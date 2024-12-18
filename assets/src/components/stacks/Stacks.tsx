@@ -28,7 +28,7 @@ import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 
 import usePersistedState from 'components/hooks/usePersistedState'
 
-import { keyToTag } from 'utils/clusterTags'
+import { keySetToTagArray } from 'utils/clusterTags'
 
 import {
   Conjunction,
@@ -148,8 +148,7 @@ export default function Stacks() {
     Conjunction.Or
   )
   const searchTags = useMemo(
-    () =>
-      Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
+    () => keySetToTagArray(selectedTagKeys),
     [selectedTagKeys]
   )
 

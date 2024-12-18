@@ -40,8 +40,24 @@ fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   type
 }
 
-query ClusterUsages($after: String, $first: Int, $before: String, $last: Int) {
-  clusterUsages(after: $after, first: $first, before: $before, last: $last) {
+query ClusterUsages(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $q: String
+  $tagQuery: TagQuery
+  $projectId: ID
+) {
+  clusterUsages(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    q: $q
+    tagQuery: $tagQuery
+    projectId: $projectId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -59,10 +75,21 @@ query ClusterUsageNamespaces(
   $first: Int
   $before: String
   $last: Int
+  $q: String
 ) {
   clusterUsage(id: $id) {
     id
-    namespaces(after: $after, first: $first, before: $before, last: $last) {
+    cluster {
+      id
+      name
+    }
+    namespaces(
+      after: $after
+      first: $first
+      before: $before
+      last: $last
+      q: $q
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -81,14 +108,22 @@ query ClusterUsageScalingRecommendations(
   $first: Int
   $before: String
   $last: Int
+  $q: String
+  $type: ScalingRecommendationType
 ) {
   clusterUsage(id: $id) {
     id
+    cluster {
+      id
+      name
+    }
     recommendations(
       after: $after
       first: $first
       before: $before
       last: $last
+      q: $q
+      type: $type
     ) {
       pageInfo {
         ...PageInfo
