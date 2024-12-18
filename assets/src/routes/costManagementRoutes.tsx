@@ -17,7 +17,7 @@ export const costManagementRoutes = [
     element={<CostManagement />}
   />,
   <Route
-    path={`${COST_MANAGEMENT_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}`}
+    path={`${COST_MANAGEMENT_ABS_PATH}/details/${KUBERNETES_PARAM_CLUSTER}`}
     element={<CostManagementDetails />}
   >
     <Route
