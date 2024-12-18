@@ -2358,6 +2358,8 @@ export type DeploymentSettings = {
   logging?: Maybe<LoggingSettings>;
   /** the way we can connect to your loki instance */
   lokiConnection?: Maybe<HttpConnection>;
+  /** the root repo you used to run `plural up` */
+  mgmtRepo?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   /** the way we can connect to your prometheus instance */
   prometheusConnection?: Maybe<HttpConnection>;
@@ -2387,6 +2389,7 @@ export type DeploymentSettingsAttributes = {
   gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** connection details for a loki instance to use */
   lokiConnection?: InputMaybe<HttpConnectionAttributes>;
+  mgmtRepo?: InputMaybe<Scalars['String']['input']>;
   /** connection details for a prometheus instance to use */
   prometheusConnection?: InputMaybe<HttpConnectionAttributes>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;

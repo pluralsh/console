@@ -742,6 +742,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `agentHelmValues` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | AgentHelmValues custom helm values to apply to all agents (useful for things like adding customary annotations/labels) |  | Optional: {} <br /> |
+| `managementRepo` _string_ | The root repo for setting up your infrastructure with Plural.  Usually this will be your `plural up repo` |  | Optional: {} <br /> |
 | `stacks` _[StackSettings](#stacksettings)_ | Stacks global configuration for stack execution |  | Optional: {} <br /> |
 | `bindings` _[DeploymentSettingsBindings](#deploymentsettingsbindings)_ | Bindings |  | Optional: {} <br /> |
 | `prometheusConnection` _[HTTPConnection](#httpconnection)_ | PrometheusConnection connection details for a prometheus instance to use |  | Optional: {} <br /> |

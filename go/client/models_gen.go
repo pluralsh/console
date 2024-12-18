@@ -1917,6 +1917,8 @@ type DeploymentSettings struct {
 	Cost *CostSettings `json:"cost,omitempty"`
 	// settings for connections to log aggregation datastores
 	Logging *LoggingSettings `json:"logging,omitempty"`
+	// the root repo you used to run `plural up`
+	MgmtRepo *string `json:"mgmtRepo,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -1950,6 +1952,7 @@ type DeploymentSettingsAttributes struct {
 	PrometheusConnection *HTTPConnectionAttributes `json:"prometheusConnection,omitempty"`
 	// connection details for a loki instance to use
 	LokiConnection *HTTPConnectionAttributes `json:"lokiConnection,omitempty"`
+	MgmtRepo       *string                   `json:"mgmtRepo,omitempty"`
 	// configuration for smtp message delivery
 	SMTP *SMTPSettingsAttributes `json:"smtp,omitempty"`
 	// configuration for LLM provider clients
