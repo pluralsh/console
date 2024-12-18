@@ -26,6 +26,15 @@ defmodule Console.Schema.ClusterScalingRecommendation do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    wildcard = "%#{q}%"
+    from(csr in query, where: like(csr.namespace, ^wildcard) or like(csr.name, ^wildcard) or like(csr.container, ^wildcard))
+  end
+
+  def for_type(query \\ __MODULE__, t) do
+    from(csr in query, where: csr.type == ^t)
+  end
+
   def for_cluster(query \\ __MODULE__, cid) do
     from(csr in query, where: csr.cluster_id == ^cid)
   end

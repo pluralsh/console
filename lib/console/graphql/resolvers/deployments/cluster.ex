@@ -102,7 +102,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   end
 
   def list_cluster_usage(args, %{context: %{current_user: user}}) do
-    ClusterUsage.for_user(user)
+    Cluster.for_user(user)
+    |> maybe_search(Cluster, args)
+    |> cluster_filters(args)
+    |> ClusterUsage.for_clusters()
     |> ClusterUsage.ordered()
     |> ClusterUsage.preloaded()
     |> paginate(args)
@@ -110,6 +113,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def list_namespace_usage(%ClusterUsage{cluster_id: cluster_id}, args, _) do
     ClusterNamespaceUsage.for_cluster(cluster_id)
+    |> maybe_search(ClusterNamespaceUsage, args)
     |> ClusterNamespaceUsage.ordered()
     |> ClusterNamespaceUsage.preloaded()
     |> paginate(args)
@@ -117,6 +121,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def list_scaling_recommendations(%ClusterUsage{cluster_id: cluster_id}, args, _) do
     ClusterScalingRecommendation.for_cluster(cluster_id)
+    |> recommendation_filters(args)
+    |> maybe_search(ClusterScalingRecommendation, args)
     |> ClusterScalingRecommendation.ordered()
     |> ClusterScalingRecommendation.preloaded()
     |> paginate(args)
@@ -233,6 +239,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:backups, e}, q -> Cluster.with_backups(q, !!e)
       {:project_id, id}, q -> Cluster.for_project(q, id)
       {:parent_id, id}, q -> Cluster.for_parent(q, id)
+      _, q -> q
+    end)
+  end
+
+  defp recommendation_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:type, t}, q -> ClusterScalingRecommendation.for_type(q, t)
       _, q -> q
     end)
   end

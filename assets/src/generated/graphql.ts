@@ -1676,6 +1676,7 @@ export type ClusterUsageNamespacesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1684,6 +1685,8 @@ export type ClusterUsageRecommendationsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ScalingRecommendationType>;
 };
 
 export type ClusterUsageConnection = {
@@ -7189,6 +7192,9 @@ export type RootQueryTypeClusterUsagesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  tagQuery?: InputMaybe<TagQuery>;
 };
 
 

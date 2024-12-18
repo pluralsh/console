@@ -261,7 +261,7 @@ type RootQueryType {
   "fetch an individual runtime service for more thorough detail views"
   runtimeService(id: ID!): RuntimeService
 
-  clusterUsages(after: String, first: Int, before: String, last: Int): ClusterUsageConnection
+  clusterUsages(after: String, first: Int, before: String, last: Int, q: String, tagQuery: TagQuery, projectId: ID): ClusterUsageConnection
 
   clusterUsage(id: ID!): ClusterUsage
 
@@ -5320,9 +5320,9 @@ type ClusterUsage {
 
   cluster: Cluster
 
-  namespaces(after: String, first: Int, before: String, last: Int): ClusterNamespaceUsageConnection
+  namespaces(after: String, first: Int, before: String, last: Int, q: String): ClusterNamespaceUsageConnection
 
-  recommendations(after: String, first: Int, before: String, last: Int): ClusterScalingRecommendationConnection
+  recommendations(after: String, first: Int, before: String, last: Int, type: ScalingRecommendationType, q: String): ClusterScalingRecommendationConnection
 
   insertedAt: DateTime
 

@@ -759,10 +759,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
     connection field :namespaces, node_type: :cluster_namespace_usage do
+      arg :q, :string
       resolve &Deployments.list_namespace_usage/3
     end
 
     connection field :recommendations, node_type: :cluster_scaling_recommendation do
+      arg :type, :scaling_recommendation_type
+      arg :q,    :string
       resolve &Deployments.list_scaling_recommendations/3
     end
 
@@ -984,6 +987,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :cluster_usages, node_type: :cluster_usage do
       middleware Authenticated
+      arg :q,          :string
+      arg :tag_query,  :tag_query
+      arg :project_id, :id
 
       resolve &Deployments.list_cluster_usage/2
     end
