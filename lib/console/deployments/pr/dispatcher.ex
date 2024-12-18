@@ -72,10 +72,10 @@ defmodule Console.Deployments.Pr.Dispatcher do
   end
   defp external_git(_), do: {:ok, nil}
 
-  defp resolve_repo("MGMT") do
+  defp resolve_repo("mgmt") do
     case Settings.cached() do
       %DeploymentSettings{mgmt_repo: r} when is_binary(r) -> r
-      _ -> "MGMT"
+      _ -> "mgmt"
     end
   end
   defp resolve_repo(identifier), do: identifier
