@@ -1375,6 +1375,11 @@ func (in *DeploymentSettingsSpec) DeepCopyInto(out *DeploymentSettingsSpec) {
 		*out = new(runtime.RawExtension)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.ManagementRepo != nil {
+		in, out := &in.ManagementRepo, &out.ManagementRepo
+		*out = new(string)
+		**out = **in
+	}
 	if in.Stacks != nil {
 		in, out := &in.Stacks, &out.Stacks
 		*out = new(StackSettings)

@@ -436,6 +436,10 @@ spec:
                 required:
                 - host
                 type: object
+              managementRepo:
+                description: The root repo for setting up your infrastructure with
+                  Plural.  Usually this will be your `plural up repo`
+                type: string
               prometheusConnection:
                 description: PrometheusConnection connection details for a prometheus
                   instance to use

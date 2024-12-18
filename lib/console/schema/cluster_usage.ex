@@ -25,6 +25,15 @@ defmodule Console.Schema.ClusterUsage do
     timestamps()
   end
 
+  def for_clusters(query \\ __MODULE__, cluster_q) do
+    from(cu in query,
+      join: c in subquery(cluster_q),
+        on: c.id == cu.cluster_id,
+        as: :clusters,
+      distinct: true
+    )
+  end
+
   def for_user(query \\ __MODULE__, user) do
     from(cu in query,
       join: c in ^Cluster.for_user(user),

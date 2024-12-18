@@ -25,6 +25,22 @@ defmodule Console.Schema.ClusterNamespaceUsage do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(cu in query, where: like(cu.namespace, ^"%#{q}%"))
+  end
+
+  def preloaded(query \\ __MODULE__, preloads \\ [:cluster]) do
+    from(cu in query, preload: ^preloads)
+  end
+
+  def for_cluster(query \\ __MODULE__, cid) do
+    from(cn in query, where: cn.cluster_id == ^cid)
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :namespace]) do
+    from(cn in query, order_by: ^order)
+  end
+
   @valid ~w(
     memory
     cpu
@@ -42,18 +58,6 @@ defmodule Console.Schema.ClusterNamespaceUsage do
     ingress_cost
     egress_cost
   )a
-
-  def preloaded(query \\ __MODULE__, preloads \\ [:cluster]) do
-    from(cu in query, preload: ^preloads)
-  end
-
-  def for_cluster(query \\ __MODULE__, cid) do
-    from(cn in query, where: cn.cluster_id == ^cid)
-  end
-
-  def ordered(query \\ __MODULE__, order \\ [asc: :namespace]) do
-    from(cn in query, order_by: ^order)
-  end
 
   def changeset(model, attrs \\ %{}) do
     model

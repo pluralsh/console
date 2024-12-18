@@ -32,6 +32,7 @@ defmodule Console.Schema.DeploymentSettings do
     field :read_policy_id,   :binary_id
     field :create_policy_id, :binary_id
     field :git_policy_id,    :binary_id
+    field :mgmt_repo,        :string
 
     field :agent_helm_values, EncryptedString
 
@@ -152,7 +153,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   def smtp_config(), do: @smtp
 
-  @valid ~w(name enabled agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
+  @valid ~w(name enabled mgmt_repo agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

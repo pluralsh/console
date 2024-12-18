@@ -2,10 +2,10 @@ defmodule Console.Deployments.Pr.Dispatcher do
   import Console.Deployments.Pr.Git
   import Console.Deployments.Pr.Utils
   alias Console.Repo
-  alias Console.Deployments.{Pr.Config, Git.Discovery, Tar}
+  alias Console.Deployments.{Pr.Config, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
   alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
-  alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository}
+  alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
 
   @type pr_resp :: {:ok, binary, binary} | Console.error
 
@@ -37,7 +37,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def create(%PrAutomation{} = pr, branch, ctx) when is_binary(branch) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection, :repository])
     impl = dispatcher(conn)
-    with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
+    with {:ok, conn} <- setup(%{conn | branch: pr.branch}, resolve_repo(pr.identifier), branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, ext} <- external_git(pr),
          {:ok, _} <- Plural.template(f, conn.dir, ext),
@@ -71,6 +71,14 @@ defmodule Console.Deployments.Pr.Dispatcher do
       do: {:ok, dir}
   end
   defp external_git(_), do: {:ok, nil}
+
+  defp resolve_repo("MGMT") do
+    case Settings.cached() do
+      %DeploymentSettings{mgmt_repo: r} when is_binary(r) -> r
+      _ -> "MGMT"
+    end
+  end
+  defp resolve_repo(identifier), do: identifier
 
   def dispatcher(%{type: :github}), do: Github
   def dispatcher(%{type: :gitlab}), do: Gitlab
