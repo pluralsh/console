@@ -50,7 +50,7 @@ defmodule Console.AI.Fixer.Parent do
 
   defp do_parent_prompt(_, _), do: []
 
-  defp global_details(%GlobalService{service: %Service{}} = global) do
+  defp global_details(%GlobalService{} = global) do
     """
     The global service has name #{global.name}.  It will define services on a set of targeted clusters using precise replication rules.
 

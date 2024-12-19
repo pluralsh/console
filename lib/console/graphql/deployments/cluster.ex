@@ -259,6 +259,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :ingress_cost,        :float
     field :load_balancer_cost,  :float
     field :egress_cost,         :float
+    field :node_cost,           :float
+    field :control_plane_cost,  :float
   end
 
   input_object :cluster_recommendation_attributes do
@@ -755,6 +757,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :ingress_cost,       :float
     field :load_balancer_cost, :float
     field :egress_cost,        :float
+    field :node_cost,          :float
+    field :control_plane_cost, :float
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
 

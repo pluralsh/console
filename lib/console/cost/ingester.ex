@@ -25,14 +25,14 @@ defmodule Console.Cost.Ingester do
       |> ok()
     end)
     |> add_operation(:namespace, fn _ ->
-      Map.get(attrs, :namespaces, [])
+      (Map.get(attrs, :namespaces) || [])
       |> Stream.map(&cluster_timestamped(&1, id))
-      |> Stream.map(&Map.drop(&1, ~w(gpu_util)a))
+      |> Stream.map(&Map.drop(&1, ~w(gpu_util node_cost control_plane_cost)a))
       |> batch_insert(ClusterNamespaceUsage)
       |> ok()
     end)
     |> add_operation(:scaling, fn _ ->
-      Map.get(attrs, :recommendations, [])
+      (Map.get(attrs, :recommendations) || [])
       |> Stream.map(&cluster_timestamped(&1, id))
       |> batch_insert(ClusterScalingRecommendation)
       |> ok()

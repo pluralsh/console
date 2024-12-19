@@ -1650,6 +1650,7 @@ export type ClusterUpgradePlan = {
 export type ClusterUsage = {
   __typename?: 'ClusterUsage';
   cluster?: Maybe<Cluster>;
+  controlPlaneCost?: Maybe<Scalars['Float']['output']>;
   cpu?: Maybe<Scalars['Float']['output']>;
   cpuCost?: Maybe<Scalars['Float']['output']>;
   /** the amount of cpu utilized */
@@ -1666,6 +1667,7 @@ export type ClusterUsage = {
   memory?: Maybe<Scalars['Float']['output']>;
   memoryCost?: Maybe<Scalars['Float']['output']>;
   namespaces?: Maybe<ClusterNamespaceUsageConnection>;
+  nodeCost?: Maybe<Scalars['Float']['output']>;
   recommendations?: Maybe<ClusterScalingRecommendationConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -2045,6 +2047,7 @@ export type CostAnalysis = {
 };
 
 export type CostAttributes = {
+  controlPlaneCost?: InputMaybe<Scalars['Float']['input']>;
   cpu?: InputMaybe<Scalars['Float']['input']>;
   /** the historical cpu cost for this scope */
   cpuCost?: InputMaybe<Scalars['Float']['input']>;
@@ -2065,6 +2068,7 @@ export type CostAttributes = {
   memoryUtil?: InputMaybe<Scalars['Float']['input']>;
   /** leave null if cluster scoped */
   namespace?: InputMaybe<Scalars['String']['input']>;
+  nodeCost?: InputMaybe<Scalars['Float']['input']>;
   storage?: InputMaybe<Scalars['Float']['input']>;
 };
 
