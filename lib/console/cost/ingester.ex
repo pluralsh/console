@@ -5,6 +5,7 @@ defmodule Console.Cost.Ingester do
   alias Console.Schema.{Cluster, ClusterUsage, ClusterNamespaceUsage, ClusterScalingRecommendation}
 
   def ingest(attrs, %Cluster{id: id}) do
+    IO.inspect(attrs)
     start_transaction()
     |> add_operation(:cluster, fn _ ->
       case Repo.get_by(ClusterUsage, cluster_id: id) do
