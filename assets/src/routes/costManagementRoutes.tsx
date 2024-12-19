@@ -22,7 +22,12 @@ export const costManagementRoutes = [
   >
     <Route
       index
-      element={<Navigate to={CM_NAMESPACES_REL_PATH} />}
+      element={
+        <Navigate
+          replace
+          to={CM_NAMESPACES_REL_PATH}
+        />
+      }
     />
     <Route
       path={CM_NAMESPACES_REL_PATH}
