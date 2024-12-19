@@ -1,13 +1,3 @@
-import { Link } from 'react-router-dom'
-import {
-  ServiceDeploymentDetailsFragment,
-  ServiceDeploymentStatus,
-  ServicePromotion,
-  useKickServiceMutation,
-} from 'generated/graphql'
-import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
-import { InlineLink } from 'components/utils/typography/InlineLink'
-import { useMemo } from 'react'
 import {
   AppIcon,
   Chip,
@@ -17,11 +7,23 @@ import {
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-
-import { getProviderIconUrl } from 'components/utils/Provider'
 
 import KickButton from 'components/utils/KickButton'
+
+import { getProviderIconUrl } from 'components/utils/Provider'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import {
+  ServiceDeploymentDetailsFragment,
+  ServiceDeploymentStatus,
+  ServicePromotion,
+  useKickServiceMutation,
+} from 'generated/graphql'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
+import { useTheme } from 'styled-components'
+import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
+import StackStatusIcon from '../../../stacks/common/StackStatusIcon.tsx'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
@@ -186,6 +188,27 @@ export function ServiceDetailsSidecar({
             >
               {cluster.name}
             </InlineLink>
+          </SidecarItem>
+        )}
+        {(serviceDeployment?.imports?.length ?? 0) > 0 && (
+          <SidecarItem heading="Imported stacks">
+            {serviceDeployment.imports?.map((ref) => (
+              <div
+                css={{
+                  display: 'flex',
+                  gap: theme.spacing.xsmall,
+                  alignItems: 'center',
+                }}
+              >
+                <StackStatusIcon status={ref?.stack?.status} />
+                <InlineLink
+                  as={Link}
+                  to={getStacksAbsPath(ref?.stack?.id)}
+                >
+                  {ref?.stack?.name}
+                </InlineLink>
+              </div>
+            ))}
           </SidecarItem>
         )}
       </Sidecar>

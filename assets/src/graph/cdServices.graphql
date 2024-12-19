@@ -107,6 +107,14 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   insight {
     ...AiInsight
   }
+  imports {
+    stack {
+      id
+      name
+      status
+      deletedAt
+    }
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {
