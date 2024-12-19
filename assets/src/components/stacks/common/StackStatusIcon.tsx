@@ -19,7 +19,10 @@ export default function StackStatusIcon({ status }: { status?: StackStatus }) {
   const severity = statusToSeverity[status ?? '']
 
   return (
-    <Tooltip label={status}>
+    <Tooltip
+      label={status}
+      placement="left"
+    >
       <LegendColor color={theme.colors[severityToColor[severity]]} />
     </Tooltip>
   )

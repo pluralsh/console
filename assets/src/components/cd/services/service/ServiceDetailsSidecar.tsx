@@ -194,23 +194,26 @@ export function ServiceDetailsSidecar({
         )}
         {(serviceDeployment?.imports?.length ?? 0) > 0 && (
           <SidecarItem heading="Stack ref">
-            {serviceDeployment.imports?.map((ref) => (
-              <div
-                css={{
-                  display: 'flex',
-                  gap: theme.spacing.xsmall,
-                  alignItems: 'center',
-                }}
-              >
-                <StackStatusIcon status={ref?.stack?.status} />
-                <InlineLink
-                  as={Link}
-                  to={getStacksAbsPath(ref?.stack?.id)}
+            {serviceDeployment.imports
+              ?.concat(serviceDeployment.imports)
+              ?.concat(serviceDeployment.imports)
+              .map((ref) => (
+                <div
+                  css={{
+                    display: 'flex',
+                    gap: theme.spacing.xsmall,
+                    alignItems: 'center',
+                  }}
                 >
-                  {ref?.stack?.name}
-                </InlineLink>
-              </div>
-            ))}
+                  <StackStatusIcon status={ref?.stack?.status} />
+                  <InlineLink
+                    as={Link}
+                    to={getStacksAbsPath(ref?.stack?.id)}
+                  >
+                    {ref?.stack?.name}
+                  </InlineLink>
+                </div>
+              ))}
           </SidecarItem>
         )}
       </Sidecar>
