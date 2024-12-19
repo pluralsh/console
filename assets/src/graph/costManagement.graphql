@@ -7,11 +7,17 @@ fragment ClusterUsageTiny on ClusterUsage {
   memUtil
   cpuCost
   memoryCost
+  nodeCost
+  controlPlaneCost
   ingressCost
   loadBalancerCost
   egressCost
   cluster {
     ...ClusterTiny
+    project {
+      id
+      name
+    }
   }
 }
 

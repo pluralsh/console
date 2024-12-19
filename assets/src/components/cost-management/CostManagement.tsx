@@ -33,10 +33,11 @@ import {
   ColCpuEfficiency,
   ColMemoryCost,
   ColMemoryEfficiency,
+  ColNodeCost,
 } from './ClusterUsagesTableCols'
 import {
   CostManagementTreeMap,
-  cpuCostByCluster,
+  nodeCostByCluster,
   memoryCostByCluster,
 } from './CostManagementTreeMap'
 
@@ -91,6 +92,7 @@ export function CostManagement() {
         <Card
           css={{
             padding: theme.spacing.large,
+            paddingTop: 0,
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -98,16 +100,20 @@ export function CostManagement() {
             content: (
               <Flex gap="small">
                 <CpuIcon />
-                <OverlineH1 as="h3">cpu cost by cluster</OverlineH1>
+                <OverlineH1 as="h3">node cost by cluster</OverlineH1>
               </Flex>
             ),
           }}
         >
-          <CostManagementTreeMap data={cpuCostByCluster(usages)} />
+          <CostManagementTreeMap
+            colorScheme="blue"
+            data={nodeCostByCluster(usages)}
+          />
         </Card>
         <Card
           css={{
             padding: theme.spacing.large,
+            paddingTop: 0,
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -120,7 +126,10 @@ export function CostManagement() {
             ),
           }}
         >
-          <CostManagementTreeMap data={memoryCostByCluster(usages)} />
+          <CostManagementTreeMap
+            colorScheme="purple"
+            data={memoryCostByCluster(usages)}
+          />
         </Card>
       </Flex>
       <Card
@@ -174,6 +183,7 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 const cols = [
   ColCluster,
+  ColNodeCost,
   ColCpuCost,
   ColCpuEfficiency,
   ColMemoryCost,

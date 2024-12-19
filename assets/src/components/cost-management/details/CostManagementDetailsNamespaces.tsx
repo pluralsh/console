@@ -18,13 +18,11 @@ import { useMemo } from 'react'
 
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { CMContextType } from './CostManagementDetails'
 import {
   ColCpuCost,
   ColCpuEfficiency,
   ColMemoryCost,
   ColMemoryEfficiency,
-  ColActions,
   ColNamespace,
 } from '../ClusterUsagesTableCols'
 import { CM_TREE_MAP_CARD_HEIGHT } from '../CostManagement'
@@ -33,6 +31,7 @@ import {
   cpuCostByNamespace,
   memoryCostByNamespace,
 } from '../CostManagementTreeMap'
+import { CMContextType } from './CostManagementDetails'
 
 export function CostManagementDetailsNamespaces() {
   const theme = useTheme()
@@ -54,11 +53,13 @@ export function CostManagementDetailsNamespaces() {
     <Flex
       direction="column"
       gap="large"
+      overflow="hidden"
     >
       <Flex gap="large">
         <Card
           css={{
             padding: theme.spacing.large,
+
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -71,7 +72,12 @@ export function CostManagementDetailsNamespaces() {
             ),
           }}
         >
-          <CostManagementTreeMap data={cpuCostByNamespace(usages)} />
+          <CostManagementTreeMap
+            enableParentLabel={false}
+            colorScheme="blue"
+            nodeOpacity={0.9}
+            data={cpuCostByNamespace(usages)}
+          />
         </Card>
         <Card
           css={{
@@ -88,12 +94,17 @@ export function CostManagementDetailsNamespaces() {
             ),
           }}
         >
-          <CostManagementTreeMap data={memoryCostByNamespace(usages)} />
+          <CostManagementTreeMap
+            enableParentLabel={false}
+            colorScheme="purple"
+            data={memoryCostByNamespace(usages)}
+          />
         </Card>
       </Flex>
       <Flex
         direction="column"
         gap="small"
+        overflow="hidden"
       >
         <Input
           flexShrink={0}
@@ -147,5 +158,4 @@ const cols = [
   ColCpuEfficiency,
   ColMemoryCost,
   ColMemoryEfficiency,
-  ColActions,
 ]

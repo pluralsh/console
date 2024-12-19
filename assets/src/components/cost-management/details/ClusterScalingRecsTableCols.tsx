@@ -46,7 +46,7 @@ export const ColMemoryChange = columnHelper.accessor((rec) => rec, {
 
     return (
       <Body2P css={{ whiteSpace: 'pre-wrap' }}>
-        {`${rec.memoryRequest ?? '--'}  →  `}
+        {`${rec.memoryRequest ? `${Math.round(rec.memoryRequest / (1024 * 1024))}mb` : '--'}  →  `}
         <BoldTextSC>{`${rec.memoryRecommendation ?? '--'}`}</BoldTextSC>
       </Body2P>
     )

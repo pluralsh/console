@@ -52,6 +52,22 @@ export const ColNamespace = (
   },
 })
 
+export const ColNodeCost = (
+  columnHelper as ColumnHelper<ClusterUsageTinyFragment>
+).accessor(({ nodeCost }) => nodeCost, {
+  id: 'nodeCost',
+  header: 'Node cost',
+  cell: function Cell({ getValue }) {
+    const nodeCost = getValue()
+
+    return (
+      <SimpleTextWrapperSC>
+        {nodeCost ? `$${nodeCost.toFixed(3)}` : '--'}
+      </SimpleTextWrapperSC>
+    )
+  },
+})
+
 export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
   id: 'cpuCost',
   header: 'CPU cost',
@@ -60,7 +76,7 @@ export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
 
     return (
       <SimpleTextWrapperSC>
-        {cpuCost ? `$${cpuCost}` : '--'}
+        {cpuCost ? `$${cpuCost.toFixed(3)}` : '--'}
       </SimpleTextWrapperSC>
     )
   },
@@ -98,7 +114,7 @@ export const ColMemoryCost = columnHelper.accessor(
 
       return (
         <SimpleTextWrapperSC>
-          {memoryCost ? `$${memoryCost}` : '--'}
+          {memoryCost ? `$${memoryCost.toFixed(3)}` : '--'}
         </SimpleTextWrapperSC>
       )
     },

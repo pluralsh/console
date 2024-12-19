@@ -38,7 +38,7 @@ export function useSyncCooldown(
     intervalRef.current = setInterval(updateCountdown, timerInterval)
 
     return () => clearInterval(intervalRef.current)
-  }, [end, timerInterval])
+  }, [cooldown, end, timerInterval])
 
   return {
     disabled,
