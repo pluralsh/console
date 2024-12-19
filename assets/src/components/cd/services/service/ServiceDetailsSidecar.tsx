@@ -57,8 +57,6 @@ export function ServiceDetailsSidecar({
     helmRepository,
   } = serviceDeployment
 
-  console.log(serviceDeployment)
-
   return (
     <div
       css={{
@@ -193,7 +191,7 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
         {(serviceDeployment?.imports?.length ?? 0) > 0 && (
-          <SidecarItem heading="Stack ref">
+          <SidecarItem heading="Imported stacks">
             {serviceDeployment.imports?.map((ref) => (
               <div
                 css={{
