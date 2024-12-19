@@ -6,11 +6,11 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   CatalogIcon,
+  CostManagementIcon,
   Sidebar as DSSidebar,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
-  HistoryIcon,
   HomeIcon,
   KubernetesAltIcon,
   LogoutIcon,
@@ -141,15 +141,22 @@ function getMenuItems({
       hotkeys: ['8'],
     },
     {
-      text: 'Backups',
-      expandedLabel: 'Backups',
-      icon: <HistoryIcon />,
-      path: '/backups',
-      enabled:
-        isCDEnabled &&
-        !!(personaConfig?.all || personaConfig?.sidebar?.backups),
-      hotkeys: ['shift B', '9'],
+      text: 'Cost Management',
+      expandedLabel: 'Cost Management',
+      icon: <CostManagementIcon />,
+      path: '/cost-management',
+      hotkeys: ['shift C+M', '9'],
     },
+    // {
+    //   text: 'Backups',
+    //   expandedLabel: 'Backups',
+    //   icon: <HistoryIcon />,
+    //   path: '/backups',
+    //   enabled:
+    //     isCDEnabled &&
+    //     !!(personaConfig?.all || personaConfig?.sidebar?.backups),
+    //   hotkeys: ['shift B', '9'],
+    // },
     {
       text: 'Settings',
       expandedLabel: 'Settings',
