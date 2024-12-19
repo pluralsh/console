@@ -49,6 +49,7 @@ export function CostManagementDetailsNamespaces() {
         .filter((node): node is ClusterNamespaceUsageFragment => !!node) || [],
     [data?.clusterUsage?.namespaces?.edges]
   )
+
   return (
     <Flex
       direction="column"
@@ -75,8 +76,8 @@ export function CostManagementDetailsNamespaces() {
           <CostManagementTreeMap
             enableParentLabel={false}
             colorScheme="blue"
-            nodeOpacity={0.9}
             data={cpuCostByNamespace(usages)}
+            dataSize={usages.length}
           />
         </Card>
         <Card
@@ -98,6 +99,7 @@ export function CostManagementDetailsNamespaces() {
             enableParentLabel={false}
             colorScheme="purple"
             data={memoryCostByNamespace(usages)}
+            dataSize={usages.length}
           />
         </Card>
       </Flex>

@@ -108,6 +108,7 @@ export function CostManagement() {
           <CostManagementTreeMap
             colorScheme="blue"
             data={nodeCostByCluster(usages)}
+            dataSize={usages.length}
           />
         </Card>
         <Card
@@ -129,6 +130,7 @@ export function CostManagement() {
           <CostManagementTreeMap
             colorScheme="purple"
             data={memoryCostByCluster(usages)}
+            dataSize={usages.length}
           />
         </Card>
       </Flex>
