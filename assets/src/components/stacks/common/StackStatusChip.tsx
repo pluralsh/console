@@ -45,3 +45,5 @@ export default function StackStatusChip({
     </Chip>
   )
 }
+
+export { statusToSeverity }
