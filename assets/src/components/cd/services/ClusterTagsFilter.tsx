@@ -2,12 +2,13 @@ import {
   ListBoxFooterPlus,
   ReloadIcon,
   TagMultiSelect,
+  TagMultiSelectProps,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { Conjunction, TagType, useTagPairsLazyQuery } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
-import { type ComponentProps, type Key, useMemo, useState } from 'react'
+import { type Key, useMemo, useState } from 'react'
 import { tagToKey } from 'utils/clusterTags'
 
 export function TagsFilter({
@@ -25,9 +26,9 @@ export function TagsFilter({
   selectedTagKeys: Set<Key>
   setSelectedTagKeys: (keys: Set<Key>) => void
   searchOp: Conjunction
-  setSearchOp: ComponentProps<typeof TagMultiSelect>['onChangeMatchType']
-  comboBoxProps?: ComponentProps<typeof TagMultiSelect>['comboBoxProps']
-  selectProps?: ComponentProps<typeof TagMultiSelect>['selectProps']
+  setSearchOp: TagMultiSelectProps['onChangeMatchType']
+  comboBoxProps?: TagMultiSelectProps['comboBoxProps']
+  selectProps?: TagMultiSelectProps['selectProps']
 }) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')

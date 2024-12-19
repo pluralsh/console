@@ -1,4 +1,3 @@
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   Breadcrumb,
   GearTrainIcon,
@@ -7,12 +6,13 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
+import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
+import chroma from 'chroma-js'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import chroma from 'chroma-js'
-import { useDebounce } from '@react-hooks-library/core'
 
 import {
   ClustersRowFragment,
@@ -26,11 +26,11 @@ import {
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
 
-import { Edge } from 'utils/graphql'
-import { keyToTag } from 'utils/clusterTags'
 import usePersistedState from 'components/hooks/usePersistedState'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { keySetToTagArray } from 'utils/clusterTags'
+import { Edge } from 'utils/graphql'
 
 import { isEmpty } from 'lodash'
 
@@ -40,8 +40,8 @@ import {
   useSetPageHeaderContent,
   useSetPageScrollable,
 } from '../ContinuousDeployment'
-import { useCDEnabled } from '../utils/useCDEnabled'
 import { DEMO_CLUSTERS } from '../utils/demoData'
+import { useCDEnabled } from '../utils/useCDEnabled'
 
 import {
   ClusterStatusTabKey,
@@ -57,10 +57,10 @@ import {
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
-import CreateCluster from './create/CreateCluster'
+import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
-import { cdClustersColumns } from './ClustersColumns'
+import CreateCluster from './create/CreateCluster'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -111,8 +111,7 @@ export default function Clusters() {
   const debouncedSearchString = useDebounce(searchString, 100)
 
   const searchTags = useMemo(
-    () =>
-      Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
+    () => keySetToTagArray(selectedTagKeys),
     [selectedTagKeys]
   )
 

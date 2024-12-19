@@ -3,11 +3,11 @@ import {
   ArrowTopRightIcon,
   CatalogIcon,
   ClusterIcon,
+  CostManagementIcon,
   DocumentIcon,
   EyeIcon,
   GearTrainIcon,
   GitPullIcon,
-  HistoryIcon,
   HomeIcon,
   IconProps,
   KubernetesAltIcon,
@@ -27,9 +27,9 @@ import { isEmpty } from 'lodash'
 import { ComponentType, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { useClustersTinyQuery } from '../../generated/graphql'
 import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
-import { BACKUPS_ABS_PATH } from '../../routes/backupRoutesConsts'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import {
   CD_ABS_PATH,
@@ -191,11 +191,11 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['8'],
           },
           {
-            label: 'Backups',
-            icon: HistoryIcon,
-            callback: () => navigate(BACKUPS_ABS_PATH),
+            label: 'Cost Management',
+            icon: CostManagementIcon,
+            callback: () => navigate(COST_MANAGEMENT_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift B', '9'],
+            hotkeys: ['shift C+M', '9'],
           },
           {
             label: 'Settings',
