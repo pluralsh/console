@@ -487,11 +487,21 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "ingestClusterCost" do
     test "it can ingest cluster cost information in one transaction" do
       cluster = insert(:cluster)
+      deployment_settings(cost: %{recommendation_cushion: 10})
       cost = %{"cpu" => 1.0, "memory" => 100.0, "gpu" => 0.0, "cpuUtil" => 0.5, "memoryUtil" => 20.0, "gpuUtil" => 0.0}
       ingest = %{
         "cluster" => cost,
         "namespaces" => Enum.map([cost], &Map.put(&1, "namespace", "default")),
-        "recommendations" => [%{"type" => "DEPLOYMENT", "namespace" => "default", "name" => "default", "container" => "nginx"}]
+        "recommendations" => [
+          %{
+            "type" => "DEPLOYMENT",
+            "namespace" => "default",
+            "name" => "default",
+            "container" => "nginx",
+            "memoryRequest" => 10.0,
+            "cpuRequest" => 10.0
+          }
+        ]
       }
 
       {:ok, %{data: %{"ingestClusterCost" => true}}} = run_query("""
