@@ -34,6 +34,13 @@ import {
   ColMemoryCost,
   ColMemoryEfficiency,
 } from './ClusterUsagesTableCols'
+import {
+  CostManagementTreeMap,
+  cpuCostByCluster,
+  memoryCostByCluster,
+} from './CostManagementTreeMap'
+
+export const CM_TREE_MAP_CARD_HEIGHT = 300
 
 export function CostManagement() {
   const theme = useTheme()
@@ -82,7 +89,10 @@ export function CostManagement() {
       </Flex>
       <Flex gap="large">
         <Card
-          css={{ padding: theme.spacing.large }}
+          css={{
+            padding: theme.spacing.large,
+            height: CM_TREE_MAP_CARD_HEIGHT,
+          }}
           header={{
             outerProps: { style: { flex: 1 } },
             content: (
@@ -93,10 +103,13 @@ export function CostManagement() {
             ),
           }}
         >
-          Graph goes here
+          <CostManagementTreeMap data={cpuCostByCluster(usages)} />
         </Card>
         <Card
-          css={{ padding: theme.spacing.large }}
+          css={{
+            padding: theme.spacing.large,
+            height: CM_TREE_MAP_CARD_HEIGHT,
+          }}
           header={{
             outerProps: { style: { flex: 1 } },
             content: (
@@ -107,7 +120,7 @@ export function CostManagement() {
             ),
           }}
         >
-          Graph goes here
+          <CostManagementTreeMap data={memoryCostByCluster(usages)} />
         </Card>
       </Flex>
       <Card

@@ -27,6 +27,12 @@ import {
   ColActions,
   ColNamespace,
 } from '../ClusterUsagesTableCols'
+import { CM_TREE_MAP_CARD_HEIGHT } from '../CostManagement'
+import {
+  CostManagementTreeMap,
+  cpuCostByNamespace,
+  memoryCostByNamespace,
+} from '../CostManagementTreeMap'
 
 export function CostManagementDetailsNamespaces() {
   const theme = useTheme()
@@ -51,7 +57,10 @@ export function CostManagementDetailsNamespaces() {
     >
       <Flex gap="large">
         <Card
-          css={{ padding: theme.spacing.large }}
+          css={{
+            padding: theme.spacing.large,
+            height: CM_TREE_MAP_CARD_HEIGHT,
+          }}
           header={{
             outerProps: { style: { flex: 1 } },
             content: (
@@ -62,10 +71,13 @@ export function CostManagementDetailsNamespaces() {
             ),
           }}
         >
-          Graph goes here
+          <CostManagementTreeMap data={cpuCostByNamespace(usages)} />
         </Card>
         <Card
-          css={{ padding: theme.spacing.large }}
+          css={{
+            padding: theme.spacing.large,
+            height: CM_TREE_MAP_CARD_HEIGHT,
+          }}
           header={{
             outerProps: { style: { flex: 1 } },
             content: (
@@ -76,7 +88,7 @@ export function CostManagementDetailsNamespaces() {
             ),
           }}
         >
-          Graph goes here
+          <CostManagementTreeMap data={memoryCostByNamespace(usages)} />
         </Card>
       </Flex>
       <Flex
