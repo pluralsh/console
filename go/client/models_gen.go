@@ -1339,6 +1339,8 @@ type ClusterUsage struct {
 	IngressCost      *float64                                `json:"ingressCost,omitempty"`
 	LoadBalancerCost *float64                                `json:"loadBalancerCost,omitempty"`
 	EgressCost       *float64                                `json:"egressCost,omitempty"`
+	NodeCost         *float64                                `json:"nodeCost,omitempty"`
+	ControlPlaneCost *float64                                `json:"controlPlaneCost,omitempty"`
 	Cluster          *Cluster                                `json:"cluster,omitempty"`
 	Namespaces       *ClusterNamespaceUsageConnection        `json:"namespaces,omitempty"`
 	Recommendations  *ClusterScalingRecommendationConnection `json:"recommendations,omitempty"`
@@ -1660,6 +1662,8 @@ type CostAttributes struct {
 	IngressCost      *float64 `json:"ingressCost,omitempty"`
 	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
 	EgressCost       *float64 `json:"egressCost,omitempty"`
+	NodeCost         *float64 `json:"nodeCost,omitempty"`
+	ControlPlaneCost *float64 `json:"controlPlaneCost,omitempty"`
 }
 
 type CostIngestAttributes struct {

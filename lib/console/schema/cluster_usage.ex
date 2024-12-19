@@ -8,9 +8,11 @@ defmodule Console.Schema.ClusterUsage do
     field :storage,     :float
     field :gpu,         :float
 
-    field :cpu_cost,    :float
-    field :memory_cost, :float
-    field :gpu_cost,    :float
+    field :cpu_cost,           :float
+    field :memory_cost,        :float
+    field :gpu_cost,           :float
+    field :node_cost,          :float
+    field :control_plane_cost, :float
 
     field :memory_util, :float
     field :cpu_util,    :float
@@ -67,6 +69,8 @@ defmodule Console.Schema.ClusterUsage do
     gpu_util
     cpu_cost
     memory_cost
+    node_cost
+    control_plane_cost
     gpu_cost
     load_balancer_cost
     ingress_cost

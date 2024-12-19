@@ -4651,6 +4651,10 @@ input CostAttributes {
   loadBalancerCost: Float
 
   egressCost: Float
+
+  nodeCost: Float
+
+  controlPlaneCost: Float
 }
 
 input ClusterRecommendationAttributes {
@@ -5322,6 +5326,10 @@ type ClusterUsage {
   loadBalancerCost: Float
 
   egressCost: Float
+
+  nodeCost: Float
+
+  controlPlaneCost: Float
 
   cluster: Cluster
 
