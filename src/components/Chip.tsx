@@ -22,14 +22,15 @@ import Tooltip from './Tooltip'
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 const SIZES = ['small', 'medium', 'large'] as const
 
-type ChipSize = (typeof SIZES)[number]
-type ChipSeverity = (typeof SEVERITIES)[number]
+export type ChipSize = (typeof SIZES)[number]
+export type ChipSeverity = (typeof SEVERITIES)[number]
 
 export type ChipProps = Omit<FlexProps, 'size'> &
   BaseCardProps & {
     size?: ChipSize
     condensed?: boolean
     severity?: ChipSeverity
+    inactive?: boolean
     icon?: ReactElement
     loading?: boolean
     closeButton?: boolean
@@ -73,15 +74,26 @@ const sizeToCloseHeight = {
 const ChipCardSC = styled(Card)<{
   $size: ChipSize
   $severity: ChipSeverity
+  $inactive: boolean
   $truncateWidth?: number
   $truncateEdge?: 'start' | 'end'
   $condensed?: boolean
-}>(({ $size, $severity, $truncateWidth, $truncateEdge, $condensed, theme }) => {
-  const textColor =
-    theme.colors[severityToColor[$severity]] || theme.colors.text
+}>(({
+  $size,
+  $severity,
+  $inactive,
+  $truncateWidth,
+  $truncateEdge,
+  $condensed,
+  theme,
+}) => {
+  const textColor = $inactive
+    ? theme.colors['text-xlight']
+    : theme.colors[severityToColor[$severity]] ?? theme.colors.text
 
   return {
     '&&': {
+      backgroundColor: $inactive ? 'transparent' : undefined,
       padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
         $size === 'large' && $condensed
           ? 6
@@ -164,9 +176,9 @@ function ChipRef(
     size = 'medium',
     condensed = false,
     severity = 'neutral',
+    inactive = false,
     truncateWidth,
     truncateEdge,
-    hue,
     fillLevel,
     loading = false,
     icon,
@@ -180,7 +192,7 @@ function ChipRef(
   }: ChipProps,
   ref: Ref<any>
 ) {
-  fillLevel = useDecideFillLevel({ hue, fillLevel })
+  fillLevel = useDecideFillLevel({ fillLevel })
   const theme = useTheme()
 
   const iconCol = severityToIconColor[severity] || 'icon-default'
@@ -193,6 +205,7 @@ function ChipRef(
       fillLevel={fillLevel}
       clickable={clickable}
       disabled={clickable && disabled}
+      $inactive={inactive}
       $size={size}
       $condensed={condensed}
       $severity={severity}

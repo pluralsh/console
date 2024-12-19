@@ -19,7 +19,12 @@ export type { CalloutProps } from './components/Callout'
 export { default as Callout } from './components/Callout'
 export { default as CatalogCard } from './components/CatalogCard'
 export { default as Checkbox } from './components/Checkbox'
-export { default as Chip, type ChipProps } from './components/Chip'
+export {
+  default as Chip,
+  type ChipProps,
+  type ChipSize,
+  type ChipSeverity,
+} from './components/Chip'
 export { default as ChipList } from './components/ChipList'
 export { default as Code } from './components/Code'
 export { default as CodeEditor } from './components/CodeEditor'

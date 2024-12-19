@@ -1,20 +1,18 @@
 import chroma from 'chroma-js'
 import { Div, type DivProps } from 'honorable'
-import { forwardRef } from 'react'
-import styled, { type DefaultTheme } from 'styled-components'
 import { memoize } from 'lodash-es'
+import { type ComponentProps, type ReactNode, forwardRef } from 'react'
+import styled, { type DefaultTheme } from 'styled-components'
 
 import { type Severity, type SeverityExt, sanitizeSeverity } from '../types'
 
 import {
   type FillLevel,
   FillLevelProvider,
-  isFillLevel,
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
-
-const HUES = ['default', 'lighter', 'lightest'] as const
+import WrapWithIf from './WrapWithIf'
 
 const CARD_SEVERITIES = [
   'info',
@@ -27,12 +25,9 @@ const CARD_SEVERITIES = [
 
 type CornerSize = 'medium' | 'large'
 type CardFillLevel = Exclude<FillLevel, 0>
-type CardHue = (typeof HUES)[number]
 type CardSeverity = Extract<SeverityExt, (typeof CARD_SEVERITIES)[number]>
 
 type BaseCardProps = {
-  /** @deprecated Colors set by `FillLevelContext`. If you need to override context, use `fillLevel` */
-  hue?: CardHue
   /** Used to override a fill level set by `FillLevelContext`  */
   fillLevel?: FillLevel
   cornerSize?: CornerSize
@@ -40,6 +35,12 @@ type BaseCardProps = {
   disabled?: boolean
   selected?: boolean
   severity?: SeverityExt
+  header?: {
+    size?: 'medium' | 'large'
+    content?: ReactNode
+    headerProps?: ComponentProps<'div'>
+    outerProps?: ComponentProps<'div'>
+  }
 }
 
 type CardProps = DivProps & BaseCardProps
@@ -65,12 +66,6 @@ const fillToNeutralHoverBgC = {
   3: 'fill-three-hover',
 } as const satisfies Record<FillLevel, keyof DefaultTheme['colors']>
 
-const hueToFill = {
-  default: 1,
-  lighter: 2,
-  lightest: 3,
-} as const satisfies Record<CardHue, CardFillLevel>
-
 const fillToNeutralSelectedBgC = {
   0: 'fill-one-selected',
   1: 'fill-one-selected',
@@ -78,22 +73,14 @@ const fillToNeutralSelectedBgC = {
   3: 'fill-three-selected',
 } as const satisfies Record<FillLevel, keyof DefaultTheme['colors']>
 
-export function useDecideFillLevel({
-  hue,
-  fillLevel,
-}: {
-  hue?: CardHue
-  fillLevel?: number
-}) {
+export function useDecideFillLevel({ fillLevel }: { fillLevel?: number }) {
   const parentFillLevel = useFillLevel()
 
-  if (isFillLevel(fillLevel)) {
-    return toFillLevel(Math.max(1, fillLevel)) as CardFillLevel
-  }
-
-  return isFillLevel(hueToFill[hue])
-    ? hueToFill[hue]
-    : (toFillLevel(parentFillLevel + 1) as CardFillLevel)
+  return (
+    typeof fillLevel === 'number'
+      ? toFillLevel(Math.max(1, fillLevel))
+      : toFillLevel(parentFillLevel + 1)
+  ) as CardFillLevel
 }
 
 export const getFillToLightBgC = memoize(
@@ -151,7 +138,38 @@ const getBgColor = ({
   return fillToLightBgC[severity][fillLevel]
 }
 
+const HeaderSC = styled.div<{
+  $fillLevel: CardFillLevel
+  $selected: boolean
+  $size: 'medium' | 'large'
+  $cornerSize: CornerSize
+}>(
+  ({
+    theme,
+    $fillLevel: fillLevel,
+    $selected: selected,
+    $size: size,
+    $cornerSize: cornerSize,
+  }) => ({
+    ...theme.partials.text.overline,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.colors['text-xlight'],
+    border: `1px solid ${theme.colors[fillToNeutralBorderC[fillLevel]]}`,
+    borderBottom: 'none',
+    borderRadius: `${theme.borderRadiuses[cornerSize]}px ${theme.borderRadiuses[cornerSize]}px 0 0`,
+    backgroundColor: selected
+      ? theme.colors[fillToNeutralSelectedBgC[fillLevel]]
+      : getBgColor({ theme, fillLevel }),
+    height: size === 'large' ? 48 : 40,
+    padding: `0 ${theme.spacing.medium}px`,
+    overflow: 'hidden',
+  })
+)
+
 const CardSC = styled(Div)<{
+  $hasHeader: boolean
   $fillLevel: CardFillLevel
   $cornerSize: CornerSize
   $severity: Severity
@@ -161,6 +179,7 @@ const CardSC = styled(Div)<{
 }>(
   ({
     theme,
+    $hasHeader,
     $fillLevel: fillLevel,
     $cornerSize: cornerSize,
     $severity: severity,
@@ -169,8 +188,16 @@ const CardSC = styled(Div)<{
     $disabled: disabled,
   }) => ({
     ...theme.partials.reset.button,
-    border: `1px solid ${theme.colors[fillToNeutralBorderC[fillLevel]]}`,
-    borderRadius: theme.borderRadiuses[cornerSize],
+    border: `1px solid ${
+      theme.colors[
+        fillToNeutralBorderC[
+          $hasHeader ? toFillLevel(fillLevel + 1) : fillLevel
+        ]
+      ]
+    }`,
+    borderRadius: $hasHeader
+      ? `0 0 ${theme.borderRadiuses[cornerSize]}px ${theme.borderRadiuses[cornerSize]}px`
+      : theme.borderRadiuses[cornerSize],
     backgroundColor: selected
       ? theme.colors[fillToNeutralSelectedBgC[fillLevel]]
       : getBgColor({ theme, fillLevel }),
@@ -196,47 +223,85 @@ const CardSC = styled(Div)<{
   })
 )
 
+const OuterWrapSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  width: '100%',
+  height: '100%',
+})
+
 const Card = forwardRef(
   (
     {
+      header,
       cornerSize = 'large',
-      hue, // Deprecated, prefer fillLevel
       severity = 'neutral',
       fillLevel,
       selected = false,
       clickable = false,
       disabled = false,
+      children,
       ...props
     }: CardProps,
     ref
   ) => {
-    fillLevel = useDecideFillLevel({ hue, fillLevel })
+    const hasHeader = !!header
+    const {
+      size,
+      content: headerContent,
+      headerProps,
+      outerProps,
+    } = header ?? {}
+
+    const mainFillLevel = useDecideFillLevel({ fillLevel })
+    const headerFillLevel = useDecideFillLevel({ fillLevel: mainFillLevel + 1 })
+
     const cardSeverity = sanitizeSeverity(severity, {
       allowList: CARD_SEVERITIES,
       default: 'neutral',
     })
 
     return (
-      <FillLevelProvider value={fillLevel}>
-        <CardSC
-          ref={ref}
-          $cornerSize={cornerSize}
-          $fillLevel={fillLevel}
-          $severity={cardSeverity}
-          $selected={selected}
-          $clickable={clickable}
-          {...(clickable && {
-            forwardedAs: 'button',
-            type: 'button',
-            'data-clickable': 'true',
-          })}
-          $disabled={clickable && disabled}
-          {...props}
-        />
+      <FillLevelProvider value={mainFillLevel}>
+        <WrapWithIf
+          condition={hasHeader}
+          wrapper={<OuterWrapSC {...outerProps} />}
+        >
+          {header && (
+            <HeaderSC
+              $fillLevel={headerFillLevel}
+              $selected={selected}
+              $size={size}
+              $cornerSize={cornerSize}
+              {...headerProps}
+            >
+              {headerContent}
+            </HeaderSC>
+          )}
+          <CardSC
+            ref={ref}
+            $cornerSize={cornerSize}
+            $fillLevel={mainFillLevel}
+            $severity={cardSeverity}
+            $selected={selected}
+            $clickable={clickable}
+            $hasHeader={hasHeader}
+            {...(clickable && {
+              forwardedAs: 'button',
+              type: 'button',
+              'data-clickable': 'true',
+            })}
+            $disabled={clickable && disabled}
+            {...props}
+          >
+            {children}
+          </CardSC>
+        </WrapWithIf>
       </FillLevelProvider>
     )
   }
 )
 
 export default Card
-export type { BaseCardProps, CardProps, CornerSize, CardHue, CardFillLevel }
+export type { BaseCardProps, CardFillLevel, CardProps, CornerSize }

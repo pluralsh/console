@@ -324,6 +324,7 @@ function TableRef(
           setScrollTop(target?.scrollTop)
         }
         width="100%"
+        height="100%"
         {...props}
       >
         <T $gridTemplateColumns={gridTemplateColumns}>

@@ -13,12 +13,6 @@ export default {
   title: 'Chip',
   component: Chip,
   argTypes: {
-    hue: {
-      options: [undefined, 'default', 'lighter', 'lightest'],
-      control: {
-        type: 'select',
-      },
-    },
     onFillLevel: {
       options: [0, 1, 2, 3],
       control: {
@@ -42,7 +36,12 @@ const sizes: ComponentProps<typeof Chip>['size'][] = [
 
 const severities = SEVERITIES
 
-const versionsArgs = [{}, { loading: true }, { icon: <StatusOkIcon /> }]
+const versionsArgs = [
+  {},
+  { loading: true },
+  { icon: <StatusOkIcon /> },
+  { inactive: true },
+]
 
 function Template({ onFillLevel, asLink, ...args }: any) {
   if (asLink) {

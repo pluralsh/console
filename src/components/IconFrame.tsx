@@ -74,7 +74,7 @@ const sizeToIconSize: Record<Size, number> = {
   xsmall: 8,
   small: 16,
   medium: 16,
-  large: 24,
+  large: 16,
   xlarge: 24,
 }
 
