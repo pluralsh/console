@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 export function useSyncCooldown(
   end: Date | null | undefined,
+  cooldown: number,
   timerInterval: number = 1000
 ): {
   disabled: boolean
@@ -20,7 +21,7 @@ export function useSyncCooldown(
     }
     const updateCountdown = () => {
       const now = new Date()
-      const remaining = end.getTime() - now.getTime()
+      const remaining = end.getTime() + cooldown - now.getTime()
 
       if (remaining > 0) {
         setDisabled(true)
