@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ButtonProps } from 'honorable'
 
 export default function KickButton({
@@ -27,13 +27,12 @@ export default function KickButton({
   variables: any
 } & ButtonProps) {
   const [mutation, { loading, error }] = kickMutationHook({ variables })
-  const [buttonClicked, setButtonClicked] = useState(false)
-
-  const lastPullPlus15 =
-    typeof pulledAt === 'string'
-      ? new Date(new Date(pulledAt).getTime() + 15 * 1000)
-      : null
-  const { disabled, secondsRemaining } = useSyncCooldown(lastPullPlus15)
+  const [lastSync, setLastSync] = useState<Date | undefined>(undefined)
+  const { disabled, secondsRemaining } = useSyncCooldown(lastSync, 5 * 1000)
+  const onClick = useCallback(() => {
+    setLastSync(new Date())
+    mutation()
+  }, [mutation])
 
   return (
     <div>
@@ -59,34 +58,22 @@ export default function KickButton({
               loading ? (
                 <Spinner />
               ) : (
-                <ReloadIcon
-                  color={
-                    disabled && buttonClicked ? 'icon-disabled' : undefined
-                  }
-                />
+                <ReloadIcon color={disabled ? 'icon-disabled' : undefined} />
               )
             }
             type="secondary"
-            disabled={disabled && buttonClicked}
+            disabled={disabled}
             clickable
-            onClick={() => {
-              setButtonClicked(true)
-              mutation()
-            }}
+            onClick={onClick}
           />
         ) : (
           <Button
-            disabled={disabled && buttonClicked}
-            onClick={() => {
-              setButtonClicked(true)
-              mutation()
-            }}
+            disabled={disabled}
+            onClick={onClick}
             loading={loading}
             {...props}
           >
-            {disabled && buttonClicked
-              ? `Resync cooldown ${secondsRemaining}`
-              : message}
+            {message} {disabled && `(${secondsRemaining})`}
           </Button>
         )}
       </Tooltip>
