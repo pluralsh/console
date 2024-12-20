@@ -37,7 +37,7 @@ import {
 } from './ClusterUsagesTableCols'
 import {
   CostManagementTreeMap,
-  nodeCostByCluster,
+  cpuCostByCluster,
   memoryCostByCluster,
 } from './CostManagementTreeMap'
 
@@ -100,14 +100,14 @@ export function CostManagement() {
             content: (
               <Flex gap="small">
                 <CpuIcon />
-                <OverlineH1 as="h3">node cost by cluster</OverlineH1>
+                <OverlineH1 as="h3">CPU cost by cluster</OverlineH1>
               </Flex>
             ),
           }}
         >
           <CostManagementTreeMap
             colorScheme="blue"
-            data={nodeCostByCluster(usages)}
+            data={cpuCostByCluster(usages)}
             dataSize={usages.length}
           />
         </Card>

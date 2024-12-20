@@ -109,23 +109,23 @@ const WrapperSC = styled.div(({ theme }) => ({
   },
 }))
 
-export function nodeCostByCluster(usages: ClusterUsageTinyFragment[]) {
+export function cpuCostByCluster(usages: ClusterUsageTinyFragment[]) {
   const avg =
     usages.reduce((acc, usage) => acc + (usage.nodeCost ?? 0), 0) /
     usages.length
   const projectMap: Record<string, TreeMapData> = {}
 
   for (const usage of usages) {
-    if (!usage.nodeCost || !usage.cluster?.project) continue
+    if (!usage.cpuCost || !usage.cluster?.project) continue
 
     const project = usage.cluster.project.name
     if (!projectMap[project])
       projectMap[project] = { name: project, children: [] }
 
-    if (usage.nodeCost / avg > MIN_COST_PERCENTAGE)
+    if (usage.cpuCost / avg > MIN_COST_PERCENTAGE)
       projectMap[project].children?.push({
         name: usage.cluster?.name ?? usage.id,
-        amount: usage.nodeCost,
+        amount: usage.cpuCost,
       })
   }
 

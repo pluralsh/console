@@ -138,7 +138,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   end
 
   def metrics_summary(cluster, _args, _) do
-    case Clusters.cluster_metrics(cluster) do
+    case Clusters.cached_cluster_metrics(cluster) do
       {:ok, %Kube.MetricsAggregate{status: %Kube.MetricsAggregate.Status{} = metrics}} ->
         {:ok, %{
           cpu_available: cores(metrics.cpu_available_millicores),
