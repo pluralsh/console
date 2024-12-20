@@ -30,6 +30,7 @@ import { Body1BoldP, Body1P } from 'components/utils/typography/Text'
 
 import { PrConfigurationFields } from './PrConfigurationFields'
 import { validateAndFilterConfig } from './prConfigurationUtils'
+import { isEmpty } from 'lodash'
 
 function CreateSuccess({ pr }: { pr: PullRequestFragment }) {
   const theme = useTheme()
@@ -60,7 +61,10 @@ function CreatePrModalBase({
   onClose: Nullable<() => void>
 }) {
   const configuration = prAutomation.configuration || []
-  const [currentStep, setCurrentStep] = useState<StepKey>('config')
+  const hasConfiguration = !isEmpty(configuration)
+  const [currentStep, setCurrentStep] = useState<StepKey>(
+    hasConfiguration ? 'config' : 'review'
+  )
   const stepIndex = steps.findIndex((s) => s.key === currentStep)
   const [configVals, setConfigVals] = useState(
     Object.fromEntries(
@@ -184,12 +188,14 @@ function CreatePrModalBase({
               >
                 Create
               </Button>
-              <Button
-                secondary
-                onClick={() => setCurrentStep('config')}
-              >
-                Back
-              </Button>
+              {hasConfiguration && (
+                <Button
+                  secondary
+                  onClick={() => setCurrentStep('config')}
+                >
+                  Back
+                </Button>
+              )}
               <Button
                 secondary
                 onClick={() => onClose?.()}
@@ -225,7 +231,7 @@ function CreatePrModalBase({
           gap: theme.spacing.large,
         }}
       >
-        {currentStep !== 'success' && (
+        {currentStep !== 'success' && hasConfiguration && (
           <div css={{ display: 'flex' }}>
             <Stepper
               compact
@@ -274,17 +280,19 @@ function CreatePrModalBase({
               </Card>
             )}
 
-            <FormField
-              label="Configuration review"
-              name="configuration"
-            >
-              <Code
-                language="json"
-                showHeader={false}
+            {hasConfiguration && (
+              <FormField
+                label="Configuration review"
+                name="configuration"
               >
-                {configJson || ''}
-              </Code>
-            </FormField>
+                <Code
+                  language="json"
+                  showHeader={false}
+                >
+                  {configJson || ''}
+                </Code>
+              </FormField>
+            )}
             <FormField
               label="Repository"
               required
