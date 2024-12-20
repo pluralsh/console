@@ -41,28 +41,6 @@ export const securityRoutes = [
       element={<Policies />}
     />
     <Route
-      path={`${POLICIES_REL_PATH}/:${POLICY_PARAM_ID}`}
-      element={<Policy />}
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to={`${POLICIES_DETAILS_PATH}`}
-          />
-        }
-      />
-      <Route
-        path={`${POLICIES_DETAILS_PATH}`}
-        element={<PolicyDetails />}
-      />
-      <Route
-        path={`${POLICIES_AFFECTED_RESOURCES_PATH}`}
-        element={<PolicyAffectedResources />}
-      />
-    </Route>
-    <Route
       path={`${VULNERABILITY_REPORTS_REL_PATH}/${KUBERNETES_PARAM_CLUSTER}`}
       element={<Cluster />}
     >
@@ -76,4 +54,26 @@ export const securityRoutes = [
     path={`${VULNERABILITY_REPORTS_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
     element={<VulnerabilityReportDetails />}
   />,
+  <Route
+    path={`${POLICIES_ABS_PATH}/:${POLICY_PARAM_ID}`}
+    element={<Policy />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={`${POLICIES_DETAILS_PATH}`}
+        />
+      }
+    />
+    <Route
+      path={`${POLICIES_DETAILS_PATH}`}
+      element={<PolicyDetails />}
+    />
+    <Route
+      path={`${POLICIES_AFFECTED_RESOURCES_PATH}`}
+      element={<PolicyAffectedResources />}
+    />
+  </Route>,
 ]

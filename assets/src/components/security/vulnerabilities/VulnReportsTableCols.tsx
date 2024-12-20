@@ -108,7 +108,6 @@ export const ColSummary = columnHelper.accessor(({ node }) => node?.summary, {
   id: 'summary',
   header: 'Summary',
   meta: {
-    // @ts-ignore, need to update this type in DS to be ReactNode
     tooltip: (
       <div style={{ width: 240 }}>
         Displays the number of{' '}

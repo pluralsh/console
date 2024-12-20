@@ -6,6 +6,7 @@ import {
   Input,
   SearchIcon,
   SubTab,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ClusterSelect } from 'components/cd/utils/ClusterSelect'
@@ -20,6 +21,20 @@ import { ComponentProps, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { VulneratbilityReportsTable } from './VulnReportsTable'
+import {
+  SECURITY_REL_PATH,
+  SECURITY_ABS_PATH,
+  VULNERABILITY_REPORTS_ABS_PATH,
+  VULNERABILITY_REPORTS_REL_PATH,
+} from 'routes/securityRoutesConsts'
+
+const breadcrumbs = [
+  { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
+  {
+    label: VULNERABILITY_REPORTS_REL_PATH,
+    url: VULNERABILITY_REPORTS_ABS_PATH,
+  },
+]
 
 export const gradeToSeverityMap: Record<
   VulnReportGrade | 'All',
@@ -34,6 +49,7 @@ export const gradeToSeverityMap: Record<
 }
 
 export function VulnerabilityReports() {
+  useSetBreadcrumbs(breadcrumbs)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
@@ -125,6 +141,7 @@ export function VulnerabilityReports() {
         selectedClusters={selectedClusters}
         selectedNamespaces={selectedNamespaces}
         selectedGrade={selectedGrade === 'All' ? undefined : selectedGrade}
+        reportsQ={throttledReportsQ}
       />
     </ContentWrapperSC>
   )

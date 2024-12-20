@@ -1,0 +1,144 @@
+fragment ClusterUsageTiny on ClusterUsage {
+  id
+  cpu
+  memory
+  gpu
+  cpuUtil
+  memUtil
+  cpuCost
+  memoryCost
+  nodeCost
+  controlPlaneCost
+  ingressCost
+  loadBalancerCost
+  egressCost
+  cluster {
+    ...ClusterTiny
+    project {
+      id
+      name
+    }
+  }
+}
+
+fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
+  id
+  namespace
+  cpuCost
+  cpuUtil
+  cpu
+  memoryCost
+  memUtil
+  memory
+}
+
+fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
+  id
+  namespace
+  name
+  container
+  cpuCost
+  cpuRequest
+  cpuRecommendation
+  memoryCost
+  memoryRequest
+  memoryRecommendation
+  type
+}
+
+query ClusterUsages(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $q: String
+  $tagQuery: TagQuery
+  $projectId: ID
+) {
+  clusterUsages(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    q: $q
+    tagQuery: $tagQuery
+    projectId: $projectId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterUsageTiny
+      }
+    }
+  }
+}
+
+query ClusterUsageNamespaces(
+  $id: ID!
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $q: String
+) {
+  clusterUsage(id: $id) {
+    id
+    cluster {
+      id
+      name
+    }
+    namespaces(
+      after: $after
+      first: $first
+      before: $before
+      last: $last
+      q: $q
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterNamespaceUsage
+        }
+      }
+    }
+  }
+}
+
+query ClusterUsageScalingRecommendations(
+  $id: ID!
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $q: String
+  $type: ScalingRecommendationType
+) {
+  clusterUsage(id: $id) {
+    id
+    cluster {
+      id
+      name
+    }
+    recommendations(
+      after: $after
+      first: $first
+      before: $before
+      last: $last
+      q: $q
+      type: $type
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterScalingRecommendation
+        }
+      }
+    }
+  }
+}

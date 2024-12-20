@@ -26,7 +26,6 @@ export default function NotificationSeverity({
   return (
     <div>
       <Chip
-        hue="lighter"
         severity={getChipSeverity(lowerCase)}
         textTransform="capitalize"
       >

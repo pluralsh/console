@@ -9,6 +9,7 @@ import {
   useVulnerabilityReportsQuery,
   VulnReportGrade,
 } from 'generated/graphql'
+import { memo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
 import {
@@ -19,57 +20,62 @@ import {
   ColSummary,
 } from './VulnReportsTableCols'
 
-export function VulneratbilityReportsTable({
-  selectedClusters,
-  selectedNamespaces,
-  selectedGrade,
-}: {
-  selectedClusters?: string[]
-  selectedNamespaces?: string[]
-  selectedGrade?: VulnReportGrade
-}) {
-  const { clusterId = '' } = useParams()
-  const navigate = useNavigate()
-  const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: useVulnerabilityReportsQuery,
-        keyPath: ['vulnerabilityReports'],
-      },
-      {
-        clusters: selectedClusters,
-        namespaces: selectedNamespaces,
-        grade: selectedGrade,
-      }
+export const VulneratbilityReportsTable = memo(
+  function VulneratbilityReportsTable({
+    selectedClusters,
+    selectedNamespaces,
+    selectedGrade,
+    reportsQ,
+  }: {
+    selectedClusters?: string[]
+    selectedNamespaces?: string[]
+    selectedGrade?: VulnReportGrade
+    reportsQ?: string
+  }) {
+    const { clusterId = '' } = useParams()
+    const navigate = useNavigate()
+    const { data, loading, error, fetchNextPage, setVirtualSlice } =
+      useFetchPaginatedData(
+        {
+          queryHook: useVulnerabilityReportsQuery,
+          keyPath: ['vulnerabilityReports'],
+        },
+        {
+          clusters: selectedClusters,
+          namespaces: selectedNamespaces,
+          grade: selectedGrade,
+          q: reportsQ || undefined,
+        }
+      )
+
+    if (error) return <GqlError error={error} />
+
+    return (
+      <FullHeightTableWrap css={{ flex: 1 }}>
+        <Table
+          virtualizeRows
+          data={data?.vulnerabilityReports?.edges || []}
+          columns={columns}
+          loading={!data && loading}
+          css={{ maxHeight: '100%' }}
+          onRowClick={(_e, row) => {
+            navigate(
+              getVulnerabilityReportDetailsPath({
+                clusterId,
+                vulnerabilityReportId: row.original.node?.id,
+              })
+            )
+          }}
+          hasNextPage={data?.vulnerabilityReports?.pageInfo?.hasNextPage}
+          isFetchingNextPage={loading}
+          fetchNextPage={fetchNextPage}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          onVirtualSliceChange={setVirtualSlice}
+          emptyStateProps={{ message: 'No vulnerability reports found.' }}
+        />
+      </FullHeightTableWrap>
     )
-
-  if (error) return <GqlError error={error} />
-
-  return (
-    <FullHeightTableWrap css={{ flex: 1 }}>
-      <Table
-        virtualizeRows
-        data={data?.vulnerabilityReports?.edges || []}
-        columns={columns}
-        loading={!data && loading}
-        css={{ maxHeight: '100%' }}
-        onRowClick={(_e, row) => {
-          navigate(
-            getVulnerabilityReportDetailsPath({
-              clusterId,
-              vulnerabilityReportId: row.original.node?.id,
-            })
-          )
-        }}
-        hasNextPage={data?.vulnerabilityReports?.pageInfo?.hasNextPage}
-        isFetchingNextPage={loading}
-        fetchNextPage={fetchNextPage}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'No vulnerability reports found.' }}
-      />
-    </FullHeightTableWrap>
-  )
-}
+  }
+)
 
 const columns = [ColImage, ColNamespaces, ColGrade, ColSummary, ColActions]
