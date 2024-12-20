@@ -1955,8 +1955,9 @@ type DeploymentSettingsAttributes struct {
 	// connection details for a prometheus instance to use
 	PrometheusConnection *HTTPConnectionAttributes `json:"prometheusConnection,omitempty"`
 	// connection details for a loki instance to use
-	LokiConnection *HTTPConnectionAttributes `json:"lokiConnection,omitempty"`
-	MgmtRepo       *string                   `json:"mgmtRepo,omitempty"`
+	LokiConnection *HTTPConnectionAttributes  `json:"lokiConnection,omitempty"`
+	Logging        *LoggingSettingsAttributes `json:"logging,omitempty"`
+	MgmtRepo       *string                    `json:"mgmtRepo,omitempty"`
 	// configuration for smtp message delivery
 	SMTP *SMTPSettingsAttributes `json:"smtp,omitempty"`
 	// configuration for LLM provider clients
@@ -2780,6 +2781,12 @@ type LoggingSettings struct {
 	Driver *LogDriver `json:"driver,omitempty"`
 	// configures a connection to victoria metrics
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
+}
+
+type LoggingSettingsAttributes struct {
+	Enabled  *bool                     `json:"enabled,omitempty"`
+	Driver   *LogDriver                `json:"driver,omitempty"`
+	Victoria *HTTPConnectionAttributes `json:"victoria,omitempty"`
 }
 
 type LoginInfo struct {

@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :stacks,                 :stack_settings_attributes, description: "global configuration for stack execution"
     field :prometheus_connection,  :http_connection_attributes, description: "connection details for a prometheus instance to use"
     field :loki_connection,        :http_connection_attributes, description: "connection details for a loki instance to use"
+    field :logging,                :logging_settings_attributes
     field :mgmt_repo,              :string
 
     field :smtp, :smtp_settings_attributes, description: "configuration for smtp message delivery"
