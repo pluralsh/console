@@ -134,11 +134,10 @@ export function CostManagementDetails() {
 const PageWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   padding: theme.spacing.large,
   height: '100%',
   width: '100%',
-  overflow: 'hidden',
 }))
 
 const HeaderWrapperSC = styled.div({

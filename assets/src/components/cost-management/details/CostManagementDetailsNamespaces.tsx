@@ -53,8 +53,8 @@ export function CostManagementDetailsNamespaces() {
   return (
     <Flex
       direction="column"
-      gap="large"
-      overflow="hidden"
+      gap="medium"
+      paddingBottom={theme.spacing.large}
     >
       <Flex gap="large">
         <Card
@@ -116,7 +116,7 @@ export function CostManagementDetailsNamespaces() {
           onChange={(e) => setNamespaceQ(e.target.value)}
         />
         <Card
-          css={{ overflow: 'hidden' }}
+          css={{ overflow: 'hidden', maxHeight: 300 }}
           header={{
             content: (
               <Flex gap="small">

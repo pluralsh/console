@@ -135,7 +135,7 @@ export function CostManagement() {
         </Card>
       </Flex>
       <Card
-        css={{ overflow: 'hidden' }}
+        css={{ overflow: 'hidden', maxHeight: 300 }}
         header={{
           content: (
             <Flex gap="small">
@@ -174,13 +174,11 @@ export function CostManagement() {
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
-  height: '100%',
   width: '100%',
   padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
-  overflow: 'hidden',
+  gap: theme.spacing.medium,
 }))
 
 const cols = [
