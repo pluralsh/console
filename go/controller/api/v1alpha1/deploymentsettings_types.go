@@ -241,6 +241,22 @@ type AISettings struct {
 	Vertex *VertexSettings `json:"vertex,omitempty"`
 }
 
+func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.LoggingSettingsAttributes, error) {
+	attr := &console.LoggingSettingsAttributes{
+		Enabled: in.Enabled,
+		Driver:  in.Driver,
+	}
+	if in.Victoria != nil {
+		connection, err := in.Victoria.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Victoria = connection
+	}
+
+	return attr, nil
+}
+
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
 	attr := &console.AiSettingsAttributes{
 		Enabled:      in.Enabled,
