@@ -21,9 +21,11 @@ import { useTheme } from 'styled-components'
 import {
   ColCpuCost,
   ColCpuEfficiency,
+  ColLoadBalancerCost,
   ColMemoryCost,
   ColMemoryEfficiency,
   ColNamespace,
+  ColNetworkCost,
 } from '../ClusterUsagesTableCols'
 import { CM_TREE_MAP_CARD_HEIGHT } from '../CostManagement'
 import {
@@ -157,7 +159,10 @@ export function CostManagementDetailsNamespaces() {
 const cols = [
   ColNamespace,
   ColCpuCost,
-  ColCpuEfficiency,
   ColMemoryCost,
+  // ColStorageCost,
+  ColLoadBalancerCost,
+  ColNetworkCost,
+  ColCpuEfficiency,
   ColMemoryEfficiency,
 ]

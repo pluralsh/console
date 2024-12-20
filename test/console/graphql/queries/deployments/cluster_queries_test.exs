@@ -692,6 +692,12 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       usage = insert(:cluster_usage)
       nsu = insert_list(4, :cluster_namespace_usage, cluster: usage.cluster)
       sr = insert_list(3, :cluster_scaling_recommendation, cluster: usage.cluster)
+      hist = for i <- 1..3 do
+        insert(:cluster_usage_history,
+          cluster: usage.cluster,
+          timestamp: Timex.now() |> Timex.shift(days: -i)
+        )
+      end
 
       {:ok, %{data: %{"clusterUsage" => found}}} = run_query("""
         query Usage($id: ID!) {
@@ -703,6 +709,9 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
             recommendations(first: 5) {
               edges { node { id } }
             }
+            history(first: 5) {
+              edges { node { id } }
+            }
           }
         }
       """, %{"id" => usage.id}, %{current_user: admin_user()})
@@ -712,6 +721,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
              |> ids_equal(nsu)
       assert from_connection(found["recommendations"])
              |> ids_equal(sr)
+      assert from_connection(found["history"])
+             |> ids_equal(hist)
     end
   end
 end

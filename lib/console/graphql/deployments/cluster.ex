@@ -245,22 +245,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cost_attributes do
-    field :namespace,           :string, description: "leave null if cluster scoped"
-    field :memory,              :float
-    field :cpu,                 :float
-    field :gpu,                 :float
-    field :storage,             :float
-    field :memory_util,         :float, description: "the historical memory utilization for this scope"
-    field :cpu_util,            :float, description: "the historical cpu utilization for this scope"
-    field :gpu_util,            :float, description: "the historical gpu utilization for this scope"
-    field :cpu_cost,            :float, description: "the historical cpu cost for this scope"
-    field :memory_cost,         :float, description: "the historical memory cost for this scope"
-    field :gpu_cost,            :float, description: "the historical gpu cost for this scope"
-    field :ingress_cost,        :float
-    field :load_balancer_cost,  :float
-    field :egress_cost,         :float
-    field :node_cost,           :float
-    field :control_plane_cost,  :float
+    field :namespace,          :string, description: "leave null if cluster scoped"
+    field :memory,             :float
+    field :cpu,                :float
+    field :gpu,                :float
+    field :storage,            :float
+    field :memory_util,        :float, description: "the historical memory utilization for this scope"
+    field :cpu_util,           :float, description: "the historical cpu utilization for this scope"
+    field :gpu_util,           :float, description: "the historical gpu utilization for this scope"
+    field :cpu_cost,           :float, description: "the historical cpu cost for this scope"
+    field :memory_cost,        :float, description: "the historical memory cost for this scope"
+    field :gpu_cost,           :float, description: "the historical gpu cost for this scope"
+    field :ingress_cost,       :float
+    field :load_balancer_cost, :float
+    field :egress_cost,        :float
+    field :node_cost,          :float
+    field :control_plane_cost, :float
+    field :storage_cost,       :float
   end
 
   input_object :cluster_recommendation_attributes do
@@ -748,6 +749,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cpu,                :float
     field :memory,             :float
     field :gpu,                :float
+    field :storage,            :float, description: "the amount of storage used by this cluster"
     field :cpu_util,           :float, description: "the amount of cpu utilized"
     field :mem_util,           :float, description: "the amount of memory utilized"
 
@@ -758,6 +760,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :load_balancer_cost, :float
     field :egress_cost,        :float
     field :node_cost,          :float
+    field :storage_cost,       :float
     field :control_plane_cost, :float
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
@@ -773,6 +776,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.list_scaling_recommendations/3
     end
 
+    connection field :history, node_type: :cluster_usage_history do
+      resolve &Deployments.list_cluster_usage_history/3
+    end
+
+    timestamps()
+  end
+
+  object :cluster_usage_history do
+    field :id,        non_null(:id)
+    field :timestamp, non_null(:datetime)
+
+    field :cpu_cost,           :float
+    field :memory_cost,        :float
+    field :gpu_cost,           :float
+    field :ingress_cost,       :float
+    field :load_balancer_cost, :float
+    field :egress_cost,        :float
+    field :node_cost,          :float
+    field :storage_cost,       :float
+    field :control_plane_cost, :float
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
     timestamps()
   end
 
@@ -782,6 +808,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cpu,       :float
     field :memory,    :float
     field :gpu,       :float
+    field :storage,   :float, description: "the amount of storage used by this namespace"
     field :cpu_util,  :float, description: "the amount of cpu utilized"
     field :mem_util,  :float, description: "the amount of memory utilized"
 
@@ -789,6 +816,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_cost,        :float
     field :gpu_cost,           :float
     field :ingress_cost,       :float
+    field :storage_cost,       :float
     field :load_balancer_cost, :float
     field :egress_cost,        :float
 
@@ -826,6 +854,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_usage
   connection node_type: :cluster_namespace_usage
   connection node_type: :cluster_scaling_recommendation
+  connection node_type: :cluster_usage_history
 
   delta :cluster
   delta :cluster_provider

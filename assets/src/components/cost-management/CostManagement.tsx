@@ -31,9 +31,10 @@ import {
   ColCluster,
   ColCpuCost,
   ColCpuEfficiency,
+  ColLoadBalancerCost,
   ColMemoryCost,
   ColMemoryEfficiency,
-  ColNodeCost,
+  ColNetworkCost,
 } from './ClusterUsagesTableCols'
 import {
   CostManagementTreeMap,
@@ -183,10 +184,12 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 const cols = [
   ColCluster,
-  ColNodeCost,
   ColCpuCost,
-  ColCpuEfficiency,
   ColMemoryCost,
+  // ColStorageCost,
+  ColLoadBalancerCost,
+  ColNetworkCost,
   ColMemoryEfficiency,
+  ColCpuEfficiency,
   ColActions,
 ]

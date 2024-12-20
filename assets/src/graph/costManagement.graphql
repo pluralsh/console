@@ -3,6 +3,7 @@ fragment ClusterUsageTiny on ClusterUsage {
   cpu
   memory
   gpu
+  storage
   cpuUtil
   memUtil
   cpuCost
@@ -24,12 +25,16 @@ fragment ClusterUsageTiny on ClusterUsage {
 fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
   namespace
+  storage
   cpuCost
   cpuUtil
   cpu
   memoryCost
   memUtil
   memory
+  ingressCost
+  loadBalancerCost
+  egressCost
 }
 
 fragment ClusterScalingRecommendation on ClusterScalingRecommendation {

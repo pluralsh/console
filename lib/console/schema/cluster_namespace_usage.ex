@@ -19,6 +19,7 @@ defmodule Console.Schema.ClusterNamespaceUsage do
     field :load_balancer_cost, :float
     field :ingress_cost,       :float
     field :egress_cost,        :float
+    field :storage_cost,       :float
 
     belongs_to :cluster, Cluster
 
@@ -57,6 +58,7 @@ defmodule Console.Schema.ClusterNamespaceUsage do
     load_balancer_cost
     ingress_cost
     egress_cost
+    storage_cost
   )a
 
   def changeset(model, attrs \\ %{}) do

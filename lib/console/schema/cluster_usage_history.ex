@@ -1,8 +1,9 @@
-defmodule Console.Schema.ClusterUsage do
+defmodule Console.Schema.ClusterUsageHistory do
   use Piazza.Ecto.Schema
   alias Console.Schema.Cluster
 
-  schema "cluster_usage" do
+  schema "cluster_usage_history" do
+    field :timestamp,   :utc_datetime_usec
     field :memory,      :float
     field :cpu,         :float
     field :storage,     :float
@@ -28,43 +29,24 @@ defmodule Console.Schema.ClusterUsage do
     timestamps()
   end
 
-  def for_clusters(query \\ __MODULE__, cluster_q) do
-    from(cu in query,
-      join: c in subquery(cluster_q),
-        on: c.id == cu.cluster_id,
-        as: :clusters,
-      distinct: true
-    )
-  end
-
-  def for_user(query \\ __MODULE__, user) do
-    from(cu in query,
-      join: c in ^Cluster.for_user(user),
-        on: c.id == cu.cluster_id,
-        as: :clusters,
-      distinct: true
-    )
-  end
-
   def for_cluster(query \\ __MODULE__, cid) do
     from(cu in query,
       where: cu.cluster_id == ^cid
     )
   end
 
-  def preloaded(query \\ __MODULE__, preloads \\ [:cluster]) do
-    from(cu in query, preload: ^preloads)
-  end
-
-  def ordered(query, order) do
+  def ordered(query \\ __MODULE__, order \\ [asc: :timestamp]) do
     from(cu in query, order_by: ^order)
   end
 
-  def ordered(query \\ __MODULE__) do
-    from(cu in query, order_by: [asc: :cluster_id])
+  def expired(query \\ __MODULE__) do
+    expiry = Timex.now() |> Timex.shift(days: -14)
+    from(cu in query, where: cu.timestamp <= ^expiry)
   end
 
-  @valid ~w(memory
+  @valid ~w(
+    timestamp
+    memory
     cpu
     gpu
     storage
@@ -82,6 +64,8 @@ defmodule Console.Schema.ClusterUsage do
     egress_cost
     storage_cost
   )a
+
+  def fields(), do: @valid
 
   def changeset(model, attrs \\ %{}) do
     model

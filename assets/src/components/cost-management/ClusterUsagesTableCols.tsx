@@ -15,6 +15,8 @@ const columnHelper = createColumnHelper<
   ClusterUsageTinyFragment | ClusterNamespaceUsageFragment
 >()
 
+const dollarize = (cost) => (cost ? `$${cost.toFixed(3)}` : '--')
+
 export const ColCluster = (
   columnHelper as ColumnHelper<ClusterUsageTinyFragment>
 ).accessor(({ cluster }) => cluster?.name, {
@@ -81,6 +83,49 @@ export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
     )
   },
 })
+
+export const ColStorageCost = columnHelper.accessor(({ storage }) => storage, {
+  id: 'storageCost',
+  header: 'Storage cost',
+  cell: function Cell({ getValue }) {
+    const storage = getValue()
+
+    return <SimpleTextWrapperSC>{dollarize(storage)}</SimpleTextWrapperSC>
+  },
+})
+
+export const ColLoadBalancerCost = columnHelper.accessor(
+  ({ loadBalancerCost }) => loadBalancerCost,
+  {
+    id: 'loadBalancerCost',
+    header: 'Load balancer cost',
+    cell: function Cell({ getValue }) {
+      const loadBalancerCost = getValue()
+
+      return (
+        <SimpleTextWrapperSC>{dollarize(loadBalancerCost)}</SimpleTextWrapperSC>
+      )
+    },
+  }
+)
+
+export const ColNetworkCost = columnHelper.accessor(
+  ({ ingressCost, egressCost }) =>
+    (ingressCost || egressCost) && { ingressCost, egressCost },
+  {
+    id: 'networkCost',
+    header: 'Network cost',
+    cell: function Cell({ row: { original } }) {
+      const { ingressCost, egressCost } = original
+
+      return (
+        <SimpleTextWrapperSC>
+          {dollarize(ingressCost)} / {dollarize(egressCost)}
+        </SimpleTextWrapperSC>
+      )
+    },
+  }
+)
 
 export const ColCpuEfficiency = columnHelper.accessor(
   (usage) => {

@@ -1081,6 +1081,8 @@ type ClusterNamespaceUsage struct {
 	CPU       *float64 `json:"cpu,omitempty"`
 	Memory    *float64 `json:"memory,omitempty"`
 	Gpu       *float64 `json:"gpu,omitempty"`
+	// the amount of storage used by this namespace
+	Storage *float64 `json:"storage,omitempty"`
 	// the amount of cpu utilized
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// the amount of memory utilized
@@ -1089,6 +1091,7 @@ type ClusterNamespaceUsage struct {
 	MemoryCost       *float64 `json:"memoryCost,omitempty"`
 	GpuCost          *float64 `json:"gpuCost,omitempty"`
 	IngressCost      *float64 `json:"ingressCost,omitempty"`
+	StorageCost      *float64 `json:"storageCost,omitempty"`
 	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
 	EgressCost       *float64 `json:"egressCost,omitempty"`
 	Cluster          *Cluster `json:"cluster,omitempty"`
@@ -1329,6 +1332,8 @@ type ClusterUsage struct {
 	CPU    *float64 `json:"cpu,omitempty"`
 	Memory *float64 `json:"memory,omitempty"`
 	Gpu    *float64 `json:"gpu,omitempty"`
+	// the amount of storage used by this cluster
+	Storage *float64 `json:"storage,omitempty"`
 	// the amount of cpu utilized
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// the amount of memory utilized
@@ -1340,10 +1345,12 @@ type ClusterUsage struct {
 	LoadBalancerCost *float64                                `json:"loadBalancerCost,omitempty"`
 	EgressCost       *float64                                `json:"egressCost,omitempty"`
 	NodeCost         *float64                                `json:"nodeCost,omitempty"`
+	StorageCost      *float64                                `json:"storageCost,omitempty"`
 	ControlPlaneCost *float64                                `json:"controlPlaneCost,omitempty"`
 	Cluster          *Cluster                                `json:"cluster,omitempty"`
 	Namespaces       *ClusterNamespaceUsageConnection        `json:"namespaces,omitempty"`
 	Recommendations  *ClusterScalingRecommendationConnection `json:"recommendations,omitempty"`
+	History          *ClusterUsageHistoryConnection          `json:"history,omitempty"`
 	InsertedAt       *string                                 `json:"insertedAt,omitempty"`
 	UpdatedAt        *string                                 `json:"updatedAt,omitempty"`
 }
@@ -1356,6 +1363,33 @@ type ClusterUsageConnection struct {
 type ClusterUsageEdge struct {
 	Node   *ClusterUsage `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type ClusterUsageHistory struct {
+	ID               string   `json:"id"`
+	Timestamp        string   `json:"timestamp"`
+	CPUCost          *float64 `json:"cpuCost,omitempty"`
+	MemoryCost       *float64 `json:"memoryCost,omitempty"`
+	GpuCost          *float64 `json:"gpuCost,omitempty"`
+	IngressCost      *float64 `json:"ingressCost,omitempty"`
+	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
+	EgressCost       *float64 `json:"egressCost,omitempty"`
+	NodeCost         *float64 `json:"nodeCost,omitempty"`
+	StorageCost      *float64 `json:"storageCost,omitempty"`
+	ControlPlaneCost *float64 `json:"controlPlaneCost,omitempty"`
+	Cluster          *Cluster `json:"cluster,omitempty"`
+	InsertedAt       *string  `json:"insertedAt,omitempty"`
+	UpdatedAt        *string  `json:"updatedAt,omitempty"`
+}
+
+type ClusterUsageHistoryConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*ClusterUsageHistoryEdge `json:"edges,omitempty"`
+}
+
+type ClusterUsageHistoryEdge struct {
+	Node   *ClusterUsageHistory `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
 }
 
 type Command struct {
@@ -1664,6 +1698,7 @@ type CostAttributes struct {
 	EgressCost       *float64 `json:"egressCost,omitempty"`
 	NodeCost         *float64 `json:"nodeCost,omitempty"`
 	ControlPlaneCost *float64 `json:"controlPlaneCost,omitempty"`
+	StorageCost      *float64 `json:"storageCost,omitempty"`
 }
 
 type CostIngestAttributes struct {
