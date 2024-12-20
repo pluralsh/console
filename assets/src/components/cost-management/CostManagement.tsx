@@ -37,7 +37,7 @@ import {
 } from './ClusterUsagesTableCols'
 import {
   CostManagementTreeMap,
-  nodeCostByCluster,
+  cpuCostByCluster,
   memoryCostByCluster,
 } from './CostManagementTreeMap'
 
@@ -100,14 +100,14 @@ export function CostManagement() {
             content: (
               <Flex gap="small">
                 <CpuIcon />
-                <OverlineH1 as="h3">node cost by cluster</OverlineH1>
+                <OverlineH1 as="h3">CPU cost by cluster</OverlineH1>
               </Flex>
             ),
           }}
         >
           <CostManagementTreeMap
             colorScheme="blue"
-            data={nodeCostByCluster(usages)}
+            data={cpuCostByCluster(usages)}
             dataSize={usages.length}
           />
         </Card>
@@ -135,7 +135,7 @@ export function CostManagement() {
         </Card>
       </Flex>
       <Card
-        css={{ overflow: 'hidden' }}
+        css={{ overflow: 'hidden', maxHeight: 300 }}
         header={{
           content: (
             <Flex gap="small">
@@ -174,13 +174,11 @@ export function CostManagement() {
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
-  height: '100%',
   width: '100%',
   padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
-  overflow: 'hidden',
+  gap: theme.spacing.medium,
 }))
 
 const cols = [

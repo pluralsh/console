@@ -197,6 +197,9 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+  @spec cached_cluster_metrics(Cluster.t) :: {:ok, term} | Console.error
+  def cached_cluster_metrics(%Cluster{id: id}), do: @local_adapter.get({:cluster_metrics, id})
+
   @doc """
   Fetches the node metrics for a cluster, this query is heavily cached for performance
   """

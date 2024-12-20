@@ -28,7 +28,7 @@ export default function KickButton({
 } & ButtonProps) {
   const [mutation, { loading, error }] = kickMutationHook({ variables })
   const [lastSync, setLastSync] = useState<Date | undefined>(undefined)
-  const { disabled, secondsRemaining } = useSyncCooldown(lastSync, 5 * 1000)
+  const { disabled, secondsRemaining } = useSyncCooldown(lastSync, 15 * 1000)
   const onClick = useCallback(() => {
     setLastSync(new Date())
     mutation()

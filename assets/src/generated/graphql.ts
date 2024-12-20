@@ -2391,6 +2391,7 @@ export type DeploymentSettingsAttributes = {
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
   gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  logging?: InputMaybe<LoggingSettingsAttributes>;
   /** connection details for a loki instance to use */
   lokiConnection?: InputMaybe<HttpConnectionAttributes>;
   mgmtRepo?: InputMaybe<Scalars['String']['input']>;
@@ -3376,6 +3377,12 @@ export type LoggingSettings = {
   enabled?: Maybe<Scalars['Boolean']['output']>;
   /** configures a connection to victoria metrics */
   victoria?: Maybe<HttpConnection>;
+};
+
+export type LoggingSettingsAttributes = {
+  driver?: InputMaybe<LogDriver>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  victoria?: InputMaybe<HttpConnectionAttributes>;
 };
 
 export type LoginInfo = {

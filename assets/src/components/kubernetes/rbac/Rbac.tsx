@@ -35,7 +35,7 @@ const directory = [
   { path: ROLE_BINDINGS_REL_PATH, label: 'Role bindings' },
   { path: CLUSTER_ROLES_REL_PATH, label: 'Cluster roles' },
   { path: CLUSTER_ROLE_BINDINGS_REL_PATH, label: 'Cluster role bindings' },
-  { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service Accounts' },
+  { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service accounts' },
 ] as const
 
 export default function Rbac() {
