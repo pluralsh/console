@@ -748,6 +748,7 @@ _Appears in:_
 | `prometheusConnection` _[HTTPConnection](#httpconnection)_ | PrometheusConnection connection details for a prometheus instance to use |  | Optional: {} <br /> |
 | `lokiConnection` _[HTTPConnection](#httpconnection)_ | LokiConnection connection details for a loki instance to use |  | Optional: {} <br /> |
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: {} <br /> |
+| `logging` _[LoggingSettings](#loggingsettings)_ | Settings for connections to log aggregation datastores |  | Optional: {} <br /> |
 
 
 
@@ -948,6 +949,7 @@ _Appears in:_
 
 _Appears in:_
 - [DeploymentSettingsSpec](#deploymentsettingsspec)
+- [LoggingSettings](#loggingsettings)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1180,6 +1182,24 @@ _Appears in:_
 | `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
 | `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br /> |
 | `resources` _[ContainerResources](#containerresources)_ | Resource specification that overrides implicit container resources when containers are not directly configured. |  | Optional: {} <br /> |
+
+
+#### LoggingSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ |  |  | Optional: {} <br /> |
+| `driver` _[LogDriver](#logdriver)_ | The type of log aggregation solution you wish to use |  | Optional: {} <br /> |
+| `victoria` _[HTTPConnection](#httpconnection)_ | Configures a connection to victoria metrics |  | Optional: {} <br /> |
 
 
 #### ManagedNamespace

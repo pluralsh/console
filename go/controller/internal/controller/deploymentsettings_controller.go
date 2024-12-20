@@ -186,6 +186,17 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.Ai = ai
 	}
+	if settings.Spec.Logging != nil {
+		logging, err := settings.Spec.Logging.Attributes(ctx, r.Client, settings.Namespace)
+		if errors.IsNotFound(err) {
+			return nil, operrors.ErrReferenceNotFound
+		}
+
+		if err != nil {
+			return nil, err
+		}
+		attr.Logging = logging
+	}
 	if settings.Spec.Stacks != nil {
 		var jobSpec *console.GateJobAttributes
 		var err error
