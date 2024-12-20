@@ -132,6 +132,7 @@ function CreatePrModalBase({
             })
         }
       }}
+      size="large"
       open={open}
       onClose={onClose || undefined}
       header={
@@ -297,6 +298,7 @@ function CreatePrModalBase({
               label="Repository"
               required
               name="repository"
+              hint={'Repository slug, i.e. username/infra-repo.'}
             >
               <Input2
                 value={identifier}
@@ -307,6 +309,7 @@ function CreatePrModalBase({
               label="Branch"
               required
               name="branch"
+              hint="Pull request source branch name. Avoid using existing branches."
             >
               <Input2
                 value={branch}
