@@ -400,6 +400,52 @@ spec:
                       type: object
                     type: array
                 type: object
+              logging:
+                description: Settings for connections to log aggregation datastores
+                properties:
+                  driver:
+                    description: The type of log aggregation solution you wish to
+                      use
+                    type: string
+                  enabled:
+                    type: boolean
+                  victoria:
+                    description: Configures a connection to victoria metrics
+                    properties:
+                      host:
+                        description: Host ...
+                        type: string
+                      password:
+                        description: Password to connect w/ for basic auth
+                        type: string
+                      passwordSecretRef:
+                        description: PasswordSecretRef selects a key of a password
+                          Secret
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      user:
+                        description: User to connect with basic auth
+                        type: string
+                    required:
+                    - host
+                    type: object
+                type: object
               lokiConnection:
                 description: LokiConnection connection details for a loki instance
                   to use

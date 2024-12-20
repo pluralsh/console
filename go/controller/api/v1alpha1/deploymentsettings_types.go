@@ -98,6 +98,22 @@ type DeploymentSettingsSpec struct {
 	//
 	// +kubebuilder:validation:Optional
 	AI *AISettings `json:"ai,omitempty"`
+
+	// Settings for connections to log aggregation datastores
+	//
+	// +kubebuilder:validation:Optional
+	Logging *LoggingSettings `json:"logging,omitempty"`
+}
+
+type LoggingSettings struct {
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+	// The type of log aggregation solution you wish to use
+	// +kubebuilder:validation:Optional
+	Driver *console.LogDriver `json:"driver,omitempty"`
+	// Configures a connection to victoria metrics
+	// +kubebuilder:validation:Optional
+	Victoria *HTTPConnection `json:"victoria,omitempty"`
 }
 
 type HTTPConnection struct {
