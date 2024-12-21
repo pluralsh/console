@@ -769,6 +769,17 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_usage_history_factory do
+    %Schema.ClusterUsageHistory{
+      timestamp: Timex.now(),
+      cluster: build(:cluster),
+      cpu: 100,
+      memory: 100,
+      cpu_util: 50,
+      memory_util: 50
+    }
+  end
+
   def cluster_namespace_usage_factory do
     %Schema.ClusterNamespaceUsage{
       cluster: build(:cluster),

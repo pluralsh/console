@@ -1391,6 +1391,9 @@ export type ClusterNamespaceUsage = {
   memory?: Maybe<Scalars['Float']['output']>;
   memoryCost?: Maybe<Scalars['Float']['output']>;
   namespace?: Maybe<Scalars['String']['output']>;
+  /** the amount of storage used by this namespace */
+  storage?: Maybe<Scalars['Float']['output']>;
+  storageCost?: Maybe<Scalars['Float']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -1658,6 +1661,7 @@ export type ClusterUsage = {
   egressCost?: Maybe<Scalars['Float']['output']>;
   gpu?: Maybe<Scalars['Float']['output']>;
   gpuCost?: Maybe<Scalars['Float']['output']>;
+  history?: Maybe<ClusterUsageHistoryConnection>;
   id: Scalars['ID']['output'];
   ingressCost?: Maybe<Scalars['Float']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1669,7 +1673,18 @@ export type ClusterUsage = {
   namespaces?: Maybe<ClusterNamespaceUsageConnection>;
   nodeCost?: Maybe<Scalars['Float']['output']>;
   recommendations?: Maybe<ClusterScalingRecommendationConnection>;
+  /** the amount of storage used by this cluster */
+  storage?: Maybe<Scalars['Float']['output']>;
+  storageCost?: Maybe<Scalars['Float']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type ClusterUsageHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1701,6 +1716,36 @@ export type ClusterUsageEdge = {
   __typename?: 'ClusterUsageEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ClusterUsage>;
+};
+
+export type ClusterUsageHistory = {
+  __typename?: 'ClusterUsageHistory';
+  cluster?: Maybe<Cluster>;
+  controlPlaneCost?: Maybe<Scalars['Float']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
+  egressCost?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  ingressCost?: Maybe<Scalars['Float']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  loadBalancerCost?: Maybe<Scalars['Float']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
+  nodeCost?: Maybe<Scalars['Float']['output']>;
+  storageCost?: Maybe<Scalars['Float']['output']>;
+  timestamp: Scalars['DateTime']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterUsageHistoryConnection = {
+  __typename?: 'ClusterUsageHistoryConnection';
+  edges?: Maybe<Array<Maybe<ClusterUsageHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterUsageHistoryEdge = {
+  __typename?: 'ClusterUsageHistoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterUsageHistory>;
 };
 
 export type Command = {
@@ -2070,6 +2115,7 @@ export type CostAttributes = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   nodeCost?: InputMaybe<Scalars['Float']['input']>;
   storage?: InputMaybe<Scalars['Float']['input']>;
+  storageCost?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type CostIngestAttributes = {
@@ -11412,9 +11458,9 @@ export type ComponentTreeQueryVariables = Exact<{
 
 export type ComponentTreeQuery = { __typename?: 'RootQueryType', componentTree?: { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null } | null };
 
-export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
-export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null };
+export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
 
 export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null };
 
@@ -11429,7 +11475,7 @@ export type ClusterUsagesQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
 
 export type ClusterUsageNamespacesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11441,7 +11487,7 @@ export type ClusterUsageNamespacesQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null } | null } | null> | null } | null } | null };
+export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null } | null } | null> | null } | null } | null };
 
 export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -14206,6 +14252,7 @@ export const ClusterUsageTinyFragmentDoc = gql`
   cpu
   memory
   gpu
+  storage
   cpuUtil
   memUtil
   cpuCost
@@ -14228,12 +14275,16 @@ export const ClusterNamespaceUsageFragmentDoc = gql`
     fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
   namespace
+  storage
   cpuCost
   cpuUtil
   cpu
   memoryCost
   memUtil
   memory
+  ingressCost
+  loadBalancerCost
+  egressCost
 }
     `;
 export const ClusterScalingRecommendationFragmentDoc = gql`

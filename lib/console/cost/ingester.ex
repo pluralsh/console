@@ -1,7 +1,7 @@
 defmodule Console.Cost.Ingester do
-  alias Console.Repo
   import Console.Services.Base
   import Console.Cost.Utils, only: [batch_insert: 2]
+  alias Console.Repo
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, Cluster, ClusterUsage, ClusterNamespaceUsage, ClusterScalingRecommendation}
 

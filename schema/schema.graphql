@@ -4663,6 +4663,8 @@ input CostAttributes {
   nodeCost: Float
 
   controlPlaneCost: Float
+
+  storageCost: Float
 }
 
 input ClusterRecommendationAttributes {
@@ -5317,6 +5319,9 @@ type ClusterUsage {
 
   gpu: Float
 
+  "the amount of storage used by this cluster"
+  storage: Float
+
   "the amount of cpu utilized"
   cpuUtil: Float
 
@@ -5337,6 +5342,8 @@ type ClusterUsage {
 
   nodeCost: Float
 
+  storageCost: Float
+
   controlPlaneCost: Float
 
   cluster: Cluster
@@ -5345,8 +5352,27 @@ type ClusterUsage {
 
   recommendations(after: String, first: Int, before: String, last: Int, type: ScalingRecommendationType, q: String): ClusterScalingRecommendationConnection
 
+  history(after: String, first: Int, before: String, last: Int): ClusterUsageHistoryConnection
+
   insertedAt: DateTime
 
+  updatedAt: DateTime
+}
+
+type ClusterUsageHistory {
+  id: ID!
+  timestamp: DateTime!
+  cpuCost: Float
+  memoryCost: Float
+  gpuCost: Float
+  ingressCost: Float
+  loadBalancerCost: Float
+  egressCost: Float
+  nodeCost: Float
+  storageCost: Float
+  controlPlaneCost: Float
+  cluster: Cluster
+  insertedAt: DateTime
   updatedAt: DateTime
 }
 
@@ -5361,6 +5387,9 @@ type ClusterNamespaceUsage {
 
   gpu: Float
 
+  "the amount of storage used by this namespace"
+  storage: Float
+
   "the amount of cpu utilized"
   cpuUtil: Float
 
@@ -5374,6 +5403,8 @@ type ClusterNamespaceUsage {
   gpuCost: Float
 
   ingressCost: Float
+
+  storageCost: Float
 
   loadBalancerCost: Float
 
@@ -5438,6 +5469,11 @@ type ClusterNamespaceUsageConnection {
 type ClusterScalingRecommendationConnection {
   pageInfo: PageInfo!
   edges: [ClusterScalingRecommendationEdge]
+}
+
+type ClusterUsageHistoryConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterUsageHistoryEdge]
 }
 
 enum AuthMethod {
@@ -8644,6 +8680,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ClusterUsageHistoryEdge {
+  node: ClusterUsageHistory
   cursor: String
 }
 

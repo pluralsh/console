@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterRevision,
     PinnedCustomResource,
     ClusterUsage,
+    ClusterUsageHistory,
     ClusterNamespaceUsage,
     ClusterScalingRecommendation
   }
@@ -108,6 +109,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> ClusterUsage.for_clusters()
     |> ClusterUsage.ordered()
     |> ClusterUsage.preloaded()
+    |> paginate(args)
+  end
+
+  def list_cluster_usage_history(%ClusterUsage{cluster_id: cluster_id}, args, _) do
+    ClusterUsageHistory.for_cluster(cluster_id)
+    |> ClusterUsageHistory.ordered()
     |> paginate(args)
   end
 
