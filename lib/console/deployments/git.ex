@@ -23,6 +23,7 @@ defmodule Console.Deployments.Git do
   require Logger
 
   @cache Console.conf(:cache_adapter)
+  @local_cache Console.conf(:local_cache)
   @ttl :timer.minutes(30)
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
@@ -389,6 +390,10 @@ defmodule Console.Deployments.Git do
       _ -> {:ok, []}
     end
   end
+
+  def cached_helm_repositories(), do: @local_cache.get(:helm_repositories)
+
+  def warm_helm_cache(), do: @local_cache.put(:helm_repositories, list_helm_repositories(), ttl: @ttl)
 
   @spec upsert_helm_repository(binary) :: helm_resp
   def upsert_helm_repository(url) do

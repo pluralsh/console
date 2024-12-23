@@ -20,6 +20,7 @@ defmodule Console.AI.Stream.Exec do
       {%AIStream.SSE.Event{data: data}, ind}, acc ->
         case reducer.(data) do
           c when is_binary(c) ->
+            IO.inspect(c, label: "publishing text stream")
             AIStream.publish(stream, c, ind)
             {:cont, [c | acc]}
           _ -> {:cont, acc}

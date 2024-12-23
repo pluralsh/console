@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  alias Console.Deployments.{Services, Clusters, Global, Stacks}
+  alias Console.Deployments.{Services, Clusters, Global, Stacks, Git}
   alias Console.Services.Users
   alias Console.Schema.{
     Cluster,
@@ -62,6 +62,7 @@ defmodule Console.Deployments.Cron do
   end
 
   def cache_warm() do
+    Task.async(fn -> Git.warm_helm_cache() end)
     Cluster.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn cluster ->
@@ -69,6 +70,7 @@ defmodule Console.Deployments.Cron do
       try do
         Clusters.warm(:cluster_metrics, cluster)
         Clusters.warm(:nodes, cluster)
+        Clusters.warm(:node_metrics, cluster)
         Clusters.warm(:api_discovery, cluster)
       rescue
         e ->

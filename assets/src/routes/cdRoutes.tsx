@@ -16,7 +16,6 @@ import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
-import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
 import ServiceErrors from 'components/cd/services/service/ServiceErrors'
 import ServiceHelm from 'components/cd/services/service/ServiceHelm'
@@ -516,7 +515,7 @@ const serviceDetailsRoutes = (
       element={<ServiceSettings />}
       path="settings"
     />
-    <Route
+    {/* <Route
       element={<ServiceDocs />}
       path="docs"
     >
@@ -524,7 +523,7 @@ const serviceDetailsRoutes = (
         path=":docName"
         element={<ServiceDocs />}
       />
-    </Route>
+    </Route> */}
   </Route>
 )
 

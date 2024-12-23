@@ -160,6 +160,17 @@ defmodule Console.Deployments.Clusters do
   def warm(:api_discovery, %Cluster{} = cluster), do: api_discovery(cluster)
 
   @doc """
+  Same as `nodes/1` except only reads from cache
+  """
+  @spec cached_nodes(Cluster.t) :: {:ok, term} | Console.error
+  def cached_nodes(%Cluster{id: id}) do
+    case @local_adapter.get({:nodes, id}) do
+      {:ok, nodes} when is_list(nodes) -> {:ok, nodes}
+      _ -> {:ok, []}
+    end
+  end
+
+  @doc """
   Fetches the nodes for a cluster, this query is heavily cached for performance
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
@@ -178,6 +189,13 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+
+  def cached_node_metrics(%Cluster{id: id}) do
+    case @local_adapter.get({:node_metrics, id}) do
+      {:ok, nodes} when is_list(nodes) -> {:ok, nodes}
+      _ -> {:ok, []}
+    end
+  end
 
   @doc """
   Fetches the node metrics for a cluster, this query is heavily cached for performance
