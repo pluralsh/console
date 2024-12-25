@@ -13,7 +13,6 @@ import {
   ChatThreadDetailsDocument,
   ChatThreadDetailsQuery,
   ChatThreadFragment,
-  useAiChatStreamSubscription,
   useChatMutation,
   useChatThreadDetailsQuery,
 } from 'generated/graphql'
@@ -25,6 +24,8 @@ import {
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
+import { useStreamTopic } from '../useStreamTopic.tsx'
+import { useChannel } from 'components/hooks/useChannel.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -44,20 +45,22 @@ export function ChatbotPanelThread({
   }, [messageListRef])
 
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
-  useAiChatStreamSubscription({
-    variables: { threadId: currentThread.id },
-    onData: ({ data: { data } }) => {
+  const topic = useStreamTopic({ threadId: currentThread.id })
+  const callback = useCallback(
+    ({ content, seq }) => {
       setStreaming(true)
-      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
+      if ((seq ?? 1) % 120 === 0) scrollToBottom()
       setStreamedMessage((streamedMessage) => [
         ...streamedMessage,
         {
-          seq: data?.aiStream?.seq ?? 0,
-          content: data?.aiStream?.content ?? '',
+          seq: seq ?? 0,
+          content: content ?? '',
         },
       ])
     },
-  })
+    [setStreaming, setStreamedMessage, scrollToBottom]
+  )
+  useChannel(topic, 'stream', callback)
 
   const { data } = useChatThreadDetailsQuery({
     variables: { id: currentThread.id },

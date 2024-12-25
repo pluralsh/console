@@ -1,5 +1,6 @@
 defmodule Console.AI.Stream do
   alias Console.Schema.User
+  alias ConsoleWeb.AIChannel
 
   defstruct [:topic]
 
@@ -10,9 +11,11 @@ defmodule Console.AI.Stream do
   def stream(), do: Process.get(@stream)
 
   def publish(%__MODULE__{topic: topic}, c, ind) when is_binary(topic) do
+    msg = %{content: c, seq: ind}
+    AIChannel.stream(topic, msg)
     Absinthe.Subscription.publish(
       ConsoleWeb.Endpoint,
-      %{content: c, seq: ind},
+      msg,
       [ai_stream: topic]
     )
   end

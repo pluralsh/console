@@ -6,6 +6,9 @@ defmodule ConsoleWeb.Endpoint do
     websocket: [check_origin: false],
     longpoll: false
 
+  socket "/gql-ws", ConsoleWeb.GraphqlWSSocket,
+    websocket: [path: "", subprotocols: ["graphql-transport-ws"]]
+
   socket "/ext/socket", ConsoleWeb.ExternalSocket,
     websocket: [check_origin: false],
     longpoll: false

@@ -99,6 +99,7 @@ defmodule Console.MixProject do
       {:yajwt, "~> 1.4"},
       {:joken, "~> 2.6"},
       {:mdex, "~> 0.1"},
+      {:absinthe_graphql_ws, "~> 0.3"},
       {:prom_ex, "~> 1.11.0"},
       {:telemetry_poller, "~> 1.1"},
       {:cowboy_telemetry, "~> 0.4"},

@@ -24,15 +24,15 @@ export const authlessClient = new ApolloClient({
   cache: new InMemoryCache(),
 })
 
-// function maybeRejoin(chan) {
-//   const state = chan.state
-//   if (state === 'closed' || state === 'errored') {
-//     console.log('broken absinthe channel, rejoining')
-//     chan.rejoin()
-//   }
+// function resetAbsinthe(absintheSocket) {
+//   absintheSocket.channelJoinCreated = false
+//   absintheSocket.channel.joinedOnce = false
+//   absintheSocket.channel.leave()
 // }
 
-function maybeReconnect(socket) {
+function maybeReconnect(absintheSocket) {
+  console.log('polled socket', absintheSocket)
+  const socket = absintheSocket.phoenixSocket
   // console.log('socket reconnect attempt', socket)
   if (socket.connectionState() === 'closed') {
     console.warn('found dead websocket, attempting a reconnect')
@@ -44,6 +44,7 @@ function maybeReconnect(socket) {
       socket.reconnectTimer.reset()
       socket.reconnectTimer.scheduleTimeout()
     }
+    // resetAbsinthe(absintheSocket)
 
     return
   }
@@ -121,9 +122,14 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     }),
   })
 
-  // socket.onOpen(() => maybeRejoin(absintheSocket.channel))
-  socket.onClose(() => maybeReconnect(socket))
-  setInterval(() => maybeReconnect(socket), 5000)
+  // setInterval(() => {
+  //   console.log('log absinthe socket', absintheSocket)
+  //   maybeRejoin(absintheSocket.channel)
+  // }, 5000)
+  // socket.onClose(() => {
+  //   maybeReconnect(absintheSocket)
+  // })
+  setInterval(() => maybeReconnect(absintheSocket), 5000)
 
   return { client, socket }
 }
