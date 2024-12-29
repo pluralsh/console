@@ -5780,6 +5780,8 @@ export type RootMutationType = {
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   syncGlobalService?: Maybe<GlobalService>;
+  /** Creates a pull request given the thread message history */
+  threadPr?: Maybe<Chat>;
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
   updateCluster?: Maybe<Cluster>;
@@ -6559,6 +6561,11 @@ export type RootMutationTypeSignupArgs = {
 
 export type RootMutationTypeSyncGlobalServiceArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeThreadPrArgs = {
+  threadId: Scalars['ID']['input'];
 };
 
 

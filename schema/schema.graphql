@@ -933,6 +933,9 @@ type RootMutationType {
   "saves a set of messages and generates a new one transactionally"
   chat(threadId: ID, messages: [ChatMessage]): Chat
 
+  "Creates a pull request given the thread message history"
+  threadPr(threadId: ID!): Chat
+
   "Wipes your current chat history blank"
   clearChatHistory(
     threadId: ID

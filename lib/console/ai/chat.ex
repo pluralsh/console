@@ -1,13 +1,15 @@
 defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
-  alias Console.AI.Provider
+  alias Console.AI.{Provider, Tools.Pr}
   alias Console.Schema.{
+    AiInsight,
     Chat,
     ChatThread,
     ChatSequence,
     User,
-    AiPin
+    AiPin,
+    PullRequest
   }
 
   @type thread_resp :: {:ok, ChatThread.t} | Console.error
@@ -29,6 +31,13 @@ defmodule Console.AI.Chat do
   The following is a chat history concerning a set of kubernetes or devops questions, usually encompassing topics like terraform,
   helm, GitOps, and other technologies and best practices.  Please provide a response suitable for a junior engineer
   with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
+  """
+
+  @pr """
+  The above is a chat log debugging a devops issue related to Kubernetes, Infrastructure as Code or general devops issues. Please spawn a
+  Pull Request to fix the issue described above.  The code change should be the most direct and straightforward way to
+  fix the issue described.  Change only the minimal amount of lines in the original files provided to successfully
+  fix the issue, avoid any extraneous changes as they will potentially break additional functionality upon application.
   """
 
   def get_thread!(id), do: Repo.get!(ChatThread, id)
@@ -237,6 +246,45 @@ defmodule Console.AI.Chat do
     end
   end
 
+  def pr(thread_id, %User{} = user) do
+    Console.AI.Tool.set_actor(user)
+    with {:ok, thread} <- thread_access(thread_id, user) do
+      Chat.for_thread(thread_id)
+      |> Repo.all()
+      |> fit_context_window()
+      |> Enum.map(fn %{role: r, content: c} -> {r, c} end)
+      |> Enum.concat([{:user, @pr}])
+      |> Provider.tool_call([Pr])
+      |> handle_tool_call(thread, user)
+    end
+  end
+
+  defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
+    thread = Repo.preload(thread, [:insight])
+    start_transaction()
+    |> add_operation(:pr, fn _ ->
+      %PullRequest{}
+      |> PullRequest.changeset(Map.merge(pr_attrs, pr_attrs(thread)))
+      |> Repo.insert()
+    end)
+    |> add_operation(:msg, fn %{pr: %{id: id}} ->
+      msg("Ok I created the PR for you, here it is")
+      |> Map.put(:pull_request_id, id)
+      |> save_message(thread.id, user)
+    end)
+    |> add_operation(:bump, fn _ ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(extract: :msg)
+  end
+  defp handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _, _), do: {:error, err}
+  defp handle_tool_call({:ok, txt}, %ChatThread{id: tid}, user), do: save_message(msg(txt), tid, user)
+  defp handle_tool_call(err, _, _), do: err
+
+  defp pr_attrs(%ChatThread{insight: %AiInsight{} = insight}), do: Map.take(insight, ~w(service_id stack_id cluster_id)a)
+  defp pr_attrs(_), do: %{}
+
   def thread_access(tid, %User{} = user) do
     get_thread!(tid)
     |> allow(user, :read)
@@ -299,4 +347,6 @@ defmodule Console.AI.Chat do
   defp trim_messages(_, [] = msgs), do: msgs
   defp trim_messages(total, [%Chat{content: content} | rest]),
     do: trim_messages(total - byte_size(content), rest)
+
+  defp msg(text), do: %{role: :assistant, content: text}
 end

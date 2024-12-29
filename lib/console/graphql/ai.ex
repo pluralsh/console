@@ -210,6 +210,14 @@ defmodule Console.GraphQl.AI do
       resolve &AI.chat/2
     end
 
+    @desc "Creates a pull request given the thread message history"
+    field :thread_pr, :chat do
+      middleware Authenticated
+      arg :thread_id, non_null(:id)
+
+      resolve &AI.thread_pr/2
+    end
+
     @desc "Wipes your current chat history blank"
     field :clear_chat_history, :integer do
       middleware Authenticated

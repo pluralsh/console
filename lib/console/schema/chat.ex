@@ -1,6 +1,6 @@
 defmodule Console.Schema.Chat do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, ChatThread}
+  alias Console.Schema.{User, ChatThread, PullRequest}
 
   defenum Role, user: 0, assistant: 1, system: 2
 
@@ -9,6 +9,7 @@ defmodule Console.Schema.Chat do
     field :content, :string
     field :seq,     :integer
 
+    belongs_to :pull_request, PullRequest
     belongs_to :user, User
     belongs_to :thread, ChatThread
 
@@ -21,6 +22,10 @@ defmodule Console.Schema.Chat do
 
   def for_user(query \\ __MODULE__, user_id) do
     from(c in query, where: c.user_id == ^user_id)
+  end
+
+  def for_pull_request(query \\ __MODULE__, pr_id) do
+    from(c in query, where: c.pull_request_id == ^pr_id)
   end
 
   def rollup(query \\ __MODULE__) do
@@ -45,13 +50,13 @@ defmodule Console.Schema.Chat do
 
   defp expiry(), do: Timex.now() |> Timex.shift(days: -5)
 
-  @valid ~w(user_id thread_id role content seq)a
+  @valid ~w(user_id thread_id role content seq pull_request_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:thread_id)
-    |> validate_required(@valid)
+    |> validate_required(~w(user_id thread_id role content seq)a)
   end
 end
