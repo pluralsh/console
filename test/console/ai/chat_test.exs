@@ -302,3 +302,45 @@ defmodule Console.AI.ChatTest do
     end
   end
 end
+
+defmodule Console.AI.ChatSyncTest do
+  use Console.DataCase, async: false
+  alias Console.AI.Chat
+  use Mimic
+
+  describe "#add_context/2" do
+    test "adds a set of context messages to a thread from a source" do
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
+      )
+
+      thread = insert(:chat_thread, user: user)
+
+      {:ok, [_ | _] = msgs} = Chat.add_context({:service, svc.id}, thread.id, user)
+
+      assert Enum.any?(msgs, & &1.type == :file)
+    end
+
+    test "you can't add context if you don't have access" do
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+      thread = insert(:chat_thread, user: user)
+
+      {:error, _} = Chat.add_context({:service, svc.id}, thread.id, user)
+    end
+  end
+end

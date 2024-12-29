@@ -1,7 +1,9 @@
 defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
-  alias Console.AI.{Provider, Tools.Pr}
+  import Console.AI.Evidence.Base, only: [prepend: 2]
+  alias Console.AI.{Provider, Tools.Pr, Fixer}
+  alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{
     AiInsight,
     Chat,
@@ -9,11 +11,16 @@ defmodule Console.AI.Chat do
     ChatSequence,
     User,
     AiPin,
-    PullRequest
+    PullRequest,
+    Service,
+    Stack
   }
 
+  @type context_source :: :service | :stack
   @type thread_resp :: {:ok, ChatThread.t} | Console.error
   @type pin_resp :: {:ok, AiPin.t} | Console.error
+  @type chat_list_resp :: {:ok, [Chat.t]} | Console.error
+  @type chat_resp :: {:ok, Chat.t} | Console.error
 
   @context_window 128_000 * 4
 
@@ -142,7 +149,7 @@ defmodule Console.AI.Chat do
       Enum.sort_by(chats, & &1.seq)
       |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one or two paragraphs."}])
       |> fit_context_window(@rollup)
-      |> Enum.map(fn %{role: r, content: t} -> {r, t} end)
+      |> Enum.map(&Chat.message/1)
       |> Provider.completion(preface: @rollup)
     end)
     |> add_operation(:summary, fn %{summarize: s} ->
@@ -162,7 +169,7 @@ defmodule Console.AI.Chat do
     |> Repo.all()
     |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one sentence."}])
     |> fit_context_window(@summary)
-    |> Enum.map(fn %Chat{role: r, content: t} -> {r, t} end)
+    |> Enum.map(&Chat.message/1)
     |> Provider.completion(preface: @summary)
     |> when_ok(fn summary ->
       ChatThread.changeset(thread, %{summarized: true, summary: summary})
@@ -197,7 +204,7 @@ defmodule Console.AI.Chat do
   @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
-  @spec chat([map], binary | nil, User.t) :: {:ok, Chat.t} | Console.error
+  @spec chat([map], binary | nil, User.t) :: chat_resp
   def chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
     start_transaction()
@@ -208,7 +215,7 @@ defmodule Console.AI.Chat do
       |> Chat.ordered()
       |> Repo.all()
       |> fit_context_window()
-      |> Enum.map(fn %Chat{role: r, content: c} -> {r, c} end)
+      |> Enum.map(&Chat.message/1)
       |> Provider.completion(preface: @chat)
     end)
     |> add_operation(:msg, fn %{chat: c} ->
@@ -224,35 +231,62 @@ defmodule Console.AI.Chat do
   @doc """
   Saves a set of messages to a users chat history
   """
-  @spec save([map], binary | nil, User.t) :: {:ok, [Chat.t]} | Console.error
+  @spec save([map], binary | nil, User.t) :: chat_list_resp
   def save(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
-    with {:ok, _} <- thread_access(thread_id, user) do
-      Enum.with_index(messages)
-      |> Enum.reduce(start_transaction(), fn {message, ind}, xact ->
-        add_operation(xact, {:msg, ind}, fn _ ->
-          save_message(message, thread_id, user)
-        end)
+    start_transaction()
+    |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
+    |> maybe_save_messages(messages, user)
+    |> execute()
+    |> when_ok(fn results ->
+      Enum.filter(results, fn
+        {{:msg, _}, _} -> true
+        _ -> false
       end)
-      |> execute()
-      |> when_ok(fn results ->
-        Enum.filter(results, fn
-          {{:msg, _}, _} -> true
-          _ -> false
-        end)
-        |> Enum.map(&elem(&1, 1))
-        |> Enum.sort_by(& &1.seq)
+      |> Enum.map(&elem(&1, 1))
+      |> Enum.sort_by(& &1.seq)
+    end)
+  end
+
+  @doc """
+  Adds context to the given chat thread from a source, eg a service or stack
+  """
+  @spec add_context({context_source, binary}, binary, User.t) :: chat_list_resp
+  def add_context({source_type, id}, thread_id, %User{} = user) do
+    Fixer.Base.raw()
+    source = context_source(source_type, id)
+    with {:ok, source} <- allow(source, user, :read),
+         {:ok, _} <- thread_access(thread_id, user),
+         {:ok, [_ | prompt]} <- context_prompt(source) do
+      Enum.map(prompt, fn
+        {role, %{file: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
+        {role, c} -> %{role: role, content: c}
       end)
+      |> prepend(%{
+        role: :user,
+        content: "Please give me the full details of the Plural #{source_type} with name: #{source.name}"
+      })
+      |> save(thread_id, user)
     end
   end
 
+  defp context_source(:service, id), do: Services.get_service!(id)
+  defp context_source(:stack, id), do: Stacks.get_stack!(id)
+
+  defp context_prompt(%Service{} = svc), do: Fixer.Service.prompt(svc, "")
+  defp context_prompt(%Stack{} = stack), do: Fixer.Stack.prompt(stack, "")
+
+  @doc """
+  Generates a PR given the chat history in the input thread
+  """
+  @spec pr(binary, User.t) :: chat_resp
   def pr(thread_id, %User{} = user) do
     Console.AI.Tool.set_actor(user)
     with {:ok, thread} <- thread_access(thread_id, user) do
       Chat.for_thread(thread_id)
       |> Repo.all()
       |> fit_context_window()
-      |> Enum.map(fn %{role: r, content: c} -> {r, c} end)
+      |> Enum.map(&Chat.message/1)
       |> Enum.concat([{:user, @pr}])
       |> Provider.tool_call([Pr])
       |> handle_tool_call(thread, user)
@@ -307,7 +341,7 @@ defmodule Console.AI.Chat do
     |> Enum.each(&backfill_thread/1)
   end
 
-  defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user) do
+  defp maybe_save_messages(xact, [_ | _] = msgs, user) do
     Enum.with_index(msgs)
     |> Enum.reduce(xact, fn {msg, ind}, xact ->
       add_operation(xact, {:msg, ind}, fn %{thread: %{id: tid}} ->
@@ -315,6 +349,7 @@ defmodule Console.AI.Chat do
       end)
     end)
   end
+  defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user), do: maybe_save_messages(xact, msgs, user)
   defp maybe_save_messages(xact, _, _), do: xact
 
   defp save_message(message, thread_id, %User{id: uid} = user) do

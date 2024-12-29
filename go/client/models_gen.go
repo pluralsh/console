@@ -748,13 +748,15 @@ type Changelog struct {
 }
 
 type Chat struct {
-	ID         string      `json:"id"`
-	Role       AiRole      `json:"role"`
-	Content    string      `json:"content"`
-	Seq        int64       `json:"seq"`
-	Thread     *ChatThread `json:"thread,omitempty"`
-	InsertedAt *string     `json:"insertedAt,omitempty"`
-	UpdatedAt  *string     `json:"updatedAt,omitempty"`
+	ID         string              `json:"id"`
+	Type       ChatType            `json:"type"`
+	Role       AiRole              `json:"role"`
+	Content    string              `json:"content"`
+	Seq        int64               `json:"seq"`
+	Attributes *ChatTypeAttributes `json:"attributes,omitempty"`
+	Thread     *ChatThread         `json:"thread,omitempty"`
+	InsertedAt *string             `json:"insertedAt,omitempty"`
+	UpdatedAt  *string             `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {
@@ -765,6 +767,11 @@ type ChatConnection struct {
 type ChatEdge struct {
 	Node   *Chat   `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+// Additional attributes for describing a file type chat
+type ChatFile struct {
+	Name *string `json:"name,omitempty"`
 }
 
 // A basic AI chat message input, modeled after OpenAI's api model
@@ -805,6 +812,11 @@ type ChatThreadConnection struct {
 type ChatThreadEdge struct {
 	Node   *ChatThread `json:"node,omitempty"`
 	Cursor *string     `json:"cursor,omitempty"`
+}
+
+// Additional attributes of this chat message, used for formatting it in the display
+type ChatTypeAttributes struct {
+	File *ChatFile `json:"file,omitempty"`
 }
 
 type CloneAttributes struct {
@@ -6754,6 +6766,47 @@ func (e BuildType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type ChatType string
+
+const (
+	ChatTypeText ChatType = "TEXT"
+	ChatTypeFile ChatType = "FILE"
+)
+
+var AllChatType = []ChatType{
+	ChatTypeText,
+	ChatTypeFile,
+}
+
+func (e ChatType) IsValid() bool {
+	switch e {
+	case ChatTypeText, ChatTypeFile:
+		return true
+	}
+	return false
+}
+
+func (e ChatType) String() string {
+	return string(e)
+}
+
+func (e *ChatType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ChatType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ChatType", str)
+	}
+	return nil
+}
+
+func (e ChatType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ClusterDistro string
 
 const (
@@ -7025,6 +7078,48 @@ func (e *ConstraintViolationField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ConstraintViolationField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// The source of additional context to send to a thread
+type ContextSource string
+
+const (
+	ContextSourceService ContextSource = "SERVICE"
+	ContextSourceStack   ContextSource = "STACK"
+)
+
+var AllContextSource = []ContextSource{
+	ContextSourceService,
+	ContextSourceStack,
+}
+
+func (e ContextSource) IsValid() bool {
+	switch e {
+	case ContextSourceService, ContextSourceStack:
+		return true
+	}
+	return false
+}
+
+func (e ContextSource) String() string {
+	return string(e)
+}
+
+func (e *ContextSource) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContextSource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContextSource", str)
+	}
+	return nil
+}
+
+func (e ContextSource) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

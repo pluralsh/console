@@ -945,12 +945,14 @@ export type Changelog = {
 
 export type Chat = {
   __typename?: 'Chat';
+  attributes?: Maybe<ChatTypeAttributes>;
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   role: AiRole;
   seq: Scalars['Int']['output'];
   thread?: Maybe<ChatThread>;
+  type: ChatType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -964,6 +966,12 @@ export type ChatEdge = {
   __typename?: 'ChatEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Chat>;
+};
+
+/** Additional attributes for describing a file type chat */
+export type ChatFile = {
+  __typename?: 'ChatFile';
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 /** A basic AI chat message input, modeled after OpenAI's api model */
@@ -1016,6 +1024,17 @@ export type ChatThreadEdge = {
   __typename?: 'ChatThreadEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ChatThread>;
+};
+
+export enum ChatType {
+  File = 'FILE',
+  Text = 'TEXT'
+}
+
+/** Additional attributes of this chat message, used for formatting it in the display */
+export type ChatTypeAttributes = {
+  __typename?: 'ChatTypeAttributes';
+  file?: Maybe<ChatFile>;
 };
 
 export type CloneAttributes = {
@@ -2075,6 +2094,12 @@ export type ContextAttributes = {
 export type ContextBindingAttributes = {
   contextId: Scalars['String']['input'];
 };
+
+/** The source of additional context to send to a thread */
+export enum ContextSource {
+  Service = 'SERVICE',
+  Stack = 'STACK'
+}
 
 export type CostAnalysis = {
   __typename?: 'CostAnalysis';
@@ -5616,6 +5641,8 @@ export type RollingUpdate = {
 
 export type RootMutationType = {
   __typename?: 'RootMutationType';
+  /** it will add additional context to the given chat from a source object */
+  addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addRunLogs?: Maybe<RunLogs>;
   aiFixPr?: Maybe<PullRequest>;
   approveBuild?: Maybe<Build>;
@@ -5826,6 +5853,13 @@ export type RootMutationType = {
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
+};
+
+
+export type RootMutationTypeAddChatContextArgs = {
+  source: ContextSource;
+  sourceId?: InputMaybe<Scalars['ID']['input']>;
+  threadId: Scalars['ID']['input'];
 };
 
 
