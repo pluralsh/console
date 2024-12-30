@@ -1,10 +1,4 @@
-import {
-  Chip,
-  collectHeadings,
-  Flex,
-  getMdContent,
-} from '@pluralsh/design-system'
-import capitalize from 'lodash/capitalize'
+import { Chip, Flex } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { memo, useContext, useMemo } from 'react'
 import {
@@ -16,7 +10,6 @@ import {
 import styled, { useTheme } from 'styled-components'
 
 import {
-  FileContent,
   ServiceDeploymentDetailsFragment,
   useServiceDeploymentQuery,
   useServiceDeploymentsTinyQuery,
@@ -60,50 +53,48 @@ import { useProjectId } from '../../../contexts/ProjectsContext'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
-import { config } from '../../../../markdoc/mdSchema.ts'
 
-function getDocsData(
-  docs:
-    | (Pick<FileContent, 'content' | 'path'> | null | undefined)[]
-    | null
-    | undefined
-) {
-  return docs?.map((doc, i) => {
-    const content = getMdContent(doc?.content, config)
-    const headings = collectHeadings(content)
-    const id = headings?.[0]?.id || `page-${i}`
-    const label = headings?.[0]?.title || `Page ${i}`
-    const path = `docs/${id}`
+// function getDocsData(
+//   docs:
+//     | (Pick<FileContent, 'content' | 'path'> | null | undefined)[]
+//     | null
+//     | undefined
+// ) {
+//   return docs?.map((doc, i) => {
+//     const content = getMdContent(doc?.content, config)
+//     const headings = collectHeadings(content)
+//     const id = headings?.[0]?.id || `page-${i}`
+//     const label = headings?.[0]?.title || `Page ${i}`
+//     const path = `docs/${id}`
 
-    const subpaths = headings
-      .map((heading) => {
-        if (heading.level === 3 && heading.id && heading.title) {
-          return {
-            path: `${path}#${heading.id}`,
-            label: `${heading.title}`,
-            id: heading.id,
-            type: 'docPageHash',
-          }
-        }
+//     const subpaths = headings
+//       .map((heading) => {
+//         if (heading.level === 3 && heading.id && heading.title) {
+//           return {
+//             path: `${path}#${heading.id}`,
+//             label: `${heading.title}`,
+//             id: heading.id,
+//             type: 'docPageHash',
+//           }
+//         }
 
-        return null
-      })
-      .filter((heading) => !!heading)
+//         return null
+//       })
+//       .filter((heading) => !!heading)
 
-    return {
-      path,
-      id,
-      label,
-      subpaths,
-      content,
-      headings,
-      type: 'docPage',
-    }
-  })
-}
+//     return {
+//       path,
+//       id,
+//       label,
+//       subpaths,
+//       content,
+//       headings,
+//       type: 'docPage',
+//     }
+//   })
+// }
 
 type ServiceContextType = {
-  docs: ReturnType<typeof getDocsData>
   service: ServiceDeploymentDetailsFragment
   refetch: () => void
   loading: boolean
@@ -154,19 +145,17 @@ const ErrorsLabel = memo(({ count }: { count: Nullable<number> }) => (
 
 export const getDirectory = ({
   serviceDeployment,
-  docs = null,
   logsEnabled = false,
   isAdmin = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
-  docs?: ReturnType<typeof getDocsData> | null
   logsEnabled?: boolean | undefined
   isAdmin?: boolean
 }): Directory => {
   if (!serviceDeployment) {
     return []
   }
-  const { name, componentStatus, dryRun, status } = serviceDeployment
+  const { componentStatus, dryRun, status } = serviceDeployment
 
   const healthyDependencies =
     serviceDeployment.dependencies?.filter((dep) => dep?.status === 'HEALTHY')
@@ -205,12 +194,12 @@ export const getDirectory = ({
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: 'revisions', label: 'Revisions', enabled: true },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
-    {
-      path: 'docs',
-      label: name ? `${capitalize(name)} docs` : 'Docs',
-      enabled: !isEmpty(docs),
-      ...(docs ? { subpaths: docs } : {}),
-    },
+    // {
+    //   path: 'docs',
+    //   label: name ? `${capitalize(name)} docs` : 'Docs',
+    //   enabled: !isEmpty(docs),
+    //   ...(docs ? { subpaths: docs } : {}),
+    // },
     {
       path: 'dependencies',
       label: (
@@ -262,20 +251,19 @@ function ServiceDetailsBase() {
     errorPolicy: 'all',
   })
   const { serviceDeployment } = serviceData || {}
-  const docs = useMemo(
-    () => getDocsData(serviceData?.serviceDeployment?.docs),
-    [serviceData?.serviceDeployment?.docs]
-  )
+  // const docs = useMemo(
+  //   () => getDocsData(serviceData?.serviceDeployment?.docs),
+  //   [serviceData?.serviceDeployment?.docs]
+  // )
 
   const directory = useMemo(
     () =>
       getDirectory({
         serviceDeployment,
-        docs,
         logsEnabled,
         isAdmin,
       }),
-    [docs, logsEnabled, serviceDeployment, isAdmin]
+    [logsEnabled, serviceDeployment, isAdmin]
   )
 
   return (
@@ -316,7 +304,6 @@ function ServiceDetailsBase() {
           <Outlet
             context={
               {
-                docs,
                 service: serviceDeployment,
                 refetch,
                 loading,

@@ -90,10 +90,6 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     values
     valuesFiles
   }
-  docs {
-    content
-    path
-  }
   components {
     ...ServiceDeploymentComponent
   }

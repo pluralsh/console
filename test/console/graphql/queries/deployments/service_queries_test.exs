@@ -45,11 +45,11 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       cluster = insert(:cluster)
       services = insert_list(3, :service, cluster: cluster)
       svc = insert(:service, cluster: cluster, helm: %{chart: "chart", version: "0.1.0", repository: %{namespace: "ns", name: "name"}})
-      expect(Kube.Client, :list_helm_repositories, fn ->
-        {:ok, %{items: [%Kube.HelmRepository{
+      expect(Console.Deployments.Git, :cached_helm_repositories, fn ->
+        {:ok, [%Kube.HelmRepository{
           metadata: %{namespace: "ns", name: "name"},
           spec: %Kube.HelmRepository.Spec{url: "https://helm.sh"},
-        }]}}
+        }]}
       end)
 
       {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""

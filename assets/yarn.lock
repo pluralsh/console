@@ -10196,7 +10196,7 @@ __metadata:
     moment: 2.29.4
     moment-timezone: 0.5.43
     npm-run-all: 4.1.5
-    phoenix: 1.7.3
+    phoenix: 1.7.14
     pluralize: 8.0.0
     pluralsh-absinthe-socket-apollo-link: 0.2.0
     prettier: 3.3.3
@@ -17199,10 +17199,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"phoenix@npm:1.7.3":
-  version: 1.7.3
-  resolution: "phoenix@npm:1.7.3"
-  checksum: 039270c919e269412cbc40e46cbe667073506d387406856c3b03aa7ec338a710615f9ff3a2156e08877b851f5b29eaefb71da55d66ea1c7738a294761db04b93
+"phoenix@npm:1.7.14":
+  version: 1.7.14
+  resolution: "phoenix@npm:1.7.14"
+  checksum: c687f340380df1ba9af5f526c76a06a445cb819d366873bee228a2151f66c9732d1e579dda5371be3c80674e5fd8003bc19549dbadec1fd25220bc8081e30440
   languageName: node
   linkType: hard
 

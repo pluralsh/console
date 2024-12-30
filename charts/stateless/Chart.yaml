@@ -1,0 +1,6 @@
+apiVersion: v2
+name: stateless
+description: A Helm chart to deploy a basic stateless application
+type: application
+version: 0.1.0
+appVersion: "1.16.0"

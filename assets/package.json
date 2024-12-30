@@ -80,7 +80,7 @@
     "kubernetes-resource-parser": "0.1.0",
     "lodash": "4.17.21",
     "moment": "2.29.4",
-    "phoenix": "1.7.3",
+    "phoenix": "1.7.14",
     "pluralize": "8.0.0",
     "pluralsh-absinthe-socket-apollo-link": "0.2.0",
     "query-string": "8.1.0",

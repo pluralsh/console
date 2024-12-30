@@ -17,6 +17,10 @@ defmodule Console.AI.Policy do
   def can?(%User{id: id}, %Chat{user_id: id}, _), do: :pass
   def can?(%User{id: id}, %ChatThread{user_id: id}, _), do: :pass
 
+  def can?(%User{} = u, %Service{} = svc, action), do: Deployments.can?(u, svc, action)
+
+  def can?(%User{} = u, %Stack{} = stack, action), do: Deployments.can?(u, stack, action)
+
   def can?(user, %AiInsight{} = insight, action) do
     case Repo.preload(insight, [:stack, :service]) do
       %AiInsight{stack: %Stack{} = stack} -> Deployments.can?(user, stack, action)

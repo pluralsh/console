@@ -933,6 +933,12 @@ type RootMutationType {
   "saves a set of messages and generates a new one transactionally"
   chat(threadId: ID, messages: [ChatMessage]): Chat
 
+  "Creates a pull request given the thread message history"
+  threadPr(threadId: ID!): Chat
+
+  "it will add additional context to the given chat from a source object"
+  addChatContext(source: ContextSource!, sourceId: ID, threadId: ID!): [Chat]
+
   "Wipes your current chat history blank"
   clearChatHistory(
     threadId: ID
@@ -6532,6 +6538,11 @@ type CatalogConnection {
   edges: [CatalogEdge]
 }
 
+enum ChatType {
+  TEXT
+  FILE
+}
+
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
 enum AiRole {
   SYSTEM
@@ -6544,6 +6555,12 @@ enum InsightFreshness {
   FRESH
   STALE
   EXPIRED
+}
+
+"The source of additional context to send to a thread"
+enum ContextSource {
+  SERVICE
+  STACK
 }
 
 "A basic AI chat message input, modeled after OpenAI's api model"
@@ -6575,12 +6592,24 @@ input ChatThreadAttributes {
 
 type Chat {
   id: ID!
+  type: ChatType!
   role: AiRole!
   content: String!
   seq: Int!
+  attributes: ChatTypeAttributes
   thread: ChatThread
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"Additional attributes of this chat message, used for formatting it in the display"
+type ChatTypeAttributes {
+  file: ChatFile
+}
+
+"Additional attributes for describing a file type chat"
+type ChatFile {
+  name: String
 }
 
 "A list of chat messages around a specific topic created on demand"

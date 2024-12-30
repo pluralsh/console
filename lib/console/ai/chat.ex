@@ -1,17 +1,26 @@
 defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
-  alias Console.AI.Provider
+  import Console.AI.Evidence.Base, only: [prepend: 2]
+  alias Console.AI.{Provider, Tools.Pr, Fixer}
+  alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{
+    AiInsight,
     Chat,
     ChatThread,
     ChatSequence,
     User,
-    AiPin
+    AiPin,
+    PullRequest,
+    Service,
+    Stack
   }
 
+  @type context_source :: :service | :stack
   @type thread_resp :: {:ok, ChatThread.t} | Console.error
   @type pin_resp :: {:ok, AiPin.t} | Console.error
+  @type chat_list_resp :: {:ok, [Chat.t]} | Console.error
+  @type chat_resp :: {:ok, Chat.t} | Console.error
 
   @context_window 128_000 * 4
 
@@ -29,6 +38,13 @@ defmodule Console.AI.Chat do
   The following is a chat history concerning a set of kubernetes or devops questions, usually encompassing topics like terraform,
   helm, GitOps, and other technologies and best practices.  Please provide a response suitable for a junior engineer
   with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
+  """
+
+  @pr """
+  The above is a chat log debugging a devops issue related to Kubernetes, Infrastructure as Code or general devops issues. Please spawn a
+  Pull Request to fix the issue described above.  The code change should be the most direct and straightforward way to
+  fix the issue described.  Change only the minimal amount of lines in the original files provided to successfully
+  fix the issue, avoid any extraneous changes as they will potentially break additional functionality upon application.
   """
 
   def get_thread!(id), do: Repo.get!(ChatThread, id)
@@ -133,7 +149,7 @@ defmodule Console.AI.Chat do
       Enum.sort_by(chats, & &1.seq)
       |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one or two paragraphs."}])
       |> fit_context_window(@rollup)
-      |> Enum.map(fn %{role: r, content: t} -> {r, t} end)
+      |> Enum.map(&Chat.message/1)
       |> Provider.completion(preface: @rollup)
     end)
     |> add_operation(:summary, fn %{summarize: s} ->
@@ -153,7 +169,7 @@ defmodule Console.AI.Chat do
     |> Repo.all()
     |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one sentence."}])
     |> fit_context_window(@summary)
-    |> Enum.map(fn %Chat{role: r, content: t} -> {r, t} end)
+    |> Enum.map(&Chat.message/1)
     |> Provider.completion(preface: @summary)
     |> when_ok(fn summary ->
       ChatThread.changeset(thread, %{summarized: true, summary: summary})
@@ -188,7 +204,7 @@ defmodule Console.AI.Chat do
   @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
-  @spec chat([map], binary | nil, User.t) :: {:ok, Chat.t} | Console.error
+  @spec chat([map], binary | nil, User.t) :: chat_resp
   def chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
     start_transaction()
@@ -199,7 +215,7 @@ defmodule Console.AI.Chat do
       |> Chat.ordered()
       |> Repo.all()
       |> fit_context_window()
-      |> Enum.map(fn %Chat{role: r, content: c} -> {r, c} end)
+      |> Enum.map(&Chat.message/1)
       |> Provider.completion(preface: @chat)
     end)
     |> add_operation(:msg, fn %{chat: c} ->
@@ -215,27 +231,93 @@ defmodule Console.AI.Chat do
   @doc """
   Saves a set of messages to a users chat history
   """
-  @spec save([map], binary | nil, User.t) :: {:ok, [Chat.t]} | Console.error
+  @spec save([map], binary | nil, User.t) :: chat_list_resp
   def save(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
-    with {:ok, _} <- thread_access(thread_id, user) do
-      Enum.with_index(messages)
-      |> Enum.reduce(start_transaction(), fn {message, ind}, xact ->
-        add_operation(xact, {:msg, ind}, fn _ ->
-          save_message(message, thread_id, user)
-        end)
+    start_transaction()
+    |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
+    |> maybe_save_messages(messages, user)
+    |> execute()
+    |> when_ok(fn results ->
+      Enum.filter(results, fn
+        {{:msg, _}, _} -> true
+        _ -> false
       end)
-      |> execute()
-      |> when_ok(fn results ->
-        Enum.filter(results, fn
-          {{:msg, _}, _} -> true
-          _ -> false
-        end)
-        |> Enum.map(&elem(&1, 1))
-        |> Enum.sort_by(& &1.seq)
+      |> Enum.map(&elem(&1, 1))
+      |> Enum.sort_by(& &1.seq)
+    end)
+  end
+
+  @doc """
+  Adds context to the given chat thread from a source, eg a service or stack
+  """
+  @spec add_context({context_source, binary}, binary, User.t) :: chat_list_resp
+  def add_context({source_type, id}, thread_id, %User{} = user) do
+    Fixer.Base.raw()
+    source = context_source(source_type, id)
+    with {:ok, source} <- allow(source, user, :read),
+         {:ok, _} <- thread_access(thread_id, user),
+         {:ok, [_ | prompt]} <- context_prompt(source) do
+      Enum.map(prompt, fn
+        {role, %{file: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
+        {role, c} -> %{role: role, content: c}
       end)
+      |> prepend(%{
+        role: :user,
+        content: "Please give me the full details of the Plural #{source_type} with name: #{source.name}"
+      })
+      |> save(thread_id, user)
     end
   end
+
+  defp context_source(:service, id), do: Services.get_service!(id)
+  defp context_source(:stack, id), do: Stacks.get_stack!(id)
+
+  defp context_prompt(%Service{} = svc), do: Fixer.Service.prompt(svc, "")
+  defp context_prompt(%Stack{} = stack), do: Fixer.Stack.prompt(stack, "")
+
+  @doc """
+  Generates a PR given the chat history in the input thread
+  """
+  @spec pr(binary, User.t) :: chat_resp
+  def pr(thread_id, %User{} = user) do
+    Console.AI.Tool.set_actor(user)
+    with {:ok, thread} <- thread_access(thread_id, user) do
+      Chat.for_thread(thread_id)
+      |> Repo.all()
+      |> fit_context_window()
+      |> Enum.map(&Chat.message/1)
+      |> Enum.concat([{:user, @pr}])
+      |> Provider.tool_call([Pr])
+      |> handle_tool_call(thread, user)
+    end
+  end
+
+  defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
+    thread = Repo.preload(thread, [:insight])
+    start_transaction()
+    |> add_operation(:pr, fn _ ->
+      %PullRequest{}
+      |> PullRequest.changeset(Map.merge(pr_attrs, pr_attrs(thread)))
+      |> Repo.insert()
+    end)
+    |> add_operation(:msg, fn %{pr: %{id: id}} ->
+      msg("Ok I created the PR for you, here it is")
+      |> Map.put(:pull_request_id, id)
+      |> save_message(thread.id, user)
+    end)
+    |> add_operation(:bump, fn _ ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(extract: :msg)
+  end
+  defp handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _, _), do: {:error, err}
+  defp handle_tool_call({:ok, txt}, %ChatThread{id: tid}, user), do: save_message(msg(txt), tid, user)
+  defp handle_tool_call(err, _, _), do: err
+
+  defp pr_attrs(%ChatThread{insight: %AiInsight{} = insight}), do: Map.take(insight, ~w(service_id stack_id cluster_id)a)
+  defp pr_attrs(_), do: %{}
 
   def thread_access(tid, %User{} = user) do
     get_thread!(tid)
@@ -259,7 +341,7 @@ defmodule Console.AI.Chat do
     |> Enum.each(&backfill_thread/1)
   end
 
-  defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user) do
+  defp maybe_save_messages(xact, [_ | _] = msgs, user) do
     Enum.with_index(msgs)
     |> Enum.reduce(xact, fn {msg, ind}, xact ->
       add_operation(xact, {:msg, ind}, fn %{thread: %{id: tid}} ->
@@ -267,6 +349,7 @@ defmodule Console.AI.Chat do
       end)
     end)
   end
+  defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user), do: maybe_save_messages(xact, msgs, user)
   defp maybe_save_messages(xact, _, _), do: xact
 
   defp save_message(message, thread_id, %User{id: uid} = user) do
@@ -299,4 +382,6 @@ defmodule Console.AI.Chat do
   defp trim_messages(_, [] = msgs), do: msgs
   defp trim_messages(total, [%Chat{content: content} | rest]),
     do: trim_messages(total - byte_size(content), rest)
+
+  defp msg(text), do: %{role: :assistant, content: text}
 end

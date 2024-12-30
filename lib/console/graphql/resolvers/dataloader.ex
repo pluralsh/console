@@ -12,7 +12,7 @@ defmodule Console.GraphQl.Resolvers.HelmRepositoryLoader do
   end
 
   def fetch_repos() do
-    case Git.list_helm_repositories() do
+    case Git.cached_helm_repositories() do
       {:ok, repos} ->
         Map.new(repos, & {{&1.metadata.namespace, &1.metadata.name}, &1})
       _ -> %{}

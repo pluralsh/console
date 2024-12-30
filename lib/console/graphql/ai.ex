@@ -4,6 +4,8 @@ defmodule Console.GraphQl.AI do
   alias Console.GraphQl.Resolvers.AI
   alias Console.GraphQl.Resolvers.{User, AI, Deployments}
 
+  ecto_enum :chat_type, Console.Schema.Chat.Type
+
   @desc "A role to pass to an LLM, modeled after OpenAI's chat api roles"
   enum :ai_role do
     value :system
@@ -16,6 +18,12 @@ defmodule Console.GraphQl.AI do
     value :fresh
     value :stale
     value :expired
+  end
+
+  @desc "The source of additional context to send to a thread"
+  enum :context_source do
+    value :service
+    value :stack
   end
 
   @desc "A basic AI chat message input, modeled after OpenAI's api model"
@@ -40,14 +48,26 @@ defmodule Console.GraphQl.AI do
   end
 
   object :chat do
-    field :id,      non_null(:id)
-    field :role,    non_null(:ai_role)
-    field :content, non_null(:string)
-    field :seq,     non_null(:integer)
+    field :id,         non_null(:id)
+    field :type,       non_null(:chat_type)
+    field :role,       non_null(:ai_role)
+    field :content,    non_null(:string)
+    field :seq,        non_null(:integer)
+    field :attributes, :chat_type_attributes
 
     field :thread,  :chat_thread, resolve: dataloader(AI)
 
     timestamps()
+  end
+
+  @desc "Additional attributes of this chat message, used for formatting it in the display"
+  object :chat_type_attributes do
+    field :file, :chat_file
+  end
+
+  @desc "Additional attributes for describing a file type chat"
+  object :chat_file do
+    field :name, :string
   end
 
   @desc "A list of chat messages around a specific topic created on demand"
@@ -208,6 +228,24 @@ defmodule Console.GraphQl.AI do
       arg :messages,  list_of(:chat_message)
 
       resolve &AI.chat/2
+    end
+
+    @desc "Creates a pull request given the thread message history"
+    field :thread_pr, :chat do
+      middleware Authenticated
+      arg :thread_id, non_null(:id)
+
+      resolve &AI.thread_pr/2
+    end
+
+    @desc "it will add additional context to the given chat from a source object"
+    field :add_chat_context, list_of(:chat) do
+      middleware Authenticated
+      arg :source,    non_null(:context_source)
+      arg :source_id, :id
+      arg :thread_id, non_null(:id)
+
+      resolve &AI.add_context/2
     end
 
     @desc "Wipes your current chat history blank"

@@ -1,6 +1,7 @@
 defmodule Console.AI.ChatTest do
   use Console.DataCase, async: true
   alias Console.AI.Chat
+  alias Console.Repo
   use Mimic
 
   describe "#create_thread/2" do
@@ -248,6 +249,98 @@ defmodule Console.AI.ChatTest do
 
     test "users cannot delete others' pins" do
       {:error, _} = Chat.delete_pin(insert(:ai_pin).id, insert(:user))
+    end
+  end
+
+  describe "#pr/2" do
+    test "it can spawn a pr from a thread" do
+      insert(:scm_connection, token: "some-pat", default: true)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "plrl/ai/pr-test" <> _} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "https://github.com/pluralsh/console.git", "plrl/ai/pr-test" <> _ ->
+        {:ok, %{conn | dir: Briefly.create!(directory: true)}}
+      end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
+      expect(File, :write, fn _, "first" -> :ok end)
+      expect(File, :write, fn _, "second" -> :ok end)
+      expect(HTTPoison, :post, fn _, _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
+            %{
+              message: %{
+                tool_calls: [%{
+                  function: %{
+                    name: "create_pr",
+                    arguments: Jason.encode!(%{
+                      repo_url: "git@github.com:pluralsh/console.git",
+                      branch_name: "pr-test",
+                      pr_description: "some pr",
+                      pr_title: "some pr",
+                      commit_message: "a commit",
+                      file_updates: [%{file_name: "file.yaml", content: "first"}, %{file_name: "file2.yaml", content: "second"}]
+                    })
+                  }
+              }]
+            }
+          }
+        ]})}}
+      end)
+
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      insert_list(3, :chat, thread: thread)
+
+      {:ok, chat} = Chat.pr(thread.id, user)
+
+      assert chat.thread_id == thread.id
+
+      %{pull_request: pr} = Repo.preload(chat, [:pull_request])
+
+      assert pr.url == "https://github.com/pr/url"
+    end
+  end
+end
+
+defmodule Console.AI.ChatSyncTest do
+  use Console.DataCase, async: false
+  alias Console.AI.Chat
+  use Mimic
+
+  describe "#add_context/2" do
+    test "adds a set of context messages to a thread from a source" do
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
+      )
+
+      thread = insert(:chat_thread, user: user)
+
+      {:ok, [_ | _] = msgs} = Chat.add_context({:service, svc.id}, thread.id, user)
+
+      assert Enum.any?(msgs, & &1.type == :file)
+    end
+
+    test "you can't add context if you don't have access" do
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+      thread = insert(:chat_thread, user: user)
+
+      {:error, _} = Chat.add_context({:service, svc.id}, thread.id, user)
     end
   end
 end

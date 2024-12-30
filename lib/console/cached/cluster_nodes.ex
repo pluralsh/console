@@ -4,14 +4,15 @@ defmodule Console.Cached.ClusterNodes do
   require Logger
   alias Console.Deployments.{Cron}
 
+  @warm :timer.minutes(5)
+
   def start_link(opt \\ :ok) do
     GenServer.start_link(__MODULE__, opt, name: __MODULE__)
   end
 
   def init(_) do
     if Console.conf(:initialize) do
-      :timer.minutes(5)
-      |> :timer.send_interval(:warm)
+      :timer.send_interval(@warm, :warm)
       send self(), :warm
     end
     {:ok, %{}}
@@ -28,4 +29,6 @@ defmodule Console.Cached.ClusterNodes do
     end
     {:noreply, s}
   end
+
+  def handle_info(_, s), do: {:noreply, s}
 end
