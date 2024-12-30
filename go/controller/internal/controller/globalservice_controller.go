@@ -111,7 +111,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	provider, err := r.getProvider(ctx, globalService)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -121,7 +121,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	project, err := r.getProject(ctx, globalService)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -233,7 +233,7 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 		}
 		if provider.Status.ID == nil {
 			logger.Info("Provider is not ready")
-			return provider, apierrors.NewNotFound(schema.GroupResource{}, globalService.Spec.ProviderRef.Name)
+			return provider, apierrors.NewNotFound(schema.GroupResource{Resource: "Provider", Group: "deployments.plural.sh"}, globalService.Spec.ProviderRef.Name)
 		}
 	}
 
@@ -250,7 +250,7 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
-			return project, apierrors.NewNotFound(schema.GroupResource{}, globalService.Spec.ProjectRef.Name)
+			return project, apierrors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, globalService.Spec.ProjectRef.Name)
 		}
 
 		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {

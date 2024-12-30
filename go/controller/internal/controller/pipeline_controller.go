@@ -124,7 +124,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 			return requeue, nil
 		}
 		if apierrors.IsNotFound(err) {
-			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

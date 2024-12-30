@@ -94,7 +94,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if service.Status.ID == nil {
-		return nil, errors.NewNotFound(schema.GroupResource{}, service.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "ServiceDeployment", Group: "deployments.plural.sh"}, service.Name)
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).

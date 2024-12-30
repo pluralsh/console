@@ -109,7 +109,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -130,7 +130,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -204,7 +204,7 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 			return nil, err
 		}
 		if stack.Status.ID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{}, stackRun.Spec.StackRef.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{Resource: "InfrastructureStack", Group: "deployments.plural.sh"}, stackRun.Spec.StackRef.Name)
 		}
 		attr.StackID = stack.Status.ID
 	}
