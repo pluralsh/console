@@ -4812,6 +4812,17 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/ollama-chart-v0.63.0/ollama-0.63.0.tgz
     version: 0.63.0
+  stateless:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-12-30T02:07:19.270105453Z"
+    description: A Helm chart to deploy a basic stateless application
+    digest: 541dd5a3679d3610c39fc1fbeb4460d0198d217782a9751c85589649ef50dd2d
+    name: stateless
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/stateless-chart-v0.1.0/stateless-0.1.0.tgz
+    version: 0.1.0
   system-upgrade-controller:
   - apiVersion: v2
     appVersion: v0.13.1
@@ -4877,4 +4888,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-12-22T17:11:42.225518934Z"
+generated: "2024-12-30T02:07:19.270651727Z"
