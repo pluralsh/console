@@ -24,9 +24,8 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           cache: true
-      - name: Download dependencies
-        run: go mod download
       - name: Download tools
+        working-directory: go
         run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - name: Regenerate docs
         working-directory: go/controller
