@@ -2,9 +2,6 @@ name: Docs
 on:
   schedule:
     - cron: '0 0 * * *'
-  pull_request:
-    branches:
-      - "master" # TODO
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
@@ -42,7 +39,7 @@ jobs:
           commit-message: Update docs for Console controller
           branch: docs-${{steps.date.outputs.date}}
           labels: documentation
-          base: update-docs # TODO main
+          base: main
 #      - name: Auto-approve
 #        if: steps.cpr.outputs.pull-request-operation == 'created'
 #        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
