@@ -485,6 +485,7 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
 		logger.Info("Repository is not healthy")
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
