@@ -1,29 +1,56 @@
-name: Refresh Operator Docs
+name: Docs
 on:
   schedule:
     - cron: '0 0 * * *'
-
+  pull_request:
+    branches:
+      - "master" # TODO
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
 jobs:
-  gendocs:
+  docs:
+    name: Regenerate
     runs-on: ubuntu-latest
     permissions:
       contents: 'write'
       id-token: 'write'
       pull-requests: 'write'
     steps:
-    - name: 'Checkout'
-      uses: actions/checkout@v3
-    - name: 'Regenerate Docs'
-      run: make crd-docs
-      working-directory: ./controller
-    - id: date
-      run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        title: Generating Api Docs for ${{steps.date.outputs.date}}
-        body: Automated pull request to regenerate api docs for the Plural operator
-        commit-message: Update docs for operator
-        branch: docs-${{steps.date.outputs.date}}
-        labels: release
-        base: main
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Regenerate docs
+        working-directory: go/controller
+        run: make crd-docs
+      - name: Save date
+        id: date
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "chore: API documentation sync"
+          body: Automated pull request to regenerate API docs for the Console controller.
+          commit-message: Update docs for Console controller
+          branch: docs-${{steps.date.outputs.date}}
+          labels: release
+          base: update-docs # TODO main
+      - name: Auto-approve
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enable pull request auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
