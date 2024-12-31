@@ -43,12 +43,11 @@ jobs:
           branch: docs-${{steps.date.outputs.date}}
           labels: documentation
           base: update-docs # TODO main
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-      - name: Auto-approve
-        if: steps.cpr.outputs.pull-request-operation == 'created'
-        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Auto-approve
+#        if: steps.cpr.outputs.pull-request-operation == 'created'
+#        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Enable pull request auto-merge
         if: steps.cpr.outputs.pull-request-operation == 'created'
         uses: peter-evans/enable-pull-request-automerge@v3
