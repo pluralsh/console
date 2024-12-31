@@ -24,7 +24,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version-file: go.mod
+          go-version-file: go/controller/go.mod
           cache: false
       - name: Regenerate docs
         working-directory: go/controller
