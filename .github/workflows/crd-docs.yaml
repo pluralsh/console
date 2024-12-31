@@ -19,16 +19,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install Go
+      - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version-file: go/controller/go.mod
-          cache: false
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - name: Download tools
+        run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - name: Regenerate docs
         working-directory: go/controller
-        run: make crd-docs
+        run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
       - name: Save date
         id: date
         run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
