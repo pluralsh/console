@@ -41,8 +41,9 @@ jobs:
           body: Automated pull request to regenerate API docs for the Console controller.
           commit-message: Update docs for Console controller
           branch: docs-${{steps.date.outputs.date}}
-          labels: release
+          labels: documentation
           base: update-docs # TODO main
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
       - name: Auto-approve
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
