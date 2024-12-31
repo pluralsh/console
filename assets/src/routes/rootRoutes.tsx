@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
 
 import Console from 'components/layout/Console'
@@ -8,9 +8,12 @@ import Invite from 'components/login/Invite'
 import { LinkLogin } from 'components/login/LinkLogin'
 import Login, { GrantAccess } from 'components/login/Login'
 import { OAuthCallback } from 'components/login/OauthCallback'
-
-import Sandbox from 'components/utils/Sandbox'
 import { consoleRoutes } from './consoleRoutes'
+
+const Sandbox =
+  import.meta.env.MODE === 'development'
+    ? lazy(() => import('components/utils/Sandbox'))
+    : null
 
 function Root() {
   return (
@@ -45,10 +48,7 @@ export const rootRoutes = [
         path: 'invite/:inviteId',
         element: <Invite />,
       },
-      {
-        path: 'sandbox',
-        element: <Sandbox />,
-      },
+      ...(!!Sandbox ? [{ path: 'sandbox', element: <Sandbox /> }] : []),
       {
         path: '*',
         element: <Console />,

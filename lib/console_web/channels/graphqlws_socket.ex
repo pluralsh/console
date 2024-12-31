@@ -14,5 +14,6 @@ defmodule ConsoleWeb.GraphqlWSSocket do
 
   def fetch_token(%{"Authorization" => "Bearer " <> token}), do: {:ok, token}
   def fetch_token(%{"token" => "Bearer " <> token}), do: {:ok, token}
+  def fetch_token(%{"token" => token}), do: {:ok, token}
   def fetch_token(_), do: {:error, :notoken}
 end

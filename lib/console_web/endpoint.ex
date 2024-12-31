@@ -2,12 +2,12 @@ defmodule ConsoleWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :console
   use Absinthe.Phoenix.Endpoint
 
+  socket "/socket/gql-ws", ConsoleWeb.GraphqlWSSocket,
+    websocket: [path: "", subprotocols: ["graphql-transport-ws"]]
+
   socket "/socket", ConsoleWeb.UserSocket,
     websocket: [check_origin: false],
     longpoll: false
-
-  socket "/gql-ws", ConsoleWeb.GraphqlWSSocket,
-    websocket: [path: "", subprotocols: ["graphql-transport-ws"]]
 
   socket "/ext/socket", ConsoleWeb.ExternalSocket,
     websocket: [check_origin: false],

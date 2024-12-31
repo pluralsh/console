@@ -70,12 +70,6 @@ defmodule ConsoleWeb.Router do
     end
   end
 
-  forward "/graphiql", Absinthe.Plug.GraphiQL,
-    schema: Console.GraphQl,
-    interface: :playground,
-    default_url: {Console, :graphql_endpoint},
-    socket_url: {Console, :socket_endpoint}
-
   scope "/" do
     pipe_through [:auth]
 

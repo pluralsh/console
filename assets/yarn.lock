@@ -10217,6 +10217,7 @@ __metadata:
     filesize: 10.0.12
     fuse.js: 6.6.2
     globals: 15.10.0
+    graphql-ws: ^5.16.0
     honorable: 1.0.0-beta.17
     honorable-theme-default: 1.0.0-beta.5
     husky: 8.0.3
@@ -13436,7 +13437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-ws@npm:^5.14.0, graphql-ws@npm:^5.9.0":
+"graphql-ws@npm:^5.14.0, graphql-ws@npm:^5.16.0, graphql-ws@npm:^5.9.0":
   version: 5.16.0
   resolution: "graphql-ws@npm:5.16.0"
   peerDependencies:

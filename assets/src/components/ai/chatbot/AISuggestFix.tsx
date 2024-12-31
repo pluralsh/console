@@ -19,6 +19,7 @@ import {
   AiInsightFragment,
   AiRole,
   ChatMessage,
+  useAiChatStreamSubscription,
   useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
 } from '../../../generated/graphql.ts'
@@ -27,8 +28,6 @@ import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
-import { useStreamTopic } from '../useStreamTopic.tsx'
-import { useChannel } from 'components/hooks/useChannel.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsightFragment>
@@ -53,22 +52,36 @@ export function Loading({
   setStreaming: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
-  const topic = useStreamTopic({ insightId, scopeId })
-  const callback = useCallback(
-    ({ content, seq }) => {
+  // const topic = useStreamTopic({ insightId, scopeId })
+  // const callback = useCallback(
+  //   ({ content, seq }) => {
+  //     setStreaming(true)
+  //     if ((seq ?? 1) % 120 === 0) scrollToBottom()
+  //     setStreamedMessage((streamedMessage) => [
+  //       ...streamedMessage,
+  //       {
+  //         seq: seq ?? 0,
+  //         content: content ?? '',
+  //       },
+  //     ])
+  //   },
+  //   [setStreaming, setStreamedMessage, scrollToBottom]
+  // )
+  // useChannel(topic, 'stream', callback)
+  useAiChatStreamSubscription({
+    variables: { insightId, scopeId },
+    onData: ({ data: { data } }) => {
       setStreaming(true)
-      if ((seq ?? 1) % 120 === 0) scrollToBottom()
+      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
       setStreamedMessage((streamedMessage) => [
         ...streamedMessage,
         {
-          seq: seq ?? 0,
-          content: content ?? '',
+          seq: data?.aiStream?.seq ?? 0,
+          content: data?.aiStream?.content ?? '',
         },
       ])
     },
-    [setStreaming, setStreamedMessage, scrollToBottom]
-  )
-  useChannel(topic, 'stream', callback)
+  })
 
   if (!streamedMessage.length) {
     return <LoadingIndicator />
