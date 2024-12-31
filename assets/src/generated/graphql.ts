@@ -384,59 +384,6 @@ export type AppNotificationEdge = {
   node?: Maybe<AppNotification>;
 };
 
-export type Application = {
-  __typename?: 'Application';
-  configuration?: Maybe<Configuration>;
-  cost?: Maybe<CostAnalysis>;
-  info?: Maybe<Scalars['String']['output']>;
-  license?: Maybe<License>;
-  name: Scalars['String']['output'];
-  spec: ApplicationSpec;
-  status: ApplicationStatus;
-};
-
-export type ApplicationDelta = {
-  __typename?: 'ApplicationDelta';
-  delta?: Maybe<Delta>;
-  payload?: Maybe<Application>;
-};
-
-export type ApplicationDescriptor = {
-  __typename?: 'ApplicationDescriptor';
-  description?: Maybe<Scalars['String']['output']>;
-  icons?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  links?: Maybe<Array<Maybe<ApplicationLink>>>;
-  type: Scalars['String']['output'];
-  version: Scalars['String']['output'];
-};
-
-export type ApplicationInfoItem = {
-  __typename?: 'ApplicationInfoItem';
-  name?: Maybe<Scalars['String']['output']>;
-  type?: Maybe<Scalars['String']['output']>;
-  value?: Maybe<Scalars['String']['output']>;
-};
-
-export type ApplicationLink = {
-  __typename?: 'ApplicationLink';
-  description?: Maybe<Scalars['String']['output']>;
-  url?: Maybe<Scalars['String']['output']>;
-};
-
-export type ApplicationSpec = {
-  __typename?: 'ApplicationSpec';
-  components?: Maybe<Array<Maybe<Component>>>;
-  descriptor: ApplicationDescriptor;
-  info?: Maybe<Array<Maybe<ApplicationInfoItem>>>;
-};
-
-export type ApplicationStatus = {
-  __typename?: 'ApplicationStatus';
-  components?: Maybe<Array<Maybe<StatusComponent>>>;
-  componentsReady: Scalars['String']['output'];
-  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
-};
-
 export type ArgoAnalysis = {
   __typename?: 'ArgoAnalysis';
   templates?: Maybe<Array<Maybe<ArgoAnalysisTemplate>>>;
@@ -723,74 +670,6 @@ export type BindingAttributes = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-export type Build = {
-  __typename?: 'Build';
-  approver?: Maybe<User>;
-  changelogs?: Maybe<Array<Maybe<Changelog>>>;
-  commands?: Maybe<CommandConnection>;
-  completedAt?: Maybe<Scalars['DateTime']['output']>;
-  creator?: Maybe<User>;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  repository: Scalars['String']['output'];
-  sha?: Maybe<Scalars['String']['output']>;
-  status: Status;
-  type: BuildType;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
-
-
-export type BuildCommandsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type BuildAttributes = {
-  message?: InputMaybe<Scalars['String']['input']>;
-  repository: Scalars['String']['input'];
-  type?: InputMaybe<BuildType>;
-};
-
-export type BuildConnection = {
-  __typename?: 'BuildConnection';
-  edges?: Maybe<Array<Maybe<BuildEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type BuildDelta = {
-  __typename?: 'BuildDelta';
-  delta?: Maybe<Delta>;
-  payload?: Maybe<Build>;
-};
-
-export type BuildEdge = {
-  __typename?: 'BuildEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Build>;
-};
-
-export type BuildInfo = {
-  __typename?: 'BuildInfo';
-  all?: Maybe<Scalars['Int']['output']>;
-  failed?: Maybe<Scalars['Int']['output']>;
-  queued?: Maybe<Scalars['Int']['output']>;
-  running?: Maybe<Scalars['Int']['output']>;
-  successful?: Maybe<Scalars['Int']['output']>;
-};
-
-export enum BuildType {
-  Approval = 'APPROVAL',
-  Bounce = 'BOUNCE',
-  Config = 'CONFIG',
-  Dedicated = 'DEDICATED',
-  Deploy = 'DEPLOY',
-  Destroy = 'DESTROY',
-  Install = 'INSTALL'
-}
-
 export type Canary = {
   __typename?: 'Canary';
   canaryDeployment?: Maybe<Deployment>;
@@ -933,16 +812,6 @@ export type CertificateStatus = {
   renewalTime?: Maybe<Scalars['String']['output']>;
 };
 
-export type Changelog = {
-  __typename?: 'Changelog';
-  content?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  repo: Scalars['String']['output'];
-  tool: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
-
 export type Chat = {
   __typename?: 'Chat';
   attributes?: Maybe<ChatTypeAttributes>;
@@ -1035,14 +904,6 @@ export enum ChatType {
 export type ChatTypeAttributes = {
   __typename?: 'ChatTypeAttributes';
   file?: Maybe<ChatFile>;
-};
-
-export type CloneAttributes = {
-  s3AccessKeyId?: InputMaybe<Scalars['String']['input']>;
-  s3Endpoint?: InputMaybe<Scalars['String']['input']>;
-  s3SecretAccessKey?: InputMaybe<Scalars['String']['input']>;
-  s3WalPath?: InputMaybe<Scalars['String']['input']>;
-  uid?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CloudProviderSettingsAttributes = {
@@ -1767,46 +1628,10 @@ export type ClusterUsageHistoryEdge = {
   node?: Maybe<ClusterUsageHistory>;
 };
 
-export type Command = {
-  __typename?: 'Command';
-  build?: Maybe<Build>;
-  command: Scalars['String']['output'];
-  completedAt?: Maybe<Scalars['DateTime']['output']>;
-  exitCode?: Maybe<Scalars['Int']['output']>;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  stdout?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
-
 export type CommandAttributes = {
   args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cmd: Scalars['String']['input'];
   dir?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type CommandConnection = {
-  __typename?: 'CommandConnection';
-  edges?: Maybe<Array<Maybe<CommandEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type CommandDelta = {
-  __typename?: 'CommandDelta';
-  delta?: Maybe<Delta>;
-  payload?: Maybe<Command>;
-};
-
-export type CommandEdge = {
-  __typename?: 'CommandEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Command>;
-};
-
-export type Component = {
-  __typename?: 'Component';
-  group: Scalars['String']['output'];
-  kind: Scalars['String']['output'];
 };
 
 export type ComponentAttributes = {
@@ -1881,54 +1706,6 @@ export type ConfigMap = {
   raw: Scalars['String']['output'];
 };
 
-export type Configuration = {
-  __typename?: 'Configuration';
-  helm?: Maybe<Scalars['String']['output']>;
-  readme?: Maybe<Scalars['String']['output']>;
-  terraform?: Maybe<Scalars['String']['output']>;
-};
-
-export type ConfigurationAction = {
-  __typename?: 'ConfigurationAction';
-  updates?: Maybe<Array<Maybe<PathUpdate>>>;
-};
-
-export type ConfigurationCondition = {
-  __typename?: 'ConfigurationCondition';
-  field?: Maybe<Scalars['String']['output']>;
-  operation?: Maybe<Scalars['String']['output']>;
-  value?: Maybe<Scalars['String']['output']>;
-};
-
-export type ConfigurationItem = {
-  __typename?: 'ConfigurationItem';
-  condition?: Maybe<ConfigurationCondition>;
-  default?: Maybe<Scalars['String']['output']>;
-  documentation?: Maybe<Scalars['String']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
-  optional?: Maybe<Scalars['Boolean']['output']>;
-  placeholder?: Maybe<Scalars['String']['output']>;
-  type?: Maybe<Scalars['String']['output']>;
-  validation?: Maybe<ConfigurationValidation>;
-};
-
-export type ConfigurationOverlay = {
-  __typename?: 'ConfigurationOverlay';
-  metadata: Metadata;
-  spec: ConfigurationOverlaySpec;
-};
-
-export type ConfigurationOverlaySpec = {
-  __typename?: 'ConfigurationOverlaySpec';
-  documentation?: Maybe<Scalars['String']['output']>;
-  folder?: Maybe<Scalars['String']['output']>;
-  inputType?: Maybe<Scalars['String']['output']>;
-  inputValues?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  name?: Maybe<Scalars['String']['output']>;
-  subfolder?: Maybe<Scalars['String']['output']>;
-  updates?: Maybe<Array<Maybe<OverlayUpdate>>>;
-};
-
 export enum ConfigurationType {
   Bool = 'BOOL',
   Bucket = 'BUCKET',
@@ -1940,13 +1717,6 @@ export enum ConfigurationType {
   Password = 'PASSWORD',
   String = 'STRING'
 }
-
-export type ConfigurationValidation = {
-  __typename?: 'ConfigurationValidation';
-  message?: Maybe<Scalars['String']['output']>;
-  regex?: Maybe<Scalars['String']['output']>;
-  type?: Maybe<Scalars['String']['output']>;
-};
 
 /** Validations to apply to this configuration entry prior to PR creation */
 export type ConfigurationValidationAttributes = {
@@ -2083,13 +1853,6 @@ export type ContainerStatus = {
   state?: Maybe<ContainerState>;
 };
 
-export type ContextAttributes = {
-  buckets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  configuration: Scalars['Map']['input'];
-  domain?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  protect?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
 /** a binding from a service to a service context */
 export type ContextBindingAttributes = {
   contextId: Scalars['String']['input'];
@@ -2100,21 +1863,6 @@ export enum ContextSource {
   Service = 'SERVICE',
   Stack = 'STACK'
 }
-
-export type CostAnalysis = {
-  __typename?: 'CostAnalysis';
-  cpuCost?: Maybe<Scalars['Float']['output']>;
-  cpuEfficiency?: Maybe<Scalars['Float']['output']>;
-  efficiency?: Maybe<Scalars['Float']['output']>;
-  gpuCost?: Maybe<Scalars['Float']['output']>;
-  minutes?: Maybe<Scalars['Float']['output']>;
-  networkCost?: Maybe<Scalars['Float']['output']>;
-  pvCost?: Maybe<Scalars['Float']['output']>;
-  ramCost?: Maybe<Scalars['Float']['output']>;
-  ramEfficiency?: Maybe<Scalars['Float']['output']>;
-  sharedCost?: Maybe<Scalars['Float']['output']>;
-  totalCost?: Maybe<Scalars['Float']['output']>;
-};
 
 export type CostAttributes = {
   controlPlaneCost?: InputMaybe<Scalars['Float']['input']>;
@@ -2354,11 +2102,6 @@ export type DashboardSpec = {
   timeslices?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
-export type DatabaseVolume = {
-  __typename?: 'DatabaseVolume';
-  size?: Maybe<Scalars['String']['output']>;
-};
-
 export type DatadogCredentialsAttributes = {
   apiKey: Scalars['String']['input'];
   appKey: Scalars['String']['input'];
@@ -2527,12 +2270,6 @@ export type Event = {
   message?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   type?: Maybe<Scalars['String']['output']>;
-};
-
-export type FileContent = {
-  __typename?: 'FileContent';
-  content?: Maybe<Scalars['String']['output']>;
-  path?: Maybe<Scalars['String']['output']>;
 };
 
 /** a Flux crd representation of a Helm repository */
@@ -3208,24 +2945,6 @@ export enum InsightFreshness {
   Stale = 'STALE'
 }
 
-export type Installation = {
-  __typename?: 'Installation';
-  id: Scalars['ID']['output'];
-  repository?: Maybe<Repository>;
-};
-
-export type InstallationConnection = {
-  __typename?: 'InstallationConnection';
-  edges?: Maybe<Array<Maybe<InstallationEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type InstallationEdge = {
-  __typename?: 'InstallationEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Installation>;
-};
-
 export type Invite = {
   __typename?: 'Invite';
   email?: Maybe<Scalars['String']['output']>;
@@ -3305,15 +3024,6 @@ export type KubeconfigAttributes = {
   raw?: InputMaybe<Scalars['String']['input']>;
 };
 
-/** supported kubernetes objects fetchable in runbooks */
-export type KubernetesData = Deployment | StatefulSet;
-
-export type KubernetesDatasource = {
-  __typename?: 'KubernetesDatasource';
-  name: Scalars['String']['output'];
-  resource: Scalars['String']['output'];
-};
-
 export type KubernetesUnstructured = {
   __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -3346,33 +3056,6 @@ export type LabelPair = {
   value?: Maybe<Scalars['String']['output']>;
 };
 
-export type License = {
-  __typename?: 'License';
-  metadata: Metadata;
-  spec: LicenseSpec;
-  status?: Maybe<LicenseStatus>;
-};
-
-export type LicenseFeature = {
-  __typename?: 'LicenseFeature';
-  description?: Maybe<Scalars['String']['output']>;
-  name: Scalars['String']['output'];
-};
-
-export type LicenseSpec = {
-  __typename?: 'LicenseSpec';
-  secretRef: SecretKeySelector;
-};
-
-export type LicenseStatus = {
-  __typename?: 'LicenseStatus';
-  features?: Maybe<Array<Maybe<LicenseFeature>>>;
-  free?: Maybe<Scalars['Boolean']['output']>;
-  limits?: Maybe<Scalars['Map']['output']>;
-  plan?: Maybe<Scalars['String']['output']>;
-  secrets?: Maybe<Scalars['Map']['output']>;
-};
-
 export enum ListMerge {
   Append = 'APPEND',
   Overwrite = 'OVERWRITE'
@@ -3398,26 +3081,6 @@ export type LogFacet = {
   __typename?: 'LogFacet';
   key: Scalars['String']['output'];
   value: Scalars['String']['output'];
-};
-
-export type LogFilter = {
-  __typename?: 'LogFilter';
-  metadata: Metadata;
-  spec: LogFilterSpec;
-};
-
-export type LogFilterSpec = {
-  __typename?: 'LogFilterSpec';
-  description?: Maybe<Scalars['String']['output']>;
-  labels?: Maybe<Array<Maybe<LogLabel>>>;
-  name?: Maybe<Scalars['String']['output']>;
-  query?: Maybe<Scalars['String']['output']>;
-};
-
-export type LogLabel = {
-  __typename?: 'LogLabel';
-  name?: Maybe<Scalars['String']['output']>;
-  value?: Maybe<Scalars['String']['output']>;
 };
 
 export type LogLine = {
@@ -4270,11 +3933,6 @@ export enum Operation {
   Suffix = 'SUFFIX'
 }
 
-export type OverlayUpdate = {
-  __typename?: 'OverlayUpdate';
-  path?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-};
-
 export type PageInfo = {
   __typename?: 'PageInfo';
   /** When paginating forwards, the cursor to continue. */
@@ -4285,12 +3943,6 @@ export type PageInfo = {
   hasPreviousPage: Scalars['Boolean']['output'];
   /** When paginating backwards, the cursor to continue. */
   startCursor?: Maybe<Scalars['String']['output']>;
-};
-
-export type PathUpdate = {
-  __typename?: 'PathUpdate';
-  path?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  valueFrom: Scalars['String']['output'];
 };
 
 export type PauseCondition = {
@@ -4708,13 +4360,6 @@ export type PluralCluster = {
   status: PluralObjectStatus;
 };
 
-export type PluralContext = {
-  __typename?: 'PluralContext';
-  buckets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  configuration: Scalars['Map']['output'];
-  domains?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-};
-
 /** temporary credentials for the user attached to this stack */
 export type PluralCreds = {
   __typename?: 'PluralCreds';
@@ -4914,41 +4559,6 @@ export type Port = {
   containerPort?: Maybe<Scalars['Int']['output']>;
   hostPort?: Maybe<Scalars['Int']['output']>;
   protocol?: Maybe<Scalars['String']['output']>;
-};
-
-export type PostgresInstance = {
-  __typename?: 'PostgresInstance';
-  uid: Scalars['String']['output'];
-};
-
-export type PostgresSettings = {
-  __typename?: 'PostgresSettings';
-  version?: Maybe<Scalars['String']['output']>;
-};
-
-export type Postgresql = {
-  __typename?: 'Postgresql';
-  instances?: Maybe<Array<Maybe<PostgresInstance>>>;
-  metadata: Metadata;
-  spec: PostgresqlSpec;
-  status?: Maybe<PostgresqlStatus>;
-};
-
-export type PostgresqlSpec = {
-  __typename?: 'PostgresqlSpec';
-  databases?: Maybe<Scalars['Map']['output']>;
-  numberOfInstances?: Maybe<Scalars['Int']['output']>;
-  pods?: Maybe<Array<Maybe<Pod>>>;
-  postgresql?: Maybe<PostgresSettings>;
-  resources?: Maybe<Resources>;
-  teamId?: Maybe<Scalars['String']['output']>;
-  users?: Maybe<Scalars['Map']['output']>;
-  volume?: Maybe<DatabaseVolume>;
-};
-
-export type PostgresqlStatus = {
-  __typename?: 'PostgresqlStatus';
-  clusterStatus?: Maybe<Scalars['String']['output']>;
 };
 
 /** a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo */
@@ -5243,13 +4853,6 @@ export type ProjectEdge = {
   node?: Maybe<Project>;
 };
 
-export type PrometheusDatasource = {
-  __typename?: 'PrometheusDatasource';
-  format?: Maybe<Scalars['String']['output']>;
-  legend?: Maybe<Scalars['String']['output']>;
-  query: Scalars['String']['output'];
-};
-
 /** how a promotion for a service will be performed */
 export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
@@ -5371,43 +4974,6 @@ export enum ReadType {
   Notification = 'NOTIFICATION'
 }
 
-export type Recipe = {
-  __typename?: 'Recipe';
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  oidcEnabled?: Maybe<Scalars['Boolean']['output']>;
-  provider?: Maybe<Scalars['String']['output']>;
-  recipeSections?: Maybe<Array<Maybe<RecipeSection>>>;
-  restricted?: Maybe<Scalars['Boolean']['output']>;
-};
-
-export type RecipeConnection = {
-  __typename?: 'RecipeConnection';
-  edges?: Maybe<Array<Maybe<RecipeEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type RecipeEdge = {
-  __typename?: 'RecipeEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Recipe>;
-};
-
-export type RecipeItem = {
-  __typename?: 'RecipeItem';
-  configuration?: Maybe<Array<Maybe<ConfigurationItem>>>;
-  id: Scalars['ID']['output'];
-};
-
-export type RecipeSection = {
-  __typename?: 'RecipeSection';
-  configuration?: Maybe<Array<Maybe<ConfigurationItem>>>;
-  id: Scalars['ID']['output'];
-  recipeItems?: Maybe<Array<Maybe<RecipeItem>>>;
-  repository?: Maybe<Repository>;
-};
-
 export type Recommendation = {
   __typename?: 'Recommendation';
   containerRecommendations?: Maybe<Array<Maybe<ContainerRecommendation>>>;
@@ -5477,35 +5043,6 @@ export type ReplicaSetStatus = {
   fullyLabeledReplicas?: Maybe<Scalars['Int']['output']>;
   readyReplicas?: Maybe<Scalars['Int']['output']>;
   replicas?: Maybe<Scalars['Int']['output']>;
-};
-
-export type Repository = {
-  __typename?: 'Repository';
-  configuration?: Maybe<Configuration>;
-  description?: Maybe<Scalars['String']['output']>;
-  docs?: Maybe<Array<Maybe<FileContent>>>;
-  grafanaDns?: Maybe<Scalars['String']['output']>;
-  icon?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-};
-
-export type RepositoryConnection = {
-  __typename?: 'RepositoryConnection';
-  edges?: Maybe<Array<Maybe<RepositoryEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type RepositoryContext = {
-  __typename?: 'RepositoryContext';
-  context?: Maybe<Scalars['Map']['output']>;
-  repository: Scalars['String']['output'];
-};
-
-export type RepositoryEdge = {
-  __typename?: 'RepositoryEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Repository>;
 };
 
 /** an edge representing mapping from kubernetes object metadata.uid -> metadata.uid */
@@ -5645,11 +5182,9 @@ export type RootMutationType = {
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addRunLogs?: Maybe<RunLogs>;
   aiFixPr?: Maybe<PullRequest>;
-  approveBuild?: Maybe<Build>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
-  cancelBuild?: Maybe<Build>;
   /** saves a set of messages and generates a new one transactionally */
   chat?: Maybe<Chat>;
   /** Wipes your current chat history blank */
@@ -5662,7 +5197,6 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
-  createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
   createClusterBackup?: Maybe<ClusterBackup>;
@@ -5677,7 +5211,6 @@ export type RootMutationType = {
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
   createOidcProvider?: Maybe<OidcProvider>;
-  createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
   createPin?: Maybe<AiPin>;
   createPinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -5700,9 +5233,7 @@ export type RootMutationType = {
   createStack?: Maybe<InfrastructureStack>;
   createStackDefinition?: Maybe<StackDefinition>;
   createThread?: Maybe<ChatThread>;
-  createUpgradePolicy?: Maybe<UpgradePolicy>;
   createUser?: Maybe<User>;
-  createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCatalog?: Maybe<Catalog>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
@@ -5725,7 +5256,6 @@ export type RootMutationType = {
   deleteObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   deleteObserver?: Maybe<Observer>;
   deleteOidcProvider?: Maybe<OidcProvider>;
-  deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
   deletePin?: Maybe<AiPin>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -5743,10 +5273,8 @@ export type RootMutationType = {
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
   deleteThread?: Maybe<ChatThread>;
-  deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
-  deleteWebhook?: Maybe<Webhook>;
   delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
@@ -5754,14 +5282,11 @@ export type RootMutationType = {
   detachServiceDeployment?: Maybe<ServiceDeployment>;
   detachStack?: Maybe<InfrastructureStack>;
   enableDeployments?: Maybe<DeploymentSettings>;
-  executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
   impersonateServiceAccount?: Maybe<User>;
   ingestClusterCost?: Maybe<Scalars['Boolean']['output']>;
   installAddOn?: Maybe<ServiceDeployment>;
-  installRecipe?: Maybe<Build>;
-  installStack?: Maybe<Build>;
   kickService?: Maybe<ServiceDeployment>;
   /** refresh the source repo of this stack, and potentially create a fresh run */
   kickStack?: Maybe<StackRun>;
@@ -5775,7 +5300,6 @@ export type RootMutationType = {
   oauthCallback?: Maybe<User>;
   /** Creates a custom run, with the given command list, to execute w/in the stack's environment */
   onDemandRun?: Maybe<StackRun>;
-  overlayConfiguration?: Maybe<Build>;
   /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
   /** marks a service as being able to proceed to the next stage of a canary rollout */
@@ -5785,9 +5309,7 @@ export type RootMutationType = {
   reconfigureRenovate?: Maybe<ServiceDeployment>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
-  restartBuild?: Maybe<Build>;
   restartStackRun?: Maybe<StackRun>;
-  restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
   /** saves a list of chat messages to your current chat history, can be used at any time */
@@ -5814,7 +5336,6 @@ export type RootMutationType = {
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateClusterRestore?: Maybe<ClusterRestore>;
-  updateConfiguration?: Maybe<Configuration>;
   updateCustomStackRun?: Maybe<CustomStackRun>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGate?: Maybe<PipelineGate>;
@@ -5837,7 +5358,6 @@ export type RootMutationType = {
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
-  updateSmtp?: Maybe<Smtp>;
   updateStack?: Maybe<InfrastructureStack>;
   updateStackDefinition?: Maybe<StackDefinition>;
   updateStackRun?: Maybe<StackRun>;
@@ -5875,22 +5395,12 @@ export type RootMutationTypeAiFixPrArgs = {
 };
 
 
-export type RootMutationTypeApproveBuildArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type RootMutationTypeApproveGateArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type RootMutationTypeApproveStackRunArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeCancelBuildArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5940,11 +5450,6 @@ export type RootMutationTypeCreateAccessTokenArgs = {
 
 export type RootMutationTypeCreateAgentMigrationArgs = {
   attributes: AgentMigrationAttributes;
-};
-
-
-export type RootMutationTypeCreateBuildArgs = {
-  attributes: BuildAttributes;
 };
 
 
@@ -6015,13 +5520,6 @@ export type RootMutationTypeCreateObjectStoreArgs = {
 export type RootMutationTypeCreateOidcProviderArgs = {
   attributes: OidcProviderAttributes;
   type: OidcProviderType;
-};
-
-
-export type RootMutationTypeCreatePeerArgs = {
-  email?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -6129,18 +5627,8 @@ export type RootMutationTypeCreateThreadArgs = {
 };
 
 
-export type RootMutationTypeCreateUpgradePolicyArgs = {
-  attributes: UpgradePolicyAttributes;
-};
-
-
 export type RootMutationTypeCreateUserArgs = {
   attributes: UserAttributes;
-};
-
-
-export type RootMutationTypeCreateWebhookArgs = {
-  attributes: WebhookAttributes;
 };
 
 
@@ -6254,11 +5742,6 @@ export type RootMutationTypeDeleteOidcProviderArgs = {
 };
 
 
-export type RootMutationTypeDeletePeerArgs = {
-  name: Scalars['String']['input'];
-};
-
-
 export type RootMutationTypeDeletePersonaArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6346,22 +5829,12 @@ export type RootMutationTypeDeleteThreadArgs = {
 };
 
 
-export type RootMutationTypeDeleteUpgradePolicyArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type RootMutationTypeDeleteUserArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type RootMutationTypeDeleteVirtualClusterArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeDeleteWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6386,13 +5859,6 @@ export type RootMutationTypeDetachStackArgs = {
 };
 
 
-export type RootMutationTypeExecuteRunbookArgs = {
-  input: RunbookActionInput;
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootMutationTypeForceGateArgs = {
   id: Scalars['ID']['input'];
   state?: InputMaybe<GateState>;
@@ -6414,20 +5880,6 @@ export type RootMutationTypeInstallAddOnArgs = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   global?: InputMaybe<GlobalServiceAttributes>;
   name: Scalars['String']['input'];
-};
-
-
-export type RootMutationTypeInstallRecipeArgs = {
-  context: Scalars['Map']['input'];
-  id: Scalars['ID']['input'];
-  oidc?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type RootMutationTypeInstallStackArgs = {
-  context: ContextAttributes;
-  name: Scalars['String']['input'];
-  oidc?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -6477,12 +5929,6 @@ export type RootMutationTypeOnDemandRunArgs = {
 };
 
 
-export type RootMutationTypeOverlayConfigurationArgs = {
-  context: Scalars['Map']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootMutationTypePingClusterArgs = {
   attributes: ClusterPing;
 };
@@ -6508,21 +5954,8 @@ export type RootMutationTypeRegisterRuntimeServicesArgs = {
 };
 
 
-export type RootMutationTypeRestartBuildArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type RootMutationTypeRestartStackRunArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeRestorePostgresArgs = {
-  clone?: InputMaybe<CloneAttributes>;
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-  timestamp: Scalars['DateTime']['input'];
 };
 
 
@@ -6623,14 +6056,6 @@ export type RootMutationTypeUpdateClusterProviderArgs = {
 export type RootMutationTypeUpdateClusterRestoreArgs = {
   attributes: RestoreAttributes;
   id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeUpdateConfigurationArgs = {
-  content: Scalars['String']['input'];
-  message?: InputMaybe<Scalars['String']['input']>;
-  repository: Scalars['String']['input'];
-  tool?: InputMaybe<Tool>;
 };
 
 
@@ -6765,11 +6190,6 @@ export type RootMutationTypeUpdateServiceDeploymentArgs = {
 };
 
 
-export type RootMutationTypeUpdateSmtpArgs = {
-  smtp: SmtpInput;
-};
-
-
 export type RootMutationTypeUpdateStackArgs = {
   attributes: StackAttributes;
   id: Scalars['ID']['input'];
@@ -6856,7 +6276,6 @@ export type RootQueryType = {
   accessToken?: Maybe<AccessToken>;
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
-  ai?: Maybe<Scalars['String']['output']>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
   aiPin?: Maybe<AiPin>;
@@ -6864,14 +6283,9 @@ export type RootQueryType = {
   /** Use the content of an insight and additional context from its associated object to suggest a fix */
   aiSuggestedFix?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
-  application?: Maybe<Application>;
-  applications?: Maybe<Array<Maybe<Application>>>;
   argoRollout?: Maybe<ArgoRollout>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
   audits?: Maybe<AuditConnection>;
-  build?: Maybe<Build>;
-  buildInfo?: Maybe<BuildInfo>;
-  builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
@@ -6913,8 +6327,6 @@ export type RootQueryType = {
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
-  configurationOverlays?: Maybe<Array<Maybe<ConfigurationOverlay>>>;
-  context?: Maybe<Array<Maybe<RepositoryContext>>>;
   cronJob?: Maybe<CronJob>;
   customStackRun?: Maybe<CustomStackRun>;
   daemonSet?: Maybe<DaemonSet>;
@@ -6923,7 +6335,6 @@ export type RootQueryType = {
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
-  externalToken?: Maybe<Scalars['String']['output']>;
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   fluxHelmRepositories?: Maybe<Array<Maybe<FluxHelmRepository>>>;
@@ -6940,11 +6351,9 @@ export type RootQueryType = {
   infrastructureStack?: Maybe<InfrastructureStack>;
   infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
-  installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
-  logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
@@ -6953,7 +6362,6 @@ export type RootQueryType = {
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
   /** tells you what cluster a deploy token points to */
   myCluster?: Maybe<Cluster>;
-  myWireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
   namespaces?: Maybe<Array<Maybe<Namespace>>>;
   node?: Maybe<Node>;
   nodeMetric?: Maybe<NodeMetric>;
@@ -6980,7 +6388,6 @@ export type RootQueryType = {
   pipelineGate?: Maybe<PipelineGate>;
   pipelines?: Maybe<PipelineConnection>;
   pluralCluster?: Maybe<PluralCluster>;
-  pluralContext?: Maybe<PluralContext>;
   pluralGitRepository?: Maybe<PluralGitRepository>;
   pluralServiceDeployment?: Maybe<PluralServiceDeployment>;
   pod?: Maybe<Pod>;
@@ -6988,25 +6395,17 @@ export type RootQueryType = {
   policyConstraint?: Maybe<PolicyConstraint>;
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   policyStatistics?: Maybe<Array<Maybe<PolicyStatistic>>>;
-  postgresDatabase?: Maybe<Postgresql>;
-  postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
   prAutomations?: Maybe<PrAutomationConnection>;
   project?: Maybe<Project>;
   projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
-  recipe?: Maybe<Recipe>;
-  recipes?: Maybe<RecipeConnection>;
   refresh?: Maybe<User>;
   refreshTokens?: Maybe<RefreshTokenConnection>;
-  repositories?: Maybe<RepositoryConnection>;
-  repository?: Maybe<Repository>;
   /** request manifests from an agent, to be returned by a future call to fetchManifests */
   requestManifests?: Maybe<ServiceDeployment>;
   role?: Maybe<Role>;
   roles?: Maybe<RoleConnection>;
-  runbook?: Maybe<Runbook>;
-  runbooks?: Maybe<Array<Maybe<Runbook>>>;
   /** fetch an individual runtime service for more thorough detail views */
   runtimeService?: Maybe<RuntimeService>;
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
@@ -7024,8 +6423,6 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   /** Renders a filtered list of services and all their descendents returned as a paginated connection */
   serviceTree?: Maybe<ServiceDeploymentConnection>;
-  smtp?: Maybe<Smtp>;
-  stack?: Maybe<Stack>;
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
@@ -7040,7 +6437,6 @@ export type RootQueryType = {
   unreadAppNotifications?: Maybe<Scalars['Int']['output']>;
   unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePlan?: Maybe<UpgradePlan>;
-  upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   /** gets summary information for upgradeability in your fleet */
   upgradeStatistics?: Maybe<UpgradeStatistics>;
   user?: Maybe<User>;
@@ -7049,9 +6445,6 @@ export type RootQueryType = {
   vulnerabilityReport?: Maybe<VulnerabilityReport>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
-  webhooks?: Maybe<WebhookConnection>;
-  wireguardPeer?: Maybe<WireguardPeer>;
-  wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
 };
 
 
@@ -7065,11 +6458,6 @@ export type RootQueryTypeAccessTokensArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type RootQueryTypeAiArgs = {
-  prompt: Scalars['String']['input'];
 };
 
 
@@ -7108,11 +6496,6 @@ export type RootQueryTypeAppNotificationsArgs = {
 };
 
 
-export type RootQueryTypeApplicationArgs = {
-  name: Scalars['String']['input'];
-};
-
-
 export type RootQueryTypeArgoRolloutArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -7126,19 +6509,6 @@ export type RootQueryTypeAuditsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   repo?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type RootQueryTypeBuildArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type RootQueryTypeBuildsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -7331,11 +6701,6 @@ export type RootQueryTypeConfigMapsArgs = {
 };
 
 
-export type RootQueryTypeConfigurationOverlaysArgs = {
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootQueryTypeCronJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -7483,14 +6848,6 @@ export type RootQueryTypeIngressArgs = {
 };
 
 
-export type RootQueryTypeInstallationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type RootQueryTypeInviteArgs = {
   id: Scalars['String']['input'];
 };
@@ -7509,11 +6866,6 @@ export type RootQueryTypeLogAggregationArgs = {
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
-};
-
-
-export type RootQueryTypeLogFiltersArgs = {
-  namespace: Scalars['String']['input'];
 };
 
 
@@ -7791,12 +7143,6 @@ export type RootQueryTypePolicyStatisticsArgs = {
 };
 
 
-export type RootQueryTypePostgresDatabaseArgs = {
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootQueryTypePrAutomationArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -7841,20 +7187,6 @@ export type RootQueryTypePullRequestsArgs = {
 };
 
 
-export type RootQueryTypeRecipeArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type RootQueryTypeRecipesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  id: Scalars['ID']['input'];
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type RootQueryTypeRefreshArgs = {
   token: Scalars['String']['input'];
 };
@@ -7865,20 +7197,6 @@ export type RootQueryTypeRefreshTokensArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type RootQueryTypeRepositoriesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  query: Scalars['String']['input'];
-};
-
-
-export type RootQueryTypeRepositoryArgs = {
-  name: Scalars['String']['input'];
 };
 
 
@@ -7893,18 +7211,6 @@ export type RootQueryTypeRolesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type RootQueryTypeRunbookArgs = {
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
-export type RootQueryTypeRunbooksArgs = {
-  namespace: Scalars['String']['input'];
-  pinned?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -8014,11 +7320,6 @@ export type RootQueryTypeServiceTreeArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
-};
-
-
-export type RootQueryTypeStackArgs = {
-  name: Scalars['String']['input'];
 };
 
 
@@ -8134,26 +7435,10 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
-
-export type RootQueryTypeWebhooksArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type RootQueryTypeWireguardPeerArgs = {
-  name: Scalars['String']['input'];
-};
-
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
-  applicationDelta?: Maybe<ApplicationDelta>;
-  buildDelta?: Maybe<BuildDelta>;
-  commandDelta?: Maybe<CommandDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
@@ -8164,16 +7449,6 @@ export type RootSubscriptionTypeAiStreamArgs = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   scopeId?: InputMaybe<Scalars['String']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootSubscriptionTypeBuildDeltaArgs = {
-  buildId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootSubscriptionTypeCommandDeltaArgs = {
-  buildId: Scalars['ID']['input'];
 };
 
 
@@ -8231,113 +7506,6 @@ export type RunStep = {
 
 export type RunStepAttributes = {
   status: StepStatus;
-};
-
-export type Runbook = {
-  __typename?: 'Runbook';
-  data?: Maybe<Array<Maybe<RunbookData>>>;
-  executions?: Maybe<RunbookExecutionConnection>;
-  name: Scalars['String']['output'];
-  spec: RunbookSpec;
-  status?: Maybe<RunbookStatus>;
-};
-
-
-export type RunbookDataArgs = {
-  context?: InputMaybe<RunbookContext>;
-};
-
-
-export type RunbookExecutionsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type RunbookAction = {
-  __typename?: 'RunbookAction';
-  configuration?: Maybe<ConfigurationAction>;
-  name: Scalars['String']['output'];
-  type: Scalars['String']['output'];
-};
-
-export type RunbookActionInput = {
-  action: Scalars['String']['input'];
-  context: Scalars['Map']['input'];
-};
-
-export type RunbookActionResponse = {
-  __typename?: 'RunbookActionResponse';
-  redirectTo?: Maybe<Scalars['String']['output']>;
-};
-
-export type RunbookAlertStatus = {
-  __typename?: 'RunbookAlertStatus';
-  annotations?: Maybe<Scalars['Map']['output']>;
-  fingerprint?: Maybe<Scalars['String']['output']>;
-  labels?: Maybe<Scalars['Map']['output']>;
-  name: Scalars['String']['output'];
-  startsAt?: Maybe<Scalars['String']['output']>;
-};
-
-export type RunbookContext = {
-  timeseriesStart?: InputMaybe<Scalars['Int']['input']>;
-  timeseriesStep?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type RunbookData = {
-  __typename?: 'RunbookData';
-  kubernetes?: Maybe<KubernetesData>;
-  name: Scalars['String']['output'];
-  nodes?: Maybe<Array<Maybe<Node>>>;
-  prometheus?: Maybe<Array<Maybe<MetricResponse>>>;
-  source?: Maybe<RunbookDatasource>;
-};
-
-export type RunbookDatasource = {
-  __typename?: 'RunbookDatasource';
-  kubernetes?: Maybe<KubernetesDatasource>;
-  name: Scalars['String']['output'];
-  prometheus?: Maybe<PrometheusDatasource>;
-  type: Scalars['String']['output'];
-};
-
-export type RunbookExecution = {
-  __typename?: 'RunbookExecution';
-  context: Scalars['Map']['output'];
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  name: Scalars['String']['output'];
-  namespace: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  user?: Maybe<User>;
-};
-
-export type RunbookExecutionConnection = {
-  __typename?: 'RunbookExecutionConnection';
-  edges?: Maybe<Array<Maybe<RunbookExecutionEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type RunbookExecutionEdge = {
-  __typename?: 'RunbookExecutionEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<RunbookExecution>;
-};
-
-export type RunbookSpec = {
-  __typename?: 'RunbookSpec';
-  actions?: Maybe<Array<Maybe<RunbookAction>>>;
-  datasources?: Maybe<Array<Maybe<RunbookDatasource>>>;
-  description?: Maybe<Scalars['String']['output']>;
-  display?: Maybe<Scalars['Map']['output']>;
-  name: Scalars['String']['output'];
-};
-
-export type RunbookStatus = {
-  __typename?: 'RunbookStatus';
-  alerts?: Maybe<Array<Maybe<RunbookAlertStatus>>>;
 };
 
 export type RunningState = {
@@ -8512,12 +7680,6 @@ export type Secret = {
   data: Scalars['Map']['output'];
   metadata: Metadata;
   type?: Maybe<Scalars['String']['output']>;
-};
-
-export type SecretKeySelector = {
-  __typename?: 'SecretKeySelector';
-  key?: Maybe<Scalars['String']['output']>;
-  name: Scalars['String']['output'];
 };
 
 export type Service = {
@@ -8977,23 +8139,6 @@ export enum SinkType {
   Teams = 'TEAMS'
 }
 
-export type Smtp = {
-  __typename?: 'Smtp';
-  password?: Maybe<Scalars['String']['output']>;
-  port?: Maybe<Scalars['Int']['output']>;
-  sender?: Maybe<Scalars['String']['output']>;
-  server?: Maybe<Scalars['String']['output']>;
-  user?: Maybe<Scalars['String']['output']>;
-};
-
-export type SmtpInput = {
-  password?: InputMaybe<Scalars['String']['input']>;
-  port?: InputMaybe<Scalars['Int']['input']>;
-  sender?: InputMaybe<Scalars['String']['input']>;
-  server?: InputMaybe<Scalars['String']['input']>;
-  user?: InputMaybe<Scalars['String']['input']>;
-};
-
 /** SMTP server configuration for email notifications */
 export type SmtpSettings = {
   __typename?: 'SmtpSettings';
@@ -9011,16 +8156,6 @@ export type SmtpSettingsAttributes = {
   server: Scalars['String']['input'];
   ssl: Scalars['Boolean']['input'];
   user: Scalars['String']['input'];
-};
-
-export type Stack = {
-  __typename?: 'Stack';
-  bundles?: Maybe<Array<Maybe<Recipe>>>;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  name: Scalars['String']['output'];
-  sections?: Maybe<Array<Maybe<RecipeSection>>>;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type StackAttributes = {
@@ -9415,23 +8550,6 @@ export type StatefulSetStatus = {
   updatedReplicas?: Maybe<Scalars['Int']['output']>;
 };
 
-export enum Status {
-  Cancelled = 'CANCELLED',
-  Failed = 'FAILED',
-  Pending = 'PENDING',
-  Queued = 'QUEUED',
-  Running = 'RUNNING',
-  Successful = 'SUCCESSFUL'
-}
-
-export type StatusComponent = {
-  __typename?: 'StatusComponent';
-  group?: Maybe<Scalars['String']['output']>;
-  kind: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  status: Scalars['String']['output'];
-};
-
 export type StatusCondition = {
   __typename?: 'StatusCondition';
   message: Scalars['String']['output'];
@@ -9551,11 +8669,6 @@ export type TerraformStateUrls = {
   unlock?: Maybe<Scalars['String']['output']>;
 };
 
-export enum Tool {
-  Helm = 'HELM',
-  Terraform = 'TERRAFORM'
-}
-
 export type ToolConfigAttributes = {
   createPr?: InputMaybe<CreatePrConfigAttributes>;
 };
@@ -9662,34 +8775,6 @@ export type UpgradePlanStatus = {
   __typename?: 'UpgradePlanStatus';
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
 };
-
-export type UpgradePolicy = {
-  __typename?: 'UpgradePolicy';
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  name: Scalars['String']['output'];
-  repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  target: Scalars['String']['output'];
-  type: UpgradePolicyType;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  weight?: Maybe<Scalars['Int']['output']>;
-};
-
-export type UpgradePolicyAttributes = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  target: Scalars['String']['input'];
-  type: UpgradePolicyType;
-  weight?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export enum UpgradePolicyType {
-  Approval = 'APPROVAL',
-  Deploy = 'DEPLOY',
-  Ignore = 'IGNORE'
-}
 
 /** Summary statistics of the upgradeability of your fleet */
 export type UpgradeStatistics = {
@@ -10039,65 +9124,6 @@ export type WaitingState = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
-export type Webhook = {
-  __typename?: 'Webhook';
-  health: WebhookHealth;
-  id: Scalars['ID']['output'];
-  insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  type: WebhookType;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  url: Scalars['String']['output'];
-};
-
-export type WebhookAttributes = {
-  url: Scalars['String']['input'];
-};
-
-export type WebhookConnection = {
-  __typename?: 'WebhookConnection';
-  edges?: Maybe<Array<Maybe<WebhookEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type WebhookEdge = {
-  __typename?: 'WebhookEdge';
-  cursor?: Maybe<Scalars['String']['output']>;
-  node?: Maybe<Webhook>;
-};
-
-export enum WebhookHealth {
-  Healthy = 'HEALTHY',
-  Unhealthy = 'UNHEALTHY'
-}
-
-export enum WebhookType {
-  Piazza = 'PIAZZA',
-  Slack = 'SLACK'
-}
-
-export type WireguardPeer = {
-  __typename?: 'WireguardPeer';
-  config?: Maybe<Scalars['String']['output']>;
-  metadata: Metadata;
-  raw: Scalars['String']['output'];
-  spec: WireguardPeerSpec;
-  status?: Maybe<WireguardPeerStatus>;
-  user?: Maybe<User>;
-};
-
-export type WireguardPeerSpec = {
-  __typename?: 'WireguardPeerSpec';
-  address?: Maybe<Scalars['String']['output']>;
-  publicKey?: Maybe<Scalars['String']['output']>;
-  wireguardRef?: Maybe<Scalars['String']['output']>;
-};
-
-export type WireguardPeerStatus = {
-  __typename?: 'WireguardPeerStatus';
-  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
-  ready?: Maybe<Scalars['Boolean']['output']>;
-};
-
 /** a description of a yaml-merge operation on a file */
 export type YamlOverlay = {
   __typename?: 'YamlOverlay';
@@ -10138,13 +9164,6 @@ export type ChatFragment = { __typename?: 'Chat', id: string, content: string, r
 export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null };
 
 export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null };
-
-export type AiQueryVariables = Exact<{
-  prompt: Scalars['String']['input'];
-}>;
-
-
-export type AiQuery = { __typename?: 'RootQueryType', ai?: string | null };
 
 export type AiCompletionQueryVariables = Exact<{
   system: Scalars['String']['input'];
@@ -10287,43 +9306,6 @@ export type AiChatStreamSubscriptionVariables = Exact<{
 
 
 export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, content: string } | null };
-
-export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
-
-export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
-
-export type ConfigurationFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
-
-export type ApplicationSpecFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
-
-export type ApplicationStatusFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
-
-export type ApplicationFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
-
-export type ConfigurationOverlayFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
-
-export type AppQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-
-export type AppQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', name: string, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null, configurationOverlays?: Array<{ __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } } | null> | null };
-
-export type AppInfoQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-
-export type AppInfoQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', info?: string | null, name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null };
-
-export type RepositoryFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
-
-export type RepositoryQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-
-export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
 export type AuditFragment = { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
@@ -10559,18 +9541,6 @@ export type CreateClusterRestoreMutationVariables = Exact<{
 export type CreateClusterRestoreMutation = { __typename?: 'RootMutationType', createClusterRestore?: { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null };
 
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
-
-export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type PluralContextQuery = { __typename?: 'RootQueryType', pluralContext?: { __typename?: 'PluralContext', buckets?: Array<string | null> | null, configuration: Record<string, unknown>, domains?: Array<string | null> | null } | null };
-
-export type CreateBuildMutationVariables = Exact<{
-  attributes: BuildAttributes;
-}>;
-
-
-export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
 export type CatalogFragment = { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -11543,31 +10513,6 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
 
 export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null } | null } | null> | null } | null } | null };
 
-export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
-
-export type RestorePostgresMutationVariables = Exact<{
-  clone?: InputMaybe<CloneAttributes>;
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-  timestamp: Scalars['DateTime']['input'];
-}>;
-
-
-export type RestorePostgresMutation = { __typename?: 'RootMutationType', restorePostgres?: { __typename?: 'Postgresql', status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
-
-export type PostgresDatabasesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null> | null, applications?: Array<{ __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', icons?: Array<string | null> | null } } } | null> | null };
-
-export type PostgresDatabaseQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-}>;
-
-
-export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
-
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null };
@@ -12432,7 +11377,7 @@ export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __ty
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -12682,128 +11627,6 @@ export const ChatThreadFragmentDoc = gql`
 }
     ${ChatFragmentDoc}
 ${AiInsightFragmentDoc}`;
-export const ApplicationSpecFragmentDoc = gql`
-    fragment ApplicationSpec on ApplicationSpec {
-  descriptor {
-    type
-    icons
-    description
-    version
-    links {
-      description
-      url
-    }
-  }
-  components {
-    group
-    kind
-  }
-}
-    `;
-export const ApplicationStatusFragmentDoc = gql`
-    fragment ApplicationStatus on ApplicationStatus {
-  components {
-    group
-    kind
-    name
-    status
-  }
-  conditions {
-    message
-    reason
-    status
-    type
-  }
-  componentsReady
-}
-    `;
-export const CostAnalysisFragmentDoc = gql`
-    fragment CostAnalysis on CostAnalysis {
-  minutes
-  cpuCost
-  pvCost
-  ramCost
-  totalCost
-}
-    `;
-export const ApplicationFragmentDoc = gql`
-    fragment Application on Application {
-  name
-  spec {
-    ...ApplicationSpec
-  }
-  status {
-    ...ApplicationStatus
-  }
-  cost {
-    ...CostAnalysis
-  }
-}
-    ${ApplicationSpecFragmentDoc}
-${ApplicationStatusFragmentDoc}
-${CostAnalysisFragmentDoc}`;
-export const MetadataFragmentDoc = gql`
-    fragment Metadata on Metadata {
-  uid
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-  creationTimestamp
-}
-    `;
-export const ConfigurationOverlayFragmentDoc = gql`
-    fragment ConfigurationOverlay on ConfigurationOverlay {
-  metadata {
-    ...Metadata
-  }
-  spec {
-    name
-    folder
-    subfolder
-    documentation
-    inputType
-    inputValues
-    updates {
-      path
-    }
-  }
-}
-    ${MetadataFragmentDoc}`;
-export const ConfigurationFragmentDoc = gql`
-    fragment Configuration on Configuration {
-  helm
-  terraform
-}
-    `;
-export const FileContentFragmentDoc = gql`
-    fragment FileContent on FileContent {
-  content
-  path
-}
-    `;
-export const RepositoryFragmentDoc = gql`
-    fragment Repository on Repository {
-  id
-  name
-  icon
-  description
-  grafanaDns
-  configuration {
-    ...Configuration
-  }
-  docs {
-    ...FileContent
-  }
-}
-    ${ConfigurationFragmentDoc}
-${FileContentFragmentDoc}`;
 export const PolicyBindingFragmentDoc = gql`
     fragment PolicyBinding on PolicyBinding {
   id
@@ -13919,6 +12742,22 @@ export const PipelineBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
+  uid
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+  creationTimestamp
+}
+    `;
 export const ContainerStatusFragmentDoc = gql`
     fragment ContainerStatus on ContainerStatus {
   restartCount
@@ -14353,35 +13192,6 @@ export const ClusterScalingRecommendationFragmentDoc = gql`
   type
 }
     `;
-export const DatabaseTableRowFragmentDoc = gql`
-    fragment DatabaseTableRow on Postgresql {
-  instances {
-    uid
-  }
-  metadata {
-    name
-    namespace
-    creationTimestamp
-  }
-  spec {
-    numberOfInstances
-    databases
-    postgresql {
-      version
-    }
-    resources {
-      ...Resources
-    }
-    databases
-    volume {
-      size
-    }
-  }
-  status {
-    clusterStatus
-  }
-}
-    ${ResourcesFragmentDoc}`;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -15718,44 +14528,6 @@ export const VulnerabilityStatisticFragmentDoc = gql`
   grade
 }
     `;
-export const AiDocument = gql`
-    query AI($prompt: String!) {
-  ai(prompt: $prompt)
-}
-    `;
-
-/**
- * __useAiQuery__
- *
- * To run a query within a React component, call `useAiQuery` and pass it any options that fit your needs.
- * When your component renders, `useAiQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAiQuery({
- *   variables: {
- *      prompt: // value for 'prompt'
- *   },
- * });
- */
-export function useAiQuery(baseOptions: Apollo.QueryHookOptions<AiQuery, AiQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AiQuery, AiQueryVariables>(AiDocument, options);
-      }
-export function useAiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiQuery, AiQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AiQuery, AiQueryVariables>(AiDocument, options);
-        }
-export function useAiSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiQuery, AiQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AiQuery, AiQueryVariables>(AiDocument, options);
-        }
-export type AiQueryHookResult = ReturnType<typeof useAiQuery>;
-export type AiLazyQueryHookResult = ReturnType<typeof useAiLazyQuery>;
-export type AiSuspenseQueryHookResult = ReturnType<typeof useAiSuspenseQuery>;
-export type AiQueryResult = Apollo.QueryResult<AiQuery, AiQueryVariables>;
 export const AiCompletionDocument = gql`
     query AICompletion($system: String!, $input: String, $chat: [ChatMessage], $scopeId: String) {
   aiCompletion(system: $system, input: $input, chat: $chat, scopeId: $scopeId)
@@ -16423,135 +15195,6 @@ export function useAiChatStreamSubscription(baseOptions?: Apollo.SubscriptionHoo
       }
 export type AiChatStreamSubscriptionHookResult = ReturnType<typeof useAiChatStreamSubscription>;
 export type AiChatStreamSubscriptionResult = Apollo.SubscriptionResult<AiChatStreamSubscription>;
-export const AppDocument = gql`
-    query App($name: String!) {
-  application(name: $name) {
-    configuration {
-      helm
-      terraform
-    }
-    ...Application
-  }
-  configurationOverlays(namespace: $name) {
-    ...ConfigurationOverlay
-  }
-}
-    ${ApplicationFragmentDoc}
-${ConfigurationOverlayFragmentDoc}`;
-
-/**
- * __useAppQuery__
- *
- * To run a query within a React component, call `useAppQuery` and pass it any options that fit your needs.
- * When your component renders, `useAppQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAppQuery({
- *   variables: {
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useAppQuery(baseOptions: Apollo.QueryHookOptions<AppQuery, AppQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AppQuery, AppQueryVariables>(AppDocument, options);
-      }
-export function useAppLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AppQuery, AppQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AppQuery, AppQueryVariables>(AppDocument, options);
-        }
-export function useAppSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AppQuery, AppQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AppQuery, AppQueryVariables>(AppDocument, options);
-        }
-export type AppQueryHookResult = ReturnType<typeof useAppQuery>;
-export type AppLazyQueryHookResult = ReturnType<typeof useAppLazyQuery>;
-export type AppSuspenseQueryHookResult = ReturnType<typeof useAppSuspenseQuery>;
-export type AppQueryResult = Apollo.QueryResult<AppQuery, AppQueryVariables>;
-export const AppInfoDocument = gql`
-    query AppInfo($name: String!) {
-  application(name: $name) {
-    ...Application
-    info
-  }
-}
-    ${ApplicationFragmentDoc}`;
-
-/**
- * __useAppInfoQuery__
- *
- * To run a query within a React component, call `useAppInfoQuery` and pass it any options that fit your needs.
- * When your component renders, `useAppInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAppInfoQuery({
- *   variables: {
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useAppInfoQuery(baseOptions: Apollo.QueryHookOptions<AppInfoQuery, AppInfoQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AppInfoQuery, AppInfoQueryVariables>(AppInfoDocument, options);
-      }
-export function useAppInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AppInfoQuery, AppInfoQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AppInfoQuery, AppInfoQueryVariables>(AppInfoDocument, options);
-        }
-export function useAppInfoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AppInfoQuery, AppInfoQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AppInfoQuery, AppInfoQueryVariables>(AppInfoDocument, options);
-        }
-export type AppInfoQueryHookResult = ReturnType<typeof useAppInfoQuery>;
-export type AppInfoLazyQueryHookResult = ReturnType<typeof useAppInfoLazyQuery>;
-export type AppInfoSuspenseQueryHookResult = ReturnType<typeof useAppInfoSuspenseQuery>;
-export type AppInfoQueryResult = Apollo.QueryResult<AppInfoQuery, AppInfoQueryVariables>;
-export const RepositoryDocument = gql`
-    query Repository($name: String!) {
-  repository(name: $name) {
-    ...Repository
-  }
-}
-    ${RepositoryFragmentDoc}`;
-
-/**
- * __useRepositoryQuery__
- *
- * To run a query within a React component, call `useRepositoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRepositoryQuery({
- *   variables: {
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useRepositoryQuery(baseOptions: Apollo.QueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
-      }
-export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
-        }
-export function useRepositorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
-        }
-export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
-export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
-export type RepositorySuspenseQueryHookResult = ReturnType<typeof useRepositorySuspenseQuery>;
-export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
 export const AuditsDocument = gql`
     query Audits($repo: String, $cursor: String) {
   audits(repo: $repo, after: $cursor, first: 50) {
@@ -17605,80 +16248,6 @@ export function useCreateClusterRestoreMutation(baseOptions?: Apollo.MutationHoo
 export type CreateClusterRestoreMutationHookResult = ReturnType<typeof useCreateClusterRestoreMutation>;
 export type CreateClusterRestoreMutationResult = Apollo.MutationResult<CreateClusterRestoreMutation>;
 export type CreateClusterRestoreMutationOptions = Apollo.BaseMutationOptions<CreateClusterRestoreMutation, CreateClusterRestoreMutationVariables>;
-export const PluralContextDocument = gql`
-    query PluralContext {
-  pluralContext {
-    buckets
-    configuration
-    domains
-  }
-}
-    `;
-
-/**
- * __usePluralContextQuery__
- *
- * To run a query within a React component, call `usePluralContextQuery` and pass it any options that fit your needs.
- * When your component renders, `usePluralContextQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePluralContextQuery({
- *   variables: {
- *   },
- * });
- */
-export function usePluralContextQuery(baseOptions?: Apollo.QueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
-      }
-export function usePluralContextLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
-        }
-export function usePluralContextSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
-        }
-export type PluralContextQueryHookResult = ReturnType<typeof usePluralContextQuery>;
-export type PluralContextLazyQueryHookResult = ReturnType<typeof usePluralContextLazyQuery>;
-export type PluralContextSuspenseQueryHookResult = ReturnType<typeof usePluralContextSuspenseQuery>;
-export type PluralContextQueryResult = Apollo.QueryResult<PluralContextQuery, PluralContextQueryVariables>;
-export const CreateBuildDocument = gql`
-    mutation CreateBuild($attributes: BuildAttributes!) {
-  createBuild(attributes: $attributes) {
-    id
-  }
-}
-    `;
-export type CreateBuildMutationFn = Apollo.MutationFunction<CreateBuildMutation, CreateBuildMutationVariables>;
-
-/**
- * __useCreateBuildMutation__
- *
- * To run a mutation, you first call `useCreateBuildMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateBuildMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createBuildMutation, { data, loading, error }] = useCreateBuildMutation({
- *   variables: {
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<CreateBuildMutation, CreateBuildMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateBuildMutation, CreateBuildMutationVariables>(CreateBuildDocument, options);
-      }
-export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
-export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
-export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
 export const CatalogsDocument = gql`
     query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
   catalogs(after: $after, before: $before, first: $first, last: $last) {
@@ -21879,137 +20448,6 @@ export type ClusterUsageScalingRecommendationsQueryHookResult = ReturnType<typeo
 export type ClusterUsageScalingRecommendationsLazyQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsLazyQuery>;
 export type ClusterUsageScalingRecommendationsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsSuspenseQuery>;
 export type ClusterUsageScalingRecommendationsQueryResult = Apollo.QueryResult<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>;
-export const RestorePostgresDocument = gql`
-    mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
-  restorePostgres(
-    clone: $clone
-    name: $name
-    namespace: $namespace
-    timestamp: $timestamp
-  ) {
-    status {
-      clusterStatus
-    }
-  }
-}
-    `;
-export type RestorePostgresMutationFn = Apollo.MutationFunction<RestorePostgresMutation, RestorePostgresMutationVariables>;
-
-/**
- * __useRestorePostgresMutation__
- *
- * To run a mutation, you first call `useRestorePostgresMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useRestorePostgresMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [restorePostgresMutation, { data, loading, error }] = useRestorePostgresMutation({
- *   variables: {
- *      clone: // value for 'clone'
- *      name: // value for 'name'
- *      namespace: // value for 'namespace'
- *      timestamp: // value for 'timestamp'
- *   },
- * });
- */
-export function useRestorePostgresMutation(baseOptions?: Apollo.MutationHookOptions<RestorePostgresMutation, RestorePostgresMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RestorePostgresMutation, RestorePostgresMutationVariables>(RestorePostgresDocument, options);
-      }
-export type RestorePostgresMutationHookResult = ReturnType<typeof useRestorePostgresMutation>;
-export type RestorePostgresMutationResult = Apollo.MutationResult<RestorePostgresMutation>;
-export type RestorePostgresMutationOptions = Apollo.BaseMutationOptions<RestorePostgresMutation, RestorePostgresMutationVariables>;
-export const PostgresDatabasesDocument = gql`
-    query PostgresDatabases {
-  postgresDatabases {
-    ...DatabaseTableRow
-  }
-  applications {
-    name
-    spec {
-      descriptor {
-        icons
-      }
-    }
-  }
-}
-    ${DatabaseTableRowFragmentDoc}`;
-
-/**
- * __usePostgresDatabasesQuery__
- *
- * To run a query within a React component, call `usePostgresDatabasesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePostgresDatabasesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePostgresDatabasesQuery({
- *   variables: {
- *   },
- * });
- */
-export function usePostgresDatabasesQuery(baseOptions?: Apollo.QueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
-      }
-export function usePostgresDatabasesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
-        }
-export function usePostgresDatabasesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
-        }
-export type PostgresDatabasesQueryHookResult = ReturnType<typeof usePostgresDatabasesQuery>;
-export type PostgresDatabasesLazyQueryHookResult = ReturnType<typeof usePostgresDatabasesLazyQuery>;
-export type PostgresDatabasesSuspenseQueryHookResult = ReturnType<typeof usePostgresDatabasesSuspenseQuery>;
-export type PostgresDatabasesQueryResult = Apollo.QueryResult<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>;
-export const PostgresDatabaseDocument = gql`
-    query PostgresDatabase($name: String!, $namespace: String!) {
-  postgresDatabase(name: $name, namespace: $namespace) {
-    ...DatabaseTableRow
-  }
-}
-    ${DatabaseTableRowFragmentDoc}`;
-
-/**
- * __usePostgresDatabaseQuery__
- *
- * To run a query within a React component, call `usePostgresDatabaseQuery` and pass it any options that fit your needs.
- * When your component renders, `usePostgresDatabaseQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePostgresDatabaseQuery({
- *   variables: {
- *      name: // value for 'name'
- *      namespace: // value for 'namespace'
- *   },
- * });
- */
-export function usePostgresDatabaseQuery(baseOptions: Apollo.QueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
-      }
-export function usePostgresDatabaseLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
-        }
-export function usePostgresDatabaseSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
-        }
-export type PostgresDatabaseQueryHookResult = ReturnType<typeof usePostgresDatabaseQuery>;
-export type PostgresDatabaseLazyQueryHookResult = ReturnType<typeof usePostgresDatabaseLazyQuery>;
-export type PostgresDatabaseSuspenseQueryHookResult = ReturnType<typeof usePostgresDatabaseSuspenseQuery>;
-export type PostgresDatabaseQueryResult = Apollo.QueryResult<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -25719,7 +24157,6 @@ export const MeDocument = gql`
     }
     unreadNotifications
   }
-  externalToken
   clusterInfo {
     version
     platform
@@ -26164,7 +24601,6 @@ export type VulnerabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof u
 export type VulnerabilityStatisticsQueryResult = Apollo.QueryResult<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>;
 export const namedOperations = {
   Query: {
-    AI: 'AI',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
     AIPins: 'AIPins',
@@ -26172,9 +24608,6 @@ export const namedOperations = {
     ChatThreads: 'ChatThreads',
     ChatThreadDetails: 'ChatThreadDetails',
     ClusterInsightComponent: 'ClusterInsightComponent',
-    App: 'App',
-    AppInfo: 'AppInfo',
-    Repository: 'Repository',
     Audits: 'Audits',
     AuditMetrics: 'AuditMetrics',
     PrAutomations: 'PrAutomations',
@@ -26185,7 +24618,6 @@ export const namedOperations = {
     ClusterBackup: 'ClusterBackup',
     ClusterBackups: 'ClusterBackups',
     ClusterRestores: 'ClusterRestores',
-    PluralContext: 'PluralContext',
     Catalogs: 'Catalogs',
     Catalog: 'Catalog',
     Clusters: 'Clusters',
@@ -26246,8 +24678,6 @@ export const namedOperations = {
     ClusterUsages: 'ClusterUsages',
     ClusterUsageNamespaces: 'ClusterUsageNamespaces',
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
-    PostgresDatabases: 'PostgresDatabases',
-    PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -26334,7 +24764,6 @@ export const namedOperations = {
     ConfigureBackups: 'ConfigureBackups',
     DelinkBackups: 'DelinkBackups',
     CreateClusterRestore: 'CreateClusterRestore',
-    CreateBuild: 'CreateBuild',
     UpsertCatalog: 'UpsertCatalog',
     DeleteCatalog: 'DeleteCatalog',
     UpdateClusterBindings: 'UpdateClusterBindings',
@@ -26374,7 +24803,6 @@ export const namedOperations = {
     UpdateRbac: 'UpdateRbac',
     SelfManage: 'SelfManage',
     KickService: 'KickService',
-    RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
@@ -26429,14 +24857,6 @@ export const namedOperations = {
     Chat: 'Chat',
     ChatThreadTiny: 'ChatThreadTiny',
     ChatThread: 'ChatThread',
-    CostAnalysis: 'CostAnalysis',
-    FileContent: 'FileContent',
-    Configuration: 'Configuration',
-    ApplicationSpec: 'ApplicationSpec',
-    ApplicationStatus: 'ApplicationStatus',
-    Application: 'Application',
-    ConfigurationOverlay: 'ConfigurationOverlay',
-    Repository: 'Repository',
     Audit: 'Audit',
     PrAutomation: 'PrAutomation',
     PrConfiguration: 'PrConfiguration',
@@ -26523,7 +24943,6 @@ export const namedOperations = {
     ClusterUsageTiny: 'ClusterUsageTiny',
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
-    DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',

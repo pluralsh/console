@@ -2,7 +2,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.Deployments.Clusters
-  alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
   describe "statefulSet" do
@@ -356,32 +355,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     end
   end
 
-  describe "logfilters" do
-    test "it can query logfilters" do
-      user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
-      insert(:role_binding, role: role, user: user)
-      expect(Kazan, :run, fn _ -> {:ok, %{items: [logfilter("name")]}} end)
-
-      {:ok, %{data: %{"logFilters" => [filter]}}} = run_query("""
-        query LogFilter($name: String!) {
-          logFilters(namespace: $name) {
-            metadata { name }
-            spec {
-              query
-              labels { name value }
-            }
-          }
-        }
-      """, %{"name" => "name"}, %{current_user: user})
-
-      assert filter["metadata"]["name"] == "name"
-      assert filter["spec"]["query"]
-      assert hd(filter["spec"]["labels"])["name"]
-      assert hd(filter["spec"]["labels"])["value"]
-    end
-  end
-
   describe "clusterInfo" do
     test "it will fetch kubernetes cluster info" do
       user = insert(:user)
@@ -425,23 +398,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     end
   end
 
-  describe "configurationOverlays" do
-    test "it can fetch the overlays for a namespace" do
-      user = insert(:user)
-      expect(Kazan, :run, fn _ -> {:ok, %{items: [configuration_overlay("name", name: "config")]}} end)
-
-      {:ok, %{data: %{"configurationOverlays" => [overlay]}}} = run_query("""
-        query Overlays($ns: String!) {
-          configurationOverlays(namespace: $ns) {
-            spec { name }
-          }
-        }
-      """, %{"ns" => "name"}, %{current_user: user})
-
-      assert overlay["spec"]["name"] == "config"
-    end
-  end
-
   describe "namespaces" do
     test "it will fetch all namespaces" do
       expect(Console, :namespaces, fn -> [namespace_scaffold("test")] end)
@@ -459,92 +415,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert namespace["metadata"]["name"] == "test"
       assert namespace["status"]["phase"] == "Created"
       assert namespace["spec"]["finalizers"] == ["finalizer"]
-    end
-  end
-
-  describe "wireguardPeers" do
-    test "an admin can list all peers" do
-      admin = insert(:user, roles: %{admin: true})
-      peers = [wireguard_peer("first", insert(:user)), wireguard_peer("second", insert(:user))]
-      expect(Kazan, :run, fn _ -> {:ok, %{items: peers}} end)
-
-      {:ok, %{data: %{"wireguardPeers" => found}}} = run_query("""
-        query {
-          wireguardPeers {
-            metadata { namespace name }
-            user { id }
-          }
-        }
-      """, %{}, %{current_user: admin})
-
-      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map(peers, & &1.metadata.name)
-      assert Enum.all?(found, & &1["user"]["id"])
-    end
-
-    test "non admins cannot list" do
-      user = insert(:user)
-
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query {
-          wireguardPeers {
-            metadata { namespace name }
-            user { id }
-          }
-        }
-      """, %{}, %{current_user: user})
-    end
-  end
-
-  describe "myWireguardPeers" do
-    test "you can list your own peers" do
-      user = insert(:user)
-      [f, s | _] = peers = [wireguard_peer("first", user), wireguard_peer("second", user), wireguard_peer("third", insert(:user))]
-      expect(Kazan, :run, fn _ -> {:ok, %{items: peers}} end)
-
-      {:ok, %{data: %{"myWireguardPeers" => found}}} = run_query("""
-        query {
-          myWireguardPeers {
-            metadata { namespace name }
-            user { id }
-          }
-        }
-      """, %{}, %{current_user: user})
-
-      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map([f, s], & &1.metadata.name)
-      assert Enum.all?(found, & &1["user"]["id"] == user.id)
-    end
-  end
-
-  describe "wireguardPeer" do
-    test "it can fetch a wireguard peer for a user" do
-      user = insert(:user)
-      peer = wireguard_peer("test", user)
-      expect(Kube.Client, :get_wireguard_peer, fn _, "test" -> {:ok, peer} end)
-      expect(Kazan, :run, fn _ -> {:ok, %CoreV1.Secret{data: %{"k" => Base.encode64("data")}}} end)
-
-      {:ok, %{data: %{"wireguardPeer" => fetch}}} = run_query("""
-        query Peer($name: String!) {
-          wireguardPeer(name: $name) {
-            config
-          }
-        }
-      """, %{"name" => "test"}, %{current_user: user})
-
-      assert fetch["config"] == "data"
-    end
-
-    test "it cannot fetch if you are not the owner" do
-      user = insert(:user)
-      peer = wireguard_peer("test", insert(:user))
-      expect(Kube.Client, :get_wireguard_peer, fn _, "test" -> {:ok, peer} end)
-
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Peer($name: String!) {
-          wireguardPeer(name: $name) {
-            config
-          }
-        }
-      """, %{"name" => "test"}, %{current_user: user})
     end
   end
 

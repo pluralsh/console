@@ -17,12 +17,7 @@ import {
 import { filesize } from 'filesize'
 import { isEmpty } from 'lodash'
 
-import {
-  Application,
-  Maybe,
-  Pod,
-  useDeletePodMutation,
-} from 'generated/graphql'
+import { Maybe, Pod, useDeletePodMutation } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
 import { Confirm } from 'components/utils/Confirm'
@@ -300,7 +295,6 @@ export type PodWithId = Pod & {
 type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   pods?: Maybe<PodWithId>[] & PodWithId[]
   refetch: Nullable<() => void>
-  applications?: Maybe<Maybe<Application>[]>
   columns: any[]
   linkToK8sDashboard?: boolean
   linkBasePath?: string
@@ -337,7 +331,6 @@ const PodsListContext = createContext<any>({})
 export const PodsList = memo(
   ({
     pods,
-    applications,
     columns,
     clusterId,
     serviceId,
@@ -360,16 +353,11 @@ export const PodsList = memo(
               memory: { requests: memoryRequests, limits: memoryLimits },
             } = getPodResources(containers)
 
-            const namespaceIcon =
-              pod?.metadata?.namespace &&
-              applications?.find((app) => app?.name === pod.metadata.namespace)
-                ?.spec?.descriptor?.icons?.[0]
-
             return {
               name: pod?.metadata?.name,
               nodeName: pod?.spec?.nodeName || undefined,
               namespace: pod?.metadata?.namespace || undefined,
-              namespaceIcon: namespaceIcon || undefined,
+              namespaceIcon: undefined,
               memory: {
                 requests: memoryRequests,
                 limits: memoryLimits,
@@ -384,7 +372,7 @@ export const PodsList = memo(
               creationTimestamp: pod?.metadata?.creationTimestamp || undefined,
             }
           }),
-      [applications, pods]
+      [pods]
     )
     const contextVal = useMemo(
       () => ({

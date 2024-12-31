@@ -90,7 +90,6 @@ query Me {
     }
     unreadNotifications
   }
-  externalToken
   clusterInfo {
     version
     platform

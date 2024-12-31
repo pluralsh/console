@@ -13,7 +13,6 @@ import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettin
 
 import { useLogin } from 'components/contexts'
 
-import { PluralProvider } from '../contexts/PluralContext'
 import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
@@ -37,21 +36,19 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <ProjectsProvider>
-              <PluralProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbsProvider>
-                    <TerminalThemeProvider>
-                      <ShareSecretProvider>
-                        <DeploymentSettingsProvider>
-                          <AIContextProvider>
-                            <ConsoleContent />
-                          </AIContextProvider>
-                        </DeploymentSettingsProvider>
-                      </ShareSecretProvider>
-                    </TerminalThemeProvider>
-                  </BreadcrumbsProvider>
-                </BillingSubscriptionProvider>
-              </PluralProvider>
+              <BillingSubscriptionProvider>
+                <BreadcrumbsProvider>
+                  <TerminalThemeProvider>
+                    <ShareSecretProvider>
+                      <DeploymentSettingsProvider>
+                        <AIContextProvider>
+                          <ConsoleContent />
+                        </AIContextProvider>
+                      </DeploymentSettingsProvider>
+                    </ShareSecretProvider>
+                  </TerminalThemeProvider>
+                </BreadcrumbsProvider>
+              </BillingSubscriptionProvider>
             </ProjectsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

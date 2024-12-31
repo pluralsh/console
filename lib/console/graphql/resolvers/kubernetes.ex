@@ -37,9 +37,6 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_response()
   end
 
-  def execute_overlay(%{namespace: ns, context: ctx}, %{context: %{current_user: user}}),
-    do: Console.Services.Runbooks.execute_overlay(ns, ctx, user)
-
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
   def resolve_service(%{namespace: ns, name: name}, _) do

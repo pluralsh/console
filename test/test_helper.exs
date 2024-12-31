@@ -1,7 +1,5 @@
 {:ok, _} = Application.ensure_all_started(:mimic)
 
-Mimic.copy(Console.Deployer)
-Mimic.copy(Console.Storage.Git)
 Mimic.copy(Console.Commands.Plural)
 Mimic.copy(Console.Commands.Command)
 Mimic.copy(Console.Plural.Repositories)

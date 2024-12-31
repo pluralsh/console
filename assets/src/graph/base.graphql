@@ -4,11 +4,3 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   startCursor
 }
-
-query PluralContext {
-  pluralContext {
-    buckets
-    configuration
-    domains
-  }
-}

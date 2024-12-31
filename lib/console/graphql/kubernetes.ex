@@ -1,8 +1,7 @@
 defmodule Console.GraphQl.Kubernetes do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Kubernetes
-  alias Console.GraphQl.Resolvers.VPN
-  alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, CheckComponent, CheckNamespace}
+  alias Console.Middleware.{Authenticated, AdminRequired, CheckComponent, CheckNamespace}
 
   object :metadata do
     field :labels,             list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
@@ -11,6 +10,13 @@ defmodule Console.GraphQl.Kubernetes do
     field :namespace,          :string
     field :creation_timestamp, :string
     field :uid,                :string
+  end
+
+  object :status_condition do
+    field :message, non_null(:string)
+    field :reason,  non_null(:string)
+    field :status,  non_null(:string)
+    field :type,    non_null(:string)
   end
 
   object :result_status do
@@ -74,7 +80,6 @@ defmodule Console.GraphQl.Kubernetes do
 
   import_types Console.GraphQl.Kubernetes.Event
   import_types Console.GraphQl.Kubernetes.License
-  import_types Console.GraphQl.Kubernetes.Application
   import_types Console.GraphQl.Kubernetes.Pod
   import_types Console.GraphQl.Kubernetes.Deployment
   import_types Console.GraphQl.Kubernetes.StatefulSet
@@ -82,21 +87,18 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Ingress
   import_types Console.GraphQl.Kubernetes.Node
   import_types Console.GraphQl.Kubernetes.CronJob
-  import_types Console.GraphQl.Kubernetes.LogFilter
+  # import_types Console.GraphQl.Kubernetes.LogFilter
   import_types Console.GraphQl.Kubernetes.Job
   import_types Console.GraphQl.Kubernetes.Certificate
-  import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
+  # import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
   import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
   import_types Console.GraphQl.Kubernetes.Namespace
-  import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
   import_types Console.GraphQl.Kubernetes.Canary
   import_types Console.GraphQl.Kubernetes.Rollout
   import_types Console.GraphQl.Kubernetes.UpgradePlan
   import_types Console.GraphQl.Kubernetes.DaemonSet
   import_types Console.GraphQl.Kubernetes.Plural
-
-  delta :application
 
   object :kubernetes_queries do
     field :unstructured_resource, :kubernetes_unstructured do
@@ -230,26 +232,6 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.list_all_pods/2
     end
 
-    field :wireguard_peers, list_of(:wireguard_peer) do
-      middleware Authenticated
-      middleware AdminRequired
-
-      safe_resolve &VPN.list_peers/2
-    end
-
-    field :my_wireguard_peers, list_of(:wireguard_peer) do
-      middleware Authenticated
-
-      safe_resolve &VPN.list_my_peers/2
-    end
-
-    field :wireguard_peer, :wireguard_peer do
-      middleware Authenticated
-      arg :name, non_null(:string)
-
-      safe_resolve &VPN.get_peer/2
-    end
-
     field :cached_pods, list_of(:pod) do
       middleware Authenticated
       middleware AdminRequired
@@ -263,14 +245,6 @@ defmodule Console.GraphQl.Kubernetes do
       cluster_authorized :read
 
       safe_resolve &Kubernetes.list_namespaces/2
-    end
-
-    field :log_filters, list_of(:log_filter) do
-      middleware Authenticated
-      arg :namespace, non_null(:string)
-      middleware Rbac, perm: :operate, arg: :namespace
-
-      safe_resolve &Kubernetes.list_log_filters/2
     end
 
     field :node_metrics, list_of(:node_metric) do
@@ -318,13 +292,6 @@ defmodule Console.GraphQl.Kubernetes do
       middleware CheckComponent
     end
 
-    field :configuration_overlays, list_of(:configuration_overlay) do
-      middleware Authenticated
-      arg :namespace, non_null(:string)
-
-      safe_resolve &Kubernetes.list_configuration_overlays/2
-    end
-
     import_fields :config_queries
     import_fields :plural_kubernetes_queries
   end
@@ -356,43 +323,10 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.delete_node/2
     end
 
-    field :overlay_configuration, :build do
-      middleware Authenticated
-      middleware Rbac, perm: :operate, arg: :namespace
-      arg :namespace, non_null(:string)
-      arg :context,   non_null(:map)
-
-      safe_resolve &Kubernetes.execute_overlay/2
-    end
-
-    field :create_peer, :wireguard_peer do
-      middleware Authenticated
-      middleware AdminRequired
-      middleware Feature, :vpn
-      arg :user_id, :id
-      arg :email,   :string
-      arg :name,    non_null(:string)
-
-      safe_resolve &VPN.create_peer/2
-    end
-
-    field :delete_peer, :boolean do
-      middleware Authenticated
-      middleware AdminRequired
-      middleware Feature, :vpn
-      arg :name,    non_null(:string)
-
-      safe_resolve &VPN.delete_peer/2
-    end
-
     import_fields :certificate_mutations
   end
 
   object :kubernetes_subscriptions do
-    field :application_delta, :application_delta do
-      config fn _, _ -> {:ok, topic: "applications"} end
-    end
-
     field :pod_delta, :pod_delta do
       config fn _, _ -> {:ok, topic: "pods"} end
     end

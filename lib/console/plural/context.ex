@@ -1,6 +1,5 @@
 defmodule Console.Plural.Context do
   import Console
-  alias Console.Deployer
 
   defstruct [:configuration, :bundles, :smtp, :buckets, :domains, :protect]
 
@@ -40,7 +39,7 @@ defmodule Console.Plural.Context do
   def protected?(_, _), do: false
 
   def get() do
-    with {:ok, content} <- Deployer.file(location()),
+    with {:ok, content} <- File.read(location()),
          {:ok, %{"spec" => spec}} <- YamlElixir.read_from_string(content) do
       {:ok, new(spec)}
     else

@@ -13,7 +13,6 @@ config :logger, level: :info
 config :goth, json: {:system, "GCP_CREDENTIALS"}
 
 config :console, :consumers, [
-  Console.PubSub.Consumers.Webhook,
   Console.PubSub.Consumers.Recurse,
   Console.PubSub.Consumers.Rtc,
   Console.PubSub.Consumers.Audit,
@@ -77,11 +76,7 @@ config :ex_aws,
   awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
 
 config :console, :watchers, [
-  # Console.Watchers.Application,
-  # Console.Watchers.Plural,
   Console.Watchers.Upgrade,
-  # Console.Watchers.Pod,
-  # Console.Watchers.Postgres,
 ]
 
 config :console, Console.PromEx,
