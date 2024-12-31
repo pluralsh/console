@@ -132,7 +132,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -296,7 +296,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
 			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-			return nil, errors.NewNotFound(schema.GroupResource{}, ns.Spec.ProjectRef.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, ns.Spec.ProjectRef.Name)
 		}
 
 		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
@@ -317,7 +317,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 		if repository.Status.ID == nil {
 			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return nil, errors.NewNotFound(schema.GroupResource{}, ns.Spec.Service.RepositoryRef.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{Resource: "GitRepository", Group: "deployments.plural.sh"}, ns.Spec.Service.RepositoryRef.Name)
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)

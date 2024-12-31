@@ -104,7 +104,7 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	if err != nil {
 		logger.Error(err, "unable to create or update observer")
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -182,7 +182,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			return target, actions, projectID, err
 		}
 		if !gitRepo.Status.HasID() {
-			err = errors.NewNotFound(schema.GroupResource{}, gitRepo.Name)
+			err = errors.NewNotFound(schema.GroupResource{Resource: "GitRepository", Group: "deployments.plural.sh"}, gitRepo.Name)
 			return target, actions, projectID, err
 		}
 		target.Git = &console.ObserverGitAttributes{
@@ -217,7 +217,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, projectID, err
 				}
 				if !prAutomation.Status.HasID() {
-					err = errors.NewNotFound(schema.GroupResource{}, prAutomation.Name)
+					err = errors.NewNotFound(schema.GroupResource{Resource: "PrAutomation", Group: "deployments.plural.sh"}, prAutomation.Name)
 					return target, actions, projectID, err
 				}
 
@@ -237,7 +237,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, projectID, err
 				}
 				if !pipeline.Status.HasID() {
-					err = errors.NewNotFound(schema.GroupResource{}, pipeline.Name)
+					err = errors.NewNotFound(schema.GroupResource{Resource: "Pipeline", Group: "deployments.plural.sh"}, pipeline.Name)
 					return target, actions, projectID, err
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{

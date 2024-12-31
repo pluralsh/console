@@ -108,7 +108,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		project, err := r.getProject(ctx, catalog)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -139,7 +139,7 @@ func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Ca
 
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
-			return project, apierrors.NewNotFound(schema.GroupResource{}, catalog.Spec.ProjectRef.Name)
+			return project, apierrors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, catalog.Spec.ProjectRef.Name)
 		}
 
 		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {

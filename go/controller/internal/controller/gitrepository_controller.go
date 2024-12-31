@@ -94,7 +94,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	attrs, err := r.getRepositoryAttributes(ctx, repo)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -179,7 +179,7 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, err
 		}
 		if connection.Status.ID == nil {
-			return nil, apierrors.NewNotFound(schema.GroupResource{}, repo.Spec.ConnectionRef.Name)
+			return nil, apierrors.NewNotFound(schema.GroupResource{Resource: "ScmConnection", Group: "deployments.plural.sh"}, repo.Spec.ConnectionRef.Name)
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {

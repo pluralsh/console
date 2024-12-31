@@ -3,14 +3,14 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
-
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
@@ -27,7 +27,6 @@ const (
 	// requeueAfter is the time between scheduled reconciles if there are no changes to the CRD.
 	requeueAfter            = 30 * time.Second
 	requeueWaitForResources = 5 * time.Second
-	notFoundOrReadyError    = "unable to find referenced object or is not ready yet"
 )
 
 var (
@@ -308,4 +307,8 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	}
 
 	return defaultMessage
+}
+
+func notFoundOrReadyErrorMessage(err error) string {
+	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
 }

@@ -126,7 +126,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 		attr, err := r.genNotificationRouterAttr(ctx, notificationRouter)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -191,7 +191,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		}
 
 		if notifSink.Status.ID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{}, sink.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{Resource: "NotificationSink", Group: "deployments.plural.sh"}, sink.Name)
 		}
 
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})
@@ -209,7 +209,7 @@ func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *co
 		return nil, err
 	}
 	if !cluster.Status.HasID() {
-		return nil, errors.NewNotFound(schema.GroupResource{}, obj.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Cluster", Group: "deployments.plural.sh"}, obj.Name)
 	}
 	return cluster.Status.ID, nil
 }
@@ -223,7 +223,7 @@ func (r *NotificationRouterReconciler) getServiceID(ctx context.Context, objRef 
 		return nil, err
 	}
 	if !resource.Status.HasID() {
-		return nil, errors.NewNotFound(schema.GroupResource{}, objRef.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "ServiceDeployment", Group: "deployments.plural.sh"}, objRef.Name)
 	}
 	return resource.Status.ID, nil
 }
@@ -237,7 +237,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 		return nil, err
 	}
 	if !resource.Status.HasID() {
-		return nil, errors.NewNotFound(schema.GroupResource{}, objRef.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Pipeline", Group: "deployments.plural.sh"}, objRef.Name)
 	}
 	return resource.Status.ID, nil
 }

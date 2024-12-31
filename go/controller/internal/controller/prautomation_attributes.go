@@ -35,7 +35,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, err
 	}
 	if connectionID == nil {
-		return nil, errors.NewNotFound(schema.GroupResource{}, pra.Spec.ScmConnectionRef.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "ScmConnection", Group: "deployments.plural.sh"}, pra.Spec.ScmConnectionRef.Name)
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})

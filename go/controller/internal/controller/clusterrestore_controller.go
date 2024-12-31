@@ -98,7 +98,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	apiRestore, err := r.sync(ctx, restore)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -140,7 +140,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 			return nil, err
 		}
 		if clusterID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{}, restore.Spec.BackupClusterRef.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{Resource: "Cluster", Group: "deployments.plural.sh"}, restore.Spec.BackupClusterRef.Name)
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
