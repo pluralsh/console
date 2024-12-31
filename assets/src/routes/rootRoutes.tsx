@@ -1,14 +1,15 @@
 import { Suspense } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import Console from 'components/layout/Console'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import Invite from 'components/login/Invite'
 import { LinkLogin } from 'components/login/LinkLogin'
 import Login, { GrantAccess } from 'components/login/Login'
-import Invite from 'components/login/Invite'
 import { OAuthCallback } from 'components/login/OauthCallback'
 
+import Sandbox from 'components/utils/Sandbox'
 import { consoleRoutes } from './consoleRoutes'
 
 function Root() {
@@ -43,6 +44,10 @@ export const rootRoutes = [
       {
         path: 'invite/:inviteId',
         element: <Invite />,
+      },
+      {
+        path: 'sandbox',
+        element: <Sandbox />,
       },
       {
         path: '*',
