@@ -103,7 +103,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return RequeueAfter(requeueWaitForResources), err
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -121,6 +121,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			logger.Info("Repository is not healthy")
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 	}
