@@ -310,5 +310,5 @@ func defaultErrMessage(err error, defaultMessage string) string {
 }
 
 func notFoundOrReadyErrorMessage(err error) string {
-	return fmt.Sprintf("unable to find referenced object or is not ready yet, got error: %s", err.Error())
+	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
 }
