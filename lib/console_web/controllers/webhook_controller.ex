@@ -1,6 +1,5 @@
 defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
-  alias Console.Services.{Builds, Users}
   alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook}
   alias Console.Deployments.{Git, Clusters, Observability}
 
@@ -44,12 +43,6 @@ defmodule ConsoleWeb.WebhookController do
         Logger.info "did not process observability webhook, result: #{inspect(err)}"
         json(conn, %{ignored: true})
     end
-  end
-
-  def webhook(conn, params) do
-    bot = Users.get_bot!("console")
-    with {:ok, _} <- Builds.create(params, bot),
-      do: json(conn, %{ok: true})
   end
 
   defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do

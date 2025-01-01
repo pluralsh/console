@@ -25,7 +25,6 @@ defmodule Console.Commands.CommandTest do
 
       assert command.stdout == "onetwothreefour\n"
       assert refetch(command).stdout == "onetwothreefour\n"
-      assert Console.Services.Builds.get_line(%{command | stdout: nil}) == "onetwothreefour\n"
     end
   end
 end

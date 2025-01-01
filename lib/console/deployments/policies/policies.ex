@@ -16,7 +16,8 @@ defmodule Console.Deployments.Policies do
     RunLog,
     Stack,
     TerraformState,
-    AiInsight
+    AiInsight,
+    ServiceImport
   }
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
@@ -111,6 +112,8 @@ defmodule Console.Deployments.Policies do
       _ -> :pass
     end
   end
+
+  def can?(%User{} = user, %ServiceImport{stack: %Stack{} = stack}, action), do: can?(user, stack, action)
 
   def can?(_, %Cluster{self: true}, :delete), do: {:error, "cannot delete the management cluster"}
   def can?(_, %Cluster{protect: true}, :delete), do: {:error, "this cluster has deletion protection enabled"}

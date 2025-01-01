@@ -16,9 +16,6 @@ defmodule ConsoleWeb.Router do
   scope "/v1", ConsoleWeb do
     pipe_through [:api]
 
-    post "/webhook", WebhookController, :webhook
-    post "/webhooks/piazza", WebhookController, :piazza
-
     get "/dashboard/cluster", WebhookController, :cluster
   end
 
@@ -72,12 +69,6 @@ defmodule ConsoleWeb.Router do
       end
     end
   end
-
-  forward "/graphiql", Absinthe.Plug.GraphiQL,
-    schema: Console.GraphQl,
-    interface: :playground,
-    default_url: {Console, :graphql_endpoint},
-    socket_url: {Console, :socket_endpoint}
 
   scope "/" do
     pipe_through [:auth]

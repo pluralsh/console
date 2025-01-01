@@ -155,6 +155,26 @@ defmodule Console.Deployments.ServicesTest do
         configuration: [%{name: "name", value: "value"}]
       }, cluster.id, insert(:user))
     end
+
+    test "you cannot import stacks you don't have access to" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+      stack = insert(:stack)
+
+      {:error, _} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        imports: [%{stack_id: stack.id}],
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+    end
   end
 
   describe "#update_service/3" do

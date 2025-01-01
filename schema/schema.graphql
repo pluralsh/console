@@ -7,14 +7,6 @@ schema {
 type RootQueryType {
   configuration: ConsoleConfiguration
 
-  externalToken: String
-
-  builds(after: String, first: Int, before: String, last: Int): BuildConnection
-
-  build(id: ID!): Build
-
-  buildInfo: BuildInfo
-
   user(email: String!): User
 
   group(name: String!): Group
@@ -107,17 +99,9 @@ type RootQueryType {
 
   pods(after: String, first: Int, before: String, last: Int, namespace: String, namespaces: [String], clusterId: ID): PodConnection
 
-  wireguardPeers: [WireguardPeer]
-
-  myWireguardPeers: [WireguardPeer]
-
-  wireguardPeer(name: String!): WireguardPeer
-
   cachedPods(namespaces: [String]): [Pod]
 
   namespaces(clusterId: ID): [Namespace]
-
-  logFilters(namespace: String!): [LogFilter]
 
   nodeMetrics(clusterId: ID): [NodeMetric]
 
@@ -129,49 +113,11 @@ type RootQueryType {
 
   upgradePlan(namespace: String!, name: String!, serviceId: ID): UpgradePlan
 
-  configurationOverlays(namespace: String!): [ConfigurationOverlay]
-
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
 
   auditMetrics: [AuditMetric]
 
-  ai(prompt: String!): String
-
   account: Account
-
-  installations(after: String, first: Int, before: String, last: Int): InstallationConnection
-
-  applications: [Application]
-
-  application(name: String!): Application
-
-  repository(name: String!): Repository
-
-  repositories(after: String, first: Int, before: String, last: Int, query: String!): RepositoryConnection
-
-  recipes(after: String, first: Int, before: String, last: Int, id: ID!): RecipeConnection
-
-  context: [RepositoryContext]
-
-  pluralContext: PluralContext
-
-  recipe(id: ID!): Recipe
-
-  stack(name: String!): Stack
-
-  smtp: Smtp
-
-  upgradePolicies: [UpgradePolicy]
-
-  runbook(namespace: String!, name: String!): Runbook
-
-  runbooks(namespace: String!, pinned: Boolean): [Runbook]
-
-  webhooks(after: String, first: Int, before: String, last: Int): WebhookConnection
-
-  postgresDatabases: [Postgresql]
-
-  postgresDatabase(namespace: String!, name: String!): Postgresql
 
   gitRepository(id: ID, url: String): GitRepository
 
@@ -478,14 +424,6 @@ type RootQueryType {
 }
 
 type RootMutationType {
-  createBuild(attributes: BuildAttributes!): Build
-
-  restartBuild(id: ID!): Build
-
-  cancelBuild(id: ID!): Build
-
-  approveBuild(id: ID!): Build
-
   signIn(email: String!, password: String!): User
 
   logout: User
@@ -549,32 +487,6 @@ type RootMutationType {
   deleteJob(namespace: String!, name: String!, serviceId: ID): Job
 
   deleteNode(name: String!): Node
-
-  overlayConfiguration(namespace: String!, context: Map!): Build
-
-  createPeer(userId: ID, email: String, name: String!): WireguardPeer
-
-  deletePeer(name: String!): Boolean
-
-  installRecipe(id: ID!, context: Map!, oidc: Boolean): Build
-
-  installStack(name: String!, context: ContextAttributes!, oidc: Boolean): Build
-
-  updateSmtp(smtp: SmtpInput!): Smtp
-
-  updateConfiguration(repository: String!, content: String!, tool: Tool, message: String): Configuration
-
-  createUpgradePolicy(attributes: UpgradePolicyAttributes!): UpgradePolicy
-
-  deleteUpgradePolicy(id: ID!): UpgradePolicy
-
-  executeRunbook(namespace: String!, name: String!, input: RunbookActionInput!): RunbookActionResponse
-
-  createWebhook(attributes: WebhookAttributes!): Webhook
-
-  deleteWebhook(id: ID!): Webhook
-
-  restorePostgres(namespace: String!, name: String!, timestamp: DateTime!, clone: CloneAttributes): Postgresql
 
   createGitRepository(attributes: GitAttributes!): GitRepository
 
@@ -964,13 +876,7 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
-  applicationDelta: ApplicationDelta
-
   podDelta: PodDelta
-
-  buildDelta(buildId: ID): BuildDelta
-
-  commandDelta(buildId: ID!): CommandDelta
 
   notificationDelta: NotificationDelta
 
@@ -6714,312 +6620,6 @@ type AiPinConnection {
   edges: [AiPinEdge]
 }
 
-input CloneAttributes {
-  s3AccessKeyId: String
-  s3SecretAccessKey: String
-  s3WalPath: String
-  s3Endpoint: String
-  uid: String
-}
-
-type Postgresql {
-  metadata: Metadata!
-  spec: PostgresqlSpec!
-  status: PostgresqlStatus
-  instances: [PostgresInstance]
-}
-
-type PostgresqlSpec {
-  teamId: String
-  users: Map
-  resources: Resources
-  postgresql: PostgresSettings
-  numberOfInstances: Int
-  databases: Map
-  volume: DatabaseVolume
-  pods: [Pod]
-}
-
-type DatabaseVolume {
-  size: String
-}
-
-type PostgresSettings {
-  version: String
-}
-
-type PostgresInstance {
-  uid: String!
-}
-
-type PostgresqlStatus {
-  clusterStatus: String
-}
-
-enum WebhookType {
-  PIAZZA
-  SLACK
-}
-
-enum WebhookHealth {
-  HEALTHY
-  UNHEALTHY
-}
-
-input WebhookAttributes {
-  url: String!
-}
-
-type Webhook {
-  id: ID!
-  url: String!
-  health: WebhookHealth!
-  type: WebhookType!
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type WebhookConnection {
-  pageInfo: PageInfo!
-  edges: [WebhookEdge]
-}
-
-input RunbookActionInput {
-  action: String!
-  context: Map!
-}
-
-input RunbookContext {
-  timeseriesStart: Int
-  timeseriesStep: String
-}
-
-type Runbook {
-  name: String!
-  spec: RunbookSpec!
-  status: RunbookStatus
-  data(context: RunbookContext): [RunbookData]
-  executions(after: String, first: Int, before: String, last: Int): RunbookExecutionConnection
-}
-
-type RunbookExecution {
-  id: ID!
-  name: String!
-  namespace: String!
-  context: Map!
-  user: User
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type RunbookStatus {
-  alerts: [RunbookAlertStatus]
-}
-
-type RunbookAlertStatus {
-  name: String!
-  startsAt: String
-  fingerprint: String
-  annotations: Map
-  labels: Map
-}
-
-type RunbookSpec {
-  name: String!
-  description: String
-  display: Map
-  datasources: [RunbookDatasource]
-  actions: [RunbookAction]
-}
-
-type RunbookAction {
-  name: String!
-  type: String!
-  configuration: ConfigurationAction
-}
-
-type RunbookDatasource {
-  name: String!
-  type: String!
-  prometheus: PrometheusDatasource
-  kubernetes: KubernetesDatasource
-}
-
-type PrometheusDatasource {
-  query: String!
-  format: String
-  legend: String
-}
-
-type KubernetesDatasource {
-  resource: String!
-  name: String!
-}
-
-type RunbookData {
-  name: String!
-  source: RunbookDatasource
-  kubernetes: KubernetesData
-  prometheus: [MetricResponse]
-  nodes: [Node]
-}
-
-"supported kubernetes objects fetchable in runbooks"
-union KubernetesData = Deployment | StatefulSet
-
-type ConfigurationAction {
-  updates: [PathUpdate]
-}
-
-type PathUpdate {
-  path: [String]
-  valueFrom: String!
-}
-
-type RunbookActionResponse {
-  redirectTo: String
-}
-
-type RunbookExecutionConnection {
-  pageInfo: PageInfo!
-  edges: [RunbookExecutionEdge]
-}
-
-enum UpgradePolicyType {
-  DEPLOY
-  APPROVAL
-  IGNORE
-}
-
-input UpgradePolicyAttributes {
-  name: String!
-  description: String
-  target: String!
-  type: UpgradePolicyType!
-  repositories: [String]
-  weight: Int
-}
-
-type UpgradePolicy {
-  id: ID!
-  name: String!
-  description: String
-  repositories: [String]
-  type: UpgradePolicyType!
-  target: String!
-  weight: Int
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-input SmtpInput {
-  server: String
-  port: Int
-  password: String
-  sender: String
-  user: String
-}
-
-input ContextAttributes {
-  buckets: [String]
-  domain: [String]
-  configuration: Map!
-  protect: [String]
-}
-
-type Smtp {
-  server: String
-  port: Int
-  password: String
-  sender: String
-  user: String
-}
-
-type Installation {
-  id: ID!
-  repository: Repository
-}
-
-type Repository {
-  id: ID!
-  name: String!
-  description: String
-  icon: String
-  docs: [FileContent]
-  configuration: Configuration
-  grafanaDns: String
-}
-
-type FileContent {
-  path: String
-  content: String
-}
-
-type Recipe {
-  id: ID!
-  name: String!
-  description: String
-  provider: String
-  restricted: Boolean
-  recipeSections: [RecipeSection]
-  oidcEnabled: Boolean
-}
-
-type RecipeSection {
-  id: ID!
-  repository: Repository
-  recipeItems: [RecipeItem]
-  configuration: [ConfigurationItem]
-}
-
-type RecipeItem {
-  id: ID!
-  configuration: [ConfigurationItem]
-}
-
-type ConfigurationItem {
-  name: String
-  type: String
-  placeholder: String
-  documentation: String
-  default: String
-  optional: Boolean
-  condition: ConfigurationCondition
-  validation: ConfigurationValidation
-}
-
-type ConfigurationValidation {
-  type: String
-  regex: String
-  message: String
-}
-
-type ConfigurationCondition {
-  field: String
-  value: String
-  operation: String
-}
-
-type Stack {
-  id: ID!
-  name: String!
-  bundles: [Recipe]
-  sections: [RecipeSection]
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type RepositoryContext {
-  repository: String!
-  context: Map
-}
-
-type PluralContext {
-  buckets: [String]
-  domains: [String]
-  configuration: Map!
-}
-
 type Account {
   delinquentAt: DateTime
   grandfatheredUntil: DateTime
@@ -7036,21 +6636,6 @@ type Plan {
   id: ID
   name: String
   period: String
-}
-
-type InstallationConnection {
-  pageInfo: PageInfo!
-  edges: [InstallationEdge]
-}
-
-type RepositoryConnection {
-  pageInfo: PageInfo!
-  edges: [RepositoryEdge]
-}
-
-type RecipeConnection {
-  pageInfo: PageInfo!
-  edges: [RecipeEdge]
 }
 
 enum AuditType {
@@ -7180,9 +6765,11 @@ type Metadata {
   uid: String
 }
 
-type SecretKeySelector {
-  name: String!
-  key: String
+type StatusCondition {
+  message: String!
+  reason: String!
+  status: String!
+  type: String!
 }
 
 type ClusterInfo {
@@ -7209,11 +6796,6 @@ type KubernetesUnstructured {
   raw: Map
   metadata: Metadata!
   events: [Event]
-}
-
-type ApplicationDelta {
-  delta: Delta
-  payload: Application
 }
 
 type PluralCluster {
@@ -7409,26 +6991,6 @@ type Secret {
   data: Map!
 }
 
-type WireguardPeer {
-  metadata: Metadata!
-  status: WireguardPeerStatus
-  spec: WireguardPeerSpec!
-  config: String
-  user: User
-  raw: String!
-}
-
-type WireguardPeerStatus {
-  ready: Boolean
-  conditions: [StatusCondition]
-}
-
-type WireguardPeerSpec {
-  wireguardRef: String
-  address: String
-  publicKey: String
-}
-
 type Namespace {
   status: NamespaceStatus!
   spec: NamespaceSpec!
@@ -7483,25 +7045,6 @@ type ContainerRecommendation {
   uncappedTarget: ResourceRequest
 }
 
-type ConfigurationOverlay {
-  metadata: Metadata!
-  spec: ConfigurationOverlaySpec!
-}
-
-type OverlayUpdate {
-  path: [String]
-}
-
-type ConfigurationOverlaySpec {
-  name: String
-  folder: String
-  subfolder: String
-  documentation: String
-  updates: [OverlayUpdate]
-  inputType: String
-  inputValues: [String]
-}
-
 type Certificate {
   metadata: Metadata!
   status: CertificateStatus!
@@ -7551,18 +7094,6 @@ type JobSpec {
   backoffLimit: Int
   parallelism: Int
   activeDeadlineSeconds: Int
-}
-
-type LogFilter {
-  metadata: Metadata!
-  spec: LogFilterSpec!
-}
-
-type LogFilterSpec {
-  name: String
-  description: String
-  query: String
-  labels: [LogLabel]
 }
 
 type CronJob {
@@ -7873,103 +7404,6 @@ type PodConnection {
 type PodDelta {
   delta: Delta
   payload: Pod
-}
-
-type Application {
-  name: String!
-  spec: ApplicationSpec!
-  status: ApplicationStatus!
-  cost: CostAnalysis
-  license: License
-  configuration: Configuration
-  info: String
-}
-
-type CostAnalysis {
-  minutes: Float
-  cpuCost: Float
-  cpuEfficiency: Float
-  efficiency: Float
-  gpuCost: Float
-  networkCost: Float
-  pvCost: Float
-  ramCost: Float
-  ramEfficiency: Float
-  totalCost: Float
-  sharedCost: Float
-}
-
-type ApplicationSpec {
-  descriptor: ApplicationDescriptor!
-  components: [Component]
-  info: [ApplicationInfoItem]
-}
-
-type ApplicationLink {
-  url: String
-  description: String
-}
-
-type ApplicationInfoItem {
-  type: String
-  name: String
-  value: String
-}
-
-type ApplicationDescriptor {
-  type: String!
-  version: String!
-  description: String
-  icons: [String]
-  links: [ApplicationLink]
-}
-
-type Component {
-  group: String!
-  kind: String!
-}
-
-type ApplicationStatus {
-  components: [StatusComponent]
-  conditions: [StatusCondition]
-  componentsReady: String!
-}
-
-type StatusComponent {
-  group: String
-  kind: String!
-  name: String!
-  status: String!
-}
-
-type StatusCondition {
-  message: String!
-  reason: String!
-  status: String!
-  type: String!
-}
-
-type License {
-  metadata: Metadata!
-  spec: LicenseSpec!
-  status: LicenseStatus
-}
-
-type LicenseSpec {
-  secretRef: SecretKeySelector!
-}
-
-type LicenseStatus {
-  plan: String
-  free: Boolean
-  features: [LicenseFeature]
-  limits: Map
-  secrets: Map
-}
-
-type LicenseFeature {
-  name: String!
-  description: String
 }
 
 type Event {
@@ -8360,17 +7794,6 @@ type NotificationDelta {
   payload: Notification
 }
 
-type Configuration {
-  terraform: String
-  helm: String
-  readme: String
-}
-
-type LogLabel {
-  name: String
-  value: String
-}
-
 type PluralManifest {
   network: ManifestNetwork
   bucketPrefix: String
@@ -8424,100 +7847,6 @@ type ConsoleConfiguration {
   gitStatus: GitStatus
 }
 
-enum Status {
-  QUEUED
-  RUNNING
-  SUCCESSFUL
-  FAILED
-  CANCELLED
-  PENDING
-}
-
-enum BuildType {
-  DEPLOY
-  BOUNCE
-  APPROVAL
-  INSTALL
-  DESTROY
-  DEDICATED
-  CONFIG
-}
-
-enum Tool {
-  HELM
-  TERRAFORM
-}
-
-input BuildAttributes {
-  repository: String!
-  type: BuildType
-  message: String
-}
-
-type Build {
-  id: ID!
-  repository: String!
-  type: BuildType!
-  status: Status!
-  message: String
-  completedAt: DateTime
-  sha: String
-  commands(after: String, first: Int, before: String, last: Int): CommandConnection
-  creator: User
-  approver: User
-  changelogs: [Changelog]
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type Changelog {
-  id: ID!
-  repo: String!
-  tool: String!
-  content: String
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type Command {
-  id: ID!
-  command: String!
-  exitCode: Int
-  stdout: String
-  completedAt: DateTime
-  build: Build
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type BuildInfo {
-  all: Int
-  failed: Int
-  queued: Int
-  running: Int
-  successful: Int
-}
-
-type BuildDelta {
-  delta: Delta
-  payload: Build
-}
-
-type CommandDelta {
-  delta: Delta
-  payload: Command
-}
-
-type BuildConnection {
-  pageInfo: PageInfo!
-  edges: [BuildEdge]
-}
-
-type CommandConnection {
-  pageInfo: PageInfo!
-  edges: [CommandEdge]
-}
-
 enum Delta {
   CREATE
   UPDATE
@@ -8560,16 +7889,6 @@ type PageInfo {
 
   "When paginating forwards, the cursor to continue."
   endCursor: String
-}
-
-type CommandEdge {
-  node: Command
-  cursor: String
-}
-
-type BuildEdge {
-  node: Build
-  cursor: String
 }
 
 type RefreshTokenEdge {
@@ -8624,31 +7943,6 @@ type PodEdge {
 
 type AuditEdge {
   node: Audit
-  cursor: String
-}
-
-type RecipeEdge {
-  node: Recipe
-  cursor: String
-}
-
-type RepositoryEdge {
-  node: Repository
-  cursor: String
-}
-
-type InstallationEdge {
-  node: Installation
-  cursor: String
-}
-
-type RunbookExecutionEdge {
-  node: RunbookExecution
-  cursor: String
-}
-
-type WebhookEdge {
-  node: Webhook
   cursor: String
 }
 

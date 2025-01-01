@@ -28,7 +28,6 @@ export type Login = {
   me: MeQuery['me']
   configuration: MeQuery['configuration']
   personaConfiguration: Omit<PersonaConfigurationFragment, '__typeName'>
-  token: MeQuery['externalToken']
   logout: () => void
 }
 
@@ -38,7 +37,6 @@ const DEFAULT_LOGIN = {
   me: undefined,
   configuration: undefined,
   personaConfiguration: undefined,
-  token: undefined,
   logout: completeLogout,
 } as const satisfies Partial<Login>
 const LoginContext = createContext<Partial<Login>>(DEFAULT_LOGIN)
@@ -110,7 +108,6 @@ export function LoginContextProvider({
         : {
             me: valueProp.me,
             configuration: valueProp.configuration,
-            token: valueProp.externalToken,
             personaConfiguration: personaConfig,
             logout,
           },

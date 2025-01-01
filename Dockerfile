@@ -69,7 +69,7 @@ ARG TARGETARCH=amd64
 # ENV TERRAFORM_VERSION=v1.9.8
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.10.3
+ENV CLI_VERSION=v0.11.1
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 # ENV KUBECTL_VERSION=v1.31.3

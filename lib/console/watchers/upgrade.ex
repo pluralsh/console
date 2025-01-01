@@ -94,8 +94,7 @@ defmodule Console.Watchers.Upgrade do
 
   def handle_info(:svcs, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:svcs, %{upgrades: upgrades} = state) do
-    with {:leader, true} <- {:leader, Console.Deployer.leader?()},
-         {:ok, summary} <- Info.fetch() do
+    with {:ok, summary} <- Info.fetch() do
       svcs = Services.count()
       Socket.do_push(upgrades, "usage", Map.put(summary, :services, svcs))
       {:noreply, state}
@@ -109,8 +108,7 @@ defmodule Console.Watchers.Upgrade do
   def handle_info(:usage, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:usage, %{upgrades: upgrades} = state) do
     Logger.info "Collecting resource usage"
-    with true <- Console.Deployer.leader?(),
-         {:ok, summary} <- Info.fetch() do
+    with {:ok, summary} <- Info.fetch() do
       Socket.do_push(upgrades, "usage", summary)
       {:noreply, state}
     else

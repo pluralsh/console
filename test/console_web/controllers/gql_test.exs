@@ -3,7 +3,7 @@ defmodule ConsoleWeb.GqlTest do
 
   @document """
     query {
-      builds(first: 5) {
+      serviceDeployments(first: 5) {
         edges {
           node {
             id
@@ -15,32 +15,32 @@ defmodule ConsoleWeb.GqlTest do
 
   describe "POST /gql" do
     test "It can process graphql documents", %{conn: conn} do
-      user = insert(:user)
-      builds = insert_list(3, :build)
+      user = admin_user()
+      services = insert_list(3, :service)
 
-      %{"data" => %{"builds" => found}} =
+      %{"data" => %{"serviceDeployments" => found}} =
         conn
         |> add_auth_headers(user)
         |> post("/gql", %{query: @document, variables: %{}})
         |> json_response(200)
 
       assert from_connection(found)
-             |> ids_equal(builds)
+             |> ids_equal(services)
     end
 
     test "it can handle access tokens", %{conn: conn} do
-      user = insert(:user)
+      user = admin_user()
       token = insert(:access_token, user: user)
-      builds = insert_list(3, :build)
+      services = insert_list(3, :service)
 
-      %{"data" => %{"builds" => found}} =
+      %{"data" => %{"serviceDeployments" => found}} =
         conn
         |> add_auth_headers(token)
         |> post("/gql", %{query: @document, variables: %{}})
         |> json_response(200)
 
       assert from_connection(found)
-             |> ids_equal(builds)
+             |> ids_equal(services)
     end
   end
 

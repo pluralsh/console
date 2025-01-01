@@ -8,11 +8,6 @@ import (
 	"strconv"
 )
 
-// supported kubernetes objects fetchable in runbooks
-type KubernetesData interface {
-	IsKubernetesData()
-}
-
 type AccessToken struct {
 	ID         *string                     `json:"id,omitempty"`
 	Token      *string                     `json:"token,omitempty"`
@@ -293,52 +288,6 @@ type AppNotificationEdge struct {
 	Cursor *string          `json:"cursor,omitempty"`
 }
 
-type Application struct {
-	Name          string            `json:"name"`
-	Spec          ApplicationSpec   `json:"spec"`
-	Status        ApplicationStatus `json:"status"`
-	Cost          *CostAnalysis     `json:"cost,omitempty"`
-	License       *License          `json:"license,omitempty"`
-	Configuration *Configuration    `json:"configuration,omitempty"`
-	Info          *string           `json:"info,omitempty"`
-}
-
-type ApplicationDelta struct {
-	Delta   *Delta       `json:"delta,omitempty"`
-	Payload *Application `json:"payload,omitempty"`
-}
-
-type ApplicationDescriptor struct {
-	Type        string             `json:"type"`
-	Version     string             `json:"version"`
-	Description *string            `json:"description,omitempty"`
-	Icons       []*string          `json:"icons,omitempty"`
-	Links       []*ApplicationLink `json:"links,omitempty"`
-}
-
-type ApplicationInfoItem struct {
-	Type  *string `json:"type,omitempty"`
-	Name  *string `json:"name,omitempty"`
-	Value *string `json:"value,omitempty"`
-}
-
-type ApplicationLink struct {
-	URL         *string `json:"url,omitempty"`
-	Description *string `json:"description,omitempty"`
-}
-
-type ApplicationSpec struct {
-	Descriptor ApplicationDescriptor  `json:"descriptor"`
-	Components []*Component           `json:"components,omitempty"`
-	Info       []*ApplicationInfoItem `json:"info,omitempty"`
-}
-
-type ApplicationStatus struct {
-	Components      []*StatusComponent `json:"components,omitempty"`
-	Conditions      []*StatusCondition `json:"conditions,omitempty"`
-	ComponentsReady string             `json:"componentsReady"`
-}
-
 type ArgoAnalysis struct {
 	Templates []*ArgoAnalysisTemplate `json:"templates,omitempty"`
 }
@@ -563,51 +512,6 @@ type BindingAttributes struct {
 	GroupID *string `json:"groupId,omitempty"`
 }
 
-type Build struct {
-	ID          string             `json:"id"`
-	Repository  string             `json:"repository"`
-	Type        BuildType          `json:"type"`
-	Status      Status             `json:"status"`
-	Message     *string            `json:"message,omitempty"`
-	CompletedAt *string            `json:"completedAt,omitempty"`
-	Sha         *string            `json:"sha,omitempty"`
-	Commands    *CommandConnection `json:"commands,omitempty"`
-	Creator     *User              `json:"creator,omitempty"`
-	Approver    *User              `json:"approver,omitempty"`
-	Changelogs  []*Changelog       `json:"changelogs,omitempty"`
-	InsertedAt  *string            `json:"insertedAt,omitempty"`
-	UpdatedAt   *string            `json:"updatedAt,omitempty"`
-}
-
-type BuildAttributes struct {
-	Repository string     `json:"repository"`
-	Type       *BuildType `json:"type,omitempty"`
-	Message    *string    `json:"message,omitempty"`
-}
-
-type BuildConnection struct {
-	PageInfo PageInfo     `json:"pageInfo"`
-	Edges    []*BuildEdge `json:"edges,omitempty"`
-}
-
-type BuildDelta struct {
-	Delta   *Delta `json:"delta,omitempty"`
-	Payload *Build `json:"payload,omitempty"`
-}
-
-type BuildEdge struct {
-	Node   *Build  `json:"node,omitempty"`
-	Cursor *string `json:"cursor,omitempty"`
-}
-
-type BuildInfo struct {
-	All        *int64 `json:"all,omitempty"`
-	Failed     *int64 `json:"failed,omitempty"`
-	Queued     *int64 `json:"queued,omitempty"`
-	Running    *int64 `json:"running,omitempty"`
-	Successful *int64 `json:"successful,omitempty"`
-}
-
 type Canary struct {
 	Metadata          Metadata     `json:"metadata"`
 	Status            CanaryStatus `json:"status"`
@@ -738,15 +642,6 @@ type CertificateStatus struct {
 	RenewalTime *string            `json:"renewalTime,omitempty"`
 }
 
-type Changelog struct {
-	ID         string  `json:"id"`
-	Repo       string  `json:"repo"`
-	Tool       string  `json:"tool"`
-	Content    *string `json:"content,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
-}
-
 type Chat struct {
 	ID         string              `json:"id"`
 	Type       ChatType            `json:"type"`
@@ -817,14 +712,6 @@ type ChatThreadEdge struct {
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
 	File *ChatFile `json:"file,omitempty"`
-}
-
-type CloneAttributes struct {
-	S3AccessKeyID     *string `json:"s3AccessKeyId,omitempty"`
-	S3SecretAccessKey *string `json:"s3SecretAccessKey,omitempty"`
-	S3WalPath         *string `json:"s3WalPath,omitempty"`
-	S3Endpoint        *string `json:"s3Endpoint,omitempty"`
-	UID               *string `json:"uid,omitempty"`
 }
 
 type CloudProviderSettingsAttributes struct {
@@ -1404,41 +1291,10 @@ type ClusterUsageHistoryEdge struct {
 	Cursor *string              `json:"cursor,omitempty"`
 }
 
-type Command struct {
-	ID          string  `json:"id"`
-	Command     string  `json:"command"`
-	ExitCode    *int64  `json:"exitCode,omitempty"`
-	Stdout      *string `json:"stdout,omitempty"`
-	CompletedAt *string `json:"completedAt,omitempty"`
-	Build       *Build  `json:"build,omitempty"`
-	InsertedAt  *string `json:"insertedAt,omitempty"`
-	UpdatedAt   *string `json:"updatedAt,omitempty"`
-}
-
 type CommandAttributes struct {
 	Cmd  string    `json:"cmd"`
 	Args []*string `json:"args,omitempty"`
 	Dir  *string   `json:"dir,omitempty"`
-}
-
-type CommandConnection struct {
-	PageInfo PageInfo       `json:"pageInfo"`
-	Edges    []*CommandEdge `json:"edges,omitempty"`
-}
-
-type CommandDelta struct {
-	Delta   *Delta   `json:"delta,omitempty"`
-	Payload *Command `json:"payload,omitempty"`
-}
-
-type CommandEdge struct {
-	Node   *Command `json:"node,omitempty"`
-	Cursor *string  `json:"cursor,omitempty"`
-}
-
-type Component struct {
-	Group string `json:"group"`
-	Kind  string `json:"kind"`
 }
 
 type ComponentAttributes struct {
@@ -1501,54 +1357,6 @@ type ConfigMap struct {
 	Metadata Metadata               `json:"metadata"`
 	Data     map[string]interface{} `json:"data"`
 	Raw      string                 `json:"raw"`
-}
-
-type Configuration struct {
-	Terraform *string `json:"terraform,omitempty"`
-	Helm      *string `json:"helm,omitempty"`
-	Readme    *string `json:"readme,omitempty"`
-}
-
-type ConfigurationAction struct {
-	Updates []*PathUpdate `json:"updates,omitempty"`
-}
-
-type ConfigurationCondition struct {
-	Field     *string `json:"field,omitempty"`
-	Value     *string `json:"value,omitempty"`
-	Operation *string `json:"operation,omitempty"`
-}
-
-type ConfigurationItem struct {
-	Name          *string                  `json:"name,omitempty"`
-	Type          *string                  `json:"type,omitempty"`
-	Placeholder   *string                  `json:"placeholder,omitempty"`
-	Documentation *string                  `json:"documentation,omitempty"`
-	Default       *string                  `json:"default,omitempty"`
-	Optional      *bool                    `json:"optional,omitempty"`
-	Condition     *ConfigurationCondition  `json:"condition,omitempty"`
-	Validation    *ConfigurationValidation `json:"validation,omitempty"`
-}
-
-type ConfigurationOverlay struct {
-	Metadata Metadata                 `json:"metadata"`
-	Spec     ConfigurationOverlaySpec `json:"spec"`
-}
-
-type ConfigurationOverlaySpec struct {
-	Name          *string          `json:"name,omitempty"`
-	Folder        *string          `json:"folder,omitempty"`
-	Subfolder     *string          `json:"subfolder,omitempty"`
-	Documentation *string          `json:"documentation,omitempty"`
-	Updates       []*OverlayUpdate `json:"updates,omitempty"`
-	InputType     *string          `json:"inputType,omitempty"`
-	InputValues   []*string        `json:"inputValues,omitempty"`
-}
-
-type ConfigurationValidation struct {
-	Type    *string `json:"type,omitempty"`
-	Regex   *string `json:"regex,omitempty"`
-	Message *string `json:"message,omitempty"`
 }
 
 // Validations to apply to this configuration entry prior to PR creation
@@ -1660,30 +1468,9 @@ type ContainerStatus struct {
 	State        *ContainerState `json:"state,omitempty"`
 }
 
-type ContextAttributes struct {
-	Buckets       []*string              `json:"buckets,omitempty"`
-	Domain        []*string              `json:"domain,omitempty"`
-	Configuration map[string]interface{} `json:"configuration"`
-	Protect       []*string              `json:"protect,omitempty"`
-}
-
 // a binding from a service to a service context
 type ContextBindingAttributes struct {
 	ContextID string `json:"contextId"`
-}
-
-type CostAnalysis struct {
-	Minutes       *float64 `json:"minutes,omitempty"`
-	CPUCost       *float64 `json:"cpuCost,omitempty"`
-	CPUEfficiency *float64 `json:"cpuEfficiency,omitempty"`
-	Efficiency    *float64 `json:"efficiency,omitempty"`
-	GpuCost       *float64 `json:"gpuCost,omitempty"`
-	NetworkCost   *float64 `json:"networkCost,omitempty"`
-	PvCost        *float64 `json:"pvCost,omitempty"`
-	RAMCost       *float64 `json:"ramCost,omitempty"`
-	RAMEfficiency *float64 `json:"ramEfficiency,omitempty"`
-	TotalCost     *float64 `json:"totalCost,omitempty"`
-	SharedCost    *float64 `json:"sharedCost,omitempty"`
 }
 
 type CostAttributes struct {
@@ -1905,10 +1692,6 @@ type DashboardSpec struct {
 	Graphs      []*DashboardGraph `json:"graphs,omitempty"`
 }
 
-type DatabaseVolume struct {
-	Size *string `json:"size,omitempty"`
-}
-
 type DatadogCredentialsAttributes struct {
 	APIKey string `json:"apiKey"`
 	AppKey string `json:"appKey"`
@@ -1941,8 +1724,6 @@ type Deployment struct {
 	Raw      string           `json:"raw"`
 	Events   []*Event         `json:"events,omitempty"`
 }
-
-func (Deployment) IsKubernetesData() {}
 
 // global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator
 type DeploymentSettings struct {
@@ -2063,11 +1844,6 @@ type Event struct {
 	Message       *string `json:"message,omitempty"`
 	Reason        *string `json:"reason,omitempty"`
 	Type          *string `json:"type,omitempty"`
-}
-
-type FileContent struct {
-	Path    *string `json:"path,omitempty"`
-	Content *string `json:"content,omitempty"`
 }
 
 // a Flux crd representation of a Helm repository
@@ -2634,21 +2410,6 @@ type InsightClientInfoAttributes struct {
 	LastRequestAt *string `json:"lastRequestAt,omitempty"`
 }
 
-type Installation struct {
-	ID         string      `json:"id"`
-	Repository *Repository `json:"repository,omitempty"`
-}
-
-type InstallationConnection struct {
-	PageInfo PageInfo            `json:"pageInfo"`
-	Edges    []*InstallationEdge `json:"edges,omitempty"`
-}
-
-type InstallationEdge struct {
-	Node   *Installation `json:"node,omitempty"`
-	Cursor *string       `json:"cursor,omitempty"`
-}
-
 type Invite struct {
 	SecureID string  `json:"secureId"`
 	Email    *string `json:"email,omitempty"`
@@ -2715,11 +2476,6 @@ type KubeconfigAttributes struct {
 	Raw *string `json:"raw,omitempty"`
 }
 
-type KubernetesDatasource struct {
-	Resource string `json:"resource"`
-	Name     string `json:"name"`
-}
-
 type KubernetesUnstructured struct {
 	Group    *string                `json:"group,omitempty"`
 	Version  string                 `json:"version"`
@@ -2749,29 +2505,6 @@ type LabelPair struct {
 	Value *string `json:"value,omitempty"`
 }
 
-type License struct {
-	Metadata Metadata       `json:"metadata"`
-	Spec     LicenseSpec    `json:"spec"`
-	Status   *LicenseStatus `json:"status,omitempty"`
-}
-
-type LicenseFeature struct {
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
-}
-
-type LicenseSpec struct {
-	SecretRef SecretKeySelector `json:"secretRef"`
-}
-
-type LicenseStatus struct {
-	Plan     *string                `json:"plan,omitempty"`
-	Free     *bool                  `json:"free,omitempty"`
-	Features []*LicenseFeature      `json:"features,omitempty"`
-	Limits   map[string]interface{} `json:"limits,omitempty"`
-	Secrets  map[string]interface{} `json:"secrets,omitempty"`
-}
-
 type LoadBalancerIngressStatus struct {
 	Hostname *string `json:"hostname,omitempty"`
 	IP       *string `json:"ip,omitempty"`
@@ -2784,23 +2517,6 @@ type LoadBalancerStatus struct {
 type LogFacet struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
-}
-
-type LogFilter struct {
-	Metadata Metadata      `json:"metadata"`
-	Spec     LogFilterSpec `json:"spec"`
-}
-
-type LogFilterSpec struct {
-	Name        *string     `json:"name,omitempty"`
-	Description *string     `json:"description,omitempty"`
-	Query       *string     `json:"query,omitempty"`
-	Labels      []*LogLabel `json:"labels,omitempty"`
-}
-
-type LogLabel struct {
-	Name  *string `json:"name,omitempty"`
-	Value *string `json:"value,omitempty"`
 }
 
 type LogLine struct {
@@ -3508,10 +3224,6 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 }
 
-type OverlayUpdate struct {
-	Path []*string `json:"path,omitempty"`
-}
-
 type PageInfo struct {
 	// When paginating backwards, are there more items?
 	HasPreviousPage bool `json:"hasPreviousPage"`
@@ -3521,11 +3233,6 @@ type PageInfo struct {
 	StartCursor *string `json:"startCursor,omitempty"`
 	// When paginating forwards, the cursor to continue.
 	EndCursor *string `json:"endCursor,omitempty"`
-}
-
-type PathUpdate struct {
-	Path      []*string `json:"path,omitempty"`
-	ValueFrom string    `json:"valueFrom"`
 }
 
 type PauseCondition struct {
@@ -3890,12 +3597,6 @@ type PluralCluster struct {
 	Events    []*Event           `json:"events,omitempty"`
 }
 
-type PluralContext struct {
-	Buckets       []*string              `json:"buckets,omitempty"`
-	Domains       []*string              `json:"domains,omitempty"`
-	Configuration map[string]interface{} `json:"configuration"`
-}
-
 // temporary credentials for the user attached to this stack
 type PluralCreds struct {
 	// authentication token to use for gql requests
@@ -4063,36 +3764,6 @@ type Port struct {
 	HostPort      *int64  `json:"hostPort,omitempty"`
 	ContainerPort *int64  `json:"containerPort,omitempty"`
 	Protocol      *string `json:"protocol,omitempty"`
-}
-
-type PostgresInstance struct {
-	UID string `json:"uid"`
-}
-
-type PostgresSettings struct {
-	Version *string `json:"version,omitempty"`
-}
-
-type Postgresql struct {
-	Metadata  Metadata            `json:"metadata"`
-	Spec      PostgresqlSpec      `json:"spec"`
-	Status    *PostgresqlStatus   `json:"status,omitempty"`
-	Instances []*PostgresInstance `json:"instances,omitempty"`
-}
-
-type PostgresqlSpec struct {
-	TeamID            *string                `json:"teamId,omitempty"`
-	Users             map[string]interface{} `json:"users,omitempty"`
-	Resources         *Resources             `json:"resources,omitempty"`
-	Postgresql        *PostgresSettings      `json:"postgresql,omitempty"`
-	NumberOfInstances *int64                 `json:"numberOfInstances,omitempty"`
-	Databases         map[string]interface{} `json:"databases,omitempty"`
-	Volume            *DatabaseVolume        `json:"volume,omitempty"`
-	Pods              []*Pod                 `json:"pods,omitempty"`
-}
-
-type PostgresqlStatus struct {
-	ClusterStatus *string `json:"clusterStatus,omitempty"`
 }
 
 // a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo
@@ -4350,12 +4021,6 @@ type ProjectEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
-type PrometheusDatasource struct {
-	Query  string  `json:"query"`
-	Format *string `json:"format,omitempty"`
-	Legend *string `json:"legend,omitempty"`
-}
-
 // how a promotion for a service will be performed
 type PromotionCriteria struct {
 	ID string `json:"id"`
@@ -4466,38 +4131,6 @@ type RbacAttributes struct {
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
-type Recipe struct {
-	ID             string           `json:"id"`
-	Name           string           `json:"name"`
-	Description    *string          `json:"description,omitempty"`
-	Provider       *string          `json:"provider,omitempty"`
-	Restricted     *bool            `json:"restricted,omitempty"`
-	RecipeSections []*RecipeSection `json:"recipeSections,omitempty"`
-	OidcEnabled    *bool            `json:"oidcEnabled,omitempty"`
-}
-
-type RecipeConnection struct {
-	PageInfo PageInfo      `json:"pageInfo"`
-	Edges    []*RecipeEdge `json:"edges,omitempty"`
-}
-
-type RecipeEdge struct {
-	Node   *Recipe `json:"node,omitempty"`
-	Cursor *string `json:"cursor,omitempty"`
-}
-
-type RecipeItem struct {
-	ID            string               `json:"id"`
-	Configuration []*ConfigurationItem `json:"configuration,omitempty"`
-}
-
-type RecipeSection struct {
-	ID            string               `json:"id"`
-	Repository    *Repository          `json:"repository,omitempty"`
-	RecipeItems   []*RecipeItem        `json:"recipeItems,omitempty"`
-	Configuration []*ConfigurationItem `json:"configuration,omitempty"`
-}
-
 type Recommendation struct {
 	ContainerRecommendations []*ContainerRecommendation `json:"containerRecommendations,omitempty"`
 }
@@ -4559,31 +4192,6 @@ type ReplicaSetStatus struct {
 	Replicas             *int64             `json:"replicas,omitempty"`
 	ReadyReplicas        *int64             `json:"readyReplicas,omitempty"`
 	FullyLabeledReplicas *int64             `json:"fullyLabeledReplicas,omitempty"`
-}
-
-type Repository struct {
-	ID            string         `json:"id"`
-	Name          string         `json:"name"`
-	Description   *string        `json:"description,omitempty"`
-	Icon          *string        `json:"icon,omitempty"`
-	Docs          []*FileContent `json:"docs,omitempty"`
-	Configuration *Configuration `json:"configuration,omitempty"`
-	GrafanaDNS    *string        `json:"grafanaDns,omitempty"`
-}
-
-type RepositoryConnection struct {
-	PageInfo PageInfo          `json:"pageInfo"`
-	Edges    []*RepositoryEdge `json:"edges,omitempty"`
-}
-
-type RepositoryContext struct {
-	Repository string                 `json:"repository"`
-	Context    map[string]interface{} `json:"context,omitempty"`
-}
-
-type RepositoryEdge struct {
-	Node   *Repository `json:"node,omitempty"`
-	Cursor *string     `json:"cursor,omitempty"`
 }
 
 // an edge representing mapping from kubernetes object metadata.uid -> metadata.uid
@@ -4755,89 +4363,6 @@ type RunStepAttributes struct {
 	Status StepStatus `json:"status"`
 }
 
-type Runbook struct {
-	Name       string                      `json:"name"`
-	Spec       RunbookSpec                 `json:"spec"`
-	Status     *RunbookStatus              `json:"status,omitempty"`
-	Data       []*RunbookData              `json:"data,omitempty"`
-	Executions *RunbookExecutionConnection `json:"executions,omitempty"`
-}
-
-type RunbookAction struct {
-	Name          string               `json:"name"`
-	Type          string               `json:"type"`
-	Configuration *ConfigurationAction `json:"configuration,omitempty"`
-}
-
-type RunbookActionInput struct {
-	Action  string                 `json:"action"`
-	Context map[string]interface{} `json:"context"`
-}
-
-type RunbookActionResponse struct {
-	RedirectTo *string `json:"redirectTo,omitempty"`
-}
-
-type RunbookAlertStatus struct {
-	Name        string                 `json:"name"`
-	StartsAt    *string                `json:"startsAt,omitempty"`
-	Fingerprint *string                `json:"fingerprint,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
-	Labels      map[string]interface{} `json:"labels,omitempty"`
-}
-
-type RunbookContext struct {
-	TimeseriesStart *int64  `json:"timeseriesStart,omitempty"`
-	TimeseriesStep  *string `json:"timeseriesStep,omitempty"`
-}
-
-type RunbookData struct {
-	Name       string             `json:"name"`
-	Source     *RunbookDatasource `json:"source,omitempty"`
-	Kubernetes KubernetesData     `json:"kubernetes,omitempty"`
-	Prometheus []*MetricResponse  `json:"prometheus,omitempty"`
-	Nodes      []*Node            `json:"nodes,omitempty"`
-}
-
-type RunbookDatasource struct {
-	Name       string                `json:"name"`
-	Type       string                `json:"type"`
-	Prometheus *PrometheusDatasource `json:"prometheus,omitempty"`
-	Kubernetes *KubernetesDatasource `json:"kubernetes,omitempty"`
-}
-
-type RunbookExecution struct {
-	ID         string                 `json:"id"`
-	Name       string                 `json:"name"`
-	Namespace  string                 `json:"namespace"`
-	Context    map[string]interface{} `json:"context"`
-	User       *User                  `json:"user,omitempty"`
-	InsertedAt *string                `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                `json:"updatedAt,omitempty"`
-}
-
-type RunbookExecutionConnection struct {
-	PageInfo PageInfo                `json:"pageInfo"`
-	Edges    []*RunbookExecutionEdge `json:"edges,omitempty"`
-}
-
-type RunbookExecutionEdge struct {
-	Node   *RunbookExecution `json:"node,omitempty"`
-	Cursor *string           `json:"cursor,omitempty"`
-}
-
-type RunbookSpec struct {
-	Name        string                 `json:"name"`
-	Description *string                `json:"description,omitempty"`
-	Display     map[string]interface{} `json:"display,omitempty"`
-	Datasources []*RunbookDatasource   `json:"datasources,omitempty"`
-	Actions     []*RunbookAction       `json:"actions,omitempty"`
-}
-
-type RunbookStatus struct {
-	Alerts []*RunbookAlertStatus `json:"alerts,omitempty"`
-}
-
 type RunningState struct {
 	StartedAt *string `json:"startedAt,omitempty"`
 }
@@ -4980,11 +4505,6 @@ type Secret struct {
 	Metadata Metadata               `json:"metadata"`
 	Type     *string                `json:"type,omitempty"`
 	Data     map[string]interface{} `json:"data"`
-}
-
-type SecretKeySelector struct {
-	Name string  `json:"name"`
-	Key  *string `json:"key,omitempty"`
 }
 
 type Service struct {
@@ -5361,22 +4881,6 @@ type SinkConfigurationAttributes struct {
 	Plural *PluralSinkAttributes `json:"plural,omitempty"`
 }
 
-type SMTP struct {
-	Server   *string `json:"server,omitempty"`
-	Port     *int64  `json:"port,omitempty"`
-	Password *string `json:"password,omitempty"`
-	Sender   *string `json:"sender,omitempty"`
-	User     *string `json:"user,omitempty"`
-}
-
-type SMTPInput struct {
-	Server   *string `json:"server,omitempty"`
-	Port     *int64  `json:"port,omitempty"`
-	Password *string `json:"password,omitempty"`
-	Sender   *string `json:"sender,omitempty"`
-	User     *string `json:"user,omitempty"`
-}
-
 // SMTP server configuration for email notifications
 type SMTPSettings struct {
 	Server string `json:"server"`
@@ -5393,15 +4897,6 @@ type SMTPSettingsAttributes struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Ssl      bool   `json:"ssl"`
-}
-
-type Stack struct {
-	ID         string           `json:"id"`
-	Name       string           `json:"name"`
-	Bundles    []*Recipe        `json:"bundles,omitempty"`
-	Sections   []*RecipeSection `json:"sections,omitempty"`
-	InsertedAt *string          `json:"insertedAt,omitempty"`
-	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
 type StackAttributes struct {
@@ -5746,8 +5241,6 @@ type StatefulSet struct {
 	Events   []*Event          `json:"events,omitempty"`
 }
 
-func (StatefulSet) IsKubernetesData() {}
-
 type StatefulSetSpec struct {
 	Replicas    *int64  `json:"replicas,omitempty"`
 	ServiceName *string `json:"serviceName,omitempty"`
@@ -5759,13 +5252,6 @@ type StatefulSetStatus struct {
 	ReadyReplicas   *int64             `json:"readyReplicas,omitempty"`
 	UpdatedReplicas *int64             `json:"updatedReplicas,omitempty"`
 	Conditions      []*StatusCondition `json:"conditions,omitempty"`
-}
-
-type StatusComponent struct {
-	Group  *string `json:"group,omitempty"`
-	Kind   string  `json:"kind"`
-	Name   string  `json:"name"`
-	Status string  `json:"status"`
 }
 
 type StatusCondition struct {
@@ -5951,27 +5437,6 @@ type UpgradePlanSpec struct {
 
 type UpgradePlanStatus struct {
 	Conditions []*StatusCondition `json:"conditions,omitempty"`
-}
-
-type UpgradePolicy struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Description  *string           `json:"description,omitempty"`
-	Repositories []*string         `json:"repositories,omitempty"`
-	Type         UpgradePolicyType `json:"type"`
-	Target       string            `json:"target"`
-	Weight       *int64            `json:"weight,omitempty"`
-	InsertedAt   *string           `json:"insertedAt,omitempty"`
-	UpdatedAt    *string           `json:"updatedAt,omitempty"`
-}
-
-type UpgradePolicyAttributes struct {
-	Name         string            `json:"name"`
-	Description  *string           `json:"description,omitempty"`
-	Target       string            `json:"target"`
-	Type         UpgradePolicyType `json:"type"`
-	Repositories []*string         `json:"repositories,omitempty"`
-	Weight       *int64            `json:"weight,omitempty"`
 }
 
 // Summary statistics of the upgradeability of your fleet
@@ -6263,49 +5728,6 @@ type VulnerabilityStatistic struct {
 type WaitingState struct {
 	Message *string `json:"message,omitempty"`
 	Reason  *string `json:"reason,omitempty"`
-}
-
-type Webhook struct {
-	ID         string        `json:"id"`
-	URL        string        `json:"url"`
-	Health     WebhookHealth `json:"health"`
-	Type       WebhookType   `json:"type"`
-	InsertedAt *string       `json:"insertedAt,omitempty"`
-	UpdatedAt  *string       `json:"updatedAt,omitempty"`
-}
-
-type WebhookAttributes struct {
-	URL string `json:"url"`
-}
-
-type WebhookConnection struct {
-	PageInfo PageInfo       `json:"pageInfo"`
-	Edges    []*WebhookEdge `json:"edges,omitempty"`
-}
-
-type WebhookEdge struct {
-	Node   *Webhook `json:"node,omitempty"`
-	Cursor *string  `json:"cursor,omitempty"`
-}
-
-type WireguardPeer struct {
-	Metadata Metadata             `json:"metadata"`
-	Status   *WireguardPeerStatus `json:"status,omitempty"`
-	Spec     WireguardPeerSpec    `json:"spec"`
-	Config   *string              `json:"config,omitempty"`
-	User     *User                `json:"user,omitempty"`
-	Raw      string               `json:"raw"`
-}
-
-type WireguardPeerSpec struct {
-	WireguardRef *string `json:"wireguardRef,omitempty"`
-	Address      *string `json:"address,omitempty"`
-	PublicKey    *string `json:"publicKey,omitempty"`
-}
-
-type WireguardPeerStatus struct {
-	Ready      *bool              `json:"ready,omitempty"`
-	Conditions []*StatusCondition `json:"conditions,omitempty"`
 }
 
 // a description of a yaml-merge operation on a file
@@ -6712,57 +6134,6 @@ func (e *AutoscalingTarget) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AutoscalingTarget) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type BuildType string
-
-const (
-	BuildTypeDeploy    BuildType = "DEPLOY"
-	BuildTypeBounce    BuildType = "BOUNCE"
-	BuildTypeApproval  BuildType = "APPROVAL"
-	BuildTypeInstall   BuildType = "INSTALL"
-	BuildTypeDestroy   BuildType = "DESTROY"
-	BuildTypeDedicated BuildType = "DEDICATED"
-	BuildTypeConfig    BuildType = "CONFIG"
-)
-
-var AllBuildType = []BuildType{
-	BuildTypeDeploy,
-	BuildTypeBounce,
-	BuildTypeApproval,
-	BuildTypeInstall,
-	BuildTypeDestroy,
-	BuildTypeDedicated,
-	BuildTypeConfig,
-}
-
-func (e BuildType) IsValid() bool {
-	switch e {
-	case BuildTypeDeploy, BuildTypeBounce, BuildTypeApproval, BuildTypeInstall, BuildTypeDestroy, BuildTypeDedicated, BuildTypeConfig:
-		return true
-	}
-	return false
-}
-
-func (e BuildType) String() string {
-	return string(e)
-}
-
-func (e *BuildType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = BuildType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid BuildType", str)
-	}
-	return nil
-}
-
-func (e BuildType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -8641,55 +8012,6 @@ func (e StackType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type Status string
-
-const (
-	StatusQueued     Status = "QUEUED"
-	StatusRunning    Status = "RUNNING"
-	StatusSuccessful Status = "SUCCESSFUL"
-	StatusFailed     Status = "FAILED"
-	StatusCancelled  Status = "CANCELLED"
-	StatusPending    Status = "PENDING"
-)
-
-var AllStatus = []Status{
-	StatusQueued,
-	StatusRunning,
-	StatusSuccessful,
-	StatusFailed,
-	StatusCancelled,
-	StatusPending,
-}
-
-func (e Status) IsValid() bool {
-	switch e {
-	case StatusQueued, StatusRunning, StatusSuccessful, StatusFailed, StatusCancelled, StatusPending:
-		return true
-	}
-	return false
-}
-
-func (e Status) String() string {
-	return string(e)
-}
-
-func (e *Status) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Status(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Status", str)
-	}
-	return nil
-}
-
-func (e Status) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type StepStage string
 
 const (
@@ -8823,47 +8145,6 @@ func (e TagType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type Tool string
-
-const (
-	ToolHelm      Tool = "HELM"
-	ToolTerraform Tool = "TERRAFORM"
-)
-
-var AllTool = []Tool{
-	ToolHelm,
-	ToolTerraform,
-}
-
-func (e Tool) IsValid() bool {
-	switch e {
-	case ToolHelm, ToolTerraform:
-		return true
-	}
-	return false
-}
-
-func (e Tool) String() string {
-	return string(e)
-}
-
-func (e *Tool) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Tool(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Tool", str)
-	}
-	return nil
-}
-
-func (e Tool) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type UpgradeInsightStatus string
 
 const (
@@ -8906,49 +8187,6 @@ func (e *UpgradeInsightStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UpgradeInsightStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type UpgradePolicyType string
-
-const (
-	UpgradePolicyTypeDeploy   UpgradePolicyType = "DEPLOY"
-	UpgradePolicyTypeApproval UpgradePolicyType = "APPROVAL"
-	UpgradePolicyTypeIgnore   UpgradePolicyType = "IGNORE"
-)
-
-var AllUpgradePolicyType = []UpgradePolicyType{
-	UpgradePolicyTypeDeploy,
-	UpgradePolicyTypeApproval,
-	UpgradePolicyTypeIgnore,
-}
-
-func (e UpgradePolicyType) IsValid() bool {
-	switch e {
-	case UpgradePolicyTypeDeploy, UpgradePolicyTypeApproval, UpgradePolicyTypeIgnore:
-		return true
-	}
-	return false
-}
-
-func (e UpgradePolicyType) String() string {
-	return string(e)
-}
-
-func (e *UpgradePolicyType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UpgradePolicyType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UpgradePolicyType", str)
-	}
-	return nil
-}
-
-func (e UpgradePolicyType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -9172,87 +8410,5 @@ func (e *VulnUserInteraction) UnmarshalGQL(v interface{}) error {
 }
 
 func (e VulnUserInteraction) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type WebhookHealth string
-
-const (
-	WebhookHealthHealthy   WebhookHealth = "HEALTHY"
-	WebhookHealthUnhealthy WebhookHealth = "UNHEALTHY"
-)
-
-var AllWebhookHealth = []WebhookHealth{
-	WebhookHealthHealthy,
-	WebhookHealthUnhealthy,
-}
-
-func (e WebhookHealth) IsValid() bool {
-	switch e {
-	case WebhookHealthHealthy, WebhookHealthUnhealthy:
-		return true
-	}
-	return false
-}
-
-func (e WebhookHealth) String() string {
-	return string(e)
-}
-
-func (e *WebhookHealth) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WebhookHealth(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WebhookHealth", str)
-	}
-	return nil
-}
-
-func (e WebhookHealth) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type WebhookType string
-
-const (
-	WebhookTypePiazza WebhookType = "PIAZZA"
-	WebhookTypeSLACk  WebhookType = "SLACK"
-)
-
-var AllWebhookType = []WebhookType{
-	WebhookTypePiazza,
-	WebhookTypeSLACk,
-}
-
-func (e WebhookType) IsValid() bool {
-	switch e {
-	case WebhookTypePiazza, WebhookTypeSLACk:
-		return true
-	}
-	return false
-}
-
-func (e WebhookType) String() string {
-	return string(e)
-}
-
-func (e *WebhookType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WebhookType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WebhookType", str)
-	}
-	return nil
-}
-
-func (e WebhookType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

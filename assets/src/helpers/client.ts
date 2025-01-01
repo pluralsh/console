@@ -1,13 +1,10 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { setContext } from 'apollo-link-context'
+import { ApolloClient, InMemoryCache, split } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
+import { onError } from '@apollo/client/link/error'
 import { createLink } from 'apollo-absinthe-upload-link'
-import { onError } from 'apollo-link-error'
-import * as AbsintheSocket from '@absinthe/socket'
 import { Socket as PhoenixSocket } from 'phoenix'
-import { createAbsintheSocketLink } from 'pluralsh-absinthe-socket-apollo-link'
-import { RetryLink } from 'apollo-link-retry'
+import { RetryLink } from '@apollo/client/link/retry'
 import { hasSubscription } from '@jumpn/utils-graphql'
-import { split } from 'apollo-link'
 
 import fragments from '../generated/fragments.json'
 
@@ -15,25 +12,19 @@ import { onErrorHandler } from './refreshToken'
 
 import customFetch from './uploadLink'
 import { fetchToken } from './auth'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
 
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
+const GQL_WS_URI = '/socket/gql-ws'
 
 export const authlessClient = new ApolloClient({
   link: createLink({ uri: GQL_URL }),
   cache: new InMemoryCache(),
 })
 
-// function resetAbsinthe(absintheSocket) {
-//   absintheSocket.channelJoinCreated = false
-//   absintheSocket.channel.joinedOnce = false
-//   absintheSocket.channel.leave()
-// }
-
-function maybeReconnect(absintheSocket) {
-  console.log('polled socket', absintheSocket)
-  const socket = absintheSocket.phoenixSocket
-  // console.log('socket reconnect attempt', socket)
+function maybeReconnect(socket) {
   if (socket.connectionState() === 'closed') {
     console.warn('found dead websocket, attempting a reconnect')
     if (!socket.conn) {
@@ -44,18 +35,15 @@ function maybeReconnect(absintheSocket) {
       socket.reconnectTimer.reset()
       socket.reconnectTimer.scheduleTimeout()
     }
-    // resetAbsinthe(absintheSocket)
 
     return
   }
-
-  // maybeRejoin(chan)
-
-  // console.log('found healthy channel', chan)
-  // console.log('absinthe socket not dead, ignoring')
 }
 
-export function buildClient(gqlUrl, wsUrl, fetchToken) {
+export function buildClient(
+  { gql: gqlUrl, ws: wsUrl, gqlws: gqlwsUrl },
+  fetchToken
+) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
@@ -83,17 +71,17 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     },
   })
 
-  const absintheSocket = AbsintheSocket.create(socket)
-  const socketLink = createAbsintheSocketLink(absintheSocket)
+  const socketLink = new GraphQLWsLink(
+    createClient({
+      url: gqlwsUrl,
+      lazy: false,
+      connectionParams: () => {
+        const token = fetchToken()
+        return token ? { token: `Bearer ${token}` } : {}
+      },
+    })
+  )
   const gqlLink = errorLink.concat(httpLink)
-
-  // absintheSocket.channel.onClose(() => {
-  //   absintheSocket.channel.rejoin()
-  // })
-
-  // absintheSocket.channel.onError(() => {
-  //   setTimeout(() => absintheSocket.channel.rejoin(), 1000)
-  // })
 
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
@@ -122,18 +110,14 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     }),
   })
 
-  // setInterval(() => {
-  //   console.log('log absinthe socket', absintheSocket)
-  //   maybeRejoin(absintheSocket.channel)
-  // }, 5000)
-  // socket.onClose(() => {
-  //   maybeReconnect(absintheSocket)
-  // })
-  setInterval(() => maybeReconnect(absintheSocket), 5000)
+  setInterval(() => maybeReconnect(socket), 5000)
 
   return { client, socket }
 }
 
-const { client, socket } = buildClient(GQL_URL, WS_URI, fetchToken)
+const { client, socket } = buildClient(
+  { gql: GQL_URL, ws: WS_URI, gqlws: GQL_WS_URI },
+  fetchToken
+)
 
 export { client, socket }

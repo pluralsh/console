@@ -4,7 +4,6 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext, ServiceDependency}
   alias Console.Deployments.{
     Secrets.Store,
     Settings,
@@ -12,7 +11,19 @@ defmodule Console.Deployments.Services do
     Clusters,
     Deprecations.Checker,
     AddOns,
-    Tar,
+    Tar
+  }
+  alias Console.Schema.{
+    Service,
+    ServiceComponent,
+    Revision,
+    User,
+    Cluster,
+    ClusterProvider,
+    ApiDeprecation,
+    GitRepository,
+    ServiceContext,
+    ServiceDependency
   }
   alias Console.Deployments.Helm
   require Logger
@@ -216,6 +227,7 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} -> create_revision(add_version(attrs, "0.0.1"), base) end)
     |> add_revision()
+    |> add_operation(:validate, fn %{base: base} -> post_validate(base, user) end)
     |> execute(extract: :service)
     |> notify(:create, user)
   end
@@ -275,6 +287,19 @@ defmodule Console.Deployments.Services do
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
 
+  def post_validate(%Service{} = service, %User{} = user) do
+    case Repo.preload(service, [imports: [:service, :stack]]) do
+      %Service{imports: [_ | _] = imports} ->
+        Enum.reduce_while(imports, {:ok, service}, fn imp, acc ->
+          case allow(imp, user, :write) do
+            {:ok, _} -> {:cont, acc}
+            _ -> {:halt, {:error, "you cannot edit this service without access to stack #{imp.stack.name}"}}
+          end
+        end)
+      _ -> {:ok, service}
+    end
+  end
+
   @doc """
   Determines if all dependencies for a service have been satisfied
   """
@@ -309,6 +334,7 @@ defmodule Console.Deployments.Services do
       |> allow(user, :write)
     end)
     |> add_operation(:update, fn %{check: svc} -> update_service(attrs, svc) end)
+    |> add_operation(:validate, fn %{update: base} -> post_validate(base, user) end)
     |> execute(extract: :update)
     |> notify(:update, user)
   end

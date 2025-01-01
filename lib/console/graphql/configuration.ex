@@ -1,14 +1,6 @@
 defmodule Console.GraphQl.Configuration do
   use Console.GraphQl.Schema.Base
   require Logger
-  alias Console.Middleware.{Sandboxed}
-  alias Console.GraphQl.Resolvers.Plural
-
-  object :configuration do
-    field :terraform, :string
-    field :helm,      :string
-    field :readme,    :string
-  end
 
   object :log_label do
     field :name,  :string
@@ -73,14 +65,6 @@ defmodule Console.GraphQl.Configuration do
   object :configuration_queries do
     field :configuration, :console_configuration do
       resolve fn _, _ -> {:ok, Console.Configuration.new()} end
-    end
-
-    field :external_token, :string do
-      middleware Authenticated
-      middleware AdminRequired
-      middleware Sandboxed
-
-      resolve &Plural.resolve_external_token/2
     end
   end
 end

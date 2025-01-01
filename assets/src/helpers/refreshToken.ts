@@ -1,8 +1,7 @@
 import { RefreshDocument, RefreshQuery } from 'generated/graphql'
-import { FetchResult } from '@apollo/client'
+import { FetchResult, Observable } from '@apollo/client'
 import { NetworkError } from '@apollo/client/errors'
-import { Observable } from 'apollo-link'
-import { ErrorHandler } from 'apollo-link-error'
+import { ErrorHandler } from '@apollo/client/link/error'
 
 import { authlessClient } from './client'
 import {

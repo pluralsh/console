@@ -142,10 +142,6 @@ fragment ChatThread on ChatThread {
   }
 }
 
-query AI($prompt: String!) {
-  ai(prompt: $prompt)
-}
-
 query AICompletion(
   $system: String!
   $input: String
