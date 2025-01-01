@@ -3,7 +3,7 @@ defmodule ConsoleWeb.Endpoint do
   use Absinthe.Phoenix.Endpoint
 
   socket "/socket/gql-ws", ConsoleWeb.GraphqlWSSocket,
-    websocket: [path: "", subprotocols: ["graphql-transport-ws"]]
+    websocket: [path: "", subprotocols: ["graphql-transport-ws"], check_origin: false]
 
   socket "/socket", ConsoleWeb.UserSocket,
     websocket: [check_origin: false],
