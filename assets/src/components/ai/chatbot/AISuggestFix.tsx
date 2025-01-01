@@ -52,22 +52,6 @@ export function Loading({
   setStreaming: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
-  // const topic = useStreamTopic({ insightId, scopeId })
-  // const callback = useCallback(
-  //   ({ content, seq }) => {
-  //     setStreaming(true)
-  //     if ((seq ?? 1) % 120 === 0) scrollToBottom()
-  //     setStreamedMessage((streamedMessage) => [
-  //       ...streamedMessage,
-  //       {
-  //         seq: seq ?? 0,
-  //         content: content ?? '',
-  //       },
-  //     ])
-  //   },
-  //   [setStreaming, setStreamedMessage, scrollToBottom]
-  // )
-  // useChannel(topic, 'stream', callback)
   useAiChatStreamSubscription({
     variables: { insightId, scopeId },
     onData: ({ data: { data } }) => {
