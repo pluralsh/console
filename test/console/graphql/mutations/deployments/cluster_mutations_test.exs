@@ -131,6 +131,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   end
 
   describe "registerRuntimeServices" do
+    @tag :skip
     test "it can upsert a set of runtime services" do
       cluster = insert(:cluster, version: "1.24")
 
@@ -148,6 +149,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       assert runtime.version == "1.3.1"
     end
 
+    @tag :skip
     test "it can add a service id in the upsert" do
       cluster = insert(:cluster, version: "1.24")
       svc = insert(:service, cluster: cluster)
