@@ -10,7 +10,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterUsage,
     ClusterUsageHistory,
     ClusterNamespaceUsage,
-    ClusterScalingRecommendation
+    ClusterScalingRecommendation,
+    ClusterAuditLog
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -135,6 +136,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
+  def list_cluster_audits(%Cluster{id: id}, args, _) do
+    ClusterAuditLog.for_cluster(id)
+    |> ClusterAuditLog.ordered()
+    |> paginate(args)
+  end
+
   def runtime_services(cluster, _, _), do: {:ok, Clusters.runtime_services(cluster)}
 
   def deploy_token(%{deploy_token: token} = cluster, _, %{context: %{current_user: user}}) do
@@ -237,6 +244,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)
+
+  def add_cluster_audit(_, %{context: %{current_user: %User{email: "console@plural.sh"}}}), do: {:ok, false}
+  def add_cluster_audit(%{audit: audit}, %{context: %{current_user: user}}) do
+    Map.put(audit, :actor_id, user.id)
+    |> Console.Buffers.ClusterAudit.audit()
+
+    {:ok, true}
+  end
 
   defp cluster_filters(query, args) do
     Enum.reduce(args, query, fn

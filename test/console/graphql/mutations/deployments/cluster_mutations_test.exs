@@ -486,6 +486,22 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
     end
   end
 
+  describe "addClusterAuditLog" do
+    test "it enqueues an audit log" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"addClusterAuditLog" => true}}} = run_query("""
+        mutation Add($audit: ClusterAuditAttributes!) {
+          addClusterAuditLog(audit: $audit)
+        }
+      """, %{"audit" => %{
+        "clusterId" => cluster.id,
+        "method" => "GET",
+        "path" => "/api/v1/namespaces"
+      }}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "ingestClusterCost" do
     test "it can ingest cluster cost information in one transaction" do
       cluster = insert(:cluster)

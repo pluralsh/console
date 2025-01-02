@@ -6,6 +6,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.Cluster do
 
   require Logger
 
+  def custom(_), do: false
+
   def generate(%Cluster{insight_components: [_ | _] = components} = cluster) do
     components = Enum.map(components, &{&1, Worker.generate(&1)})
                  |> Enum.map(fn {c, t} -> {c, Worker.await(t)} end)

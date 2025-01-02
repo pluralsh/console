@@ -314,6 +314,25 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["clusterMetrics"]["cpu"])
     end
 
+    test "it can fetch cluster audit logs" do
+      user    = admin_user()
+      cluster = insert(:cluster)
+      audits  = insert_list(3, :cluster_audit_log, cluster: cluster)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            auditLogs(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert from_connection(found["auditLogs"])
+             |> ids_equal(audits)
+    end
+
     test "it can fetch cluster node metrics" do
       user = admin_user()
       cluster = insert(:cluster)

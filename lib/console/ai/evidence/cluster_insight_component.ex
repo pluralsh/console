@@ -5,6 +5,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
 
   @blacklist ~w(Secret ConfigMap)
 
+  def custom(_), do: false
+
   def generate(%ClusterInsightComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
   def generate(%ClusterInsightComponent{cluster: cluster} = comp) do
     save_kubeconfig(cluster)

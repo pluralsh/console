@@ -634,6 +634,23 @@ _Appears in:_
 
 
 
+#### CostSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `recommendationCushion` _integer_ | A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,<br />should be between 1-99. |  | Optional: {} <br /> |
+| `recommendationThreshold` _integer_ | The minimal monthly cost for a recommendation to be covered by a controller |  | Optional: {} <br /> |
+
+
 #### CustomRunStep
 
 
@@ -749,6 +766,7 @@ _Appears in:_
 | `lokiConnection` _[HTTPConnection](#httpconnection)_ | LokiConnection connection details for a loki instance to use |  | Optional: {} <br /> |
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: {} <br /> |
 | `logging` _[LoggingSettings](#loggingsettings)_ | Settings for connections to log aggregation datastores |  | Optional: {} <br /> |
+| `cost` _[CostSettings](#costsettings)_ | Settings for managing Plural's cost management features |  | Optional: {} <br /> |
 
 
 

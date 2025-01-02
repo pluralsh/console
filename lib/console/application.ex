@@ -20,6 +20,7 @@ defmodule Console.Application do
       Console.Plural.Config,
       Console.Features,
       Console.Cron.Scheduler,
+      Console.Buffers.ClusterAudit,
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},

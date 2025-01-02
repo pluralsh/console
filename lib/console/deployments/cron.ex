@@ -18,7 +18,8 @@ defmodule Console.Deployments.Cron do
     RunLog,
     AppNotification,
     Observer,
-    Alert
+    Alert,
+    ClusterAuditLog
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -302,6 +303,11 @@ defmodule Console.Deployments.Cron do
 
   def prune_notifications() do
     AppNotification.expired()
+    |> Repo.delete_all()
+  end
+
+  def prune_cluster_audit_logs() do
+    ClusterAuditLog.expired()
     |> Repo.delete_all()
   end
 

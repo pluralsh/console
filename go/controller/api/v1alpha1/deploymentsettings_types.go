@@ -103,6 +103,11 @@ type DeploymentSettingsSpec struct {
 	//
 	// +kubebuilder:validation:Optional
 	Logging *LoggingSettings `json:"logging,omitempty"`
+
+	// Settings for managing Plural's cost management features
+	//
+	// +kubebuilder:validation:Optional
+	Cost *CostSettings `json:"cost,omitempty"`
 }
 
 type LoggingSettings struct {
@@ -187,6 +192,30 @@ type StackSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
+}
+
+type CostSettings struct {
+	// A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,
+	// should be between 1-99.
+	//
+	// +kubebuilder:validation:Optional
+	RecommendationCushion *int64 `json:"recommendationCushion,omitempty"`
+
+	// The minimal monthly cost for a recommendation to be covered by a controller
+	//
+	// +kubebuilder:validation:Optional
+	RecommendationThreshold *int64 `json:"recommendationThreshold,omitempty"`
+}
+
+func (cost *CostSettings) Attributes() *console.CostSettingsAttributes {
+	if cost == nil {
+		return nil
+	}
+
+	return &console.CostSettingsAttributes{
+		RecommendationThreshold: cost.RecommendationThreshold,
+		RecommendationCushion:   cost.RecommendationCushion,
+	}
 }
 
 // AISettings holds the configuration for LLM provider clients.

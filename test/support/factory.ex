@@ -805,6 +805,15 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_audit_log_factory do
+    %Schema.ClusterAuditLog{
+      method: "GET",
+      path: "/api/v1/namespaces",
+      actor: build(:user),
+      cluster: build(:cluster)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

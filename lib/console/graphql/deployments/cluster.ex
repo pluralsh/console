@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
   alias Console.Schema.{ClusterProvider, Cluster}
   alias Console.Deployments.{Compatibilities, Clusters}
-  alias Console.GraphQl.Resolvers.{Deployments}
+  alias Console.GraphQl.Resolvers.{Deployments, User}
 
   ecto_enum :cluster_distro, Cluster.Distro
   ecto_enum :upgrade_insight_status, Console.Schema.UpgradeInsight.Status
@@ -280,6 +280,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service_id, :id, description: "the service id known to be attached to this recommendation"
   end
 
+  input_object :cluster_audit_attributes do
+    field :cluster_id, non_null(:id),     description: "the cluster this request was made on"
+    field :method,     non_null(:string), description: "the http method from the given request"
+    field :path,       non_null(:string), description: "the path made for the given request"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -461,6 +467,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
+
+    connection field :audit_logs, node_type: :cluster_audit_log do
+      resolve &Deployments.list_cluster_audits/3
+    end
 
     timestamps()
   end
@@ -847,6 +857,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  object :cluster_audit_log do
+    field :id,     non_null(:id)
+    field :method, non_null(:string)
+    field :path,   non_null(:string)
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+    field :user,    :user,    resolve: dataloader(User)
+
+    timestamps()
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -855,6 +876,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_namespace_usage
   connection node_type: :cluster_scaling_recommendation
   connection node_type: :cluster_usage_history
+  connection node_type: :cluster_audit_log
 
   delta :cluster
   delta :cluster_provider
@@ -1134,6 +1156,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_pinned_custom_resource/2
+    end
+
+    field :add_cluster_audit_log, :boolean do
+      middleware Authenticated
+      arg :audit, non_null(:cluster_audit_attributes)
+
+      resolve &Deployments.add_cluster_audit/2
     end
   end
 end
