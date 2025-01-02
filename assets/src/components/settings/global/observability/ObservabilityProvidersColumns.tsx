@@ -59,7 +59,7 @@ export const observabilityproviderTypeToIcon = {
   [ObservabilityProviderType.Datadog]: <DatadogLogoIcon />,
   [ObservabilityProviderType.Newrelic]: <NewrelicLogoIcon />,
   '': <HelpIcon />,
-} as const satisfies Record<ObservabilityProviderType | '', ReactElement>
+} as const satisfies Record<ObservabilityProviderType | '', ReactElement<any>>
 
 export function DynamicObservabilityProviderTypeIcon({
   type,

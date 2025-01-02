@@ -9,7 +9,10 @@ import {
 
 export const MakeInert = forwardRef<any, any>(
   (
-    { children, inert = false }: { children: ReactElement; inert?: boolean },
+    {
+      children,
+      inert = false,
+    }: { children: ReactElement<any>; inert?: boolean },
     ref
   ) => {
     const innerRef = useRef<any>(null)

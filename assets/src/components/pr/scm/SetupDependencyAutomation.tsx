@@ -263,7 +263,7 @@ function SetupDependencyAutomationModal({
   open,
   refetch,
   onClose,
-}: SetupDependencyAutomationModalProps): ReactElement {
+}: SetupDependencyAutomationModalProps): ReactElement<any> {
   const theme = useTheme()
   const { state: formState, update: updateFormState } = useUpdateState<
     Partial<SetupRenovateAttributes>

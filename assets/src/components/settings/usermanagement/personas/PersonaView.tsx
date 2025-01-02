@@ -37,7 +37,7 @@ export default function PersonaView({
   persona: PersonaFragment
 }) {
   const theme = useTheme()
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const [currentTab, setCurrentTab] =
     useState<(typeof tabs)[number]['key']>('attributes')
 

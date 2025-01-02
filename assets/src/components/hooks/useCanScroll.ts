@@ -11,7 +11,7 @@ type ScrollableDirections = {
 const SCROLL_THRESHOLD = 1
 
 export const useCanScroll = (
-  ref: RefObject<HTMLElement>
+  ref: RefObject<HTMLElement | null>
 ): ScrollableDirections => {
   const [scrollable, setScrollable] = useState<ScrollableDirections>({
     canScrollUp: false,

@@ -60,7 +60,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Node(): ReactElement {
+export default function Node(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNodeQuery({
@@ -117,7 +117,7 @@ export default function Node(): ReactElement {
   )
 }
 
-export function NodeInfo(): ReactElement {
+export function NodeInfo(): ReactElement<any> {
   const theme = useTheme()
   const node = useOutletContext() as NodeT
 
@@ -270,7 +270,7 @@ export function NodeInfo(): ReactElement {
   )
 }
 
-export function NodeConditions(): ReactElement {
+export function NodeConditions(): ReactElement<any> {
   const node = useOutletContext() as NodeT
 
   return (
@@ -293,7 +293,7 @@ const columns = [
   }),
 ]
 
-export function NodeContainerImages(): ReactElement {
+export function NodeContainerImages(): ReactElement<any> {
   const node = useOutletContext() as NodeT
 
   return (
@@ -309,7 +309,7 @@ export function NodeContainerImages(): ReactElement {
     </FullHeightTableWrap>
   )
 }
-export function NodePods(): ReactElement {
+export function NodePods(): ReactElement<any> {
   const { name } = useParams()
   const columns = usePodsColumns()
 
@@ -327,7 +327,7 @@ export function NodePods(): ReactElement {
   )
 }
 
-export function NodeEvents(): ReactElement {
+export function NodeEvents(): ReactElement<any> {
   const { name } = useParams()
   const columns = useEventsColumns()
 

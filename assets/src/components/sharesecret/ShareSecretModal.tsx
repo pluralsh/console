@@ -49,7 +49,7 @@ export default function ShareSecretModal({
     Pick<PolicyBindingFragment, 'user' | 'group'>[]
   >([])
   const disabled = !name || !secret
-  const toastRef = useRef<HTMLElement>()
+  const toastRef = useRef<HTMLElement>(undefined)
 
   useEffect(() => {
     if (toastRef.current)

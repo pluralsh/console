@@ -48,7 +48,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Ingress(): ReactElement {
+export default function Ingress(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useIngressQuery({
@@ -187,7 +187,7 @@ const columns = [
   }),
 ]
 
-export function IngressInfo(): ReactElement {
+export function IngressInfo(): ReactElement<any> {
   const theme = useTheme()
   const ingress = useOutletContext() as IngressT
   const backend = ingress.spec.defaultBackend
@@ -272,7 +272,7 @@ export function IngressInfo(): ReactElement {
   )
 }
 
-export function IngressEvents(): ReactElement {
+export function IngressEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

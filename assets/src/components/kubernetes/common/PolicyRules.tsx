@@ -45,7 +45,7 @@ export default function PolicyRules({
   rules,
 }: {
   rules: Array<Maybe<PolicyRuleT>>
-}): ReactElement {
+}): ReactElement<any> {
   return (
     <Table
       data={rules}

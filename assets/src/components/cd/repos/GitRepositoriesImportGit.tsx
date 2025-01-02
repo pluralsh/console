@@ -110,7 +110,7 @@ export function ImportGitModal({
 
   useEffect(() => {}, [gitUrl])
 
-  const initialFocusRef = useRef<HTMLInputElement>()
+  const initialFocusRef = useRef<HTMLInputElement>(undefined)
 
   useEffect(() => {
     if (open) {

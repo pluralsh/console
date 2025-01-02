@@ -105,7 +105,7 @@ export function UpdateProviderModal({
   )
   let settings: ReactNode
 
-  const inputRef = useRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(undefined)
 
   switch (cloud) {
     case 'aws':

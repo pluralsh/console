@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react'
+import { ComponentProps, type JSX } from 'react'
 import { Chip } from '@pluralsh/design-system'
 
 function getChipSeverity(

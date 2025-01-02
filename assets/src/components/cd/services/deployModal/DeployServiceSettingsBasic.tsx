@@ -19,7 +19,7 @@ export function DeployServiceSettingsBasic({
   setClusterId: (clusterId: string) => void
   showClusterSelector: boolean
 }): any {
-  const inputRef = useRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(undefined)
 
   useEffect(() => {
     inputRef.current?.focus?.()

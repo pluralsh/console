@@ -25,7 +25,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ClusterRoleBinding(): ReactElement {
+export default function ClusterRoleBinding(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleBindingQuery({
@@ -85,7 +85,7 @@ export default function ClusterRoleBinding(): ReactElement {
 }
 
 // TODO: Add links.
-export function ClusterRoleBindingSubjects(): ReactElement {
+export function ClusterRoleBindingSubjects(): ReactElement<any> {
   const crb = useOutletContext() as ClusterRoleBindingT
 
   return (

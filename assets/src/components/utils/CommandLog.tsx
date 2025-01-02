@@ -5,8 +5,8 @@ import { Flex, Span } from 'honorable'
 import { useEffect, useMemo, useRef } from 'react'
 
 function CommandLogLine({ line, number, follow }) {
-  const mounted = useRef<any>()
-  const lineRef = useRef<any>()
+  const mounted = useRef<any>(undefined)
+  const lineRef = useRef<any>(undefined)
 
   const blocks = useMemo(
     () =>

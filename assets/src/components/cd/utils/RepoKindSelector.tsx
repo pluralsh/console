@@ -32,7 +32,7 @@ export function RepoKindSelector({
   enableFlux?: boolean
 }) {
   const theme = useTheme()
-  const tabStateRef: MutableRefObject<any> = useRef()
+  const tabStateRef: MutableRefObject<any> = useRef(undefined)
   const orientation = 'horizontal'
 
   selectedKind = selectedKind || RepoKind.Git

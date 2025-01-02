@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, type JSX } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 

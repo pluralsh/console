@@ -24,7 +24,7 @@ export function ProviderTabSelector({
   selectedProvider: Nullable<string>
 }) {
   const theme = useTheme()
-  const tabStateRef: MutableRefObject<any> = useRef()
+  const tabStateRef: MutableRefObject<any> = useRef(undefined)
   const orientation = 'horizontal'
 
   selectedProvider = selectedProvider || 'aws'

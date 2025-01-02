@@ -47,7 +47,7 @@ interface ColServiceContentProps {
 function ColServiceContent({
   serviceDeployment,
   cluster,
-}: ColServiceContentProps): ReactElement {
+}: ColServiceContentProps): ReactElement<any> {
   const serviceLink = getServiceDetailsPath({
     clusterId: cluster?.id,
     serviceId: serviceDeployment?.id,

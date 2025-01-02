@@ -79,7 +79,7 @@ export const scmTypeToIcon = {
   [ScmType.Gitlab]: <GitLabLogoIcon fullColor />,
   [ScmType.Bitbucket]: <BitBucketIcon fullColor />,
   '': <PrOpenIcon />,
-} as const satisfies Record<ScmType | '', ReactElement>
+} as const satisfies Record<ScmType | '', ReactElement<any>>
 
 export function DynamicScmTypeIcon({ type }: { type: Nullable<ScmType> }) {
   const icon = scmTypeToIcon[type || ''] || scmTypeToIcon['']

@@ -32,7 +32,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function PersistentVolume(): ReactElement {
+export default function PersistentVolume(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = usePersistentVolumeQuery({
@@ -131,7 +131,7 @@ export default function PersistentVolume(): ReactElement {
   )
 }
 
-export function PersistentVolumeInfo(): ReactElement {
+export function PersistentVolumeInfo(): ReactElement<any> {
   const theme = useTheme()
   const pv = useOutletContext() as PersistentVolumeT
   const source = pv?.persistentVolumeSource

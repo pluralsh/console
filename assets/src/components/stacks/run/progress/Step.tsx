@@ -30,7 +30,7 @@ interface StepProps {
 }
 
 export default function Step({ step, open }: StepProps): ReactNode {
-  const ref = useRef<HTMLDivElement>()
+  const ref = useRef<HTMLDivElement>(undefined)
 
   const [folded, setFolded] = useState<boolean | undefined>(undefined)
   const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)

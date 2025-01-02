@@ -56,7 +56,7 @@ export default function Node() {
   const params = useParams()
   const name = (params[NODE_PARAM_NAME] as string)!
   const clusterId = (params[NODE_PARAM_CLUSTER] as string)!
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const tab = useMatch(`${NODE_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 

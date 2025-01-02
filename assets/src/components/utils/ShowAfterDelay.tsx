@@ -19,7 +19,7 @@ function ShowAfterDelayUnstyled({
 }) {
   const [show, setShow] = useState(false)
   const [transitionIn, setTransitionIn] = useState(false)
-  const child: ReactElement = Children.only(children) as ReactElement
+  const child: ReactElement<any> = Children.only(children) as ReactElement<any>
   const clone = child
     ? cloneElement(child, {
         className: `${className}${transitionIn ? ' transitionIn' : ''}`,

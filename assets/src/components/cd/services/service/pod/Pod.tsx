@@ -47,7 +47,7 @@ export default function Pod() {
   const serviceId = (params[SERVICE_POD_PARAM_SERVICE] as string)!
   const namespace = (params[SERVICE_POD_PARAM_NAMESPACE] as string)!
   const name = (params[SERVICE_POD_PARAM_NAME] as string)!
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const theme = useTheme()
   const tab = useMatch(`${SERVICE_POD_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
