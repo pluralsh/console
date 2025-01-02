@@ -22,7 +22,7 @@ const LinkTabWrapUnstyled = forwardRef(
       subTab: _,
       ...props
     }: ComponentProps<typeof Link> &
-      TabBaseProps & { children: ReactElement; subTab?: boolean },
+      TabBaseProps & { children: ReactElement<any>; subTab?: boolean },
     ref
   ) => (
     <UnstyledLink

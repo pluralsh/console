@@ -100,7 +100,7 @@ export const sinkTypeToIcon = {
   [SinkType.Teams]: <MsTeamsLogoIcon />,
   [SinkType.Plural]: null,
   '': null,
-} as const satisfies Record<SinkType | '', ReactElement | null>
+} as const satisfies Record<SinkType | '', ReactElement<any> | null>
 
 export function DeleteNotificationSinkModal({
   sink,

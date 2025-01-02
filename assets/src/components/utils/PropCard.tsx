@@ -8,7 +8,7 @@ export default function PropCard({
   titleContent,
   children,
   ...props
-}: { title: string; titleContent?: ReactElement } & CardProps) {
+}: { title: string; titleContent?: ReactElement<any> } & CardProps) {
   const theme = useTheme()
 
   return (

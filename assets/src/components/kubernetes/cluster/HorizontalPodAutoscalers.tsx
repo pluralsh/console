@@ -72,7 +72,7 @@ export function useHorizontalPodAutoscalersColumns(): Array<object> {
   )
 }
 
-export default function HorizontalPodAutoscalers(): ReactElement {
+export default function HorizontalPodAutoscalers(): ReactElement<any> {
   const columns = useHorizontalPodAutoscalersColumns()
 
   return (

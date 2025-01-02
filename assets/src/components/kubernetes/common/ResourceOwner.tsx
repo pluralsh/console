@@ -18,7 +18,7 @@ interface ResourceOwnerProps {
 
 export default function ResourceOwner({
   owner,
-}: ResourceOwnerProps): ReactElement {
+}: ResourceOwnerProps): ReactElement<any> {
   return (
     <ResourceInfoCard title={`Controlled By ${owner?.typeMeta?.kind}`}>
       <ResourceInfoCardSection>

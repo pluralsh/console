@@ -54,7 +54,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function CronJob(): ReactElement {
+export default function CronJob(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const [triggerBanner, setTriggerBanner] = useState(false)
@@ -177,7 +177,7 @@ export default function CronJob(): ReactElement {
   )
 }
 
-export function CronJobJobs(): ReactElement {
+export function CronJobJobs(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useJobsColumns()
 
@@ -234,7 +234,7 @@ export function CronJobJobs(): ReactElement {
   )
 }
 
-export function CronJobEvents(): ReactElement {
+export function CronJobEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

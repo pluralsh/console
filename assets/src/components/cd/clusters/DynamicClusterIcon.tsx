@@ -39,7 +39,7 @@ export function DynamicClusterIcon({
   self = false,
   virtual = false,
   type = 'secondary',
-}: DynamicClusterIconProps): ReactElement {
+}: DynamicClusterIconProps): ReactElement<any> {
   const theme = useTheme()
 
   const tooltip = useMemo(() => {

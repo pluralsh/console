@@ -46,7 +46,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function CustomResourceDefinition(): ReactElement {
+export default function CustomResourceDefinition(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useCustomResourceDefinitionQuery({
@@ -109,7 +109,7 @@ export default function CustomResourceDefinition(): ReactElement {
 
 const columnHelper = createColumnHelper<CustomResourceT>()
 
-export function CustomRersourceDefinitionObjects(): ReactElement {
+export function CustomRersourceDefinitionObjects(): ReactElement<any> {
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd?.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
@@ -182,7 +182,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   )
 }
 
-export function CustomResourceDefinitionConditions(): ReactElement {
+export function CustomResourceDefinitionConditions(): ReactElement<any> {
   const { conditions } = useOutletContext() as CustomResourceDefinitionT
 
   return <Conditions conditions={conditions} />

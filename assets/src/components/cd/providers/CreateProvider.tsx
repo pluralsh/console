@@ -115,7 +115,7 @@ export function CreateProviderModal({
 
   let settings: ReactNode
 
-  const inputRef = useRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(undefined)
 
   const enabledProviders = SUPPORTED_CLOUDS.filter(
     (cloud) => !providers?.some((provider) => provider?.cloud === cloud)

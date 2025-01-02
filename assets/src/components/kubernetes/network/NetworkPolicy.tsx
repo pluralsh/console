@@ -35,7 +35,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function NetworkPolicy(): ReactElement {
+export default function NetworkPolicy(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useNetworkPolicyQuery({
@@ -106,7 +106,7 @@ export default function NetworkPolicy(): ReactElement {
   )
 }
 
-export function NetworkPolicyInfo(): ReactElement {
+export function NetworkPolicyInfo(): ReactElement<any> {
   const np = useOutletContext() as NetworkPolicyT
   const ingressTabs = useCodeTabs(np.ingress)
   const egressTabs = useCodeTabs(np.egress)

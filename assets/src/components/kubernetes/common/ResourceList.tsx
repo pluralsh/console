@@ -70,7 +70,7 @@ export function ResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
-}: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
+}: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
   const { setNamespaced, namespace, filter } = useDataSelect()

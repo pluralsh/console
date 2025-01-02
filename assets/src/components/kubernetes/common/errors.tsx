@@ -9,7 +9,7 @@ interface ErrorToastProps {
   errors: Nullable<Array<Error>>
 }
 
-function ErrorToast({ errors }: ErrorToastProps): Nullable<ReactElement> {
+function ErrorToast({ errors }: ErrorToastProps): Nullable<ReactElement<any>> {
   const [queue, setQueue] = useState<Array<Error>>(errors?.slice(1) ?? [])
   const [error, setError] = useState<Nullable<Error>>(errors?.at(0))
   const [sha, setSHA] = useState<string>()

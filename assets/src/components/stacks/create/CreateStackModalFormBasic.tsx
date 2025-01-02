@@ -44,7 +44,7 @@ export function CreateStackModalFormBasic({
   setApproval: (name: boolean) => void
 }): any {
   const theme = useTheme()
-  const inputRef = useRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(undefined)
 
   useEffect(() => {
     inputRef.current?.focus?.()

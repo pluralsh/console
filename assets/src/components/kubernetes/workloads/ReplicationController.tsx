@@ -58,7 +58,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ReplicationController(): ReactElement {
+export default function ReplicationController(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicationControllerQuery({
@@ -138,7 +138,7 @@ export default function ReplicationController(): ReactElement {
   )
 }
 
-export function ReplicationControllerPods(): ReactElement {
+export function ReplicationControllerPods(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = usePodsColumns()
 
@@ -164,7 +164,7 @@ export function ReplicationControllerPods(): ReactElement {
   )
 }
 
-export function ReplicationControllerServices(): ReactElement {
+export function ReplicationControllerServices(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useServicesColumns()
 
@@ -190,7 +190,7 @@ export function ReplicationControllerServices(): ReactElement {
   )
 }
 
-export function ReplicationControllerEvents(): ReactElement {
+export function ReplicationControllerEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

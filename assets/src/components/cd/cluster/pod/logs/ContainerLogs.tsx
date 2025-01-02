@@ -31,7 +31,7 @@ function LogHeader({
   container: string
   refetch: Nullable<() => void>
   loading: boolean
-}): ReactElement {
+}): ReactElement<any> {
   const theme = useTheme()
 
   return (
@@ -65,7 +65,7 @@ function LogHeader({
   )
 }
 
-function LogLine({ getValue }): ReactElement {
+function LogLine({ getValue }): ReactElement<any> {
   const theme = useTheme()
   const borderColor = useBorderColor()
   const level = determineLevel(getValue())
@@ -154,7 +154,7 @@ export function ContainerLogsTable({
   refetch,
   loading,
   logs,
-}: ContainerLogsTableProps): ReactElement {
+}: ContainerLogsTableProps): ReactElement<any> {
   const size = useWindowSize()
   const containerRef = createRef<HTMLDivElement>()
   const [containerHeight, setContainerHeight] = useState(0)

@@ -56,7 +56,7 @@ export function NotificationsPanelOverlay({
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
 }) {
-  const notificationsPanelRef = useRef<any>()
+  const notificationsPanelRef = useRef<any>(undefined)
   const [all, setAll] = useState<boolean>(false)
 
   useOutsideClick(notificationsPanelRef, () => {

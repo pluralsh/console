@@ -49,7 +49,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function StatefulSet(): ReactElement {
+export default function StatefulSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useStatefulSetQuery({
@@ -123,7 +123,7 @@ export default function StatefulSet(): ReactElement {
   )
 }
 
-export function StatefulSetPods(): ReactElement {
+export function StatefulSetPods(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = usePodsColumns()
 
@@ -146,7 +146,7 @@ export function StatefulSetPods(): ReactElement {
   )
 }
 
-export function StatefulSetEvents(): ReactElement {
+export function StatefulSetEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

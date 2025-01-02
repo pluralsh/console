@@ -29,7 +29,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Role(): ReactElement {
+export default function Role(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useRoleQuery({
@@ -72,7 +72,7 @@ export default function Role(): ReactElement {
   )
 }
 
-export function RolePolicyRules(): ReactElement {
+export function RolePolicyRules(): ReactElement<any> {
   const role = useOutletContext() as RoleT
 
   return (

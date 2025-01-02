@@ -11,16 +11,16 @@ const HIDDEN_ANNOTATIONS = ['last-applied-configuration']
 
 export default function Annotations({
   annotations,
-}: AnnotationsProps): ReactElement {
+}: AnnotationsProps): ReactElement<any> {
   const isHiddenAnnotation = useCallback(
     (label: [string, string]) =>
       HIDDEN_ANNOTATIONS.some((annotation) => label[0].includes(annotation)),
     []
   )
-  const [modal, setModal] = useState<ReactElement>()
+  const [modal, setModal] = useState<ReactElement<any>>()
   const [open, setOpen] = useState(false)
   const createAnnotationModal = useCallback(
-    (label: [string, string]): ReactElement => {
+    (label: [string, string]): ReactElement<any> => {
       const [_, value] = label
       const object = JSON.parse(value)
       const tabs = value

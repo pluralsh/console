@@ -25,7 +25,7 @@ export function IconExpander({
   children,
   ...cssProps
 }: {
-  icon: ReactElement
+  icon: ReactElement<any>
   active?: boolean
   hideCloseIcon?: boolean
   children: ReactNode
@@ -100,7 +100,7 @@ export function ExpandedInput({
   inputValue: string
   onChange: (value: string) => void
 } & ComponentProps<typeof Input>) {
-  const inputRef = useRef<HTMLElement>()
+  const inputRef = useRef<HTMLElement>(undefined)
 
   useEffect(() => {
     // only using querySelector because honorable input refs point to the div wrapper around the input

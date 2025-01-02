@@ -55,7 +55,7 @@ import { MARK_READ } from './queries'
 
 type MenuItem = {
   text: string
-  icon: ReactElement
+  icon: ReactElement<any>
   path: string
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp

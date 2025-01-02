@@ -116,7 +116,7 @@ export const SplitPane = forwardRef(
     } & ComponentProps<typeof SplitPaneSC>,
     parentRef: Ref<HTMLDivElement>
   ) => {
-    const localRef = useRef<HTMLDivElement>(null)
+    const localRef = useRef<HTMLDivElement>(undefined)
     const [boxTop, setBoxTop] = useState(0)
     const [boxHeight, setBoxHeight] = useState(0)
     const [dragging, setDragging] = useState(false)

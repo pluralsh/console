@@ -81,7 +81,7 @@ export function TerminalScreen({
   const shellContext = useContext(ShellContext)
   const isFirstConnect = useRef(true)
 
-  const terminalRef = useRef<HTMLElement>()
+  const terminalRef = useRef<HTMLElement>(undefined)
   const [terminalTheme] = useContext(TerminalThemeContext)
 
   const [channel, setChannel] = useState()

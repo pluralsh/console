@@ -43,7 +43,7 @@ const columns = [
 export default function ImagePullSecrets({
   imagePullSecrets,
   maxHeight,
-}: ImagePullSecretsProps): ReactElement {
+}: ImagePullSecretsProps): ReactElement<any> {
   return (
     <Table
       data={imagePullSecrets ?? []}

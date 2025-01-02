@@ -40,7 +40,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function StorageClass(): ReactElement {
+export default function StorageClass(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useStorageClassQuery({
@@ -92,7 +92,7 @@ export default function StorageClass(): ReactElement {
 
 const columnHelper = createColumnHelper<StorageClassT>()
 
-export function StorageClassPersistentVolumes(): ReactElement {
+export function StorageClassPersistentVolumes(): ReactElement<any> {
   const sc = useOutletContext() as StorageClassT
 
   const { colName, colLabels, colCreationTimestamp } =

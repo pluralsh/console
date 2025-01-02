@@ -39,7 +39,7 @@ export const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
   },
 ]
 
-function Logs(): ReactElement {
+function Logs(): ReactElement<any> {
   const { pod } = useOutletContext() as { pod: Pod }
 
   if (!pod) {

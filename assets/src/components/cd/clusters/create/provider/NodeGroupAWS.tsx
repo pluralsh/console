@@ -2,7 +2,7 @@ import { ReactElement } from 'react'
 import { Input, Switch } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-function NodeGroupAWS(): ReactElement {
+function NodeGroupAWS(): ReactElement<any> {
   const theme = useTheme()
 
   return (
