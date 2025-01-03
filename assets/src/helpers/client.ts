@@ -74,7 +74,7 @@ export function buildClient(
   const socketLink = new GraphQLWsLink(
     createClient({
       url: gqlwsUrl,
-      lazy: false,
+      lazy: true,
       connectionParams: () => {
         const token = fetchToken()
         return token ? { token: `Bearer ${token}` } : {}

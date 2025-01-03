@@ -5,6 +5,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
 
   @blacklist ~w(Secret ConfigMap)
 
+  def custom(_), do: false
+
   def generate(%ServiceComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
   def generate(%ServiceComponent{service: %{cluster: cluster}} = comp) do
     save_kubeconfig(cluster)

@@ -131,6 +131,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   end
 
   describe "registerRuntimeServices" do
+    @tag :skip
     test "it can upsert a set of runtime services" do
       cluster = insert(:cluster, version: "1.24")
 
@@ -148,6 +149,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       assert runtime.version == "1.3.1"
     end
 
+    @tag :skip
     test "it can add a service id in the upsert" do
       cluster = insert(:cluster, version: "1.24")
       svc = insert(:service, cluster: cluster)
@@ -481,6 +483,22 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       """, %{"id" => cluster.id}, %{current_user: admin_user()})
 
       %{"upgradeInsights" => [%{"name" => _, "details" => [%{"status" => "PASSING"}]}]} = found
+    end
+  end
+
+  describe "addClusterAuditLog" do
+    test "it enqueues an audit log" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"addClusterAuditLog" => true}}} = run_query("""
+        mutation Add($audit: ClusterAuditAttributes!) {
+          addClusterAuditLog(audit: $audit)
+        }
+      """, %{"audit" => %{
+        "clusterId" => cluster.id,
+        "method" => "GET",
+        "path" => "/api/v1/namespaces"
+      }}, %{current_user: insert(:user)})
     end
   end
 

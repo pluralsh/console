@@ -7,6 +7,9 @@ defprotocol Console.AI.Evidence do
   def insight(struct)
 
   def preload(term)
+
+  @spec custom(term) :: boolean
+  def custom(term)
 end
 
 defimpl Console.AI.Evidence, for: Any do
@@ -15,4 +18,6 @@ defimpl Console.AI.Evidence, for: Any do
   def preload(_), do: :ok
 
   def insight(_), do: nil
+
+  def custom(_), do: false
 end

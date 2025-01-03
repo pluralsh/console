@@ -583,6 +583,8 @@ type RootMutationType {
 
   deletePinnedCustomResource(id: ID!): PinnedCustomResource
 
+  addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
+
   createServiceDeployment(
     clusterId: ID
 
@@ -4602,6 +4604,17 @@ input ClusterRecommendationAttributes {
   serviceId: ID
 }
 
+input ClusterAuditAttributes {
+  "the cluster this request was made on"
+  clusterId: ID!
+
+  "the http method from the given request"
+  method: String!
+
+  "the path made for the given request"
+  path: String!
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -4847,6 +4860,8 @@ type Cluster {
 
   "whether the current user can edit this cluster"
   editable: Boolean
+
+  auditLogs(after: String, first: Int, before: String, last: Int): ClusterAuditLogConnection
 
   insertedAt: DateTime
 
@@ -5348,6 +5363,16 @@ type ClusterScalingRecommendation {
   updatedAt: DateTime
 }
 
+type ClusterAuditLog {
+  id: ID!
+  method: String!
+  path: String!
+  cluster: Cluster
+  user: User
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -5386,6 +5411,11 @@ type ClusterScalingRecommendationConnection {
 type ClusterUsageHistoryConnection {
   pageInfo: PageInfo!
   edges: [ClusterUsageHistoryEdge]
+}
+
+type ClusterAuditLogConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterAuditLogEdge]
 }
 
 enum AuthMethod {
@@ -8003,6 +8033,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ClusterAuditLogEdge {
+  node: ClusterAuditLog
   cursor: String
 }
 

@@ -1,7 +1,32 @@
 defmodule Console.AI.Memoizer do
+  import Console.AI.Evidence.Base, only: [append: 2]
   alias Console.Repo
   alias Console.AI.{Evidence, Provider}
   alias Console.Schema.AiInsight
+
+  @format {:user, """
+  Please format the result in the following way using markdown:
+
+  # Summary
+
+  {one paragraph summary of the issue described}
+
+  # Root Cause
+
+  {one paragraph summary of the root cause of the issue being faced}
+
+  # Key Evidence
+
+  {numbered list of supporting evidence for this root cause}
+
+  # Contextual Observations
+
+  {bulleted list of contextual information that also could be helpful}
+
+  # Debugging Steps
+
+  {suggestions for how to debug the issue}
+  """}
 
   @spec generate(struct) :: {:ok, AiInsight.t} | {:error, binary}
   def generate(model) do
@@ -36,7 +61,8 @@ defmodule Console.AI.Memoizer do
     end
   end
 
-  defp insight_attrs(%{insight_id: id}, history, sha) do
+  defp insight_attrs(%{insight_id: id} = model, history, sha) do
+    history = if Evidence.custom(model), do: history, else: append(history, @format)
     with {:ok, insight} <- Provider.completion(history),
          {:ok, summary} <- Provider.summary(insight) do
       %{insight: %{id: id, text: insight, summary: summary, errors: [], sha: sha}}

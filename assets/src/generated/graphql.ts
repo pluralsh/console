@@ -935,6 +935,7 @@ export type Cluster = {
   alerts?: Maybe<AlertConnection>;
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  auditLogs?: Maybe<ClusterAuditLogConnection>;
   clusterMetrics?: Maybe<ClusterMetrics>;
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
   /** a custom credential to use when provisioning this cluster */
@@ -1046,6 +1047,15 @@ export type ClusterAlertsArgs = {
 
 
 /** a representation of a cluster you can deploy to */
+export type ClusterAuditLogsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
 export type ClusterClusterMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
@@ -1130,6 +1140,38 @@ export type ClusterAttributes = {
   upgradePlan?: InputMaybe<UpgradePlanAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ClusterAuditAttributes = {
+  /** the cluster this request was made on */
+  clusterId: Scalars['ID']['input'];
+  /** the http method from the given request */
+  method: Scalars['String']['input'];
+  /** the path made for the given request */
+  path: Scalars['String']['input'];
+};
+
+export type ClusterAuditLog = {
+  __typename?: 'ClusterAuditLog';
+  cluster?: Maybe<Cluster>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  method: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+export type ClusterAuditLogConnection = {
+  __typename?: 'ClusterAuditLogConnection';
+  edges?: Maybe<Array<Maybe<ClusterAuditLogEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterAuditLogEdge = {
+  __typename?: 'ClusterAuditLogEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterAuditLog>;
 };
 
 export type ClusterBackup = {
@@ -5180,6 +5222,7 @@ export type RootMutationType = {
   __typename?: 'RootMutationType';
   /** it will add additional context to the given chat from a source object */
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
+  addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
   addRunLogs?: Maybe<RunLogs>;
   aiFixPr?: Maybe<PullRequest>;
   /** approves an approval pipeline gate */
@@ -5380,6 +5423,11 @@ export type RootMutationTypeAddChatContextArgs = {
   source: ContextSource;
   sourceId?: InputMaybe<Scalars['ID']['input']>;
   threadId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeAddClusterAuditLogArgs = {
+  audit: ClusterAuditAttributes;
 };
 
 

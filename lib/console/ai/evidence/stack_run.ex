@@ -7,6 +7,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
 
   require Logger
 
+  def custom(_), do: false
+
   def generate(%StackRun{steps: steps} = run) do
     Enum.filter(steps, & &1.status == :failed)
     |> Repo.preload([:logs])

@@ -6,6 +6,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
 
   require Logger
 
+  def custom(_), do: false
+
   def generate(%Service{} = service) do
     components = ServiceComponent.for_service(service.id)
                  |> ServiceComponent.for_states([:failed, :pending])

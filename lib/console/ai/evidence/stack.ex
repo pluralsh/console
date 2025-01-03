@@ -3,6 +3,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
   alias Console.AI.Worker
   alias Console.Schema.{AiInsight, Stack, StackRun}
 
+  def custom(_), do: false
+
   def generate(%Stack{} = stack) do
     StackRun.for_stack(stack.id)
     |> StackRun.for_status(:failed)

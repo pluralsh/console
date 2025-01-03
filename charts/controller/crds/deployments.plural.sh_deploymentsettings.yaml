@@ -400,6 +400,21 @@ spec:
                       type: object
                     type: array
                 type: object
+              cost:
+                description: Settings for managing Plural's cost management features
+                properties:
+                  recommendationCushion:
+                    description: |-
+                      A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,
+                      should be between 1-99.
+                    format: int64
+                    type: integer
+                  recommendationThreshold:
+                    description: The minimal monthly cost for a recommendation to
+                      be covered by a controller
+                    format: int64
+                    type: integer
+                type: object
               logging:
                 description: Settings for connections to log aggregation datastores
                 properties:

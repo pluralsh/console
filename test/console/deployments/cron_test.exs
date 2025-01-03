@@ -296,4 +296,16 @@ defmodule Console.Deployments.CronTest do
         do: assert refetch(n)
     end
   end
+
+  describe "#prune_cluster_audit_logs/0" do
+    test "it will wipe old read or really old unread cluster_audit_logs" do
+      keep   = insert_list(2, :cluster_audit_log, inserted_at: Timex.now() |> Timex.shift(days: -8))
+      remove = insert_list(2, :cluster_audit_log, inserted_at: Timex.now() |> Timex.shift(days: -61))
+
+      Cron.prune_cluster_audit_logs()
+
+      for a <- remove, do: refute refetch(a)
+      for a <- keep, do: assert refetch(a)
+    end
+  end
 end

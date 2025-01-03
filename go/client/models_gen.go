@@ -836,9 +836,10 @@ type Cluster struct {
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// whether the current user can edit this cluster
-	Editable   *bool   `json:"editable,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	Editable   *bool                      `json:"editable,omitempty"`
+	AuditLogs  *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
+	InsertedAt *string                    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                    `json:"updatedAt,omitempty"`
 }
 
 // A common kubernetes cluster add-on like cert-manager, istio, etc
@@ -871,6 +872,35 @@ type ClusterAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
+}
+
+type ClusterAuditAttributes struct {
+	// the cluster this request was made on
+	ClusterID string `json:"clusterId"`
+	// the http method from the given request
+	Method string `json:"method"`
+	// the path made for the given request
+	Path string `json:"path"`
+}
+
+type ClusterAuditLog struct {
+	ID         string   `json:"id"`
+	Method     string   `json:"method"`
+	Path       string   `json:"path"`
+	Cluster    *Cluster `json:"cluster,omitempty"`
+	User       *User    `json:"user,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type ClusterAuditLogConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*ClusterAuditLogEdge `json:"edges,omitempty"`
+}
+
+type ClusterAuditLogEdge struct {
+	Node   *ClusterAuditLog `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
 }
 
 type ClusterBackup struct {

@@ -148,6 +148,7 @@ func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error 
 func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Context, settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
 	attr := &console.DeploymentSettingsAttributes{
 		MgmtRepo: settings.Spec.ManagementRepo,
+		Cost:     settings.Spec.Cost.Attributes(),
 	}
 
 	if settings.Spec.AgentHelmValues != nil {

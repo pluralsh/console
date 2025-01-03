@@ -126,6 +126,9 @@ delete-tag:  ## deletes a tag from git locally and upstream
 	git tag -d $$tag; \
 	git push origin :$$tag
 
+latest-version:
+	@python3 utils/versions/main.py
+
 install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
 	@git config --local core.hooksPath ${GIT_HOOKS_PATH}/
 	@echo Successfully configured git hooks, \'core.hooksPath\' now points to \'${GIT_HOOKS_PATH}\'.
