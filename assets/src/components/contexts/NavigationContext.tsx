@@ -1,27 +1,25 @@
+import { NavigationContextProvider } from '@pluralsh/design-system'
+import React, { ReactNode } from 'react'
 import {
   Link as ReactRouterLink,
   useLocation,
   useNavigate,
 } from 'react-router-dom'
-import {
-  type NavigationContextLinkProps,
-  NavigationContextProvider,
-} from '@pluralsh/design-system'
-import { ReactNode, Ref, forwardRef } from 'react'
 
-function LinkRef(
-  { href, ...props }: NavigationContextLinkProps,
-  ref: Ref<any>
-) {
+function Link({
+  href,
+  ...props
+}: { href?: string } & Omit<
+  React.ComponentPropsWithRef<typeof ReactRouterLink>,
+  'to'
+>) {
   return (
     <ReactRouterLink
-      ref={ref}
       to={href ?? ''}
       {...props}
     />
   )
 }
-const Link = forwardRef(LinkRef)
 
 function usePathname() {
   const loc = useLocation()

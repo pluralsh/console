@@ -1,6 +1,13 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
-import { ReactNode, Ref, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { useCanScroll } from 'components/hooks/useCanScroll.ts'
@@ -163,7 +170,7 @@ export const ChatbotMessagesWrapper = ({
   children,
 }: {
   fullscreen: boolean
-  messageListRef?: Ref<HTMLDivElement>
+  messageListRef?: RefObject<HTMLDivElement | null>
   children: ReactNode
 }) => {
   const internalRef = useRef<HTMLDivElement>(null)
@@ -181,7 +188,9 @@ export const ChatbotMessagesWrapper = ({
         $show={canScrollDown}
         $position="bottom"
       />
-      <ChatbotMessagesListSC ref={combinedRef}>
+      <ChatbotMessagesListSC
+        ref={combinedRef as (instance: HTMLDivElement | null) => void}
+      >
         {children}
       </ChatbotMessagesListSC>
     </ChatbotMessagesWrapperSC>

@@ -3,7 +3,7 @@ import {
   ChatMessage,
   useAiCompletionQuery,
 } from '../../../generated/graphql.ts'
-import AIPanel from '../AIPanel.tsx'
+import { AIPanel } from '../AIPanel.tsx'
 import { Markdown } from '@pluralsh/design-system'
 import { GqlError } from '../../utils/Alert.tsx'
 import { useExplainWithAIContext } from '../AIContext.tsx'

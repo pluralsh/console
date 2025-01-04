@@ -1,17 +1,15 @@
+import { useResizeObserver } from '@pluralsh/design-system'
+import usePersistedState from 'components/hooks/usePersistedState'
 import {
   ComponentProps,
+  ComponentPropsWithoutRef,
   ReactNode,
-  Ref,
-  forwardRef,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react'
 import styled from 'styled-components'
-import { mergeRefs } from 'react-merge-refs'
-import { useResizeObserver } from '@pluralsh/design-system'
-import usePersistedState from 'components/hooks/usePersistedState'
 
 const RESIZER_HEIGHT = 24
 const PANE_MIN = 100
@@ -102,107 +100,102 @@ const Pane1SC = styled(PaneSC)((_) => ({
 }))
 const Pane2SC = styled(PaneSC)((_) => ({}))
 
-export const SplitPane = forwardRef(
-  (
-    {
-      id,
-      pane1,
-      pane2,
-      ...props
-    }: {
-      id: string
-      pane1: ReactNode
-      pane2: ReactNode
-    } & ComponentProps<typeof SplitPaneSC>,
-    parentRef: Ref<HTMLDivElement>
-  ) => {
-    const localRef = useRef<HTMLDivElement>(undefined)
-    const [boxTop, setBoxTop] = useState(0)
-    const [boxHeight, setBoxHeight] = useState(0)
-    const [dragging, setDragging] = useState(false)
-    const [split, setSplit] = usePersistedState(
-      `split-pane-amt-${id}`,
-      0.5,
-      (val) => (typeof val === 'number' ? Math.min(1, Math.max(0, val)) : 0.5)
-    )
+export function SplitPane({
+  id,
+  pane1,
+  pane2,
+  ...props
+}: {
+  id: string
+  pane1: ReactNode
+  pane2: ReactNode
+} & ComponentPropsWithoutRef<typeof SplitPaneSC>) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [boxTop, setBoxTop] = useState(0)
+  const [boxHeight, setBoxHeight] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const [split, setSplit] = usePersistedState(
+    `split-pane-amt-${id}`,
+    0.5,
+    (val) => (typeof val === 'number' ? Math.min(1, Math.max(0, val)) : 0.5)
+  )
 
-    useResizeObserver(
-      localRef,
-      useCallback((rect) => {
-        setBoxHeight(rect.height)
-      }, [])
-    )
-    useEffect(() => {
-      const updateTop = () => {
-        setBoxTop((pT) => localRef.current?.getBoundingClientRect().top || pT)
-      }
-
-      setBoxTop((pT) => localRef.current?.getBoundingClientRect().top || pT)
-      window.addEventListener('resize', updateTop)
-
-      updateTop()
-
-      return window.removeEventListener('resize', updateTop)
+  useResizeObserver(
+    wrapperRef,
+    useCallback((rect) => {
+      setBoxHeight(rect.height)
     }, [])
+  )
+  useEffect(() => {
+    const updateTop = () => {
+      setBoxTop((pT) => wrapperRef.current?.getBoundingClientRect().top || pT)
+    }
 
-    useEffect(() => {
-      const listener = (e) => {
-        const nextSplit = Math.min(
-          1,
-          Math.max(0, (e.clientY - boxTop) / boxHeight)
-        )
+    setBoxTop((pT) => wrapperRef.current?.getBoundingClientRect().top || pT)
+    window.addEventListener('resize', updateTop)
 
-        setSplit(nextSplit)
-      }
+    updateTop()
 
-      if (dragging) {
-        window.addEventListener('mousemove', listener)
-        window.addEventListener('mouseup', () => setDragging(false))
+    return window.removeEventListener('resize', updateTop)
+  }, [])
 
-        return () => window.removeEventListener('mousemove', listener)
-      }
-    }, [dragging, boxTop, boxHeight, setSplit])
-    const pane1Height =
-      Math.min(
-        Math.max(PANE_MIN + RESIZER_HEIGHT * 0.5, split * boxHeight),
-        boxHeight - (PANE_MIN + RESIZER_HEIGHT * 0.5)
-      ) -
-      RESIZER_HEIGHT * 0.5
+  useEffect(() => {
+    const listener = (e) => {
+      const nextSplit = Math.min(
+        1,
+        Math.max(0, (e.clientY - boxTop) / boxHeight)
+      )
 
-    return (
-      <SplitPaneSC
-        ref={mergeRefs([localRef, parentRef])}
-        {...props}
-      >
-        <Pane1SC style={{ height: pane1Height }}>{pane1}</Pane1SC>
-        <Resizer
-          onMouseDown={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setDragging(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
-              setSplit((prev) =>
-                Math.min(
-                  (prev * boxHeight + KEY_INC * (e.shiftKey ? SHIFT_MULT : 1)) /
-                    boxHeight,
-                  1
-                )
+      setSplit(nextSplit)
+    }
+
+    if (dragging) {
+      window.addEventListener('mousemove', listener)
+      window.addEventListener('mouseup', () => setDragging(false))
+
+      return () => window.removeEventListener('mousemove', listener)
+    }
+  }, [dragging, boxTop, boxHeight, setSplit])
+  const pane1Height =
+    Math.min(
+      Math.max(PANE_MIN + RESIZER_HEIGHT * 0.5, split * boxHeight),
+      boxHeight - (PANE_MIN + RESIZER_HEIGHT * 0.5)
+    ) -
+    RESIZER_HEIGHT * 0.5
+
+  return (
+    <SplitPaneSC
+      {...props}
+      ref={wrapperRef}
+    >
+      <Pane1SC style={{ height: pane1Height }}>{pane1}</Pane1SC>
+      <Resizer
+        onMouseDown={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setDragging(true)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') {
+            setSplit((prev) =>
+              Math.min(
+                (prev * boxHeight + KEY_INC * (e.shiftKey ? SHIFT_MULT : 1)) /
+                  boxHeight,
+                1
               )
-            } else if (e.key === 'ArrowUp') {
-              setSplit((prev) =>
-                Math.max(
-                  (prev * boxHeight - KEY_INC * (e.shiftKey ? SHIFT_MULT : 1)) /
-                    boxHeight,
-                  0
-                )
+            )
+          } else if (e.key === 'ArrowUp') {
+            setSplit((prev) =>
+              Math.max(
+                (prev * boxHeight - KEY_INC * (e.shiftKey ? SHIFT_MULT : 1)) /
+                  boxHeight,
+                0
               )
-            }
-          }}
-        />
-        <Pane2SC>{pane2}</Pane2SC>
-      </SplitPaneSC>
-    )
-  }
-)
+            )
+          }
+        }}
+      />
+      <Pane2SC>{pane2}</Pane2SC>
+    </SplitPaneSC>
+  )
+}

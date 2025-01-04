@@ -2,7 +2,7 @@ import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Pod } from 'generated/graphql'
 import { A } from 'honorable'
 import { Link } from 'react-router-dom'
-import { podStatusToReadiness } from 'utils/status'
+import { PhaseT, podStatusToReadiness } from 'utils/status'
 
 import { getNodeDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
@@ -49,7 +49,7 @@ export default function PodSidecar({
         {pod.spec.serviceAccountName}
       </SidecarItem>
       <SidecarItem heading="Phase">
-        <PhaseChip phase={pod.status?.phase} />
+        <PhaseChip phase={pod.status?.phase as PhaseT} />
       </SidecarItem>
       <SidecarItem heading="Status">
         <StatusChip readiness={readiness} />

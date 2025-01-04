@@ -21,7 +21,12 @@ import {
   AiPinFragment,
   ChatThreadTinyFragment,
 } from 'generated/graphql'
-import { ComponentProps, ReactNode, useCallback } from 'react'
+import {
+  ComponentProps,
+  ComponentPropsWithRef,
+  ReactNode,
+  useCallback,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime.ts'
 import { useChatbot } from './AIContext.tsx'
@@ -69,7 +74,7 @@ export function AITableEntry({
   pinLoading?: boolean
   modal?: boolean | null
   hidePins?: boolean | null
-} & ComponentProps<'div'>) {
+} & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
   const theme = useTheme()
   const { pathname } = useLocation()
   const { goToThread, goToInsight } = useChatbot()

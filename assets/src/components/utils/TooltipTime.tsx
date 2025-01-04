@@ -32,7 +32,7 @@ type BaseProps = {
   ComponentProps<typeof Tooltip>,
   'placement' | 'displayOn' | 'manualOpen'
 > &
-  ComponentPropsWithRef<'div'>
+  ComponentPropsWithRef<typeof TooltipTimeSC>
 type SingleProps = {
   date: ReactElement<any> | string | undefined | null
   prefix?: ReactElement<any> | string | undefined | null

@@ -11,81 +11,73 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentProps, forwardRef, ReactNode, Ref, useState } from 'react'
+import { ComponentProps, ReactNode, useState } from 'react'
 import styled, { CSSObject, useTheme } from 'styled-components'
 import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
 import { AiRole, useDeleteChatMutation } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
 
-export const ChatMessage = forwardRef(
-  (
-    {
-      id,
-      content,
-      role,
-      disableActions,
-      contentStyles,
-      ...props
-    }: {
-      content: string
-      role: AiRole
-      disableActions?: boolean
-      contentStyles?: CSSObject
-    } & ComponentProps<typeof ChatMessageSC>,
-    ref: Ref<HTMLDivElement>
-  ) => {
-    const theme = useTheme()
-    const [showActions, setShowActions] = useState(false)
-    let finalContent: ReactNode
+export function ChatMessage({
+  id,
+  content,
+  role,
+  disableActions,
+  contentStyles,
+  ...props
+}: {
+  content: string
+  role: AiRole
+  disableActions?: boolean
+  contentStyles?: CSSObject
+} & ComponentProps<typeof ChatMessageSC>) {
+  const theme = useTheme()
+  const [showActions, setShowActions] = useState(false)
+  let finalContent: ReactNode
 
-    if (role === AiRole.Assistant || role === AiRole.System) {
-      finalContent = <Markdown text={content} />
-    } else {
-      finalContent = content.split('\n\n').map((str, i) => (
-        <Card
-          key={i}
-          css={{ padding: theme.spacing.medium }}
-          fillLevel={2}
-        >
-          {str.split('\n').map((line, i, arr) => (
-            <div
-              key={`${i}-${line}`}
-              css={{ display: 'contents' }}
-            >
-              {line}
-              {i !== arr.length - 1 ? <br /> : null}
-            </div>
-          ))}
-        </Card>
-      ))
-    }
-
-    return (
-      <ChatMessageSC
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
-        ref={ref}
-        {...props}
+  if (role === AiRole.Assistant || role === AiRole.System) {
+    finalContent = <Markdown text={content} />
+  } else {
+    finalContent = content.split('\n\n').map((str, i) => (
+      <Card
+        key={i}
+        css={{ padding: theme.spacing.medium }}
+        fillLevel={2}
       >
-        <ChatMessageActions
-          id={id ?? ''}
-          content={content}
-          show={showActions && !disableActions}
-        />
-        <Flex
-          gap="medium"
-          justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
-        >
-          {role !== AiRole.User && <PluralAssistantIcon />}
-          <div css={{ overflow: 'hidden', ...contentStyles }}>
-            {finalContent}
+        {str.split('\n').map((line, i, arr) => (
+          <div
+            key={`${i}-${line}`}
+            css={{ display: 'contents' }}
+          >
+            {line}
+            {i !== arr.length - 1 ? <br /> : null}
           </div>
-        </Flex>
-      </ChatMessageSC>
-    )
+        ))}
+      </Card>
+    ))
   }
-)
+
+  return (
+    <ChatMessageSC
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
+      {...props}
+    >
+      <ChatMessageActions
+        id={id ?? ''}
+        content={content}
+        show={showActions && !disableActions}
+      />
+      <Flex
+        gap="medium"
+        justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
+      >
+        {role !== AiRole.User && <PluralAssistantIcon />}
+        <div css={{ overflow: 'hidden', ...contentStyles }}>{finalContent}</div>
+      </Flex>
+    </ChatMessageSC>
+  )
+}
 
 function ChatMessageActions({
   id,

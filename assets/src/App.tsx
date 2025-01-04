@@ -7,10 +7,14 @@ import {
   styledThemeLight,
   useThemeColorMode,
 } from '@pluralsh/design-system'
-import { ReactNode } from 'react'
+import { FC, ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-import { CssBaseline, ThemeProvider as HonorableThemeProvider } from 'honorable'
+import {
+  CssBaseline,
+  ThemeProvider as HonorableThemeProvider,
+  ThemeProviderProps,
+} from 'honorable'
 import {
   ThemeProvider as StyledThemeProvider,
   StyleSheetManager,
@@ -24,6 +28,11 @@ import { rootRoutes } from './routes/rootRoutes'
 
 import { shouldForwardProp } from 'utils/shouldForwardProp'
 import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
+
+// workarounds for broken type from honorable
+const TypedHonorableThemeProvider =
+  HonorableThemeProvider as FC<ThemeProviderProps>
+const TypedCssBaseline = CssBaseline as any
 
 const router = createBrowserRouter(rootRoutes)
 
@@ -45,17 +54,17 @@ function ThemeProviders({ children }: { children: ReactNode }) {
   const styledTheme = colorMode === 'light' ? styledThemeLight : styledThemeDark
 
   return (
-    <HonorableThemeProvider theme={honorableTheme}>
+    <TypedHonorableThemeProvider theme={honorableTheme}>
       <StyleSheetManager shouldForwardProp={shouldForwardProp}>
         <StyledThemeProvider theme={styledTheme}>
           <OverlayContextProvider>
-            <CssBaseline />
+            <TypedCssBaseline />
             <GlobalStyle />
             <DocSearchStyles />
             <PluralErrorBoundary>{children}</PluralErrorBoundary>
           </OverlayContextProvider>
         </StyledThemeProvider>
       </StyleSheetManager>
-    </HonorableThemeProvider>
+    </TypedHonorableThemeProvider>
   )
 }
