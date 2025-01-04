@@ -3,7 +3,7 @@ import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 import { AiRole } from 'generated/graphql'
 import {
   ClipboardEvent,
-  ComponentProps,
+  ComponentPropsWithoutRef,
   FormEvent,
   KeyboardEvent,
   useCallback,
@@ -22,7 +22,7 @@ export function SendMessageForm({
 }: {
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
-} & ComponentProps<'div'>) {
+} & ComponentPropsWithoutRef<'div'>) {
   const [newMessage, setNewMessage] = usePersistedSessionState<string>(
     'currentAiChatMessage',
     ''
@@ -100,8 +100,8 @@ export function SendMessageForm({
           onInput={onInput}
           onPaste={onPaste}
           onKeyDown={onKeyDown}
-          ref={contentEditableRef}
           {...props}
+          ref={contentEditableRef}
         />
         <SendMessageButtonSC
           type="submit"
