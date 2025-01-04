@@ -1,10 +1,4 @@
-import {
-  type ComponentProps,
-  type ReactElement,
-  type Ref,
-  cloneElement,
-  forwardRef,
-} from 'react'
+import { type ComponentProps, type ReactElement, cloneElement } from 'react'
 import { last } from 'lodash-es'
 
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
@@ -36,7 +30,7 @@ type AppIconProps = {
   hue?: AppIconHue
   clickable?: boolean
   url?: string
-  icon?: ReactElement
+  icon?: ReactElement<any>
   alt?: string
   name?: string
   initials?: string
@@ -151,22 +145,19 @@ const ImgSC = styled.img<{
   objectFit: 'cover',
 }))
 
-function AppIconRef(
-  {
-    size = 'medium',
-    spacing = 'padding',
-    hue,
-    clickable = false,
-    url,
-    icon = null,
-    alt,
-    name,
-    initials,
-    onClose,
-    ...props
-  }: AppIconProps & ComponentProps<typeof AppIconSC>,
-  ref: Ref<any>
-) {
+function AppIcon({
+  size = 'medium',
+  spacing = 'padding',
+  hue,
+  clickable = false,
+  url,
+  icon = null,
+  alt,
+  name,
+  initials,
+  onClose,
+  ...props
+}: AppIconProps & ComponentProps<typeof AppIconSC>) {
   const theme = useTheme()
   const parentFillLevel = useFillLevel()
 
@@ -198,7 +189,6 @@ function AppIconRef(
     >
       {url ? (
         <ImgSC
-          ref={ref}
           src={url}
           alt={alt}
           $iconWidth={iconWidth}
@@ -213,8 +203,6 @@ function AppIconRef(
     </AppIconSC>
   )
 }
-
-const AppIcon = forwardRef(AppIconRef)
 
 export default AppIcon
 export type { AppIconProps }

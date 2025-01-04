@@ -1,12 +1,6 @@
 // drop-in replacement for anywhere 'honorable' Flex is used
 
-import {
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-  forwardRef,
-  memo,
-} from 'react'
+import { type CSSProperties, type ReactNode, type RefObject, memo } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 
 type FlexBaseProps = {
@@ -47,27 +41,26 @@ type FlexBaseProps = {
 
   gap?: keyof DefaultTheme['spacing']
   padding?: keyof DefaultTheme['spacing']
+  ref?: RefObject<HTMLDivElement>
   children?: ReactNode
 }
 
-type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
+export type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
 
-function FlexRef(
-  {
-    direction,
-    wrap,
-    basis,
-    grow,
-    shrink,
-    align,
-    justify,
-    gap,
-    padding,
-    children,
-    ...otherProps
-  }: FlexProps,
-  ref: Ref<any>
-) {
+function BaseFlex({
+  ref,
+  direction,
+  wrap,
+  basis,
+  grow,
+  shrink,
+  align,
+  justify,
+  gap,
+  padding,
+  children,
+  ...otherProps
+}: FlexProps) {
   return (
     <FlexSC
       ref={ref}
@@ -124,8 +117,6 @@ const FlexSC = styled.div<{
     padding: theme.spacing[$padding] || 0,
   })
 )
-
-const BaseFlex = forwardRef(FlexRef)
 
 const Flex = memo(BaseFlex)
 

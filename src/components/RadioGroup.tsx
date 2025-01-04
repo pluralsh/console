@@ -1,4 +1,4 @@
-import { type PropsWithChildren, createContext, forwardRef } from 'react'
+import { type PropsWithChildren, createContext } from 'react'
 import { Div, type DivProps } from 'honorable'
 import { type AriaRadioGroupProps, useRadioGroup } from 'react-aria'
 import { useRadioGroupState } from 'react-stately'
@@ -7,25 +7,22 @@ export const RadioContext = createContext(null)
 
 type RadioGroupProps = AriaRadioGroupProps & PropsWithChildren<DivProps>
 
-function RadioGroup(
-  {
-    name,
-    label,
-    description,
-    errorMessage,
-    orientation,
-    isDisabled = false,
-    isReadOnly = false,
-    value,
-    defaultValue,
-    onChange,
-    validationState,
-    isRequired,
-    children,
-    ...props
-  }: RadioGroupProps,
-  ref: any
-) {
+function RadioGroup({
+  name,
+  label,
+  description,
+  errorMessage,
+  orientation,
+  isDisabled = false,
+  isReadOnly = false,
+  value,
+  defaultValue,
+  onChange,
+  validationState,
+  isRequired,
+  children,
+  ...props
+}: RadioGroupProps) {
   const stateProps = {
     name,
     label,
@@ -45,7 +42,6 @@ function RadioGroup(
 
   return (
     <Div
-      ref={ref}
       {...props}
       {...radioGroupProps}
     >
@@ -54,4 +50,4 @@ function RadioGroup(
   )
 }
 
-export default forwardRef(RadioGroup)
+export default RadioGroup

@@ -1,25 +1,25 @@
 import {
   type ComponentProps,
-  type ComponentPropsWithRef,
+  type ComponentPropsWithoutRef,
   type KeyboardEventHandler,
   type MouseEventHandler,
   type ReactNode,
-  forwardRef,
+  type RefObject,
   useCallback,
   useRef,
 } from 'react'
-import styled, { type DefaultTheme } from 'styled-components'
-import { mergeRefs } from 'react-merge-refs'
 import { mergeProps } from 'react-aria'
+import { mergeRefs } from 'react-merge-refs'
+import styled, { type DefaultTheme } from 'styled-components'
 
-import { simulateInputChange } from '../utils/simulateInputChange'
 import { useRefResizeObserver } from '../hooks/useRefResizeObserver'
+import { simulateInputChange } from '../utils/simulateInputChange'
 
 import { useFillLevel } from './contexts/FillLevelContext'
-import { TitleContent } from './Select'
-import Tooltip from './Tooltip'
 import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
+import { TitleContent } from './Select'
+import Tooltip from './Tooltip'
 
 import { useFormField } from './FormField'
 
@@ -52,9 +52,11 @@ export type InputProps = {
   onDeleteInputContent?: KeyboardEventHandler<HTMLInputElement>
   onClick?: MouseEventHandler<HTMLDivElement>
 }
-export type InputPropsFull = InputProps & { className?: string } & Pick<
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    ComponentPropsWithRef<'input'>,
+export type InputPropsFull = InputProps & {
+  className?: string
+  ref?: RefObject<HTMLDivElement>
+} & Pick<
+    ComponentPropsWithoutRef<'input'>,
     | 'value'
     | 'disabled'
     | 'defaultValue'
@@ -206,183 +208,176 @@ const InputContentSC = styled.div<{ $padStart: keyof DefaultTheme['spacing'] }>(
   })
 )
 
-const Input2 = forwardRef<HTMLDivElement, InputPropsFull>(
-  (
-    {
-      startIcon,
-      endIcon,
-      dropdownButton,
-      suffix,
-      prefix,
-      showClearButton,
-      titleContent,
-      size,
-      small,
-      large,
-      onEnter,
-      onDeleteInputContent,
-      inputContent,
-      inputProps,
-      // Input props
-      disabled,
-      value,
-      error,
-      placeholder,
-      onChange,
-      onFocus,
-      onBlur,
-      onKeyDown,
-      ...props
-    },
-    ref
-  ) => {
-    const inputRef = useRef<HTMLInputElement>(null)
-    const inputAreaRef = useRef<HTMLDivElement>(null)
-    const inputContentRef = useRef<HTMLDivElement>(null)
-    const inputContentWidthRef = useRef<number>(0)
-    const onInputContentResize = useCallback<
-      Parameters<typeof useRefResizeObserver>[1]
-    >((entry) => {
-      const prevWidth = inputContentWidthRef.current
+function Input2({
+  ref,
+  startIcon,
+  endIcon,
+  dropdownButton,
+  suffix,
+  prefix,
+  showClearButton,
+  titleContent,
+  size,
+  small,
+  large,
+  onEnter,
+  onDeleteInputContent,
+  inputContent,
+  inputProps,
 
-      inputContentWidthRef.current = entry.contentRect.width
-      if (entry.contentRect.width <= prevWidth) {
-        return
-      }
-      const scrollDiff =
-        (inputAreaRef.current?.scrollWidth ?? 0) -
-        (inputAreaRef.current?.getBoundingClientRect().width ?? 0)
+  // Input props
+  disabled,
+  value,
+  error,
+  placeholder,
+  onChange,
+  onFocus,
+  onBlur,
+  onKeyDown,
+  ...props
+}: InputPropsFull) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const inputAreaRef = useRef<HTMLDivElement>(null)
+  const inputContentRef = useRef<HTMLDivElement>(null)
+  const inputContentWidthRef = useRef<number>(0)
+  const onInputContentResize = useCallback<
+    Parameters<typeof useRefResizeObserver>[1]
+  >((entry) => {
+    const prevWidth = inputContentWidthRef.current
 
-      if (scrollDiff > 0) {
-        inputAreaRef.current.scrollTo({
-          left: scrollDiff + 1,
-          behavior: 'smooth',
-        })
-      }
-    }, [])
-    const inputContentRefCb = useRefResizeObserver(
-      inputContentRef,
-      onInputContentResize
-    )
-
-    inputProps = {
-      ...(inputProps ?? {}),
-      ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
+    inputContentWidthRef.current = entry.contentRect.width
+    if (entry.contentRect.width <= prevWidth) {
+      return
     }
+    const scrollDiff =
+      (inputAreaRef.current?.scrollWidth ?? 0) -
+      (inputAreaRef.current?.getBoundingClientRect().width ?? 0)
 
-    const parentFillLevel = useFillLevel()
+    if (scrollDiff > 0) {
+      inputAreaRef.current.scrollTo({
+        left: scrollDiff + 1,
+        behavior: 'smooth',
+      })
+    }
+  }, [])
+  const inputContentRefCb = useRefResizeObserver(
+    inputContentRef,
+    onInputContentResize
+  )
 
-    size = size || (large ? 'large' : small ? 'small' : 'medium')
-
-    inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
-
-    const hasEndContent = !!suffix
-    const hasStartContent = !!prefix || !!titleContent
-    const hasClearButton = showClearButton && value
-    const inputPadStart = startIcon
-      ? null
-      : hasStartContent
-      ? 'small'
-      : 'medium'
-    const inputPadEnd = endIcon ? null : hasEndContent ? 'small' : 'medium'
-
-    const wrappedOnChange: InputPropsFull['onChange'] = useCallback(
-      (e) => {
-        onChange?.(e)
-      },
-      [onChange]
-    )
-
-    const wrappedOnKeyDown: InputPropsFull['onKeyDown'] = useCallback(
-      (e) => {
-        if (e.key === 'Enter' && typeof onEnter === 'function') {
-          onEnter?.(e)
-        }
-        if (e.key === 'Backspace' && inputRef?.current?.selectionStart === 0) {
-          onDeleteInputContent?.(e)
-        }
-        if (typeof onKeyDown === 'function') {
-          onKeyDown?.(e)
-        }
-      },
-      [onDeleteInputContent, onEnter, onKeyDown]
-    )
-
-    const outerOnClick: InputPropsFull['onClick'] = useCallback((e) => {
-      e.preventDefault()
-      inputRef?.current?.focus()
-    }, [])
-
-    return (
-      <InputRootSC
-        ref={ref}
-        $size={size}
-        $error={!!error}
-        aria-disabled={disabled}
-        onClick={outerOnClick}
-        {...props}
-      >
-        {(titleContent && (
-          <InputTitleContent
-            $size={size}
-            $parentFillLevel={parentFillLevel}
-          >
-            {titleContent}
-          </InputTitleContent>
-        )) ||
-          (prefix && <PrefixSuffix>{prefix}</PrefixSuffix>)}
-
-        {startIcon && (
-          <StartIcon $hasStartContent={hasStartContent}>{startIcon}</StartIcon>
-        )}
-        <InputAreaSC ref={inputAreaRef}>
-          {inputContent && (
-            <InputContentSC
-              ref={inputContentRefCb}
-              $padStart={inputPadStart}
-            >
-              {inputContent}
-            </InputContentSC>
-          )}
-          <InputBaseSC
-            $padStart={!inputContent ? inputPadStart : 'xsmall'}
-            $padEnd={inputPadEnd}
-            disabled={disabled}
-            value={value}
-            placeholder={placeholder}
-            onChange={wrappedOnChange}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            onKeyDown={wrappedOnKeyDown}
-            {...inputProps}
-          />
-        </InputAreaSC>
-        {hasClearButton && (
-          <ClearButton
-            disabled={disabled}
-            onClick={() => {
-              const input = inputRef?.current
-
-              if (input) {
-                simulateInputChange(input, '')
-                input.focus()
-              }
-            }}
-          />
-        )}
-        {!!endIcon && (
-          <EndIcon
-            $hasEndContent={hasEndContent}
-            $hasDropdownButton={!!dropdownButton}
-          >
-            {endIcon}
-          </EndIcon>
-        )}
-        {!!suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
-        {dropdownButton}
-      </InputRootSC>
-    )
+  inputProps = {
+    ...(inputProps ?? {}),
+    ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
   }
-)
+
+  const parentFillLevel = useFillLevel()
+
+  size = size || (large ? 'large' : small ? 'small' : 'medium')
+
+  inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+
+  const hasEndContent = !!suffix
+  const hasStartContent = !!prefix || !!titleContent
+  const hasClearButton = showClearButton && value
+  const inputPadStart = startIcon ? null : hasStartContent ? 'small' : 'medium'
+  const inputPadEnd = endIcon ? null : hasEndContent ? 'small' : 'medium'
+
+  const wrappedOnChange: InputPropsFull['onChange'] = useCallback(
+    (e) => {
+      onChange?.(e)
+    },
+    [onChange]
+  )
+
+  const wrappedOnKeyDown: InputPropsFull['onKeyDown'] = useCallback(
+    (e) => {
+      if (e.key === 'Enter' && typeof onEnter === 'function') {
+        onEnter?.(e)
+      }
+      if (e.key === 'Backspace' && inputRef?.current?.selectionStart === 0) {
+        onDeleteInputContent?.(e)
+      }
+      if (typeof onKeyDown === 'function') {
+        onKeyDown?.(e)
+      }
+    },
+    [onDeleteInputContent, onEnter, onKeyDown]
+  )
+
+  const outerOnClick: InputPropsFull['onClick'] = useCallback((e) => {
+    e.preventDefault()
+    inputRef?.current?.focus()
+  }, [])
+
+  return (
+    <InputRootSC
+      ref={ref}
+      $size={size}
+      $error={!!error}
+      aria-disabled={disabled}
+      onClick={outerOnClick}
+      {...props}
+    >
+      {(titleContent && (
+        <InputTitleContent
+          $size={size}
+          $parentFillLevel={parentFillLevel}
+        >
+          {titleContent}
+        </InputTitleContent>
+      )) ||
+        (prefix && <PrefixSuffix>{prefix}</PrefixSuffix>)}
+
+      {startIcon && (
+        <StartIcon $hasStartContent={hasStartContent}>{startIcon}</StartIcon>
+      )}
+      <InputAreaSC ref={inputAreaRef}>
+        {inputContent && (
+          <InputContentSC
+            ref={inputContentRefCb}
+            $padStart={inputPadStart}
+          >
+            {inputContent}
+          </InputContentSC>
+        )}
+        <InputBaseSC
+          $padStart={!inputContent ? inputPadStart : 'xsmall'}
+          $padEnd={inputPadEnd}
+          disabled={disabled}
+          value={value}
+          placeholder={placeholder}
+          onChange={wrappedOnChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          onKeyDown={wrappedOnKeyDown}
+          {...inputProps}
+        />
+      </InputAreaSC>
+      {hasClearButton && (
+        <ClearButton
+          disabled={disabled}
+          onClick={() => {
+            const input = inputRef?.current
+
+            if (input) {
+              simulateInputChange(input, '')
+              input.focus()
+            }
+          }}
+        />
+      )}
+      {!!endIcon && (
+        <EndIcon
+          $hasEndContent={hasEndContent}
+          $hasDropdownButton={!!dropdownButton}
+        >
+          {endIcon}
+        </EndIcon>
+      )}
+      {!!suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
+      {dropdownButton}
+    </InputRootSC>
+  )
+}
 
 export default Input2

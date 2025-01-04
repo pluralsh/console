@@ -42,7 +42,7 @@ const tabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef()
+  const tabStateRef = useRef(undefined)
   const [selectedKey, setSelectedKey] = useState<Key>('1')
   const orientation = 'horizontal'
   const tabListStateProps: TabListStateProps = {

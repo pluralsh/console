@@ -1,10 +1,10 @@
 import {
+  type ComponentProps,
   type HTMLAttributes,
   type ReactElement,
   type ReactNode,
   type RefObject,
   cloneElement,
-  forwardRef,
   useRef,
   useState,
 } from 'react'
@@ -59,12 +59,12 @@ export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
     | ReactElement<ListBoxItemBaseProps>[]
   dropdownHeaderFixed?: ReactNode
   dropdownFooterFixed?: ReactNode
-  dropdownHeader?: ReactElement
-  dropdownFooter?: ReactElement
+  dropdownHeader?: ReactElement<any>
+  dropdownFooter?: ReactElement<any>
   onHeaderClick?: () => unknown
   onFooterClick?: () => unknown
   titleContent?: ReactNode
-  triggerButton?: ReactElement
+  triggerButton?: ReactElement<any>
   placement?: Placement
   size?: Size
   width?: string | number
@@ -76,7 +76,7 @@ export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   >
 
 type TriggerProps = {
-  buttonRef: RefObject<HTMLElement>
+  buttonRef: RefObject<HTMLElement | null>
   buttonElt: any
   isOpen: boolean
 } & HTMLAttributes<HTMLElement>
@@ -188,57 +188,50 @@ const SelectButtonInner = styled.div<{
   })
 )
 
-const SelectButton = forwardRef<
-  HTMLDivElement,
-  SelectButtonProps & HTMLAttributes<HTMLDivElement>
->(
-  (
-    {
-      titleContent,
-      leftContent,
-      rightContent,
-      children,
-      showArrow = true,
-      isOpen,
-      size = 'medium',
-      transparent = false,
-      ...props
-    },
-    ref
-  ) => {
-    const parentFillLevel = useFillLevel()
+function SelectButton({
+  ref,
+  titleContent,
+  leftContent,
+  rightContent,
+  children,
+  showArrow = true,
+  isOpen,
+  size = 'medium',
+  transparent = false,
+  ...props
+}: SelectButtonProps & ComponentProps<'div'>) {
+  const parentFillLevel = useFillLevel()
 
-    return (
-      <SelectButtonInner
-        ref={ref}
-        $isOpen={isOpen}
-        $size={size}
-        $parentFillLevel={parentFillLevel}
-        $transparent={transparent}
-        {...props}
-      >
-        {titleContent && (
-          <TitleContent
-            $size={size}
-            $parentFillLevel={parentFillLevel}
-          >
-            {titleContent}
-          </TitleContent>
+  return (
+    <SelectButtonInner
+      ref={ref}
+      $isOpen={isOpen}
+      $size={size}
+      $parentFillLevel={parentFillLevel}
+      $transparent={transparent}
+      {...props}
+    >
+      {titleContent && (
+        <TitleContent
+          $size={size}
+          $parentFillLevel={parentFillLevel}
+        >
+          {titleContent}
+        </TitleContent>
+      )}
+      <div className="content">
+        {leftContent && <div className="leftContent">{leftContent}</div>}
+        <div className="children">{children}</div>
+        {rightContent && <div className="rightContent">{rightContent}</div>}
+        {showArrow && (
+          <div className="arrow">
+            <DropdownArrowIcon size={16} />
+          </div>
         )}
-        <div className="content">
-          {leftContent && <div className="leftContent">{leftContent}</div>}
-          <div className="children">{children}</div>
-          {rightContent && <div className="rightContent">{rightContent}</div>}
-          {showArrow && (
-            <div className="arrow">
-              <DropdownArrowIcon size={16} />
-            </div>
-          )}
-        </div>
-      </SelectButtonInner>
-    )
-  }
-)
+      </div>
+    </SelectButtonInner>
+  )
+}
 
 const SelectInner = styled.div((_) => ({
   position: 'relative',
@@ -258,8 +251,8 @@ export type SelectPropsMultiple = Omit<
   selectionMode: 'multiple'
 } & { onSelectionChange: (keys: Set<Key>) => any }
 
-function Select(props: SelectPropsSingle): ReactElement
-function Select(props: SelectPropsMultiple): ReactElement
+function Select(props: SelectPropsSingle): ReactElement<any>
+function Select(props: SelectPropsMultiple): ReactElement<any>
 function Select({
   children,
   selectedKey,
@@ -325,7 +318,7 @@ function Select({
   setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
 
   // Get props for the listbox element
-  const ref = useRef()
+  const ref = useRef(undefined)
   const { triggerProps, menuProps } = useSelect(selectStateProps, state, ref)
 
   label = label || ' '
@@ -372,7 +365,7 @@ function Select({
         name={name}
       />
       <Trigger
-        buttonRef={triggerRef as unknown as RefObject<HTMLElement>}
+        buttonRef={triggerRef as unknown as RefObject<HTMLElement | null>}
         buttonElt={triggerButton}
         isOpen={state.isOpen}
         {...triggerProps}

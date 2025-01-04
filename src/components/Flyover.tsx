@@ -1,10 +1,4 @@
-import {
-  type ComponentPropsWithoutRef,
-  type ReactNode,
-  type Ref,
-  forwardRef,
-  useCallback,
-} from 'react'
+import { type ComponentPropsWithRef, type ReactNode, useCallback } from 'react'
 
 import styled from 'styled-components'
 
@@ -28,21 +22,19 @@ type FlyoverProps = {
   width?: string | number
   minWidth?: number
   children?: ReactNode
-} & ComponentPropsWithoutRef<'div'>
+} & ComponentPropsWithRef<'div'>
 
-function FlyoverRef(
-  {
-    open = false,
-    onClose,
-    header,
-    scrollable = true,
-    width = '40%',
-    minWidth = 570,
-    children,
-    ...props
-  }: FlyoverProps,
-  ref: Ref<any>
-) {
+function Flyover({
+  ref,
+  open = false,
+  onClose,
+  header,
+  scrollable = true,
+  width = '40%',
+  minWidth = 570,
+  children,
+  ...props
+}: FlyoverProps) {
   const triggerClose = useCallback(
     (open: boolean) => {
       if (!open) onClose?.()
@@ -151,7 +143,5 @@ const FlyoverHeaderSC = styled.h1(({ theme }) => ({
   ...theme.partials.text.subtitle1,
   color: theme.colors.text,
 }))
-
-const Flyover = forwardRef(FlyoverRef)
 
 export default Flyover

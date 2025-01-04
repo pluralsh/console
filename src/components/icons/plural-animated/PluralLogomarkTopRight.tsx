@@ -2,7 +2,7 @@ import { type LogomarkProps } from './PluralLogomarkBottomLeft'
 
 export default function PluralLogomarkTopRight({
   color = 'currentColor',
-}: LogomarkProps): JSX.Element {
+}: LogomarkProps) {
   return (
     <svg
       width={100}

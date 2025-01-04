@@ -1,3 +1,5 @@
+import type { JSX } from 'react'
+
 import { type LogomarkProps } from './PluralLogomarkBottomLeft'
 
 export default function PluralLogomarkDot({

@@ -1,10 +1,8 @@
 import {
   type ComponentProps,
   type Dispatch,
-  type Ref,
   type SetStateAction,
   createContext,
-  forwardRef,
   useContext,
   useMemo,
   useState,
@@ -58,10 +56,11 @@ const SidebarSC = styled.div<{
   overflow: 'visible',
 }))
 
-function SidebarRef(
-  { layout = 'vertical', variant = 'app', ...props }: SidebarProps,
-  ref: Ref<any>
-) {
+function Sidebar({
+  layout = 'vertical',
+  variant = 'app',
+  ...props
+}: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false)
 
   const contextVal = useMemo(
@@ -79,14 +78,11 @@ function SidebarRef(
       <SidebarSC
         $isHorizontal={layout === 'horizontal'}
         $variant={variant}
-        ref={ref}
         {...props}
       />
     </SidebarContext.Provider>
   )
 }
-
-const Sidebar = forwardRef(SidebarRef)
 
 export default Sidebar
 export { useSidebar }

@@ -1,5 +1,5 @@
 import { Button, Div, Flex, H1 } from 'honorable'
-import { forwardRef, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
@@ -104,7 +104,7 @@ const moreTabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef()
+  const tabStateRef = useRef(undefined)
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = args.orientation || 'horizontal'
   const tabListStateProps: TabListStateProps = {
@@ -162,38 +162,32 @@ function TemplateBasic(args: any) {
 }
 
 const CustomLinkWrappedTab = styled(
-  forwardRef<HTMLAnchorElement, TabBaseProps>(
-    (
-      {
-        vertical,
-        active,
-        children,
-        textValue: _textValue,
-        renderer: _renderer,
-        ...props
-      },
-      ref
-    ) => {
-      const theme = useTheme()
+  ({
+    vertical,
+    active,
+    children,
+    textValue: _textValue,
+    renderer: _renderer,
+    ...props
+  }: TabBaseProps) => {
+    const theme = useTheme()
 
-      return (
-        <a
-          ref={ref}
-          target="_blank"
-          rel="noreferrer"
-          {...props}
+    return (
+      <a
+        target="_blank"
+        rel="noreferrer"
+        {...props}
+      >
+        <Tab
+          vertical={vertical}
+          active={active}
+          color={active ? theme.colors['text-success'] : 'red'}
         >
-          <Tab
-            vertical={vertical}
-            active={active}
-            color={active ? theme.colors['text-success'] : 'red'}
-          >
-            {children}
-          </Tab>
-        </a>
-      )
-    }
-  )
+          {children}
+        </Tab>
+      </a>
+    )
+  }
 )(({ active, theme }) => ({
   display: 'block',
   backgroundColor: active
@@ -202,35 +196,36 @@ const CustomLinkWrappedTab = styled(
   textDecoration: 'none',
 }))
 
-const MyCustomTab2 = forwardRef<any, any>(({ selectedKey, ...props }, ref) => (
-  <Flex
-    justifyContent="center"
-    alignItems="center"
-    {...props}
-    ref={ref}
-    width="100%"
-    padding="20px"
-    textAlign="center"
-    border="1px solid border-fill-two"
-  >
-    <Div
-      subtitle2
-      padding="small"
-      background={
-        selectedKey === 'bears'
-          ? 'action-primary'
-          : selectedKey === 'tigers'
-          ? 'icon-danger'
-          : 'fill-two'
-      }
+function MyCustomTab2({ selectedKey, ...props }: any) {
+  return (
+    <Flex
+      justifyContent="center"
+      alignItems="center"
+      {...props}
+      width="100%"
+      padding="20px"
+      textAlign="center"
+      border="1px solid border-fill-two"
     >
-      Com&shy;plete&shy;ly custom bears
-    </Div>
-  </Flex>
-))
+      <Div
+        subtitle2
+        padding="small"
+        background={
+          selectedKey === 'bears'
+            ? 'action-primary'
+            : selectedKey === 'tigers'
+            ? 'icon-danger'
+            : 'fill-two'
+        }
+      >
+        Com&shy;plete&shy;ly custom bears
+      </Div>
+    </Flex>
+  )
+}
 
 function TemplateComplex() {
-  const tabStateRef = useRef()
+  const tabStateRef = useRef(undefined)
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = 'vertical'
   const tabListStateProps: TabListStateProps = {

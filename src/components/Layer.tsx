@@ -5,9 +5,8 @@ import { useOutsideClick } from 'honorable'
 import { isNil } from 'lodash-es'
 import {
   type ComponentProps,
-  type MutableRefObject,
-  type PropsWithChildren,
-  forwardRef,
+  type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -150,33 +149,33 @@ const LayerWrapper = styled.div<{
   paddingBottom: $margin.bottom ?? undefined,
 }))
 
-function LayerRef(
-  {
-    position,
-    animation = 'slide',
-    modal = false,
-    margin,
-    children,
-    onClickOutside,
-    onClose,
-    onCloseComplete,
-    open,
-    wrapperProps,
-  }: PropsWithChildren<{
-    open: boolean
-    position: LayerPositionType
-    animation?: AnimationType
-    modal?: boolean
-    margin?: MarginType
-    onClose?: () => void | null | undefined
-    onCloseComplete?: () => void | null | undefined
-    onClickOutside?: () => void | null | undefined
-    wrapperProps?: ComponentProps<'div'>
-  }>,
-  ref: MutableRefObject<HTMLDivElement>
-) {
+function Layer({
+  ref,
+  position,
+  animation = 'slide',
+  modal = false,
+  margin,
+  children,
+  onClickOutside,
+  onClose,
+  onCloseComplete,
+  open,
+  wrapperProps,
+}: {
+  ref: RefObject<HTMLDivElement>
+  open: boolean
+  position: LayerPositionType
+  animation?: AnimationType
+  modal?: boolean
+  margin?: MarginType
+  children: ReactNode
+  onClose?: () => void | null | undefined
+  onCloseComplete?: () => void | null | undefined
+  onClickOutside?: () => void | null | undefined
+  wrapperProps?: ComponentProps<'div'>
+}) {
   const theme = useTheme()
-  const internalRef = useRef<HTMLDivElement>()
+  const internalRef = useRef<HTMLDivElement>(undefined)
   const finalRef = ref || internalRef
   const [closeComplete, setCloseComplete] = useState(!open)
   const prevOpen = usePrevious(open)
@@ -316,7 +315,5 @@ function LayerRef(
 
   return createPortal(portalContent, portalElt)
 }
-
-const Layer = forwardRef(LayerRef)
 
 export default Layer

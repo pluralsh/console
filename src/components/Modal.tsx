@@ -1,12 +1,6 @@
 // this is just styling, actual modal logic is in ModalWrapper
 
-import {
-  type ComponentPropsWithRef,
-  type ReactNode,
-  type Ref,
-  forwardRef,
-  useCallback,
-} from 'react'
+import { type ComponentPropsWithRef, type ReactNode, useCallback } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -131,23 +125,20 @@ const ModalHeaderSC = styled.h1(({ theme }) => ({
   color: theme.colors['text-xlight'],
 }))
 
-function ModalRef(
-  {
-    children,
-    header,
-    actions,
-    open = false,
-    form = false,
-    size = form ? 'large' : 'medium',
-    onClose,
-    severity,
-    asForm = false,
-    formProps = {},
-    scrollable = true,
-    ...props
-  }: ModalPropsType,
-  ref: Ref<any>
-) {
+function Modal({
+  children,
+  header,
+  actions,
+  open = false,
+  form = false,
+  size = form ? 'large' : 'medium',
+  onClose,
+  severity,
+  asForm = false,
+  formProps = {},
+  scrollable = true,
+  ...props
+}: ModalPropsType) {
   const theme = useTheme()
   const HeaderIcon = severityToIcon[severity ?? 'default']
   const iconColorKey = severityToIconColorKey[severity ?? 'default']
@@ -166,7 +157,6 @@ function ModalRef(
 
   return (
     <ModalWrapper
-      ref={ref}
       open={open}
       onOpenChange={triggerClose}
       title={typeof header === 'string' ? header : 'Dialog'}
@@ -184,10 +174,10 @@ function ModalRef(
           $hasActions={!!actions}
         >
           {!!header && (
-            <ModalHeaderWrapSC ref={ref}>
+            <ModalHeaderWrapSC>
               {HeaderIcon && (
                 <HeaderIcon
-                  marginTop={-2} // optically center icon
+                  marginTop={-2}
                   color={iconColorKey}
                 />
               )}
@@ -206,7 +196,5 @@ function ModalRef(
     </ModalWrapper>
   )
 }
-
-const Modal = forwardRef(ModalRef)
 
 export default Modal

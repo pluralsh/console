@@ -34,7 +34,7 @@ const getTabKey = (tab: TabProps, index: number) =>
   `${tab.title ?? ''}-${index}`
 
 export function Tabs({ tabs }: { tabs: TabProps[] }) {
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const [selectedKey, setSelectedKey] = useState<Key>(tabs[0].title || '')
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',

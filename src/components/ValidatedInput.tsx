@@ -1,12 +1,10 @@
+import { Input, type InputProps } from 'honorable'
 import {
   type PropsWithChildren,
   type ReactNode,
-  type Ref,
-  forwardRef,
   useCallback,
   useState,
 } from 'react'
-import { Input, type InputProps } from 'honorable'
 
 import FormField from './FormField'
 
@@ -20,10 +18,15 @@ export type ValidatedInputProps = InputProps &
     validation?: (val: string) => ValidationResponse
   }>
 
-function ValidatedInputRef(
-  { label, hint, validation, onChange, width, ...input }: ValidatedInputProps,
-  ref: Ref<any>
-) {
+function ValidatedInput({
+  ref,
+  label,
+  hint,
+  validation,
+  onChange,
+  width,
+  ...input
+}: ValidatedInputProps) {
   const [error, setError] = useState(null)
   const wrappedOnChange = useCallback(
     (e: any) => {
@@ -53,7 +56,5 @@ function ValidatedInputRef(
     </FormField>
   )
 }
-
-const ValidatedInput = forwardRef(ValidatedInputRef)
 
 export default ValidatedInput

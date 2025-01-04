@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import {
   type Dispatch,
+  type JSX,
   type ReactNode,
   createRef,
   useCallback,

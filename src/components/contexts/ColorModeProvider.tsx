@@ -1,5 +1,8 @@
-import { ThemeProvider as HonorableThemeProvider } from 'honorable'
-import { type ComponentProps } from 'react'
+import {
+  ThemeProvider as HonorableThemeProvider,
+  type ThemeProviderProps,
+} from 'honorable'
+import { type ComponentProps, type FC } from 'react'
 
 import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
@@ -14,12 +17,16 @@ import {
 
 const Wrapper = styled.div``
 
+// workaround for broken type from honorable
+const TypedHonorableThemedProvider =
+  HonorableThemeProvider as FC<ThemeProviderProps>
+
 export function ColorModeProvider({
   mode = 'dark',
   ...props
 }: { mode: ColorMode } & ComponentProps<typeof Wrapper>) {
   return (
-    <HonorableThemeProvider
+    <TypedHonorableThemedProvider
       theme={mode === 'light' ? honorableThemeLight : honorableThemeDark}
     >
       <StyledThemeProvider
@@ -27,6 +34,6 @@ export function ColorModeProvider({
       >
         <Wrapper {...{ [`data-${COLOR_THEME_KEY}`]: mode, ...props }} />
       </StyledThemeProvider>
-    </HonorableThemeProvider>
+    </TypedHonorableThemedProvider>
   )
 }

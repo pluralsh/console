@@ -1,6 +1,7 @@
 import {
   type ComponentPropsWithRef,
   type Dispatch,
+  type JSX,
   type ReactElement,
   useCallback,
   useEffect,
@@ -79,7 +80,7 @@ type ChecklistProps = ComponentPropsWithRef<'div'> & {
   footerChildren:
     | ReactElement<ChecklistFooterProps>
     | ReactElement<ChecklistFooterProps>[]
-  completeChildren: ReactElement
+  completeChildren: ReactElement<any>
   children: ReactElement<ChecklistItemProps>[]
 }
 

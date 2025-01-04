@@ -1,27 +1,26 @@
-import styled from 'styled-components'
+import { isEmpty } from 'lodash-es'
 import {
   type Dispatch,
   type MouseEventHandler,
-  type MutableRefObject,
   type ReactElement,
   type Ref,
-  forwardRef,
+  type RefObject,
   useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
 } from 'react'
-import { isEmpty } from 'lodash-es'
+import styled from 'styled-components'
 
-import IconFrame from '../IconFrame'
 import { CloseIcon } from '../../icons'
+import IconFrame from '../IconFrame'
 import LoopingLogo from '../LoopingLogo'
 
 import { type NavigationProps } from './Navigation'
 import { type StepConfig } from './Picker'
-import { useActive, useNavigation, usePicker, useWizard } from './hooks'
 import { WizardContext } from './context'
+import { useActive, useNavigation, usePicker, useWizard } from './hooks'
 
 const Wizard = styled(WizardUnstyled)(({ theme }) => ({
   height: '100%',
@@ -82,10 +81,10 @@ type WizardProps = {
   onClose?: MouseEventHandler<void>
   onComplete?: (completed: boolean) => void
   onSelect?: (selected: Array<StepConfig>) => void
-  onResetRef?: MutableRefObject<{ onReset: Dispatch<void> }>
+  onResetRef?: RefObject<{ onReset: Dispatch<void> }>
   ref?: Ref<HTMLDivElement>
   children?: {
-    stepper?: ReactElement
+    stepper?: ReactElement<any>
     navigation?: ReactElement<NavigationProps>
   }
 }
@@ -184,23 +183,19 @@ type WizardContextProps = {
   limit?: number
 } & WizardProps
 
-function ContextAwareWizard(
-  { defaultSteps, limit, ...props }: WizardContextProps,
-  ref: Ref<HTMLDivElement>
-): ReactElement<WizardContextProps> {
+function ContextAwareWizard({
+  defaultSteps,
+  limit,
+  ...props
+}: WizardContextProps): ReactElement<WizardContextProps> {
   const context = useWizard(defaultSteps, limit)
   const memo = useMemo(() => context, [context])
 
   return (
     <WizardContext.Provider value={memo}>
-      <Wizard
-        {...props}
-        ref={ref}
-      />
+      <Wizard {...props} />
     </WizardContext.Provider>
   )
 }
 
-const WizardRef = forwardRef(ContextAwareWizard)
-
-export { WizardRef as Wizard }
+export { ContextAwareWizard as Wizard }

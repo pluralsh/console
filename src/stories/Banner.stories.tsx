@@ -33,7 +33,7 @@ function Template({ closeButton, ...args }: any) {
         action={
           <A
             href="#"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e: any) => e.preventDefault()}
           >
             Fix it
           </A>
@@ -49,7 +49,7 @@ function Template({ closeButton, ...args }: any) {
         action={
           <A
             href="#"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e: any) => e.preventDefault()}
           >
             Next
           </A>
@@ -66,7 +66,7 @@ function Template({ closeButton, ...args }: any) {
         <A
           inline
           href="#"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e: any) => e.preventDefault()}
         >
           incidents
         </A>
@@ -82,7 +82,7 @@ function Template({ closeButton, ...args }: any) {
         <A
           inline
           href="#"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e: any) => e.preventDefault()}
         >
           incidents
         </A>
@@ -98,7 +98,7 @@ function Template({ closeButton, ...args }: any) {
         <A
           inline
           href="#"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e: any) => e.preventDefault()}
         >
           incidents
         </A>

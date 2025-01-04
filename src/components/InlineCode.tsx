@@ -1,6 +1,6 @@
-import { type ComponentProps, forwardRef } from 'react'
-
 import styled from 'styled-components'
+
+import { type ComponentPropsWithRef } from '@react-spring/web'
 
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
@@ -66,22 +66,20 @@ const CodeElt = styled.code<{ $parentFillLevel: FillLevel }>(
   })
 )
 
-const InlineCode = forwardRef<HTMLElement, ComponentProps<'code'>>(
-  ({ ...props }, ref) => {
-    const parentFillLevel = useFillLevel()
+function InlineCode({ ref, ...props }: ComponentPropsWithRef<'code'>) {
+  const parentFillLevel = useFillLevel()
 
-    return (
-      <>
-        <Spacer />
-        <CodeElt
-          ref={ref}
-          $parentFillLevel={parentFillLevel}
-          {...props}
-        />
-        <Spacer />
-      </>
-    )
-  }
-)
+  return (
+    <>
+      <Spacer />
+      <CodeElt
+        ref={ref}
+        $parentFillLevel={parentFillLevel}
+        {...props}
+      />
+      <Spacer />
+    </>
+  )
+}
 
 export default InlineCode

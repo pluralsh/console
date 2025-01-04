@@ -1,12 +1,12 @@
 import type { VirtualItem } from '@tanstack/react-virtual'
-import { type MutableRefObject, useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import usePrevious from '../../hooks/usePrevious'
 
 import { type VirtualSlice } from './Table'
 
 export function useIsScrolling(
-  ref: MutableRefObject<HTMLElement>,
+  ref: RefObject<HTMLElement>,
   {
     onIsScrollingChange: onScrollingChange,
     restDelay = 350,

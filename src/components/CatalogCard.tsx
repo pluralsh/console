@@ -1,4 +1,3 @@
-import { type Ref, forwardRef } from 'react'
 import { useTheme } from 'styled-components'
 
 import { PrQueueIcon } from '../icons'
@@ -18,23 +17,19 @@ type CatalogCardProps = CardProps & {
   tags?: string[]
 }
 
-function CatalogCardRef(
-  {
-    name,
-    author,
-    category,
-    description,
-    imageUrl,
-    tags = [],
-    ...props
-  }: CatalogCardProps,
-  ref: Ref<any>
-) {
+function CatalogCard({
+  name,
+  author,
+  category,
+  description,
+  imageUrl,
+  tags = [],
+  ...props
+}: CatalogCardProps) {
   const theme = useTheme()
 
   return (
     <Card
-      ref={ref}
       clickable
       style={{
         flexDirection: 'column',
@@ -139,7 +134,5 @@ function CatalogCardRef(
     </Card>
   )
 }
-
-const CatalogCard = forwardRef(CatalogCardRef)
 
 export default CatalogCard

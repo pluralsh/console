@@ -1,4 +1,4 @@
-import { type ComponentProps, type Ref, forwardRef } from 'react'
+import { type ComponentProps } from 'react'
 import styled from 'styled-components'
 
 import Tooltip from '../components/Tooltip'
@@ -13,21 +13,17 @@ type SidebarItemProps = ComponentProps<'div'> & {
   [key: string]: unknown
 }
 
-function SidebarItemRef(
-  {
-    children,
-    tooltip = '',
-    expandedLabel = '',
-    className,
-    ...props
-  }: SidebarItemProps,
-  ref: Ref<HTMLDivElement>
-) {
+function SidebarItem({
+  children,
+  tooltip = '',
+  expandedLabel = '',
+  className,
+  ...props
+}: SidebarItemProps) {
   const { isExpanded } = useSidebar()
 
   return (
     <WithTooltip
-      ref={ref}
       tooltip={tooltip}
       className={className}
       {...props}
@@ -38,17 +34,18 @@ function SidebarItemRef(
   )
 }
 
-function WithTooltipRef(
-  { children, clickable, tooltip = '', ...props }: SidebarItemProps,
-  ref: Ref<HTMLDivElement>
-) {
+function WithTooltip({
+  children,
+  clickable,
+  tooltip = '',
+  ...props
+}: SidebarItemProps) {
   const { isExpanded } = useSidebar()
 
   if (!tooltip || isExpanded)
     return (
       <Item
         clickable={clickable}
-        ref={ref}
         {...props}
       >
         {children}
@@ -64,7 +61,6 @@ function WithTooltipRef(
     >
       <Item
         clickable={clickable}
-        ref={ref}
         {...props}
       >
         {children}
@@ -118,16 +114,17 @@ const ItemSC = styled.div<{
     : {}),
 }))
 
-function ItemRef(
-  { children, clickable = false, active = false, ...props }: SidebarItemProps,
-  ref: Ref<HTMLDivElement>
-) {
+function Item({
+  children,
+  clickable = false,
+  active = false,
+  ...props
+}: SidebarItemProps) {
   const { layout, variant } = useSidebar()
   const isHorizontal = layout === 'horizontal'
 
   return (
     <ItemSC
-      ref={ref}
       $clickable={clickable}
       $active={active}
       $isHorizontal={isHorizontal}
@@ -138,9 +135,5 @@ function ItemRef(
     </ItemSC>
   )
 }
-
-const Item = forwardRef(ItemRef)
-const WithTooltip = forwardRef(WithTooltipRef)
-const SidebarItem = forwardRef(SidebarItemRef)
 
 export default SidebarItem

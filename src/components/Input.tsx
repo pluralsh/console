@@ -1,6 +1,9 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
-import type { InputProps as HonorableInputProps } from 'honorable'
-import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
+import type {
+  InputProps as HonorableInputProps,
+  ThemeProviderProps,
+} from 'honorable'
+import { type ComponentProps, type FC, type ReactNode, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mergeRefs } from 'react-merge-refs'
 import { mergeProps } from 'react-aria'
@@ -14,6 +17,8 @@ import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
 
 import { useFormField } from './FormField'
+
+const TypedExtendTheme = ExtendTheme as FC<ThemeProviderProps>
 
 export type InputProps = HonorableInputProps & {
   suffix?: ReactNode
@@ -82,134 +87,130 @@ const InputTitleContent = styled(TitleContent)((_) => ({
   alignSelf: 'stretch',
 }))
 
-const Input = forwardRef(
-  (
-    {
-      startIcon,
-      endIcon,
-      suffix,
-      prefix,
-      showClearButton,
-      titleContent,
-      inputProps,
-      themeExtension: themeExtensionProp,
-      ...props
-    }: InputProps,
-    ref
-  ) => {
-    const theme = useTheme()
-    const inputRef = useRef<HTMLInputElement>(null)
+function Input({
+  ref,
+  startIcon,
+  endIcon,
+  suffix,
+  prefix,
+  showClearButton,
+  titleContent,
+  inputProps,
+  themeExtension: themeExtensionProp,
+  ...props
+}: InputProps) {
+  const theme = useTheme()
+  const inputRef = useRef<HTMLInputElement>(null)
 
-    inputProps = {
-      ...(inputProps ?? {}),
-      ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
-    }
-    let themeExtension: any = {
-      Input: {
-        Root: [
-          {
-            paddingLeft: 0,
-            paddingRight: 0,
-          },
-        ],
-        InputBase: [
-          {
-            paddingLeft: prefix
-              ? 'xsmall'
-              : titleContent
-              ? startIcon
-                ? 'xsmall'
-                : 'small'
-              : 'medium',
-            paddingRight: suffix
-              ? 'xsmall'
-              : showClearButton || endIcon
-              ? 'xsmall'
-              : 'medium',
-          },
-        ],
-        StartIcon: [
-          {
-            ...startEndStyles,
-            paddingLeft: prefix || titleContent ? 0 : 'medium',
-            marginRight: 0,
-          },
-        ],
-        EndIcon: [
-          {
-            ...startEndStyles,
-            paddingRight: suffix || showClearButton ? 0 : 'medium',
-            marginLeft: 0,
-          },
-        ],
-      },
-    }
-
-    themeExtension = mergeTheme(themeExtension, themeExtensionProp)
-
-    const parentFillLevel = useFillLevel()
-    const size = (props as any).large
-      ? 'large'
-      : (props as any).small
-      ? 'small'
-      : 'medium'
-
-    inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
-    const hasEndIcon = (showClearButton && props.value) || endIcon || suffix
-    const hasStartIcon = startIcon || prefix || titleContent
-
-    return (
-      <ExtendTheme theme={themeExtension}>
-        <HonorableInput
-          ref={ref}
-          endIcon={
-            hasEndIcon && (
-              <>
-                {showClearButton && props.value && (
-                  <ClearButton
-                    onClick={() => {
-                      const input = inputRef?.current
-
-                      if (input) {
-                        simulateInputChange(input, '')
-                      }
-                    }}
-                  />
-                )}
-                {endIcon || suffix ? (
-                  <>
-                    {endIcon}
-                    {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
-                  </>
-                ) : undefined}
-              </>
-            )
-          }
-          startIcon={
-            hasStartIcon ? (
-              <>
-                {(titleContent && (
-                  <InputTitleContent
-                    $size={size}
-                    $parentFillLevel={parentFillLevel}
-                  >
-                    {titleContent}
-                  </InputTitleContent>
-                )) ||
-                  (prefix && <PrefixSuffix>{prefix}</PrefixSuffix>)}
-                {startIcon}
-              </>
-            ) : undefined
-          }
-          backgroundColor={
-            theme.colors[parentFillLevelToBackground[parentFillLevel]]
-          }
-          inputProps={inputProps}
-          {...props}
-        />
-      </ExtendTheme>
-    )
+  inputProps = {
+    ...(inputProps ?? {}),
+    ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
   }
-)
+  let themeExtension: any = {
+    Input: {
+      Root: [
+        {
+          paddingLeft: 0,
+          paddingRight: 0,
+        },
+      ],
+      InputBase: [
+        {
+          paddingLeft: prefix
+            ? 'xsmall'
+            : titleContent
+            ? startIcon
+              ? 'xsmall'
+              : 'small'
+            : 'medium',
+          paddingRight: suffix
+            ? 'xsmall'
+            : showClearButton || endIcon
+            ? 'xsmall'
+            : 'medium',
+        },
+      ],
+      StartIcon: [
+        {
+          ...startEndStyles,
+          paddingLeft: prefix || titleContent ? 0 : 'medium',
+          marginRight: 0,
+        },
+      ],
+      EndIcon: [
+        {
+          ...startEndStyles,
+          paddingRight: suffix || showClearButton ? 0 : 'medium',
+          marginLeft: 0,
+        },
+      ],
+    },
+  }
+
+  themeExtension = mergeTheme(themeExtension, themeExtensionProp)
+
+  const parentFillLevel = useFillLevel()
+  const size = (props as any).large
+    ? 'large'
+    : (props as any).small
+    ? 'small'
+    : 'medium'
+
+  inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+  const hasEndIcon = (showClearButton && props.value) || endIcon || suffix
+  const hasStartIcon = startIcon || prefix || titleContent
+
+  return (
+    <TypedExtendTheme theme={themeExtension}>
+      <HonorableInput
+        ref={ref}
+        endIcon={
+          hasEndIcon && (
+            <>
+              {showClearButton && props.value && (
+                <ClearButton
+                  onClick={() => {
+                    const input = inputRef?.current
+
+                    if (input) {
+                      simulateInputChange(input, '')
+                    }
+                  }}
+                />
+              )}
+              {endIcon || suffix ? (
+                <>
+                  {endIcon}
+                  {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
+                </>
+              ) : undefined}
+            </>
+          )
+        }
+        startIcon={
+          hasStartIcon ? (
+            <>
+              {(titleContent && (
+                <InputTitleContent
+                  $size={size}
+                  $parentFillLevel={parentFillLevel}
+                >
+                  {titleContent}
+                </InputTitleContent>
+              )) ||
+                (prefix && <PrefixSuffix>{prefix}</PrefixSuffix>)}
+              {startIcon}
+            </>
+          ) : undefined
+        }
+        backgroundColor={
+          theme.colors[parentFillLevelToBackground[parentFillLevel]]
+        }
+        inputProps={inputProps}
+        {...props}
+      />
+    </TypedExtendTheme>
+  )
+}
 
 export default Input

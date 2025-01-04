@@ -3,7 +3,7 @@ import { useIsomorphicLayoutEffect } from '@react-spring/web'
 import ResizeObserver from 'resize-observer-polyfill'
 
 const useResizeObserver = (
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   callback: (entry: DOMRectReadOnly) => void
 ) => {
   const handleResize = useCallback(

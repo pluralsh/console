@@ -1,4 +1,3 @@
-import { type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, P } from 'honorable'
 
 type DividerProps = FlexProps & {
@@ -7,18 +6,14 @@ type DividerProps = FlexProps & {
   backgroundColor?: string
 }
 
-function DividerRef(
-  {
-    text,
-    color = 'text-light',
-    backgroundColor = 'text-light',
-    ...props
-  }: DividerProps,
-  ref: Ref<any>
-) {
+function Divider({
+  text,
+  color = 'text-light',
+  backgroundColor = 'text-light',
+  ...props
+}: DividerProps) {
   return (
     <Flex
-      ref={ref}
       align="center"
       {...props}
     >
@@ -47,7 +42,5 @@ function DividerRef(
     </Flex>
   )
 }
-
-const Divider = forwardRef(DividerRef)
 
 export default Divider

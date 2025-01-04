@@ -1,18 +1,13 @@
-import { type FlexProps, H3, P } from 'honorable'
-import { type Ref, forwardRef } from 'react'
+import { H3, type H3Props, P } from 'honorable'
 
-type FormTitleProps = FlexProps & {
+type FormTitleProps = H3Props & {
   title?: string
   message?: string
 }
 
-function FormTitleRef(
-  { title, message, ...props }: FormTitleProps,
-  ref: Ref<any>
-) {
+function FormTitle({ title, message, ...props }: FormTitleProps) {
   return (
     <H3
-      ref={ref}
       body1
       bold
       color="text"
@@ -29,7 +24,5 @@ function FormTitleRef(
     </H3>
   )
 }
-
-const FormTitle = forwardRef(FormTitleRef)
 
 export default FormTitle

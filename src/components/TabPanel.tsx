@@ -1,18 +1,17 @@
-import { Div, type DivProps } from 'honorable'
-import { mergeProps, useTabPanel, useVisuallyHidden } from 'react-aria'
 import { mergeRefs } from '@react-aria/utils'
+import { Div, type DivProps } from 'honorable'
 import {
   type ComponentProps,
-  type MutableRefObject,
   type ReactElement,
   type Ref,
+  type RefObject,
   cloneElement,
-  forwardRef,
   useCallback,
   useEffect,
   useReducer,
   useRef,
 } from 'react'
+import { mergeProps, useTabPanel, useVisuallyHidden } from 'react-aria'
 
 import styled from 'styled-components'
 
@@ -41,7 +40,7 @@ type Mode = 'multipanel' | 'singlepanel'
 export type WrappedTabPanelProps = DivProps & {
   stateRef: TabStateRef
   renderer?: Renderer
-  as: ReactElement & { ref?: MutableRefObject<any> }
+  as: ReactElement<any> & { ref?: RefObject<any> }
   mode?: Mode
   tabKey?: Key
 }
@@ -55,7 +54,7 @@ export const TabPanelClone = styled(
     tabRef,
     ...props
   }: ComponentProps<any> & {
-    children: ReactElement
+    children: ReactElement<any>
     tabRef: Ref<any>
   }) =>
     cloneElement(cloneAs, {
@@ -81,7 +80,7 @@ function WrappedTabPanel({
   mode,
   ...props
 }: WrappedTabPanelProps) {
-  const ref = useRef()
+  const ref = useRef(undefined)
   let { tabPanelProps } = useTabPanel(stateProps, state, ref)
   const { visuallyHiddenProps } = useVisuallyHidden()
 
@@ -120,75 +119,73 @@ function WrappedTabPanel({
   )
 }
 
-const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
-  ({ as, renderer, stateRef, tabKey, mode, ...props }, ref) => {
-    // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
-    const [numRechecks, recheckStateRef] = useReducer((x) => x + 1, 0)
-    const [, forceUpdate] = useReducer((x) => x + 1, 0)
-    const updateTabPanel = useCallback(() => forceUpdate(), [forceUpdate])
+function TabPanel({
+  as,
+  renderer,
+  stateRef,
+  tabKey,
+  mode,
+  ...props
+}: TabPanelProps) {
+  // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
+  const [numRechecks, recheckStateRef] = useReducer((x) => x + 1, 0)
+  const [, forceUpdate] = useReducer((x) => x + 1, 0)
+  const updateTabPanel = useCallback(() => forceUpdate(), [forceUpdate])
 
-    if (mode === 'multipanel' && !tabKey) {
-      throw new Error(
-        "TabPanel: tabKey prop must be set when mode='multipanel'"
-      )
-    }
-    if (mode === 'singlepanel' && tabKey) {
-      console.warn(
-        "TabPanel: tabKey prop is not supported for mode='singlepanel'. Did you mean to set mode='multipanel'?"
-      )
-    }
-
-    // Force update until stateRef.current has been filled
-    useEffect(() => {
-      if (!stateRef?.current) {
-        if (numRechecks > 1000) {
-          console.warn(
-            'TabPanel stateRef never received a value. Did you forget to pass stateRef to both TabList and TabPanel?'
-          )
-
-          return
-        }
-        recheckStateRef()
-      }
-    })
-
-    if (!renderer && !as) {
-      as = (
-        <Div
-          ref={ref}
-          {...props}
-        />
-      )
-    }
-
-    if (stateRef.current) {
-      stateRef.current.updateTabPanel = updateTabPanel
-
-      return (
-        <WrappedTabPanel
-          mode={mode}
-          as={as}
-          renderer={renderer}
-          stateRef={stateRef}
-          tabKey={tabKey}
-          {...props}
-        />
-      )
-    }
-
-    if (renderer) {
-      return renderer({ ...props }, null, null)
-    }
-
-    return (
-      <TabPanelClone
-        tabRef={mergeRefs(as.ref, ref)}
-        cloneAs={as}
-      >
-        {props.children}
-      </TabPanelClone>
+  if (mode === 'multipanel' && !tabKey) {
+    throw new Error("TabPanel: tabKey prop must be set when mode='multipanel'")
+  }
+  if (mode === 'singlepanel' && tabKey) {
+    console.warn(
+      "TabPanel: tabKey prop is not supported for mode='singlepanel'. Did you mean to set mode='multipanel'?"
     )
   }
-)
+
+  // Force update until stateRef.current has been filled
+  useEffect(() => {
+    if (!stateRef?.current) {
+      if (numRechecks > 1000) {
+        console.warn(
+          'TabPanel stateRef never received a value. Did you forget to pass stateRef to both TabList and TabPanel?'
+        )
+
+        return
+      }
+      recheckStateRef()
+    }
+  })
+
+  if (!renderer && !as) {
+    as = <Div {...props} />
+  }
+
+  if (stateRef.current) {
+    stateRef.current.updateTabPanel = updateTabPanel
+
+    return (
+      <WrappedTabPanel
+        mode={mode}
+        as={as}
+        renderer={renderer}
+        stateRef={stateRef}
+        tabKey={tabKey}
+        {...props}
+      />
+    )
+  }
+
+  if (renderer) {
+    return renderer({ ...props }, null, null)
+  }
+
+  return (
+    <TabPanelClone
+      tabRef={as.ref}
+      cloneAs={as}
+    >
+      {props.children}
+    </TabPanelClone>
+  )
+}
 
 export default TabPanel

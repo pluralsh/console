@@ -1,4 +1,4 @@
-import { type ComponentPropsWithRef } from 'react'
+import { type ComponentPropsWithRef, type JSX } from 'react'
 
 export type PluralLogoProps = ComponentPropsWithRef<'svg'> & {
   color?: string

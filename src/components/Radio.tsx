@@ -1,18 +1,13 @@
-import {
-  type MutableRefObject,
-  forwardRef,
-  memo,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react'
-import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
+import { type InputProps, Label } from 'honorable'
+import { memo, useContext, useEffect, useId, useRef, useState } from 'react'
+import {
+  type AriaRadioProps,
+  VisuallyHidden,
+  useFocusRing,
+  useRadio,
+} from 'react-aria'
 import styled from 'styled-components'
-import { type AriaRadioProps, useRadio } from 'react-aria'
-import { VisuallyHidden, useFocusRing } from 'react-aria'
 
 import { RadioContext } from './RadioGroup'
 
@@ -128,24 +123,22 @@ export type RadioProps = AriaRadioProps & {
   onChange?: (e: { target: { checked: boolean } }) => any
 } & InputProps
 
-function Radio(
-  {
-    small,
-    value,
-    checked: checkedProp,
-    disabled,
-    defaultChecked,
-    'aria-describedby': ariaDescribedBy,
-    onChange,
-    onBlur,
-    onFocus,
-    onKeyDown,
-    onKeyUp,
-    name,
-    ...props
-  }: RadioProps,
-  ref: MutableRefObject<any>
-) {
+function Radio({
+  ref,
+  small,
+  value,
+  checked: checkedProp,
+  disabled,
+  defaultChecked,
+  'aria-describedby': ariaDescribedBy,
+  onChange,
+  onBlur,
+  onFocus,
+  onKeyDown,
+  onKeyUp,
+  name,
+  ...props
+}: RadioProps) {
   const [checked, setChecked] = useState(defaultChecked || checkedProp)
   const state = useContext(RadioContext) || {
     setSelectedValue: () => {},
@@ -157,7 +150,7 @@ function Radio(
   }, [checkedProp])
 
   const labelId = useId()
-  const inputRef = useRef<any>()
+  const inputRef = useRef<any>(undefined)
   const { isFocusVisible, focusProps } = useFocusRing()
   const { inputProps, isSelected, isDisabled } = useRadio(
     {
@@ -212,4 +205,4 @@ function Radio(
   )
 }
 
-export default forwardRef(Radio)
+export default Radio

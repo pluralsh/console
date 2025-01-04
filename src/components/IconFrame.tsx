@@ -1,10 +1,5 @@
 import { ButtonBase, Flex, type FlexProps } from 'honorable'
-import {
-  type ReactElement,
-  type ReactNode,
-  cloneElement,
-  forwardRef,
-} from 'react'
+import { type ReactElement, type ReactNode, cloneElement } from 'react'
 import styled from 'styled-components'
 
 import { type styledTheme } from '../theme'
@@ -90,7 +85,7 @@ type IconFrameProps = {
   clickable?: boolean
   disabled?: boolean
   textValue?: string
-  icon: ReactElement
+  icon: ReactElement<any>
   size?: Size
   tooltip?: boolean | ReactNode
   tooltipProps?: Partial<TooltipProps>
@@ -149,69 +144,65 @@ const IconFrameSC = styled(Flex)<{
   ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
 }))
 
-const IconFrame = forwardRef(
-  (
-    {
-      icon,
-      size = 'medium',
-      textValue = '',
-      clickable = false,
-      disabled = false,
-      selected = false,
-      tooltip,
-      tooltipProps,
-      type = 'tertiary',
-      background,
-      as,
-      ...props
-    }: IconFrameProps,
-    ref
-  ) => {
-    icon = cloneElement(icon, { size: sizeToIconSize[size] })
-    if (tooltip && typeof tooltip === 'boolean') {
-      tooltip = textValue
-    }
-    const forwardedAs = as || (clickable ? ButtonBase : undefined)
-
-    let content = (
-      <IconFrameSC
-        $clickable={clickable}
-        $selected={selected}
-        $type={type}
-        $size={size}
-        $background={background}
-        ref={ref}
-        aria-label={textValue}
-        disabled={(clickable && disabled) || undefined}
-        {...(forwardedAs ? { forwardedAs } : {})}
-        {...(clickable && {
-          tabIndex: 0,
-          role: 'button',
-          type: 'button',
-        })}
-        {...props}
-      >
-        {icon}
-      </IconFrameSC>
-    )
-
-    if (tooltip) {
-      content = (
-        <Tooltip
-          displayOn="hover"
-          arrow
-          placement="top"
-          label={tooltip}
-          {...tooltipProps}
-        >
-          {content}
-        </Tooltip>
-      )
-    }
-
-    return content
+function IconFrame({
+  ref,
+  icon,
+  size = 'medium',
+  textValue = '',
+  clickable = false,
+  disabled = false,
+  selected = false,
+  tooltip,
+  tooltipProps,
+  type = 'tertiary',
+  background,
+  as,
+  ...props
+}: IconFrameProps) {
+  icon = cloneElement(icon, { size: sizeToIconSize[size] })
+  if (tooltip && typeof tooltip === 'boolean') {
+    tooltip = textValue
   }
-)
+  const forwardedAs = as || (clickable ? ButtonBase : undefined)
+
+  let content = (
+    <IconFrameSC
+      $clickable={clickable}
+      $selected={selected}
+      $type={type}
+      $size={size}
+      $background={background}
+      ref={ref}
+      aria-label={textValue}
+      disabled={(clickable && disabled) || undefined}
+      {...(forwardedAs ? { forwardedAs } : {})}
+      {...(clickable && {
+        tabIndex: 0,
+        role: 'button',
+        type: 'button',
+      })}
+      {...props}
+    >
+      {icon}
+    </IconFrameSC>
+  )
+
+  if (tooltip) {
+    content = (
+      <Tooltip
+        displayOn="hover"
+        arrow
+        placement="top"
+        label={tooltip}
+        {...tooltipProps}
+      >
+        {content}
+      </Tooltip>
+    )
+  }
+
+  return content
+}
 
 export default IconFrame
 export type { IconFrameProps }

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { useActive } from './hooks'
 
 type StepProps<T = unknown> = {
-  children: ReactElement | ReactElement[]
+  children: ReactElement<any> | ReactElement<any>[]
   valid: boolean
   data: T
 }

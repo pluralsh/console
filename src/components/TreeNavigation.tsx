@@ -4,14 +4,14 @@ import { Div } from 'honorable'
 import {
   Children,
   type ComponentProps,
+  type ComponentPropsWithRef,
   type Key,
   type MouseEventHandler,
-  type MutableRefObject,
   type PropsWithChildren,
   type ReactElement,
   type ReactNode,
+  type RefObject,
   createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -40,7 +40,7 @@ export type SideNavProps = {
 
 const NavContext = createContext<{
   optimisticPathname: null | string
-  scrollRef: MutableRefObject<HTMLDivElement | null>
+  scrollRef: RefObject<HTMLDivElement | null>
   desktop: boolean
 }>({
   optimisticPathname: null,
@@ -148,7 +148,7 @@ function NavLink({
   isSubSection?: boolean
   isOpen?: boolean
   activeSecondary: boolean
-  icon?: ReactElement
+  icon?: ReactElement<any>
   href?: string
   desktop: boolean
   active: boolean
@@ -165,8 +165,8 @@ function NavLink({
         activeSecondary={activeSecondary}
         vertical
         iconLeft={icon}
-        onClick={(e) => {
-          onClick(e as any)
+        onClick={(e: MouseEventHandler<HTMLDivElement>) => {
+          onClick(e)
         }}
         width="100%"
         innerProps={{
@@ -218,17 +218,16 @@ const SubSectionsListWrap = styled.ul<{ $indentLevel: number }>((_) => ({
   listStyle: 'none',
 }))
 
-function SubSectionsListRef(
-  { className, children, ...props }: PropsWithChildren<{ className?: string }>,
-  ref: MutableRefObject<any>
-) {
+function SubSectionsList({
+  children,
+
+  ...props
+}: ComponentPropsWithRef<'ul'>) {
   const navDepth = useContext(NavDepthContext)
 
   return (
     <SubSectionsListWrap
       $indentLevel={navDepth}
-      ref={ref}
-      className={className}
       {...props}
     >
       <NavDepthContext.Provider value={navDepth + 1}>
@@ -237,8 +236,6 @@ function SubSectionsListRef(
     </SubSectionsListWrap>
   )
 }
-
-export const SubSectionsList = forwardRef(SubSectionsListRef)
 
 const activeStatesReducer: ImmerReducer<
   Record<string, boolean>,
@@ -378,9 +375,7 @@ export function TreeNavEntry({
           }}
         >
           <KeyboardNavContext.Provider value={contextValue}>
-            <SubSectionsList
-              ref={measureRef as unknown as MutableRefObject<any>}
-            >
+            <SubSectionsList ref={measureRef as unknown as RefObject<any>}>
               {children}
             </SubSectionsList>
           </KeyboardNavContext.Provider>

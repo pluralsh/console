@@ -1,19 +1,15 @@
-import { type ComponentProps, forwardRef } from 'react'
+import { type ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
 import { FillLevelProvider } from '../contexts/FillLevelContext'
 
-const TheadUnstyled = forwardRef<
-  HTMLTableSectionElement,
-  ComponentProps<'thead'>
->((props, ref) => (
-  <FillLevelProvider value={2}>
-    <thead
-      {...props}
-      ref={ref}
-    />
-  </FillLevelProvider>
-))
+function TheadUnstyled({ ...props }: ComponentPropsWithRef<'thead'>) {
+  return (
+    <FillLevelProvider value={2}>
+      <thead {...props} />
+    </FillLevelProvider>
+  )
+}
 
 export const Thead = styled(TheadUnstyled)(() => ({
   display: 'contents',

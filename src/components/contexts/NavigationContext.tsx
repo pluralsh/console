@@ -1,17 +1,9 @@
-import {
-  type ComponentProps,
-  type ComponentType,
-  type RefAttributes,
-  createContext,
-  useContext,
-} from 'react'
+import { type ComponentProps, createContext, useContext } from 'react'
 
-export type NavigationContextLinkProps = Omit<ComponentProps<'a'>, 'ref'> & {
-  ref?: any
-}
+import { type Link } from '../../stories/NavigationContextStub'
 
 export type NavigationContextValue = {
-  Link: ComponentType<NavigationContextLinkProps & RefAttributes<any>>
+  Link: typeof Link
   usePathname: () => string
   useNavigate: () => (location?: string) => void
 }

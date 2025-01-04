@@ -58,7 +58,7 @@ function useBimodalSelectState<T extends object>({
     props.defaultSelectedKey ?? null,
     selectionMode === 'single' ? onSelectChangeProp : undefined
   )
-  const listStateRef = useRef<ReturnType<typeof useListState>>()
+  const listStateRef = useRef<ReturnType<typeof useListState>>(undefined)
   const getAllKeys = useCallback(
     () => new Set<Key>(listStateRef.current?.collection?.getKeys() ?? []),
     []

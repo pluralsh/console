@@ -2,11 +2,11 @@ import {
   Button,
   type ButtonProps,
   Div,
-  type FlexProps,
+  type DivProps,
   Section,
   type SectionProps,
 } from 'honorable'
-import { type ComponentProps, type ReactNode, forwardRef } from 'react'
+import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
 export type SidecarProps = {
@@ -26,8 +26,14 @@ const SidecarHeadingSC = styled.h1(({ theme }) => ({
   marginBottom: theme.spacing.medium,
 }))
 
-const Sidecar = forwardRef<HTMLElement, SidecarProps & SectionProps>(
-  ({ heading, headingProps, children, ...props }, ref) => (
+function Sidecar({
+  ref,
+  heading,
+  headingProps,
+  children,
+  ...props
+}: SidecarProps & SectionProps) {
+  return (
     <SidecarSC
       ref={ref}
       {...props}
@@ -38,7 +44,7 @@ const Sidecar = forwardRef<HTMLElement, SidecarProps & SectionProps>(
       {children}
     </SidecarSC>
   )
-)
+}
 
 const ItemSC = styled(Div)(({ theme }) => ({
   marginBottom: theme.spacing.large,
@@ -57,8 +63,15 @@ const ItemContentSC = styled.div(({ theme }) => ({
   overflowWrap: 'anywhere',
 }))
 
-const SidecarItem = forwardRef<HTMLDivElement, SidecarProps & FlexProps>(
-  ({ heading, headingProps, contentProps, children, ...props }, ref) => (
+function SidecarItem({
+  ref,
+  heading,
+  headingProps,
+  contentProps,
+  children,
+  ...props
+}: SidecarProps & DivProps) {
+  return (
     <ItemSC
       ref={ref}
       {...props}
@@ -67,22 +80,24 @@ const SidecarItem = forwardRef<HTMLDivElement, SidecarProps & FlexProps>(
       {children && <ItemContentSC {...contentProps}>{children}</ItemContentSC>}
     </ItemSC>
   )
-)
+}
 
-const SidecarButton = forwardRef<any, ButtonProps>(({ ...props }, ref) => (
-  <Button
-    ref={ref}
-    tertiary
-    {...{
-      width: '100%',
-      [`> :nth-child(${props.startIcon ? '2' : '1'})`]: {
-        flexGrow: 1,
-        justifyContent: 'start',
-      },
-    }}
-    {...props}
-  />
-))
+function SidecarButton({ ref, ...props }: ButtonProps) {
+  return (
+    <Button
+      ref={ref}
+      tertiary
+      {...{
+        width: '100%',
+        [`> :nth-child(${props.startIcon ? '2' : '1'})`]: {
+          flexGrow: 1,
+          justifyContent: 'start',
+        },
+      }}
+      {...props}
+    />
+  )
+}
 
 export default Sidecar
-export { SidecarItem, SidecarButton }
+export { SidecarButton, SidecarItem }

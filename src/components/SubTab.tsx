@@ -1,4 +1,4 @@
-import { type ComponentProps, type Ref, forwardRef } from 'react'
+import { type ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
 import { type styledTheme } from '../theme'
@@ -8,7 +8,7 @@ import { type TabBaseProps } from './TabList'
 
 type SubTabSize = 'small' | 'medium'
 type SubtabProps = TabBaseProps &
-  ComponentProps<'div'> & {
+  ComponentPropsWithRef<'div'> & {
     size?: SubTabSize
   }
 
@@ -76,25 +76,23 @@ const SubTabBase = styled.div<{
   })
 )
 
-function SubTabRef(
-  {
-    active,
-    disabled,
-    children,
-    textValue: _textValue,
-    size = 'medium',
-    ...props
-  }: SubtabProps,
-  ref: Ref<any>
-) {
+function SubTab({
+  ref,
+  active,
+  disabled,
+  children,
+  textValue: _textValue,
+  size = 'medium',
+  ...props
+}: SubtabProps) {
   const parentFillLevel = useFillLevel()
 
   return (
     <SubTabBase
+      ref={ref}
       $parentFillLevel={parentFillLevel}
       $active={active}
       $disabled={disabled}
-      ref={ref}
       $size={size}
       {...props}
     >
@@ -103,5 +101,4 @@ function SubTabRef(
   )
 }
 
-export const SubTab = forwardRef(SubTabRef)
 export default SubTab

@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, forwardRef, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Flex, type FlexProps, Img, P } from 'honorable'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -24,18 +24,15 @@ const iconProps = {
   height: 24,
 }
 
-function RepositoryChipRef(
-  {
-    label,
-    imageUrl = '',
-    checked = false,
-    disabled = false,
-    icon = null,
-    tooltip,
-    ...props
-  }: TagProps,
-  ref: Ref<any>
-) {
+function RepositoryChip({
+  label,
+  imageUrl = '',
+  checked = false,
+  disabled = false,
+  icon = null,
+  tooltip,
+  ...props
+}: TagProps) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -44,7 +41,6 @@ function RepositoryChipRef(
       wrapper={<Tooltip label={tooltip} />}
     >
       <Flex
-        ref={ref}
         padding="xsmall"
         align="center"
         justify="space-between"
@@ -107,7 +103,5 @@ function RepositoryChipRef(
     </WrapWithIf>
   )
 }
-
-const RepositoryChip = forwardRef(RepositoryChipRef)
 
 export default RepositoryChip

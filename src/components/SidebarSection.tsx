@@ -1,5 +1,4 @@
 import { Flex, type FlexProps } from 'honorable'
-import { type Ref, forwardRef } from 'react'
 
 import { useSidebar } from './Sidebar'
 
@@ -13,10 +12,7 @@ const styles = {
   },
 }
 
-function SidebarSectionRef(
-  { grow = 0, ...props }: SidebarSectionProps,
-  ref: Ref<any>
-) {
+function SidebarSection({ grow = 0, ...props }: SidebarSectionProps) {
   const { layout } = useSidebar()
   const isHorizontal = layout === 'horizontal'
 
@@ -25,7 +21,6 @@ function SidebarSectionRef(
       direction={isHorizontal ? 'row' : 'column'}
       grow={grow}
       align="center"
-      ref={ref}
       borderBottom={isHorizontal ? '' : '1px solid border'}
       gap={isHorizontal ? 'medium' : 'xxsmall'}
       padding={12}
@@ -35,7 +30,5 @@ function SidebarSectionRef(
     />
   )
 }
-
-const SidebarSection = forwardRef(SidebarSectionRef)
 
 export default SidebarSection

@@ -1,4 +1,4 @@
-import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { type CssProps, Div, Flex, type FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -11,10 +11,12 @@ type CodelineProps = FlexProps & {
   onCopyClick?: (text: string) => Promise<void>
 }
 
-function CodelineRef(
-  { children, displayText, onCopyClick, ...props }: CodelineProps,
-  ref: Ref<any>
-) {
+function Codeline({
+  children,
+  displayText,
+  onCopyClick,
+  ...props
+}: CodelineProps) {
   const [copied, setCopied] = useState(false)
   const theme = useTheme()
 
@@ -40,7 +42,6 @@ function CodelineRef(
 
   return (
     <Flex
-      ref={ref}
       border="1px solid border-input"
       borderRadius="medium"
       {...props}
@@ -105,7 +106,5 @@ function CodelineRef(
     </Flex>
   )
 }
-
-const Codeline = forwardRef(CodelineRef)
 
 export default Codeline

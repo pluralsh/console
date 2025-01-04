@@ -1,12 +1,7 @@
-import {
-  type MutableRefObject,
-  type RefCallback,
-  useCallback,
-  useRef,
-} from 'react'
+import { type RefCallback, type RefObject, useCallback, useRef } from 'react'
 
 export function useRefResizeObserver<T extends HTMLElement>(
-  ref: MutableRefObject<T>,
+  ref: RefObject<T>,
   callback: (entry: ResizeObserverEntry, observer: ResizeObserver) => void,
   options: ResizeObserverOptions = {}
 ) {

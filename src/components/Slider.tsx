@@ -6,7 +6,7 @@ import {
   useFocusRing,
   useNumberFormatter,
 } from 'react-aria'
-import { useRef } from 'react'
+import { type JSX, useRef } from 'react'
 import styled from 'styled-components'
 
 import Tooltip from './Tooltip'

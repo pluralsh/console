@@ -26,7 +26,7 @@ interface FormData {
   domain: string
 }
 
-function Application({ ...props }: any): ReactElement {
+function Application({ ...props }: any): ReactElement<any> {
   const { active, setData } = useActive<FormData>()
   const [domain, setDomain] = useState<string>(active?.data?.domain)
 

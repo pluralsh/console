@@ -2,6 +2,7 @@ import isEmpty from 'lodash-es/isEmpty'
 import {
   type ComponentProps,
   type Dispatch,
+  type JSX,
   type ReactElement,
   useCallback,
 } from 'react'
@@ -30,7 +31,7 @@ function ChipList<TValue = string>({
   onClickCondition,
   onClick,
   ...props
-}: ChipListProps<TValue>): ReactElement {
+}: ChipListProps<TValue>): ReactElement<any> {
   const chip = useCallback(
     (v: TValue, i: number) => {
       const clickable = onClickCondition?.(v) ?? false

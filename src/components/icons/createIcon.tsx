@@ -1,9 +1,9 @@
-import { type ReactNode, type Ref, forwardRef } from 'react'
 import {
   Icon as HonorableIcon,
   type IconProps as HonorableIconProps,
   useTheme,
 } from 'honorable'
+import { type ReactNode } from 'react'
 
 type IconBaseProps = {
   size?: number | string
@@ -15,16 +15,14 @@ type IconBaseProps = {
 export type IconProps = HonorableIconProps & IconBaseProps
 
 function createIcon(render: (props: IconBaseProps) => ReactNode) {
-  function IconRef(
-    {
-      size = 16,
-      color = 'currentColor',
-      fullColor,
-      secondaryColor,
-      ...props
-    }: IconProps,
-    ref: Ref<any>
-  ) {
+  function Icon({
+    ref,
+    size = 16,
+    color = 'currentColor',
+    fullColor,
+    secondaryColor,
+    ...props
+  }: IconProps) {
     const theme = useTheme()
     const workingColor = theme.utils.resolveColorString(color)
 
@@ -45,9 +43,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
     )
   }
 
-  const ForwardedIcon = forwardRef(IconRef)
-
-  return ForwardedIcon
+  return Icon
 }
 
 export default createIcon

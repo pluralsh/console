@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { type JSX, useContext } from 'react'
 
 import Stepper, { type StepperSteps } from '../Stepper'
 

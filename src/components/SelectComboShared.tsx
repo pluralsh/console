@@ -1,17 +1,16 @@
+import { type Key, type Selection } from '@react-types/shared'
+import { isNil } from 'lodash-es'
 import {
   type Dispatch,
-  type MutableRefObject,
   type RefObject,
   type SetStateAction,
   useCallback,
   useRef,
 } from 'react'
 import { type ListState } from 'react-stately'
-import { type Key, type Selection } from '@react-types/shared'
-import { isNil } from 'lodash-es'
 
-import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
 import { type ComboBoxProps } from './ComboBox'
+import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
 import { type SelectProps } from './Select'
 
 type TType = SelectProps | ComboBoxProps
@@ -28,7 +27,7 @@ type UseSelectComboStatePropsArgs<T extends TType> = Pick<
 > & {
   setIsOpen: Dispatch<SetStateAction<boolean>>
   stateRef: RefObject<ListState<object> | null>
-  nextFocusedKeyRef: MutableRefObject<Key>
+  nextFocusedKeyRef: RefObject<Key>
 }
 
 type UseSelectComboStatePropsReturn<T extends TType> = Pick<
@@ -111,9 +110,9 @@ const setNextFocusedKey = ({
   state,
   stateRef,
 }: {
-  nextFocusedKeyRef: MutableRefObject<Key>
+  nextFocusedKeyRef: RefObject<Key>
   state: ListState<object>
-  stateRef: MutableRefObject<ListState<object>>
+  stateRef: RefObject<ListState<object>>
 }) => {
   stateRef.current = state
 
@@ -127,4 +126,4 @@ const setNextFocusedKey = ({
   }
 }
 
-export { useSelectComboStateProps, setNextFocusedKey, useItemWrappedChildren }
+export { setNextFocusedKey, useItemWrappedChildren, useSelectComboStateProps }

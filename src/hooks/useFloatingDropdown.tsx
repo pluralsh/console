@@ -1,4 +1,4 @@
-import { type MutableRefObject, useMemo } from 'react'
+import { type RefObject, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
   autoUpdate,
@@ -23,7 +23,7 @@ export function useFloatingDropdown({
 }: Pick<SelectProps, 'placement' | 'width' | 'maxHeight'> & {
   minHeight?: string | number
   minWidth?: string | number
-  triggerRef: MutableRefObject<any>
+  triggerRef: RefObject<any>
 }) {
   const theme = useTheme()
   const sizePadding = theme.spacing.xxsmall

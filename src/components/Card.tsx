@@ -1,7 +1,7 @@
 import chroma from 'chroma-js'
 import { Div, type DivProps } from 'honorable'
 import { memoize } from 'lodash-es'
-import { type ComponentProps, type ReactNode, forwardRef } from 'react'
+import { type ComponentProps, type ReactNode } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 
 import { type Severity, type SeverityExt, sanitizeSeverity } from '../types'
@@ -231,77 +231,68 @@ const OuterWrapSC = styled.div({
   height: '100%',
 })
 
-const Card = forwardRef(
-  (
-    {
-      header,
-      cornerSize = 'large',
-      severity = 'neutral',
-      fillLevel,
-      selected = false,
-      clickable = false,
-      disabled = false,
-      children,
-      ...props
-    }: CardProps,
-    ref
-  ) => {
-    const hasHeader = !!header
-    const {
-      size,
-      content: headerContent,
-      headerProps,
-      outerProps,
-    } = header ?? {}
+function Card({
+  ref,
+  header,
+  cornerSize = 'large',
+  severity = 'neutral',
+  fillLevel,
+  selected = false,
+  clickable = false,
+  disabled = false,
+  children,
+  ...props
+}: CardProps) {
+  const hasHeader = !!header
+  const { size, content: headerContent, headerProps, outerProps } = header ?? {}
 
-    const mainFillLevel = useDecideFillLevel({ fillLevel })
-    const headerFillLevel = useDecideFillLevel({ fillLevel: mainFillLevel + 1 })
+  const mainFillLevel = useDecideFillLevel({ fillLevel })
+  const headerFillLevel = useDecideFillLevel({ fillLevel: mainFillLevel + 1 })
 
-    const cardSeverity = sanitizeSeverity(severity, {
-      allowList: CARD_SEVERITIES,
-      default: 'neutral',
-    })
+  const cardSeverity = sanitizeSeverity(severity, {
+    allowList: CARD_SEVERITIES,
+    default: 'neutral',
+  })
 
-    return (
-      <FillLevelProvider value={mainFillLevel}>
-        <WrapWithIf
-          condition={hasHeader}
-          wrapper={<OuterWrapSC {...outerProps} />}
-        >
-          {header && (
-            <HeaderSC
-              $fillLevel={headerFillLevel}
-              $selected={selected}
-              $size={size}
-              $cornerSize={cornerSize}
-              {...headerProps}
-            >
-              {headerContent}
-            </HeaderSC>
-          )}
-          <CardSC
-            ref={ref}
-            $cornerSize={cornerSize}
-            $fillLevel={mainFillLevel}
-            $severity={cardSeverity}
+  return (
+    <FillLevelProvider value={mainFillLevel}>
+      <WrapWithIf
+        condition={hasHeader}
+        wrapper={<OuterWrapSC {...outerProps} />}
+      >
+        {header && (
+          <HeaderSC
+            $fillLevel={headerFillLevel}
             $selected={selected}
-            $clickable={clickable}
-            $hasHeader={hasHeader}
-            {...(clickable && {
-              forwardedAs: 'button',
-              type: 'button',
-              'data-clickable': 'true',
-            })}
-            $disabled={clickable && disabled}
-            {...props}
+            $size={size}
+            $cornerSize={cornerSize}
+            {...headerProps}
           >
-            {children}
-          </CardSC>
-        </WrapWithIf>
-      </FillLevelProvider>
-    )
-  }
-)
+            {headerContent}
+          </HeaderSC>
+        )}
+        <CardSC
+          ref={ref}
+          $cornerSize={cornerSize}
+          $fillLevel={mainFillLevel}
+          $severity={cardSeverity}
+          $selected={selected}
+          $clickable={clickable}
+          $hasHeader={hasHeader}
+          {...(clickable && {
+            forwardedAs: 'button',
+            type: 'button',
+            'data-clickable': 'true',
+          })}
+          $disabled={clickable && disabled}
+          {...props}
+        >
+          {children}
+        </CardSC>
+      </WrapWithIf>
+    </FillLevelProvider>
+  )
+}
 
 export default Card
 export type { BaseCardProps, CardFillLevel, CardProps, CornerSize }

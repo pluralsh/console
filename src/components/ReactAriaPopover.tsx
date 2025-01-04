@@ -10,7 +10,7 @@ type PopoverProps = {
 }
 
 function Popover({ ...props }: PopoverProps) {
-  const ref = useRef()
+  const ref = useRef(undefined)
   const { popoverRef = ref, isOpen, onClose, children } = props
 
   // Handle events that should cause the popup to close,

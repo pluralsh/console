@@ -1,7 +1,5 @@
 import {
   type ComponentPropsWithoutRef,
-  type Ref,
-  forwardRef,
   useEffect,
   useMemo,
   useRef,
@@ -153,16 +151,20 @@ type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
   language?: string
   showLineNumbers?: boolean
   children: string
+  ref?: React.Ref<any>
 }
 
-function HighlightRef(
-  { language, children, showLineNumbers, ...props }: HighlightProps,
-  ref: Ref<any>
-) {
+function Highlight({
+  language,
+  children,
+  showLineNumbers,
+  ref,
+  ...props
+}: HighlightProps) {
   if (typeof children !== 'string') {
     throw new Error('Highlight component expects a string as its children')
   }
-  const codeRef = useRef()
+  const codeRef = useRef(undefined)
 
   const lines = useMemo(() => children.split(/\r?\n/), [children])
 
@@ -194,7 +196,5 @@ function HighlightRef(
     </MainWrap>
   )
 }
-
-const Highlight = forwardRef(HighlightRef)
 
 export default Highlight

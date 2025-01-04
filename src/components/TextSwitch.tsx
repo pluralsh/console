@@ -1,13 +1,8 @@
 import {
   type ComponentProps,
-  type ComponentType,
   type ReactElement,
-  type ReactFragment,
   type ReactNode,
-  type Ref,
-  type RefAttributes,
   createContext,
-  forwardRef,
   useContext,
   useEffect,
   useId,
@@ -35,7 +30,7 @@ import { AnimatedDiv } from './AnimatedDiv'
 type TextSwitchSize = 'small'
 type TextSwitchOption = { value: string } & (
   | {
-      label: ReactElement | ReactFragment
+      label: ReactElement<any> | Iterable<ReactNode>
       textValue: string
     }
   | { label: string }
@@ -105,25 +100,22 @@ const SwitchHandleSC = styled(AnimatedDiv)<{
   }
 })
 
-function TextSwitchRef(
-  {
-    name,
-    label,
-    labelPosition = 'start',
-    description,
-    errorMessage,
-    isDisabled = false,
-    isReadOnly = false,
-    value,
-    defaultValue,
-    onChange,
-    isRequired,
-    options,
-    size,
-    ...props
-  }: TextSwitchProps,
-  refProp: Ref<any>
-) {
+function TextSwitch({
+  name,
+  label,
+  labelPosition = 'start',
+  description,
+  errorMessage,
+  isDisabled = false,
+  isReadOnly = false,
+  value,
+  defaultValue,
+  onChange,
+  isRequired,
+  options,
+  size,
+  ...props
+}: TextSwitchProps) {
   const switchRef = useRef<HTMLDivElement>(null)
   const selectedElt = useRef<HTMLElement>(null)
 
@@ -175,7 +167,6 @@ function TextSwitchRef(
 
   return (
     <TextSwitchSC
-      ref={refProp}
       $size={size}
       {...props}
       {...radioGroupProps}
@@ -316,7 +307,7 @@ function TextSwitchOption({
   }, [selectedProp])
 
   const labelId = useId()
-  const inputRef = useRef<any>()
+  const inputRef = useRef<any>(undefined)
   const { focusProps } = useFocusRing()
   const { inputProps, isSelected, isDisabled } = useRadio(
     {
@@ -362,8 +353,5 @@ function TextSwitchOption({
     </TextSwitchOptionSC>
   )
 }
-
-const TextSwitch: ComponentType<TextSwitchProps & RefAttributes<any>> =
-  forwardRef(TextSwitchRef)
 
 export default TextSwitch

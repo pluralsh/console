@@ -3,8 +3,6 @@ import {
   type ComponentProps,
   type ComponentPropsWithRef,
   type ReactElement,
-  type Ref,
-  forwardRef,
 } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
@@ -31,7 +29,7 @@ export type ChipProps = Omit<FlexProps, 'size'> &
     condensed?: boolean
     severity?: ChipSeverity
     inactive?: boolean
-    icon?: ReactElement
+    icon?: ReactElement<any>
     loading?: boolean
     closeButton?: boolean
     closeButtonProps?: ComponentPropsWithRef<'div'>
@@ -170,28 +168,25 @@ const CloseButtonSC = styled.button<{
   },
 }))
 
-function ChipRef(
-  {
-    children,
-    size = 'medium',
-    condensed = false,
-    severity = 'neutral',
-    inactive = false,
-    truncateWidth,
-    truncateEdge,
-    fillLevel,
-    loading = false,
-    icon,
-    closeButton,
-    closeButtonProps,
-    clickable,
-    disabled,
-    tooltip,
-    tooltipProps,
-    ...props
-  }: ChipProps,
-  ref: Ref<any>
-) {
+function Chip({
+  children,
+  size = 'medium',
+  condensed = false,
+  severity = 'neutral',
+  inactive = false,
+  truncateWidth,
+  truncateEdge,
+  fillLevel,
+  loading = false,
+  icon,
+  closeButton,
+  closeButtonProps,
+  clickable,
+  disabled,
+  tooltip,
+  tooltipProps,
+  ...props
+}: ChipProps) {
   fillLevel = useDecideFillLevel({ fillLevel })
   const theme = useTheme()
 
@@ -199,7 +194,6 @@ function ChipRef(
 
   let content = (
     <ChipCardSC
-      ref={ref}
       severity={severity}
       cornerSize="medium"
       fillLevel={fillLevel}
@@ -263,7 +257,5 @@ function ChipRef(
 
   return content
 }
-
-const Chip = forwardRef(ChipRef)
 
 export default Chip

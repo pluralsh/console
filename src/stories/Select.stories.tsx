@@ -1,4 +1,4 @@
-import { type ComponentProps, forwardRef, useEffect, useState } from 'react'
+import { type ComponentProps, useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
@@ -176,33 +176,34 @@ const items = [
 
 // Make sure any custom trigger button forwards ref to outermost element,
 // otherwise it'll error
-const CustomTriggerButton = styled(
-  forwardRef<any, any>((props, ref) => (
-    <Button
-      ref={ref}
-      medium
-      primary
-      endIcon={<DropdownArrowIcon className="dropdownIcon" />}
-      {...props}
-    >
-      Click me!
-    </Button>
-  ))
-)<{ isOpen?: boolean }>(({ isOpen = false }) => ({
+const CustomTriggerButton = styled(({ ref, ...props }) => (
+  <Button
+    ref={ref}
+    medium
+    primary
+    endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+    {...props}
+  >
+    Click me!
+  </Button>
+))<{ isOpen?: boolean }>(({ isOpen = false }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
     transition: 'transform 0.1s ease',
   },
 }))
 
-const IconFrameTrigger = forwardRef((props: any, ref) => (
-  <IconFrame
-    ref={ref}
-    icon={<HamburgerMenuIcon />}
-    clickable
-    {...props}
-  />
-))
+function IconFrameTrigger(
+  props: Omit<ComponentProps<typeof IconFrame>, 'icon'>
+) {
+  return (
+    <IconFrame
+      icon={<HamburgerMenuIcon />}
+      clickable
+      {...props}
+    />
+  )
+}
 
 function useTestKeyCapture() {
   useEffect(() => {

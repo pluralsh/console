@@ -2,6 +2,7 @@ import { useKeyboard } from 'react-aria'
 import {
   type ComponentPropsWithRef,
   type Dispatch,
+  type JSX,
   type ReactElement,
   useEffect,
   useRef,
@@ -145,7 +146,7 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
 )
 
 type ChecklistItemProps = ComponentPropsWithRef<'div'> & {
-  children?: ReactElement | ReactElement[] | string
+  children?: ReactElement<any> | ReactElement<any>[] | string
   title: string
 }
 
@@ -183,7 +184,7 @@ function ChecklistItemInnerUnstyled({
   onFocusChange,
   ...props
 }: ChecklistItemInnerProps): JSX.Element {
-  const headerRef = useRef<HTMLDivElement>()
+  const headerRef = useRef<HTMLDivElement>(undefined)
   const { keyboardProps } = useKeyboard({
     onKeyDown: (e) => {
       switch (e.key) {

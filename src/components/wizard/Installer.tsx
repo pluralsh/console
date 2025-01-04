@@ -34,7 +34,9 @@ const Installer = styled(InstallerUnstyled)(({ theme }) => ({
   },
 }))
 
-function InstallerUnstyled({ ...props }: ComponentProps<'div'>): ReactElement {
+function InstallerUnstyled({
+  ...props
+}: ComponentProps<'div'>): ReactElement<any> {
   const { onEdit } = useNavigation()
   const { selected: apps } = useStepper()
 

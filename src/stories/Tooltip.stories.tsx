@@ -10,9 +10,10 @@ export default {
   component: Tooltip,
 }
 
-function CornerBox(props: FlexProps) {
+function CornerBox({ ref, ...props }: FlexProps) {
   return (
     <Flex
+      ref={ref}
       width="100%"
       padding={20}
       {...props}

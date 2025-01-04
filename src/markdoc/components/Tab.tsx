@@ -1,18 +1,14 @@
-import { type ComponentProps, type MutableRefObject, forwardRef } from 'react'
+import { type ComponentProps } from 'react'
 
 import { useTheme } from 'styled-components'
 
 import { Tab as TabBase } from '../../index'
 
-function TabRef(
-  { ...props }: ComponentProps<typeof TabBase>,
-  ref: MutableRefObject<HTMLDivElement>
-) {
+function Tab({ ...props }: ComponentProps<typeof TabBase>) {
   const theme = useTheme()
 
   return (
     <TabBase
-      ref={ref}
       flexGrow={1}
       flexShrink={1}
       justifyContent="center"
@@ -29,4 +25,4 @@ function TabRef(
   )
 }
 
-export default forwardRef(TabRef)
+export default Tab

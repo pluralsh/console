@@ -2,8 +2,8 @@ import { VisuallyHidden, useFocusRing } from 'react-aria'
 import { type AriaRadioProps, useRadio } from 'react-aria'
 import {
   type ReactElement,
+  type RefObject,
   cloneElement,
-  forwardRef,
   useContext,
   useRef,
 } from 'react'
@@ -43,48 +43,55 @@ const SelectItemWrap = styled.label<SelectItemWrapProps>(
 )
 
 type SelectItemProps = AriaRadioProps & {
-  icon: ReactElement
+  ref?: RefObject<any>
+  icon: ReactElement<any>
   label?: string
   name?: string
   className?: string
 }
 
-const SelectItem = forwardRef<any, SelectItemProps>(
-  ({ icon, label, value, name, className, ...props }, ref) => {
-    const state = useContext(RadioContext)
-    const inputRef = useRef<any>()
-    const { isFocusVisible, focusProps } = useFocusRing()
-    const { inputProps, isSelected } = useRadio(
-      {
-        value,
-        ...props,
-      },
-      state,
-      inputRef
-    )
+function SelectItem({
+  ref,
+  icon,
+  label,
+  value,
+  name,
+  className,
+  ...props
+}: SelectItemProps) {
+  const state = useContext(RadioContext)
+  const inputRef = useRef<any>(undefined)
+  const { isFocusVisible, focusProps } = useFocusRing()
+  const { inputProps, isSelected } = useRadio(
+    {
+      value,
+      ...props,
+    },
+    state,
+    inputRef
+  )
 
-    icon = cloneElement(icon, { size: 16 })
+  icon = cloneElement(icon, { size: 16 })
 
-    return (
-      <SelectItemWrap
-        selected={isSelected}
-        focused={isFocusVisible}
-        className={className}
-        ref={ref}
-      >
-        {icon}
-        {label && <div className="label">{label}</div>}
-        <VisuallyHidden>
-          <input
-            {...inputProps}
-            {...focusProps}
-            name={inputProps.name || name}
-            ref={inputRef}
-          />
-        </VisuallyHidden>
-      </SelectItemWrap>
-    )
-  }
-)
+  return (
+    <SelectItemWrap
+      selected={isSelected}
+      focused={isFocusVisible}
+      className={className}
+      ref={ref}
+    >
+      {icon}
+      {label && <div className="label">{label}</div>}
+      <VisuallyHidden>
+        <input
+          {...inputProps}
+          {...focusProps}
+          name={inputProps.name || name}
+          ref={inputRef}
+        />
+      </VisuallyHidden>
+    </SelectItemWrap>
+  )
+}
 
 export default SelectItem

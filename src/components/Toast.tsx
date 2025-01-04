@@ -1,7 +1,6 @@
 import {
   type ComponentProps,
-  type Ref,
-  forwardRef,
+  type JSX,
   useCallback,
   useEffect,
   useState,
@@ -33,72 +32,67 @@ const defaults = {
   severity: 'info' as ToastSeverity,
 }
 
-const Toast = forwardRef(
-  (
-    {
-      position = defaults.position,
-      closeTimeout: closeTimeoutProp = defaults.closeTimeout,
-      onClose = defaults.onClose,
-      onCloseComplete = defaults.onCloseComplete,
-      severity = defaults.severity,
-      children,
-      show = true,
-      layerProps,
-      ...props
-    }: ToastProps,
-    ref: Ref<any>
-  ): JSX.Element => {
-    const [open, setOpen] = useState(show)
-    const close = useCallback(() => {
-      setOpen(false)
-    }, [setOpen])
+function Toast({
+  ref,
+  position = defaults.position,
+  closeTimeout: closeTimeoutProp = defaults.closeTimeout,
+  onClose = defaults.onClose,
+  onCloseComplete = defaults.onCloseComplete,
+  severity = defaults.severity,
+  children,
+  show = true,
+  layerProps,
+  ...props
+}: ToastProps) {
+  const [open, setOpen] = useState(show)
+  const close = useCallback(() => {
+    setOpen(false)
+  }, [setOpen])
 
-    const closeTimeout: 'none' | number =
-      closeTimeoutProp === 'none' || +closeTimeoutProp <= 0
-        ? 'none'
-        : typeof closeTimeoutProp === 'number' &&
-          !Number.isNaN(closeTimeoutProp)
-        ? closeTimeoutProp
-        : defaults.closeTimeout
+  const closeTimeout: 'none' | number =
+    closeTimeoutProp === 'none' || +closeTimeoutProp <= 0
+      ? 'none'
+      : typeof closeTimeoutProp === 'number' && !Number.isNaN(closeTimeoutProp)
+      ? closeTimeoutProp
+      : defaults.closeTimeout
 
-    useEffect(() => {
-      setOpen(show)
-    }, [show])
+  useEffect(() => {
+    setOpen(show)
+  }, [show])
 
-    useEffect(() => {
-      if (closeTimeout === 'none') {
-        return
-      }
-      const timer = open ? setTimeout(() => close(), closeTimeout) : null
+  useEffect(() => {
+    if (closeTimeout === 'none') {
+      return
+    }
+    const timer = open ? setTimeout(() => close(), closeTimeout) : null
 
-      return () => clearTimeout(timer)
-    }, [close, closeTimeout, open])
+    return () => clearTimeout(timer)
+  }, [close, closeTimeout, open])
 
-    return (
-      <Layer
-        modal
-        open={open}
-        position={position}
-        onClose={() => {
-          onClose()
-        }}
-        onCloseComplete={() => {
-          onCloseComplete()
-        }}
-        ref={ref}
-        {...layerProps}
+  return (
+    <Layer
+      modal
+      open={open}
+      position={position}
+      onClose={() => {
+        onClose()
+      }}
+      onCloseComplete={() => {
+        onCloseComplete()
+      }}
+      ref={ref}
+      {...layerProps}
+    >
+      <Banner
+        onClose={() => setOpen(false)}
+        severity={severity}
+        {...props}
       >
-        <Banner
-          onClose={() => setOpen(false)}
-          severity={severity}
-          {...props}
-        >
-          {children}
-        </Banner>
-      </Layer>
-    )
-  }
-)
+        {children}
+      </Banner>
+    </Layer>
+  )
+}
 
 type GraphQLToastProps = {
   error: { graphQLErrors: Array<{ message: string }> }

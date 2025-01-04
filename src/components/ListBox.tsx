@@ -1,6 +1,7 @@
 import {
   Children,
   type ComponentPropsWithRef,
+  type JSX,
   type ReactElement,
   type ReactNode,
   type RefObject,
@@ -44,9 +45,9 @@ type ListBoxProps = Omit<
   onHeaderClick?: () => unknown
   onFooterClick?: () => unknown
   disallowEmptySelection?: boolean
-  children: ReactElement | ReactElement[]
-  header?: ReactElement
-  footer?: ReactElement
+  children: ReactElement<any> | ReactElement<any>[]
+  header?: ReactElement<any>
+  footer?: ReactElement<any>
 }
 
 function getCardFillLevel(theme: DefaultTheme) {
@@ -106,9 +107,9 @@ function propsToTextValue(props: Record<string, unknown> | null | undefined) {
 }
 
 function useItemWrappedChildren(
-  children: ReactElement | ReactElement[],
-  header?: ReactElement,
-  footer?: ReactElement
+  children: ReactElement<any> | ReactElement<any>[],
+  header?: ReactElement<any>,
+  footer?: ReactElement<any>
 ) {
   return useMemo(() => {
     // Children.map() prefixes the key props in an undocumented and possibly
@@ -235,7 +236,7 @@ function ListBoxUnmanaged({
   const theme = useTheme()
 
   // Get props for the listbox element
-  let ref = useRef()
+  let ref = useRef(undefined)
 
   if (listBoxRef) {
     ref = listBoxRef
@@ -272,7 +273,7 @@ function ListBoxUnmanaged({
 
 function Option({ item, state }: any) {
   // Get props for the option element
-  const ref = useRef()
+  const ref = useRef(undefined)
   const {
     optionProps,
     isSelected,

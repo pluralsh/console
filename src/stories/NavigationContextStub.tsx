@@ -1,23 +1,10 @@
-import {
-  type MutableRefObject,
-  type ReactNode,
-  forwardRef,
-  useMemo,
-  useReducer,
-} from 'react'
+import { type ComponentProps, type ReactNode, useMemo, useReducer } from 'react'
 
-import {
-  type NavigationContextLinkProps,
-  NavigationContextProvider,
-} from '../components/contexts/NavigationContext'
+import { NavigationContextProvider } from '../components/contexts/NavigationContext'
 
-export const Link = forwardRef(
-  (
-    { children, ...props }: NavigationContextLinkProps,
-    ref: MutableRefObject<any>
-  ) => (
+export function Link({ children, ...props }: ComponentProps<'a'>) {
+  return (
     <a
-      ref={ref}
       {...props}
       onClick={(e) => {
         e.preventDefault()
@@ -28,7 +15,7 @@ export const Link = forwardRef(
       {children}
     </a>
   )
-)
+}
 
 const currentPathReducer = (_: string | null, newPath: string | null) => {
   console.info('Navigate to:', newPath)

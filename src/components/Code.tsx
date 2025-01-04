@@ -1,11 +1,10 @@
+import { Button, Div, Flex } from 'honorable'
 import {
   type ComponentProps,
-  type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
   type RefObject,
   createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -13,28 +12,27 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Button, Div, Flex } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 
-import CopyIcon from './icons/CopyIcon'
 import Card, { type CardProps } from './Card'
-import CheckIcon from './icons/CheckIcon'
 import Highlight from './Highlight'
+import { ListBoxItem } from './ListBoxItem'
+import { Select } from './Select'
+import SubTab from './SubTab'
+import { TabList, type TabListStateProps } from './TabList'
+import TabPanel from './TabPanel'
 import {
   type FillLevel,
   FillLevelProvider,
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
-import FileIcon from './icons/FileIcon'
-import { TabList, type TabListStateProps } from './TabList'
-import { SubTab } from './SubTab'
-import TabPanel from './TabPanel'
-import { Select } from './Select'
-import { ListBoxItem } from './ListBoxItem'
+import CheckIcon from './icons/CheckIcon'
+import CopyIcon from './icons/CopyIcon'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
+import FileIcon from './icons/FileIcon'
 
 type CodeProps = Omit<CardProps, 'children'> & {
   children?: string
@@ -51,7 +49,7 @@ type TabInterfaceT = 'tabs' | 'dropdown'
 type TabsContext = {
   tabInterface: TabInterfaceT
   setTabInterface: (arg: TabInterfaceT) => void
-  tabStateRef?: MutableRefObject<any>
+  tabStateRef?: RefObject<any>
   selectedKey?: string
   onSelectionChange?: any
 } & Pick<CodeProps, 'tabs'>
@@ -163,28 +161,26 @@ const TabsWrap = styled.div<{ $isDisabled: boolean }>(
   })
 )
 
-const TabsDropdownButton = styled(
-  forwardRef<any, any>((props, ref) => {
-    const fillLevel = useFillLevel()
-    const theme = useTheme()
+const TabsDropdownButton = styled(({ ref, ...props }) => {
+  const fillLevel = useFillLevel()
+  const theme = useTheme()
 
-    return (
-      <Button
-        ref={ref}
-        small
-        tertiary
-        endIcon={<DropdownArrowIcon className="dropdownIcon" />}
-        {...{
-          '&, &:hover, &:focus, &:focus-visible': {
-            backgroundColor:
-              theme.colors[`fill-${fillLevel > 2 ? 'three' : 'two'}-selected`],
-          },
-        }}
-        {...props}
-      />
-    )
-  })
-)<{ $isOpen?: boolean }>(({ $isOpen: isOpen = false, theme }) => ({
+  return (
+    <Button
+      ref={ref}
+      small
+      tertiary
+      endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+      {...{
+        '&, &:hover, &:focus, &:focus-visible': {
+          backgroundColor:
+            theme.colors[`fill-${fillLevel > 2 ? 'three' : 'two'}-selected`],
+        },
+      }}
+      {...props}
+    />
+  )
+})<{ $isOpen?: boolean }>(({ $isOpen: isOpen = false, theme }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
     transition: 'transform 0.1s ease',
@@ -202,8 +198,8 @@ function CodeTabs() {
     selectedKey,
     onSelectionChange,
   } = useContext(TabsContext)
-  const tabsRef = useRef<HTMLDivElement>()
-  const tabsWrapRef = useRef<HTMLDivElement>()
+  const tabsRef = useRef<HTMLDivElement>(undefined)
+  const tabsWrapRef = useRef<HTMLDivElement>(undefined)
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation: 'horizontal',
@@ -346,21 +342,19 @@ function CodeContent({
   )
 }
 
-function CodeRef(
-  {
-    children,
-    language,
-    showLineNumbers,
-    showHeader,
-    tabs,
-    title,
-    onSelectedTabChange,
-    ...props
-  }: CodeProps,
-  ref: RefObject<any>
-) {
+function CodeUnstyled({
+  ref,
+  children,
+  language,
+  showLineNumbers,
+  showHeader,
+  tabs,
+  title,
+  onSelectedTabChange,
+  ...props
+}: CodeProps) {
   const parentFillLevel = useFillLevel()
-  const tabStateRef = useRef()
+  const tabStateRef = useRef(undefined)
   const [selectedTabKey, setSelectedTabKey] = useState<string>(
     tabs?.[0]?.key || ''
   )
@@ -478,7 +472,7 @@ function CodeRef(
   )
 }
 
-const Code = styled(forwardRef(CodeRef))((_) => ({
+const Code = styled(CodeUnstyled)((_) => ({
   [`${CopyButton}`]: {
     opacity: 0,
     pointerEvents: 'none',

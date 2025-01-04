@@ -1,7 +1,7 @@
 import {
-  type MutableRefObject,
+  type ComponentProps,
   type ReactNode,
-  forwardRef,
+  type RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -103,15 +103,13 @@ const CrumbLinkText = styled.span(({ theme }) => ({
   },
 }))
 
-const CrumbSelectTriggerUnstyled = forwardRef<any, any>(
-  (
-    {
-      className,
-      isOpen: _isOpen,
-      ...props
-    }: { className?: string; isOpen?: boolean },
-    ref
-  ) => (
+function CrumbSelectTriggerUnstyled({
+  ref,
+  className,
+  isOpen: _isOpen,
+  ...props
+}: { className?: string; isOpen?: boolean } & ComponentProps<'div'>) {
+  return (
     <div
       className={className}
       ref={ref}
@@ -120,7 +118,7 @@ const CrumbSelectTriggerUnstyled = forwardRef<any, any>(
       ...
     </div>
   )
-)
+}
 
 const CrumbSelectTrigger = styled(CrumbSelectTriggerUnstyled)(({ theme }) => ({
   ...theme.partials.text.caption,
@@ -213,18 +211,17 @@ const CrumbListSC = styled.ol<{
     : {}),
 }))
 
-function CrumbListRef(
-  {
-    breadcrumbs,
-    maxLength,
-    visibleListId,
-  }: {
-    breadcrumbs: Breadcrumb[]
-    maxLength: number
-    visibleListId?: string
-  },
-  ref: MutableRefObject<any>
-) {
+function CrumbList({
+  ref,
+  breadcrumbs,
+  maxLength,
+  visibleListId,
+}: {
+  ref?: RefObject<any>
+  breadcrumbs: Breadcrumb[]
+  maxLength: number
+  visibleListId?: string
+}) {
   const id = useId()
 
   if (breadcrumbs?.length < 1) {
@@ -281,8 +278,6 @@ function CrumbListRef(
   )
 }
 
-const CrumbList = forwardRef(CrumbListRef)
-
 const transitionStyles = {
   entering: { opacity: 0, height: 0 },
   entered: { opacity: 1 },
@@ -313,10 +308,10 @@ export function DynamicBreadcrumbs({
   wrapperRef: transitionRef,
   ...props
 }: BreadcrumbPropsBase & {
-  wrapperRef?: MutableRefObject<HTMLDivElement>
+  wrapperRef?: RefObject<HTMLDivElement>
   style: any
 }) {
-  const wrapperRef = useRef<HTMLDivElement | undefined>()
+  const wrapperRef = useRef<HTMLDivElement | undefined>(undefined)
   const [visibleListId, setVisibleListId] = useState<string>('')
   const children: ReactNode[] = []
 
@@ -405,10 +400,10 @@ export function Breadcrumbs({
   collapsible = true,
   breadcrumbs: propsCrumbs,
   ...props
-}: BreadcrumbsProps & NavProps) {
+}: BreadcrumbsProps & Omit<NavProps, 'ref'>) {
   const contextCrumbs = useContext(BreadcrumbsContext)?.breadcrumbs
   const breadcrumbs = propsCrumbs || contextCrumbs
-  const nodeRef = useRef<HTMLDivElement>()
+  const nodeRef = useRef<HTMLDivElement>(undefined)
 
   if (!breadcrumbs) {
     throw Error(

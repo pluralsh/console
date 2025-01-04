@@ -1,4 +1,4 @@
-import { type ComponentProps, type MutableRefObject, forwardRef } from 'react'
+import { type ComponentProps } from 'react'
 
 import styled from 'styled-components'
 
@@ -22,20 +22,13 @@ const StyledBlockquote = styled.blockquote(({ theme }) => ({
   },
 }))
 
-function BlockquoteRef(
-  { children, ...props }: ComponentProps<typeof StyledBlockquote>,
-  ref: MutableRefObject<any>
-) {
+export function Blockquote({
+  children,
+  ...props
+}: ComponentProps<typeof StyledBlockquote>) {
   return (
     <FillLevelProvider value={1}>
-      <StyledBlockquote
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </StyledBlockquote>
+      <StyledBlockquote {...props}>{children}</StyledBlockquote>
     </FillLevelProvider>
   )
 }
-
-export const Blockquote = forwardRef(BlockquoteRef)

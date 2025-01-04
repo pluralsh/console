@@ -1,14 +1,15 @@
-import { type ReactElement, cloneElement, forwardRef } from 'react'
+import { type ReactElement, type RefObject, cloneElement } from 'react'
 
 import { useInert } from '../hooks/useInert'
 
-export const SetInert = forwardRef<any, any>(
-  (
-    { children, inert = false }: { children: ReactElement; inert?: boolean },
-    ref
-  ) => {
-    const finalRef = useInert(inert, ref)
+export const SetInert = ({
+  ref,
+  children,
+  inert = false,
+}: { children: ReactElement<any>; inert?: boolean } & {
+  ref?: RefObject<any>
+}) => {
+  const finalRef = useInert(inert, ref)
 
-    return cloneElement(children, { ref: finalRef })
-  }
-)
+  return cloneElement(children, { ref: finalRef })
+}

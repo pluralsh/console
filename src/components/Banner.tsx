@@ -1,5 +1,5 @@
 import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
-import { type ReactNode, type Ref, forwardRef } from 'react'
+import { type ReactNode } from 'react'
 import styled from 'styled-components'
 
 import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
@@ -114,19 +114,16 @@ const CloseButton = styled(IconFrame)(({ theme }) => ({
   marginLeft: theme.spacing.medium,
 }))
 
-function BannerRef(
-  {
-    heading,
-    action,
-    actionProps,
-    children,
-    severity = 'success',
-    fullWidth = false,
-    onClose,
-    ...props
-  }: BannerProps,
-  ref: Ref<any>
-) {
+function Banner({
+  heading,
+  action,
+  actionProps,
+  children,
+  severity = 'success',
+  fullWidth = false,
+  onClose,
+  ...props
+}: BannerProps) {
   const finalSeverity = sanitizeSeverity(severity, {
     allowList: BANNER_SEVERITIES,
     default: DEFAULT_SEVERITY,
@@ -138,7 +135,6 @@ function BannerRef(
 
   const content = (
     <BannerOuter
-      ref={ref}
       $borderColorKey={borderColorKey}
       $fullWidth={fullWidth}
       as={Flex}
@@ -176,7 +172,5 @@ function BannerRef(
 
   return <FillLevelProvider value={3}>{content}</FillLevelProvider>
 }
-
-const Banner = forwardRef(BannerRef)
 
 export default Banner

@@ -1,9 +1,9 @@
-import { type MutableRefObject, forwardRef, memo, useId, useRef } from 'react'
-import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
-import styled from 'styled-components'
-import { useToggleState } from 'react-stately'
+import { type InputProps, Label } from 'honorable'
+import { memo, useId, useRef } from 'react'
 import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
+import { useToggleState } from 'react-stately'
+import styled from 'styled-components'
 
 const CheckedIcon = memo(({ small }: { small: boolean }) => {
   const width = small ? 16 : 24
@@ -148,34 +148,31 @@ export type CheckboxProps = {
   defaultSelected?: boolean
   onChange?: (e: { target: { checked: boolean } }) => any
   onFocusChange?: (isFocused: boolean) => void
-  tabIndex?: number | string
+  tabIndex?: number
 } & Omit<InputProps, 'onChange'>
 
-function Checkbox(
-  {
-    small,
-    onChange,
-    checked: checkedProp,
-    indeterminate,
-    disabled,
-    defaultSelected,
-    onFocus,
-    onBlur,
-    onFocusChange,
-    onKeyDown,
-    onKeyUp,
-    tabIndex,
-    ...props
-  }: CheckboxProps,
-  ref: MutableRefObject<any>
-) {
+function Checkbox({
+  small,
+  onChange,
+  checked: checkedProp,
+  indeterminate,
+  disabled,
+  defaultSelected,
+  onFocus,
+  onBlur,
+  onFocusChange,
+  onKeyDown,
+  onKeyUp,
+  tabIndex,
+  ...props
+}: CheckboxProps) {
   const toggleStateProps = {
     ...(checkedProp !== undefined ? { isSelected: checkedProp } : {}),
     defaultSelected: !!defaultSelected,
   }
   const labelId = useId()
   const toggleState = useToggleState(toggleStateProps)
-  const inputRef = useRef<any>()
+  const inputRef = useRef<any>(undefined)
   const { isFocusVisible, focusProps } = useFocusRing()
   const { inputProps } = useCheckbox(
     {
@@ -204,7 +201,6 @@ function Checkbox(
     <HonorableLabelStyled
       htmlFor={inputProps.id}
       id={labelId}
-      ref={ref}
       className={classNames({
         checked: toggleState.isSelected,
         indeterminate,
@@ -238,4 +234,4 @@ function Checkbox(
   )
 }
 
-export default forwardRef(Checkbox)
+export default Checkbox

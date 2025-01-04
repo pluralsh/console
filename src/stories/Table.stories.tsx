@@ -25,7 +25,7 @@ type Method = {
   id?: string | number
   function: string
   inputType: string
-  returnedValue: ReactElement | string
+  returnedValue: ReactElement<any> | string
   description: string
   expandable?: boolean
 }

@@ -3,8 +3,6 @@ import {
   type ComponentProps,
   type ReactElement,
   type ReactNode,
-  type Ref,
-  forwardRef,
   useId,
 } from 'react'
 
@@ -22,21 +20,17 @@ import Card from './Card'
 export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
 
-function AccordionRef(
-  {
-    children,
-    ...props
-  }: {
-    children?:
-      | ReactElement<typeof AccordionItem>
-      | ReactElement<typeof AccordionItem>[]
-    collapsible?: boolean
-  } & AccordionProps,
-  ref: Ref<HTMLDivElement>
-) {
+function Accordion({
+  children,
+  ...props
+}: {
+  children?:
+    | ReactElement<typeof AccordionItem>
+    | ReactElement<typeof AccordionItem>[]
+  collapsible?: boolean
+} & AccordionProps) {
   return (
     <RadixAccordion.Root
-      ref={ref}
       asChild
       collapsible={props.collapsible ?? true}
       {...props}
@@ -46,34 +40,28 @@ function AccordionRef(
   )
 }
 
-function AccordionItemRef(
-  {
-    value,
-    padding = 'relaxed',
-    paddingArea = 'all',
-    caret = 'right',
-    trigger,
-    children,
-    ...props
-  }: {
-    value?: string
-    padding?: 'none' | 'compact' | 'relaxed'
-    paddingArea?: 'trigger-only' | 'all'
-    caret?: 'none' | 'left' | 'right'
-    trigger: ReactNode
-    children: ReactNode
-  } & Omit<ComponentProps<typeof RadixAccordion.Item>, 'value'>,
-  ref: Ref<HTMLDivElement>
-) {
+function AccordionItem({
+  value,
+  padding = 'relaxed',
+  paddingArea = 'all',
+  caret = 'right',
+  trigger,
+  children,
+  ...props
+}: {
+  value?: string
+  padding?: 'none' | 'compact' | 'relaxed'
+  paddingArea?: 'trigger-only' | 'all'
+  caret?: 'none' | 'left' | 'right'
+  trigger: ReactNode
+  children: ReactNode
+} & Omit<ComponentProps<typeof RadixAccordion.Item>, 'value'>) {
   const theme = useTheme()
   const paddingSize = getPaddingSize(theme, padding)
-  // if value is not provided, use a random persisted id
   const defaultValue = useId()
 
   return (
     <ItemSC
-      // @ts-ignore, this is the sorta thing React 19 will be nice for
-      ref={ref}
       value={value ?? defaultValue}
       {...props}
     >
@@ -207,9 +195,6 @@ const ContentSC = styled(RadixAccordion.Content)`
         ${slideAnimation('in', 'width')}`} 300ms ease-out;
   }
 `
-
-const Accordion = forwardRef(AccordionRef)
-const AccordionItem = forwardRef(AccordionItemRef)
 
 export default Accordion
 export { AccordionItem }

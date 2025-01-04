@@ -1,12 +1,9 @@
 // styling here mostly just for the overlay and animations
 import * as Dialog from '@radix-ui/react-dialog'
-
-import { type ReactNode, forwardRef } from 'react'
-import styled, { type CSSObject, useTheme } from 'styled-components'
-
 import { FocusScope } from '@radix-ui/react-focus-scope'
-
+import { type ComponentPropsWithRef, type ReactNode } from 'react'
 import { VisuallyHidden } from 'react-aria'
+import styled, { type CSSObject, useTheme } from 'styled-components'
 
 import WrapWithIf from './WrapWithIf'
 
@@ -17,19 +14,16 @@ export type ModalWrapperProps = {
   onOpenChange?: (open: boolean) => void
   overlayStyles?: CSSObject
   children?: ReactNode
-} & Dialog.DialogContentProps
+} & ComponentPropsWithRef<typeof Dialog.Content>
 
-function ModalWrapperRef(
-  {
-    open,
-    onOpenChange,
-    overlayStyles,
-    title,
-    children,
-    ...props
-  }: ModalWrapperProps,
-  ref: any
-) {
+function ModalWrapper({
+  open,
+  onOpenChange,
+  overlayStyles,
+  title,
+  children,
+  ...props
+}: ModalWrapperProps) {
   const theme = useTheme()
   const portalElement = document.getElementById(theme.portals.default.id)
 
@@ -54,10 +48,7 @@ function ModalWrapperRef(
               />
             }
           >
-            <ContentSC
-              ref={ref}
-              {...props}
-            >
+            <ContentSC {...props}>
               <VisuallyHidden>
                 <Dialog.Title>{title}</Dialog.Title>
               </VisuallyHidden>
@@ -117,4 +108,4 @@ const OverlaySC = styled(Dialog.Overlay)(({ theme }) => ({
   },
 }))
 
-export const ModalWrapper = forwardRef(ModalWrapperRef)
+export { ModalWrapper }

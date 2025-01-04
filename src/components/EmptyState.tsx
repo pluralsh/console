@@ -1,15 +1,10 @@
-import {
-  type ComponentProps,
-  type ReactElement,
-  type Ref,
-  forwardRef,
-} from 'react'
+import { type ComponentProps, type ReactElement } from 'react'
 import styled from 'styled-components'
 
 export type EmptyStateProps = ComponentProps<typeof EmptyStateSC> & {
   message: string
   description?: string
-  icon?: ReactElement
+  icon?: ReactElement<any>
 }
 
 const EmptyStateSC = styled.div(({ theme }) => ({
@@ -34,15 +29,15 @@ const IconSC = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.large,
 }))
 
-function EmptyStateRef(
-  { message, description, icon = null, children, ...props }: EmptyStateProps,
-  ref: Ref<any>
-) {
+function EmptyState({
+  message,
+  description,
+  icon = null,
+  children,
+  ...props
+}: EmptyStateProps) {
   return (
-    <EmptyStateSC
-      ref={ref}
-      {...props}
-    >
+    <EmptyStateSC {...props}>
       {icon && <IconSC>{icon}</IconSC>}
       <MessageSC>{message}</MessageSC>
       {description && <DescriptionSC>{description}</DescriptionSC>}
@@ -50,7 +45,5 @@ function EmptyStateRef(
     </EmptyStateSC>
   )
 }
-
-const EmptyState = forwardRef(EmptyStateRef)
 
 export default EmptyState

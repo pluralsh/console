@@ -1,13 +1,19 @@
-import { type DivProps, Flex, type FlexProps, H1 } from 'honorable'
-import { type ReactNode, forwardRef } from 'react'
+import { Flex, type FlexProps, H1 } from 'honorable'
+import { type ComponentProps, type ReactNode } from 'react'
 
 export type PageTitleProps = {
   heading?: ReactNode
-  headingProps?: DivProps
+  headingProps?: ComponentProps<'h1'>
 } & FlexProps
 
-const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
-  ({ heading, headingProps = {}, children, ...props }, ref) => (
+function PageTitle({
+  ref,
+  heading,
+  headingProps = {},
+  children,
+  ...props
+}: PageTitleProps) {
+  return (
     <Flex
       ref={ref}
       borderBottom="1px solid border"
@@ -29,6 +35,6 @@ const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
       {children}
     </Flex>
   )
-)
+}
 
 export default PageTitle

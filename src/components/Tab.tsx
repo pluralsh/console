@@ -1,30 +1,29 @@
-import { type ReactNode, type Ref, forwardRef } from 'react'
-import { Div, type DivProps, Flex, Icon } from 'honorable'
+import { Div, type DivProps, Icon } from 'honorable'
+import { type ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
+import Flex, { type FlexProps } from './Flex'
 import { type TabBaseProps } from './TabList'
 
 type TabProps = DivProps &
   TabBaseProps & {
     startIcon?: ReactNode
-    innerProps?: DivProps
+    innerProps?: FlexProps
   }
 
 export const TAB_INDICATOR_THICKNESS = 2
 
-function TabRef(
-  {
-    startIcon,
-    active,
-    activeSecondary,
-    children,
-    vertical,
-    textValue: _textValue,
-    innerProps,
-    ...props
-  }: TabProps,
-  ref: Ref<any>
-) {
+function Tab({
+  ref,
+  startIcon,
+  active,
+  activeSecondary,
+  children,
+  vertical,
+  textValue: _textValue,
+  innerProps,
+  ...props
+}: TabProps) {
   const theme = useTheme()
 
   const borderRadiuses = {
@@ -64,38 +63,45 @@ function TabRef(
       {...props}
     >
       <Flex
-        paddingHorizontal="medium"
-        paddingTop="xsmall"
-        paddingBottom="xsmall"
+        paddingLeft={theme.spacing.medium}
+        paddingRight={theme.spacing.medium}
+        paddingTop={theme.spacing.xsmall}
+        paddingBottom={theme.spacing.xsmall}
         align="center"
         borderBottom={
           vertical
             ? null
             : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
-                active ? 'border-primary' : 'transparent'
+                active ? theme.colors['border-primary'] : 'transparent'
               }`
         }
         borderRight={
           vertical
             ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
                 active
-                  ? 'border-primary'
+                  ? theme.colors['border-primary']
                   : activeSecondary
-                  ? 'border-fill-two'
+                  ? theme.colors['border-fill-two']
                   : 'transparent'
               }`
             : null
         }
         {...borderRadiuses}
-        color={active || activeSecondary ? 'text' : 'text-xlight'}
+        color={
+          active || activeSecondary
+            ? theme.colors.text
+            : theme.colors['text-xlight']
+        }
         backgroundColor={
           !active && activeSecondary ? theme.colors['fill-two'] : 'transparent'
         }
-        _hover={{
-          color: 'text',
-          ...(!(!active && activeSecondary)
-            ? { backgroundColor: 'fill-zero-hover' }
-            : {}),
+        {...{
+          '&:hover': {
+            color: theme.colors.text,
+            ...(!(!active && activeSecondary)
+              ? { backgroundColor: theme.colors['fill-zero-hover'] }
+              : {}),
+          },
         }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
         {...innerProps}
@@ -106,8 +112,6 @@ function TabRef(
     </Div>
   )
 }
-
-const Tab = forwardRef(TabRef)
 
 export default Tab
 export type { TabProps }

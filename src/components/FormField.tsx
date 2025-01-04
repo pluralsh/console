@@ -1,16 +1,14 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
 import { Div, type DivProps, Flex, Label, P } from 'honorable'
+import { isNil } from 'lodash-es'
 import {
   type LabelHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
-  type Ref,
   createContext,
-  forwardRef,
   useContext,
   useMemo,
 } from 'react'
-import { isNil } from 'lodash-es'
 
 import { useLabel } from 'react-aria'
 
@@ -44,23 +42,20 @@ export function useFormField() {
   return context
 }
 
-function FormFieldRef(
-  {
-    children,
-    label,
-    labelProps = {},
-    labellingProps = {},
-    caption,
-    hint,
-    error,
-    length,
-    maxLength,
-    required,
-    small,
-    ...props
-  }: FormFieldProps,
-  ref: Ref<any>
-) {
+function FormField({
+  children,
+  label,
+  labelProps = {},
+  labellingProps = {},
+  caption,
+  hint,
+  error,
+  length,
+  maxLength,
+  required,
+  small,
+  ...props
+}: FormFieldProps) {
   const hasLabel = label || required
   const hasTopContent = hasLabel || caption
   const hasBottomContent = !isNil(hint) || typeof maxLength === 'number'
@@ -84,10 +79,7 @@ function FormFieldRef(
   )
 
   const content = (
-    <Div
-      ref={ref}
-      {...props}
-    >
+    <Div {...props}>
       {hasTopContent && (
         <Flex
           align="center"
@@ -167,7 +159,5 @@ function FormFieldRef(
     </FormFieldContext.Provider>
   )
 }
-
-const FormField = forwardRef(FormFieldRef)
 
 export default FormField

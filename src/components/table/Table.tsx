@@ -1,15 +1,4 @@
-import { Div, type DivProps } from 'honorable'
-import {
-  Fragment,
-  type MouseEvent,
-  type Ref,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { rankItem } from '@tanstack/match-sorter-utils'
 import type {
   ColumnDef,
   FilterFn,
@@ -24,16 +13,25 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { rankItem } from '@tanstack/match-sorter-utils'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useTheme } from 'styled-components'
+import { Div, type DivProps } from 'honorable'
 import { isEmpty, isNil } from 'lodash-es'
+import {
+  Fragment,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { useTheme } from 'styled-components'
 
 import { type FillLevel, InfoOutlineIcon, Tooltip } from '../../index'
 import Button from '../Button'
-import CaretUpIcon from '../icons/CaretUpIcon'
 import EmptyState, { type EmptyStateProps } from '../EmptyState'
+import CaretUpIcon from '../icons/CaretUpIcon'
 import { Spinner } from '../Spinner'
 
 import { tableFillLevelToBg, tableFillLevelToBorderColor } from './colors'
@@ -125,40 +123,38 @@ const defaultGlobalFilterFn: FilterFn<any> = (
   return itemRank.passed
 }
 
-function TableRef(
-  {
-    data,
-    columns,
-    loading = false,
-    loadingSkeletonRows = 10,
-    hideHeader = false,
-    getRowCanExpand,
-    renderExpanded,
-    loose = false,
-    padCells = true,
-    fillLevel = 0,
-    rowBg = 'stripes',
-    stickyColumn = false,
-    scrollTopMargin = 500,
-    flush = false,
-    width,
-    virtualizeRows = false,
-    lockColumnsOnScroll,
-    reactVirtualOptions,
-    reactTableOptions,
-    highlightedRowId,
-    onRowClick,
-    emptyStateProps,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    onVirtualSliceChange,
-    ...props
-  }: TableProps,
-  forwardRef: Ref<any>
-) {
+function Table({
+  ref: forwardedRef,
+  data,
+  columns,
+  loading = false,
+  loadingSkeletonRows = 10,
+  hideHeader = false,
+  getRowCanExpand,
+  renderExpanded,
+  loose = false,
+  padCells = true,
+  fillLevel = 0,
+  rowBg = 'stripes',
+  stickyColumn = false,
+  scrollTopMargin = 500,
+  flush = false,
+  width,
+  virtualizeRows = false,
+  lockColumnsOnScroll,
+  reactVirtualOptions,
+  reactTableOptions,
+  highlightedRowId,
+  onRowClick,
+  emptyStateProps,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+  onVirtualSliceChange,
+  ...props
+}: TableProps) {
   const theme = useTheme()
-  const tableContainerRef = useRef<HTMLDivElement>()
+  const tableContainerRef = useRef<HTMLDivElement>(undefined)
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
   const table = useReactTable({
@@ -306,7 +302,7 @@ function TableRef(
       width={width}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      ref={forwardRef}
+      ref={forwardedRef}
     >
       <Div
         backgroundColor={tableFillLevelToBg[fillLevel]}
@@ -319,7 +315,7 @@ function TableRef(
             : 'large'
         }
         overflow="auto"
-        ref={tableContainerRef}
+        ref={tableContainerRef as DivProps['ref']}
         onScroll={({ target }: { target: HTMLDivElement }) =>
           setScrollTop(target?.scrollTop)
         }
@@ -540,7 +536,5 @@ function TableRef(
     </Div>
   )
 }
-
-const Table = forwardRef(TableRef)
 
 export default Table

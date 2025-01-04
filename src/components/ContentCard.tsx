@@ -1,32 +1,30 @@
-import { Div, type DivProps } from 'honorable'
-import { forwardRef } from 'react'
+import { useTheme } from 'styled-components'
 
 import Card, { type CardProps } from './Card'
 
-export type ContentCardProps = CardProps & {
-  innerProps?: DivProps
-} & DivProps
+function ContentCard({ ref, children, ...props }: CardProps) {
+  const theme = useTheme()
 
-const ContentCard = forwardRef<HTMLDivElement, ContentCardProps>(
-  ({ children, innerProps, ...props }, ref) => (
+  return (
     <Card
       ref={ref}
       overflowY="auto"
-      paddingHorizontal="xlarge"
+      padding={`0 ${theme.spacing.xlarge}px`}
       {...props}
     >
-      <Div
-        width="100%"
-        marginLeft="auto"
-        marginRight="auto"
-        paddingVertical="xlarge"
-        maxWidth={608}
-        {...innerProps}
+      <div
+        css={{
+          width: '100%',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          padding: `${theme.spacing.xlarge}px 0`,
+          maxWidth: 608,
+        }}
       >
         {children}
-      </Div>
+      </div>
     </Card>
   )
-)
+}
 
 export default ContentCard

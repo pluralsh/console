@@ -1,4 +1,4 @@
-import { type MutableRefObject, useMemo } from 'react'
+import { type RefObject, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
   autoUpdate,
@@ -15,7 +15,7 @@ export function useFloatingCornerScale({
   placement,
   triggerRef,
 }: Pick<SelectProps, 'placement' | 'width' | 'maxHeight'> & {
-  triggerRef: MutableRefObject<any>
+  triggerRef: RefObject<any>
 }) {
   const theme = useTheme()
   const sizePadding = theme.spacing.xxsmall

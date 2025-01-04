@@ -1,15 +1,12 @@
-import { Children, type ReactElement, type Ref, forwardRef } from 'react'
+import { Children, type ReactElement } from 'react'
 import { Div, P } from 'honorable'
 
 import Carousel, { type CarouselProps } from './Carousel'
 
-function TipCarouselRef({ children, ...props }: CarouselProps, ref: Ref<any>) {
+function TipCarousel({ children, ...props }: CarouselProps) {
   return (
-    <Carousel
-      ref={ref}
-      {...props}
-    >
-      {Children.map(children, (child: ReactElement) => (
+    <Carousel {...props}>
+      {Children.map(children, (child: ReactElement<any>) => (
         <Div
           width="100%"
           paddingTop="medium"
@@ -31,7 +28,5 @@ function TipCarouselRef({ children, ...props }: CarouselProps, ref: Ref<any>) {
     </Carousel>
   )
 }
-
-const TipCarousel = forwardRef(TipCarouselRef)
 
 export default TipCarousel

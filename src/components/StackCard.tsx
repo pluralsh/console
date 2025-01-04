@@ -1,5 +1,4 @@
 import { Div, type DivProps, Flex, H1, H3, P } from 'honorable'
-import { type Ref, forwardRef } from 'react'
 
 import Card from './Card'
 import AppIcon from './AppIcon'
@@ -29,13 +28,15 @@ const hueToColor = {
   yellow: 'text-warning-light',
 }
 
-function StackCardRef(
-  { title, description, apps = [], hue = 'neutral', ...props }: StackCardProps,
-  ref: Ref<any>
-) {
+function StackCard({
+  title,
+  description,
+  apps = [],
+  hue = 'neutral',
+  ...props
+}: StackCardProps) {
   return (
     <Card
-      ref={ref}
       clickable
       flexDirection="column"
       padding="large"
@@ -124,7 +125,5 @@ function StackCardRef(
     </Card>
   )
 }
-
-const StackCard = forwardRef(StackCardRef)
 
 export default StackCard

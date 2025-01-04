@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 
 import {
+  type JSX,
   createRef,
   useCallback,
   useContext,

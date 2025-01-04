@@ -1,13 +1,5 @@
-import {
-  Div,
-  type DivProps,
-  Flex,
-  H1,
-  type H1Props,
-  H2,
-  type H2Props,
-} from 'honorable'
-import { type ReactNode, forwardRef } from 'react'
+import { Div, type DivProps, Flex, H1, H2 } from 'honorable'
+import { type ComponentProps, type ReactNode } from 'react'
 
 import AppIcon, { type AppIconProps } from './AppIcon'
 
@@ -16,24 +8,22 @@ type PageCardProps = {
   heading?: ReactNode
   subheading?: ReactNode
   subheadingIcon?: ReactNode
-  headingProps?: H1Props
-  subheadingProps?: H2Props
+  headingProps?: ComponentProps<'h1'>
+  subheadingProps?: ComponentProps<'h2'>
 } & DivProps
 
-const PageCard = forwardRef<HTMLDivElement, PageCardProps>(
-  (
-    {
-      icon = {},
-      heading,
-      headingProps,
-      subheading,
-      subheadingProps,
-      subheadingIcon,
-      children,
-      ...props
-    },
-    ref
-  ) => (
+function PageCard({
+  ref,
+  icon = {},
+  heading,
+  headingProps,
+  subheading,
+  subheadingProps,
+  subheadingIcon,
+  children,
+  ...props
+}: PageCardProps) {
+  return (
     <Div paddingLeft="medium">
       <Flex
         ref={ref}
@@ -90,7 +80,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(
       )}
     </Div>
   )
-)
+}
 
 export default PageCard
 export type { PageCardProps }

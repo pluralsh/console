@@ -1,5 +1,10 @@
 import classNames from 'classnames'
-import { type Dispatch, type PropsWithChildren, forwardRef, useId } from 'react'
+import {
+  type Dispatch,
+  type PropsWithChildren,
+  type RefObject,
+  useId,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { Flex } from 'honorable'
@@ -79,6 +84,7 @@ const sizeToIconSize: Record<CalloutSize, number> = {
 }
 
 export type CalloutProps = PropsWithChildren<{
+  ref?: RefObject<HTMLDivElement>
   title?: string
   severity?: CalloutSeverity
   size?: CalloutSize
@@ -104,158 +110,152 @@ export function CalloutButton(props: ButtonProps) {
   )
 }
 
-const Callout = forwardRef<HTMLDivElement, CalloutProps>(
-  (
-    {
-      title,
-      severity = DEFAULT_SEVERITY,
-      size = 'full',
-      expandable = false,
-      expanded: expandedProp,
-      defaultExpanded = false,
-      onExpand: onExpandProp,
-      closeable = false,
-      closed = false,
-      onClose,
-      fillLevel,
-      className,
-      buttonProps,
-      children,
-      id,
-    },
-    ref
-  ) => {
-    if (expandable && closeable) {
-      throw new Error(
-        'Callout component cannot be expandable and closable at the same time'
-      )
-    }
-    const generatedId = useId()
-
-    id = id || generatedId
-    const {
-      triggerProps,
-      contentProps,
-      isOpen: expanded,
-    } = useDisclosure({
-      defaultOpen: defaultExpanded,
-      isOpen: expandedProp,
-      onOpenChange: onExpandProp,
-      id,
-    })
-
-    severity = sanitizeSeverity(severity, {
-      default: DEFAULT_SEVERITY,
-      allowList: CALLOUT_SEVERITIES,
-    })
-    const theme = useTheme()
-
-    const text = severityToText[severity]
-    const iconColor = theme.colors[severityToIconColorKey[severity]]
-    const borderColorKey = severityToBorderColorKey[severity]
-    const Icon = severityToIcon[severity]
-    const parentFillLevel = useFillLevel()
-
-    fillLevel = toFillLevel(
-      Math.max(
-        2,
-        isFillLevel(fillLevel) && fillLevel >= 0
-          ? fillLevel
-          : parentFillLevel + 1
-      )
-    )
-
-    let iconTopMargin = size === 'full' ? 0 : 2
-
-    if (title) {
-      iconTopMargin += 2
-    }
-
-    if (closed) {
-      return null
-    }
-
-    return (
-      <FillLevelProvider value={fillLevel}>
-        <CalloutSC
-          className={`${className} ${classNames({ expandable })}`}
-          $borderColorKey={borderColorKey}
-          $fillLevel={fillLevel}
-          $size={size}
-          $expanded={expanded}
-          ref={ref}
-          {...(expandable && !expanded ? triggerProps : {})}
-        >
-          <div className="icon">
-            <Icon
-              marginTop={iconTopMargin}
-              size={sizeToIconSize[size]}
-              color={iconColor}
-              display="flex"
-            />
-          </div>
-          <div
-            className="content"
-            {...(expandable ? contentProps : {})}
-          >
-            <h6 className={classNames({ visuallyHidden: !title, expandable })}>
-              <span className="visuallyHidden">{`${text}: `}</span>
-              {title}
-            </h6>
-            <AnimateHeight
-              contentClassName={classNames('body', {
-                bodyWithTitle: !!title && !!children,
-              })}
-              duration={300}
-              height={
-                (expandable && expanded) || !expandable
-                  ? 'auto'
-                  : size === 'compact'
-                  ? theme.spacing.xsmall
-                  : theme.spacing.medium
-              }
-            >
-              <div className="children">{children}</div>
-              {buttonProps && (
-                <div className="buttonArea">
-                  <CalloutButton {...buttonProps} />
-                </div>
-              )}
-            </AnimateHeight>
-          </div>
-          {(expandable || closeable) && (
-            <Flex
-              grow={1}
-              justify="flex-end"
-            >
-              <IconFrame
-                textValue=""
-                display="flex"
-                size="small"
-                clickable
-                {...(closeable && onClose
-                  ? {
-                      onClick: () => {
-                        onClose(!closed)
-                      },
-                    }
-                  : {})}
-                {...(expandable && expanded ? triggerProps : {})}
-                icon={
-                  expandable ? (
-                    <CaretDownIcon className="expandIcon" />
-                  ) : (
-                    <CloseIcon />
-                  )
-                }
-              />
-            </Flex>
-          )}
-        </CalloutSC>
-      </FillLevelProvider>
+function Callout({
+  ref,
+  title,
+  severity = DEFAULT_SEVERITY,
+  size = 'full',
+  expandable = false,
+  expanded: expandedProp,
+  defaultExpanded = false,
+  onExpand: onExpandProp,
+  closeable = false,
+  closed = false,
+  onClose,
+  fillLevel,
+  className,
+  buttonProps,
+  children,
+  id,
+}: CalloutProps) {
+  if (expandable && closeable) {
+    throw new Error(
+      'Callout component cannot be expandable and closable at the same time'
     )
   }
-)
+  const generatedId = useId()
+
+  id = id || generatedId
+  const {
+    triggerProps,
+    contentProps,
+    isOpen: expanded,
+  } = useDisclosure({
+    defaultOpen: defaultExpanded,
+    isOpen: expandedProp,
+    onOpenChange: onExpandProp,
+    id,
+  })
+
+  severity = sanitizeSeverity(severity, {
+    default: DEFAULT_SEVERITY,
+    allowList: CALLOUT_SEVERITIES,
+  })
+  const theme = useTheme()
+
+  const text = severityToText[severity]
+  const iconColor = theme.colors[severityToIconColorKey[severity]]
+  const borderColorKey = severityToBorderColorKey[severity]
+  const Icon = severityToIcon[severity]
+  const parentFillLevel = useFillLevel()
+
+  fillLevel = toFillLevel(
+    Math.max(
+      2,
+      isFillLevel(fillLevel) && fillLevel >= 0 ? fillLevel : parentFillLevel + 1
+    )
+  )
+
+  let iconTopMargin = size === 'full' ? 0 : 2
+
+  if (title) {
+    iconTopMargin += 2
+  }
+
+  if (closed) {
+    return null
+  }
+
+  return (
+    <FillLevelProvider value={fillLevel}>
+      <CalloutSC
+        className={`${className} ${classNames({ expandable })}`}
+        $borderColorKey={borderColorKey}
+        $fillLevel={fillLevel}
+        $size={size}
+        $expanded={expanded}
+        ref={ref}
+        {...(expandable && !expanded ? triggerProps : {})}
+      >
+        <div className="icon">
+          <Icon
+            marginTop={iconTopMargin}
+            size={sizeToIconSize[size]}
+            color={iconColor}
+            display="flex"
+          />
+        </div>
+        <div
+          className="content"
+          {...(expandable ? contentProps : {})}
+        >
+          <h6 className={classNames({ visuallyHidden: !title, expandable })}>
+            <span className="visuallyHidden">{`${text}: `}</span>
+            {title}
+          </h6>
+          <AnimateHeight
+            contentClassName={classNames('body', {
+              bodyWithTitle: !!title && !!children,
+            })}
+            duration={300}
+            height={
+              (expandable && expanded) || !expandable
+                ? 'auto'
+                : size === 'compact'
+                ? theme.spacing.xsmall
+                : theme.spacing.medium
+            }
+          >
+            <div className="children">{children}</div>
+            {buttonProps && (
+              <div className="buttonArea">
+                <CalloutButton {...buttonProps} />
+              </div>
+            )}
+          </AnimateHeight>
+        </div>
+        {(expandable || closeable) && (
+          <Flex
+            grow={1}
+            justify="flex-end"
+          >
+            <IconFrame
+              textValue=""
+              display="flex"
+              size="small"
+              clickable
+              {...(closeable && onClose
+                ? {
+                    onClick: () => {
+                      onClose(!closed)
+                    },
+                  }
+                : {})}
+              {...(expandable && expanded ? triggerProps : {})}
+              icon={
+                expandable ? (
+                  <CaretDownIcon className="expandIcon" />
+                ) : (
+                  <CloseIcon />
+                )
+              }
+            />
+          </Flex>
+        )}
+      </CalloutSC>
+    </FillLevelProvider>
+  )
+}
 
 const CalloutSC = styled.div<{
   $borderColorKey: string

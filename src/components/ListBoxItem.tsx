@@ -3,7 +3,6 @@ import {
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
-  forwardRef,
 } from 'react'
 import { type ItemProps } from '@react-types/shared'
 import styled from 'styled-components'
@@ -113,21 +112,19 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
   })
 )
 
-const ListBoxItem = forwardRef<HTMLDivElement, ListBoxItemProps>(
-  (
-    {
-      selected,
-      label,
-      labelProps = {},
-      description,
-      descriptionProps = {},
-      leftContent,
-      rightContent,
-      reserveSelectedIndicatorSpace,
-      ...props
-    },
-    ref
-  ) => (
+function ListBoxItem({
+  ref,
+  selected,
+  label,
+  labelProps = {},
+  description,
+  descriptionProps = {},
+  leftContent,
+  rightContent,
+  reserveSelectedIndicatorSpace,
+  ...props
+}: ListBoxItemProps) {
+  return (
     <ListBoxItemInner
       ref={ref}
       selected={selected}
@@ -161,7 +158,7 @@ const ListBoxItem = forwardRef<HTMLDivElement, ListBoxItemProps>(
       )}
     </ListBoxItemInner>
   )
-)
+}
 
 type ListBoxFooterProps = ComponentPropsWithRef<typeof ListBoxFooterInner> & {
   children: ReactNode
@@ -203,8 +200,15 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
       : {}),
   })
 )
-const ListBoxFooter = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
-  ({ leftContent, rightContent, children, ...props }, ref) => (
+
+function ListBoxFooter({
+  ref,
+  leftContent,
+  rightContent,
+  children,
+  ...props
+}: ListBoxFooterProps) {
+  return (
     <ListBoxFooterInner
       tabIndex={0}
       ref={ref}
@@ -215,13 +219,19 @@ const ListBoxFooter = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
       {rightContent && <div className="rightContent">{rightContent}</div>}
     </ListBoxFooterInner>
   )
-)
+}
 
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
-const ListBoxFooterPlus = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
-  ({ leftContent, children, ...props }, ref) => (
+
+function ListBoxFooterPlus({
+  ref,
+  leftContent,
+  children,
+  ...props
+}: ListBoxFooterProps) {
+  return (
     <ListBoxFooterPlusInner
       ref={ref}
       leftContent={
@@ -239,7 +249,7 @@ const ListBoxFooterPlus = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
       {children}
     </ListBoxFooterPlusInner>
   )
-)
+}
 
 export type {
   ListBoxItemBaseProps,

@@ -1,9 +1,4 @@
-import {
-  type ComponentProps,
-  type ReactNode,
-  type Ref,
-  forwardRef,
-} from 'react'
+import { type ComponentProps, type ReactNode } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -75,25 +70,22 @@ const FeaturedBorder = styled(
   }
 })
 
-function RepositoryCardRef(
-  {
-    title,
-    publisher,
-    priv,
-    installed,
-    verified,
-    trending,
-    featuredLabel,
-    description,
-    imageUrl,
-    tags = [],
-    size = 'small',
-    variant = 'app',
-    releaseStatus,
-    ...props
-  }: RepositoryCardProps,
-  ref: Ref<any>
-) {
+function RepositoryCard({
+  title,
+  publisher,
+  priv,
+  installed,
+  verified,
+  trending,
+  featuredLabel,
+  description,
+  imageUrl,
+  tags = [],
+  size = 'small',
+  variant = 'app',
+  releaseStatus,
+  ...props
+}: RepositoryCardProps) {
   const maxTags = trending ? 5 : 6
   const showRelease = prerelease(releaseStatus)
   const mainChipProps = {
@@ -105,7 +97,6 @@ function RepositoryCardRef(
 
   return (
     <Card
-      ref={ref}
       clickable
       style={{
         flexDirection: 'column',
@@ -285,7 +276,5 @@ const DescriptionSC = styled.p(({ theme }) => ({
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
 }))
-
-const RepositoryCard = forwardRef(RepositoryCardRef)
 
 export default RepositoryCard

@@ -1,8 +1,7 @@
 import {
   Fragment,
   type ReactNode,
-  type Ref,
-  forwardRef,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -52,6 +51,7 @@ export type StepConnectionProps = {
 export type StepperSteps = (StepBaseProps & { key: string })[]
 
 type StepperProps = {
+  ref?: RefObject<HTMLDivElement>
   stepIndex: number
   steps: StepperSteps
   vertical?: boolean
@@ -70,18 +70,16 @@ const StepperSC = styled.div<{ $compact: boolean; $vertical: boolean }>(
   })
 )
 
-function StepperRef(
-  {
-    stepIndex,
-    steps,
-    vertical = false,
-    collapseAtWidth = 160,
-    forceCollapse = false,
-    compact = false,
-  }: StepperProps,
-  ref: Ref<any>
-) {
-  const eltRef = useRef<HTMLDivElement>()
+function Stepper({
+  ref,
+  stepIndex,
+  steps,
+  vertical = false,
+  collapseAtWidth = 160,
+  forceCollapse = false,
+  compact = false,
+}: StepperProps) {
+  const eltRef = useRef<HTMLDivElement>(undefined)
   const mergedRef = mergeRefs(ref, eltRef)
   const [collapseTitles, setCollapseTitles] = useState(true)
 
@@ -133,7 +131,5 @@ function StepperRef(
     </StepperSC>
   )
 }
-
-const Stepper = forwardRef(StepperRef)
 
 export default Stepper
