@@ -21,7 +21,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ClusterRole(): ReactElement {
+export default function ClusterRole(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleQuery({

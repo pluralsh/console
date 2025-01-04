@@ -154,7 +154,7 @@ function FlyoverContent({ open, cluster, refetch }) {
                 key={DeprecationType.GitOps}
                 innerProps={{
                   flexGrow: 1,
-                  gap: theme.spacing.xsmall,
+                  gap: 'xsmall',
                   justifyContent: 'center',
                 }}
                 css={{ display: 'flex', flexGrow: 1 }}
@@ -169,7 +169,7 @@ function FlyoverContent({ open, cluster, refetch }) {
                 key={DeprecationType.CloudProvider}
                 innerProps={{
                   flexGrow: 1,
-                  gap: theme.spacing.xsmall,
+                  gap: 'xsmall',
                   justifyContent: 'center',
                 }}
                 css={{ display: 'flex', flexGrow: 1 }}

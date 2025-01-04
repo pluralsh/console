@@ -23,7 +23,7 @@ import { hash } from '../../../utils/sha'
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-export default function Raw(): ReactElement {
+export default function Raw(): ReactElement<any> {
   const theme = useTheme()
   const { clusterId, name, namespace, crd } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)

@@ -30,7 +30,7 @@ const directory: Array<TabEntry> = [
   { path: 'events', label: 'Events' },
 ] as const
 
-export default function CustomResource(): ReactElement {
+export default function CustomResource(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace, crd = '' } = useParams()
   const { data, loading } = useCustomResourceQuery({
@@ -84,7 +84,7 @@ export default function CustomResource(): ReactElement {
   )
 }
 
-export function CustomResourceEvents(): ReactElement {
+export function CustomResourceEvents(): ReactElement<any> {
   const { name, namespace, crd } = useParams()
   const columns = useEventsColumns()
 

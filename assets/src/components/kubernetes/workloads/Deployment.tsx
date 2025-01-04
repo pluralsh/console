@@ -62,7 +62,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Deployment(): ReactElement {
+export default function Deployment(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useDeploymentQuery({
@@ -139,7 +139,7 @@ export default function Deployment(): ReactElement {
   )
 }
 
-export function DeploymentReplicaSets(): ReactElement {
+export function DeploymentReplicaSets(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useReplicaSetsColumns()
 
@@ -174,7 +174,7 @@ export function DeploymentReplicaSets(): ReactElement {
   )
 }
 
-function NewReplicaSet(): ReactElement {
+function NewReplicaSet(): ReactElement<any> {
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useDeploymentNewReplicaSetQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -228,7 +228,7 @@ function NewReplicaSet(): ReactElement {
   )
 }
 
-export function DeploymentHorizontalPodAutoscalers(): ReactElement {
+export function DeploymentHorizontalPodAutoscalers(): ReactElement<any> {
   const { name, namespace } = useParams()
 
   return (
@@ -240,7 +240,7 @@ export function DeploymentHorizontalPodAutoscalers(): ReactElement {
   )
 }
 
-export function DeploymentEvents(): ReactElement {
+export function DeploymentEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

@@ -20,7 +20,7 @@ import { getBreadcrumbs } from './IngressClasses'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
-export default function IngressClass(): ReactElement {
+export default function IngressClass(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useIngressClassQuery({

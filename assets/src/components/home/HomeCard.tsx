@@ -22,7 +22,7 @@ export function HomeCard({
   noPadding = false,
   children,
 }: {
-  icon?: ReactElement
+  icon?: ReactElement<any>
   title: string
   tooltip?: ReactNode
   link?: string

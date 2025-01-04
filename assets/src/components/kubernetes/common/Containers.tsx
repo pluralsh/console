@@ -21,7 +21,7 @@ interface ContainersProps {
 
 export default function Containers({
   containers,
-}: ContainersProps): ReactElement {
+}: ContainersProps): ReactElement<any> {
   return (
     <div
       css={{
@@ -45,7 +45,7 @@ interface ContainerProps {
   container: ContainerT
 }
 
-function Container({ container }: ContainerProps): ReactElement {
+function Container({ container }: ContainerProps): ReactElement<any> {
   return (
     <ResourceInfoCard
       title={
@@ -100,7 +100,6 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.status?.restartCount}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="Security">
         <ResourceInfoCardEntry heading="Privileged">
           {container.securityContext?.privileged}
@@ -124,7 +123,6 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.securityContext?.procMount}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="Seccomp profile">
         <ResourceInfoCardEntry heading="Type">
           {container.securityContext?.seccompProfile?.type}
@@ -133,7 +131,6 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.securityContext?.seccompProfile?.localhostProfile}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="Windows Options">
         <ResourceInfoCardEntry heading="Run as user">
           {container.securityContext?.windowsOptions?.runAsUserName}
@@ -148,7 +145,6 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.securityContext?.windowsOptions?.gmsaCredentialSpec}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="SELinux options">
         <ResourceInfoCardEntry heading="Role">
           {container.securityContext?.seLinuxOptions?.role && (
@@ -179,7 +175,6 @@ function Container({ container }: ContainerProps): ReactElement {
           )}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="Capabilities">
         <ResourceInfoCardEntry heading="Add">
           {container.securityContext?.capabilities?.add && (
@@ -200,7 +195,6 @@ function Container({ container }: ContainerProps): ReactElement {
           )}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <ResourceInfoCardSection heading="Resources">
         <ResourceInfoCardEntry heading="Claims">
           {container?.resources?.claims && (
@@ -237,7 +231,6 @@ function Container({ container }: ContainerProps): ReactElement {
           )}
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
-
       <Probe
         heading="Liveness probe"
         probe={container?.livenessProbe}
@@ -260,7 +253,7 @@ function Probe({
 }: {
   heading: string
   probe: ProbeT
-}): ReactElement {
+}): ReactElement<any> {
   return (
     <ResourceInfoCardSection heading={heading}>
       <ResourceInfoCardEntry heading="Failure threshold">

@@ -18,6 +18,7 @@ export default function MarkdocComponent({
     return null
   }
 
+  // @ts-ignore, React version mismatch but just a TS issue
   const node = renderers.react(content, React, {
     components: {
       ...components,

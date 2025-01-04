@@ -26,7 +26,7 @@ export function AIPanelOverlay({
   children: ReactNode
 }) {
   const theme = useTheme()
-  const ref = useRef<any>()
+  const ref = useRef<any>(undefined)
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
   const maxHeight = useOverlayMaxHeight(ref, 32)
@@ -60,7 +60,7 @@ export function AIPanelOverlay({
 }
 
 function useOverlayMaxHeight(
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   padding: number,
   defaultValue: string = '300px'
 ) {

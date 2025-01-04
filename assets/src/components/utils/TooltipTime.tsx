@@ -32,16 +32,16 @@ type BaseProps = {
   ComponentProps<typeof Tooltip>,
   'placement' | 'displayOn' | 'manualOpen'
 > &
-  ComponentPropsWithRef<'div'>
+  ComponentPropsWithRef<typeof TooltipTimeSC>
 type SingleProps = {
-  date: ReactElement | string | undefined | null
-  prefix?: ReactElement | string | undefined | null
-  suffix?: ReactElement | string | undefined | null
+  date: ReactElement<any> | string | undefined | null
+  prefix?: ReactElement<any> | string | undefined | null
+  suffix?: ReactElement<any> | string | undefined | null
 } & BaseProps
 type MultiProps = {
-  date: (ReactElement | string | undefined | null)[]
-  prefix?: (ReactElement | string | undefined | null)[]
-  suffix?: (ReactElement | string | undefined | null)[]
+  date: (ReactElement<any> | string | undefined | null)[]
+  prefix?: (ReactElement<any> | string | undefined | null)[]
+  suffix?: (ReactElement<any> | string | undefined | null)[]
 } & BaseProps
 
 function TooltipTime(props: MultiProps)
@@ -64,7 +64,7 @@ function TooltipTime({
   const dateArr = isArray(date) ? date : [date]
   const prefixArr = isArray(prefix) ? prefix : [prefix]
   const suffixArr = isArray(suffix) ? suffix : [suffix]
-  const timeoutRef = useRef<number>()
+  const timeoutRef = useRef<number>(undefined)
 
   useEffect(
     () => () => {

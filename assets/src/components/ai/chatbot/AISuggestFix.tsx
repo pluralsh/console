@@ -25,7 +25,7 @@ import {
 } from '../../../generated/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
-import AIPanel from '../AIPanel.tsx'
+import { AIPanel } from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 

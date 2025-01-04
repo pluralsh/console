@@ -17,10 +17,16 @@ interface ContextProps {
 
 const ShareSecretContext = createContext<ContextProps>({} as ContextProps)
 
-export function ShareSecretProvider({ children }): ReactElement {
+export function ShareSecretProvider({ children }): ReactElement<any> {
   const [open, setOpen] = useState<boolean>(false)
   const doOpen = useCallback(() => setOpen(true), [setOpen])
-  const context = useMemo(() => ({ open: doOpen }) as ContextProps, [doOpen])
+  const context = useMemo(
+    () =>
+      ({
+        open: doOpen,
+      }) as ContextProps,
+    [doOpen]
+  )
 
   return (
     <ShareSecretContext.Provider value={context}>

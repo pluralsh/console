@@ -111,7 +111,7 @@ const roleToIcon = {
   [PrRole.Update]: <ClusterIcon />,
   [PrRole.Upgrade]: <ClusterIcon />,
   '': <ClusterIcon />,
-} as const satisfies Record<PrRole | '', ReactElement>
+} as const satisfies Record<PrRole | '', ReactElement<any>>
 
 export function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
   const icon = roleToIcon[role || ''] || roleToIcon['']

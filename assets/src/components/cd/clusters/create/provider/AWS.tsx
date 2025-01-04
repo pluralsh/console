@@ -23,7 +23,7 @@ export function settingsAreValidAws(
   return requiredProps.reduce((acc, reqProp) => acc && !!props?.[reqProp], true)
 }
 
-export function AWS(): ReactElement {
+export function AWS(): ReactElement<any> {
   const theme = useTheme()
   const {
     new: {

@@ -3,7 +3,7 @@ import { Div, Flex, Span } from 'honorable'
 import styled from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
-import { ReactElement } from 'react'
+import { ReactElement, type JSX } from 'react'
 import { ContainerStatusT } from '../cd/cluster/pod/PodsList.tsx'
 
 const iconBaseProps = {
@@ -73,7 +73,7 @@ export function ContainerStatus({
   status,
 }: {
   status: ContainerStatusT
-}): ReactElement {
+}): ReactElement<any> {
   const { name, readiness } = status
 
   return (

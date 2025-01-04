@@ -50,7 +50,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Job(): ReactElement {
+export default function Job(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useJobQuery({
@@ -119,13 +119,13 @@ export default function Job(): ReactElement {
   )
 }
 
-export function JobConditions(): ReactElement {
+export function JobConditions(): ReactElement<any> {
   const { jobStatus } = useOutletContext() as JobT
 
   return <Conditions conditions={jobStatus?.conditions} />
 }
 
-export function JobPods(): ReactElement {
+export function JobPods(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = usePodsColumns()
 
@@ -143,7 +143,7 @@ export function JobPods(): ReactElement {
   )
 }
 
-export function JobEvents(): ReactElement {
+export function JobEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

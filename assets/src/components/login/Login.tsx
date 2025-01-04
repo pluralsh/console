@@ -177,7 +177,7 @@ export default function Login() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
-  const emailRef = useRef<any>()
+  const emailRef = useRef<any>(undefined)
 
   useEffect(() => {
     setInputFocus(emailRef)

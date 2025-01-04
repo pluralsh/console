@@ -26,7 +26,7 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
-import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
+import { Avatar, Flex, Menu, MenuItem } from 'honorable'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -48,6 +48,7 @@ import { useLogin } from '../contexts'
 
 import HelpLauncher from '../help/HelpLauncher'
 
+import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -55,7 +56,7 @@ import { MARK_READ } from './queries'
 
 type MenuItem = {
   text: string
-  icon: ReactElement
+  icon: ReactElement<any>
   path: string
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp

@@ -44,7 +44,7 @@ export function ProjectsProvider({
   children,
 }: {
   children: ReactNode
-}): ReactElement {
+}): ReactElement<any> {
   const [error, setError] = useState<ApolloError>()
 
   const { data, loading } = useProjectsTinyQuery({
@@ -69,7 +69,13 @@ export function ProjectsProvider({
   )
 
   const context = useMemo(
-    () => ({ projects, project, projectId, setProjectId }) as ProjectsContextT,
+    () =>
+      ({
+        projects,
+        project,
+        projectId,
+        setProjectId,
+      }) as ProjectsContextT,
     [projects, project, projectId, setProjectId]
   )
 

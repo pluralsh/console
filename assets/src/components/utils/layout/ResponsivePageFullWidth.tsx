@@ -1,24 +1,19 @@
-import { CSSProperties, ComponentProps, Ref, forwardRef } from 'react'
+import { CSSProperties, ComponentPropsWithoutRef } from 'react'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import { ScrollablePage } from './ScrollablePage'
 
-export const ResponsivePageFullWidth = forwardRef(
-  (
-    {
-      scrollable = true,
-      style,
-      children,
-      ...props
-    }: { scrollable?: boolean; style?: CSSProperties } & ComponentProps<
-      typeof ResponsiveLayoutPage
-    > &
-      ComponentProps<typeof ScrollablePage>,
-    ref: Ref<HTMLDivElement>
-  ) => (
+export function ResponsivePageFullWidth({
+  scrollable = true,
+  style,
+  children,
+  ...props
+}: { scrollable?: boolean; style?: CSSProperties } & ComponentPropsWithoutRef<
+  typeof ScrollablePage
+>) {
+  return (
     <ResponsiveLayoutPage
-      ref={ref}
       css={{
         flexDirection: 'column',
         ...(scrollable
@@ -39,4 +34,4 @@ export const ResponsivePageFullWidth = forwardRef(
       </ScrollablePage>
     </ResponsiveLayoutPage>
   )
-)
+}
