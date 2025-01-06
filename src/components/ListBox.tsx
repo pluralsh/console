@@ -289,7 +289,7 @@ function Option({ item, state }: any) {
     focused: isFocused,
     labelProps,
     descriptionProps,
-    ref: mergeRefs([ref, item.rendered.ref]),
+    ref: mergeRefs([ref, item?.rendered?.props?.ref]),
   })
 
   return cloneElement(item.rendered, mergedProps)

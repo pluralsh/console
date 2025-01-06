@@ -116,11 +116,11 @@ function ArrowScroll({ children, ...props }: { children?: any }) {
         onScroll: checkScroll,
         ref: (node: HTMLElement) => {
           containerRef.current = node
-          if (children.ref) {
-            if (typeof children.ref === 'function') {
-              children.ref(node)
-            } else if (children.ref) {
-              children.ref.current = node
+          if (children?.props?.ref) {
+            if (typeof children.props.ref === 'function') {
+              children.props.ref(node)
+            } else if (children.props.ref) {
+              children.props.ref.current = node
             }
           }
         },

@@ -4,7 +4,6 @@ import {
   type ComponentProps,
   type ReactElement,
   type Ref,
-  type RefObject,
   cloneElement,
   useCallback,
   useEffect,
@@ -40,7 +39,7 @@ type Mode = 'multipanel' | 'singlepanel'
 export type WrappedTabPanelProps = DivProps & {
   stateRef: TabStateRef
   renderer?: Renderer
-  as: ReactElement<any> & { ref?: RefObject<any> }
+  as: ReactElement<any>
   mode?: Mode
   tabKey?: Key
 }
@@ -112,7 +111,7 @@ function WrappedTabPanel({
 
   return (
     <TabPanelClone
-      tabRef={mergeRefs(as.ref, ref)}
+      tabRef={mergeRefs(as.props?.ref, ref)}
       cloneAs={as}
       {...mergedProps}
     />
@@ -180,7 +179,7 @@ function TabPanel({
 
   return (
     <TabPanelClone
-      tabRef={as.ref}
+      tabRef={as.props?.ref}
       cloneAs={as}
     >
       {props.children}

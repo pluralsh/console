@@ -163,7 +163,7 @@ function Tooltip({
 
   // Preserve the consumer's ref
   const childrenRef = useMemo(
-    () => mergeRefs([reference, (children as any).ref]),
+    () => mergeRefs([reference, children.props?.ref]),
     [reference, children]
   )
 

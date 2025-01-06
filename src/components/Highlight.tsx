@@ -1,5 +1,6 @@
 import {
   type ComponentPropsWithoutRef,
+  type RefObject,
   useEffect,
   useMemo,
   useRef,
@@ -151,7 +152,7 @@ type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
   language?: string
   showLineNumbers?: boolean
   children: string
-  ref?: React.Ref<any>
+  ref?: RefObject<HTMLDivElement>
 }
 
 function Highlight({
