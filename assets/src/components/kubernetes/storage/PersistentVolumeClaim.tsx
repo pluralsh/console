@@ -29,7 +29,7 @@ import { PVCStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
-export default function PersistentVolumeClaim(): ReactElement {
+export default function PersistentVolumeClaim(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = usePersistentVolumeClaimQuery({

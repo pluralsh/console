@@ -25,7 +25,7 @@ import { getBreadcrumbs } from './ServiceAccounts'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
-export default function ServiceAccount(): ReactElement {
+export default function ServiceAccount(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceAccountQuery({

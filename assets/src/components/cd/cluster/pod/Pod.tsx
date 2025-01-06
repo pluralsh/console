@@ -43,7 +43,7 @@ export default function Pod() {
   const clusterId = (params[POD_PARAM_CLUSTER] as string)!
   const namespace = (params[POD_PARAM_NAMESPACE] as string)!
   const name = (params[POD_PARAM_NAME] as string)!
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const theme = useTheme()
   const tab = useMatch(`${POD_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)

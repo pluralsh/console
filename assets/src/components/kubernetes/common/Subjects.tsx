@@ -51,7 +51,7 @@ export default function Subjects({
   subjects,
 }: {
   subjects?: Maybe<Array<Maybe<SubjectT>>>
-}): ReactElement {
+}): ReactElement<any> {
   return (
     <Table
       data={subjects || []}

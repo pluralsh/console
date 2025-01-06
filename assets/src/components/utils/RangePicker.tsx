@@ -4,7 +4,7 @@ import { Key, useEffect, useRef, useState } from 'react'
 import { DURATIONS } from 'utils/time'
 
 export default function RangePicker({ duration, setDuration }: any) {
-  const tabStateRef = useRef<any>()
+  const tabStateRef = useRef<any>(undefined)
   const [selectedKey, setSelectedKey] = useState<Key>(
     `${duration.offset}+${duration.step}`
   )

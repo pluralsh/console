@@ -17,7 +17,7 @@ export function ModalMountTransition({
   children,
 }: {
   open: boolean
-  children: ReactElement
+  children: ReactElement<any>
 }) {
   const wasOpen = usePrevious(open)
   const [counter, setCounter] = useState(0)

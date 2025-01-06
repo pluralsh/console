@@ -22,7 +22,7 @@ export default function HorizontalPodAutoscalersForResource({
   kind,
   namespace,
   name,
-}: HorizontalPodAutoscalersProps): ReactElement {
+}: HorizontalPodAutoscalersProps): ReactElement<any> {
   const columns = useHorizontalPodAutoscalersColumns()
 
   return (

@@ -139,7 +139,7 @@ export function IconHeading({
   icon,
   children,
 }: {
-  icon: ReactElement
+  icon: ReactElement<any>
   children: ReactNode
 }) {
   const theme = useTheme()

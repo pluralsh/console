@@ -64,7 +64,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Service(): ReactElement {
+export default function Service(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceQuery({
@@ -156,7 +156,7 @@ const columns = [
   }),
 ]
 
-export function ServiceInfo(): ReactElement {
+export function ServiceInfo(): ReactElement<any> {
   const theme = useTheme()
   const service = useOutletContext() as ServiceT
 
@@ -204,7 +204,7 @@ export function ServiceInfo(): ReactElement {
   )
 }
 
-export function ServiceIngresses(): ReactElement {
+export function ServiceIngresses(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useIngressesColumns()
 
@@ -227,7 +227,7 @@ export function ServiceIngresses(): ReactElement {
   )
 }
 
-export function ServicePods(): ReactElement {
+export function ServicePods(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = usePodsColumns()
 
@@ -245,7 +245,7 @@ export function ServicePods(): ReactElement {
   )
 }
 
-export function ServiceEvents(): ReactElement {
+export function ServiceEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 

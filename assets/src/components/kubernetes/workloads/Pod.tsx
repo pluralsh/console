@@ -80,7 +80,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export function Pod(): ReactElement {
+export function Pod(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = usePodQuery({
@@ -169,7 +169,7 @@ export function Pod(): ReactElement {
   )
 }
 
-export function PodInfo(): ReactElement {
+export function PodInfo(): ReactElement<any> {
   const cluster = useCluster()
   const pod = useOutletContext() as PodT
   const conditions = pod?.conditions
@@ -220,7 +220,7 @@ export function PodInfo(): ReactElement {
   )
 }
 
-export function PodContainers(): ReactElement {
+export function PodContainers(): ReactElement<any> {
   const pod = useOutletContext() as PodT
 
   return (
@@ -239,7 +239,7 @@ export function PodContainers(): ReactElement {
   )
 }
 
-export function PodLogs(): ReactElement {
+export function PodLogs(): ReactElement<any> {
   const { name, namespace, clusterId } = useParams()
   const pod = useOutletContext() as PodT
   const theme = useTheme()
@@ -333,7 +333,7 @@ export function PodLogs(): ReactElement {
   )
 }
 
-export function PodEvents(): ReactElement {
+export function PodEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 
@@ -352,7 +352,7 @@ export function PodEvents(): ReactElement {
   )
 }
 
-export function PodExec(): ReactElement {
+export function PodExec(): ReactElement<any> {
   const theme = useTheme()
   const navigate = useNavigate()
   const pod = useOutletContext() as PodT

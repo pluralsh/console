@@ -50,7 +50,7 @@ const columns = [
 export default function Conditions({
   conditions,
   maxHeight = '500px',
-}: ConditionsProps): ReactElement {
+}: ConditionsProps): ReactElement<any> {
   return (
     <Table
       data={conditions ?? []}

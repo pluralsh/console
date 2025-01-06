@@ -58,7 +58,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ReplicaSet(): ReactElement {
+export default function ReplicaSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicaSetQuery({
@@ -133,7 +133,7 @@ export default function ReplicaSet(): ReactElement {
   )
 }
 
-export function ReplicaSetInfo(): ReactElement {
+export function ReplicaSetInfo(): ReactElement<any> {
   const { name, namespace } = useParams()
 
   return (
@@ -148,7 +148,7 @@ export function ReplicaSetInfo(): ReactElement {
   )
 }
 
-export function ReplicaSetEvents(): ReactElement {
+export function ReplicaSetEvents(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useEventsColumns()
 
@@ -175,7 +175,7 @@ export function ReplicaSetEvents(): ReactElement {
   )
 }
 
-export function ReplicaSetPods(): ReactElement {
+export function ReplicaSetPods(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = usePodsColumns()
 
@@ -198,7 +198,7 @@ export function ReplicaSetPods(): ReactElement {
   )
 }
 
-export function ReplicaSetServices(): ReactElement {
+export function ReplicaSetServices(): ReactElement<any> {
   const { name, namespace } = useParams()
   const columns = useServicesColumns()
 

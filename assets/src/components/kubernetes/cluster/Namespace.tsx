@@ -42,7 +42,7 @@ const directory: Array<TabEntry> = [
   { path: 'events', label: 'Events' },
 ] as const
 
-export default function Namespace(): ReactElement {
+export default function Namespace(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNamespaceQuery({
@@ -132,7 +132,7 @@ const lrColumns = [
   }),
 ]
 
-export function NamespaceInfo(): ReactElement {
+export function NamespaceInfo(): ReactElement<any> {
   const namespace = useOutletContext() as NamespaceT
 
   return (
@@ -167,7 +167,7 @@ export function NamespaceInfo(): ReactElement {
   )
 }
 
-export function NamespaceEvents(): ReactElement {
+export function NamespaceEvents(): ReactElement<any> {
   const { name } = useParams()
   const columns = useEventsColumns()
 

@@ -1,6 +1,6 @@
 import { Button, CloseIcon, IconFrame } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
-import { ReactElement, ReactNode } from 'react'
+import { ReactElement, ReactNode, type JSX } from 'react'
 import { DropzoneOptions, useDropzone } from 'react-dropzone'
 import styled from 'styled-components'
 
@@ -131,7 +131,7 @@ export function FileDrop({
     accept?: string
   }
   error?: boolean
-  files?: (JSX.Element | ReactElement)[] | undefined | false
+  files?: (JSX.Element | ReactElement<any>)[] | undefined | false
 }) {
   const hasFiles = !isEmpty(files)
   const noClick = hasFiles

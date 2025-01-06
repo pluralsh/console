@@ -29,8 +29,8 @@ export default function StackEnvironmentApplyModal({
     hasUpdates,
     update,
   } = useUpdateState(initialValue)
-  const nameRef = useRef<HTMLInputElement>()
-  const valueRef = useRef<HTMLInputElement>()
+  const nameRef = useRef<HTMLInputElement>(undefined)
+  const valueRef = useRef<HTMLInputElement>(undefined)
 
   useEffect(() => {
     if (mode === 'edit') {

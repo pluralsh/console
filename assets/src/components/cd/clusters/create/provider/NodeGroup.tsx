@@ -38,7 +38,7 @@ function NodeGroup({
   onRemove,
   onChange,
   ...props
-}: NodeGroupProps): ReactElement {
+}: NodeGroupProps): ReactElement<any> {
   const theme = useTheme()
   const regions = useMemo(() => RegionsForProvider[provider], [provider])
   const [selectedRegion, setSelectedRegion] = useState<Key>(

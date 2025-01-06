@@ -47,7 +47,7 @@ export function OAuthCallback() {
   const navigate = useNavigate()
   const theme = useTheme()
   const { code, ...oauthError } = qs.parse(location.search)
-  const prevCode = useRef<any>()
+  const prevCode = useRef<any>(undefined)
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: (result) => {

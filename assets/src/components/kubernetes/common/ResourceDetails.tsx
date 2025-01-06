@@ -27,9 +27,9 @@ export interface TabEntry {
 
 interface ResourceDetailsProps {
   tabs: Array<TabEntry>
-  additionalHeaderContent?: Array<ReactElement> | ReactElement
-  sidecar: ReactElement
-  children?: Array<ReactElement> | ReactElement
+  additionalHeaderContent?: Array<ReactElement<any>> | ReactElement<any>
+  sidecar: ReactElement<any>
+  children?: Array<ReactElement<any>> | ReactElement<any>
 }
 
 export default function ResourceDetails({
@@ -37,7 +37,7 @@ export default function ResourceDetails({
   additionalHeaderContent,
   sidecar,
   children,
-}: ResourceDetailsProps): ReactElement {
+}: ResourceDetailsProps): ReactElement<any> {
   const theme = useTheme()
   const basePath = useResolvedPath('.')
   const pathMatch = useMatch(`${basePath.pathname}/:tab`)

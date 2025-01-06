@@ -94,7 +94,7 @@ export function useComponentKindSelect(
 ): {
   selectedKinds: Set<string>
   allKinds: Set<string>
-  kindSelector: ReactElement
+  kindSelector: ReactElement<any>
 } {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
   const [selectedKinds, setSelectedKinds] = useState<Set<string>>(

@@ -10,9 +10,9 @@ export const LoadingIndicatorWrap = styled.div(({ theme }) => ({
   padding: theme.spacing.xlarge,
 }))
 
-export default function LoadingIndicator({
-  ...props
-}: ComponentPropsWithRef<'div'>) {
+export default function LoadingIndicator(
+  props: ComponentPropsWithRef<typeof LoadingIndicatorWrap>
+) {
   return (
     <LoadingIndicatorWrap {...props}>
       <LoopingLogo />

@@ -1,6 +1,6 @@
 import { Card, FillLevel, useFillLevel } from '@pluralsh/design-system'
 import { Ul } from 'honorable'
-import { ComponentProps, ReactNode, forwardRef } from 'react'
+import { ReactNode } from 'react'
 import styled from 'styled-components'
 
 const fillLevelToBorderColor: Record<FillLevel, string> = {
@@ -29,29 +29,25 @@ type ListItemProps = any & {
   children: ReactNode
 }
 
-const ListItem = forwardRef<ComponentProps<typeof ListItemSC>, ListItemProps>(
-  ({ last, ...props }, ref) => {
-    const fillLevel = useFillLevel()
+function ListItem({ last, ...props }: ListItemProps) {
+  const fillLevel = useFillLevel()
 
-    return (
-      <ListItemSC
-        ref={ref}
-        $fillLevel={fillLevel}
-        $last={last}
-        {...props}
-      />
-    )
-  }
-)
+  return (
+    <ListItemSC
+      $fillLevel={fillLevel}
+      $last={last}
+      {...props}
+    />
+  )
+}
 
 type ListProps = any & {
   children: ReactNode
 }
 
-const List = forwardRef<HTMLDivElement, ListProps>(
-  ({ children, ...props }, ref) => (
+function List({ children, ...props }: ListProps) {
+  return (
     <Card
-      ref={ref}
       display="flex"
       alignItems="top"
       flexDirection="column"
@@ -66,6 +62,6 @@ const List = forwardRef<HTMLDivElement, ListProps>(
       {children}
     </Card>
   )
-)
+}
 
 export { List, ListItem, fillLevelToBorderColor }

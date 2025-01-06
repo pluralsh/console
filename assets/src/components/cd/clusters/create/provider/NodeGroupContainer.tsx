@@ -69,7 +69,7 @@ function NodeGroupsScrollContainer({
   )
 }
 
-function NodeGroupContainer({ provider }): ReactElement {
+function NodeGroupContainer({ provider }): ReactElement<any> {
   const theme = useTheme()
   const [nodeGroups, setNodeGroups] = useState<Array<NodeGroup>>([
     NewNodeGroup(provider),

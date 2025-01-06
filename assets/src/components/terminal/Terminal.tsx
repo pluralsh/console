@@ -2,7 +2,6 @@ import 'xterm/css/xterm.css'
 
 import {
   MutableRefObject,
-  Ref,
   createContext,
   useCallback,
   useContext,
@@ -12,17 +11,17 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useResizeDetector } from 'react-resize-detector'
 import styled from 'styled-components'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
-import { useResizeDetector } from 'react-resize-detector'
 
 import { socket } from 'helpers/client'
 
 import { Div } from 'honorable'
 
-import { normalizedThemes } from './themes'
 import TerminalThemeContext from './TerminalThemeContext'
+import { normalizedThemes } from './themes'
 
 enum ChannelEvent {
   OnData = 'command',
@@ -81,7 +80,7 @@ export function TerminalScreen({
   const shellContext = useContext(ShellContext)
   const isFirstConnect = useRef(true)
 
-  const terminalRef = useRef<HTMLElement>()
+  const terminalRef = useRef<HTMLElement>(undefined)
   const [terminalTheme] = useContext(TerminalThemeContext)
 
   const [channel, setChannel] = useState()
@@ -181,7 +180,7 @@ export function TerminalScreen({
       <Div
         id="terminal"
         className="terminal"
-        ref={terminalRef as Ref<any>}
+        ref={terminalRef}
       />
     </TerminalWrapper>
   )

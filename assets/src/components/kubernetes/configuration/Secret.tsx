@@ -41,7 +41,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Secret(): ReactElement {
+export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useSecretQuery({
@@ -161,7 +161,7 @@ const columns = [
   }),
 ]
 
-export function SecretData(): ReactElement {
+export function SecretData(): ReactElement<any> {
   const secret = useOutletContext() as SecretT
   const [revealAll, setRevealAll] = useState(false)
 

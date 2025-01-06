@@ -125,7 +125,7 @@ function SecretEditModal({
     hasUpdates,
     update,
   } = useUpdateState(initialValue || { name: '', value: '' })
-  const nameRef = useRef<HTMLInputElement>()
+  const nameRef = useRef<HTMLInputElement>(undefined)
   const valueRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

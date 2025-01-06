@@ -22,7 +22,7 @@ const priorityToIcon = {
   [NotificationPriority.Low]: undefined,
   [NotificationPriority.Medium]: <WarningIcon />,
   [NotificationPriority.High]: <ErrorIcon />,
-} as const satisfies Record<NotificationPriority, ReactElement | undefined>
+} as const satisfies Record<NotificationPriority, ReactElement<any> | undefined>
 
 export default function NotificationPriorityChip({
   priority,

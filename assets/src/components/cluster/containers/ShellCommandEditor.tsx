@@ -102,7 +102,7 @@ export function ShellCommandEditor({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(command)
-  const inputWrapRef = useRef<HTMLDivElement>()
+  const inputWrapRef = useRef<HTMLDivElement>(undefined)
 
   useEffect(() => {
     if (!isEditing) {

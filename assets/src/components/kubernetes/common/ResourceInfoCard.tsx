@@ -55,7 +55,7 @@ const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
   },
 }))
 
-function SkeletonUnstyled({ ...props }): ReactElement {
+function SkeletonUnstyled({ ...props }): ReactElement<any> {
   return (
     <div {...props}>
       <div className="title" />
@@ -79,14 +79,14 @@ function SkeletonUnstyled({ ...props }): ReactElement {
 interface ResourceInfoCardProps {
   title?: ReactNode
   loading?: boolean
-  children: ReactElement | Array<ReactElement> | undefined | null
+  children: ReactElement<any> | Array<ReactElement<any>> | undefined | null
 }
 
 export default function ResourceInfoCard({
   title,
   loading = false,
   children,
-}: ResourceInfoCardProps): ReactElement {
+}: ResourceInfoCardProps): ReactElement<any> {
   const parentFillLevel = useFillLevel()
   const theme = useTheme()
   const content = useMemo(
@@ -148,13 +148,13 @@ const TitleArea = styled.div(({ theme }) => ({
 
 interface SectionProps {
   heading?: string
-  children: Array<ReactElement> | ReactElement
+  children: Array<ReactElement<any>> | ReactElement<any>
 }
 
 export function ResourceInfoCardSection({
   heading,
   children,
-}: SectionProps): Nullable<ReactElement> {
+}: SectionProps): Nullable<ReactElement<any>> {
   const theme = useTheme()
   const hasChildren = useMemo(
     () =>

@@ -32,7 +32,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ConfigMap(): ReactElement {
+export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useConfigMapQuery({
@@ -83,7 +83,7 @@ export default function ConfigMap(): ReactElement {
   )
 }
 
-export function ConfigMapData(): ReactElement {
+export function ConfigMapData(): ReactElement<any> {
   const cm = useOutletContext() as ConfigMapT
   const tabs = useMemo(
     () => [
