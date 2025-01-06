@@ -25,11 +25,11 @@ defmodule Console.AI.Ollama do
   defmodule ChatResponse do
     alias Console.AI.Ollama
 
-    @type t :: %__MODULE__{message: [Ollama.Message.t]}
+    @type t :: %__MODULE__{message: Ollama.Message.t}
 
     defstruct [:model, :message]
 
-    def spec(), do: %__MODULE__{message: [Ollama.Message.spec()]}
+    def spec(), do: %__MODULE__{message: Ollama.Message.spec()}
   end
 
   def new(opts) do
@@ -71,7 +71,7 @@ defmodule Console.AI.Ollama do
   end
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}}, type) when code in 200..299,
-    do: {:ok, Poison.decode!(body, as: type)}
+    do: Poison.decode(body, as: type)
   defp handle_response({:ok, %HTTPoison.Response{body: body}}, _) do
     Logger.error "ollama error: #{body}"
     {:error, "ollama error: #{body}"}

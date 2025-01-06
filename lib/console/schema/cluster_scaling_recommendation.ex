@@ -10,6 +10,9 @@ defmodule Console.Schema.ClusterScalingRecommendation do
     field :name,         :string
     field :container,    :string
 
+    field :cpu_util,    :float
+    field :memory_util, :float
+
     field :memory_request, :float
     field :cpu_request,    :float
 
@@ -56,6 +59,8 @@ defmodule Console.Schema.ClusterScalingRecommendation do
     namespace
     name
     container
+    cpu_util
+    memory_util
     cpu_request
     memory_request
     memory_recommendation
