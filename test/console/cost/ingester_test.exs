@@ -19,6 +19,8 @@ defmodule Console.Cost.IngesterTest do
             container: "nginx",
             memory_request: 10.0,
             cpu_request: 1.0,
+            memory_util: 10.0,
+            cpu_util: 1.0,
             cpu_cost: 1.0,
             memory_cost: 2.0,
           },
@@ -59,6 +61,8 @@ defmodule Console.Cost.IngesterTest do
       assert sr.container      == "nginx"
       assert sr.memory_request == 10.0
       assert sr.cpu_request    == 1.0
+      assert sr.memory_util    == 10.0
+      assert sr.cpu_util       == 1.0
 
       assert sr.memory_recommendation == 11.0
       assert sr.cpu_recommendation    == 1.1

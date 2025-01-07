@@ -516,8 +516,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
             "namespace" => "default",
             "name" => "default",
             "container" => "nginx",
-            "memoryRequest" => 10.0,
-            "cpuRequest" => 10.0
+            "memoryUtil" => 10.0,
+            "cpuUtil" => 10.0
           }
         ]
       }

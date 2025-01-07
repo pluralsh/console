@@ -57,14 +57,14 @@ defmodule Console.Cost.Ingester do
   defp infer_recommendation(map, %DeploymentSettings{cost: %DeploymentSettings.Cost{recommendation_cushion: cush}})
     when is_integer(cush) do
     case map do
-      %{memory_request: mr, cpu_request: cr} = map when is_float(mr) and is_float(cr) ->
+      %{memory_util: mr, cpu_util: cr} = map when is_float(mr) and is_float(cr) ->
         Map.merge(map, %{memory_recommendation: cushioned(mr, cush), cpu_recommendation: cushioned(cr, cush)})
       _ -> nil
     end
   end
   defp infer_recommendation(_, _), do: nil
 
-  defp filter_threshold(map, %DeploymentSettings{cost: %DeploymentSettings.Cost{recommendation_threshold: threshold}})
+  defp filter_threshold(%{} = map, %DeploymentSettings{cost: %DeploymentSettings.Cost{recommendation_threshold: threshold}})
     when is_integer(threshold) do
     Map.take(map, ~w(cpu_cost memory_cost)a)
     |> Enum.reduce(0.0, fn {_, v}, sum -> sum + safe(v) end)
