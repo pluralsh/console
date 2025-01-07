@@ -643,15 +643,16 @@ type CertificateStatus struct {
 }
 
 type Chat struct {
-	ID         string              `json:"id"`
-	Type       ChatType            `json:"type"`
-	Role       AiRole              `json:"role"`
-	Content    string              `json:"content"`
-	Seq        int64               `json:"seq"`
-	Attributes *ChatTypeAttributes `json:"attributes,omitempty"`
-	Thread     *ChatThread         `json:"thread,omitempty"`
-	InsertedAt *string             `json:"insertedAt,omitempty"`
-	UpdatedAt  *string             `json:"updatedAt,omitempty"`
+	ID          string              `json:"id"`
+	Type        ChatType            `json:"type"`
+	Role        AiRole              `json:"role"`
+	Content     string              `json:"content"`
+	Seq         int64               `json:"seq"`
+	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
+	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
+	Thread      *ChatThread         `json:"thread,omitempty"`
+	InsertedAt  *string             `json:"insertedAt,omitempty"`
+	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {

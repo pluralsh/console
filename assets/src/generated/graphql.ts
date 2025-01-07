@@ -818,6 +818,7 @@ export type Chat = {
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
   thread?: Maybe<ChatThread>;

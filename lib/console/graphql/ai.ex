@@ -55,7 +55,8 @@ defmodule Console.GraphQl.AI do
     field :seq,        non_null(:integer)
     field :attributes, :chat_type_attributes
 
-    field :thread,  :chat_thread, resolve: dataloader(AI)
+    field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :thread,       :chat_thread,  resolve: dataloader(AI)
 
     timestamps()
   end
