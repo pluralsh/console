@@ -6566,6 +6566,7 @@ type Chat {
   content: String!
   seq: Int!
   attributes: ChatTypeAttributes
+  pullRequest: PullRequest
   thread: ChatThread
   insertedAt: DateTime
   updatedAt: DateTime
