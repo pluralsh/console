@@ -24,11 +24,11 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../stacks/insights/StackInsights.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
+import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
 
 const DIRECTORY: Array<DirectoryEntry> = [
   { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },

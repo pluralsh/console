@@ -1,5 +1,4 @@
 import { Flex } from '@pluralsh/design-system'
-import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
@@ -12,6 +11,7 @@ import {
 } from '../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
+import { InsightDisplay } from '../ai/InsightDisplay.tsx'
 
 export function ComponentInsights() {
   const { component, refetch, loading } =

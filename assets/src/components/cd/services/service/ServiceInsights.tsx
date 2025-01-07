@@ -1,6 +1,5 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import moment from 'moment/moment'
 import { useMemo } from 'react'
 
@@ -21,6 +20,7 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
+import { InsightDisplay } from '../../../ai/InsightDisplay.tsx'
 
 export function ServiceInsights() {
   const theme = useTheme()
