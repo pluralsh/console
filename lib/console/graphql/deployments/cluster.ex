@@ -272,6 +272,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :cpu_util,       :float, description: "the historical cpu utilization for this scope"
     field :gpu_util,       :float, description: "the historical gpu utilization for this scope"
+    field :memory_util,    :float, description: "the historical memory utilization for this scope"
 
     field :memory_request, :float
     field :cpu_request,    :float
@@ -855,6 +856,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :gpu_cost,              :float
 
     field :cpu_util,              :float, description: "the historical cpu utilization for this scope"
+    field :memory_util,           :float, description: "the historical memory utilization for this scope"
     field :gpu_util,              :float, description: "the historical gpu utilization for this scope"
 
     field :service, :service_deployment, resolve: dataloader(Deployments)
