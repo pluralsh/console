@@ -112,7 +112,7 @@ export function ComponentEntry({
             </span>
           </div>
         }
-        second={`${component.group}/${component.kind}`}
+        second={`${component.group ?? component.version ?? 'v1'}/${component.kind}`}
       ></StackedText>
     </Flex>
   ) : undefined
