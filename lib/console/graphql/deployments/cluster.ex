@@ -270,12 +270,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,           :string
     field :container,      :string
 
+    field :cpu_util,       :float, description: "the historical cpu utilization for this scope"
+    field :gpu_util,       :float, description: "the historical gpu utilization for this scope"
+
     field :memory_request, :float
     field :cpu_request,    :float
 
-    field :cpu_cost,      :float
-    field :memory_cost,   :float
-    field :gpu_cost,      :float
+    field :cpu_cost,       :float
+    field :memory_cost,    :float
+    field :gpu_cost,       :float
 
     field :service_id, :id, description: "the service id known to be attached to this recommendation"
   end
@@ -850,6 +853,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cpu_cost,              :float
     field :memory_cost,           :float
     field :gpu_cost,              :float
+
+    field :cpu_util,              :float, description: "the historical cpu utilization for this scope"
+    field :gpu_util,              :float, description: "the historical gpu utilization for this scope"
 
     field :service, :service_deployment, resolve: dataloader(Deployments)
     field :cluster, :cluster, resolve: dataloader(Deployments)

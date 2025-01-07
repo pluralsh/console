@@ -1416,7 +1416,11 @@ export type ClusterRecommendationAttributes = {
   container?: InputMaybe<Scalars['String']['input']>;
   cpuCost?: InputMaybe<Scalars['Float']['input']>;
   cpuRequest?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical cpu utilization for this scope */
+  cpuUtil?: InputMaybe<Scalars['Float']['input']>;
   gpuCost?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical gpu utilization for this scope */
+  gpuUtil?: InputMaybe<Scalars['Float']['input']>;
   memoryCost?: InputMaybe<Scalars['Float']['input']>;
   memoryRequest?: InputMaybe<Scalars['Float']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -1476,7 +1480,11 @@ export type ClusterScalingRecommendation = {
   cpuCost?: Maybe<Scalars['Float']['output']>;
   cpuRecommendation?: Maybe<Scalars['Float']['output']>;
   cpuRequest?: Maybe<Scalars['Float']['output']>;
+  /** the historical cpu utilization for this scope */
+  cpuUtil?: Maybe<Scalars['Float']['output']>;
   gpuCost?: Maybe<Scalars['Float']['output']>;
+  /** the historical gpu utilization for this scope */
+  gpuUtil?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   memoryCost?: Maybe<Scalars['Float']['output']>;

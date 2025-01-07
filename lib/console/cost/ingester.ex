@@ -37,6 +37,7 @@ defmodule Console.Cost.Ingester do
       (Map.get(attrs, :recommendations) || [])
       |> Stream.map(&cluster_timestamped(&1, id))
       |> Stream.map(&infer_recommendation(&1, settings))
+      |> Stream.map(&filter_threshold(&1, settings))
       |> Stream.filter(& &1)
       |> batch_insert(ClusterScalingRecommendation)
       |> ok()
@@ -57,11 +58,25 @@ defmodule Console.Cost.Ingester do
     when is_integer(cush) do
     case map do
       %{memory_request: mr, cpu_request: cr} = map when is_float(mr) and is_float(cr) ->
-        Map.merge(map, %{memory_recommendation: cushioned(mr, cush), cpu_recommendation: cushioned(mr, cush)})
+        Map.merge(map, %{memory_recommendation: cushioned(mr, cush), cpu_recommendation: cushioned(cr, cush)})
       _ -> nil
     end
   end
   defp infer_recommendation(_, _), do: nil
 
+  defp filter_threshold(map, %DeploymentSettings{cost: %DeploymentSettings.Cost{recommendation_threshold: threshold}})
+    when is_integer(threshold) do
+    Map.take(map, ~w(cpu_cost memory_cost)a)
+    |> Enum.reduce(0.0, fn {_, v}, sum -> sum + safe(v) end)
+    |> case do
+      cost when cost > threshold -> map
+      _ -> nil
+    end
+  end
+  defp filter_threshold(m, _), do: m
+
   defp cushioned(val, cushion), do: val * ((cushion + 100) / 100)
+
+  defp safe(nil), do: 0
+  defp safe(v), do: v
 end

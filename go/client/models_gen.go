@@ -1110,15 +1110,19 @@ type ClusterProviderUpdateAttributes struct {
 }
 
 type ClusterRecommendationAttributes struct {
-	Type          *ScalingRecommendationType `json:"type,omitempty"`
-	Namespace     *string                    `json:"namespace,omitempty"`
-	Name          *string                    `json:"name,omitempty"`
-	Container     *string                    `json:"container,omitempty"`
-	MemoryRequest *float64                   `json:"memoryRequest,omitempty"`
-	CPURequest    *float64                   `json:"cpuRequest,omitempty"`
-	CPUCost       *float64                   `json:"cpuCost,omitempty"`
-	MemoryCost    *float64                   `json:"memoryCost,omitempty"`
-	GpuCost       *float64                   `json:"gpuCost,omitempty"`
+	Type      *ScalingRecommendationType `json:"type,omitempty"`
+	Namespace *string                    `json:"namespace,omitempty"`
+	Name      *string                    `json:"name,omitempty"`
+	Container *string                    `json:"container,omitempty"`
+	// the historical cpu utilization for this scope
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the historical gpu utilization for this scope
+	GpuUtil       *float64 `json:"gpuUtil,omitempty"`
+	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
+	CPURequest    *float64 `json:"cpuRequest,omitempty"`
+	CPUCost       *float64 `json:"cpuCost,omitempty"`
+	MemoryCost    *float64 `json:"memoryCost,omitempty"`
+	GpuCost       *float64 `json:"gpuCost,omitempty"`
 	// the service id known to be attached to this recommendation
 	ServiceID *string `json:"serviceId,omitempty"`
 }
@@ -1173,10 +1177,14 @@ type ClusterScalingRecommendation struct {
 	CPUCost              *float64                   `json:"cpuCost,omitempty"`
 	MemoryCost           *float64                   `json:"memoryCost,omitempty"`
 	GpuCost              *float64                   `json:"gpuCost,omitempty"`
-	Service              *ServiceDeployment         `json:"service,omitempty"`
-	Cluster              *Cluster                   `json:"cluster,omitempty"`
-	InsertedAt           *string                    `json:"insertedAt,omitempty"`
-	UpdatedAt            *string                    `json:"updatedAt,omitempty"`
+	// the historical cpu utilization for this scope
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the historical gpu utilization for this scope
+	GpuUtil    *float64           `json:"gpuUtil,omitempty"`
+	Service    *ServiceDeployment `json:"service,omitempty"`
+	Cluster    *Cluster           `json:"cluster,omitempty"`
+	InsertedAt *string            `json:"insertedAt,omitempty"`
+	UpdatedAt  *string            `json:"updatedAt,omitempty"`
 }
 
 type ClusterScalingRecommendationConnection struct {

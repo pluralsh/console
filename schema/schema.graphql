@@ -4590,6 +4590,12 @@ input ClusterRecommendationAttributes {
 
   container: String
 
+  "the historical cpu utilization for this scope"
+  cpuUtil: Float
+
+  "the historical gpu utilization for this scope"
+  gpuUtil: Float
+
   memoryRequest: Float
 
   cpuRequest: Float
@@ -5346,20 +5352,41 @@ type ClusterNamespaceUsage {
 
 type ClusterScalingRecommendation {
   id: ID!
+
   type: ScalingRecommendationType
+
   namespace: String
+
   name: String
+
   container: String
+
   memoryRequest: Float
+
   cpuRequest: Float
+
   memoryRecommendation: Float
+
   cpuRecommendation: Float
+
   cpuCost: Float
+
   memoryCost: Float
+
   gpuCost: Float
+
+  "the historical cpu utilization for this scope"
+  cpuUtil: Float
+
+  "the historical gpu utilization for this scope"
+  gpuUtil: Float
+
   service: ServiceDeployment
+
   cluster: Cluster
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
