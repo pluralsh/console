@@ -1,6 +1,5 @@
 import { Flex } from '@pluralsh/design-system'
 
-import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import moment from 'moment'
 import { useOutletContext } from 'react-router-dom'
@@ -15,6 +14,7 @@ import {
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
+import { InsightDisplay } from '../../../ai/InsightDisplay.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
@@ -67,7 +67,10 @@ export function StackRunInsights() {
           {/* <AISuggestFix insight={stackRun?.insight} /> */}
         </Flex>
       </Flex>
-      <InsightDisplay text={stackRun.insight?.text} />
+      <InsightDisplay
+        text={stackRun.insight?.text}
+        kind="stack run"
+      />
     </Flex>
   )
 }

@@ -17,7 +17,6 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../stacks/insights/StackInsights.tsx'
 import { ClusterProviderIcon } from '../../utils/Provider.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { BasicLink } from '../../utils/typography/BasicLink.tsx'
@@ -29,6 +28,7 @@ import {
 import { ComponentEntry } from './ClusterInsightsComponents.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
+import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
 
 export default function ClusterInsightComponent(): ReactNode {
   const theme = useTheme()
@@ -140,7 +140,10 @@ export default function ClusterInsightComponent(): ReactNode {
             : {}),
         }}
       >
-        <InsightDisplay text={component?.insight?.text} />
+        <InsightDisplay
+          text={component?.insight?.text}
+          kind={component?.kind}
+        />
         {showRaw && (
           <Code language="yaml">{stringify(component?.resource?.raw)}</Code>
         )}
