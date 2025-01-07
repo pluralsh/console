@@ -35,7 +35,7 @@ export default function ConsoleNavContextProvider({
   return (
     <NavigationContextProvider
       value={{
-        Link,
+        Link: Link as any,
         usePathname,
         useNavigate: () => {
           const navigate = useNavigate()

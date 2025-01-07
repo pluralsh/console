@@ -46,7 +46,6 @@ function EditScmConnectionModalBase({
     update: updateFormState,
     hasUpdates,
   } = useUpdateState<Partial<ScmConnectionAttributes>>({
-    ...DEFAULT_ATTRIBUTES,
     ...pick(scmConnection, [
       'apiUrl',
       'baseUrl',
@@ -74,16 +73,16 @@ function EditScmConnectionModalBase({
         const attributes = {
           name,
           type,
-          apiUrl: formState.apiUrl || '',
-          baseUrl: formState.baseUrl || '',
-          username: formState.username || '',
-          ...(!formState.token ? {} : { token: formState.token }),
+          ...(formState.apiUrl ? { apiUrl: formState.apiUrl } : {}),
+          ...(formState.baseUrl ? { baseUrl: formState.baseUrl } : {}),
+          ...(formState.username ? { username: formState.username } : {}),
+          ...(formState.token ? { token: formState.token } : {}),
           ...(formState.github && type === ScmType.Github
             ? { github: formState.github }
             : {}),
-          ...(!formState.signingPrivateKey
-            ? {}
-            : { signingPrivateKey: formState.signingPrivateKey }),
+          ...(formState.signingPrivateKey
+            ? { signingPrivateKey: formState.signingPrivateKey }
+            : {}),
         }
 
         mutation({ variables: { id: scmConnection.id, attributes } })

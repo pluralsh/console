@@ -1,6 +1,20 @@
-import { SendMessageIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  PlusIcon,
+  PrOpenIcon,
+  SendMessageIcon,
+  Tooltip,
+} from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-import { AiRole } from 'generated/graphql'
+import { GqlError } from 'components/utils/Alert'
+import {
+  AiRole,
+  ChatThreadFragment,
+  useAddChatContextMutation,
+  useThreadPrMutation,
+} from 'generated/graphql'
 import {
   ClipboardEvent,
   ComponentPropsWithoutRef,
@@ -14,19 +28,41 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
 import { ChatMessage } from './ChatMessage'
+import { useCurrentPageChatContext } from './useCurrentPageChatContext'
 
 export function SendMessageForm({
+  currentThread,
   sendMessage,
   fullscreen,
   ...props
 }: {
+  currentThread: ChatThreadFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
 } & ComponentPropsWithoutRef<'div'>) {
+  const { sourceId, source } = useCurrentPageChatContext()
+  const showContextBtn = !!source && !!sourceId
+  const [contextBtnClicked, setContextBtnClicked] = useState(false)
+  const [threadPrBtnClicked, setThreadPrBtnClicked] = useState(false)
   const [newMessage, setNewMessage] = usePersistedSessionState<string>(
     'currentAiChatMessage',
     ''
   )
+
+  const [addChatContext, { loading: contextLoading, error: contextError }] =
+    useAddChatContextMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['ChatThreadDetails'],
+      onCompleted: () => {
+        setContextBtnClicked(true)
+      },
+    })
+
+  const [createThreadPr, { loading: threadPrLoading, error: threadPrError }] =
+    useThreadPrMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['ChatThreadDetails'],
+    })
 
   const contentEditableRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -87,6 +123,19 @@ export function SendMessageForm({
     [newMessage, sendMessage, setNewMessage]
   )
 
+  const handleAddPageContext = useCallback(() => {
+    setContextBtnClicked(true)
+    if (showContextBtn)
+      addChatContext({
+        variables: { source, sourceId, threadId: currentThread.id },
+      })
+  }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
+
+  const handleCreateThreadPr = useCallback(() => {
+    setThreadPrBtnClicked(true)
+    createThreadPr({ variables: { threadId: currentThread.id } })
+  }, [createThreadPr, currentThread.id])
+
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -94,21 +143,61 @@ export function SendMessageForm({
       ref={formRef}
     >
       <EditableContentWrapperSC $fullscreen={fullscreen}>
+        {contextError && <GqlError error={contextError} />}
+        {threadPrError && <GqlError error={threadPrError} />}
         <EditableContentSC
           contentEditable
-          data-placeholder="Ask Plural AI"
+          data-placeholder="Start typing..."
           onInput={onInput}
           onPaste={onPaste}
           onKeyDown={onKeyDown}
           {...props}
           ref={contentEditableRef}
         />
-        <SendMessageButtonSC
-          type="submit"
-          disabled={!newMessage.trim()}
-        >
-          <SendMessageIcon />
-        </SendMessageButtonSC>
+        <Flex justifyContent="space-between">
+          <Flex
+            gap="small"
+            height="100%"
+          >
+            {showContextBtn && (
+              <Tooltip
+                label={`Appends prompts and files related to the ${source.toLowerCase()} currently being viewed`}
+                placement="top"
+              >
+                <Button
+                  small
+                  secondary
+                  disabled={contextBtnClicked}
+                  loading={contextLoading}
+                  onClick={handleAddPageContext}
+                  startIcon={<PlusIcon />}
+                >
+                  Add page context
+                </Button>
+              </Tooltip>
+            )}
+            <Button
+              small
+              secondary
+              disabled={threadPrBtnClicked}
+              loading={threadPrLoading}
+              onClick={handleCreateThreadPr}
+              startIcon={<PrOpenIcon />}
+            >
+              Create PR
+            </Button>
+          </Flex>
+          <IconFrame
+            icon={<SendMessageIcon />}
+            clickable
+            type="secondary"
+            css={{ '&:disabled': { opacity: 0.5 } }}
+            disabled={!newMessage.trim()}
+            onClick={() => {
+              formRef.current?.requestSubmit()
+            }}
+          />
+        </Flex>
       </EditableContentWrapperSC>
     </SendMessageFormSC>
   )
@@ -132,7 +221,9 @@ const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
 const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     display: 'flex',
-    gap: theme.spacing.medium,
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+    padding: theme.spacing.small,
     borderRadius: theme.borderRadiuses.large,
     backgroundColor: $fullscreen
       ? theme.colors['fill-two']
@@ -146,7 +237,7 @@ const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
 const EditableContentSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2,
   flex: 1,
-  padding: theme.spacing.small,
+
   border: 'none',
   outline: 'none',
   overflowY: 'auto',
@@ -156,21 +247,6 @@ const EditableContentSC = styled.div(({ theme }) => ({
     content: 'attr(data-placeholder)',
     color: theme.colors['text-light'],
     pointerEvents: 'none',
-  },
-}))
-
-const SendMessageButtonSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  padding: theme.spacing.small,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  '&:hover:not(:disabled)': {
-    cursor: 'pointer',
-    backgroundColor: theme.colors['fill-three-selected'],
-  },
-  '&:disabled': {
-    opacity: 0.5,
   },
 }))
 
