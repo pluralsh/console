@@ -140,7 +140,10 @@ export default function ClusterInsightComponent(): ReactNode {
             : {}),
         }}
       >
-        <InsightDisplay text={component?.insight?.text} />
+        <InsightDisplay
+          text={component?.insight?.text}
+          kind={component?.kind}
+        />
         {showRaw && (
           <Code language="yaml">{stringify(component?.resource?.raw)}</Code>
         )}

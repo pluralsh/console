@@ -259,15 +259,15 @@ export function AIEmptyState({
   )
 }
 
-function AIDisabledState() {
+export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
   const navigate = useNavigate()
 
   return (
     <AIEmptyState
-      cssProps={{ justifyContent: 'start' }}
+      cssProps={{ justifyContent: 'start', ...cssProps }}
       icon={
         <img
-          src="ai.png"
+          src="/ai.png"
           alt="Plural AI features are disabled"
           width={480}
         />

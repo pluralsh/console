@@ -80,7 +80,10 @@ export function ServiceInsights() {
           <AISuggestFix insight={service?.insight} />
         </Flex>
       </Flex>
-      <InsightDisplay text={service.insight?.text} />
+      <InsightDisplay
+        text={service.insight?.text}
+        kind="service"
+      />
     </Flex>
   )
 }

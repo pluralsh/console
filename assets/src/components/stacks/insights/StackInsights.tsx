@@ -60,7 +60,10 @@ export function StackInsights() {
           <AISuggestFix insight={stack?.insight} />
         </Flex>
       </Flex>
-      <InsightDisplay text={stack.insight?.text} />
+      <InsightDisplay
+        text={stack.insight?.text}
+        kind="stack"
+      />
     </Flex>
   )
 }

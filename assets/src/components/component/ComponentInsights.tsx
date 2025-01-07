@@ -49,7 +49,10 @@ export function ComponentInsights() {
         />
         <AISuggestFix insight={component?.insight} />
       </Flex>
-      <InsightDisplay text={component.insight?.text} />
+      <InsightDisplay
+        text={component.insight?.text}
+        kind={component.kind}
+      />
     </Flex>
   )
 }

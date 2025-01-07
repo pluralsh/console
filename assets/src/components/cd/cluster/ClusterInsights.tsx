@@ -144,7 +144,12 @@ export function ClusterInsightsSummary(): ReactNode {
     )
   )
 
-  return <InsightDisplay text={cluster.insight?.text} />
+  return (
+    <InsightDisplay
+      text={cluster.insight?.text}
+      kind="cluster"
+    />
+  )
 }
 
 type ClusterInsightsContextType = {

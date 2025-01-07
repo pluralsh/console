@@ -67,7 +67,10 @@ export function StackRunInsights() {
           {/* <AISuggestFix insight={stackRun?.insight} /> */}
         </Flex>
       </Flex>
-      <InsightDisplay text={stackRun.insight?.text} />
+      <InsightDisplay
+        text={stackRun.insight?.text}
+        kind="stack run"
+      />
     </Flex>
   )
 }
