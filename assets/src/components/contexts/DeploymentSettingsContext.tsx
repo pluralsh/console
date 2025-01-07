@@ -29,6 +29,12 @@ export function useMetricsEnabled() {
   return isValidURL(ctx?.prometheusConnection?.host ?? '')
 }
 
+export function useAIEnabled() {
+  const ctx = useDeploymentSettings()
+
+  return !!ctx.ai?.enabled
+}
+
 export function DeploymentSettingsProvider({
   children,
 }: {

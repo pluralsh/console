@@ -1,5 +1,7 @@
 import {
   Button,
+  Card,
+  ChatOutlineIcon,
   Flex,
   GearTrainIcon,
   useSetBreadcrumbs,
@@ -17,59 +19,24 @@ import {
   useAiPinsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
-import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
 import { AITable } from './AITable.tsx'
 import { sortThreadsOrPins } from './AITableEntry.tsx'
+import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
+import { CSSProperties, useTheme } from 'styled-components'
+import { Body1BoldP } from '../utils/typography/Text.tsx'
+import { isEmpty } from 'lodash'
 
 export const breadcrumbs = [{ label: 'plural ai' }]
 
 export default function AI() {
-  const settings = useDeploymentSettings()
+  const aiEnabled = useAIEnabled()
 
-  useSetBreadcrumbs(breadcrumbs)
-
-  return (
-    <ResponsivePageFullWidth
-      noPadding
-      maxContentWidth={1080}
-    >
-      {settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />}
-    </ResponsivePageFullWidth>
-  )
-}
-
-function AiDisabled() {
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-      paddingBottom="large"
-      height="100%"
-    >
-      <Flex
-        justify="space-between"
-        align="center"
-      >
-        <StackedText
-          first="Plural AI"
-          second="You have yet to enable AI, set everything up below."
-          firstPartialType="subtitle1"
-          secondPartialType="body2"
-        />
-      </Flex>
-      <GlobalSettingsAiProvider />
-    </Flex>
-  )
-}
-
-function AIEnabled() {
   const threadsQuery = useFetchPaginatedData({
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
@@ -103,30 +70,41 @@ function AIEnabled() {
     [filteredPins, threadsQuery.data?.chatThreads?.edges]
   )
 
+  useSetBreadcrumbs(breadcrumbs)
+
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      paddingBottom="48px"
-      height="100%"
-      overflow="hidden"
+    <ResponsivePageFullWidth
+      noPadding
+      maxContentWidth={1080}
     >
-      <Header />
       <Flex
         direction="column"
-        gap="large"
+        gap="medium"
+        paddingBottom="48px"
         height="100%"
+        overflow="hidden"
       >
-        <PinnedSection
-          filteredPins={filteredPins}
-          pinsQuery={pinsQuery}
-        />
-        <ThreadsSection
-          filteredThreads={filteredThreads}
-          threadsQuery={threadsQuery}
-        />
+        <Header />
+        {aiEnabled ? (
+          <Flex
+            direction="column"
+            gap="large"
+            height="100%"
+          >
+            <PinnedSection
+              filteredPins={filteredPins}
+              pinsQuery={pinsQuery}
+            />
+            <ThreadsSection
+              filteredThreads={filteredThreads}
+              threadsQuery={threadsQuery}
+            />
+          </Flex>
+        ) : (
+          <AIDisabledState />
+        )}
       </Flex>
-    </Flex>
+    </ResponsivePageFullWidth>
   )
 }
 
@@ -201,11 +179,110 @@ function ThreadsSection({
         firstPartialType="subtitle2"
       />
       <FullHeightTableWrap>
-        <AITable
-          query={threadsQuery}
-          rowData={filteredThreads}
-        />
+        {!isEmpty(filteredThreads) ? (
+          <AITable
+            query={threadsQuery}
+            rowData={filteredThreads}
+          />
+        ) : (
+          <AIThreadsEmptyState />
+        )}
       </FullHeightTableWrap>
     </Flex>
+  )
+}
+
+function AIEmptyState({
+  message,
+  description,
+  icon,
+  children,
+  cssProps,
+}: {
+  message: string
+  description: string
+  icon: ReactNode
+  children?: ReactNode
+  cssProps?: CSSProperties
+}) {
+  const theme = useTheme()
+
+  return (
+    <Card
+      css={{
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.xxsmall,
+        height: '100%',
+        justifyContent: 'center',
+        padding: theme.spacing.xlarge,
+        ...cssProps,
+      }}
+    >
+      <div css={{ margin: theme.spacing.medium }}>{icon}</div>
+      <Body1BoldP>{message}</Body1BoldP>
+      <p
+        css={{
+          color: theme.colors['text-xlight'],
+          maxWidth: 480,
+          textAlign: 'center',
+        }}
+      >
+        {description}
+      </p>
+      <div css={{ margin: theme.spacing.medium }}>{children}</div>
+    </Card>
+  )
+}
+
+function AIDisabledState() {
+  const navigate = useNavigate()
+
+  return (
+    <AIEmptyState
+      cssProps={{ justifyContent: 'start' }}
+      icon={
+        <img
+          src="ai.png"
+          alt="Plural AI features are disabled"
+          width={480}
+        />
+      }
+      message="Plural AI features are disabled"
+      description="Leverage Plural’s unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters."
+    >
+      <Button
+        startIcon={<GearTrainIcon />}
+        onClick={() => navigate(`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`)}
+      >
+        Go to settings
+      </Button>
+    </AIEmptyState>
+  )
+}
+
+function AIThreadsEmptyState() {
+  const aiEnabled = useAIEnabled()
+
+  return (
+    <AIEmptyState
+      icon={
+        aiEnabled ? (
+          <ChatOutlineIcon
+            color="icon-primary"
+            size={24}
+          />
+        ) : null
+      }
+      message={
+        aiEnabled ? 'No threads or insights' : 'Plural AI features are disabled'
+      }
+      description={
+        aiEnabled
+          ? 'Insights will be automatically created and appear here when potential fixes are found.'
+          : 'Leverage Plural’s unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters.'
+      }
+    />
   )
 }
