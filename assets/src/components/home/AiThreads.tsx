@@ -1,5 +1,5 @@
 import { HOME_CARD_CONTENT_HEIGHT, HomeCard } from './HomeCard.tsx'
-import { AiSparkleOutlineIcon } from '@pluralsh/design-system'
+import { AiSparkleOutlineIcon, ChatOutlineIcon } from '@pluralsh/design-system'
 import { AITable } from '../ai/AITable.tsx'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 import {
@@ -9,6 +9,8 @@ import {
 import { useMemo } from 'react'
 import { sortThreadsOrPins } from '../ai/AITableEntry.tsx'
 import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { isEmpty } from 'lodash'
+import { AIEmptyState } from '../ai/AI.tsx'
 
 export function AiThreads() {
   const threadsQuery = useFetchPaginatedData(
@@ -34,18 +36,32 @@ export function AiThreads() {
       link={AI_ABS_PATH}
       noPadding
     >
-      <AITable
-        query={threadsQuery}
-        rowData={threads}
-        hidePins
-        css={{
-          border: 'none',
-          borderTopLeftRadius: 0,
-          borderTopRightRadius: 0,
-          maxHeight: HOME_CARD_CONTENT_HEIGHT,
-        }}
-        hasNextPage={false} // Prevent from loading more items than on the first page.
-      />
+      {!isEmpty(threads) && !threadsQuery.loading ? (
+        <AITable
+          query={threadsQuery}
+          rowData={threads}
+          hidePins
+          css={{
+            border: 'none',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            maxHeight: HOME_CARD_CONTENT_HEIGHT,
+          }}
+          hasNextPage={false} // Prevent from loading more items than on the first page.
+        />
+      ) : (
+        <AIEmptyState
+          icon={
+            <ChatOutlineIcon
+              color="icon-primary"
+              size={24}
+            />
+          }
+          message="No threads or insights"
+          description="Insights will be automatically created and appear here when potential fixes are found."
+          cssProps={{ backgroundColor: 'transparent', border: 'none' }}
+        />
+      )}
     </HomeCard>
   )
 }

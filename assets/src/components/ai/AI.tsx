@@ -4,6 +4,7 @@ import {
   ChatOutlineIcon,
   Flex,
   GearTrainIcon,
+  PushPinFilledIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
@@ -150,10 +151,23 @@ function PinnedSection({
         firstPartialType="subtitle2"
       />
       <FullHeightTableWrap>
-        <AITable
-          query={pinsQuery}
-          rowData={filteredPins}
-        />
+        {!isEmpty(filteredPins) && !pinsQuery.loading ? (
+          <AITable
+            query={pinsQuery}
+            rowData={filteredPins}
+          />
+        ) : (
+          <AIEmptyState
+            icon={
+              <PushPinFilledIcon
+                color="icon-primary"
+                size={24}
+              />
+            }
+            message="No pinned threads or insights"
+            description="Click on the pin icon of any thread or insight to access it here."
+          />
+        )}
       </FullHeightTableWrap>
     </Flex>
   )
@@ -179,20 +193,29 @@ function ThreadsSection({
         firstPartialType="subtitle2"
       />
       <FullHeightTableWrap>
-        {!isEmpty(filteredThreads) ? (
+        {!isEmpty(filteredThreads) && !threadsQuery.loading ? (
           <AITable
             query={threadsQuery}
             rowData={filteredThreads}
           />
         ) : (
-          <AIThreadsEmptyState />
+          <AIEmptyState
+            icon={
+              <ChatOutlineIcon
+                color="icon-primary"
+                size={24}
+              />
+            }
+            message="No threads or insights"
+            description="Insights will be automatically created and appear here when potential fixes are found."
+          />
         )}
       </FullHeightTableWrap>
     </Flex>
   )
 }
 
-function AIEmptyState({
+export function AIEmptyState({
   message,
   description,
   icon,
@@ -259,30 +282,5 @@ function AIDisabledState() {
         Go to settings
       </Button>
     </AIEmptyState>
-  )
-}
-
-function AIThreadsEmptyState() {
-  const aiEnabled = useAIEnabled()
-
-  return (
-    <AIEmptyState
-      icon={
-        aiEnabled ? (
-          <ChatOutlineIcon
-            color="icon-primary"
-            size={24}
-          />
-        ) : null
-      }
-      message={
-        aiEnabled ? 'No threads or insights' : 'Plural AI features are disabled'
-      }
-      description={
-        aiEnabled
-          ? 'Insights will be automatically created and appear here when potential fixes are found.'
-          : 'Leverage Plural’s unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters.'
-      }
-    />
   )
 }
