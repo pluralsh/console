@@ -4596,6 +4596,9 @@ input ClusterRecommendationAttributes {
   "the historical gpu utilization for this scope"
   gpuUtil: Float
 
+  "the historical memory utilization for this scope"
+  memoryUtil: Float
+
   memoryRequest: Float
 
   cpuRequest: Float
@@ -5377,6 +5380,9 @@ type ClusterScalingRecommendation {
 
   "the historical cpu utilization for this scope"
   cpuUtil: Float
+
+  "the historical memory utilization for this scope"
+  memoryUtil: Float
 
   "the historical gpu utilization for this scope"
   gpuUtil: Float

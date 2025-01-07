@@ -1423,6 +1423,8 @@ export type ClusterRecommendationAttributes = {
   gpuUtil?: InputMaybe<Scalars['Float']['input']>;
   memoryCost?: InputMaybe<Scalars['Float']['input']>;
   memoryRequest?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical memory utilization for this scope */
+  memoryUtil?: InputMaybe<Scalars['Float']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
   /** the service id known to be attached to this recommendation */
@@ -1490,6 +1492,8 @@ export type ClusterScalingRecommendation = {
   memoryCost?: Maybe<Scalars['Float']['output']>;
   memoryRecommendation?: Maybe<Scalars['Float']['output']>;
   memoryRequest?: Maybe<Scalars['Float']['output']>;
+  /** the historical memory utilization for this scope */
+  memoryUtil?: Maybe<Scalars['Float']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   namespace?: Maybe<Scalars['String']['output']>;
   service?: Maybe<ServiceDeployment>;

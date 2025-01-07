@@ -1117,7 +1117,9 @@ type ClusterRecommendationAttributes struct {
 	// the historical cpu utilization for this scope
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// the historical gpu utilization for this scope
-	GpuUtil       *float64 `json:"gpuUtil,omitempty"`
+	GpuUtil *float64 `json:"gpuUtil,omitempty"`
+	// the historical memory utilization for this scope
+	MemoryUtil    *float64 `json:"memoryUtil,omitempty"`
 	MemoryRequest *float64 `json:"memoryRequest,omitempty"`
 	CPURequest    *float64 `json:"cpuRequest,omitempty"`
 	CPUCost       *float64 `json:"cpuCost,omitempty"`
@@ -1179,6 +1181,8 @@ type ClusterScalingRecommendation struct {
 	GpuCost              *float64                   `json:"gpuCost,omitempty"`
 	// the historical cpu utilization for this scope
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the historical memory utilization for this scope
+	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
 	// the historical gpu utilization for this scope
 	GpuUtil    *float64           `json:"gpuUtil,omitempty"`
 	Service    *ServiceDeployment `json:"service,omitempty"`
