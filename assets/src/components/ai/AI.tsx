@@ -32,6 +32,7 @@ import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import { CSSProperties, useTheme } from 'styled-components'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { isEmpty } from 'lodash'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
 export const breadcrumbs = [{ label: 'plural ai' }]
 
@@ -72,6 +73,8 @@ export default function AI() {
   )
 
   useSetBreadcrumbs(breadcrumbs)
+
+  if (aiEnabled === undefined) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth

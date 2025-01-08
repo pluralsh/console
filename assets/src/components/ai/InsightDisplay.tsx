@@ -2,6 +2,7 @@ import { AiSparkleFilledIcon, Card, Markdown } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import { AIDisabledState, AIEmptyState } from './AI.tsx'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
 const cssProps = {
   background: 'transparent',
@@ -17,6 +18,8 @@ export const InsightDisplay = ({
   kind: Nullable<string>
 }) => {
   const aiEnabled = useAIEnabled()
+
+  if (aiEnabled === undefined) return <LoadingIndicator />
 
   return (
     <InsightWrapperCardSC>
