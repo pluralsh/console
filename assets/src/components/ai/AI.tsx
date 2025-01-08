@@ -154,12 +154,7 @@ function PinnedSection({
         firstPartialType="subtitle2"
       />
       <FullHeightTableWrap>
-        {!isEmpty(filteredPins) && !pinsQuery.loading ? (
-          <AITable
-            query={pinsQuery}
-            rowData={filteredPins}
-          />
-        ) : (
+        {isEmpty(filteredPins) && pinsQuery.data ? (
           <AIEmptyState
             icon={
               <PushPinFilledIcon
@@ -169,6 +164,11 @@ function PinnedSection({
             }
             message="No pinned threads or insights"
             description="Click on the pin icon of any thread or insight to access it here."
+          />
+        ) : (
+          <AITable
+            query={pinsQuery}
+            rowData={filteredPins}
           />
         )}
       </FullHeightTableWrap>
@@ -196,12 +196,7 @@ function ThreadsSection({
         firstPartialType="subtitle2"
       />
       <FullHeightTableWrap>
-        {!isEmpty(filteredThreads) && !threadsQuery.loading ? (
-          <AITable
-            query={threadsQuery}
-            rowData={filteredThreads}
-          />
-        ) : (
+        {isEmpty(filteredThreads) && threadsQuery.data ? (
           <AIEmptyState
             icon={
               <ChatOutlineIcon
@@ -211,6 +206,11 @@ function ThreadsSection({
             }
             message="No threads or insights"
             description="Insights will be automatically created and appear here when potential fixes are found."
+          />
+        ) : (
+          <AITable
+            query={threadsQuery}
+            rowData={filteredThreads}
           />
         )}
       </FullHeightTableWrap>
