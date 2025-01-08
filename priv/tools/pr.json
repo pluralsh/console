@@ -21,6 +21,19 @@
             "type": "string",
             "description": "A longer-form description body for this PR, should allow users to understand the context and implications of the change.  The expected format should include a Summary section, a Changes Made section and a Rationale section to explain the PR to reviewers."
         },
+        "confidence": {
+            "type": "object",
+            "properties": {
+                "confident": {
+                    "type": "boolean",
+                    "description": "Provide false as the value if you believe an experienced engineer would be less than 70% sure this is the correct fix for the issue"
+                },
+                "reason": {
+                    "type": "string",
+                    "description": "The reason why you're not confident about this change. This will be exposed to users to explain why the PR is not created"
+                }
+            }
+        },
         "file_updates": {
             "type": "array",
             "description": "A list of files to update in this PR",

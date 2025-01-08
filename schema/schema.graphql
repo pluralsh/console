@@ -585,6 +585,8 @@ type RootMutationType {
 
   addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
 
+  applyScalingRecommendation(id: ID!): PullRequest
+
   createServiceDeployment(
     clusterId: ID
 

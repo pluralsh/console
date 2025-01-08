@@ -1172,5 +1172,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.add_cluster_audit/2
     end
+
+    field :apply_scaling_recommendation, :pull_request do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.scaling_pr/2
+    end
   end
 end

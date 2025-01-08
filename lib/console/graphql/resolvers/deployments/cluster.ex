@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Clusters
+  alias Console.Cost.Pr
   alias Console.Schema.{
     User,
     Cluster,
@@ -244,6 +245,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)
+
+  def scaling_pr(%{id: id}, %{context: %{current_user: user}}),
+    do: Pr.create(id, user)
 
   def add_cluster_audit(_, %{context: %{current_user: %User{email: "console@plural.sh"}}}), do: {:ok, false}
   def add_cluster_audit(%{audit: audit}, %{context: %{current_user: user}}) do
