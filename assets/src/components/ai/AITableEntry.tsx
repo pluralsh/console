@@ -173,6 +173,7 @@ export function AIEntryLabel({
   isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
+  const theme = useTheme()
   return (
     <Flex
       alignItems="center"
@@ -181,7 +182,7 @@ export function AIEntryLabel({
       {...props}
     >
       <IconFrame
-        size="large"
+        size="medium"
         type="floating"
         css={{ flexShrink: 0 }}
         icon={
@@ -197,8 +198,9 @@ export function AIEntryLabel({
           isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
         }
         second={<TableEntryResourceLink {...getInsightPathInfo(insight)} />}
-        firstPartialType="body1Bold"
-        secondPartialType="body2"
+        css={{ color: theme.colors['text'] }}
+        firstPartialType="body2"
+        secondPartialType="caption"
       />
     </Flex>
   )
@@ -214,7 +216,7 @@ function TableEntryIcon({
   insight: Nullable<AiInsightSummaryFragment>
 }): ReactNode {
   const theme = useTheme()
-  const ICON_SIZE = 24
+  const ICON_SIZE = 16
   if (!!insight?.cluster)
     return (
       <ClusterProviderIcon
