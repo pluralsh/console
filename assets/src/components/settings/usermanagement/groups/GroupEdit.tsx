@@ -4,6 +4,7 @@ import {
   ComboBox,
   FormField,
   Modal,
+  Switch,
   ValidatedInput,
 } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
@@ -17,6 +18,7 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import {
   Group,
+  GroupFragment,
   GroupMembersDocument,
   useCreateGroupMemberMutation,
   useUpdateGroupMutation,
@@ -158,7 +160,15 @@ function EditGroupMembersModal({
   )
 }
 
-function EditGroupAttributesModal({ group, open, onClose }: any) {
+function EditGroupAttributesModal({
+  group,
+  open,
+  onClose,
+}: {
+  group: GroupFragment
+  open: boolean
+  onClose: () => void
+}) {
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
 
   const {
@@ -168,12 +178,13 @@ function EditGroupAttributesModal({ group, open, onClose }: any) {
   } = useUpdateState({
     name: group.name,
     description: group.description,
+    global: group.global,
     users: [],
   })
-  const { name, description } = formState
+  const { name, description, global } = formState
 
   const [mutation, { loading, error }] = useUpdateGroupMutation({
-    variables: { id: group.id, attributes: { name, description } },
+    variables: { id: group.id, attributes: { name, description, global } },
     onCompleted: onClose,
   })
 
@@ -218,6 +229,12 @@ function EditGroupAttributesModal({ group, open, onClose }: any) {
           value={description}
           onChange={({ target: { value } }) => update({ description: value })}
         />
+        <Switch
+          checked={!!global}
+          onChange={(checked) => update({ global: checked })}
+        >
+          Global
+        </Switch>
       </Flex>
     </Modal>
   )

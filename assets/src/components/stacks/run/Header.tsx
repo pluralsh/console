@@ -8,12 +8,16 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import { ReactNode, useMemo, useRef } from 'react'
+import { ReactNode, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
 
+import {
+  ServiceErrorsChip,
+  ServiceErrorsModal,
+} from 'components/cd/services/ServicesTableErrors'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import {
   StackRunDetailsFragment,
@@ -131,7 +135,7 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
     <div
       css={{
         display: 'flex',
-        flex: '1 1 auto',
+        flex: 1,
         flexDirection: 'column',
         overflow: 'hidden',
       }}
@@ -170,9 +174,10 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
   )
 }
 
-function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
+function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const [serviceErrorsOpen, setServiceErrorsOpen] = useState(false)
 
   const [mutation, { loading, error }] = useApproveStackRunMutation({
     variables: { id: stackRun.id },
@@ -223,6 +228,21 @@ function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
           gap: theme.spacing.medium,
         }}
       >
+        {!isEmpty(stackRun.errors) && (
+          <>
+            <ServiceErrorsChip
+              onClick={() => setServiceErrorsOpen(true)}
+              clickable
+              errors={stackRun.errors}
+            />
+            <ServiceErrorsModal
+              isOpen={serviceErrorsOpen}
+              setIsOpen={setServiceErrorsOpen}
+              header="Service errors"
+              errors={stackRun.errors}
+            />
+          </>
+        )}
         {terminal && (
           <Button
             secondary
