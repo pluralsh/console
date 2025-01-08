@@ -69,9 +69,6 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
       return null
     }
 
-    if (data?.applyScalingRecommendation?.id) {
-    }
-
     return (
       <Body2P css={{ whiteSpace: 'pre-wrap' }}>
         {error && (

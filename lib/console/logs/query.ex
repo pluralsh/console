@@ -23,7 +23,6 @@ defmodule Console.Logs.Query do
   def limit(%__MODULE__{limit: l}) when is_integer(l), do: l
   def limit(_), do: @default_limit
 
-  def accessible(q, %User{roles: %{admin: true}}), do: {:ok, q}
 
   def accessible(%__MODULE__{project_id: project_id} = q, %User{} = user) when is_binary(project_id),
     do: check_access(Project, project_id, user, q)
