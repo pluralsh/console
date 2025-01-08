@@ -9220,11 +9220,11 @@ export type ClusterInsightComponentDetailFragment = { __typename?: 'ClusterInsig
 
 export type AiPinFragment = { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
-export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null };
+export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null };
 
 export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null };
 
-export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null };
+export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null };
 
 export type AiCompletionQueryVariables = Exact<{
   system: Scalars['String']['input'];
@@ -9276,7 +9276,7 @@ export type ChatThreadDetailsQueryVariables = Exact<{
 }>;
 
 
-export type ChatThreadDetailsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+export type ChatThreadDetailsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
 export type ClusterInsightComponentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9305,7 +9305,7 @@ export type ChatMutationVariables = Exact<{
 }>;
 
 
-export type ChatMutation = { __typename?: 'RootMutationType', chat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type ChatMutation = { __typename?: 'RootMutationType', chat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null };
 
 export type ClearChatHistoryMutationVariables = Exact<{
   before?: InputMaybe<Scalars['Int']['input']>;
@@ -9319,7 +9319,7 @@ export type DeleteChatMutationVariables = Exact<{
 }>;
 
 
-export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null };
 
 export type SaveChatsMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -9327,14 +9327,14 @@ export type SaveChatsMutationVariables = Exact<{
 }>;
 
 
-export type SaveChatsMutation = { __typename?: 'RootMutationType', saveChats?: Array<{ __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
+export type SaveChatsMutation = { __typename?: 'RootMutationType', saveChats?: Array<{ __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null> | null };
 
 export type CreateChatThreadMutationVariables = Exact<{
   attributes: ChatThreadAttributes;
 }>;
 
 
-export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
 export type UpdateChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9342,14 +9342,14 @@ export type UpdateChatThreadMutationVariables = Exact<{
 }>;
 
 
-export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
 export type DeleteChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
 export type AiFixPrMutationVariables = Exact<{
   insightId: Scalars['ID']['input'];
@@ -9358,6 +9358,22 @@ export type AiFixPrMutationVariables = Exact<{
 
 
 export type AiFixPrMutation = { __typename?: 'RootMutationType', aiFixPr?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type AddChatContextMutationVariables = Exact<{
+  source: ContextSource;
+  sourceId?: InputMaybe<Scalars['ID']['input']>;
+  threadId: Scalars['ID']['input'];
+}>;
+
+
+export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null> | null };
+
+export type ThreadPrMutationVariables = Exact<{
+  threadId: Scalars['ID']['input'];
+}>;
+
+
+export type ThreadPrMutation = { __typename?: 'RootMutationType', threadPr?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null };
 
 export type AiChatStreamSubscriptionVariables = Exact<{
   threadId?: InputMaybe<Scalars['ID']['input']>;
@@ -11657,16 +11673,68 @@ export const AiPinFragmentDoc = gql`
 }
     ${AiInsightFragmentDoc}
 ${ChatThreadTinyFragmentDoc}`;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  ...ClusterMinimal
+  self
+  upgradePlan {
+    compatibilities
+    deprecations
+    incompatibilities
+  }
+  virtual
+}
+    ${ClusterMinimalFragmentDoc}`;
+export const ClusterBasicFragmentDoc = gql`
+    fragment ClusterBasic on Cluster {
+  ...ClusterTiny
+  handle
+  protect
+  deletedAt
+  version
+  currentVersion
+}
+    ${ClusterTinyFragmentDoc}`;
+export const PullRequestFragmentDoc = gql`
+    fragment PullRequest on PullRequest {
+  id
+  service {
+    id
+    name
+    protect
+    deletedAt
+  }
+  cluster {
+    ...ClusterBasic
+  }
+  title
+  url
+  labels
+  creator
+  status
+  insertedAt
+  updatedAt
+}
+    ${ClusterBasicFragmentDoc}`;
 export const ChatFragmentDoc = gql`
     fragment Chat on Chat {
   id
   content
   role
   seq
+  pullRequest {
+    ...PullRequest
+  }
+  type
+  attributes {
+    file {
+      name
+    }
+  }
   insertedAt
   updatedAt
 }
-    `;
+    ${PullRequestFragmentDoc}`;
 export const ChatThreadFragmentDoc = gql`
     fragment ChatThread on ChatThread {
   id
@@ -11789,28 +11857,6 @@ export const ScmWebhookFragmentDoc = gql`
   updatedAt
 }
     `;
-export const ClusterTinyFragmentDoc = gql`
-    fragment ClusterTiny on Cluster {
-  ...ClusterMinimal
-  self
-  upgradePlan {
-    compatibilities
-    deprecations
-    incompatibilities
-  }
-  virtual
-}
-    ${ClusterMinimalFragmentDoc}`;
-export const ClusterBasicFragmentDoc = gql`
-    fragment ClusterBasic on Cluster {
-  ...ClusterTiny
-  handle
-  protect
-  deletedAt
-  version
-  currentVersion
-}
-    ${ClusterTinyFragmentDoc}`;
 export const ObjectStoreFragmentDoc = gql`
     fragment ObjectStore on ObjectStore {
   id
@@ -12676,27 +12722,6 @@ export const StageServiceFragmentDoc = gql`
 }
     ${PromotionCriteriaFragmentDoc}
 ${PipelineServiceDeploymentFragmentDoc}`;
-export const PullRequestFragmentDoc = gql`
-    fragment PullRequest on PullRequest {
-  id
-  service {
-    id
-    name
-    protect
-    deletedAt
-  }
-  cluster {
-    ...ClusterBasic
-  }
-  title
-  url
-  labels
-  creator
-  status
-  insertedAt
-  updatedAt
-}
-    ${ClusterBasicFragmentDoc}`;
 export const PipelinePullRequestFragmentDoc = gql`
     fragment PipelinePullRequest on PipelinePullRequest {
   id
@@ -15223,6 +15248,74 @@ export function useAiFixPrMutation(baseOptions?: Apollo.MutationHookOptions<AiFi
 export type AiFixPrMutationHookResult = ReturnType<typeof useAiFixPrMutation>;
 export type AiFixPrMutationResult = Apollo.MutationResult<AiFixPrMutation>;
 export type AiFixPrMutationOptions = Apollo.BaseMutationOptions<AiFixPrMutation, AiFixPrMutationVariables>;
+export const AddChatContextDocument = gql`
+    mutation AddChatContext($source: ContextSource!, $sourceId: ID, $threadId: ID!) {
+  addChatContext(source: $source, sourceId: $sourceId, threadId: $threadId) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type AddChatContextMutationFn = Apollo.MutationFunction<AddChatContextMutation, AddChatContextMutationVariables>;
+
+/**
+ * __useAddChatContextMutation__
+ *
+ * To run a mutation, you first call `useAddChatContextMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddChatContextMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addChatContextMutation, { data, loading, error }] = useAddChatContextMutation({
+ *   variables: {
+ *      source: // value for 'source'
+ *      sourceId: // value for 'sourceId'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useAddChatContextMutation(baseOptions?: Apollo.MutationHookOptions<AddChatContextMutation, AddChatContextMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddChatContextMutation, AddChatContextMutationVariables>(AddChatContextDocument, options);
+      }
+export type AddChatContextMutationHookResult = ReturnType<typeof useAddChatContextMutation>;
+export type AddChatContextMutationResult = Apollo.MutationResult<AddChatContextMutation>;
+export type AddChatContextMutationOptions = Apollo.BaseMutationOptions<AddChatContextMutation, AddChatContextMutationVariables>;
+export const ThreadPrDocument = gql`
+    mutation ThreadPr($threadId: ID!) {
+  threadPr(threadId: $threadId) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type ThreadPrMutationFn = Apollo.MutationFunction<ThreadPrMutation, ThreadPrMutationVariables>;
+
+/**
+ * __useThreadPrMutation__
+ *
+ * To run a mutation, you first call `useThreadPrMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useThreadPrMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [threadPrMutation, { data, loading, error }] = useThreadPrMutation({
+ *   variables: {
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useThreadPrMutation(baseOptions?: Apollo.MutationHookOptions<ThreadPrMutation, ThreadPrMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ThreadPrMutation, ThreadPrMutationVariables>(ThreadPrDocument, options);
+      }
+export type ThreadPrMutationHookResult = ReturnType<typeof useThreadPrMutation>;
+export type ThreadPrMutationResult = Apollo.MutationResult<ThreadPrMutation>;
+export type ThreadPrMutationOptions = Apollo.BaseMutationOptions<ThreadPrMutation, ThreadPrMutationVariables>;
 export const AiChatStreamDocument = gql`
     subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
   aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
@@ -24809,6 +24902,8 @@ export const namedOperations = {
     UpdateChatThread: 'UpdateChatThread',
     DeleteChatThread: 'DeleteChatThread',
     AiFixPr: 'AiFixPr',
+    AddChatContext: 'AddChatContext',
+    ThreadPr: 'ThreadPr',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',

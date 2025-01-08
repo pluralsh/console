@@ -107,6 +107,15 @@ fragment Chat on Chat {
   content
   role
   seq
+  pullRequest {
+    ...PullRequest
+  }
+  type
+  attributes {
+    file {
+      name
+    }
+  }
   insertedAt
   updatedAt
 }
@@ -259,6 +268,22 @@ mutation DeleteChatThread($id: ID!) {
 mutation AiFixPr($insightId: ID!, $messages: [ChatMessage]) {
   aiFixPr(insightId: $insightId, messages: $messages) {
     ...PullRequest
+  }
+}
+
+mutation AddChatContext(
+  $source: ContextSource!
+  $sourceId: ID
+  $threadId: ID!
+) {
+  addChatContext(source: $source, sourceId: $sourceId, threadId: $threadId) {
+    ...Chat
+  }
+}
+
+mutation ThreadPr($threadId: ID!) {
+  threadPr(threadId: $threadId) {
+    ...Chat
   }
 }
 

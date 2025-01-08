@@ -20,6 +20,7 @@ import {
   ChatThreadDetailsDocument,
   ChatThreadDetailsQuery,
   ChatThreadFragment,
+  ChatType,
   useAiChatStreamSubscription,
   useChatMutation,
   useChatThreadDetailsQuery,
@@ -81,6 +82,7 @@ export function ChatbotPanelThread({
           content: messages?.[0]?.content ?? '',
           role: AiRole.User,
           seq: 0,
+          type: ChatType.Text,
           insertedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
@@ -157,6 +159,7 @@ export function ChatbotPanelThread({
           ))}
       </ChatbotMessagesWrapper>
       <SendMessageForm
+        currentThread={currentThread}
         sendMessage={sendMessage}
         fullscreen={fullscreen}
       />
