@@ -1,8 +1,16 @@
-import { Input, SearchIcon } from '@pluralsh/design-system'
+import { Input, ListBoxItem, SearchIcon, Select } from '@pluralsh/design-system'
 import LogsLabels from 'components/apps/app/logs/LogsLabels'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { useCallback, useState } from 'react'
 
+import LogsLegend from 'components/apps/app/logs/LogsLegend'
+import { Body2P } from 'components/utils/typography/Text'
+import { clamp } from 'lodash'
+import styled from 'styled-components'
+import {
+  SinceSecondsOptions,
+  SinceSecondsSelectOptions,
+} from '../cluster/pod/logs/Logs'
 import { LogsCard } from './LogsCard'
 
 export function Logs({
@@ -14,6 +22,10 @@ export function Logs({
 }) {
   const query = useQueryParams()
   const [search, setSearch] = useState('')
+  const [queryLength, setQueryLength] = useState(100)
+  const [sinceSeconds, setSinceSeconds] = useState(
+    SinceSecondsOptions.QuarterHour
+  )
   const [labels, setLabels] = useState(toMap(query))
 
   const addLabel = useCallback(
@@ -34,36 +46,83 @@ export function Logs({
     value,
   }))
 
-  const lokiQuery = search
-    ? { labels: labelList, filter: { text: search } }
-    : { labels: labelList }
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
-      <Input
-        marginBottom={labelList?.length > 0 ? '' : 'medium'}
-        placeholder="Filter logs"
-        startIcon={<SearchIcon size={14} />}
-        value={search}
-        onChange={({ target: { value } }) => setSearch(value)}
-        flexShrink={0}
-      />
-      <LogsLabels
-        labels={labelList}
-        removeLabel={removeLabel}
-      />
-      <LogsCard
-        serviceId={serviceId}
-        clusterId={clusterId}
-        query={lokiQuery}
-        addLabel={addLabel}
-      />
-    </div>
+    <PageWrapperSC>
+      <MainContentWrapperSC>
+        <FiltersWrapperSC>
+          <Input
+            placeholder="Filter logs"
+            startIcon={<SearchIcon size={14} />}
+            value={search}
+            onChange={({ target: { value } }) => setSearch(value)}
+            flex={1}
+          />
+          <Input
+            endIcon={<Body2P $color="text-xlight">lines</Body2P>}
+            inputProps={{
+              css: {
+                textAlign: 'right',
+                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                },
+              },
+            }}
+            width={220}
+            prefix="Query length"
+            type="number"
+            value={queryLength || ''}
+            onChange={({ target: { value } }) =>
+              setQueryLength(clamp(Number(value), 0, 1000))
+            }
+          />
+          <Select
+            selectedKey={`${sinceSeconds}`}
+            onSelectionChange={(key) =>
+              setSinceSeconds(key as SinceSecondsOptions)
+            }
+          >
+            {SinceSecondsSelectOptions.map((opts) => (
+              <ListBoxItem
+                key={`${opts.key}`}
+                label={opts.label}
+                selected={opts.key === sinceSeconds}
+              />
+            ))}
+          </Select>
+        </FiltersWrapperSC>
+        <LogsLabels
+          labels={labelList}
+          removeLabel={removeLabel}
+        />
+        <LogsCard
+          serviceId={serviceId}
+          clusterId={clusterId}
+          query={search}
+          limit={queryLength}
+          time={{ duration: `${sinceSeconds}` }}
+          addLabel={addLabel}
+        />
+      </MainContentWrapperSC>
+      <LogsLegend css={{ height: 'fit-content', width: 168 }} />
+    </PageWrapperSC>
   )
 }
+
+const PageWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
+  height: '100%',
+  width: '100%',
+}))
+
+const FiltersWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.small,
+}))
+
+const MainContentWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  flex: 1,
+}))

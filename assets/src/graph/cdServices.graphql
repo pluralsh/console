@@ -423,17 +423,3 @@ query ServiceStatuses($clusterId: ID) {
     ...ServiceStatusCount
   }
 }
-
-query ServiceLogs(
-  $serviceId: ID!
-  $query: LokiQuery!
-  $start: Long
-  $end: Long
-  $limit: Int!
-) {
-  serviceDeployment(id: $serviceId) {
-    logs(query: $query, start: $start, end: $end, limit: $limit) {
-      ...LogStream
-    }
-  }
-}
