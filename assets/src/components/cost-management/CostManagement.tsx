@@ -136,7 +136,7 @@ export function CostManagement() {
         </Card>
       </Flex>
       <Card
-        css={{ overflow: 'hidden', maxHeight: 300 }}
+        css={{ overflow: 'hidden', maxHeight: 500 }}
         header={{
           content: (
             <Flex gap="small">
