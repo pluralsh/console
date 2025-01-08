@@ -10,6 +10,8 @@ defmodule Console.AI.Fixer do
   alias Console.AI.Fixer.Stack, as: StackFixer
   alias Console.AI.{Provider, Tools.Pr}
 
+  @type pr_resp :: {:ok, PullRequest.t} | Console.error
+
   @prompt """
   Please provide the most straightforward code or configuration change available based on the information I've already provided above to fix this issue.
 
@@ -44,7 +46,7 @@ defmodule Console.AI.Fixer do
   @doc """
   Generate a fix recommendation from an ai insight struct
   """
-  @spec pr(AiInsight.t, Provider.history) :: {:ok, PullRequest.t} | Console.error
+  @spec pr(AiInsight.t, Provider.history) :: pr_resp
   def pr(%AiInsight{service: svc, stack: stack} = insight, history) when is_map(svc) or is_map(stack) do
     with {:ok, prompt} <- pr_prompt(insight, history) do
       ask(prompt, @tool)
@@ -58,7 +60,7 @@ defmodule Console.AI.Fixer do
   @doc """
   Spawns a pr given a fix recommendation
   """
-  @spec pr(binary, Provider.history, User.t) :: {:ok, PullRequest.t} | Console.error
+  @spec pr(binary, Provider.history, User.t) :: pr_resp
   def pr(id, history, %User{} = user) do
     Console.AI.Tool.set_actor(user)
 
@@ -79,14 +81,14 @@ defmodule Console.AI.Fixer do
     |> when_ok(&fix/1)
   end
 
-  defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, additional) do
+  def handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, additional) do
     %PullRequest{}
     |> PullRequest.changeset(Map.merge(pr_attrs, additional))
     |> Repo.insert()
   end
-  defp handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _), do: {:error, err}
-  defp handle_tool_call({:ok, msg}, _), do: {:error, msg}
-  defp handle_tool_call(err, _), do: err
+  def handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _), do: {:error, err}
+  def handle_tool_call({:ok, msg}, _), do: {:error, msg}
+  def handle_tool_call(err, _), do: err
 
   defp ask(prompt, task \\ @prompt), do: prompt ++ [{:user, task}]
 

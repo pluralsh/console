@@ -19,6 +19,7 @@ import {
   ColCpuChange,
   ColMemoryChange,
   ColName,
+  ColScalingPr,
 } from './ClusterScalingRecsTableCols'
 import { CMContextType } from './CostManagementDetails'
 import { useMemo } from 'react'
@@ -111,4 +112,4 @@ export function CostManagementDetailsRecommendations() {
   )
 }
 
-const cols = [ColName, ColCpuChange, ColMemoryChange]
+const cols = [ColName, ColCpuChange, ColMemoryChange, ColScalingPr]

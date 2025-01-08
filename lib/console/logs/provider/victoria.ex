@@ -53,6 +53,7 @@ defmodule Console.Logs.Provider.Victoria do
     %{cluster: %Cluster{} = cluster} = Console.Repo.preload(svc, [:cluster])
     [cluster_label(cluster), ~s("namespace":#{ns}) | io]
   end
+  defp add_resource(io, _), do: io
 
   defp cluster_label(%Cluster{handle: h}), do: ~s("cluster":"#{h}")
 
@@ -60,6 +61,7 @@ defmodule Console.Logs.Provider.Victoria do
     do: [~s(_time:[#{a}, #{b}]) | io]
   defp add_time(io, %Query{time: %Time{duration: d}}) when is_binary(d),
     do: [~s(_time:#{d}) | io]
+  defp add_time(io, _), do: io
 
   defp maybe_reverse(io, %Query{time: %Time{reverse: true}}), do: io ++ ["| sort by (_time desc)"]
   defp maybe_reverse(io, _), do: io

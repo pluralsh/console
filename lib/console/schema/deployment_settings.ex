@@ -254,7 +254,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp logging_changeset(model, attrs) do
     model
-    |> cast(attrs, [:enabled])
+    |> cast(attrs, ~w(enabled driver)a)
     |> cast_embed(:victoria)
   end
 end

@@ -41,6 +41,7 @@ fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   id
   namespace
   name
+  type
   container
   cpuCost
   cpuRequest
@@ -48,7 +49,9 @@ fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   memoryCost
   memoryRequest
   memoryRecommendation
-  type
+  service {
+    ...ServiceDeploymentTiny
+  }
 }
 
 query ClusterUsages(
@@ -145,5 +148,11 @@ query ClusterUsageScalingRecommendations(
         }
       }
     }
+  }
+}
+
+mutation ApplyScalingRecommendation($id: ID!) {
+  applyScalingRecommendation(id: $id) {
+    ...PullRequest
   }
 }

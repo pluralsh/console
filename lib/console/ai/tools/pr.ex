@@ -17,6 +17,11 @@ defmodule Console.AI.Tools.Pr do
       field :file_name, :string
       field :content,   :string
     end
+
+    embeds_one :confidence, Confidence, on_replace: :update do
+      field :confident, :boolean
+      field :reason,    :string
+    end
   end
 
   @valid ~w(repo_url branch_name commit_message pr_title pr_description)a
@@ -25,7 +30,9 @@ defmodule Console.AI.Tools.Pr do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:file_updates, with: &file_update_changeset/2)
+    |> cast_embed(:confidence, with: &confidence_changeset/2)
     |> validate_required(@valid)
+    |> ensure_confident()
   end
 
   @json_schema Console.priv_file!("tools/pr.json") |> Jason.decode!()
@@ -72,5 +79,18 @@ defmodule Console.AI.Tools.Pr do
     model
     |> cast(attrs, ~w(file_name content)a)
     |> validate_required(~w(file_name content)a)
+  end
+
+  defp confidence_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(confident reason)a)
+  end
+
+  defp ensure_confident(cs) do
+    case get_field(cs, :confidence) do
+      %__MODULE__.Confidence{confident: false, reason: reason} ->
+        add_error(cs, :confidence, "There's not sufficient confidence to apply this PR, the reason is: #{reason}")
+      _ -> cs
+    end
   end
 end

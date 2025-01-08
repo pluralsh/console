@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -5238,6 +5238,7 @@ export type RootMutationType = {
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
   addRunLogs?: Maybe<RunLogs>;
   aiFixPr?: Maybe<PullRequest>;
+  applyScalingRecommendation?: Maybe<PullRequest>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
@@ -5453,6 +5454,11 @@ export type RootMutationTypeAddRunLogsArgs = {
 export type RootMutationTypeAiFixPrArgs = {
   insightId: Scalars['ID']['input'];
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+};
+
+
+export type RootMutationTypeApplyScalingRecommendationArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -10550,7 +10556,7 @@ export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string
 
 export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
 
-export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null };
+export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
 
 export type ClusterUsagesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -10588,7 +10594,14 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null } | null } | null> | null } | null } | null };
+export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null } | null> | null } | null } | null };
+
+export type ApplyScalingRecommendationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ApplyScalingRecommendationMutation = { __typename?: 'RootMutationType', applyScalingRecommendation?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -13037,17 +13050,6 @@ export const ServiceDeploymentRevisionsFragmentDoc = gql`
   }
 }
     ${ServiceDeploymentRevisionFragmentDoc}`;
-export const ServiceDeploymentTinyFragmentDoc = gql`
-    fragment ServiceDeploymentTiny on ServiceDeployment {
-  id
-  name
-  cluster {
-    id
-    name
-    handle
-  }
-}
-    `;
 export const ApiDeprecationFragmentDoc = gql`
     fragment ApiDeprecation on ApiDeprecation {
   availableIn
@@ -13263,11 +13265,23 @@ export const ClusterNamespaceUsageFragmentDoc = gql`
   egressCost
 }
     `;
+export const ServiceDeploymentTinyFragmentDoc = gql`
+    fragment ServiceDeploymentTiny on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+    handle
+  }
+}
+    `;
 export const ClusterScalingRecommendationFragmentDoc = gql`
     fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   id
   namespace
   name
+  type
   container
   cpuCost
   cpuRequest
@@ -13275,9 +13289,11 @@ export const ClusterScalingRecommendationFragmentDoc = gql`
   memoryCost
   memoryRequest
   memoryRecommendation
-  type
+  service {
+    ...ServiceDeploymentTiny
+  }
 }
-    `;
+    ${ServiceDeploymentTinyFragmentDoc}`;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -20602,6 +20618,39 @@ export type ClusterUsageScalingRecommendationsQueryHookResult = ReturnType<typeo
 export type ClusterUsageScalingRecommendationsLazyQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsLazyQuery>;
 export type ClusterUsageScalingRecommendationsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsSuspenseQuery>;
 export type ClusterUsageScalingRecommendationsQueryResult = Apollo.QueryResult<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>;
+export const ApplyScalingRecommendationDocument = gql`
+    mutation ApplyScalingRecommendation($id: ID!) {
+  applyScalingRecommendation(id: $id) {
+    ...PullRequest
+  }
+}
+    ${PullRequestFragmentDoc}`;
+export type ApplyScalingRecommendationMutationFn = Apollo.MutationFunction<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>;
+
+/**
+ * __useApplyScalingRecommendationMutation__
+ *
+ * To run a mutation, you first call `useApplyScalingRecommendationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApplyScalingRecommendationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [applyScalingRecommendationMutation, { data, loading, error }] = useApplyScalingRecommendationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useApplyScalingRecommendationMutation(baseOptions?: Apollo.MutationHookOptions<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>(ApplyScalingRecommendationDocument, options);
+      }
+export type ApplyScalingRecommendationMutationHookResult = ReturnType<typeof useApplyScalingRecommendationMutation>;
+export type ApplyScalingRecommendationMutationResult = Apollo.MutationResult<ApplyScalingRecommendationMutation>;
+export type ApplyScalingRecommendationMutationOptions = Apollo.BaseMutationOptions<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -24959,6 +25008,7 @@ export const namedOperations = {
     UpdateRbac: 'UpdateRbac',
     SelfManage: 'SelfManage',
     KickService: 'KickService',
+    ApplyScalingRecommendation: 'ApplyScalingRecommendation',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
