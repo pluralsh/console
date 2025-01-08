@@ -1,0 +1,5 @@
+{% if configuration.lokiUrl -%}
+loki:
+  monolithic:
+    url: {{ configuration.lokiUrl }}
+{%- endif -%}
