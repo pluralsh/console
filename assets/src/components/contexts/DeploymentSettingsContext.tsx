@@ -32,7 +32,7 @@ export function useMetricsEnabled() {
 export function useAIEnabled() {
   const ctx = useDeploymentSettings()
 
-  return !!ctx.ai?.enabled
+  return ctx.ai?.enabled
 }
 
 export function DeploymentSettingsProvider({
