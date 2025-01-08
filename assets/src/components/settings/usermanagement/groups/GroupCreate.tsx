@@ -1,5 +1,5 @@
 import { useCallback, useContext, useState } from 'react'
-import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
+import { Button, Modal, Switch, ValidatedInput } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { GroupsDocument, useCreateGroupMutation } from 'generated/graphql'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
@@ -21,15 +21,17 @@ export default function GroupCreate({ q }: { q: string }) {
   const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [global, setGlobal] = useState(false)
 
   const resetAndClose = useCallback(() => {
     setName('')
     setDescription('')
+    setGlobal(false)
     setCreateModalVisible(false)
   }, [])
 
   const [mutation, { loading, error }] = useCreateGroupMutation({
-    variables: { attributes: { name, description } },
+    variables: { attributes: { name, description, global } },
     onCompleted: () => resetAndClose(),
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -98,6 +100,12 @@ export default function GroupCreate({ q }: { q: string }) {
             value={description}
             onChange={({ target: { value } }) => setDescription(value)}
           />
+          <Switch
+            checked={global}
+            onChange={(checked) => setGlobal(checked)}
+          >
+            Global
+          </Switch>
         </div>
       </Modal>
       <BillingFeatureBlockModal

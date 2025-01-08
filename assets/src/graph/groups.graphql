@@ -11,6 +11,7 @@ fragment Group on Group {
   id
   name
   description
+  global
   insertedAt
   updatedAt
 }
