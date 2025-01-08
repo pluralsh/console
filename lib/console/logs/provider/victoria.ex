@@ -9,17 +9,20 @@ defmodule Console.Logs.Provider.Victoria do
 
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
 
+  @options [recv_timeout: :timer.seconds(30), timeout: :timer.seconds(30)]
+
   defstruct [:connection]
 
   def new(conn), do: %__MODULE__{connection: conn}
 
   def query(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{} = query) when is_binary(host) do
-    Path.join(host, "/select/logsql/query")
-    |> HTTPoison.post({:form, [
-      {"query", build_query(query)},
-      {"limit", "#{Query.limit(query)}"}
-    ]}, headers(conn), [stream_to: self(), async: :once])
-    |> Exec.exec(mapper: &line/1)
+    Exec.exec(fn ->
+      Path.join(host, "/select/logsql/query")
+      |> HTTPoison.post({:form, [
+        {"query", build_query(query)},
+        {"limit", "#{Query.limit(query)}"}
+      ]}, headers(conn), [stream_to: self(), async: :once] ++ @options)
+    end, mapper: &line/1)
   end
   def query(_, _), do: {:error, "no victoria metrics host specified"}
 
