@@ -113,12 +113,59 @@ type DeploymentSettingsSpec struct {
 type LoggingSettings struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
+
 	// The type of log aggregation solution you wish to use
+	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC
+	// +kubebuilder:default=VICTORIA
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
+
 	// Configures a connection to victoria metrics
 	// +kubebuilder:validation:Optional
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
+
+	// Configures a connection to elasticsearch
+	// +kubebuilder:validation:Optional
+	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
+}
+
+type ElasticsearchConnection struct {
+	// Host ...
+	//
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// Index to query in elasticsearch
+	//
+	// +kubebuilder:validation:Optional
+	Index string `json:"index"`
+
+	// User to connect with basic auth
+	//
+	// +kubebuilder:validation:Optional
+	User *string `json:"user,omitempty"`
+
+	// PasswordSecretRef selects a key of a password Secret
+	//
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+}
+
+func (r *ElasticsearchConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.ElasticsearchConnectionAttributes, error) {
+	attr := &console.ElasticsearchConnectionAttributes{
+		Host:  r.Host,
+		User:  r.User,
+		Index: r.Index,
+	}
+	if r.PasswordSecretRef != nil {
+		secret := &corev1.Secret{}
+		if err := c.Get(ctx, types.NamespacedName{Name: r.PasswordSecretRef.Name, Namespace: namespace}, secret); err != nil {
+			return nil, err
+		}
+		password := secret.Data[r.PasswordSecretRef.Key]
+		attr.Password = lo.ToPtr(string(password))
+	}
+	return attr, nil
 }
 
 type HTTPConnection struct {
@@ -275,12 +322,21 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 		Enabled: in.Enabled,
 		Driver:  in.Driver,
 	}
+
 	if in.Victoria != nil {
 		connection, err := in.Victoria.Attributes(ctx, c, namespace)
 		if err != nil {
 			return nil, err
 		}
 		attr.Victoria = connection
+	}
+
+	if in.Elastic != nil {
+		connection, err := in.Elastic.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Elastic = connection
 	}
 
 	return attr, nil

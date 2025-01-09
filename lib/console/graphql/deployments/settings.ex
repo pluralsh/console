@@ -57,6 +57,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :enabled,  :boolean
     field :driver,   :log_driver
     field :victoria, :http_connection_attributes
+    field :elastic,  :elasticsearch_connection_attributes
+  end
+
+  input_object :elasticsearch_connection_attributes do
+    field :host,     non_null(:string)
+    field :index,    non_null(:string)
+    field :user,     :string
+    field :password, :string
   end
 
   input_object :ai_settings_attributes do
@@ -276,6 +284,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :enabled,  :boolean
     field :driver,   :log_driver, description: "the type of log aggregation solution you wish to use"
     field :victoria, :http_connection, description: "configures a connection to victoria metrics"
+    field :elastic,  :elasticsearch_connection, description: "configures a connection to elasticsearch for logging"
+  end
+
+  object :elasticsearch_connection do
+    field :host,     non_null(:string)
+    field :index,    non_null(:string), description: "the index to query for log data"
+    field :user,     :string
   end
 
   connection node_type: :project

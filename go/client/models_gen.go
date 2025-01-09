@@ -1859,6 +1859,20 @@ type DeploymentStrategy struct {
 	RollingUpdate *RollingUpdate `json:"rollingUpdate,omitempty"`
 }
 
+type ElasticsearchConnection struct {
+	Host string `json:"host"`
+	// the index to query for log data
+	Index string  `json:"index"`
+	User  *string `json:"user,omitempty"`
+}
+
+type ElasticsearchConnectionAttributes struct {
+	Host     string  `json:"host"`
+	Index    string  `json:"index"`
+	User     *string `json:"user,omitempty"`
+	Password *string `json:"password,omitempty"`
+}
+
 type EmailSettings struct {
 	// whether you want to receive digest emails
 	Digest *bool `json:"digest,omitempty"`
@@ -2587,12 +2601,15 @@ type LoggingSettings struct {
 	Driver *LogDriver `json:"driver,omitempty"`
 	// configures a connection to victoria metrics
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
+	// configures a connection to elasticsearch for logging
+	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
 }
 
 type LoggingSettingsAttributes struct {
-	Enabled  *bool                     `json:"enabled,omitempty"`
-	Driver   *LogDriver                `json:"driver,omitempty"`
-	Victoria *HTTPConnectionAttributes `json:"victoria,omitempty"`
+	Enabled  *bool                              `json:"enabled,omitempty"`
+	Driver   *LogDriver                         `json:"driver,omitempty"`
+	Victoria *HTTPConnectionAttributes          `json:"victoria,omitempty"`
+	Elastic  *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 }
 
 type LoginInfo struct {

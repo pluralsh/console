@@ -1071,6 +1071,14 @@ input LoggingSettingsAttributes {
   enabled: Boolean
   driver: LogDriver
   victoria: HttpConnectionAttributes
+  elastic: ElasticsearchConnectionAttributes
+}
+
+input ElasticsearchConnectionAttributes {
+  host: String!
+  index: String!
+  user: String
+  password: String
 }
 
 input AiSettingsAttributes {
@@ -1431,6 +1439,18 @@ type LoggingSettings {
 
   "configures a connection to victoria metrics"
   victoria: HttpConnection
+
+  "configures a connection to elasticsearch for logging"
+  elastic: ElasticsearchConnection
+}
+
+type ElasticsearchConnection {
+  host: String!
+
+  "the index to query for log data"
+  index: String!
+
+  user: String
 }
 
 type ProjectConnection {

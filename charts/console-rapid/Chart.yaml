@@ -8,7 +8,7 @@ dependencies:
     version: 0.1.0
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.100
+    version: 0.0.101
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
