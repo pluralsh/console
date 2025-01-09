@@ -118,7 +118,7 @@ export function CostManagementDetailsNamespaces() {
           onChange={(e) => setNamespaceQ(e.target.value)}
         />
         <Card
-          css={{ overflow: 'hidden', maxHeight: 300 }}
+          css={{ overflow: 'hidden', maxHeight: 500 }}
           header={{
             content: (
               <Flex gap="small">

@@ -83,6 +83,8 @@ export function ChatbotPanelThread({
           role: AiRole.User,
           seq: 0,
           type: ChatType.Text,
+          attributes: null,
+          pullRequest: null,
           insertedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },

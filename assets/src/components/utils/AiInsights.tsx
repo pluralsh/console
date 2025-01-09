@@ -11,6 +11,8 @@ import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { CaptionP } from './typography/Text'
+import dayjs from 'dayjs'
 
 export function AiInsightSummaryIcon({
   insight,
@@ -63,10 +65,16 @@ export function AiInsightSummaryIcon({
       label={
         <Flex
           direction="column"
-          gap="xxsmall"
+          gap="xsmall"
           maxWidth={320}
+          color={theme.colors.text}
         >
-          <Overline>insights summary</Overline>
+          <Flex justify="space-between">
+            <Overline>insights summary</Overline>
+            <CaptionP $color="text-xlight">
+              {dayjs(insight.updatedAt).fromNow()}
+            </CaptionP>
+          </Flex>
           {insight.summary}
         </Flex>
       }
