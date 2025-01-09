@@ -46,20 +46,7 @@ export function AiThreads() {
       noPadding
     >
       {aiEnabled !== undefined ? (
-        !isEmpty(threads) && !threadsQuery.loading ? (
-          <AITable
-            query={threadsQuery}
-            rowData={threads}
-            hidePins
-            css={{
-              border: 'none',
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              maxHeight: HOME_CARD_CONTENT_HEIGHT,
-            }}
-            hasNextPage={false} // Prevent from loading more items than on the first page.
-          />
-        ) : (
+        isEmpty(threads) && threadsQuery.data ? (
           <AIEmptyState
             icon={
               aiEnabled ? (
@@ -80,6 +67,19 @@ export function AiThreads() {
                 : 'Leverage Plural’s unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters.'
             }
             cssProps={{ backgroundColor: 'transparent', border: 'none' }}
+          />
+        ) : (
+          <AITable
+            query={threadsQuery}
+            rowData={threads}
+            hidePins
+            css={{
+              border: 'none',
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              maxHeight: HOME_CARD_CONTENT_HEIGHT,
+            }}
+            hasNextPage={false} // Prevent from loading more items than on the first page.
           />
         )
       ) : (
