@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -12,11 +14,21 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+)
+
+const (
+	generatedSecretAnnotationName = "deployments.plural.sh/generated-secret"
+	GeneratedSecretFinalizer      = "deployments.plural.sh/generated-secret-protection"
 )
 
 // GeneratedSecretReconciler reconciles a GeneratedSecret object
@@ -41,6 +53,9 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := r.Get(ctx, req.NamespacedName, generatedSecret); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	if !generatedSecret.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, generatedSecret)
+	}
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, generatedSecret)
 	if err != nil {
@@ -48,17 +63,12 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-
 	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
-
-	if !generatedSecret.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, generatedSecret)
-	}
 
 	bindings, err := r.prepareBindings(ctx, generatedSecret)
 	if err != nil {
@@ -77,7 +87,7 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	for _, destination := range generatedSecret.Spec.Destinations {
-		destSecretRef := &corev1.SecretReference{Name: destination.Name, Namespace: generatedSecret.Namespace}
+		destSecretRef := &corev1.SecretReference{Name: destination.Name, Namespace: destination.Namespace}
 		destSecret, err := utils.GetSecret(ctx, r.Client, destSecretRef)
 		// create if it doesn't exist
 		if err != nil {
@@ -85,18 +95,15 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			if err := r.ensureNamespace(ctx, generatedSecret.Namespace); err != nil {
+			if err := r.ensureNamespace(ctx, destination.Namespace); err != nil {
 				utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			if err := r.createSecret(ctx, destination.Namespace, destination.Name, data); err != nil {
+			if err := r.createSecret(ctx, destination.Namespace, destination.Name, generatedSecret.Namespace, generatedSecret.Name, data); err != nil {
 				utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			if err := r.tryAddSecretControllerRef(ctx, generatedSecret, destSecretRef); err != nil {
-				utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
+
 			continue
 		}
 		// update destination secret if it's different then persisted data
@@ -111,6 +118,8 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	generatedSecret.Status.RenderedTemplateSecretRef = &corev1.LocalObjectReference{Name: generatedSecret.GetSecretName()}
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	controllerutil.AddFinalizer(generatedSecret, GeneratedSecretFinalizer)
+
 	return ctrl.Result{}, nil
 }
 
@@ -145,7 +154,7 @@ func (r *GeneratedSecretReconciler) persistData(ctx context.Context, gs *v1alpha
 			utils.MarkCondition(gs.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return nil, err
 		}
-		if err := r.createSecret(ctx, gs.Namespace, gs.GetSecretName(), data); err != nil {
+		if err := r.createSecret(ctx, gs.Namespace, gs.GetSecretName(), gs.Namespace, gs.GetSecretName(), data); err != nil {
 			return nil, err
 		}
 
@@ -181,11 +190,17 @@ func (r *GeneratedSecretReconciler) ensureNamespace(ctx context.Context, namespa
 	return nil
 }
 
-func (r *GeneratedSecretReconciler) createSecret(ctx context.Context, namespace, name string, data map[string][]byte) error {
+func (r *GeneratedSecretReconciler) createSecret(ctx context.Context, namespace, name, generatedSecretNamespace, generatedSecretName string, data map[string][]byte) error {
+	if generatedSecretNamespace == "" {
+		generatedSecretNamespace = "default"
+	}
 	secret := &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Annotations: map[string]string{
+				generatedSecretAnnotationName: generatedSecretNamespace + "/" + generatedSecretName,
+			},
 		},
 		Data: data,
 	}
@@ -216,8 +231,49 @@ func templateData(tmp map[string]string, bindings map[string]interface{}) (map[s
 	return data, nil
 }
 
-func (r *GeneratedSecretReconciler) handleDelete(ctx context.Context, secret *v1alpha1.GeneratedSecret) (ctrl.Result, error) {
-	return ctrl.Result{}, nil
+func (r *GeneratedSecretReconciler) handleDelete(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	if !controllerutil.ContainsFinalizer(generatedSecret, GeneratedSecretFinalizer) {
+		return ctrl.Result{}, nil
+	}
+	for _, destination := range generatedSecret.Spec.Destinations {
+		destSecretRef := &corev1.SecretReference{Name: destination.Name, Namespace: destination.Namespace}
+		destSecret, err := utils.GetSecret(ctx, r.Client, destSecretRef)
+		if err != nil {
+			if !errors.IsNotFound(err) {
+				return ctrl.Result{}, err
+			}
+			logger.Info("Secret already deleted", "namespace", destination.Namespace, "name", destination.Name)
+			continue
+		}
+		if err := r.Delete(ctx, destSecret); err != nil {
+			return ctrl.Result{}, err
+		}
+		logger.Info("Secret deleted successfully", "namespace", destination.Namespace, "name", destination.Name)
+	}
+
+	return ctrl.Result{}, utils.TryRemoveFinalizer(ctx, r.Client, generatedSecret, GeneratedSecretFinalizer)
+}
+
+// requestFromSecret returns a reconcile.Request for the generated secret if changed secret has specific annotation.
+func requestFromSecret() handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+		if obj.GetAnnotations() != nil && obj.GetAnnotations()[generatedSecretAnnotationName] != "" {
+			generatedSecret := obj.GetAnnotations()[generatedSecretAnnotationName]
+			namespaceName := strings.Split(generatedSecret, "/")
+			if len(namespaceName) != 2 {
+				err := fmt.Errorf("the annotation has wrong format %s", generatedSecret)
+				utilruntime.HandleError(err)
+				return nil
+			}
+			return []reconcile.Request{
+				{
+					NamespacedName: types.NamespacedName{Namespace: namespaceName[0], Name: namespaceName[1]},
+				},
+			}
+		}
+		return nil
+	})
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -225,5 +281,6 @@ func (r *GeneratedSecretReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.GeneratedSecret{}).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Watches(&corev1.Secret{}, requestFromSecret()).
 		Complete(r)
 }
