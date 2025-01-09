@@ -104,6 +104,8 @@ defmodule Console.MixProject do
       {:telemetry_poller, "~> 1.1"},
       {:cowboy_telemetry, "~> 0.4"},
       {:telemetry_registry, "~> 0.3"},
+      {:snap, "~> 0.11"},
+      {:finch, "~> 0.16"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", branch: "master", override: true},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
@@ -164,7 +166,7 @@ defmodule Console.MixProject do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
 
       # if using the Mint adapter:
-      {:castore, "~> 0.1.7"},
+      {:castore, "~> 1.0", override: true},
       {:req, "~> 0.5", override: true},
       {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},

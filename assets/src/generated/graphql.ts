@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -2295,6 +2295,21 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+export type ElasticsearchConnection = {
+  __typename?: 'ElasticsearchConnection';
+  host: Scalars['String']['output'];
+  /** the index to query for log data */
+  index: Scalars['String']['output'];
+  user?: Maybe<Scalars['String']['output']>;
+};
+
+export type ElasticsearchConnectionAttributes = {
+  host: Scalars['String']['input'];
+  index: Scalars['String']['input'];
+  password?: InputMaybe<Scalars['String']['input']>;
+  user?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type EmailSettings = {
   __typename?: 'EmailSettings';
   /** whether you want to receive digest emails */
@@ -3163,6 +3178,8 @@ export type LoggingSettings = {
   __typename?: 'LoggingSettings';
   /** the type of log aggregation solution you wish to use */
   driver?: Maybe<LogDriver>;
+  /** configures a connection to elasticsearch for logging */
+  elastic?: Maybe<ElasticsearchConnection>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
   /** configures a connection to victoria metrics */
   victoria?: Maybe<HttpConnection>;
@@ -3170,6 +3187,7 @@ export type LoggingSettings = {
 
 export type LoggingSettingsAttributes = {
   driver?: InputMaybe<LogDriver>;
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   victoria?: InputMaybe<HttpConnectionAttributes>;
 };

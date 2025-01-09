@@ -419,9 +419,49 @@ spec:
                 description: Settings for connections to log aggregation datastores
                 properties:
                   driver:
+                    default: VICTORIA
                     description: The type of log aggregation solution you wish to
                       use
+                    enum:
+                    - VICTORIA
+                    - ELASTIC
                     type: string
+                  elastic:
+                    description: Configures a connection to elasticsearch
+                    properties:
+                      host:
+                        description: Host ...
+                        type: string
+                      index:
+                        description: Index to query in elasticsearch
+                        type: string
+                      passwordSecretRef:
+                        description: PasswordSecretRef selects a key of a password
+                          Secret
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      user:
+                        description: User to connect with basic auth
+                        type: string
+                    required:
+                    - host
+                    type: object
                   enabled:
                     type: boolean
                   victoria:

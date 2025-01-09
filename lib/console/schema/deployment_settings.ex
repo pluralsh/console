@@ -61,6 +61,12 @@ defmodule Console.Schema.DeploymentSettings do
       field :driver,   LogDriver
 
       embeds_one :victoria, Connection, on_replace: :update
+      embeds_one :elastic,  Elastic, on_replace: :update do
+        field :host,     :string
+        field :index,    :string
+        field :user,     :string
+        field :password, EncryptedString
+      end
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -256,5 +262,12 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(enabled driver)a)
     |> cast_embed(:victoria)
+    |> cast_embed(:elastic, with: &elastic_changeset/2)
+  end
+
+  defp elastic_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(host index user password)a)
+    |> validate_required([:host, :index])
   end
 end

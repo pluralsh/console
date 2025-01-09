@@ -769,6 +769,25 @@ _Appears in:_
 | `cost` _[CostSettings](#costsettings)_ | Settings for managing Plural's cost management features |  | Optional: {} <br /> |
 
 
+#### ElasticsearchConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [LoggingSettings](#loggingsettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host ... |  | Required: {} <br /> |
+| `index` _string_ | Index to query in elasticsearch |  | Optional: {} <br /> |
+| `user` _string_ | User to connect with basic auth |  | Optional: {} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
+
+
 
 
 
@@ -1216,8 +1235,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ |  |  | Optional: {} <br /> |
-| `driver` _[LogDriver](#logdriver)_ | The type of log aggregation solution you wish to use |  | Optional: {} <br /> |
+| `driver` _[LogDriver](#logdriver)_ | The type of log aggregation solution you wish to use | VICTORIA | Enum: [VICTORIA ELASTIC] <br />Optional: {} <br /> |
 | `victoria` _[HTTPConnection](#httpconnection)_ | Configures a connection to victoria metrics |  | Optional: {} <br /> |
+| `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Configures a connection to elasticsearch |  | Optional: {} <br /> |
 
 
 #### ManagedNamespace
