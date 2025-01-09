@@ -1,5 +1,12 @@
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table'
-import { Cluster, Node, NodeMetric } from 'generated/graphql'
+import {
+  ClusterFragment,
+  ClusterNodeFragment,
+  Node,
+  NodeMetric,
+  NodeMetricFragment,
+  useClusterNodesQuery,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
@@ -27,11 +34,19 @@ import { EmptyState, Table, Tooltip } from '@pluralsh/design-system'
 import { rounded } from '../../../utils/number.ts'
 import { UsageBar } from '../../utils/UsageBar.tsx'
 import { filesize } from 'filesize'
+import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+import { POLL_INTERVAL } from '../../cluster/constants.ts'
 
 export default function ClusterNodes() {
   const theme = useTheme()
   const metricsEnabled = useMetricsEnabled()
-  const { cluster } = useOutletContext() as { cluster: Cluster }
+  const { cluster } = useOutletContext() as { cluster: ClusterFragment }
+
+  const { data } = useClusterNodesQuery({
+    variables: { id: cluster.id || '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
     () => [
@@ -48,6 +63,8 @@ export default function ClusterNodes() {
     [cluster]
   )
 
+  if (!data) return <LoadingIndicator />
+
   return (
     <div
       css={{
@@ -56,15 +73,15 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {!isEmpty(cluster.nodes) && metricsEnabled && (
+      {!isEmpty(data?.cluster?.nodes) && metricsEnabled && (
         <ClusterMetrics
-          nodes={cluster?.nodes?.filter((node): boolean => !!node) || []}
+          nodes={data?.cluster?.nodes?.filter((node): boolean => !!node) || []}
           cluster={cluster}
         />
       )}
       <NodesList
-        nodes={cluster?.nodes || []}
-        nodeMetrics={cluster?.nodeMetrics || []}
+        nodes={data?.cluster?.nodes || []}
+        nodeMetrics={data?.cluster?.nodeMetrics || []}
         columns={columns}
         linkBasePath={getNodeDetailsPath({
           clusterId: cluster?.id,
@@ -233,8 +250,8 @@ function NodesList({
   columns,
   linkBasePath = `/nodes/`,
 }: {
-  nodes: (Node | null)[]
-  nodeMetrics: (NodeMetric | null)[]
+  nodes: (ClusterNodeFragment | null)[]
+  nodeMetrics: (NodeMetricFragment | null)[]
   columns: ColumnDef<TableData, any>[]
   linkBasePath?: string
 }) {

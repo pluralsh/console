@@ -1,8 +1,8 @@
 import { Flex } from 'honorable'
 import {
   ClusterFragment,
+  ClusterNodeFragment,
   Maybe,
-  Node,
   useClusterMetricsQuery,
 } from 'generated/graphql'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
@@ -20,7 +20,7 @@ export function ClusterMetrics({
   nodes,
   cluster,
 }: {
-  nodes: Maybe<Node>[]
+  nodes: Maybe<ClusterNodeFragment>[]
   cluster?: ClusterFragment
 }) {
   const theme = useTheme()
