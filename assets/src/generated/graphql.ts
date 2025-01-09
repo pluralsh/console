@@ -3153,6 +3153,11 @@ export type LogFacet = {
   value: Scalars['String']['output'];
 };
 
+export type LogFacetInput = {
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
 export type LogLine = {
   __typename?: 'LogLine';
   facets?: Maybe<Array<Maybe<LogFacet>>>;
@@ -3167,8 +3172,8 @@ export type LogStream = {
 };
 
 export type LogTimeRange = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['DateTime']['input']>;
+  before?: InputMaybe<Scalars['DateTime']['input']>;
   duration?: InputMaybe<Scalars['String']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
@@ -6947,6 +6952,7 @@ export type RootQueryTypeJobArgs = {
 
 export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;

@@ -7,7 +7,7 @@ defmodule Console.Logs.Query do
 
   @type t :: %__MODULE__{time: Time.t}
 
-  defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time]
+  defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time, :facets]
 
   def new(args) do
     %__MODULE__{
@@ -16,7 +16,8 @@ defmodule Console.Logs.Query do
       service_id: args[:service_id],
       query: args[:query],
       limit: args[:limit],
-      time: Time.new(args)
+      time: Time.new(args),
+      facets: args[:facets]
     }
   end
 
