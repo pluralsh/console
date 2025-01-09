@@ -2866,6 +2866,33 @@ entries:
   console-rapid:
   - apiVersion: v2
     appVersion: 0.10.46
+    created: "2025-01-09T05:14:14.83592269Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.100
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.10.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 6e5bea16c0c0d67fe69eaaa88b0c316369e0486dd413dd308395b649036382b0
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.80/console-rapid-0.3.80.tgz
+    version: 0.3.80
+  - apiVersion: v2
+    appVersion: 0.10.46
     created: "2025-01-08T22:47:04.432803588Z"
     dependencies:
     - name: kas
@@ -3944,6 +3971,16 @@ entries:
   controller:
   - apiVersion: v2
     appVersion: 0.10.46
+    created: "2025-01-09T05:14:14.977787845Z"
+    description: deploys the deployment operator for plural cd
+    digest: 571de77d17213ba3a309138e28bdebe867b83bd47a6fe8e42111862c20658986
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.100/controller-0.0.100.tgz
+    version: 0.0.100
+  - apiVersion: v2
+    appVersion: 0.10.46
     created: "2025-01-08T22:47:04.577576097Z"
     description: deploys the deployment operator for plural cd
     digest: ac97ed8cf3fc7e5f4aa2fa8f86c1af3cc39606664a6912169058119f505a0388
@@ -5018,4 +5055,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-08T22:58:16.349756283Z"
+generated: "2025-01-09T05:14:14.979004529Z"
