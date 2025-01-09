@@ -1,6 +1,7 @@
 import { sumBy } from 'lodash'
 
 import {
+  ClusterNodeFragment,
   HttpConnection,
   Maybe,
   MetricResponse,
@@ -29,7 +30,7 @@ function avg(metrics: Array<MetricResult>): number | undefined {
 
 function capacity(
   type: CapacityType,
-  ...nodes: Array<Maybe<Node> | Node>
+  ...nodes: Array<Maybe<ClusterNodeFragment> | Node>
 ): number | null {
   if (nodes?.length === 0) {
     return null

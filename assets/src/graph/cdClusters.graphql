@@ -287,12 +287,6 @@ fragment Cluster on Cluster {
   nodePools {
     ...NodePool
   }
-  nodes {
-    ...ClusterNode
-  }
-  nodeMetrics {
-    ...NodeMetric
-  }
   pingedAt
   provider {
     id
@@ -385,6 +379,16 @@ fragment ClusterBasic on Cluster {
   currentVersion
 }
 
+fragment ClusterWithNodes on Cluster {
+  ...ClusterBasic
+  nodes {
+    ...ClusterNode
+  }
+  nodeMetrics {
+    ...NodeMetric
+  }
+}
+
 query ClustersTiny($projectId: ID, $first: Int) {
   clusters(first: $first, projectId: $projectId) {
     edges {
@@ -454,6 +458,12 @@ query Cluster($id: ID!) {
 query ClusterBasic($id: ID!) {
   cluster(id: $id) {
     ...ClusterBasic
+  }
+}
+
+query ClusterNodes($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterWithNodes
   }
 }
 
