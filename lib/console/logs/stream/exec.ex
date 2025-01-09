@@ -1,6 +1,8 @@
 defmodule Console.Logs.Stream.Exec do
   alias Console.Logs.Line
 
+  @timeout :timer.seconds(30)
+
   def exec(start, opts \\ []) do
     parser = Keyword.get(opts, :parser, Console.Logs.Stream.JsonLine)
     mapper = Keyword.get(opts, :mapper, &Line.new/1)
@@ -42,6 +44,8 @@ defmodule Console.Logs.Stream.Exec do
 
             %HTTPoison.AsyncEnd{id: ^id} ->
               {:halt, res}
+          after
+            @timeout -> {:halt, res}
           end
         {:error, _} -> {:halt, :error}
         :error -> {:halt, :error}
