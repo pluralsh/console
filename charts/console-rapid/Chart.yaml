@@ -2,7 +2,7 @@ apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
 appVersion: 0.10.46
-version: 0.3.80
+version: 0.3.81
 dependencies:
   - name: kas
     version: 0.1.0
