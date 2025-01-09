@@ -54,7 +54,7 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	if !generatedSecret.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, generatedSecret)
+		return ctrl.Result{}, r.handleDelete(ctx, generatedSecret)
 	}
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, generatedSecret)
@@ -231,28 +231,28 @@ func templateData(tmp map[string]string, bindings map[string]interface{}) (map[s
 	return data, nil
 }
 
-func (r *GeneratedSecretReconciler) handleDelete(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (ctrl.Result, error) {
+func (r *GeneratedSecretReconciler) handleDelete(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) error {
 	logger := log.FromContext(ctx)
 	if !controllerutil.ContainsFinalizer(generatedSecret, GeneratedSecretFinalizer) {
-		return ctrl.Result{}, nil
+		return nil
 	}
 	for _, destination := range generatedSecret.Spec.Destinations {
 		destSecretRef := &corev1.SecretReference{Name: destination.Name, Namespace: destination.Namespace}
 		destSecret, err := utils.GetSecret(ctx, r.Client, destSecretRef)
 		if err != nil {
 			if !errors.IsNotFound(err) {
-				return ctrl.Result{}, err
+				return err
 			}
 			logger.Info("Secret already deleted", "namespace", destination.Namespace, "name", destination.Name)
 			continue
 		}
 		if err := r.Delete(ctx, destSecret); err != nil {
-			return ctrl.Result{}, err
+			return err
 		}
 		logger.Info("Secret deleted successfully", "namespace", destination.Namespace, "name", destination.Name)
 	}
 
-	return ctrl.Result{}, utils.TryRemoveFinalizer(ctx, r.Client, generatedSecret, GeneratedSecretFinalizer)
+	return utils.TryRemoveFinalizer(ctx, r.Client, generatedSecret, GeneratedSecretFinalizer)
 }
 
 // requestFromSecret returns a reconcile.Request for the generated secret if changed secret has specific annotation.
