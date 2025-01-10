@@ -1,0 +1,26 @@
+fragment LogLine on LogLine {
+  facets {
+    key
+    value
+  }
+  log
+  timestamp
+}
+
+query LogAggregation(
+  $clusterId: ID
+  $limit: Int
+  $query: String
+  $serviceId: ID
+  $time: LogTimeRange
+) {
+  logAggregation(
+    clusterId: $clusterId
+    limit: $limit
+    query: $query
+    serviceId: $serviceId
+    time: $time
+  ) {
+    ...LogLine
+  }
+}

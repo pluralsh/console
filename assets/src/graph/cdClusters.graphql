@@ -623,20 +623,6 @@ fragment LogStream on LogStream {
   }
 }
 
-query ClusterLogs(
-  $clusterId: ID!
-  $query: LokiQuery!
-  $start: Long
-  $end: Long
-  $limit: Int!
-) {
-  cluster(id: $clusterId) {
-    logs(query: $query, start: $start, end: $end, limit: $limit) {
-      ...LogStream
-    }
-  }
-}
-
 query ClusterMetrics(
   $clusterId: ID!
   $start: DateTime
