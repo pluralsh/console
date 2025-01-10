@@ -25,6 +25,7 @@ defmodule Console.Logs.Provider.Elastic do
   end
 
   defp search(%Logging.Elastic{index: index, host: host} = conn, query) do
+    IO.inspect(query)
     case HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn)) do
       {:ok, %HTTPoison.Response{body: body, status_code: 200}} ->
         with {:ok, resp} <- Jason.decode(body),
