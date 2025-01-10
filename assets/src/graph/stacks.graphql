@@ -477,6 +477,12 @@ mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
   }
 }
 
+mutation CompleteStackRun($id: ID!, $attributes: StackRunAttributes!) {
+  completeStackRun(id: $id, attributes: $attributes) {
+    ...StackRun
+  }
+}
+
 mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
     ...StackRun

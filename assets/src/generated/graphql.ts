@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -11400,6 +11400,14 @@ export type UpdateStackRunMutationVariables = Exact<{
 
 
 export type UpdateStackRunMutation = { __typename?: 'RootMutationType', updateStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+
+export type CompleteStackRunMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: StackRunAttributes;
+}>;
+
+
+export type CompleteStackRunMutation = { __typename?: 'RootMutationType', completeStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
 export type ApproveStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24017,6 +24025,40 @@ export function useUpdateStackRunMutation(baseOptions?: Apollo.MutationHookOptio
 export type UpdateStackRunMutationHookResult = ReturnType<typeof useUpdateStackRunMutation>;
 export type UpdateStackRunMutationResult = Apollo.MutationResult<UpdateStackRunMutation>;
 export type UpdateStackRunMutationOptions = Apollo.BaseMutationOptions<UpdateStackRunMutation, UpdateStackRunMutationVariables>;
+export const CompleteStackRunDocument = gql`
+    mutation CompleteStackRun($id: ID!, $attributes: StackRunAttributes!) {
+  completeStackRun(id: $id, attributes: $attributes) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type CompleteStackRunMutationFn = Apollo.MutationFunction<CompleteStackRunMutation, CompleteStackRunMutationVariables>;
+
+/**
+ * __useCompleteStackRunMutation__
+ *
+ * To run a mutation, you first call `useCompleteStackRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCompleteStackRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [completeStackRunMutation, { data, loading, error }] = useCompleteStackRunMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCompleteStackRunMutation(baseOptions?: Apollo.MutationHookOptions<CompleteStackRunMutation, CompleteStackRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CompleteStackRunMutation, CompleteStackRunMutationVariables>(CompleteStackRunDocument, options);
+      }
+export type CompleteStackRunMutationHookResult = ReturnType<typeof useCompleteStackRunMutation>;
+export type CompleteStackRunMutationResult = Apollo.MutationResult<CompleteStackRunMutation>;
+export type CompleteStackRunMutationOptions = Apollo.BaseMutationOptions<CompleteStackRunMutation, CompleteStackRunMutationVariables>;
 export const ApproveStackRunDocument = gql`
     mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
@@ -25077,6 +25119,7 @@ export const namedOperations = {
     KickStack: 'KickStack',
     kickStackPullRequest: 'kickStackPullRequest',
     UpdateStackRun: 'UpdateStackRun',
+    CompleteStackRun: 'CompleteStackRun',
     ApproveStackRun: 'ApproveStackRun',
     RestartStackRun: 'RestartStackRun',
     CreateAccessToken: 'CreateAccessToken',

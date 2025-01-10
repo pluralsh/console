@@ -23,8 +23,8 @@ import {
   StackRunDetailsFragment,
   StackStatus,
   useApproveStackRunMutation,
+  useCompleteStackRunMutation,
   useRestartStackRunMutation,
-  useUpdateStackRunMutation,
 } from '../../../generated/graphql'
 import {
   STACK_RUNS_INSIGHTS_REL_PATH,
@@ -191,7 +191,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         navigate(getStackRunsAbsPath(stackRun.id, restartStackRun?.id)),
     })
 
-  const [cancel, { loading: cancelLoading }] = useUpdateStackRunMutation({
+  const [cancel, { loading: cancelLoading }] = useCompleteStackRunMutation({
     variables: {
       id: stackRun.id,
       attributes: {
