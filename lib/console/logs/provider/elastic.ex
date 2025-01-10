@@ -3,30 +3,33 @@ defmodule Console.Logs.Provider.Elastic do
   Log driver implementation for victoria metrics
   """
   @behaviour Console.Logs.Provider
-  alias Console.Schema.{Cluster, Service}
+  alias Console.Schema.{Cluster, Service, DeploymentSettings.Logging}
   alias Console.Logs.{Query, Line, Time}
-  alias Console.Logs.Provider.Elastic.Client
+
+  @headers [{"Content-Type", "application/json"}]
 
   @type t :: %__MODULE__{}
 
   defstruct [:connection, :client]
 
   def new(conn) do
-    Client.init(conn)
-    %__MODULE__{connection: conn, client: Client}
+    %__MODULE__{connection: conn}
   end
 
   @spec query(t(), Query.t) :: {:ok, [Line.t]} | Console.error
-  def query(%__MODULE__{connection: %{index: index}, client: client}, %Query{} = q) do
-    case search(client, index, build_query(q)) do
+  def query(%__MODULE__{connection: connection}, %Query{} = q) do
+    case search(connection, build_query(q)) do
       {:ok, hits} -> {:ok, format_hits(hits)}
       {:error, err} -> {:error, "failed to query elasticsearch: #{inspect(err)}"}
     end
   end
 
-  defp search(client, index, query) do
-    case client.post("/#{index}/_search", query) do
-      {:ok, response} -> {:ok, Snap.SearchResponse.new(response)}
+  defp search(%Logging.Elastic{index: index, host: host} = conn, query) do
+    case HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn)) do
+      {:ok, %HTTPoison.Response{body: body, status_code: 200}} ->
+        with {:ok, resp} <- Jason.decode(body),
+          do: Snap.SearchResponse.new(resp)
+      {:ok, %HTTPoison.Response{body: body}} -> {:error, body}
       err -> err
     end
   end
@@ -100,4 +103,8 @@ defmodule Console.Logs.Provider.Elastic do
 
   defp add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
   defp add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
+
+  defp headers(%Logging.Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
+    do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
+  defp headers(_), do: @headers
 end
