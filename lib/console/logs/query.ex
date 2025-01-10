@@ -1,4 +1,5 @@
 defmodule Console.Logs.Query do
+  alias Console.Repo
   alias Console.Logs.Time
   alias Console.Schema.{User, Project, Cluster, Service}
   alias Console.Deployments.Policies
@@ -24,23 +25,24 @@ defmodule Console.Logs.Query do
   def limit(%__MODULE__{limit: l}) when is_integer(l), do: l
   def limit(_), do: @default_limit
 
+  def preload(%__MODULE__{resource: %Service{} = svc} = query),
+    do: %{query | resource: Repo.preload(svc, [:cluster])}
+  def preload(q), do: q
 
   def accessible(%__MODULE__{project_id: project_id} = q, %User{} = user) when is_binary(project_id),
     do: check_access(Project, project_id, user, q)
-
   def accessible(%__MODULE__{cluster_id: id} = q, %User{} = user) when is_binary(id),
     do: check_access(Cluster, id, user, q)
-
   def accessible(%__MODULE__{service_id: id} = q, %User{} = user) when is_binary(id),
     do: check_access(Service, id, user, q)
-
   def accessible(_, _), do: {:error, "forbidden"}
 
   defp check_access(model, id, user, query) do
     Console.Repo.get!(model, id)
     |> Policies.allow(user, :read)
     |> case do
-      {:ok, resource} -> {:ok, %{query | resource: resource}}
+      {:ok, resource} ->
+        {:ok, preload(%{query | resource: resource})}
       err -> err
     end
   end
