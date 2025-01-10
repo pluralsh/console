@@ -25,22 +25,21 @@ defmodule Console.Logs.Provider.Elastic do
   end
 
   defp search(%Logging.Elastic{index: index, host: host} = conn, query) do
-    IO.inspect(query)
     case HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn)) do
       {:ok, %HTTPoison.Response{body: body, status_code: 200}} ->
         with {:ok, resp} <- Jason.decode(body),
-          do: Snap.SearchResponse.new(resp)
+          do: {:ok, Snap.SearchResponse.new(resp)}
       {:ok, %HTTPoison.Response{body: body}} -> {:error, body}
       err -> err
     end
   end
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
-    Enum.map(hits, fn %Snap.Hit{fields: fields} ->
+    Enum.map(hits, fn %Snap.Hit{source: source} ->
       %Line{
-        log: fields["message"],
-        timestamp: Timex.parse(fields["@timestamp"], "{ISO:Extended:Z}"),
-        facets: facets(fields)
+        log: source["message"],
+        timestamp: Timex.parse!(source["@timestamp"], "{ISO:Extended:Z}"),
+        facets: facets(source)
       }
     end)
   end
@@ -48,39 +47,39 @@ defmodule Console.Logs.Provider.Elastic do
 
   defp build_query(%Query{query: str} = q) do
     %{
-      query: maybe_query(str) |> add_terms(q) |> add_range(q) |> add_facets(q),
-      sort: [%{"@timestamp": %{order: "desc"}}],
+      query: maybe_query(str)
+             |> add_terms(q)
+             |> add_range(q)
+             |> add_facets(q),
+      sort: sort(q),
       size: Query.limit(q),
     }
   end
 
   defp add_terms(query, %Query{resource: %Cluster{} = cluster}),
-    do: Map.put(query, :term, term(cluster))
-  defp add_terms(query, %Query{resource: %Service{cluster: %Cluster{} = cluster}} = svc),
-    do: Map.put(query, :term, term(cluster) |> term(svc))
+    do: put_in(query[:bool][:filter], [%{term: %{"cluster.handle.keyword" => cluster.handle}}])
+  defp add_terms(query, %Query{resource: %Service{cluster: %Cluster{} = cluster} = svc}) do
+    put_in(query[:bool][:filter], [
+      %{term: %{"kubernetes.namespace.keyword" => svc.namespace}},
+      %{term: %{"cluster.handle.keyword" => cluster.handle}}
+    ])
+  end
   defp add_terms(query, _), do: query
 
   defp add_range(q, %Query{time: %Time{after: aft, before: bef}}) when not is_nil(aft) and not is_nil(bef),
-    do: Map.put(q, :range, %{"@timestamp": %{gte: aft, lte: bef}})
+    do: add_filter(q, %{range: %{"@timestamp": %{gte: aft, lte: bef}}})
   defp add_range(q, %Query{time: %Time{after: aft, before: nil, duration: dur}}) when not is_nil(aft),
-    do: Map.put(q, :range, %{"@timestamp": maybe_dur(:gte, aft, dur)})
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gte, aft, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
-    do: Map.put(q, :range, %{"@timestamp": maybe_dur(:lte, bef, dur)})
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lte, bef, dur)}})
   defp add_range(q,  _), do: q
 
   defp add_facets(q, %Query{facets: [_ | _] = facets}) do
-    term   = Map.get(q, :term, %{})
-    facets = Enum.reduce(facets, term, fn %{key: k, value: v}, acc ->
-      Map.put(acc, k, %{value: v})
+    Enum.reduce(facets, q, fn %{key: k, value: v}, acc ->
+      add_filter(acc, %{term: %{"#{k}.keyword" => v}})
     end)
-
-    Map.put(q, :term, facets)
   end
   defp add_facets(q, _), do: q
-
-  defp term(q \\ %{}, resource)
-  defp term(q, %Cluster{handle: handle}), do: Map.put(q, :"cluster.name", %{value: handle})
-  defp term(q, %Service{namespace: namespace}), do: Map.put(q, :"kubernetes.namespace", %{value: namespace})
 
   defp facets(resp) do
     Map.take(resp, ~w(kubernetes cloud container cluster))
@@ -88,9 +87,12 @@ defmodule Console.Logs.Provider.Elastic do
     |> Line.facets()
   end
 
+  defp add_filter(%{bool: %{filter: fs}} = q, range) when is_list(fs), do: put_in(q[:bool][:filter], [range | fs])
+  defp add_filter(q, range), do: put_in(q[:bool][:filter], [range])
+
   defp maybe_query(q) when is_binary(q) and byte_size(q) > 0,
-    do: %{query_string: %{query: q, default_field: "message"}}
-  defp maybe_query(_), do: %{}
+    do: %{bool: %{must: %{match: %{message: q}}}}
+  defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) do
     opp = opposite(dir)
@@ -104,6 +106,9 @@ defmodule Console.Logs.Provider.Elastic do
 
   defp add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
   defp add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
+
+  defp sort(%Query{time: %Time{reverse: true}}), do: [%{"@timestamp": %{order: "asc"}}]
+  defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]
 
   defp headers(%Logging.Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
