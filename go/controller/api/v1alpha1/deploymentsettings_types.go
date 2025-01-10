@@ -273,6 +273,9 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	Tools *Tools `json:"tools,omitempty"`
+
 	// Provider defines which of the supported LLM providers should be used.
 	//
 	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
@@ -317,6 +320,15 @@ type AISettings struct {
 	Vertex *VertexSettings `json:"vertex,omitempty"`
 }
 
+type Tools struct {
+	CreatePr *CreatePr `json:"createPr,omitempty"`
+}
+
+type CreatePr struct {
+	// ScmConnectionRef the SCM connection to use for pr automations
+	ScmConnectionRef *corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
+}
+
 func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.LoggingSettingsAttributes, error) {
 	attr := &console.LoggingSettingsAttributes{
 		Enabled: in.Enabled,
@@ -347,6 +359,22 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		Enabled:      in.Enabled,
 		Provider:     in.Provider,
 		ToolProvider: in.ToolProvider,
+	}
+
+	if in.Tools != nil && in.Tools.CreatePr != nil {
+		if in.Tools.CreatePr.ScmConnectionRef != nil {
+			scm := in.Tools.CreatePr.ScmConnectionRef
+			connection := &ScmConnection{}
+			if err := c.Get(ctx, types.NamespacedName{Name: scm.Name, Namespace: scm.Namespace}, connection); err != nil {
+				return nil, err
+			}
+
+			attr.Tools = &console.ToolConfigAttributes{
+				CreatePr: &console.CreatePrConfigAttributes{
+					ConnectionID: connection.Status.ID,
+				},
+			}
+		}
 	}
 
 	switch *in.Provider {
