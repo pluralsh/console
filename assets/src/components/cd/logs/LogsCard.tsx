@@ -46,7 +46,8 @@ export function LogsCard({
   const [loader, setLoader] = useState<any>(null)
 
   const { data, loading, error, fetchMore, refetch } = useLogAggregationQuery({
-    variables: { clusterId, query, limit: limit || LIMIT, serviceId },
+    variables: { clusterId, query, limit: limit || LIMIT, serviceId, time },
+    fetchPolicy: 'cache-and-network',
     pollInterval: live ? POLL_INTERVAL : 0,
     skip: !clusterId && !serviceId,
   })
