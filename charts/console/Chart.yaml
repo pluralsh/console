@@ -3,17 +3,17 @@ name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
 appVersion: 0.10.46
-version: 0.3.74
+version: 0.3.75
 dependencies:
   - name: kas
-    version: 0.1.0
+    version: 0.1.1
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.100
+    version: 0.0.101
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
-    version: 7.10.0
+    version: 7.10.1
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
