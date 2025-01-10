@@ -17,7 +17,7 @@ defmodule Console.Logs.Provider.Elastic.Client do
     ], &elem(&1, 1))
   end
 
-  def config(), do: Process.get(@key)
+  def config(), do: Process.get(@key) || []
 
   def json_library(), do: Jason
 

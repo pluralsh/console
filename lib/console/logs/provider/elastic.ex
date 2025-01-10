@@ -18,9 +18,16 @@ defmodule Console.Logs.Provider.Elastic do
 
   @spec query(t(), Query.t) :: {:ok, [Line.t]} | Console.error
   def query(%__MODULE__{connection: %{index: index}, client: client}, %Query{} = q) do
-    case Snap.Search.search(client, index, build_query(q)) do
+    case search(client, index, build_query(q)) do
       {:ok, hits} -> {:ok, format_hits(hits)}
       {:error, err} -> {:error, "failed to query elasticsearch: #{inspect(err)}"}
+    end
+  end
+
+  defp search(client, index, query) do
+    case client.post("/#{index}/_search", query) do
+      {:ok, response} -> {:ok, Snap.SearchResponse.new(response)}
+      err -> err
     end
   end
 
