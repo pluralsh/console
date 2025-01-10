@@ -29,6 +29,7 @@ rules:
   - update
   - watch
   - create
+  - delete
 - apiGroups:
   - deployments.plural.sh
   resources:
