@@ -55,6 +55,7 @@ defmodule Console.Logs.Provider.Elastic do
     do: Map.put(q, :range, %{"@timestamp": maybe_dur(:gte, aft, dur)})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
     do: Map.put(q, :range, %{"@timestamp": maybe_dur(:lte, bef, dur)})
+  defp add_range(q,  _), do: q
 
   defp add_facets(q, %Query{facets: [_ | _] = facets}) do
     term   = Map.get(q, :term, %{})
