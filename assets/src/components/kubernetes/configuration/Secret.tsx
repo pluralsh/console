@@ -48,6 +48,7 @@ export default function Secret(): ReactElement<any> {
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
+    fetchPolicy: 'cache-and-network',
     variables: {
       name,
       namespace,

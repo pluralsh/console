@@ -2576,6 +2576,11 @@ type LogFacet struct {
 	Value string `json:"value"`
 }
 
+type LogFacetInput struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type LogLine struct {
 	Timestamp *string     `json:"timestamp,omitempty"`
 	Log       string      `json:"log"`

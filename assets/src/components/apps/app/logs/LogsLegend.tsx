@@ -4,6 +4,7 @@ import { Prop, PropsContainer } from '@pluralsh/design-system'
 
 import { useBorderColor } from './LogLine'
 import { Level } from './misc'
+import { ComponentPropsWithRef } from 'react-spring'
 
 export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
   backgroundColor: color,
@@ -18,12 +19,14 @@ export const LegendWrap = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-export default function LogsLegend() {
+export default function LogsLegend(
+  props: ComponentPropsWithRef<typeof PropsContainer>
+) {
   const borderColor = useBorderColor()
 
   return (
-    <PropsContainer>
-      <Prop title="Log legend">
+    <PropsContainer {...props}>
+      <FlexPropSC title="Log legend">
         <LegendWrap>
           <LegendColor color={borderColor(Level.OTHER)} />
           Unknown
@@ -40,7 +43,13 @@ export default function LogsLegend() {
           <LegendColor color={borderColor(Level.ERROR)} />
           Error
         </LegendWrap>
-      </Prop>
+      </FlexPropSC>
     </PropsContainer>
   )
 }
+
+const FlexPropSC = styled(Prop)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+}))

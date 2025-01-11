@@ -51,7 +51,7 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int): [LogLine]
+  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
@@ -6790,10 +6790,15 @@ input LabelInput {
 }
 
 input LogTimeRange {
-  before: String
-  after: String
+  before: DateTime
+  after: DateTime
   duration: String
   reverse: Boolean
+}
+
+input LogFacetInput {
+  key: String!
+  value: String!
 }
 
 type Dashboard {
