@@ -1,9 +1,9 @@
 import { Input, ListBoxItem, SearchIcon, Select } from '@pluralsh/design-system'
-import LogsLabels from 'components/apps/app/logs/LogsLabels'
+import LogsLabels from 'components/cd/logs/LogsLabels'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { useCallback, useState } from 'react'
 
-import LogsLegend from 'components/apps/app/logs/LogsLegend'
+import LogsLegend from 'components/cd/logs/LogsLegend'
 import { Body2P } from 'components/utils/typography/Text'
 import { clamp } from 'lodash'
 import styled from 'styled-components'

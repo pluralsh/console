@@ -26,7 +26,7 @@ import {
 } from '../../../../routes/cdRoutesConsts'
 import { useClusterQuery, usePodQuery } from '../../../../generated/graphql'
 import { LinkTabWrap } from '../../../utils/Tabs'
-import LogsLegend from '../../../apps/app/logs/LogsLegend'
+import LogsLegend from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
 

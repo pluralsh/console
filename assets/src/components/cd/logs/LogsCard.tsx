@@ -1,6 +1,6 @@
 import { Card } from '@pluralsh/design-system'
 import LogContent from 'components/apps/app/logs/LogContent'
-import LogsScrollIndicator from 'components/apps/app/logs/LogsScrollIndicator'
+import LogsScrollIndicator from 'components/cd/logs/LogsScrollIndicator'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { LogTimeRange, useLogAggregationQuery } from 'generated/graphql'
@@ -54,12 +54,6 @@ export function LogsCard({
 
   const logs = data?.logAggregation
 
-  const returnToTop = useCallback(() => {
-    setLive(true)
-    refetch().then(() => listRef?.scrollToItem(0))
-    loader?.resetloadMoreItemsCache()
-  }, [refetch, setLive, listRef, loader])
-
   return error ? (
     <GqlError error={error} />
   ) : (
@@ -70,38 +64,11 @@ export function LogsCard({
       borderLeft="none"
       borderTopLeftRadius={0}
       borderBottomLeftRadius={0}
+      header={{
+        content: <LogsScrollIndicator live={live} />,
+      }}
     >
-      <Flex
-        direction="row"
-        fill
-        gap="small"
-      >
-        {data ? (
-          <LogContent
-            listRef={listRef}
-            setListRef={setListRef}
-            namespace={clusterId || serviceId}
-            logs={logs}
-            setLoader={setLoader}
-            search={query}
-            loading={loading}
-            fetchMore={fetchMore}
-            updateFunc={(prev, { fetchMoreResult }) =>
-              doUpdate(prev, fetchMoreResult)
-            }
-            onScroll={(arg) => setLive(!arg)}
-            addLabel={addLabel}
-          />
-        ) : (
-          <LoadingIndicator />
-        )}
-      </Flex>
-      {data && (
-        <LogsScrollIndicator
-          live={live}
-          returnToTop={returnToTop}
-        />
-      )}
+      {data ? <span>test</span> : <LoadingIndicator />}
     </Card>
   )
 }

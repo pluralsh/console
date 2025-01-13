@@ -2,7 +2,7 @@ import { Tooltip } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { StackStatus } from '../../../generated/graphql'
-import { LegendColor } from '../../apps/app/logs/LogsLegend.tsx'
+import { LegendColor } from '../../cd/logs/LogsLegend.tsx'
 import { statusToSeverity } from './StackStatusChip.tsx'
 
 const severityToColor = {
