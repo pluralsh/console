@@ -106,6 +106,11 @@ defmodule Console.GraphQl.Users do
     field :security, :boolean
   end
 
+  input_object :bootstrap_token_attributes do
+    field :user_id,    :id, description: "An optional external user id to be the user identity for this bootstrap token in audit logs"
+    field :project_id, non_null(:id), description: "the project all clusters spawned by this bootstrap token are put into"
+  end
+
   object :user do
     field :id,              non_null(:id)
     field :name,            non_null(:string)
@@ -297,6 +302,17 @@ defmodule Console.GraphQl.Users do
   object :persona_home do
     field :manager,  :boolean
     field :security, :boolean
+  end
+
+  @desc "A restricted token meant only for use in registering clusters, esp for edge devices"
+  object :bootstrap_token do
+    field :id,       non_null(:id)
+    field :token,    non_null(:string), description: "the token to use when bootstrapping clusters"
+
+    field :user,    :user,    resolve: dataloader(User)
+    field :project, :project, resolve: dataloader(Deployments), description: "the project for all clusters to live within"
+
+    timestamps()
   end
 
   connection node_type: :user
@@ -645,6 +661,20 @@ defmodule Console.GraphQl.Users do
       arg :token, non_null(:string)
 
       safe_resolve &User.delete_access_token/2
+    end
+
+    field :create_bootstrap_token, :bootstrap_token do
+      middleware Authenticated
+      arg :attributes, non_null(:bootstrap_token_attributes)
+
+      resolve &User.create_bootstrap_token/2
+    end
+
+    field :delete_bootstrap_token, :bootstrap_token do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &User.delete_bootstrap_token/2
     end
 
     field :create_persona, :persona do

@@ -377,4 +377,66 @@ defmodule Console.Services.UsersTest do
       {:error, _} = Users.delete_access_token(token.token, insert(:user))
     end
   end
+
+  describe "#create_bootstrap_token/2" do
+    test "admins can create bootstrap tokens" do
+      admin = admin_user()
+      project = insert(:project)
+
+      {:ok, token} = Users.create_bootstrap_token(%{project_id: project.id}, admin)
+
+      assert token.token
+      assert token.project_id == project.id
+      assert token.user_id == admin.id
+    end
+
+    test "project writers can create bootstrap tokens" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, token} = Users.create_bootstrap_token(%{project_id: project.id}, user)
+
+      assert token.token
+      assert token.project_id == project.id
+      assert token.user_id == user.id
+    end
+
+    test "non writers cannot create" do
+      user = insert(:user)
+      project = insert(:project)
+
+      {:error, _} = Users.create_bootstrap_token(%{project_id: project.id}, user)
+    end
+  end
+
+  describe "#delete_bootstrap_token/2" do
+    test "admins can delete bootstrap tokens" do
+      admin = admin_user()
+      bootstrap = insert(:bootstrap_token)
+
+      {:ok, token} = Users.delete_bootstrap_token(bootstrap.id, admin)
+
+      assert token.id == bootstrap.id
+      refute refetch(bootstrap)
+    end
+
+    test "project writers can delete bootstrap tokens" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      bootstrap = insert(:bootstrap_token, project: project)
+
+      {:ok, token} = Users.delete_bootstrap_token(bootstrap.id, user)
+
+      assert token.id == bootstrap.id
+      refute refetch(bootstrap)
+    end
+
+    test "non writers cannot delete" do
+      user = insert(:user)
+      project = insert(:project)
+      bootstrap = insert(:bootstrap_token, project: project)
+
+      {:error, _} = Users.delete_bootstrap_token(bootstrap.id, user)
+    end
+  end
 end

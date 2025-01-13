@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -667,6 +667,26 @@ export type BedrockAiSettings = {
 export type BindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** A restricted token meant only for use in registering clusters, esp for edge devices */
+export type BootstrapToken = {
+  __typename?: 'BootstrapToken';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the project for all clusters to live within */
+  project?: Maybe<Project>;
+  /** the token to use when bootstrapping clusters */
+  token: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+export type BootstrapTokenAttributes = {
+  /** the project all clusters spawned by this bootstrap token are put into */
+  projectId: Scalars['ID']['input'];
+  /** An optional external user id to be the user identity for this bootstrap token in audit logs */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -5277,6 +5297,7 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
+  createBootstrapToken?: Maybe<BootstrapToken>;
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
   createClusterBackup?: Maybe<ClusterBackup>;
@@ -5315,6 +5336,7 @@ export type RootMutationType = {
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   deleteAccessToken?: Maybe<AccessToken>;
+  deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   /** deletes a chat from a users history */
@@ -5543,6 +5565,11 @@ export type RootMutationTypeCreateAgentMigrationArgs = {
 };
 
 
+export type RootMutationTypeCreateBootstrapTokenArgs = {
+  attributes: BootstrapTokenAttributes;
+};
+
+
 export type RootMutationTypeCreateClusterArgs = {
   attributes: ClusterAttributes;
 };
@@ -5724,6 +5751,11 @@ export type RootMutationTypeCreateUserArgs = {
 
 export type RootMutationTypeDeleteAccessTokenArgs = {
   token: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteBootstrapTokenArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

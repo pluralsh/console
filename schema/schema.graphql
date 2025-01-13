@@ -474,6 +474,10 @@ type RootMutationType {
 
   deleteAccessToken(token: String!): AccessToken
 
+  createBootstrapToken(attributes: BootstrapTokenAttributes!): BootstrapToken
+
+  deleteBootstrapToken(id: ID!): BootstrapToken
+
   createPersona(attributes: PersonaAttributes!): Persona
 
   updatePersona(id: ID!, attributes: PersonaAttributes!): Persona
@@ -7637,6 +7641,14 @@ input PersonaHomeAttributes {
   security: Boolean
 }
 
+input BootstrapTokenAttributes {
+  "An optional external user id to be the user identity for this bootstrap token in audit logs"
+  userId: ID
+
+  "the project all clusters spawned by this bootstrap token are put into"
+  projectId: ID!
+}
+
 type User {
   id: ID!
   name: String!
@@ -7833,6 +7845,23 @@ type PersonaSidebar {
 type PersonaHome {
   manager: Boolean
   security: Boolean
+}
+
+"A restricted token meant only for use in registering clusters, esp for edge devices"
+type BootstrapToken {
+  id: ID!
+
+  "the token to use when bootstrapping clusters"
+  token: String!
+
+  user: User
+
+  "the project for all clusters to live within"
+  project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type UserConnection {

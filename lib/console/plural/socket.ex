@@ -18,7 +18,7 @@ defmodule Console.Plural.Socket do
 
   @impl Slipstream
   def handle_call({:join, channel}, _, socket) do
-    {:reply, :ok, join(socket, channel) |> IO.inspect()}
+    {:reply, :ok, join(socket, channel)}
   end
 
   def handle_call({:push, channel, msg, args}, from, socket) do

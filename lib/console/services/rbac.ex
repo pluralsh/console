@@ -1,10 +1,11 @@
 defmodule Console.Services.Rbac do
-  alias Console.Schema.{Role, User}
+  alias Console.Schema.{Role, User, BootstrapToken}
 
   def preload(user) do
     Console.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
   end
 
+  def allow(%User{bootstrap: %BootstrapToken{}}, _, _), do: {:error, :forbidden}
   def allow(%User{roles: %{admin: true}}, _, _), do: :ok
   def allow(%User{} = user, repository, action) do
     case validate(user, repository, action) do

@@ -252,6 +252,12 @@ defmodule Console.GraphQl.Resolvers.User do
   def delete_access_token(%{token: token}, %{context: %{current_user: user}}),
     do: Users.delete_access_token(token, user)
 
+  def create_bootstrap_token(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Users.create_bootstrap_token(attrs, user)
+
+  def delete_bootstrap_token(%{id: id}, %{context: %{current_user: user}}),
+    do: Users.delete_bootstrap_token(id, user)
+
   def create_persona(%{attributes: attrs}, _),
     do: Users.create_persona(attrs)
 

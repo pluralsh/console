@@ -1,5 +1,6 @@
 defmodule ConsoleWeb.GqlTest do
   use ConsoleWeb.ConnCase, async: true
+  use Mimic
 
   @document """
     query {
@@ -41,6 +42,41 @@ defmodule ConsoleWeb.GqlTest do
 
       assert from_connection(found)
              |> ids_equal(services)
+    end
+
+    test "it can correctly authorize bootstrap tokens", %{conn: conn} do
+      user = insert(:user)
+      token = insert(:bootstrap_token, user: user)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      expect(Console.Features, :available?, fn :cd -> true end)
+
+      %{"data" => %{"createCluster" => result}} =
+        conn
+        |> add_auth_headers(token)
+        |> post("/gql", %{query: """
+        mutation Create($name: String!) {
+          createCluster(attributes: {name: $name}) {
+            id
+            handle
+            project { id }
+          }
+        }
+        """, variables: %{"name" => "edge-1"}})
+        |> json_response(200)
+
+      assert result["project"]["id"] == token.project_id
+
+      %{"errors" => [_ | _]} =
+        conn
+        |> add_auth_headers(token)
+        |> post("/gql", %{query: """
+        mutation Delete($id: ID!) {
+          deleteCluster(id: $id) {
+            id
+          }
+        }
+        """, variables: %{"id" => result["id"]}})
+        |> json_response(200)
     end
   end
 
