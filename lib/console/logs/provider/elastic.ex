@@ -45,6 +45,7 @@ defmodule Console.Logs.Provider.Elastic do
         facets: facets(source)
       }
     end)
+    |> Enum.filter(& &1.log)
   end
   defp format_hits(_), do: []
 
