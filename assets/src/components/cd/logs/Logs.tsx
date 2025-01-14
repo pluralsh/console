@@ -13,6 +13,11 @@ import {
 } from '../cluster/pod/logs/Logs'
 import { LogsCard } from './LogsCard'
 
+// convert seconds to ISO 8601 duration string
+const secondsToDuration = (seconds: number) => {
+  return `PT${seconds}S`
+}
+
 export function Logs({
   serviceId,
   clusterId,
@@ -99,7 +104,11 @@ export function Logs({
           clusterId={clusterId}
           query={search}
           limit={queryLength}
-          time={{ duration: `${sinceSeconds}` }}
+          time={{
+            // before: dayjs().toISOString(),
+            before: '2025-01-14T00:45:06.037Z',
+            duration: secondsToDuration(sinceSeconds),
+          }}
           addLabel={addLabel}
         />
       </MainContentWrapperSC>

@@ -1,81 +1,92 @@
-import { ansiToJson } from 'anser'
-import { textStyle } from 'components/utils/AnsiText'
-import escapeCarriageReturn from 'escape-carriage'
-import { Flex, Span } from 'honorable'
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
-import { Level, ts } from './misc'
+import { LogLineFragment } from 'generated/graphql'
+import { dayjsExtended } from 'utils/datetime'
+
+export const Level = {
+  UNKNOWN: 'u',
+  INFO: 'i',
+  SUCCESS: 's',
+  WARN: 'w',
+  ERROR: 'e',
+  FATAL: 'f',
+}
+
+export function determineLevel(line) {
+  if (/fatal/i.test(line)) return Level.FATAL
+  if (/error/i.test(line)) return Level.ERROR
+  if (/warn/i.test(line)) return Level.WARN
+  if (/info/i.test(line)) return Level.INFO
+  if (/success/i.test(line)) return Level.SUCCESS
+
+  return Level.UNKNOWN
+}
 
 export function useBorderColor() {
-  const { green, red, yellow, grey } = useTheme().colors
+  const theme = useTheme()
 
   return useCallback(
     (lvl) => {
       switch (lvl) {
-        case Level.FATAL:
-          return red[300]
-        case Level.ERROR:
-          return red[200]
-        case Level.WARN:
-          return yellow[200]
         case Level.INFO:
-          return green[300]
+          return theme.colors['border-selected']
+        case Level.ERROR:
+          return theme.colors['border-danger-light']
+        case Level.SUCCESS:
+          return theme.colors['border-success']
+        case Level.WARN:
+          return theme.colors['border-warning']
+        case Level.FATAL:
+          return theme.colors['icon-danger-critical']
         default:
-          return grey[750]
+          return theme.colors['border-fill-three']
       }
     },
-    [green, grey, red, yellow]
+    [theme.colors]
   )
 }
 
 export default function LogLine({
-  line: { timestamp, value },
-  level,
+  line: { timestamp, log },
   open = false,
   onClick,
+}: {
+  line: LogLineFragment
+  open?: boolean
+  onClick?: () => void
 }) {
-  const blocks = useMemo(
-    () =>
-      ansiToJson(escapeCarriageReturn(value), {
-        json: true,
-        remove_empty: true,
-      }),
-    [value]
-  )
   const borderColor = useBorderColor()
-
+  const level = determineLevel(log)
   return (
-    <>
-      <Flex
-        borderLeft={
-          open ? '4px solid border-info' : `4px solid ${borderColor(level)}`
-        }
-        backgroundColor={open ? 'fill-one-selected' : undefined}
-        direction="row"
-        fontFamily="Monument Mono"
-        paddingHorizontal="small"
-        paddinbVertical="xxsmall"
-        wordBreak="break-word"
-        wrap="wrap"
-        onClick={onClick}
-        _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
-      >
-        {ts(timestamp)}
-        {blocks.map((json) => (
-          <Span
-            key={json.content}
-            {...textStyle(json)}
-          >
-            &nbsp;{json.content}
-          </Span>
-        ))}
-      </Flex>
-      <Flex
-        borderLeft="4px solid border"
-        height={4}
-      />
-    </>
+    <LogLineWrapper
+      $open={open}
+      $borderColor={borderColor(level)}
+      onClick={onClick}
+    >
+      {dayjsExtended(timestamp).utc().format('MM/DD/YYYY-HH:mm:ss[[UTC]] ')}
+      {log.split('\n').map((line, index) => (
+        <span key={index}>{line}</span>
+      ))}
+    </LogLineWrapper>
   )
 }
+const LogLineWrapper = styled.div<{
+  $open?: boolean
+  $borderColor?: string
+}>(({ theme, $open, $borderColor }) => ({
+  borderLeft: $open
+    ? `4px solid ${theme.colors['border-info']}`
+    : `4px solid ${$borderColor}`,
+  backgroundColor: $open ? theme.colors['fill-one-selected'] : undefined,
+  flexDirection: 'row',
+  fontFamily: 'Monument Mono',
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  wordBreak: 'break-word',
+  flexWrap: 'wrap',
+  '&:hover': {
+    backgroundColor: theme.colors['fill-two'],
+    borderColor: theme.colors['border-info'],
+  },
+}))

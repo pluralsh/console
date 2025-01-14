@@ -1,30 +1,20 @@
-import { Card } from '@pluralsh/design-system'
-import LogContent from 'components/apps/app/logs/LogContent'
+import { Card, Table } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import LogsScrollIndicator from 'components/cd/logs/LogsScrollIndicator'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { LogTimeRange, useLogAggregationQuery } from 'generated/graphql'
-import { Flex } from 'honorable'
-import { useCallback, useState } from 'react'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import {
+  LogLineFragment,
+  LogTimeRange,
+  useLogAggregationQuery,
+} from 'generated/graphql'
+import { useState } from 'react'
+import LogLine from './LogLine'
 
 const LIMIT = 1000
 const POLL_INTERVAL = 10 * 1000
 
-function doUpdate(prev, result) {
-  let key = 'cluster'
-
-  if (prev.service) {
-    key = 'service'
-  }
-
-  return {
-    ...prev,
-    [key]: {
-      ...prev[key],
-      logs: [...prev[key].logs, ...result[key].logs],
-    },
-  }
-}
+const columnHelper = createColumnHelper<LogLineFragment>()
 
 export function LogsCard({
   serviceId,
@@ -32,7 +22,7 @@ export function LogsCard({
   query,
   limit,
   time,
-  addLabel,
+  addLabel: _addLabel,
 }: {
   serviceId?: string
   clusterId?: string
@@ -41,34 +31,68 @@ export function LogsCard({
   time?: LogTimeRange
   addLabel?: (name: string, value: string) => void
 }) {
-  const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
-  const [loader, setLoader] = useState<any>(null)
 
-  const { data, loading, error, fetchMore, refetch } = useLogAggregationQuery({
+  const { data, loading, error } = useLogAggregationQuery({
     variables: { clusterId, query, limit: limit || LIMIT, serviceId, time },
     fetchPolicy: 'cache-and-network',
     pollInterval: live ? POLL_INTERVAL : 0,
     skip: !clusterId && !serviceId,
   })
 
-  const logs = data?.logAggregation
+  const initialLoading = !data && loading
+
+  const logs =
+    data?.logAggregation?.filter(
+      (log): log is LogLineFragment => log !== null
+    ) ?? []
 
   return error ? (
     <GqlError error={error} />
   ) : (
     <Card
-      overflow="hidden"
-      position="relative"
       height="100%"
-      borderLeft="none"
-      borderTopLeftRadius={0}
-      borderBottomLeftRadius={0}
+      overflow="hidden"
       header={{
-        content: <LogsScrollIndicator live={live} />,
+        size: 'large',
+        content: (
+          <LogsScrollIndicator
+            live={live}
+            setLive={setLive}
+          />
+        ),
       }}
     >
-      {data ? <span>test</span> : <LoadingIndicator />}
+      <FullHeightTableWrap
+        css={
+          initialLoading || {
+            '& td': { minHeight: 0 },
+            '& > div': { height: '100%' },
+          }
+        }
+      >
+        <Table
+          flush
+          hideHeader
+          loadingSkeletonRows={12}
+          virtualizeRows
+          rowBg="raised"
+          data={logs}
+          columns={cols}
+          loading={initialLoading}
+          padCells={false}
+        />
+      </FullHeightTableWrap>
     </Card>
   )
 }
+
+const cols = [
+  columnHelper.accessor((line) => line, {
+    id: 'row',
+    cell: function Cell({ getValue }) {
+      const line = getValue()
+      return <LogLine line={line} />
+    },
+  }),
+]

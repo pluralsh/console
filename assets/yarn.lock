@@ -10320,7 +10320,6 @@ __metadata:
     semver: 7.5.4
     styled-components: 6.1.13
     stylelint: 15.11.0
-    tinyqueue: 2.0.3
     type-fest: 4.8.3
     typescript: 5.6.2
     typescript-eslint: 8.8.0
@@ -20440,13 +20439,6 @@ __metadata:
   version: 1.0.2
   resolution: "tinypool@npm:1.0.2"
   checksum: 752f23114d8fc95a9497fc812231d6d0a63728376aa11e6e8499c10423a91112e760e388887ea7854f1b16977c321f07c0eab061ec2f60f6761e58b184aac880
-  languageName: node
-  linkType: hard
-
-"tinyqueue@npm:2.0.3":
-  version: 2.0.3
-  resolution: "tinyqueue@npm:2.0.3"
-  checksum: 0b6bda46b680dca072f84aef1acd22a7085a2ff2aa8e222bb41045c61a056943805056d77d7f976587ed6a0597872beb5c416043f65f0314304432d6c178dd20
   languageName: node
   linkType: hard
 

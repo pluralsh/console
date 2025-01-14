@@ -1,26 +1,36 @@
-import { Button, CaretUpIcon } from '@pluralsh/design-system'
-import styled from 'styled-components'
+import { Button } from '@pluralsh/design-system'
+import styled, { useTheme } from 'styled-components'
 
-export const LiveIcon = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['text-success'],
+export const LiveIcon = styled.div<{ $live: boolean }>(({ theme, $live }) => ({
+  backgroundColor: $live
+    ? theme.colors['icon-success']
+    : theme.colors['icon-neutral'],
   borderRadius: 10,
   height: 10,
   width: 10,
+  transition: 'background-color 0.2s ease-in-out',
 }))
 
-export default function LogsScrollIndicator({ live, returnToTop }) {
+export default function LogsScrollIndicator({
+  live,
+  setLive,
+}: {
+  live: boolean
+  setLive: (live: boolean) => void
+}) {
+  const theme = useTheme()
   return (
     <Button
       small
-      position="absolute"
-      bottom={24}
-      right={24}
-      floating
-      cursor={live ? 'auto' : undefined}
-      endIcon={live ? <LiveIcon /> : <CaretUpIcon />}
-      onClick={returnToTop}
+      {...(live ? { floating: true } : { secondary: true })}
+      startIcon={<LiveIcon $live={live} />}
+      onClick={() => setLive(!live)}
+      style={{
+        color: live ? theme.colors.text : theme.colors['text-xlight'],
+        transition: 'color 0.2s ease-in-out',
+      }}
     >
-      {live ? 'Live' : 'Back to top'}
+      Live
     </Button>
   )
 }
