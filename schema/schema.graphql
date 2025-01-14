@@ -6842,13 +6842,13 @@ type MetricResponse {
 
 type LogLine {
   timestamp: DateTime
-  log: String!
+  log: String
   facets: [LogFacet]
 }
 
 type LogFacet {
   key: String!
-  value: String!
+  value: String
 }
 
 type Metadata {

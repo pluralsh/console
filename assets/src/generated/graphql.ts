@@ -3170,7 +3170,7 @@ export enum LogDriver {
 export type LogFacet = {
   __typename?: 'LogFacet';
   key: Scalars['String']['output'];
-  value: Scalars['String']['output'];
+  value?: Maybe<Scalars['String']['output']>;
 };
 
 export type LogFacetInput = {
@@ -3181,7 +3181,7 @@ export type LogFacetInput = {
 export type LogLine = {
   __typename?: 'LogLine';
   facets?: Maybe<Array<Maybe<LogFacet>>>;
-  log: Scalars['String']['output'];
+  log?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -10975,7 +10975,7 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
-export type LogLineFragment = { __typename?: 'LogLine', log: string, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value: string } | null> | null };
+export type LogLineFragment = { __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null };
 
 export type LogAggregationQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -10986,7 +10986,7 @@ export type LogAggregationQueryVariables = Exact<{
 }>;
 
 
-export type LogAggregationQuery = { __typename?: 'RootQueryType', logAggregation?: Array<{ __typename?: 'LogLine', log: string, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value: string } | null> | null } | null> | null };
+export type LogAggregationQuery = { __typename?: 'RootQueryType', logAggregation?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null };
 
 export type UrlSinkConfigurationFragment = { __typename?: 'UrlSinkConfiguration', url: string };
 

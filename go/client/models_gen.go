@@ -2591,8 +2591,8 @@ type LoadBalancerStatus struct {
 }
 
 type LogFacet struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string  `json:"key"`
+	Value *string `json:"value,omitempty"`
 }
 
 type LogFacetInput struct {
@@ -2602,7 +2602,7 @@ type LogFacetInput struct {
 
 type LogLine struct {
 	Timestamp *string     `json:"timestamp,omitempty"`
-	Log       string      `json:"log"`
+	Log       *string     `json:"log,omitempty"`
 	Facets    []*LogFacet `json:"facets,omitempty"`
 }
 
