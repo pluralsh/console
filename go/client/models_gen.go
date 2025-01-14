@@ -512,6 +512,25 @@ type BindingAttributes struct {
 	GroupID *string `json:"groupId,omitempty"`
 }
 
+// A restricted token meant only for use in registering clusters, esp for edge devices
+type BootstrapToken struct {
+	ID string `json:"id"`
+	// the token to use when bootstrapping clusters
+	Token string `json:"token"`
+	User  *User  `json:"user,omitempty"`
+	// the project for all clusters to live within
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type BootstrapTokenAttributes struct {
+	// An optional external user id to be the user identity for this bootstrap token in audit logs
+	UserID *string `json:"userId,omitempty"`
+	// the project all clusters spawned by this bootstrap token are put into
+	ProjectID string `json:"projectId"`
+}
+
 type Canary struct {
 	Metadata          Metadata     `json:"metadata"`
 	Status            CanaryStatus `json:"status"`
@@ -2572,6 +2591,11 @@ type LoadBalancerStatus struct {
 }
 
 type LogFacet struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type LogFacetInput struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }

@@ -14,10 +14,15 @@ defmodule Console.GraphQl.Observability do
   end
 
   input_object :log_time_range do
-    field :before,   :string
-    field :after,    :string
+    field :before,   :datetime
+    field :after,    :datetime
     field :duration, :string
     field :reverse,  :boolean
+  end
+
+  input_object :log_facet_input do
+    field :key,   non_null(:string)
+    field :value, non_null(:string)
   end
 
   object :dashboard do
@@ -108,6 +113,7 @@ defmodule Console.GraphQl.Observability do
       arg :query,      :string
       arg :time,       :log_time_range
       arg :limit,      :integer
+      arg :facets,     list_of(:log_facet_input)
 
       resolve &Observability.list_logs/2
     end

@@ -369,7 +369,7 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:cluster, fn _ ->
       %Cluster{}
-      |> Cluster.changeset(Settings.add_project_id(attrs))
+      |> Cluster.changeset(Settings.add_project_id(attrs, user))
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
@@ -1134,7 +1134,7 @@ defmodule Console.Deployments.Clusters do
 
   defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "providerName", value: name}]}
 
-  defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
+  defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}, bootstrap: nil}
 
   defp add_errors(%Cluster{} = cluster, errors) when is_list(errors) do
     Repo.preload(cluster, [:service_errors])

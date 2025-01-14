@@ -139,7 +139,8 @@ defmodule Console.AI.OpenAI do
 
   defp json_headers(token), do: headers([{"Content-Type", "application/json"}], token)
 
-  defp headers(headers, token), do: [{"Authorization", "Bearer #{token}"} | headers]
+  defp headers(headers, token) when is_binary(token), do: [{"Authorization", "Bearer #{token}"} | headers]
+  defp headers(headers, _), do: headers
 
   defp gen_tools(calls) do
     Enum.map(calls, fn

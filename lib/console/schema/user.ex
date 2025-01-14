@@ -4,6 +4,7 @@ defmodule Console.Schema.User do
     RoleBinding,
     Group,
     AccessToken,
+    BootstrapToken,
     PolicyBinding,
     GroupMember,
     Chat
@@ -49,9 +50,11 @@ defmodule Console.Schema.User do
 
     has_many :role_bindings, RoleBinding
     many_to_many :groups, Group, join_through: "group_members"
+
     has_many :group_members, GroupMember
+    has_one :token,          AccessToken
+    has_one :bootstrap,      BootstrapToken
     has_many :group_role_bindings, through: [:groups, :role_bindings]
-    has_one :token, AccessToken
 
     timestamps()
   end

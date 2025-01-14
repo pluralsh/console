@@ -52,6 +52,7 @@ defmodule Console do
 
   def authed_user("deploy-" <> _ = deploy), do: Console.Deployments.Clusters.get_by_deploy_token(deploy)
   def authed_user("console-" <> _ = access), do: Console.Services.Users.get_by_token(access)
+  def authed_user("plrl-edge" <> _ = bootstrap), do: Console.Services.Users.get_by_bootstrap_token(bootstrap)
   def authed_user(jwt) do
     case Console.Guardian.resource_from_token(jwt) do
       {:ok, user, _} -> user

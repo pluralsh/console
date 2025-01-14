@@ -51,7 +51,7 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int): [LogLine]
+  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
@@ -473,6 +473,10 @@ type RootMutationType {
   createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
 
   deleteAccessToken(token: String!): AccessToken
+
+  createBootstrapToken(attributes: BootstrapTokenAttributes!): BootstrapToken
+
+  deleteBootstrapToken(id: ID!): BootstrapToken
 
   createPersona(attributes: PersonaAttributes!): Persona
 
@@ -6790,10 +6794,15 @@ input LabelInput {
 }
 
 input LogTimeRange {
-  before: String
-  after: String
+  before: DateTime
+  after: DateTime
   duration: String
   reverse: Boolean
+}
+
+input LogFacetInput {
+  key: String!
+  value: String!
 }
 
 type Dashboard {
@@ -7632,6 +7641,14 @@ input PersonaHomeAttributes {
   security: Boolean
 }
 
+input BootstrapTokenAttributes {
+  "An optional external user id to be the user identity for this bootstrap token in audit logs"
+  userId: ID
+
+  "the project all clusters spawned by this bootstrap token are put into"
+  projectId: ID!
+}
+
 type User {
   id: ID!
   name: String!
@@ -7828,6 +7845,23 @@ type PersonaSidebar {
 type PersonaHome {
   manager: Boolean
   security: Boolean
+}
+
+"A restricted token meant only for use in registering clusters, esp for edge devices"
+type BootstrapToken {
+  id: ID!
+
+  "the token to use when bootstrapping clusters"
+  token: String!
+
+  user: User
+
+  "the project for all clusters to live within"
+  project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type UserConnection {

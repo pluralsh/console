@@ -814,6 +814,14 @@ defmodule Console.Factory do
     }
   end
 
+  def bootstrap_token_factory do
+    %Schema.BootstrapToken{
+      token:   sequence(:bootstrap_token, &"plrl-edge-#{&1}"),
+      user:    build(:user),
+      project: build(:project)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

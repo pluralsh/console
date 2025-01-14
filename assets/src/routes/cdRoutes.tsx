@@ -128,6 +128,7 @@ import {
 import { pipelineRoutes } from './pipelineRoutes'
 import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
+import styled from 'styled-components'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -193,6 +194,14 @@ export function RequireCdEnabled() {
   useCDEnabled({ redirect: true })
 
   return <Outlet />
+}
+
+function CDWrapper() {
+  return (
+    <MaxWidthWrapperSC>
+      <RequireCdEnabled />
+    </MaxWidthWrapperSC>
+  )
 }
 
 const mainRoutes = (
@@ -530,7 +539,7 @@ const serviceDetailsRoutes = (
 export const cdRoutes = [
   <Route
     path={CD_REL_PATH}
-    element={<RequireCdEnabled />}
+    element={<CDWrapper />}
   >
     <Route
       index
@@ -548,3 +557,12 @@ export const cdRoutes = [
     {namespacesRoutes}
   </Route>,
 ]
+
+const MaxWidthWrapperSC = styled.div({
+  overflow: 'hidden',
+  maxWidth: 1440,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  height: '100%',
+  width: '100%',
+})

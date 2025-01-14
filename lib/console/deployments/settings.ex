@@ -6,7 +6,7 @@ defmodule Console.Deployments.Settings do
   alias Console.Commands.Plural
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User, Project}
+  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken}
 
   @agent_vsn File.read!("AGENT_VERSION")
   @kube_vsn File.read!("KUBE_VERSION")
@@ -107,6 +107,9 @@ defmodule Console.Deployments.Settings do
   end
 
   def default_project!(), do: Repo.get_by(Project, default: true)
+
+  def add_project_id(attrs, %User{bootstrap: %BootstrapToken{project_id: pid}}), do: Map.put(attrs, :project_id, pid)
+  def add_project_id(attrs, _), do: add_project_id(attrs)
 
   def add_project_id(%{project_id: id} = attrs) when is_binary(id) and byte_size(id) > 0, do: attrs
   def add_project_id(attrs) do

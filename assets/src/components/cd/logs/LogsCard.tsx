@@ -1,10 +1,11 @@
 import { Card } from '@pluralsh/design-system'
 import LogContent from 'components/apps/app/logs/LogContent'
 import LogsScrollIndicator from 'components/apps/app/logs/LogsScrollIndicator'
+import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useClusterLogsQuery, useServiceLogsQuery } from 'generated/graphql'
+import { LogTimeRange, useLogAggregationQuery } from 'generated/graphql'
 import { Flex } from 'honorable'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const LIMIT = 1000
 const POLL_INTERVAL = 10 * 1000
@@ -25,35 +26,33 @@ function doUpdate(prev, result) {
   }
 }
 
-export function LogsCard({ serviceId, clusterId, query, addLabel }: any) {
+export function LogsCard({
+  serviceId,
+  clusterId,
+  query,
+  limit,
+  time,
+  addLabel,
+}: {
+  serviceId?: string
+  clusterId?: string
+  query?: string
+  limit?: number
+  time?: LogTimeRange
+  addLabel?: (name: string, value: string) => void
+}) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState<any>(null)
 
-  const clusterResp = useClusterLogsQuery({
-    variables: { clusterId, query, limit: LIMIT },
+  const { data, loading, error, fetchMore, refetch } = useLogAggregationQuery({
+    variables: { clusterId, query, limit: limit || LIMIT, serviceId, time },
+    fetchPolicy: 'cache-and-network',
     pollInterval: live ? POLL_INTERVAL : 0,
-    skip: !clusterId,
+    skip: !clusterId && !serviceId,
   })
 
-  const serviceResp = useServiceLogsQuery({
-    variables: { serviceId, query, limit: LIMIT },
-    pollInterval: live ? POLL_INTERVAL : 0,
-    skip: !serviceId,
-  })
-
-  const { data, loading, fetchMore, refetch } = useMemo(
-    () => (clusterId ? clusterResp : serviceResp),
-    [clusterId, clusterResp, serviceResp]
-  )
-
-  const logs = useMemo(
-    () =>
-      clusterId
-        ? clusterResp.data?.cluster?.logs
-        : serviceResp.data?.serviceDeployment?.logs,
-    [clusterId, clusterResp, serviceResp]
-  )
+  const logs = data?.logAggregation
 
   const returnToTop = useCallback(() => {
     setLive(true)
@@ -61,7 +60,9 @@ export function LogsCard({ serviceId, clusterId, query, addLabel }: any) {
     loader?.resetloadMoreItemsCache()
   }, [refetch, setLive, listRef, loader])
 
-  return (
+  return error ? (
+    <GqlError error={error} />
+  ) : (
     <Card
       overflow="hidden"
       position="relative"

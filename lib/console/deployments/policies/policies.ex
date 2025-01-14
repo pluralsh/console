@@ -2,7 +2,7 @@ defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Repo
-  alias Console.Deployments.{Services, Clusters, Global}
+  alias Console.Deployments.{Services, Clusters, Global, BootstrapPolicies}
   alias Console.Schema.{
     User,
     Cluster,
@@ -17,8 +17,11 @@ defmodule Console.Deployments.Policies do
     Stack,
     TerraformState,
     AiInsight,
-    ServiceImport
+    ServiceImport,
+    BootstrapToken
   }
+
+  def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)

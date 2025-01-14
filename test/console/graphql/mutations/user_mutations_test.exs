@@ -644,4 +644,40 @@ defmodule Console.GraphQl.UserMutationsTest do
       """, %{"id" => persona.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "createBootstrapToken" do
+    test "it can create a new bootstrap token" do
+      project = insert(:project)
+
+      {:ok, %{data: %{"createBootstrapToken" => bootstrap}}} = run_query("""
+        mutation Create($attrs: BootstrapTokenAttributes!) {
+          createBootstrapToken(attributes: $attrs) {
+            id
+            token
+            project { id }
+          }
+        }
+      """, %{"attrs" => %{"projectId" => project.id}}, %{current_user: admin_user()})
+
+      assert bootstrap["token"]
+      assert bootstrap["project"]["id"] == project.id
+    end
+  end
+
+  describe "deleteBootstrapToken" do
+    test "it can delete a bootstrap token" do
+      token = insert(:bootstrap_token)
+
+      {:ok, %{data: %{"deleteBootstrapToken" => bootstrap}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteBootstrapToken(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => token.id}, %{current_user: admin_user()})
+
+      assert bootstrap["id"] == token.id
+      refute refetch(token)
+    end
+  end
 end

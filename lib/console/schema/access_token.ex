@@ -31,7 +31,7 @@ defmodule Console.Schema.AccessToken do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> foreign_key_constraint(:token_id)
+    |> foreign_key_constraint(:user_id)
     |> cast_embed(:scopes, with: &scope_changeset/2)
     |> put_new_change(:token, fn -> "console-#{Console.rand_alphanum(30)}" end)
     |> validate_required(~w(user_id token)a)

@@ -35,6 +35,15 @@ defmodule ConsoleWeb.Plugs.Token do
     end
   end
 
+  def fetch_resource(:bootstrap, token, {conn, opts}) do
+    key = Guardian.Plug.Pipeline.fetch_key(conn, opts)
+    with %User{bootstrap: bootstrap} = user <- Users.get_by_bootstrap_token(token) do
+      conn
+      |> Guardian.Plug.put_current_token(bootstrap.token, key: key)
+      |> Guardian.Plug.put_current_resource(user)
+    end
+  end
+
   def fetch_resource(:bearer, token, {conn, opts}) do
     key = Guardian.Plug.Pipeline.fetch_key(conn, opts)
     with {:ok, claims} <- Console.Guardian.decode_and_verify(token) do
@@ -58,6 +67,7 @@ defmodule ConsoleWeb.Plugs.Token do
     case get_req_header(conn, "authorization") do
       ["Token deploy-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :deploy)
       ["Token console-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :user)
+      ["Token plrl-edge-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :bootstrap)
       ["Token " <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :bearer)
       _ -> {:error, :unauthorized}
     end

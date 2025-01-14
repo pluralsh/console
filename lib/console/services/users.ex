@@ -12,6 +12,7 @@ defmodule Console.Services.Users do
     Role,
     Notification,
     AccessToken,
+    BootstrapToken,
     Persona,
     RefreshToken,
     ChatSequence
@@ -28,6 +29,7 @@ defmodule Console.Services.Users do
   @type role_resp :: {:ok, Role.t} | error
   @type group_member_resp :: {:ok, GroupMember.t} | error
   @type token_resp :: {:ok, AccessToken.t} | error
+  @type bootstrap_token_resp :: {:ok, BootstrapToken.t} | error
   @type persona_resp :: {:ok, Persona.t} | error
   @type refresh_token_resp :: {:ok, RefreshToken.t} | error
 
@@ -52,6 +54,16 @@ defmodule Console.Services.Users do
     |> Repo.preload([:user])
     |> case do
       %AccessToken{user: %User{} = user, scopes: scopes} = token -> %{user | token: token, scopes: scopes}
+      _ -> nil
+    end
+  end
+
+  @decorate cacheable(cache: Console.Cache, key: {:bootstrap, token}, opts: [ttl: @ttl])
+  def get_by_bootstrap_token(token) do
+    Repo.get_by(BootstrapToken, token: token)
+    |> Repo.preload([:user])
+    |> case do
+      %BootstrapToken{user: %User{} = user} = token -> %{user | bootstrap: token}
       _ -> nil
     end
   end
@@ -270,6 +282,21 @@ defmodule Console.Services.Users do
     end
   end
   defp maybe_admin(attrs), do: attrs
+
+  @spec create_bootstrap_token(map, User.t) :: bootstrap_token_resp
+  def create_bootstrap_token(attrs, %User{id: id} = user) do
+    %BootstrapToken{user_id: id}
+    |> BootstrapToken.changeset(Map.put_new(attrs, :user_id, id))
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @spec delete_bootstrap_token(binary, User.t) :: bootstrap_token_resp
+  def delete_bootstrap_token(id, %User{} = user) do
+    Repo.get(BootstrapToken, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
 
   def temporary_token(%User{} = user) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, %{}, ttl: {1, :hour}) do
