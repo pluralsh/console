@@ -16,7 +16,7 @@ import (
 )
 
 func SetupServer() (*httptest.Server, error) {
-	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+	p, err := proxy.NewTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +66,35 @@ func CreateRequest[T any](method string, endpoint string, body T) func(requestSe
 		}
 
 		return io.ReadAll(res.Body)
+	}
+}
+
+func CreateRequestWithResponse[T any](method string, endpoint string, body T) func(requestServer *httptest.Server, externalServer *httptest.Server) ([]byte, *http.Response, error) {
+	return func(requestServer *httptest.Server, externalServer *httptest.Server) ([]byte, *http.Response, error) {
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		url := fmt.Sprintf("%s/%s", externalServer.URL, strings.TrimLeft(endpoint, "/"))
+		req, err := http.NewRequest(method, url, bytes.NewReader(bodyBytes))
+		if err != nil {
+			return nil, nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err := requestServer.Client().Do(req)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer res.Body.Close()
+
+		responseBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return responseBytes, res, nil
 	}
 }
 

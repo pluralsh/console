@@ -79,7 +79,7 @@ func ProviderCredentials() string {
 		return *argProviderServiceAccount
 	}
 
-	if Provider() == defaultProvider {
+	if Provider() == defaultProvider || Provider() == api.ProviderOpenAIStandard {
 		return ""
 	}
 
