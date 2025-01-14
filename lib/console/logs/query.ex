@@ -18,7 +18,7 @@ defmodule Console.Logs.Query do
       service_id: args[:service_id],
       query: args[:query],
       limit: args[:limit],
-      time: Time.new(args),
+      time: Time.new(args[:time]),
       facets: args[:facets]
     }
   end
@@ -28,8 +28,8 @@ defmodule Console.Logs.Query do
   def opposite(:lte), do: :gte
 
   @spec add_duration(direction, Timex.t, Timex.Duration.t) :: Timex.t
-  def add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
-  def add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
+  def add_duration(:lte, ts, dur), do: Timex.add(ts, dur)
+  def add_duration(:gte, ts, dur), do: Timex.subtract(ts, dur)
 
   def limit(%__MODULE__{limit: l}) when is_integer(l), do: l
   def limit(_), do: @default_limit
