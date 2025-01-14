@@ -72,6 +72,10 @@ defmodule Console.Logs.Provider.Elastic do
     do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gte, aft, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
     do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lte, bef, dur)}})
+  defp add_range(q, %Query{time: %Time{before: bef}}) when not is_nil(bef),
+    do: add_filter(q, %{range: %{"@timestamp": %{lte: bef}}})
+  defp add_range(q, %Query{time: %Time{after: aft}}) when not is_nil(aft),
+    do: add_filter(q, %{range: %{"@timestamp": %{gte: aft}}})
   defp add_range(q,  _), do: q
 
   defp add_facets(q, %Query{facets: [_ | _] = facets}) do
@@ -95,17 +99,11 @@ defmodule Console.Logs.Provider.Elastic do
   defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) do
-    opp = opposite(dir)
+    opp = Query.opposite(dir)
     dur = Timex.Duration.parse!(String.upcase(duration))
-    %{dir => ts, opp => add_duration(dir, ts, dur)}
+    %{dir => ts, opp => Query.add_duration(opp, ts, dur)}
   end
   defp maybe_dur(dir, ts, _), do: %{dir => ts}
-
-  defp opposite(:gte), do: :lte
-  defp opposite(:lte), do: :gte
-
-  defp add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
-  defp add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
 
   defp sort(%Query{time: %Time{reverse: true}}), do: [%{"@timestamp": %{order: "asc"}}]
   defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]

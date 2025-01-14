@@ -22,6 +22,12 @@ defmodule Console.Logs.Query do
     }
   end
 
+  def opposite(:gte), do: :lte
+  def opposite(:lte), do: :gte
+
+  def add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
+  def add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
+
   def limit(%__MODULE__{limit: l}) when is_integer(l), do: l
   def limit(_), do: @default_limit
 

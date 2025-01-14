@@ -7,8 +7,16 @@ defmodule Console.Logs.Line do
     %__MODULE__{log: map[:log], timestamp: map[:timestamp], facets: map[:facets]}
   end
 
-  def facets(%{} = map), do: Enum.map(map, fn {k, v} -> %{key: k, value: v} end)
-  def facets(l) when is_list(l), do: Enum.map(l, fn {k, v} -> %{key: k, value: v} end)
+  def facets(%{} = map), do: to_facets(map)
+  def facets(l) when is_list(l), do: to_facets(l)
+
+  defp to_facets(enum) do
+    Enum.map(enum, fn
+      {k, v} when is_binary(v) -> %{key: k, value: v}
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+  end
 
   def flat_map(%{} = map, pref \\ nil) do
     Enum.flat_map(map, fn
