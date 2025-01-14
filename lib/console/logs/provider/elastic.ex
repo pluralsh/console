@@ -50,14 +50,15 @@ defmodule Console.Logs.Provider.Elastic do
   defp format_hits(_), do: []
 
   defp build_query(%Query{query: str} = q) do
-    %{
+    IO.inspect(q)
+    IO.inspect(%{
       query: maybe_query(str)
              |> add_terms(q)
              |> add_range(q)
              |> add_facets(q),
       sort: sort(q),
       size: Query.limit(q),
-    }
+    })
   end
 
   defp add_terms(query, %Query{resource: %Cluster{} = cluster}),
