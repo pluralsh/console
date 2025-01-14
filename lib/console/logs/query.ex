@@ -7,6 +7,7 @@ defmodule Console.Logs.Query do
   @default_limit 200
 
   @type t :: %__MODULE__{time: Time.t}
+  @type direction :: :gte | :lte
 
   defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time, :facets]
 
@@ -22,9 +23,11 @@ defmodule Console.Logs.Query do
     }
   end
 
+  @spec opposite(direction) :: direction
   def opposite(:gte), do: :lte
   def opposite(:lte), do: :gte
 
+  @spec add_duration(direction, Timex.t, Timex.Duration.t) :: Timex.t
   def add_duration(:lte, ts, dur), do: Timex.subtract(ts, dur)
   def add_duration(:gte, ts, dur), do: Timex.add(ts, dur)
 
