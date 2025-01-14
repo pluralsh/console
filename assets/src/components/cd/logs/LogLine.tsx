@@ -66,7 +66,7 @@ export default function LogLine({
       onClick={onClick}
     >
       {dayjsExtended(timestamp).utc().format('MM/DD/YYYY-HH:mm:ss[[UTC]] ')}
-      {log.split('\n').map((line, index) => (
+      {(log || '').split('\n').map((line, index) => (
         <span key={index}>{line}</span>
       ))}
     </LogLineWrapper>
