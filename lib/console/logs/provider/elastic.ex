@@ -91,7 +91,9 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_facets(q, _), do: q
 
   defp facets(resp) do
-    Map.take(resp, ~w(kubernetes cloud container cluster))
+    put_in(resp, ~w(kubernetes node labels), nil)
+    |> put_in(~w(kubernetes labels), nil)
+    |>  Map.take(~w(kubernetes cloud container cluster))
     |> Line.flat_map()
     |> Line.facets()
   end
