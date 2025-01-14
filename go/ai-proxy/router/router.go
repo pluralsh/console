@@ -17,7 +17,14 @@ func NewRouter(proxy api.TranslationProxy) http.Handler {
 	router.HandleFunc(ollama.EndpointChat, proxy.Proxy())
 
 	// Register OpenAI API routes  (ollama/openai --> openai
-	router.HandleFunc(openai_standard.EndpointChat, proxy.Proxy())
+	//router.HandleFunc(openai_standard.EndpointChat, proxy.Proxy())
 
+	return router
+}
+
+func NewOpenAIRouter(proxy api.OpenAIProxy) http.Handler {
+	router := mux.NewRouter()
+
+	router.HandleFunc(openai_standard.EndpointChat, proxy.Proxy())
 	return router
 }

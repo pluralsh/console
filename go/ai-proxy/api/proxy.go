@@ -10,3 +10,7 @@ type TranslationProxy interface {
 	ModifyRequest(*httputil.ProxyRequest)
 	ModifyResponse(*http.Response) error
 }
+
+type OpenAIProxy interface {
+	Proxy() http.HandlerFunc
+}
