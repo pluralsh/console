@@ -44,7 +44,6 @@ export function Logs({
   const time = useMemo(
     () => ({
       before: dayjs().toISOString(),
-      reverse: true,
       duration: secondsToDuration(sinceSeconds),
     }),
     [sinceSeconds]
