@@ -822,6 +822,14 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_registration_factory do
+    %Schema.ClusterRegistration{
+      machine_id: sequence(:machine, & "machine-#{&1}"),
+      project: build(:project),
+      creator: build(:user)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
@@ -829,6 +837,11 @@ defmodule Console.Factory do
 
   def admin_user() do
     insert(:user, roles: %{admin: true})
+  end
+
+  def bootstrap_user() do
+    token = insert(:bootstrap_token)
+    %{token.user | bootstrap: token}
   end
 
   def bot(name) do

@@ -290,6 +290,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :path,       non_null(:string), description: "the path made for the given request"
   end
 
+  input_object :cluster_registration_create_attributes do
+    field :machine_id, non_null(:string), description: "a unique machine id for the created cluster"
+    field :project_id, :id, description: "the project this cluster will live in (can be inferred from bootstrap token)"
+  end
+
+  input_object :cluster_registration_update_attributes do
+    field :name,     non_null(:string), description: "the name to give to the cluster"
+    field :handle,   :string, description: "the handle to apply to the cluster"
+    field :tags,     list_of(:tag_input), description: "the tags to apply to the given cluster"
+    field :metadata, :json, description: "additional metadata to apply to the cluster"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -876,6 +888,20 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  object :cluster_registration do
+    field :id,         non_null(:id)
+    field :name,       non_null(:string), description: "the name to give to the cluster"
+    field :handle,     non_null(:string), description: "the handle to apply to the cluster"
+    field :machine_id, non_null(:string), description: "a unique machine id for the created cluster"
+    field :tags,       list_of(:tag), description: "the tags to apply to the given cluster"
+    field :metadata,   :map, description: "additional metadata to apply to the cluster"
+
+    field :creator,    :user,    resolve: dataloader(Deployments)
+    field :project,    :project, resolve: dataloader(Deployments), description: "the project the cluster will live in"
+
+    timestamps()
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -885,6 +911,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_scaling_recommendation
   connection node_type: :cluster_usage_history
   connection node_type: :cluster_audit_log
+  connection node_type: :cluster_registration
 
   delta :cluster
   delta :cluster_provider
@@ -1063,6 +1090,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.resolve_cluster_usage/2
     end
+
+    field :cluster_registration, :cluster_registration do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_cluster_registration/2
+    end
+
+    connection field :cluster_registrations, node_type: :cluster_registration do
+      middleware Authenticated
+
+      resolve &Deployments.list_cluster_registrations/2
+    end
   end
 
   object :cluster_mutations do
@@ -1178,6 +1218,28 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.scaling_pr/2
+    end
+
+    field :create_cluster_registration, :cluster_registration do
+      middleware Authenticated
+      arg :attributes, non_null(:cluster_registration_create_attributes)
+
+      resolve &Deployments.create_cluster_registration/2
+    end
+
+    field :update_cluster_registration, :cluster_registration do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:cluster_registration_update_attributes)
+
+      resolve &Deployments.update_cluster_registration/2
+    end
+
+    field :delete_cluster_registration, :cluster_registration do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_cluster_registration/2
     end
   end
 end

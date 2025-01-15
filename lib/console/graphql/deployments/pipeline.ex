@@ -334,7 +334,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_pull_request do
     field :id,           non_null(:id)
     field :service,      :service_deployment, resolve: dataloader(Deployments)
-    field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :pull_request, :pull_request,       resolve: dataloader(Deployments)
+    field :stage,        :pipeline_stage,     resolve: dataloader(Deployments)
   end
 
   @desc "A record of a prior pipeline context attached to a stage"

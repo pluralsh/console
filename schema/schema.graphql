@@ -211,6 +211,10 @@ type RootQueryType {
 
   clusterUsage(id: ID!): ClusterUsage
 
+  clusterRegistration(id: ID!): ClusterRegistration
+
+  clusterRegistrations(after: String, first: Int, before: String, last: Int): ClusterRegistrationConnection
+
   serviceDeployments(
     after: String
 
@@ -590,6 +594,12 @@ type RootMutationType {
   addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
 
   applyScalingRecommendation(id: ID!): PullRequest
+
+  createClusterRegistration(attributes: ClusterRegistrationCreateAttributes!): ClusterRegistration
+
+  updateClusterRegistration(id: ID!, attributes: ClusterRegistrationUpdateAttributes!): ClusterRegistration
+
+  deleteClusterRegistration(id: ID!): ClusterRegistration
 
   createServiceDeployment(
     clusterId: ID
@@ -3597,6 +3607,7 @@ type PipelinePullRequest {
   id: ID!
   service: ServiceDeployment
   pullRequest: PullRequest
+  stage: PipelineStage
 }
 
 "A record of a prior pipeline context attached to a stage"
@@ -4650,6 +4661,28 @@ input ClusterAuditAttributes {
   path: String!
 }
 
+input ClusterRegistrationCreateAttributes {
+  "a unique machine id for the created cluster"
+  machineId: String!
+
+  "the project this cluster will live in (can be inferred from bootstrap token)"
+  projectId: ID
+}
+
+input ClusterRegistrationUpdateAttributes {
+  "the name to give to the cluster"
+  name: String!
+
+  "the handle to apply to the cluster"
+  handle: String
+
+  "the tags to apply to the given cluster"
+  tags: [TagInput]
+
+  "additional metadata to apply to the cluster"
+  metadata: Json
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -5432,6 +5465,34 @@ type ClusterAuditLog {
   updatedAt: DateTime
 }
 
+type ClusterRegistration {
+  id: ID!
+
+  "the name to give to the cluster"
+  name: String!
+
+  "the handle to apply to the cluster"
+  handle: String!
+
+  "a unique machine id for the created cluster"
+  machineId: String!
+
+  "the tags to apply to the given cluster"
+  tags: [Tag]
+
+  "additional metadata to apply to the cluster"
+  metadata: Map
+
+  creator: User
+
+  "the project the cluster will live in"
+  project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -5475,6 +5536,11 @@ type ClusterUsageHistoryConnection {
 type ClusterAuditLogConnection {
   pageInfo: PageInfo!
   edges: [ClusterAuditLogEdge]
+}
+
+type ClusterRegistrationConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterRegistrationEdge]
 }
 
 enum AuthMethod {
@@ -8123,6 +8189,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ClusterRegistrationEdge {
+  node: ClusterRegistration
   cursor: String
 }
 

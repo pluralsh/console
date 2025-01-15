@@ -1149,6 +1149,53 @@ type ClusterRecommendationAttributes struct {
 	ServiceID *string `json:"serviceId,omitempty"`
 }
 
+type ClusterRegistration struct {
+	ID string `json:"id"`
+	// the name to give to the cluster
+	Name string `json:"name"`
+	// the handle to apply to the cluster
+	Handle string `json:"handle"`
+	// a unique machine id for the created cluster
+	MachineID string `json:"machineId"`
+	// the tags to apply to the given cluster
+	Tags []*Tag `json:"tags,omitempty"`
+	// additional metadata to apply to the cluster
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Creator  *User                  `json:"creator,omitempty"`
+	// the project the cluster will live in
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type ClusterRegistrationConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*ClusterRegistrationEdge `json:"edges,omitempty"`
+}
+
+type ClusterRegistrationCreateAttributes struct {
+	// a unique machine id for the created cluster
+	MachineID string `json:"machineId"`
+	// the project this cluster will live in (can be inferred from bootstrap token)
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
+type ClusterRegistrationEdge struct {
+	Node   *ClusterRegistration `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
+}
+
+type ClusterRegistrationUpdateAttributes struct {
+	// the name to give to the cluster
+	Name string `json:"name"`
+	// the handle to apply to the cluster
+	Handle *string `json:"handle,omitempty"`
+	// the tags to apply to the given cluster
+	Tags []*TagInput `json:"tags,omitempty"`
+	// additional metadata to apply to the cluster
+	Metadata *string `json:"metadata,omitempty"`
+}
+
 type ClusterRestore struct {
 	ID         string         `json:"id"`
 	Status     RestoreStatus  `json:"status"`
@@ -3618,6 +3665,7 @@ type PipelinePullRequest struct {
 	ID          string             `json:"id"`
 	Service     *ServiceDeployment `json:"service,omitempty"`
 	PullRequest *PullRequest       `json:"pullRequest,omitempty"`
+	Stage       *PipelineStage     `json:"stage,omitempty"`
 }
 
 // a pipeline stage, has a list of services and potentially a promotion which might be pending

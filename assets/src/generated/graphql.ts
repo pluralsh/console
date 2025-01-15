@@ -1453,6 +1453,56 @@ export type ClusterRecommendationAttributes = {
   type?: InputMaybe<ScalingRecommendationType>;
 };
 
+export type ClusterRegistration = {
+  __typename?: 'ClusterRegistration';
+  creator?: Maybe<User>;
+  /** the handle to apply to the cluster */
+  handle: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a unique machine id for the created cluster */
+  machineId: Scalars['String']['output'];
+  /** additional metadata to apply to the cluster */
+  metadata?: Maybe<Scalars['Map']['output']>;
+  /** the name to give to the cluster */
+  name: Scalars['String']['output'];
+  /** the project the cluster will live in */
+  project?: Maybe<Project>;
+  /** the tags to apply to the given cluster */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterRegistrationConnection = {
+  __typename?: 'ClusterRegistrationConnection';
+  edges?: Maybe<Array<Maybe<ClusterRegistrationEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterRegistrationCreateAttributes = {
+  /** a unique machine id for the created cluster */
+  machineId: Scalars['String']['input'];
+  /** the project this cluster will live in (can be inferred from bootstrap token) */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type ClusterRegistrationEdge = {
+  __typename?: 'ClusterRegistrationEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterRegistration>;
+};
+
+export type ClusterRegistrationUpdateAttributes = {
+  /** the handle to apply to the cluster */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** additional metadata to apply to the cluster */
+  metadata?: InputMaybe<Scalars['Json']['input']>;
+  /** the name to give to the cluster */
+  name: Scalars['String']['input'];
+  /** the tags to apply to the given cluster */
+  tags?: InputMaybe<Array<InputMaybe<TagInput>>>;
+};
+
 export type ClusterRestore = {
   __typename?: 'ClusterRestore';
   backup?: Maybe<ClusterBackup>;
@@ -4381,6 +4431,7 @@ export type PipelinePullRequest = {
   id: Scalars['ID']['output'];
   pullRequest?: Maybe<PullRequest>;
   service?: Maybe<ServiceDeployment>;
+  stage?: Maybe<PipelineStage>;
 };
 
 /** a pipeline stage, has a list of services and potentially a promotion which might be pending */
@@ -5302,6 +5353,7 @@ export type RootMutationType = {
   /** upserts a cluster backup resource */
   createClusterBackup?: Maybe<ClusterBackup>;
   createClusterProvider?: Maybe<ClusterProvider>;
+  createClusterRegistration?: Maybe<ClusterRegistration>;
   createClusterRestore?: Maybe<ClusterRestore>;
   createCustomStackRun?: Maybe<CustomStackRun>;
   createGitRepository?: Maybe<GitRepository>;
@@ -5343,6 +5395,7 @@ export type RootMutationType = {
   deleteChat?: Maybe<Chat>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
+  deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
@@ -5437,6 +5490,7 @@ export type RootMutationType = {
   triggerRun?: Maybe<StackRun>;
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
+  updateClusterRegistration?: Maybe<ClusterRegistration>;
   updateClusterRestore?: Maybe<ClusterRestore>;
   updateCustomStackRun?: Maybe<CustomStackRun>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
@@ -5582,6 +5636,11 @@ export type RootMutationTypeCreateClusterBackupArgs = {
 
 export type RootMutationTypeCreateClusterProviderArgs = {
   attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterRegistrationArgs = {
+  attributes: ClusterRegistrationCreateAttributes;
 };
 
 
@@ -5781,6 +5840,11 @@ export type RootMutationTypeDeleteClusterArgs = {
 
 
 export type RootMutationTypeDeleteClusterProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterRegistrationArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6175,6 +6239,12 @@ export type RootMutationTypeUpdateClusterProviderArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterRegistrationArgs = {
+  attributes: ClusterRegistrationUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateClusterRestoreArgs = {
   attributes: RestoreAttributes;
   id: Scalars['ID']['input'];
@@ -6433,6 +6503,8 @@ export type RootQueryType = {
   clusterProvider?: Maybe<ClusterProvider>;
   /** a relay connection of all providers visible to the current user */
   clusterProviders?: Maybe<ClusterProviderConnection>;
+  clusterRegistration?: Maybe<ClusterRegistration>;
+  clusterRegistrations?: Maybe<ClusterRegistrationConnection>;
   clusterRestore?: Maybe<ClusterRestore>;
   clusterRestores?: Maybe<ClusterRestoreConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
@@ -6739,6 +6811,19 @@ export type RootQueryTypeClusterProviderArgs = {
 
 
 export type RootQueryTypeClusterProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClusterRegistrationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterRegistrationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

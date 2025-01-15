@@ -23,7 +23,8 @@ defmodule Console.Deployments.Clusters do
     PinnedCustomResource,
     UpgradeInsight,
     ClusterInsightComponent,
-    ClusterUsage
+    ClusterUsage,
+    ClusterRegistration
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -38,6 +39,7 @@ defmodule Console.Deployments.Clusters do
   @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
   @type runtime_service_resp :: {:ok, RuntimeService.t} | Console.error
   @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
+  @type reg_resp :: {:ok, ClusterRegistration.t} | Console.error
 
   @doc """
   True if there's been one cluster that's successfully pinged in the fleet
@@ -71,6 +73,8 @@ defmodule Console.Deployments.Clusters do
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
 
   def get_cluster_usage!(id), do: Repo.get!(ClusterUsage, id) |> Repo.preload([:cluster])
+
+  def get_cluster_registration(id), do: Repo.get!(ClusterRegistration, id)
 
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)
@@ -779,6 +783,49 @@ defmodule Console.Deployments.Clusters do
     |> when_ok(&ClusterProvider.rbac_changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
+  end
+
+  @doc """
+  Creates a new cluster registration, with inferred project id if necessary
+  """
+  @spec create_cluster_registration(map, User.t) :: reg_resp
+  def create_cluster_registration(attrs, %User{} = user) do
+    %ClusterRegistration{creator_id: user.id}
+    |> ClusterRegistration.changeset(Settings.add_project_id(attrs, user))
+    |> allow(user, :create)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Adds cluster data to the registration, eg name/handle/tags and tests for validity
+  """
+  @spec update_cluster_registration(map, binary, %User{}) :: reg_resp
+  def update_cluster_registration(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:update, fn _ ->
+      Repo.get!(ClusterRegistration, id)
+      |> ClusterRegistration.changeset(attrs)
+      |> ClusterRegistration.update_changeset()
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:test, fn %{update: %ClusterRegistration{handle: handle} = reg} ->
+      case get_cluster_by_handle(handle) do
+        %Cluster{} -> {:error, "a cluster already exists with handle #{handle}"}
+        _ -> {:ok, reg}
+      end
+    end)
+    |> execute(extract: :update)
+  end
+
+  @doc """
+  Removes the registration if allowed
+  """
+  @spec delete_cluster_registration(binary, User.t) :: reg_resp
+  def delete_cluster_registration(id, %User{} = user) do
+    Repo.get!(ClusterRegistration, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   def create_agent_migration(attrs, %User{} = user) do
