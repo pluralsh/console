@@ -7,12 +7,13 @@ import {
   LogTimeRange,
   useLogAggregationQuery,
 } from 'generated/graphql'
-import { memo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { LogContextPanel } from './LogContextPanel'
-import { LogsTable } from './LogsTable'
 import { secondsToDuration } from './Logs'
+import { LogsTable } from './LogsTable'
+import { isEmpty } from 'lodash'
 
-const LIMIT = 1000
+const LIMIT = 250
 const POLL_INTERVAL = 10 * 1000
 
 export const LogsCard = memo(function LogsCard({
@@ -34,28 +35,71 @@ export const LogsCard = memo(function LogsCard({
 }) {
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
-  const [live, setLive] = useState(true)
+  const [live, setLive] = useState(false)
+  const [hasNextPage, setHasNextPage] = useState(true)
 
-  const { data, loading, error } = useLogAggregationQuery({
-    variables: {
-      clusterId,
-      query,
-      limit: limit || LIMIT,
-      serviceId,
-      time,
-      facets: labels,
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: live ? POLL_INTERVAL : 0,
-    skip: !(live && (clusterId || serviceId)),
-  })
+  const { data, loading, error, fetchMore, startPolling, stopPolling } =
+    useLogAggregationQuery({
+      variables: {
+        clusterId,
+        query,
+        limit: limit || LIMIT,
+        serviceId,
+        time,
+        facets: labels,
+      },
+      fetchPolicy: 'cache-and-network',
+      notifyOnNetworkStatusChange: true,
+      skip: !(clusterId || serviceId),
+    })
+
+  const logs = useMemo(
+    () =>
+      data?.logAggregation?.filter(
+        (log): log is LogLineFragment => log !== null
+      ) ?? [],
+    [data]
+  )
+
+  const toggleLive = useCallback(() => {
+    if (live) stopPolling()
+    else startPolling(POLL_INTERVAL)
+    setLive(!live)
+  }, [live, startPolling, stopPolling])
+
+  const fetchOlderLogs = useCallback(() => {
+    if (loading || !hasNextPage) return
+    if (live) toggleLive()
+    fetchMore({
+      variables: {
+        limit: limit || LIMIT,
+        time: {
+          before: logs[logs.length - 1]?.timestamp,
+          duration: time?.duration,
+        },
+      },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        // first log will be duplicate of last since range is inclusive
+        const newLogs = fetchMoreResult.logAggregation?.slice(1) ?? []
+        if (isEmpty(newLogs)) {
+          setHasNextPage(false)
+          return prev
+        }
+        return { logAggregation: [...(prev.logAggregation ?? []), ...newLogs] }
+      },
+    })
+  }, [
+    loading,
+    hasNextPage,
+    live,
+    toggleLive,
+    fetchMore,
+    limit,
+    logs,
+    time?.duration,
+  ])
 
   const initialLoading = !data && loading
-
-  const logs =
-    data?.logAggregation?.filter(
-      (log): log is LogLineFragment => log !== null
-    ) ?? []
 
   return error ? (
     <GqlError error={error} />
@@ -68,14 +112,17 @@ export const LogsCard = memo(function LogsCard({
         content: (
           <LogsScrollIndicator
             live={live}
-            setLive={setLive}
+            toggleLive={toggleLive}
           />
         ),
       }}
     >
       <LogsTable
-        loading={initialLoading}
         data={logs}
+        loading={loading}
+        initialLoading={initialLoading}
+        fetchMore={fetchOlderLogs}
+        hasNextPage={hasNextPage && logs.length >= (limit || LIMIT)}
         onRowClick={(_, row) => {
           setLogLine(row.original)
           setContextPanelOpen(true)

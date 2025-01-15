@@ -13,10 +13,10 @@ export const LiveIcon = styled.div<{ $live: boolean }>(({ theme, $live }) => ({
 
 export default function LogsScrollIndicator({
   live,
-  setLive,
+  toggleLive,
 }: {
   live: boolean
-  setLive: (live: boolean) => void
+  toggleLive: () => void
 }) {
   const theme = useTheme()
   return (
@@ -24,7 +24,7 @@ export default function LogsScrollIndicator({
       small
       {...(live ? { floating: true } : { secondary: true })}
       startIcon={<LiveIcon $live={live} />}
-      onClick={() => setLive(!live)}
+      onClick={toggleLive}
       style={{
         color: live ? theme.colors.text : theme.colors['text-xlight'],
         transition: 'color 0.2s ease-in-out',

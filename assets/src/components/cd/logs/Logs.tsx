@@ -92,7 +92,7 @@ export function Logs({
             type="number"
             value={queryLimit || ''}
             onChange={({ target: { value } }) =>
-              setQueryLimit(clamp(Number(value), 0, MAX_QUERY_LENGTH))
+              setQueryLimit(clamp(Number(value), 10, MAX_QUERY_LENGTH))
             }
           />
           <Select
