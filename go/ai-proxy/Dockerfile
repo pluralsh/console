@@ -19,7 +19,6 @@ COPY args ./args
 COPY environment ./environment
 COPY internal ./internal
 COPY proxy ./proxy
-COPY router ./router
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
