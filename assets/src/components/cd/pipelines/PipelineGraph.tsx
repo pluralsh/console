@@ -34,7 +34,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
     () => getNodesAndEdges(pipeline),
     [pipeline]
   )
-  const { setViewport, getViewport, viewportInitialized } = useReactFlow()
+  const { fitView, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [needsLayout, setNeedsLayout] = useState(true)
@@ -88,7 +88,8 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
 
   return (
     <ReactFlowGraph
-      resetView={() => setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })}
+      resetView={() => fitView({ duration: 500 })}
+      onLoad={() => fitView()}
       nodes={nodes}
       edges={edges}
       onNodesChange={onNodesChange}
