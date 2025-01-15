@@ -10,9 +10,13 @@ import (
 	"net/http/httptest"
 	"strings"
 
+	"github.com/gorilla/mux"
+
+	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
+	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
 	"github.com/pluralsh/console/go/ai-proxy/proxy"
-	"github.com/pluralsh/console/go/ai-proxy/router"
 )
 
 func SetupServer() (*httptest.Server, error) {
@@ -21,9 +25,16 @@ func SetupServer() (*httptest.Server, error) {
 		return nil, err
 	}
 
-	return httptest.NewServer(router.NewRouter(p)), nil
-}
+	op, err := proxy.NewOpenAIProxy(api.ProviderOpenAI, args.ProviderHost(), args.ProviderCredentials())
+	if err != nil {
+		return nil, err
+	}
+	router := mux.NewRouter()
+	router.HandleFunc(ollama.EndpointChat, p.Proxy())
+	router.HandleFunc(openai.EndpointChat, op.Proxy())
 
+	return httptest.NewServer(router), nil
+}
 func SetupProviderServer(handlers map[string]http.HandlerFunc) (*httptest.Server, error) {
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		if handler, exists := handlers[request.URL.Path]; exists {
@@ -66,6 +77,35 @@ func CreateRequest[T any](method string, endpoint string, body T) func(requestSe
 		}
 
 		return io.ReadAll(res.Body)
+	}
+}
+
+func CreateRequestWithResponse[T any](method string, endpoint string, body T) func(requestServer *httptest.Server, externalServer *httptest.Server) ([]byte, *http.Response, error) {
+	return func(requestServer *httptest.Server, externalServer *httptest.Server) ([]byte, *http.Response, error) {
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		url := fmt.Sprintf("%s/%s", externalServer.URL, strings.TrimLeft(endpoint, "/"))
+		req, err := http.NewRequest(method, url, bytes.NewReader(bodyBytes))
+		if err != nil {
+			return nil, nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err := requestServer.Client().Do(req)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer res.Body.Close()
+
+		responseBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return responseBytes, res, nil
 	}
 }
 
