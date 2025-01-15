@@ -5,7 +5,6 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
-	"github.com/pluralsh/console/go/ai-proxy/api/openai_standard"
 	"github.com/pluralsh/console/go/ai-proxy/api/vertex"
 )
 
@@ -51,9 +50,6 @@ var (
 	ollamaToVertex ProviderAPIMapping = map[string]string{
 		ollama.EndpointChat: vertex.EndpointChat,
 	}
-	openAIToOpenAI ProviderAPIMapping = map[string]string{
-		openai_standard.EndpointChat: openai.EndpointChat,
-	}
 )
 
 func ToProviderAPIPath(target Provider, path string) string {
@@ -62,13 +58,6 @@ func ToProviderAPIPath(target Provider, path string) string {
 		return path
 	case ProviderOpenAI:
 		targetPath, exists := ollamaToOpenAI[path]
-		if !exists {
-			panic(fmt.Sprintf("path %s not registered for provider %s", path, target))
-		}
-
-		return targetPath
-	case ProviderOpenAIStandard:
-		targetPath, exists := openAIToOpenAI[path]
 		if !exists {
 			panic(fmt.Sprintf("path %s not registered for provider %s", path, target))
 		}

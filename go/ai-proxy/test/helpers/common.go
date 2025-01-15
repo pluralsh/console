@@ -10,20 +10,40 @@ import (
 	"net/http/httptest"
 	"strings"
 
+	"github.com/gorilla/mux"
+
+	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
+	"github.com/pluralsh/console/go/ai-proxy/api/openai_standard"
 	"github.com/pluralsh/console/go/ai-proxy/args"
 	"github.com/pluralsh/console/go/ai-proxy/proxy"
-	"github.com/pluralsh/console/go/ai-proxy/router"
 )
 
 func SetupServer() (*httptest.Server, error) {
-	p, err := proxy.NewTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
-	if err != nil {
-		return nil, err
+	provider := args.Provider()
+	host := args.ProviderHost()
+	creds := args.ProviderCredentials()
+
+	router := mux.NewRouter()
+
+	if provider == api.ProviderOpenAIStandard {
+		op, err := proxy.NewOpenAIProxy(provider, host, creds)
+		if err != nil {
+			return nil, err
+		}
+		router.HandleFunc(openai_standard.EndpointChat, op.Proxy())
+
+	} else {
+		p, err := proxy.NewTranslationProxy(provider, host, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	}
 
-	return httptest.NewServer(router.NewRouter(p)), nil
+	return httptest.NewServer(router), nil
 }
-
 func SetupProviderServer(handlers map[string]http.HandlerFunc) (*httptest.Server, error) {
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		if handler, exists := handlers[request.URL.Path]; exists {
