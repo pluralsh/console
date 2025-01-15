@@ -17,6 +17,7 @@ export default function ClusterInsightsComponents(): ReactNode {
 
   return (
     <Table
+      fullHeightWrap
       virtualizeRows
       padCells={false}
       data={data}
@@ -113,7 +114,7 @@ export function ComponentEntry({
           </div>
         }
         second={`${component.group ?? component.version ?? 'v1'}/${component.kind}`}
-      ></StackedText>
+      />
     </Flex>
   ) : undefined
 }

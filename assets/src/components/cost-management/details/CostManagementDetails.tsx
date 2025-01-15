@@ -16,6 +16,7 @@ import { useMemo, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import {
   CM_NAMESPACES_REL_PATH,
+  CM_OVERVIEW_REL_PATH,
   CM_RECOMMENDATIONS_REL_PATH,
   COST_MANAGEMENT_ABS_PATH,
 } from 'routes/costManagementRoutesConsts'
@@ -104,6 +105,16 @@ export function CostManagementDetails() {
           </Subtitle1H1>
         </Flex>
         <Flex>
+          <SubTab
+            active={route?.includes(CM_OVERVIEW_REL_PATH)}
+            onClick={() => {
+              if (!route?.includes(CM_OVERVIEW_REL_PATH)) {
+                navigate(`${CM_OVERVIEW_REL_PATH}`)
+              }
+            }}
+          >
+            Overview
+          </SubTab>
           <SubTab
             active={route?.includes(CM_NAMESPACES_REL_PATH)}
             onClick={() => {

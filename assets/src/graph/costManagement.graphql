@@ -22,6 +22,14 @@ fragment ClusterUsageTiny on ClusterUsage {
   }
 }
 
+fragment ClusterUsageHistory on ClusterUsageHistory {
+  id
+  timestamp
+  cpuCost
+  memoryCost
+  storageCost
+}
+
 fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
   namespace
@@ -78,6 +86,31 @@ query ClusterUsages(
     edges {
       node {
         ...ClusterUsageTiny
+      }
+    }
+  }
+}
+
+query ClusterUsageHistory(
+  $id: ID!
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  clusterUsage(id: $id) {
+    id
+    cpuCost
+    memoryCost
+    storageCost
+    history(after: $after, first: $first, before: $before, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterUsageHistory
+        }
       }
     }
   }

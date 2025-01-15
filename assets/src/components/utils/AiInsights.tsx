@@ -69,7 +69,10 @@ export function AiInsightSummaryIcon({
           maxWidth={320}
           color={theme.colors.text}
         >
-          <Flex justify="space-between">
+          <Flex
+            gap="xsmall"
+            justify="space-between"
+          >
             <Overline>insights summary</Overline>
             <CaptionP $color="text-xlight">
               {dayjs(insight.updatedAt).fromNow()}

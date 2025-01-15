@@ -1,10 +1,6 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import { ComponentProps, useEffect, useState } from 'react'
-import {
-  unstable_BlockerFunction as BlockerFunction,
-  unstable_useBlocker as useBlocker,
-  useNavigate,
-} from 'react-router-dom'
+import { BlockerFunction, useBlocker, useNavigate } from 'react-router-dom'
 import { P } from 'honorable'
 
 type NavProps = Parameters<BlockerFunction>[0]
