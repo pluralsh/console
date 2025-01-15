@@ -149,6 +149,8 @@ type ConsoleClient interface {
 	CreateOIDCProvider(ctx context.Context, pType console.OidcProviderType, attributes console.OidcProviderAttributes) (*console.OIDCProviderFragment, error)
 	UpdateOIDCProvider(ctx context.Context, id string, pType console.OidcProviderType, attributes console.OidcProviderAttributes) (*console.OIDCProviderFragment, error)
 	DeleteOIDCProvider(ctx context.Context, id string, pType console.OidcProviderType) error
+	CreateBootstrapToken(ctx context.Context, attributes console.BootstrapTokenAttributes) (*console.BootstrapTokenBase, error)
+	DeleteBootstrapToken(ctx context.Context, id string) error
 }
 
 func New(url, token string) ConsoleClient {

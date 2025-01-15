@@ -15,6 +15,8 @@ type ConsoleClient interface {
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
 	CreateClusterRestore(ctx context.Context, backupID string, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRestore, error)
 	GetClusterRestore(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRestore, error)
+	CreateBootstrapToken(ctx context.Context, attributes BootstrapTokenAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateBootstrapToken, error)
+	DeleteBootstrapToken(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteBootstrapToken, error)
 	UpsertCatalog(ctx context.Context, attributes *CatalogAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCatalog, error)
 	DeleteCatalog(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCatalog, error)
 	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
@@ -260,6 +262,24 @@ func (t *ClusterRestoreFragment) GetBackup() *ClusterBackupFragment {
 		t = &ClusterRestoreFragment{}
 	}
 	return t.Backup
+}
+
+type BootstrapTokenBase struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Token string "json:\"token\" graphql:\"token\""
+}
+
+func (t *BootstrapTokenBase) GetID() string {
+	if t == nil {
+		t = &BootstrapTokenBase{}
+	}
+	return t.ID
+}
+func (t *BootstrapTokenBase) GetToken() string {
+	if t == nil {
+		t = &BootstrapTokenBase{}
+	}
+	return t.Token
 }
 
 type CatalogFragment struct {
@@ -6108,6 +6128,17 @@ type GetClusterRestore_ClusterRestore_ClusterRestoreFragment_Backup_ClusterBacku
 func (t *GetClusterRestore_ClusterRestore_ClusterRestoreFragment_Backup_ClusterBackupFragment_Cluster) GetID() string {
 	if t == nil {
 		t = &GetClusterRestore_ClusterRestore_ClusterRestoreFragment_Backup_ClusterBackupFragment_Cluster{}
+	}
+	return t.ID
+}
+
+type DeleteBootstrapToken_DeleteBootstrapToken struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteBootstrapToken_DeleteBootstrapToken) GetID() string {
+	if t == nil {
+		t = &DeleteBootstrapToken_DeleteBootstrapToken{}
 	}
 	return t.ID
 }
@@ -12337,6 +12368,28 @@ func (t *GetClusterRestore) GetClusterRestore() *ClusterRestoreFragment {
 	return t.ClusterRestore
 }
 
+type CreateBootstrapToken struct {
+	CreateBootstrapToken *BootstrapTokenBase "json:\"createBootstrapToken,omitempty\" graphql:\"createBootstrapToken\""
+}
+
+func (t *CreateBootstrapToken) GetCreateBootstrapToken() *BootstrapTokenBase {
+	if t == nil {
+		t = &CreateBootstrapToken{}
+	}
+	return t.CreateBootstrapToken
+}
+
+type DeleteBootstrapToken struct {
+	DeleteBootstrapToken *DeleteBootstrapToken_DeleteBootstrapToken "json:\"deleteBootstrapToken,omitempty\" graphql:\"deleteBootstrapToken\""
+}
+
+func (t *DeleteBootstrapToken) GetDeleteBootstrapToken() *DeleteBootstrapToken_DeleteBootstrapToken {
+	if t == nil {
+		t = &DeleteBootstrapToken{}
+	}
+	return t.DeleteBootstrapToken
+}
+
 type UpsertCatalog struct {
 	UpsertCatalog *CatalogFragment "json:\"upsertCatalog,omitempty\" graphql:\"upsertCatalog\""
 }
@@ -14492,6 +14545,58 @@ func (c *Client) GetClusterRestore(ctx context.Context, id string, interceptors 
 
 	var res GetClusterRestore
 	if err := c.Client.Post(ctx, "GetClusterRestore", GetClusterRestoreDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateBootstrapTokenDocument = `mutation CreateBootstrapToken ($attributes: BootstrapTokenAttributes!) {
+	createBootstrapToken(attributes: $attributes) {
+		... BootstrapTokenBase
+	}
+}
+fragment BootstrapTokenBase on BootstrapToken {
+	id
+	token
+}
+`
+
+func (c *Client) CreateBootstrapToken(ctx context.Context, attributes BootstrapTokenAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateBootstrapToken, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateBootstrapToken
+	if err := c.Client.Post(ctx, "CreateBootstrapToken", CreateBootstrapTokenDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteBootstrapTokenDocument = `mutation DeleteBootstrapToken ($id: ID!) {
+	deleteBootstrapToken(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteBootstrapToken(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteBootstrapToken, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteBootstrapToken
+	if err := c.Client.Post(ctx, "DeleteBootstrapToken", DeleteBootstrapTokenDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -27824,6 +27929,8 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
 	CreateClusterRestoreDocument:                      "CreateClusterRestore",
 	GetClusterRestoreDocument:                         "GetClusterRestore",
+	CreateBootstrapTokenDocument:                      "CreateBootstrapToken",
+	DeleteBootstrapTokenDocument:                      "DeleteBootstrapToken",
 	UpsertCatalogDocument:                             "UpsertCatalog",
 	DeleteCatalogDocument:                             "DeleteCatalog",
 	GetCatalogDocument:                                "GetCatalog",

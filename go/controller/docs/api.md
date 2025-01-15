@@ -9,6 +9,7 @@
 Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 API group
 
 ### Resource Types
+- [BootstrapToken](#bootstraptoken)
 - [Catalog](#catalog)
 - [Cluster](#cluster)
 - [ClusterRestore](#clusterrestore)
@@ -73,6 +74,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: {} <br /> |
+| `tools` _[Tools](#tools)_ |  |  | Optional: {} <br /> |
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: {} <br /> |
@@ -169,6 +171,41 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `read` _[Binding](#binding) array_ | Read bindings. |  | Optional: {} <br /> |
 | `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: {} <br /> |
+
+
+#### BootstrapToken
+
+
+
+BootstrapToken is the Schema for the BootstrapTokens API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `BootstrapToken` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[BootstrapTokenSpec](#bootstraptokenspec)_ |  |  |  |
+
+
+#### BootstrapTokenSpec
+
+
+
+BootstrapTokenSpec defines the desired state of BootstrapToken
+
+
+
+_Appears in:_
+- [BootstrapToken](#bootstraptoken)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `userID` _string_ | User is an optional email to be user identity for this bootstrap token in audit logs |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef is the optional project that all clusters spawned by generated bootstrap token will belong to |  | Optional: {} <br /> |
 
 
 #### Cascade
@@ -649,6 +686,22 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `recommendationCushion` _integer_ | A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,<br />should be between 1-99. |  | Optional: {} <br /> |
 | `recommendationThreshold` _integer_ | The minimal monthly cost for a recommendation to be covered by a controller |  | Optional: {} <br /> |
+
+
+#### CreatePr
+
+
+
+
+
+
+
+_Appears in:_
+- [Tools](#tools)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for pr automations |  |  |
 
 
 #### CustomRunStep
@@ -2837,6 +2890,22 @@ TaintEffect is the effect for a Kubernetes taint.
 _Appears in:_
 - [Taint](#taint)
 
+
+
+#### Tools
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `createPr` _[CreatePr](#createpr)_ |  |  |  |
 
 
 #### VertexSettings
