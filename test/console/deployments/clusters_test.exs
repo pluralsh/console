@@ -1287,4 +1287,104 @@ defmodule Console.Deployments.ClustersTest do
       assert updated.upgrade_plan.incompatibilities
     end
   end
+
+  describe "#create_cluster_registration/2" do
+    test "project writers can create registrations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, reg} = Clusters.create_cluster_registration(%{machine_id: "blah", project_id: project.id}, user)
+
+      assert reg.project_id == project.id
+      assert reg.machine_id == "blah"
+      assert reg.creator_id == user.id
+    end
+
+    test "bootstrap tokens can create registrations" do
+      user = bootstrap_user()
+      {:ok, reg} = Clusters.create_cluster_registration(%{machine_id: "blah"}, user)
+
+      assert reg.project_id == user.bootstrap.project_id
+      assert reg.machine_id == "blah"
+      assert reg.creator_id == user.id
+    end
+
+    test "nonwriters cannot create" do
+      user = insert(:user)
+      project = insert(:project)
+
+      {:error, _} = Clusters.create_cluster_registration(%{machine_id: "blah", project_id: project.id}, user)
+    end
+  end
+
+  describe "#update_cluster_regstration/3" do
+    test "project writers can update registrations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      reg = insert(:cluster_registration, project: project)
+
+      {:ok, reg} = Clusters.update_cluster_registration(%{
+        name: "edge-1",
+        tags: [%{name: "t", value: "v"}]
+      }, reg.id, user)
+
+      assert reg.name == "edge-1"
+      assert reg.handle == "edge-1"
+      [%{name: "t", value: "v"}] = reg.tags
+    end
+
+    test "you cannot chose existing cluster handles" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      reg = insert(:cluster_registration, project: project)
+      insert(:cluster, handle: "edge-1")
+
+      {:error, _} = Clusters.update_cluster_registration(%{
+        name: "edge-1",
+        tags: [%{name: "t", value: "v"}]
+      }, reg.id, user)
+    end
+
+    test "nonwriters cannot update" do
+      user = insert(:user)
+      project = insert(:project)
+      reg = insert(:cluster_registration, project: project)
+
+      {:error, _} = Clusters.update_cluster_registration(%{
+        name: "edge-1",
+        tags: [%{name: "t", value: "v"}]
+      }, reg.id, user)
+    end
+  end
+
+  describe "#delete_cluster_registration/2" do
+    test "creators can delete" do
+      user = bootstrap_user()
+      reg  = insert(:cluster_registration, creator: user)
+
+      {:ok, del} = Clusters.delete_cluster_registration(reg.id, user)
+
+      assert del.id == reg.id
+      refute refetch(reg)
+    end
+
+    test "project writers can delete" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      reg = insert(:cluster_registration, project: project)
+
+      {:ok, del} = Clusters.delete_cluster_registration(reg.id, user)
+
+      assert del.id == reg.id
+      refute refetch(reg)
+    end
+
+    test "nonwriters cannot delete" do
+      user = insert(:user)
+      project = insert(:project)
+      reg = insert(:cluster_registration, project: project)
+
+      {:error, _} = Clusters.delete_cluster_registration(reg.id, user)
+    end
+  end
 end

@@ -171,6 +171,9 @@ fragment PipelinePullRequest on PipelinePullRequest {
     protect
     deletedAt
   }
+  stage {
+    id
+  }
   pullRequest {
     ...PullRequest
   }

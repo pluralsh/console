@@ -30,7 +30,8 @@ defmodule Console.Deployments.Policies.Rbac do
     Observer,
     Catalog,
     ClusterInsightComponent,
-    VulnerabilityReport
+    VulnerabilityReport,
+    ClusterRegistration
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -84,6 +85,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(comp, user, action, & &1.cluster)
   def evaluate(%VulnerabilityReport{} = comp, user, action),
     do: recurse(comp, user, action, & &1.cluster)
+  def evaluate(%ClusterRegistration{} = reg, user, action),
+    do: recurse(reg, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -158,6 +161,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(pcr, [stack: @stack_preloads])
   def preload(%GlobalService{} = global),
     do: Repo.preload(global, [project: @bindings])
+  def preload(%ClusterRegistration{} = reg),
+    do: Repo.preload(reg, [project: @bindings])
   def preload(%ManagedNamespace{} = ns),
     do: Repo.preload(ns, [project: @bindings])
   def preload(%CustomStackRun{} = pcr),

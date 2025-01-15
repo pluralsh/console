@@ -88,9 +88,9 @@ defmodule Console.Deployments.Init do
     case Console.cloud?() do
       true ->
         Map.put(attrs, :ai, %{
-          provider: :ollama,
+          provider: :openai,
           enabled: true,
-          ollama: %{model: "gpt-4o-mini", url: "http://ai-proxy.ai-proxy:8000"}
+          openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai"}
         })
       _ -> attrs
     end

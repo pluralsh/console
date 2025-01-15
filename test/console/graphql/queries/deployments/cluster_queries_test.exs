@@ -744,4 +744,36 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
              |> ids_equal(hist)
     end
   end
+
+  describe "clusterRegistration" do
+    test "bootstrap token creators can read" do
+      user = bootstrap_user()
+      reg  = insert(:cluster_registration, creator: user)
+
+      {:ok, %{data: %{"clusterRegistration" => found}}} = run_query("""
+        query Reg($id: ID!) {
+          clusterRegistration(id: $id) { id }
+        }
+      """, %{"id" => reg.id}, %{current_user: user})
+
+      assert found["id"] == reg.id
+    end
+  end
+
+  describe "clusterRegistrations" do
+    test "it can list" do
+      regs = insert_list(3, :cluster_registration)
+
+      {:ok, %{data: %{"clusterRegistrations" => found}}} = run_query("""
+        query {
+          clusterRegistrations(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(regs)
+    end
+  end
 end

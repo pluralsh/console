@@ -166,7 +166,7 @@ defmodule Console.Deployments.Pipelines do
       end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})
-        %PipelinePullRequest{service_id: service.id}
+        %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
         |> PipelinePullRequest.changeset(%{context_id: ctx.id, pull_request_id: pr.id})
         |> Repo.insert()
       end)

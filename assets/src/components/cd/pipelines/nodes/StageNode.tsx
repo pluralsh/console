@@ -230,12 +230,14 @@ export function StageNode(
     () =>
       mapValues(
         groupBy(
-          stage.context?.pipelinePullRequests,
+          stage.context?.pipelinePullRequests?.filter(
+            (pipelinePr) => pipelinePr?.stage?.id === stage.id
+          ),
           (pipelinePr) => pipelinePr?.service?.id
         ),
         (prs) => prs?.map?.((pr) => pr?.pullRequest)
       ),
-    [stage.context?.pipelinePullRequests]
+    [stage.context?.pipelinePullRequests, stage.id]
   )
 
   return (

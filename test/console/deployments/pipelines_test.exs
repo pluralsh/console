@@ -263,6 +263,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert stage.applied_context_id == ctx.id
       pipe_pr = Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
       %{pull_request: pr} = Console.Repo.preload(pipe_pr, [:pull_request])
+      assert pipe_pr.stage_id == stage.id
 
       assert pr.service_id == svc.id
 

@@ -12,7 +12,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterUsageHistory,
     ClusterNamespaceUsage,
     ClusterScalingRecommendation,
-    ClusterAuditLog
+    ClusterAuditLog,
+    ClusterRegistration
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -43,6 +44,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def resolve_provider(args, %{context: %{current_user: user}}) do
     get_provider(args)
+    |> allow(user, :read)
+  end
+
+  def resolve_cluster_registration(%{id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_cluster_registration(id)
     |> allow(user, :read)
   end
 
@@ -140,6 +146,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def list_cluster_audits(%Cluster{id: id}, args, _) do
     ClusterAuditLog.for_cluster(id)
     |> ClusterAuditLog.ordered()
+    |> paginate(args)
+  end
+
+  def list_cluster_registrations(args, _) do
+    ClusterRegistration.ordered()
     |> paginate(args)
   end
 
@@ -242,6 +253,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def save_upgrade_insights(%{insights: insights}, %{context: %{cluster: cluster}}),
     do: Clusters.save_upgrade_insights(insights, cluster)
+
+  def create_cluster_registration(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.create_cluster_registration(attrs, user)
+
+  def update_cluster_registration(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.update_cluster_registration(attrs, id, user)
+
+  def delete_cluster_registration(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_cluster_registration(id, user)
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)

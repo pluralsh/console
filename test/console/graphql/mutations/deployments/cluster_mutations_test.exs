@@ -544,4 +544,67 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       assert sr.cluster_id == cluster.id
     end
   end
+
+  describe "createClusterRegistration" do
+    test "can create a new registration" do
+      user = bootstrap_user()
+
+      {:ok, %{data: %{"createClusterRegistration" => reg}}} = run_query("""
+        mutation Create($attrs: ClusterRegistrationCreateAttributes!) {
+          createClusterRegistration(attributes: $attrs) {
+            id
+            machineId
+            project { id }
+          }
+        }
+      """, %{"attrs" => %{"machineId" => "blah"}}, %{current_user: user})
+
+      assert reg["id"]
+      assert reg["machineId"] == "blah"
+      assert reg["project"]["id"] == user.bootstrap.project_id
+    end
+  end
+
+  describe "updateClusterRegistration" do
+    test "can update a new registration" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      reg  = insert(:cluster_registration, project: project)
+
+      {:ok, %{data: %{"updateClusterRegistration" => upd}}} = run_query("""
+        mutation Update($id: ID!, $attrs: ClusterRegistrationUpdateAttributes!) {
+          updateClusterRegistration(id: $id, attributes: $attrs) {
+            id
+            name
+            handle
+          }
+        }
+      """, %{"attrs" => %{"name" => "edge-1"}, "id" => reg.id}, %{current_user: user})
+
+      assert upd["id"]     == reg.id
+      assert upd["name"]   == "edge-1"
+      assert upd["handle"] == "edge-1"
+    end
+  end
+
+  describe "deleteClusterRegistration" do
+    test "can delete a new registration" do
+      user    = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      reg     = insert(:cluster_registration, project: project, name: "edge-1", handle: "edge-1")
+
+      {:ok, %{data: %{"deleteClusterRegistration" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteClusterRegistration(id: $id) {
+            id
+            name
+            handle
+          }
+        }
+      """, %{"id" => reg.id}, %{current_user: user})
+
+      assert del["id"] == reg.id
+      refute refetch(reg)
+    end
+  end
 end

@@ -13,7 +13,7 @@ import (
 type Endpoint string
 
 const (
-	EndpointChat            = "/openai/chat/completions"
+	EndpointChat            = "/openai/v1/chat/completions"
 	EndpointChatCompletions = "/v1/chat/completions"
 )
 

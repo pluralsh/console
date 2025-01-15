@@ -76,6 +76,8 @@ defmodule Console.Logs.Provider.Elastic do
     do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gt, aft, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
     do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lt, bef, dur)}})
+  defp add_range(q, %Query{time: %Time{after: nil, before: nil, duration: dur}}),
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lt, Timex.now(), dur)}})
   defp add_range(q, %Query{time: %Time{before: bef}}) when not is_nil(bef),
     do: add_filter(q, %{range: %{"@timestamp": %{lt: bef}}})
   defp add_range(q, %Query{time: %Time{after: aft}}) when not is_nil(aft),
