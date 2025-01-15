@@ -10,7 +10,6 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 import { Body2P } from 'components/utils/typography/Text'
-import dayjs from 'dayjs'
 import { LogFacetInput } from 'generated/graphql'
 import { clamp } from 'lodash'
 import styled, { useTheme } from 'styled-components'
@@ -43,8 +42,8 @@ export function Logs({
 
   const time = useMemo(
     () => ({
-      before: dayjs().toISOString(),
       duration: secondsToDuration(sinceSeconds),
+      reverse: false,
     }),
     [sinceSeconds]
   )
