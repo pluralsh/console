@@ -1,54 +1,60 @@
-import { Chip, Tooltip } from '@pluralsh/design-system'
-import { Flex, Span } from 'honorable'
-import { truncate } from 'lodash'
+import { Chip, Flex, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { LogFacetInput } from 'generated/graphql'
 
-const MAX_LENGTH = 20
+import { isEmpty, truncate } from 'lodash'
+import { Fragment } from 'react/jsx-runtime'
 
-function LogsLabelChip({ name, value, removeLabel }) {
+const MAX_LENGTH = 30
+
+function LogsLabelChip({ name, value, removeLabel, ...props }) {
   return (
     <Chip
       clickable
       closeButton
       onClick={() => removeLabel(name)}
+      {...props}
     >
-      <span>{name}:</span>
-      <Span fontWeight={400}>{truncate(value, { length: MAX_LENGTH })}</Span>
+      <Flex
+        align="center"
+        gap="xsmall"
+      >
+        <Body2BoldP>{name}:</Body2BoldP>
+        <Body2P>{truncate(value, { length: MAX_LENGTH - name.length })}</Body2P>
+      </Flex>
     </Chip>
   )
 }
 
-export default function LogsLabels({ labels, removeLabel }) {
-  if (labels?.length < 1) return null
+export function LogsLabels({
+  labels,
+  removeLabel,
+}: {
+  labels: LogFacetInput[]
+  removeLabel: (key: string) => void
+}) {
+  if (isEmpty(labels)) return null
 
   return (
     <Flex
       direction="row"
       gap="xsmall"
       align="center"
-      marginVertical="medium"
       wrap="wrap"
     >
-      {labels.map(({ name, value }) => (
-        <>
-          {value.length > MAX_LENGTH && (
-            <Tooltip label={value}>
-              <div>
-                <LogsLabelChip
-                  name={name}
-                  value={value}
-                  removeLabel={removeLabel}
-                />
-              </div>
-            </Tooltip>
-          )}
-          {value.length <= MAX_LENGTH && (
+      {labels.map(({ key, value }) => (
+        <Fragment key={key}>
+          <WrapWithIf
+            condition={key.length + value.length > MAX_LENGTH}
+            wrapper={<Tooltip label={value} />}
+          >
             <LogsLabelChip
-              name={name}
+              name={key}
               value={value}
               removeLabel={removeLabel}
             />
-          )}
-        </>
+          </WrapWithIf>
+        </Fragment>
       ))}
     </Flex>
   )

@@ -1,43 +1,53 @@
-import { Card, Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { Card, Flyover } from '@pluralsh/design-system'
 import LogsScrollIndicator from 'components/cd/logs/LogsScrollIndicator'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
+  LogFacetInput,
   LogLineFragment,
   LogTimeRange,
   useLogAggregationQuery,
 } from 'generated/graphql'
-import { useState } from 'react'
-import LogLine from './LogLine'
+import { memo, useState } from 'react'
+import { LogContextPanel } from './LogContextPanel'
+import { LogsTable } from './LogsTable'
+import { secondsToDuration } from './Logs'
 
 const LIMIT = 1000
 const POLL_INTERVAL = 10 * 1000
 
-const columnHelper = createColumnHelper<LogLineFragment>()
-
-export function LogsCard({
+export const LogsCard = memo(function LogsCard({
   serviceId,
   clusterId,
   query,
   limit,
   time,
-  addLabel: _addLabel,
+  labels,
+  addLabel,
 }: {
   serviceId?: string
   clusterId?: string
   query?: string
   limit?: number
   time?: LogTimeRange
-  addLabel?: (name: string, value: string) => void
+  labels?: LogFacetInput[]
+  addLabel?: (key: string, value: string) => void
 }) {
+  const [contextPanelOpen, setContextPanelOpen] = useState(false)
+  const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
   const [live, setLive] = useState(true)
 
   const { data, loading, error } = useLogAggregationQuery({
-    variables: { clusterId, query, limit: limit || LIMIT, serviceId, time },
+    variables: {
+      clusterId,
+      query,
+      limit: limit || LIMIT,
+      serviceId,
+      time,
+      facets: labels,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: live ? POLL_INTERVAL : 0,
-    skip: !clusterId && !serviceId,
+    skip: !(live && (clusterId || serviceId)),
   })
 
   const initialLoading = !data && loading
@@ -63,36 +73,34 @@ export function LogsCard({
         ),
       }}
     >
-      <FullHeightTableWrap
-        css={
-          initialLoading || {
-            '& td': { minHeight: 0 },
-            '& > div': { height: '100%' },
-          }
-        }
-      >
-        <Table
-          flush
-          hideHeader
-          loadingSkeletonRows={12}
-          virtualizeRows
-          rowBg="raised"
-          data={logs}
-          columns={cols}
-          loading={initialLoading}
-          padCells={false}
-        />
-      </FullHeightTableWrap>
+      <LogsTable
+        loading={initialLoading}
+        data={logs}
+        onRowClick={(_, row) => {
+          setLogLine(row.original)
+          setContextPanelOpen(true)
+        }}
+      />
+      {logLine && (
+        <Flyover
+          open={contextPanelOpen}
+          onClose={() => setContextPanelOpen(false)}
+          header="Log context"
+          width={640}
+        >
+          <LogContextPanel
+            logLine={logLine}
+            addLabel={addLabel}
+            curDuration={time?.duration ?? secondsToDuration(900)}
+            queryVars={{
+              clusterId,
+              serviceId,
+              query,
+              facets: labels,
+            }}
+          />
+        </Flyover>
+      )}
     </Card>
   )
-}
-
-const cols = [
-  columnHelper.accessor((line) => line, {
-    id: 'row',
-    cell: function Cell({ getValue }) {
-      const line = getValue()
-      return <LogLine line={line} />
-    },
-  }),
-]
+})

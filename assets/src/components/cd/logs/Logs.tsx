@@ -1,55 +1,72 @@
-import { Input, ListBoxItem, SearchIcon, Select } from '@pluralsh/design-system'
-import LogsLabels from 'components/cd/logs/LogsLabels'
-import { toMap, useQueryParams } from 'components/utils/query'
-import { useCallback, useState } from 'react'
+import {
+  Input,
+  ListBoxItem,
+  SearchIcon,
+  Select,
+  Toast,
+} from '@pluralsh/design-system'
+import { LogsLabels } from 'components/cd/logs/LogsLabels'
+import { useCallback, useMemo, useState } from 'react'
 
-import LogsLegend from 'components/cd/logs/LogsLegend'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { Body2P } from 'components/utils/typography/Text'
+import dayjs from 'dayjs'
+import { LogFacetInput } from 'generated/graphql'
 import { clamp } from 'lodash'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   SinceSecondsOptions,
   SinceSecondsSelectOptions,
 } from '../cluster/pod/logs/Logs'
 import { LogsCard } from './LogsCard'
 
-// convert seconds to ISO 8601 duration string
-const secondsToDuration = (seconds: number) => {
-  return `PT${seconds}S`
-}
+const MAX_QUERY_LENGTH = 250
 
 export function Logs({
   serviceId,
   clusterId,
 }: {
-  serviceId?: string | undefined
-  clusterId?: string | undefined
+  serviceId?: string
+  clusterId?: string
 }) {
-  const query = useQueryParams()
-  const [search, setSearch] = useState('')
-  const [queryLength, setQueryLength] = useState(100)
+  const theme = useTheme()
+  const [showErrorToast, setShowErrorToast] = useState(false)
+  const [showSuccessToast, setShowSuccessToast] = useState(false)
   const [sinceSeconds, setSinceSeconds] = useState(
     SinceSecondsOptions.QuarterHour
   )
-  const [labels, setLabels] = useState(toMap(query))
+  const [labels, setLabels] = useState<LogFacetInput[]>([])
+  const [q, setQ] = useState('')
+  const [queryLimit, setQueryLimit] = useState(100)
+  const throttledQ = useThrottle(q, 1000)
+  const throttledQueryLimit = useThrottle(queryLimit, 300)
+
+  const time = useMemo(
+    () => ({
+      before: dayjs().toISOString(),
+      reverse: true,
+      duration: secondsToDuration(sinceSeconds),
+    }),
+    [sinceSeconds]
+  )
 
   const addLabel = useCallback(
-    (name, value) => setLabels({ ...labels, [name]: value }),
-    [labels, setLabels]
-  )
-  const removeLabel = useCallback(
-    (name) => {
-      const { [name]: _val, ...rest } = labels
-
-      setLabels(rest)
+    (key: string, value: string) => {
+      if (!labels.some((l) => l.key === key)) {
+        setLabels([...labels, { key, value }])
+        setShowSuccessToast(true)
+      } else {
+        setShowErrorToast(true)
+      }
     },
     [labels, setLabels]
   )
-
-  const labelList = Object.entries(labels).map(([name, value]) => ({
-    name,
-    value,
-  }))
+  const removeLabel = useCallback(
+    (key: string) => {
+      setLabels(labels.filter((l) => l.key !== key))
+    },
+    [labels, setLabels]
+  )
 
   return (
     <PageWrapperSC>
@@ -58,8 +75,8 @@ export function Logs({
           <Input
             placeholder="Filter logs"
             startIcon={<SearchIcon size={14} />}
-            value={search}
-            onChange={({ target: { value } }) => setSearch(value)}
+            value={q}
+            onChange={({ target: { value } }) => setQ(value)}
             flex={1}
           />
           <Input
@@ -75,9 +92,9 @@ export function Logs({
             width={220}
             prefix="Query length"
             type="number"
-            value={queryLength || ''}
+            value={queryLimit || ''}
             onChange={({ target: { value } }) =>
-              setQueryLength(clamp(Number(value), 0, 1000))
+              setQueryLimit(clamp(Number(value), 0, MAX_QUERY_LENGTH))
             }
           />
           <Select
@@ -96,25 +113,46 @@ export function Logs({
           </Select>
         </FiltersWrapperSC>
         <LogsLabels
-          labels={labelList}
+          labels={labels}
           removeLabel={removeLabel}
         />
         <LogsCard
           serviceId={serviceId}
           clusterId={clusterId}
-          query={search}
-          limit={queryLength}
-          time={{
-            // before: dayjs().toISOString(),
-            before: '2025-01-14T00:45:06.037Z',
-            duration: secondsToDuration(sinceSeconds),
-          }}
+          query={throttledQ}
+          limit={throttledQueryLimit}
+          time={time}
+          labels={labels}
           addLabel={addLabel}
         />
       </MainContentWrapperSC>
-      <LogsLegend css={{ height: 'fit-content', width: 168 }} />
+      <Toast
+        severity="danger"
+        position="bottom"
+        show={showErrorToast}
+        closeTimeout={1000}
+        onClose={() => setShowErrorToast(false)}
+        css={{ margin: theme.spacing.large }}
+      >
+        Label already added
+      </Toast>
+      <Toast
+        severity="success"
+        position="bottom"
+        show={showSuccessToast}
+        closeTimeout={1000}
+        onClose={() => setShowSuccessToast(false)}
+        css={{ margin: theme.spacing.large }}
+      >
+        Label added
+      </Toast>
     </PageWrapperSC>
   )
+}
+
+// convert seconds to ISO 8601 duration string
+export const secondsToDuration = (seconds: number) => {
+  return `PT${seconds}S`
 }
 
 const PageWrapperSC = styled.div(({ theme }) => ({

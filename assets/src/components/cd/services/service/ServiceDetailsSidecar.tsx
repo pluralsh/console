@@ -19,7 +19,7 @@ import {
   useKickServiceMutation,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
@@ -29,12 +29,14 @@ import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import { countDeprecations } from './deprecationUtils'
 import ServicePromote from './ServicePromote'
+import LogsLegend from 'components/cd/logs/LogsLegend.tsx'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
 }) {
+  const { pathname } = useLocation()
   const theme = useTheme()
   const deprecationCount = useMemo(() => {
     const { components } = serviceDeployment || {}
@@ -63,6 +65,7 @@ export function ServiceDetailsSidecar({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
+        paddingBottom: theme.spacing.medium,
       }}
     >
       <div
@@ -212,6 +215,7 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
       </Sidecar>
+      {pathname.includes('logs') && <LogsLegend />}
     </div>
   )
 }

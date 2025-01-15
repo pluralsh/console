@@ -10983,6 +10983,7 @@ export type LogAggregationQueryVariables = Exact<{
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
 }>;
 
 
@@ -21995,13 +21996,14 @@ export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstr
 export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
 export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
 export const LogAggregationDocument = gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
     query: $query
     serviceId: $serviceId
     time: $time
+    facets: $facets
   ) {
     ...LogLine
   }
@@ -22025,6 +22027,7 @@ export const LogAggregationDocument = gql`
  *      query: // value for 'query'
  *      serviceId: // value for 'serviceId'
  *      time: // value for 'time'
+ *      facets: // value for 'facets'
  *   },
  * });
  */

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { RefObject, useCallback } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -48,21 +48,26 @@ export function useBorderColor() {
   )
 }
 
-export default function LogLine({
+export function LogLine({
+  ref,
   line: { timestamp, log },
-  open = false,
+  inferLevel = true,
+  highlighted = false,
   onClick,
 }: {
+  ref?: RefObject<HTMLDivElement | null>
   line: LogLineFragment
-  open?: boolean
+  inferLevel?: boolean
+  highlighted?: boolean
   onClick?: () => void
 }) {
   const borderColor = useBorderColor()
-  const level = determineLevel(log)
+  const level = inferLevel ? determineLevel(log) : Level.UNKNOWN
   return (
     <LogLineWrapper
-      $open={open}
+      ref={ref}
       $borderColor={borderColor(level)}
+      $highlighted={highlighted}
       onClick={onClick}
     >
       {dayjsExtended(timestamp).utc().format('MM/DD/YYYY-HH:mm:ss[[UTC]] ')}
@@ -73,18 +78,19 @@ export default function LogLine({
   )
 }
 const LogLineWrapper = styled.div<{
-  $open?: boolean
   $borderColor?: string
-}>(({ theme, $open, $borderColor }) => ({
-  borderLeft: $open
-    ? `4px solid ${theme.colors['border-info']}`
-    : `4px solid ${$borderColor}`,
-  backgroundColor: $open ? theme.colors['fill-one-selected'] : undefined,
-  flexDirection: 'row',
-  fontFamily: 'Monument Mono',
+  $highlighted?: boolean
+}>(({ theme, $borderColor, $highlighted }) => ({
+  width: '100%',
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  borderLeft: `4px solid ${$borderColor}`,
+  color: $highlighted ? theme.colors.text : theme.colors['text-light'],
   wordBreak: 'break-word',
-  flexWrap: 'wrap',
+  fontFamily: 'Monument Mono',
+  fontSize: '12px',
+  lineHeight: '20px',
+  letterSpacing: '0.25px',
+  backgroundColor: $highlighted ? theme.colors['fill-two'] : 'transparent',
   '&:hover': {
     backgroundColor: theme.colors['fill-two'],
     borderColor: theme.colors['border-info'],

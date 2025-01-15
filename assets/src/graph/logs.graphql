@@ -13,6 +13,7 @@ query LogAggregation(
   $query: String
   $serviceId: ID
   $time: LogTimeRange
+  $facets: [LogFacetInput]
 ) {
   logAggregation(
     clusterId: $clusterId
@@ -20,6 +21,7 @@ query LogAggregation(
     query: $query
     serviceId: $serviceId
     time: $time
+    facets: $facets
   ) {
     ...LogLine
   }
