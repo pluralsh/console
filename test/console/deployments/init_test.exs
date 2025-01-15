@@ -86,8 +86,8 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.create_policy_id
 
       assert res.settings.ai.enabled
-      assert res.settings.ai.provider == :ollama
-      assert res.settings.ai.ollama.url == "http://ai-proxy.ai-proxy:8000"
+      assert res.settings.ai.provider == :openai
+      assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai"
     end
   end
 end
