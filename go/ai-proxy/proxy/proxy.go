@@ -8,7 +8,7 @@ import (
 	"github.com/pluralsh/console/go/ai-proxy/proxy/provider"
 )
 
-func NewTranslationProxy(p api.Provider, host string, credentials string) (api.TranslationProxy, error) {
+func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) (api.TranslationProxy, error) {
 	switch p {
 	case api.ProviderOllama:
 		return provider.NewOllamaProxy(host)
@@ -25,7 +25,7 @@ func NewTranslationProxy(p api.Provider, host string, credentials string) (api.T
 
 func NewOpenAIProxy(p api.Provider, host, token string) (api.OpenAIProxy, error) {
 	switch p {
-	case api.ProviderOpenAIStandard:
+	case api.ProviderOpenAI:
 		return openai.NewOpenAIStandardProxy(host, token)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)

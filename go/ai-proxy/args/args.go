@@ -75,10 +75,6 @@ func ProviderCredentials() string {
 		return *argProviderToken
 	}
 
-	if len(*argProviderToken) > 0 && Provider() == api.ProviderOpenAIStandard {
-		return *argProviderToken
-	}
-
 	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
 		return *argProviderServiceAccount
 	}

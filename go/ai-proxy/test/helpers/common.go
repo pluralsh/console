@@ -20,27 +20,18 @@ import (
 )
 
 func SetupServer() (*httptest.Server, error) {
-	provider := args.Provider()
-	host := args.ProviderHost()
-	creds := args.ProviderCredentials()
-
-	router := mux.NewRouter()
-
-	if provider == api.ProviderOpenAIStandard {
-		op, err := proxy.NewOpenAIProxy(provider, host, creds)
-		if err != nil {
-			return nil, err
-		}
-		router.HandleFunc(openai_standard.EndpointChat, op.Proxy())
-
-	} else {
-		p, err := proxy.NewTranslationProxy(provider, host, creds)
-		if err != nil {
-			return nil, err
-		}
-
-		router.HandleFunc(ollama.EndpointChat, p.Proxy())
+	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+	if err != nil {
+		return nil, err
 	}
+
+	op, err := proxy.NewOpenAIProxy(api.ProviderOpenAI, args.ProviderHost(), args.ProviderCredentials())
+	if err != nil {
+		return nil, err
+	}
+	router := mux.NewRouter()
+	router.HandleFunc(ollama.EndpointChat, p.Proxy())
+	router.HandleFunc(openai_standard.EndpointChat, op.Proxy())
 
 	return httptest.NewServer(router), nil
 }

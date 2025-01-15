@@ -20,8 +20,6 @@ func ToProvider(s string) (Provider, error) {
 		return ProviderOllama, nil
 	case ProviderOpenAI.String():
 		return ProviderOpenAI, nil
-	case ProviderOpenAIStandard.String():
-		return ProviderOpenAIStandard, nil
 	case ProviderAnthropic.String():
 		return ProviderAnthropic, nil
 	case ProviderVertex.String():
@@ -32,11 +30,10 @@ func ToProvider(s string) (Provider, error) {
 }
 
 const (
-	ProviderOpenAI         Provider = "openai"
-	ProviderOpenAIStandard Provider = "openai_standard"
-	ProviderAnthropic      Provider = "anthropic"
-	ProviderOllama         Provider = "ollama"
-	ProviderVertex         Provider = "vertex"
+	ProviderOpenAI    Provider = "openai"
+	ProviderAnthropic Provider = "anthropic"
+	ProviderOllama    Provider = "ollama"
+	ProviderVertex    Provider = "vertex"
 )
 
 type OllamaAPI string
