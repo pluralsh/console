@@ -9,7 +9,7 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
-	"github.com/pluralsh/console/go/ai-proxy/api/openai_standard"
+	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
 	"github.com/pluralsh/console/go/ai-proxy/environment"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
@@ -33,7 +33,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc(ollama.EndpointChat, p.Proxy())
-	router.HandleFunc(openai_standard.EndpointChat, op.Proxy())
+	router.HandleFunc(openai.EndpointChat, op.Proxy())
 
 	klog.V(log.LogLevelMinimal).InfoS("Listening and serving HTTP", "address", args.Address())
 	if err := http.ListenAndServe(args.Address(), router); err != nil {

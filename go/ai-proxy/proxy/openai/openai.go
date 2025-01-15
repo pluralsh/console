@@ -24,7 +24,7 @@ func (o *OpenAIProxy) Proxy() http.HandlerFunc {
 	}
 }
 
-func NewOpenAIStandardProxy(host, token string) (api.OpenAIProxy, error) {
+func NewOpenAIProxy(host, token string) (api.OpenAIProxy, error) {
 	parsedURL, err := url.Parse(host)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func NewOpenAIStandardProxy(host, token string) (api.OpenAIProxy, error) {
 
 			r.SetXForwarded()
 
-			targetURL, err := url.Parse(openai.EndpointChat)
+			targetURL, err := url.Parse(openai.EndpointChatCompletions)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse target url")
 				return

@@ -13,7 +13,8 @@ import (
 type Endpoint string
 
 const (
-	EndpointChat = "/v1/chat/completions"
+	EndpointChat            = "/openai/chat/completions"
+	EndpointChatCompletions = "/v1/chat/completions"
 )
 
 type ChatCompletionRequest struct {

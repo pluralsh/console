@@ -26,7 +26,7 @@ func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) 
 func NewOpenAIProxy(p api.Provider, host, token string) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIStandardProxy(host, token)
+		return openai.NewOpenAIProxy(host, token)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }

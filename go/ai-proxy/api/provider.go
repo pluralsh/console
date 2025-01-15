@@ -42,7 +42,7 @@ type ProviderAPIMapping map[string]string
 
 var (
 	ollamaToOpenAI ProviderAPIMapping = map[string]string{
-		ollama.EndpointChat: openai.EndpointChat,
+		ollama.EndpointChat: openai.EndpointChatCompletions,
 	}
 	ollamaToVertex ProviderAPIMapping = map[string]string{
 		ollama.EndpointChat: vertex.EndpointChat,

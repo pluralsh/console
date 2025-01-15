@@ -14,7 +14,7 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
-	"github.com/pluralsh/console/go/ai-proxy/api/openai_standard"
+	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
 	"github.com/pluralsh/console/go/ai-proxy/proxy"
 )
@@ -31,7 +31,7 @@ func SetupServer() (*httptest.Server, error) {
 	}
 	router := mux.NewRouter()
 	router.HandleFunc(ollama.EndpointChat, p.Proxy())
-	router.HandleFunc(openai_standard.EndpointChat, op.Proxy())
+	router.HandleFunc(openai.EndpointChat, op.Proxy())
 
 	return httptest.NewServer(router), nil
 }
