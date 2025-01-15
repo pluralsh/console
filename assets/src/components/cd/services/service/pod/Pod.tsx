@@ -29,7 +29,7 @@ import {
 } from '../../../../../generated/graphql'
 import { LinkTabWrap } from '../../../../utils/Tabs'
 
-import LogsLegend from '../../../../apps/app/logs/LogsLegend'
+import LogsLegend from '../../../logs/LogsLegend.tsx'
 import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
 import PodSidecar from '../../../cluster/pod/PodSidecar.tsx'
 

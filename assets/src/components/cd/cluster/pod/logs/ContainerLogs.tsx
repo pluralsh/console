@@ -14,8 +14,7 @@ import { useTheme } from 'styled-components'
 
 import { Pod, usePodLogsQuery } from '../../../../../generated/graphql'
 import LoadingIndicator from '../../../../utils/LoadingIndicator'
-import { determineLevel } from '../../../../apps/app/logs/LogContent'
-import { useBorderColor } from '../../../../apps/app/logs/LogLine'
+import { determineLevel, useBorderColor } from '../../../logs/LogLine'
 
 import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
 

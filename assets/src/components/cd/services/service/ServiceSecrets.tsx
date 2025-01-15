@@ -337,13 +337,11 @@ const ColActions = ({
               type="secondary"
             />
             <ChangeSecret
-              key={serviceDeploymentId}
               serviceDeploymentId={serviceDeploymentId}
               secret={{ name: original.name, value: original.value || '' }}
               refetch={refetch}
             />
             <DeleteSecret
-              key={serviceDeploymentId}
               serviceDeploymentId={serviceDeploymentId}
               secretName={original.name}
               refetch={refetch}

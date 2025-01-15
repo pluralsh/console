@@ -8,6 +8,7 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
+import styled from 'styled-components'
 
 export default function ServiceLogs() {
   const { service } = useServiceContext()
@@ -29,5 +30,14 @@ export default function ServiceLogs() {
 
   useSetBreadcrumbs(breadcrumbs)
 
-  return <Logs serviceId={serviceId} />
+  return (
+    <WrapperSC>
+      <Logs serviceId={serviceId} />
+    </WrapperSC>
+  )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  height: '100%',
+  paddingBottom: theme.spacing.medium,
+}))

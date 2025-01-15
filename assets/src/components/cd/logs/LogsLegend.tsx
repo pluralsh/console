@@ -2,8 +2,7 @@ import styled from 'styled-components'
 
 import { Prop, PropsContainer } from '@pluralsh/design-system'
 
-import { useBorderColor } from './LogLine'
-import { Level } from './misc'
+import { useBorderColor, Level } from './LogLine'
 import { ComponentPropsWithRef } from 'react-spring'
 
 export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
@@ -28,12 +27,16 @@ export default function LogsLegend(
     <PropsContainer {...props}>
       <FlexPropSC title="Log legend">
         <LegendWrap>
-          <LegendColor color={borderColor(Level.OTHER)} />
+          <LegendColor color={borderColor(Level.UNKNOWN)} />
           Unknown
         </LegendWrap>
         <LegendWrap>
           <LegendColor color={borderColor(Level.INFO)} />
           Info
+        </LegendWrap>
+        <LegendWrap>
+          <LegendColor color={borderColor(Level.SUCCESS)} />
+          Success
         </LegendWrap>
         <LegendWrap>
           <LegendColor color={borderColor(Level.WARN)} />

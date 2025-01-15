@@ -245,20 +245,20 @@ defmodule Console.Deployments.Cron do
   end
 
   def poll_stacks() do
-    Stream.each(stack_stream(), fn stack ->
+    Task.async_stream(stack_stream(), fn stack ->
       Logger.info "polling repository for stack #{stack.id}"
       Stacks.poll(stack)
       |> log("poll stack for a new run")
-    end)
+    end, max_concurrency: 20)
     |> Stream.run()
   end
 
   def dequeue_stacks() do
-    Stream.each(stack_stream(), fn stack ->
+    Task.async_stream(stack_stream(), fn stack ->
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
       |> log("dequeue a new stack run")
-    end)
+    end, max_concurrency: 20)
     |> Stream.run()
   end
 

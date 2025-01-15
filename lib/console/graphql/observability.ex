@@ -64,13 +64,13 @@ defmodule Console.GraphQl.Observability do
 
   object :log_line do
     field :timestamp, :datetime
-    field :log,       non_null(:string)
+    field :log,       :string
     field :facets,    list_of(:log_facet)
   end
 
   object :log_facet do
     field :key,   non_null(:string)
-    field :value, non_null(:string)
+    field :value, :string
   end
 
   object :observability_queries do

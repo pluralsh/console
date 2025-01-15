@@ -15,16 +15,19 @@ export const StackedTextSC = styled.div<{ $truncate?: boolean }>(
 const FirstSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
-}>(({ theme, $truncate, $partialType = 'body2LooseLineHeight' }) => ({
+  $color?: string
+}>(({ theme, $truncate, $partialType = 'body2LooseLineHeight', $color }) => ({
   ...theme.partials.text[$partialType],
   ...($truncate ? TRUNCATE : {}),
+  color: $color,
 }))
 const SecondSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
-}>(({ theme, $truncate, $partialType = 'caption' }) => ({
+  $color?: string
+}>(({ theme, $truncate, $partialType = 'caption', $color }) => ({
   ...theme.partials.text[$partialType],
-  color: theme.colors['text-xlight'],
+  color: $color || theme.colors['text-xlight'],
   ...($truncate ? TRUNCATE : {}),
 }))
 
@@ -35,6 +38,8 @@ export const StackedText = memo(
     truncate,
     firstPartialType,
     secondPartialType,
+    firstColor,
+    secondColor,
     ...props
   }: {
     first: ReactNode
@@ -42,6 +47,8 @@ export const StackedText = memo(
     truncate?: boolean
     firstPartialType?: PartialType
     secondPartialType?: PartialType
+    firstColor?: string
+    secondColor?: string
   } & ComponentProps<typeof StackedTextSC>) => (
     <StackedTextSC
       $truncate={truncate}
@@ -50,10 +57,18 @@ export const StackedText = memo(
       <FirstSC
         $partialType={firstPartialType}
         $truncate={truncate}
+        $color={firstColor}
       >
         {first}
       </FirstSC>
-      {second && <SecondSC $partialType={secondPartialType}>{second}</SecondSC>}
+      {second && (
+        <SecondSC
+          $partialType={secondPartialType}
+          $color={secondColor}
+        >
+          {second}
+        </SecondSC>
+      )}
     </StackedTextSC>
   )
 )
