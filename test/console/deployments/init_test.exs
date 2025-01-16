@@ -87,7 +87,7 @@ defmodule Console.Deployments.InitTest do
 
       assert res.settings.ai.enabled
       assert res.settings.ai.provider == :openai
-      assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai"
+      assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
     end
   end
 end
