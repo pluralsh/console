@@ -14,7 +14,7 @@ defmodule Console.AI.Fixer.Parent do
   defp do_parent_prompt(%Service{} = svc, info) do
     svc = Console.Repo.preload(svc, [:cluster, :repository, :parent])
     with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- code_prompt(f, folder(svc)) do
+         {:ok, code} <- svc_code_prompt(f, svc) do
       [
         {:user, """
         The #{info[:child]} is being instantiated using a Plural service-of-services structure, and will be represented as a #{info[:cr]} kubernetes
@@ -33,7 +33,7 @@ defmodule Console.AI.Fixer.Parent do
   defp do_parent_prompt(%GlobalService{} = global, info) do
     %{parent: svc} = global = Console.Repo.preload(global, [:project, :service, :template, parent: [:cluster, :repository, :parent]])
     with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- code_prompt(f, folder(svc)) do
+         {:ok, code} <- svc_code_prompt(f, svc) do
       [
         {:user, """
         The #{info[:child]} is being instantiated by a GlobalService named #{global.name} which is itself defined using a Plural service-of-services structure,

@@ -103,7 +103,7 @@ defmodule Console.GraphQl.Resolvers.AI do
     do: ChatSvc.pr(id, user)
 
   def add_context(%{thread_id: id, source: source} = args, %{context: %{current_user: user}}),
-    do: ChatSvc.add_context({source, args[:source_id]}, id, user)
+    do: ChatSvc.add_context(source, args[:source_id], id, user)
 
   def clear_chats(args, %{context: %{current_user: user}}),
     do: ChatSvc.clear(user, args[:thread_id], args[:before])

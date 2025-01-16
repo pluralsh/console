@@ -1,5 +1,6 @@
 defmodule Console.AI.Provider do
   import Console.Services.Base, only: [ok: 1]
+  import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
   alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
 
@@ -78,6 +79,7 @@ defmodule Console.AI.Provider do
         %{tool.name() => %{result: result}}
       else
         {:error, res} when is_binary(res) -> %{tool.name() => %{error: res}}
+        {:error, %Ecto.Changeset{} = cs} -> %{tool.name() => %{error: Enum.join(resolve_changeset(cs), ". ")}}
         {:error, [r | _] = errs} when is_binary(r) ->
           %{tool.name() => %{error: Enum.join(errs, "\n")}}
         err -> raise ArgumentError, message: "unknown tool error: #{inspect(err)}"
