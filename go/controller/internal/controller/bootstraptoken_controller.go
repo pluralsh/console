@@ -43,8 +43,8 @@ type BootstrapTokenReconciler struct {
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=bootstraptokens,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=bootstraptokens/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=bootstraptokens/finalizers,verbs=update
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=secrets,verbs=create
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=projects,verbs=get
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;create;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
