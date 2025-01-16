@@ -1,6 +1,7 @@
-import { type RefObject, useMemo } from 'react'
+import { type RefCallback, type RefObject, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
+  type UseFloatingReturn,
   autoUpdate,
   flip,
   offset,
@@ -24,7 +25,10 @@ export function useFloatingDropdown({
   minHeight?: string | number
   minWidth?: string | number
   triggerRef: RefObject<any>
-}) {
+}): {
+  floating: UseFloatingReturn
+  triggerRef: RefCallback<any>
+} {
   const theme = useTheme()
   const sizePadding = theme.spacing.xxsmall
 

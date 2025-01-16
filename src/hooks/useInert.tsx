@@ -1,7 +1,7 @@
-import { type Ref, useLayoutEffect, useRef } from 'react'
+import { type Ref, type RefCallback, useLayoutEffect, useRef } from 'react'
 import { mergeRefs } from 'react-merge-refs'
 
-export function useInert(inert: boolean, ref?: Ref<any>) {
+export function useInert(inert: boolean, ref?: Ref<any>): RefCallback<any> {
   const innerRef = useRef<any>(null)
   const finalRef = mergeRefs([innerRef, ref])
 

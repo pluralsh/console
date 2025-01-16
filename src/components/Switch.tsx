@@ -1,3 +1,4 @@
+import { type ComponentPropsWithRef } from '@react-spring/web'
 import { useMemo, useRef } from 'react'
 import {
   type AriaSwitchProps,
@@ -5,7 +6,7 @@ import {
   useSwitch as useAriaSwitch,
   useFocusRing,
 } from 'react-aria'
-import { useToggleState } from 'react-stately'
+import { type ToggleState, useToggleState } from 'react-stately'
 import styled from 'styled-components'
 
 export type SwitchStyleProps = {
@@ -109,7 +110,11 @@ export const useSwitch = ({
   disabled,
   readOnly,
   ...props
-}: UseSwitchProps) => {
+}: UseSwitchProps): {
+  inputProps: ComponentPropsWithRef<'input'>
+  styleProps: SwitchStyleProps
+  state: ToggleState
+} => {
   const ariaProps: AriaSwitchProps = {
     isSelected: checked,
     isDisabled: disabled,

@@ -33,7 +33,7 @@ export const Td = styled.td<{
     justifyContent: 'center',
     alignItems: center ? 'center' : 'flex-start',
     height: 'auto',
-    minHeight: 52,
+    minHeight: padCells ? 52 : 0,
 
     backgroundColor: highlight
       ? theme.colors[tableFillLevelToHighlightedCellBg[fillLevel]]
