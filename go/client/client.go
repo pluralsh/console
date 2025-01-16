@@ -73,6 +73,11 @@ type ConsoleClient interface {
 	DeleteGlobalService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteGlobalService, error)
 	KickService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*KickService, error)
 	KickServiceByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*KickServiceByHandle, error)
+	GetClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error)
+	GetClusterRegistrations(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistrations, error)
+	CreateClusterRegistration(ctx context.Context, attributes ClusterRegistrationCreateAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRegistration, error)
+	UpdateClusterRegistration(ctx context.Context, id string, attributes ClusterRegistrationUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRegistration, error)
+	DeleteClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterRegistration, error)
 	GetClusterGates(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetClusterGates, error)
 	PagedClusterGates(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGates, error)
 	PagedClusterGateIDs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGateIDs, error)
@@ -709,6 +714,80 @@ func (t *ClusterConditionFragment) GetReason() *string {
 		t = &ClusterConditionFragment{}
 	}
 	return t.Reason
+}
+
+type ClusterRegistrationFragment struct {
+	ID         string                 "json:\"id\" graphql:\"id\""
+	InsertedAt *string                "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	MachineID  string                 "json:\"machineId\" graphql:\"machineId\""
+	Name       string                 "json:\"name\" graphql:\"name\""
+	Handle     string                 "json:\"handle\" graphql:\"handle\""
+	Metadata   map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Tags       []*ClusterTags         "json:\"tags,omitempty\" graphql:\"tags\""
+	Creator    *UserFragment          "json:\"creator,omitempty\" graphql:\"creator\""
+	Project    *TinyProjectFragment   "json:\"project,omitempty\" graphql:\"project\""
+}
+
+func (t *ClusterRegistrationFragment) GetID() string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.ID
+}
+func (t *ClusterRegistrationFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *ClusterRegistrationFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *ClusterRegistrationFragment) GetMachineID() string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.MachineID
+}
+func (t *ClusterRegistrationFragment) GetName() string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Name
+}
+func (t *ClusterRegistrationFragment) GetHandle() string {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Handle
+}
+func (t *ClusterRegistrationFragment) GetMetadata() map[string]interface{} {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Metadata
+}
+func (t *ClusterRegistrationFragment) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Tags
+}
+func (t *ClusterRegistrationFragment) GetCreator() *UserFragment {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Creator
+}
+func (t *ClusterRegistrationFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &ClusterRegistrationFragment{}
+	}
+	return t.Project
 }
 
 type PipelineGateIDsEdgeFragment struct {
@@ -9851,6 +9930,35 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 	return t.Value
 }
 
+type GetClusterRegistrations_ClusterRegistrations_Edges struct {
+	Node *ClusterRegistrationFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *GetClusterRegistrations_ClusterRegistrations_Edges) GetNode() *ClusterRegistrationFragment {
+	if t == nil {
+		t = &GetClusterRegistrations_ClusterRegistrations_Edges{}
+	}
+	return t.Node
+}
+
+type GetClusterRegistrations_ClusterRegistrations struct {
+	PageInfo PageInfoFragment                                      "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*GetClusterRegistrations_ClusterRegistrations_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *GetClusterRegistrations_ClusterRegistrations) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &GetClusterRegistrations_ClusterRegistrations{}
+	}
+	return &t.PageInfo
+}
+func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterRegistrations_ClusterRegistrations_Edges {
+	if t == nil {
+		t = &GetClusterRegistrations_ClusterRegistrations{}
+	}
+	return t.Edges
+}
+
 type GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -12973,6 +13081,61 @@ func (t *KickServiceByHandle) GetKickService() *ServiceDeploymentExtended {
 		t = &KickServiceByHandle{}
 	}
 	return t.KickService
+}
+
+type GetClusterRegistration struct {
+	ClusterRegistration *ClusterRegistrationFragment "json:\"clusterRegistration,omitempty\" graphql:\"clusterRegistration\""
+}
+
+func (t *GetClusterRegistration) GetClusterRegistration() *ClusterRegistrationFragment {
+	if t == nil {
+		t = &GetClusterRegistration{}
+	}
+	return t.ClusterRegistration
+}
+
+type GetClusterRegistrations struct {
+	ClusterRegistrations *GetClusterRegistrations_ClusterRegistrations "json:\"clusterRegistrations,omitempty\" graphql:\"clusterRegistrations\""
+}
+
+func (t *GetClusterRegistrations) GetClusterRegistrations() *GetClusterRegistrations_ClusterRegistrations {
+	if t == nil {
+		t = &GetClusterRegistrations{}
+	}
+	return t.ClusterRegistrations
+}
+
+type CreateClusterRegistration struct {
+	CreateClusterRegistration *ClusterRegistrationFragment "json:\"createClusterRegistration,omitempty\" graphql:\"createClusterRegistration\""
+}
+
+func (t *CreateClusterRegistration) GetCreateClusterRegistration() *ClusterRegistrationFragment {
+	if t == nil {
+		t = &CreateClusterRegistration{}
+	}
+	return t.CreateClusterRegistration
+}
+
+type UpdateClusterRegistration struct {
+	UpdateClusterRegistration *ClusterRegistrationFragment "json:\"updateClusterRegistration,omitempty\" graphql:\"updateClusterRegistration\""
+}
+
+func (t *UpdateClusterRegistration) GetUpdateClusterRegistration() *ClusterRegistrationFragment {
+	if t == nil {
+		t = &UpdateClusterRegistration{}
+	}
+	return t.UpdateClusterRegistration
+}
+
+type DeleteClusterRegistration struct {
+	DeleteClusterRegistration *ClusterRegistrationFragment "json:\"deleteClusterRegistration,omitempty\" graphql:\"deleteClusterRegistration\""
+}
+
+func (t *DeleteClusterRegistration) GetDeleteClusterRegistration() *ClusterRegistrationFragment {
+	if t == nil {
+		t = &DeleteClusterRegistration{}
+	}
+	return t.DeleteClusterRegistration
 }
 
 type GetClusterGates struct {
@@ -20096,6 +20259,301 @@ func (c *Client) KickServiceByHandle(ctx context.Context, cluster string, name s
 
 	var res KickServiceByHandle
 	if err := c.Client.Post(ctx, "KickServiceByHandle", KickServiceByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterRegistrationDocument = `query GetClusterRegistration ($id: ID!) {
+	clusterRegistration(id: $id) {
+		... ClusterRegistrationFragment
+	}
+}
+fragment ClusterRegistrationFragment on ClusterRegistration {
+	id
+	insertedAt
+	updatedAt
+	machineId
+	name
+	handle
+	metadata
+	tags {
+		... ClusterTags
+	}
+	creator {
+		... UserFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetClusterRegistration
+	if err := c.Client.Post(ctx, "GetClusterRegistration", GetClusterRegistrationDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterRegistrationsDocument = `query GetClusterRegistrations ($after: String, $first: Int, $before: String, $last: Int) {
+	clusterRegistrations(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... ClusterRegistrationFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ClusterRegistrationFragment on ClusterRegistration {
+	id
+	insertedAt
+	updatedAt
+	machineId
+	name
+	handle
+	metadata
+	tags {
+		... ClusterTags
+	}
+	creator {
+		... UserFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetClusterRegistrations(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistrations, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res GetClusterRegistrations
+	if err := c.Client.Post(ctx, "GetClusterRegistrations", GetClusterRegistrationsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateClusterRegistrationDocument = `mutation CreateClusterRegistration ($attributes: ClusterRegistrationCreateAttributes!) {
+	createClusterRegistration(attributes: $attributes) {
+		... ClusterRegistrationFragment
+	}
+}
+fragment ClusterRegistrationFragment on ClusterRegistration {
+	id
+	insertedAt
+	updatedAt
+	machineId
+	name
+	handle
+	metadata
+	tags {
+		... ClusterTags
+	}
+	creator {
+		... UserFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) CreateClusterRegistration(ctx context.Context, attributes ClusterRegistrationCreateAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRegistration, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateClusterRegistration
+	if err := c.Client.Post(ctx, "CreateClusterRegistration", CreateClusterRegistrationDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateClusterRegistrationDocument = `mutation UpdateClusterRegistration ($id: ID!, $attributes: ClusterRegistrationUpdateAttributes!) {
+	updateClusterRegistration(id: $id, attributes: $attributes) {
+		... ClusterRegistrationFragment
+	}
+}
+fragment ClusterRegistrationFragment on ClusterRegistration {
+	id
+	insertedAt
+	updatedAt
+	machineId
+	name
+	handle
+	metadata
+	tags {
+		... ClusterTags
+	}
+	creator {
+		... UserFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) UpdateClusterRegistration(ctx context.Context, id string, attributes ClusterRegistrationUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRegistration, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateClusterRegistration
+	if err := c.Client.Post(ctx, "UpdateClusterRegistration", UpdateClusterRegistrationDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteClusterRegistrationDocument = `mutation DeleteClusterRegistration ($id: ID!) {
+	deleteClusterRegistration(id: $id) {
+		... ClusterRegistrationFragment
+	}
+}
+fragment ClusterRegistrationFragment on ClusterRegistration {
+	id
+	insertedAt
+	updatedAt
+	machineId
+	name
+	handle
+	metadata
+	tags {
+		... ClusterTags
+	}
+	creator {
+		... UserFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) DeleteClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterRegistration, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteClusterRegistration
+	if err := c.Client.Post(ctx, "DeleteClusterRegistration", DeleteClusterRegistrationDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -27882,6 +28340,11 @@ var DocumentOperationNames = map[string]string{
 	DeleteGlobalServiceDocument:                       "DeleteGlobalService",
 	KickServiceDocument:                               "KickService",
 	KickServiceByHandleDocument:                       "KickServiceByHandle",
+	GetClusterRegistrationDocument:                    "GetClusterRegistration",
+	GetClusterRegistrationsDocument:                   "GetClusterRegistrations",
+	CreateClusterRegistrationDocument:                 "CreateClusterRegistration",
+	UpdateClusterRegistrationDocument:                 "UpdateClusterRegistration",
+	DeleteClusterRegistrationDocument:                 "DeleteClusterRegistration",
 	GetClusterGatesDocument:                           "GetClusterGates",
 	PagedClusterGatesDocument:                         "PagedClusterGates",
 	PagedClusterGateIDsDocument:                       "PagedClusterGateIDs",
