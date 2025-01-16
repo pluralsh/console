@@ -6819,7 +6819,8 @@ export type RootQueryTypeClusterProvidersArgs = {
 
 
 export type RootQueryTypeClusterRegistrationArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  machineId?: InputMaybe<Scalars['String']['input']>;
 };
 
 

@@ -74,7 +74,8 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_usage!(id), do: Repo.get!(ClusterUsage, id) |> Repo.preload([:cluster])
 
-  def get_cluster_registration(id), do: Repo.get!(ClusterRegistration, id)
+  def get_cluster_registration!(id), do: Repo.get!(ClusterRegistration, id)
+  def get_registration_by_machine_id!(id), do: Repo.get_by!(ClusterRegistration, machine_id: id)
 
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)

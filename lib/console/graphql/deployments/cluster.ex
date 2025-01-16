@@ -1093,7 +1093,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :cluster_registration, :cluster_registration do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,         :id
+      arg :machine_id, :string
 
       resolve &Deployments.resolve_cluster_registration/2
     end

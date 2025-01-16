@@ -211,7 +211,7 @@ type RootQueryType {
 
   clusterUsage(id: ID!): ClusterUsage
 
-  clusterRegistration(id: ID!): ClusterRegistration
+  clusterRegistration(id: ID, machineId: String): ClusterRegistration
 
   clusterRegistrations(after: String, first: Int, before: String, last: Int): ClusterRegistrationConnection
 

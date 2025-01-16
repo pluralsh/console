@@ -90,7 +90,7 @@ defmodule Console.Deployments.Init do
         Map.put(attrs, :ai, %{
           provider: :openai,
           enabled: true,
-          openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai"}
+          openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
         })
       _ -> attrs
     end
