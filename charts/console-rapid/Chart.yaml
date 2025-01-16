@@ -2,22 +2,22 @@ apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
 appVersion: 0.10.46
-version: 0.3.81
+version: 0.3.82
 dependencies:
   - name: kas
-    version: 0.1.0
+    version: 0.1.1
     repository: file://../../plural/helm/kas
   - name: controller
     version: 0.0.101
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
-    version: 7.10.0
+    version: 7.10.1
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
   - name: flux2
-    version: 2.11.1
+    version: 2.14.1
     repository: https://fluxcd-community.github.io/helm-charts
     condition: flux2.enabled
 type: application
