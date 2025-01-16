@@ -27,6 +27,65 @@ func (_m *ConsoleClientMock) EXPECT() *ConsoleClientMock_Expecter {
 	return &ConsoleClientMock_Expecter{mock: &_m.Mock}
 }
 
+// CreateBootstrapToken provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateBootstrapToken(ctx context.Context, attributes client.BootstrapTokenAttributes) (*client.BootstrapTokenBase, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateBootstrapToken")
+	}
+
+	var r0 *client.BootstrapTokenBase
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.BootstrapTokenAttributes) (*client.BootstrapTokenBase, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.BootstrapTokenAttributes) *client.BootstrapTokenBase); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.BootstrapTokenBase)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.BootstrapTokenAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateBootstrapToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateBootstrapToken'
+type ConsoleClientMock_CreateBootstrapToken_Call struct {
+	*mock.Call
+}
+
+// CreateBootstrapToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.BootstrapTokenAttributes
+func (_e *ConsoleClientMock_Expecter) CreateBootstrapToken(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateBootstrapToken_Call {
+	return &ConsoleClientMock_CreateBootstrapToken_Call{Call: _e.mock.On("CreateBootstrapToken", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateBootstrapToken_Call) Run(run func(ctx context.Context, attributes client.BootstrapTokenAttributes)) *ConsoleClientMock_CreateBootstrapToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.BootstrapTokenAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateBootstrapToken_Call) Return(_a0 *client.BootstrapTokenBase, _a1 error) *ConsoleClientMock_CreateBootstrapToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateBootstrapToken_Call) RunAndReturn(run func(context.Context, client.BootstrapTokenAttributes) (*client.BootstrapTokenBase, error)) *ConsoleClientMock_CreateBootstrapToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateCluster provides a mock function with given fields: attrs
 func (_m *ConsoleClientMock) CreateCluster(attrs client.ClusterAttributes) (*client.ClusterFragment, error) {
 	ret := _m.Called(attrs)
@@ -1209,6 +1268,53 @@ func (_c *ConsoleClientMock_CreateStackDefinition_Call) Return(_a0 *client.Stack
 }
 
 func (_c *ConsoleClientMock_CreateStackDefinition_Call) RunAndReturn(run func(context.Context, client.StackDefinitionAttributes) (*client.StackDefinitionFragment, error)) *ConsoleClientMock_CreateStackDefinition_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteBootstrapToken provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteBootstrapToken(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteBootstrapToken")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteBootstrapToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteBootstrapToken'
+type ConsoleClientMock_DeleteBootstrapToken_Call struct {
+	*mock.Call
+}
+
+// DeleteBootstrapToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteBootstrapToken(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteBootstrapToken_Call {
+	return &ConsoleClientMock_DeleteBootstrapToken_Call{Call: _e.mock.On("DeleteBootstrapToken", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteBootstrapToken_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteBootstrapToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteBootstrapToken_Call) Return(_a0 error) *ConsoleClientMock_DeleteBootstrapToken_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteBootstrapToken_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteBootstrapToken_Call {
 	_c.Call.Return(run)
 	return _c
 }

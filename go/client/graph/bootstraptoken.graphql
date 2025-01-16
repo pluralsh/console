@@ -1,0 +1,16 @@
+fragment BootstrapTokenBase on BootstrapToken {
+  id
+  token
+}
+
+mutation CreateBootstrapToken($attributes: BootstrapTokenAttributes!) {
+  createBootstrapToken(attributes: $attributes) {
+    ...BootstrapTokenBase
+  }
+}
+
+mutation DeleteBootstrapToken($id: ID!) {
+  deleteBootstrapToken(id: $id) {
+    id
+  }
+}
