@@ -91,13 +91,34 @@ spec:
                 x-kubernetes-validations:
                 - message: Project is immutable
                   rule: self == oldSelf
-              userID:
-                description: User is an optional email to be user identity for this
+              tokenSecretRef:
+                description: |-
+                  TokenSecretRef points to an output secret where bootstrap token will be stored.
+                  It will be created automatically in the same namespace as BootstrapToken and cannot exist.
+                properties:
+                  name:
+                    description: name is unique within a namespace to reference a
+                      secret resource.
+                    type: string
+                  namespace:
+                    description: namespace defines the space within which the secret
+                      name must be unique.
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+                x-kubernetes-validations:
+                - message: Token secret is immutable
+                  rule: self == oldSelf
+              user:
+                description: User is an optional email to the user identity for this
                   bootstrap token in audit logs
                 type: string
                 x-kubernetes-validations:
                 - message: User is immutable
                   rule: self == oldSelf
+            required:
+            - projectRef
+            - tokenSecretRef
             type: object
           status:
             properties:

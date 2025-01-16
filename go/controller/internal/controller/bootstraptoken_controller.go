@@ -25,6 +25,12 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
+const (
+	// BootstrapTokenProtectionFinalizerName defines name for the main finalizer that synchronizes
+	// resource deletion from the Console API prior to removing the CRD.
+	BootstrapTokenProtectionFinalizerName = "projects.deployments.plural.sh/bootstrap-token-protection"
+)
+
 // BootstrapTokenReconciler reconciles a BootstrapToken object
 type BootstrapTokenReconciler struct {
 	client.Client
@@ -67,9 +73,10 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}()
 
-	// Handle resource deletion
-	if !bootstrapToken.GetDeletionTimestamp().IsZero() {
-		return in.handleDelete(ctx, bootstrapToken)
+	// Handle proper resource deletion via finalizer
+	result := in.addOrRemoveFinalizer(ctx, bootstrapToken)
+	if result != nil {
+		return *result, nil
 	}
 
 	// Check if token already exists and return early.
@@ -77,8 +84,8 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
-	// Mark resource as managed by this operator.
-	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Create token and generate secret
 	apiBootstrapToken, err := in.ensure(ctx, bootstrapToken)
@@ -118,16 +125,37 @@ func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapTok
 	return project, nil
 }
 
-func (in *BootstrapTokenReconciler) handleDelete(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (ctrl.Result, error) {
+func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) *ctrl.Result {
+	// If object is not being deleted and if it does not have our finalizer,
+	// then lets add the finalizer. This is equivalent to registering our finalizer.
+	if bootstrapToken.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(bootstrapToken, BootstrapTokenProtectionFinalizerName) {
+		controllerutil.AddFinalizer(bootstrapToken, BootstrapTokenProtectionFinalizerName)
+	}
+
+	// If object is not being deleted, do nothing
+	if bootstrapToken.GetDeletionTimestamp().IsZero() {
+		return nil
+	}
+
+	// if object is being deleted but there is no console ID available to delete the resource
+	// remove the finalizer and stop reconciliation
+	if !bootstrapToken.Status.HasID() {
+		// stop reconciliation as there is no console ID available to delete the resource
+		controllerutil.RemoveFinalizer(bootstrapToken, BootstrapTokenProtectionFinalizerName)
+		return &ctrl.Result{}
+	}
+
+	// try to delete the resource
 	if err := in.ConsoleClient.DeleteBootstrapToken(ctx, bootstrapToken.Status.GetID()); err != nil {
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return &requeue
 	}
 
-	// bootstrapToken deletion is synchronous so we can just stop reconciling
-	return ctrl.Result{}, nil
+	// stop reconciliation as the item has been deleted
+	controllerutil.RemoveFinalizer(bootstrapToken, BootstrapTokenProtectionFinalizerName)
+	return &ctrl.Result{}
 }
 
 func (in *BootstrapTokenReconciler) ensure(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*consoleapi.BootstrapTokenBase, error) {
@@ -173,6 +201,7 @@ func (in *BootstrapTokenReconciler) ensure(ctx context.Context, bootstrapToken *
 }
 
 func (in *BootstrapTokenReconciler) createSecret(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken, token string) error {
+	logger := log.FromContext(ctx)
 	secret := &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      bootstrapToken.Spec.TokenSecretRef.Name,
@@ -181,7 +210,17 @@ func (in *BootstrapTokenReconciler) createSecret(ctx context.Context, bootstrapT
 		StringData: map[string]string{"token": token},
 	}
 
-	return in.Create(ctx, secret)
+	if err := in.Create(ctx, secret); err != nil {
+		return err
+	}
+
+	// This is the best effort action only as we can't do a full reconcile when owner ref fails.
+	// Token and secret are already created at this point.
+	if err := utils.TryAddOwnerRef(ctx, in.Client, bootstrapToken, secret, in.Scheme); err != nil {
+		logger.Error(err, "unable to set owner reference on bootstrap token")
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

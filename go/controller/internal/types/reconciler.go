@@ -3,11 +3,12 @@ package types
 import (
 	"fmt"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/controller"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // Reconciler is a name of reconciler supported by this controller.
@@ -42,6 +43,7 @@ const (
 	CatalogReconciler               Reconciler = "catalogprovider"
 	OIDCProviderReconciler          Reconciler = "oidcprovider"
 	GeneratedSecretReconciler       Reconciler = "generatedsecret"
+	BootstrapTokenReconciler        Reconciler = "bootstraptoken"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -100,6 +102,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case OIDCProviderReconciler:
 		fallthrough
 	case GeneratedSecretReconciler:
+		fallthrough
+	case BootstrapTokenReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -317,6 +321,13 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}, nil
+	case BootstrapTokenReconciler:
+		return &controller.BootstrapTokenReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -358,6 +369,7 @@ func Reconcilers() ReconcilerList {
 		CatalogReconciler,
 		OIDCProviderReconciler,
 		GeneratedSecretReconciler,
+		BootstrapTokenReconciler,
 	}
 }
 

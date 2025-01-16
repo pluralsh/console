@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: token-test
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Project
+metadata:
+  name: default
+spec:
+  name: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: BootstrapToken
+metadata:
+  name: bootstrap-token
+  namespace: token-test
+spec:
+  user: sebastian@plural.sh # optional user email that should be tied to the token
+  projectRef:
+    name: default
+  tokenSecretRef:
+    name: bootstrap-token

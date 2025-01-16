@@ -26,6 +26,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - bootstraptokens
   - catalogs
   - clusterrestores
   - clusterrestoretriggers
@@ -65,6 +66,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - bootstraptokens/finalizers
   - catalogs/finalizers
   - clusterrestores/finalizers
   - clusterrestoretriggers/finalizers
@@ -98,6 +100,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - bootstraptokens/status
   - catalogs/status
   - clusterrestores/status
   - clusterrestoretriggers/status
@@ -130,3 +133,9 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - secrets
+  verbs:
+  - create

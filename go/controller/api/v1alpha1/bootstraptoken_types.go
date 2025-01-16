@@ -36,7 +36,7 @@ type BootstrapTokenSpec struct {
 	// User is an optional email to the user identity for this bootstrap token in audit logs
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
 	// +kubebuilder:validation:Optional
-	User *string `json:"userID,omitempty"`
+	User *string `json:"user,omitempty"`
 
 	// ProjectRef is the optional project that all clusters spawned by generated bootstrap token will belong to
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Project is immutable"
