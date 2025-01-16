@@ -47,8 +47,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> allow(user, :read)
   end
 
+  def resolve_cluster_registration(%{machine_id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_registration_by_machine_id!(id)
+    |> allow(user, :read)
+  end
   def resolve_cluster_registration(%{id: id}, %{context: %{current_user: user}}) do
-    Clusters.get_cluster_registration(id)
+    Clusters.get_cluster_registration!(id)
     |> allow(user, :read)
   end
 

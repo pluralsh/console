@@ -758,6 +758,19 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert found["id"] == reg.id
     end
+
+    test "bootstrap token creators can read by machine id" do
+      user = bootstrap_user()
+      reg  = insert(:cluster_registration, creator: user)
+
+      {:ok, %{data: %{"clusterRegistration" => found}}} = run_query("""
+        query Reg($machineId: String!) {
+          clusterRegistration(machineId: $machineId) { id }
+        }
+      """, %{"machineId" => reg.machine_id}, %{current_user: user})
+
+      assert found["id"] == reg.id
+    end
   end
 
   describe "clusterRegistrations" do
