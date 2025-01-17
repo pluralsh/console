@@ -110,6 +110,7 @@ function CreatePrModalBase({
 
   return (
     <Modal
+      onOpenAutoFocus={(e) => e.preventDefault()}
       asForm
       onSubmit={(e) => {
         e.preventDefault()
