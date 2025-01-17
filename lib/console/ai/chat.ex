@@ -251,8 +251,8 @@ defmodule Console.AI.Chat do
   @doc """
   Adds context to the given chat thread from a source, eg a service or stack
   """
-  @spec add_context({context_source, binary}, binary, User.t) :: chat_list_resp
-  def add_context({source_type, id}, thread_id, %User{} = user) do
+  @spec add_context(context_source, binary, binary, User.t) :: chat_list_resp
+  def add_context(source_type, id, thread_id, %User{} = user) do
     Fixer.Base.raw()
     source = context_source(source_type, id)
     with {:ok, source} <- allow(source, user, :read),

@@ -326,7 +326,7 @@ defmodule Console.AI.ChatSyncTest do
 
       thread = insert(:chat_thread, user: user)
 
-      {:ok, [_ | _] = msgs} = Chat.add_context({:service, svc.id}, thread.id, user)
+      {:ok, [_ | _] = msgs} = Chat.add_context(:service, svc.id, thread.id, user)
 
       assert Enum.any?(msgs, & &1.type == :file)
     end
@@ -340,7 +340,7 @@ defmodule Console.AI.ChatSyncTest do
       )
       thread = insert(:chat_thread, user: user)
 
-      {:error, _} = Chat.add_context({:service, svc.id}, thread.id, user)
+      {:error, _} = Chat.add_context(:service, svc.id, thread.id, user)
     end
   end
 end

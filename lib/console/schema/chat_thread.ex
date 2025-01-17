@@ -37,7 +37,8 @@ defmodule Console.Schema.ChatThread do
       join: nt in "numbered_threads",
         on: nt.id == t.id,
       where: (nt.row_number > @max_threads and t.inserted_at <= ^expired) or
-             (not is_nil(t.last_message_at) and t.last_message_at < ^too_old)
+             (not is_nil(t.last_message_at) and t.last_message_at < ^too_old) or
+             (is_nil(t.last_message_at) and t.inserted_at < ^too_old)
     )
   end
 

@@ -10,7 +10,7 @@ defmodule Console.AI.Fixer.Service do
   def prompt(%Service{} = svc, insight) do
     svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent])
     with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- code_prompt(f, folder(svc)) do
+         {:ok, code} <- svc_code_prompt(f, svc) do
       Enum.concat([
         {:user, """
           We've found the following insight about a Plural service that is currently in #{svc.status} state:
@@ -51,6 +51,10 @@ defmodule Console.AI.Fixer.Service do
       (if h.values, do: "helm values overrides:\n#{h.values}", else: nil),
       (if is_list(h.values_files) && !Enum.empty?(h.values_files), do: "values files: #{Enum.join(h.values_files, ",")}", else: nil)
     ])}
+
+    Changes to helm charts should be focused on values files or values overrides, if there is no value file present,
+    simply add the customized values as the `spec.helm.values` field, which supports any unstructured map type,
+    of the associated ServiceDeployment kubernetes custom resource for this service.
     """
   end
   def helm_details(_), do: nil
