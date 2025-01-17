@@ -141,8 +141,8 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 			return &requeue
 		}
 
-		// Remove Pipeline from Console API if it exists.
-		if exists {
+		// Remove project from Console API if it exists and is not readonly
+		if exists && !project.Status.IsReadonly() {
 			if err := in.ConsoleClient.DeleteProject(ctx, project.Status.GetID()); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
