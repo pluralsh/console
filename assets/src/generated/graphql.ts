@@ -10683,6 +10683,8 @@ export type ComponentTreeQuery = { __typename?: 'RootQueryType', componentTree?:
 
 export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
+export type ClusterUsageHistoryFragment = { __typename?: 'ClusterUsageHistory', id: string, timestamp: string, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null };
+
 export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
 
 export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
@@ -10699,6 +10701,17 @@ export type ClusterUsagesQueryVariables = Exact<{
 
 
 export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+
+export type ClusterUsageHistoryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterUsageHistoryQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null, history?: { __typename?: 'ClusterUsageHistoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageHistoryEdge', node?: { __typename?: 'ClusterUsageHistory', id: string, timestamp: string, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null } | null } | null> | null } | null } | null };
 
 export type ClusterUsageNamespacesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13450,6 +13463,15 @@ export const ClusterUsageTinyFragmentDoc = gql`
   }
 }
     ${ClusterTinyFragmentDoc}`;
+export const ClusterUsageHistoryFragmentDoc = gql`
+    fragment ClusterUsageHistory on ClusterUsageHistory {
+  id
+  timestamp
+  cpuCost
+  memoryCost
+  storageCost
+}
+    `;
 export const ClusterNamespaceUsageFragmentDoc = gql`
     fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
@@ -20608,6 +20630,64 @@ export type ClusterUsagesQueryHookResult = ReturnType<typeof useClusterUsagesQue
 export type ClusterUsagesLazyQueryHookResult = ReturnType<typeof useClusterUsagesLazyQuery>;
 export type ClusterUsagesSuspenseQueryHookResult = ReturnType<typeof useClusterUsagesSuspenseQuery>;
 export type ClusterUsagesQueryResult = Apollo.QueryResult<ClusterUsagesQuery, ClusterUsagesQueryVariables>;
+export const ClusterUsageHistoryDocument = gql`
+    query ClusterUsageHistory($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+  clusterUsage(id: $id) {
+    id
+    cpuCost
+    memoryCost
+    storageCost
+    history(after: $after, first: $first, before: $before, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterUsageHistory
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterUsageHistoryFragmentDoc}`;
+
+/**
+ * __useClusterUsageHistoryQuery__
+ *
+ * To run a query within a React component, call `useClusterUsageHistoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterUsageHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterUsageHistoryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterUsageHistoryQuery(baseOptions: Apollo.QueryHookOptions<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>(ClusterUsageHistoryDocument, options);
+      }
+export function useClusterUsageHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>(ClusterUsageHistoryDocument, options);
+        }
+export function useClusterUsageHistorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>(ClusterUsageHistoryDocument, options);
+        }
+export type ClusterUsageHistoryQueryHookResult = ReturnType<typeof useClusterUsageHistoryQuery>;
+export type ClusterUsageHistoryLazyQueryHookResult = ReturnType<typeof useClusterUsageHistoryLazyQuery>;
+export type ClusterUsageHistorySuspenseQueryHookResult = ReturnType<typeof useClusterUsageHistorySuspenseQuery>;
+export type ClusterUsageHistoryQueryResult = Apollo.QueryResult<ClusterUsageHistoryQuery, ClusterUsageHistoryQueryVariables>;
 export const ClusterUsageNamespacesDocument = gql`
     query ClusterUsageNamespaces($id: ID!, $after: String, $first: Int, $before: String, $last: Int, $q: String) {
   clusterUsage(id: $id) {
@@ -25082,6 +25162,7 @@ export const namedOperations = {
     ServiceStatuses: 'ServiceStatuses',
     ComponentTree: 'ComponentTree',
     ClusterUsages: 'ClusterUsages',
+    ClusterUsageHistory: 'ClusterUsageHistory',
     ClusterUsageNamespaces: 'ClusterUsageNamespaces',
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
     Groups: 'Groups',
@@ -25353,6 +25434,7 @@ export const namedOperations = {
     ServiceStatusCount: 'ServiceStatusCount',
     ComponentTree: 'ComponentTree',
     ClusterUsageTiny: 'ClusterUsageTiny',
+    ClusterUsageHistory: 'ClusterUsageHistory',
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     GroupMember: 'GroupMember',

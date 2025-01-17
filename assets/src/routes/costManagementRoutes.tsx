@@ -5,11 +5,13 @@ import {
   CM_RECOMMENDATIONS_REL_PATH,
   CM_NAMESPACES_REL_PATH,
   COST_MANAGEMENT_PARAM_ID,
+  CM_OVERVIEW_REL_PATH,
 } from './costManagementRoutesConsts'
 import { CostManagement } from 'components/cost-management/CostManagement'
 import { CostManagementDetails } from 'components/cost-management/details/CostManagementDetails'
 import { CostManagementDetailsRecommendations } from 'components/cost-management/details/CostManagementDetailsRecommendations'
 import { CostManagementDetailsNamespaces } from 'components/cost-management/details/CostManagementDetailsNamespaces'
+import { CostManagementDetailsOverview } from 'components/cost-management/details/CostManagementDetailsOverview'
 
 export const costManagementRoutes = [
   <Route
@@ -25,9 +27,13 @@ export const costManagementRoutes = [
       element={
         <Navigate
           replace
-          to={CM_NAMESPACES_REL_PATH}
+          to={CM_OVERVIEW_REL_PATH}
         />
       }
+    />
+    <Route
+      path={CM_OVERVIEW_REL_PATH}
+      element={<CostManagementDetailsOverview />}
     />
     <Route
       path={CM_NAMESPACES_REL_PATH}

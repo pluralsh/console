@@ -1,19 +1,14 @@
 import { Flex, FlexProps } from 'honorable'
-import { forwardRef } from 'react'
 
-export const FullHeightTableWrap = forwardRef<HTMLElement, FlexProps>(
-  (props, ref) => (
+// TODO: this is now folded into tables with fullHeightWrap=true
+// all instances should be replaced with that so this component can be removed
+export function FullHeightTableWrap(props: FlexProps) {
+  return (
     <Flex
-      ref={ref}
       direction="column"
       height="100%"
       overflow="hidden"
-      {...{
-        '& > div': {
-          maxHeight: '100%',
-        },
-      }}
       {...props}
     />
   )
-)
+}

@@ -1,19 +1,17 @@
 import { ResponsiveLine } from '@nivo/line'
-import { Card } from '@pluralsh/design-system'
-import { Flex, Span } from 'honorable'
+import { Card, Flex } from '@pluralsh/design-system'
+import dayjs from 'dayjs'
 import { last } from 'lodash'
-import moment from 'moment'
 import { Key, useMemo, useState } from 'react'
-import { DefaultTheme, useTheme } from 'styled-components'
-import { DEFAULT_THEME } from 'theme'
+import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
+import { CaptionP } from './typography/Text'
 
 export function dateFormat(date) {
-  return moment(date).format('MM/DD h:mm:ss a')
+  return dayjs(date).format('MM/DD h:mm:ss a')
 }
 
-const graphTheme = (theme: DefaultTheme) => ({
-  ...DEFAULT_THEME,
+export const graphTheme = (theme: DefaultTheme) => ({
   axis: {
     ticks: {
       text: {
@@ -36,29 +34,28 @@ const graphTheme = (theme: DefaultTheme) => ({
   },
 })
 
-function SliceTooltip({ point: { serieColor, serieId, data } }) {
+const SliceTootipWrapperSC = styled(Card)(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+}))
+
+export function SliceTooltip({ point: { serieColor, serieId, data } }) {
   return (
-    <Card
-      display="flex"
-      alignItems="center"
-      fillLevel={2}
-      paddingVertical="xxsmall"
-      paddingHorizontal="xsmall"
-      direction="row"
-      gap="xsmall"
-      caption
-    >
+    <SliceTootipWrapperSC fillLevel={2}>
       <Flex
         width={12}
         height={12}
         backgroundColor={serieColor}
       />
       <div>
-        {serieId}: <Span style={{ fontWeight: 700 }}>{data.yFormatted}</Span>
+        {serieId}: <span css={{ fontWeight: 700 }}>{data.yFormatted}</span>
         <br />
         {data.xFormatted}
       </div>
-    </Card>
+    </SliceTootipWrapperSC>
   )
 }
 
@@ -81,8 +78,7 @@ export function Graph({
     return data
   }, [data, selected])
 
-  if (graph.length === 0)
-    return <Span css={theme.partials.text.caption}>no data</Span>
+  if (graph.length === 0) return <CaptionP>no data</CaptionP>
 
   const hasData = !!graph[0].data[0]
 
