@@ -10292,7 +10292,7 @@ __metadata:
     eslint-plugin-prettier: 5.2.1
     eslint-plugin-react: 7.37.1
     eslint-plugin-react-hooks: 4.6.2
-    filesize: 10.0.12
+    filesize: 10.1.6
     fuse.js: 6.6.2
     globals: 15.10.0
     graphql-ws: ^5.16.0
@@ -13006,10 +13006,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filesize@npm:10.0.12":
-  version: 10.0.12
-  resolution: "filesize@npm:10.0.12"
-  checksum: 1719683813fabf8afb39133871b80dcc71f31695c70b866814d7fd15151888fc3405d6ca0b9ac2665c59c046e7104e8776e938e6f5c68b2fda060d35d256416b
+"filesize@npm:10.1.6":
+  version: 10.1.6
+  resolution: "filesize@npm:10.1.6"
+  checksum: a797a9d41c8f27a9ae334d23f99fc5d903eac5d03c82190dc163901205435b56626fe1260c779ba3e87a2a34d426f19ff264c3f7d956e00f2d3ac69760b52e33
   languageName: node
   linkType: hard
 

@@ -112,12 +112,25 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
 
 const formatCpu = (cpu: Nullable<number>) => {
   if (isNullish(cpu)) return '--'
-  return `${Number((cpu * 1000).toFixed(10))}m`
+  if (cpu > 1) return `${Number(cpu).toFixed(1)}`
+
+  return `${round(cpu * 1000, 10)}m`
 }
+
+const round = (val: number, mult: number) => Math.round(val / mult) * mult
 
 const formatMemory = (memory: Nullable<number>) => {
   if (isNullish(memory)) return '--'
-  return filesize(memory, { spacer: '' }).toLowerCase()
+  return filesize(memory, {
+    spacer: '',
+    symbols: {
+      KB: 'Ki',
+      MB: 'Mi',
+      GB: 'Gi',
+      TB: 'Ti',
+      PB: 'Pi',
+    },
+  })
 }
 
 const BoldTextSC = styled.strong(({ theme }) => ({
