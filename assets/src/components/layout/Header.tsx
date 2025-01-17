@@ -10,7 +10,7 @@ import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLaun
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
 import DemoBanner from './DemoBanner'
-import ProjectSelect from './ProjectSelect'
+import ProjectSelect from './HeaderProjectSelect'
 
 const APP_ICON_LIGHT = '/console-logo.png'
 const APP_ICON_DARK = '/console-white.png'

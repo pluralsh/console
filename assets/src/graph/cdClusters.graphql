@@ -353,6 +353,7 @@ query Clusters(
 fragment ClusterMinimal on Cluster {
   id
   name
+  handle
   provider {
     cloud
   }
@@ -372,7 +373,6 @@ fragment ClusterTiny on Cluster {
 
 fragment ClusterBasic on Cluster {
   ...ClusterTiny
-  handle
   protect
   deletedAt
   version

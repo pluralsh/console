@@ -1,4 +1,6 @@
 import { Input, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
+import { ClusterHandleSelector } from 'components/cd/utils/ClusterHandleSelector'
+import ProjectSelector from 'components/utils/ProjectSelector'
 import { ConfigurationType, PrConfiguration } from 'generated/graphql'
 
 import { parseToBool } from 'utils/parseToBool'
@@ -22,6 +24,21 @@ export function PrConfigurationInput({
   }
 
   switch (type) {
+    case ConfigurationType.Cluster:
+      return (
+        <ClusterHandleSelector
+          clusterHandle={value}
+          setClusterHandle={setValue}
+        />
+      )
+    case ConfigurationType.Project:
+      return (
+        <ProjectSelector
+          selectedProject={value}
+          setSelectedProject={setValue}
+          selectionValueType="name"
+        />
+      )
     case ConfigurationType.Bool:
       return (
         <Switch
