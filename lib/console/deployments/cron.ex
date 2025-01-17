@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
+  import Console, only: [clamp: 1]
   alias Console.Deployments.{Services, Clusters, Global, Stacks, Git}
   alias Console.Services.Users
   alias Console.Schema.{
@@ -30,14 +31,14 @@ defmodule Console.Deployments.Cron do
     Service.deleted()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn %{namespace: ns} = svc ->
+    |> Task.async_stream(fn %{namespace: ns} = svc ->
       Logger.info "pruning service #{svc.id}"
       case Repo.preload(svc, [:components]) do
         %Service{components: []} -> Services.hard_delete(svc)
         %Service{components: [%ServiceComponent{kind: "Namespace", name: ^ns}]} -> Services.hard_delete(svc)
         _ -> Logger.info "ignoring service #{svc.id}, not drained"
       end
-    end)
+    end, max_concurrency: clamp(Services.count_all()))
     |> Stream.run()
   end
 
@@ -46,13 +47,13 @@ defmodule Console.Deployments.Cron do
     Cluster.deleted()
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn cluster ->
+    |> Task.async_stream(fn cluster ->
       Logger.info "pruning cluster #{cluster.id}"
       case Clusters.draining?(cluster) do
         true -> Logger.info "ignoring cluster #{cluster.id}, not drained"
         false -> Clusters.drained(cluster)
       end
-    end)
+    end, max_concurrency: clamp(Clusters.count()))
     |> Stream.run()
   end
 
@@ -78,7 +79,7 @@ defmodule Console.Deployments.Cron do
           Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
           Logger.error(Exception.format(:error, e, __STACKTRACE__))
       end
-    end, max_concurrency: 50, ordered: false, timeout: :timer.seconds(30), on_timeout: :kill_task)
+    end, max_concurrency: clamp(Clusters.count()), ordered: false, timeout: :timer.seconds(30), on_timeout: :kill_task)
     |> Stream.run()
   end
 
@@ -121,10 +122,10 @@ defmodule Console.Deployments.Cron do
 
     Service.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn svc ->
+    |> Task.async_stream(fn svc ->
       Logger.info "pruning revisions for #{svc.id}"
       Services.prune_revisions(svc)
-    end)
+    end, max_concurrency: clamp(Services.count_all()))
     |> Stream.run()
   end
 
@@ -132,10 +133,10 @@ defmodule Console.Deployments.Cron do
     Cluster.installed()
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn cluster ->
+    |> Task.async_stream(fn cluster ->
       Logger.info "compiling upgrade plan for #{cluster.handle}"
       Clusters.update_upgrade_plan(cluster)
-    end)
+    end, max_concurrency: clamp(Clusters.count()))
     |> Stream.run()
   end
 
@@ -144,10 +145,10 @@ defmodule Console.Deployments.Cron do
 
     Service.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn svc ->
+    |> Task.async_stream(fn svc ->
       Logger.info "checking deprecations for #{svc.id}"
       Services.add_deprecations(svc)
-    end)
+    end, max_concurrency: clamp(Services.count_all()))
     |> Stream.run()
   end
 
@@ -157,10 +158,10 @@ defmodule Console.Deployments.Cron do
     GlobalService.stream()
     |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn global ->
+    |> Task.async_stream(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
@@ -169,10 +170,10 @@ defmodule Console.Deployments.Cron do
 
     ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn mns ->
+    |> Task.async_stream(fn mns ->
       Logger.info "syncing managed namespace #{mns.id}"
       Global.reconcile_namespace(mns)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
@@ -182,10 +183,10 @@ defmodule Console.Deployments.Cron do
     ManagedNamespace.deleted()
     |> ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn mns ->
+    |> Task.async_stream(fn mns ->
       Logger.info "draining managed namespace #{mns.id}"
       Global.drain_managed_namespace(mns)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
@@ -194,10 +195,10 @@ defmodule Console.Deployments.Cron do
     Logger.info "rotating cluster deploy tokens"
     Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn cluster ->
+    |> Task.async_stream(fn cluster ->
       Logger.info "rotating token for #{cluster.id}"
       Clusters.rotate_deploy_token(cluster)
-    end)
+    end, max_concurrency: clamp(Clusters.count()))
     |> Stream.run()
   end
 
@@ -216,20 +217,20 @@ defmodule Console.Deployments.Cron do
   def scan_pipeline_stages() do
     PipelineStage.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn stage ->
+    |> Task.async_stream(fn stage ->
       Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
       Discovery.stage(stage)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
   def scan_pending_promotions() do
     PipelinePromotion.pending()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn promo ->
+    |> Task.async_stream(fn promo ->
       Logger.info "attempting to apply promotion #{promo.id}"
       Discovery.promotion(promo)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
@@ -237,10 +238,10 @@ defmodule Console.Deployments.Cron do
     PipelineStage.pending_context()
     |> PipelineStage.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn stage ->
+    |> Task.async_stream(fn stage ->
       Logger.info "attempt to apply context for a stage"
       Discovery.context(stage)
-    end)
+    end, max_concurrency: 10)
     |> Stream.run()
   end
 
@@ -249,7 +250,7 @@ defmodule Console.Deployments.Cron do
       Logger.info "polling repository for stack #{stack.id}"
       Stacks.poll(stack)
       |> log("poll stack for a new run")
-    end, max_concurrency: 20)
+    end, max_concurrency: clamp(Stacks.count()))
     |> Stream.run()
   end
 
@@ -258,7 +259,7 @@ defmodule Console.Deployments.Cron do
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
       |> log("dequeue a new stack run")
-    end, max_concurrency: 20)
+    end, max_concurrency: clamp(Stacks.count()))
     |> Stream.run()
   end
 
@@ -315,7 +316,7 @@ defmodule Console.Deployments.Cron do
     Observer.runnable()
     |> Observer.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
-    |> Enum.each(&Console.Deployments.Observer.Discovery.runner/1)
+    |> Task.async_stream(&Console.Deployments.Observer.Discovery.runner/1, max_concurrency: 50)
   end
 
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"

@@ -53,7 +53,7 @@ defmodule Console.AI.Cron do
 
   def clusters() do
     if_enabled(fn ->
-      Cluster
+      Cluster.with_insight_components()
       |> Cluster.ordered(asc: :id)
       |> Cluster.preloaded([:insight, insight_components: [:insight, :cluster]])
       |> Repo.stream(method: :keyset)
@@ -87,9 +87,9 @@ defmodule Console.AI.Cron do
   end
 
   defp batch_insight(event, chunk) do
-    Enum.map(chunk, & {&1, Worker.generate(&1)})
-    |> Enum.map(fn {res, t} -> {res, Worker.await(t)} end)
-    |> Enum.map(fn
+    Stream.map(chunk, & {&1, Worker.generate(&1)})
+    |> Stream.map(fn {res, t} -> {res, Worker.await(t)} end)
+    |> Enum.each(fn
       {res, {:ok, insight}} ->
         handle_notify(event, {res, insight})
       res ->
