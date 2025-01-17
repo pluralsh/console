@@ -17,8 +17,8 @@ fragment ClusterRegistrationFragment on ClusterRegistration {
     }
 }
 
-query GetClusterRegistration($id: ID!) {
-    clusterRegistration(id: $id) {
+query GetClusterRegistration($id: ID, $machineId: String) {
+    clusterRegistration(id: $id, machineId: $machineId) {
         ...ClusterRegistrationFragment
     }
 }
