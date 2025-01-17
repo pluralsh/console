@@ -75,7 +75,7 @@ type ConsoleClient interface {
 	DeleteGlobalService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteGlobalService, error)
 	KickService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*KickService, error)
 	KickServiceByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*KickServiceByHandle, error)
-	GetClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error)
+	GetClusterRegistration(ctx context.Context, id *string, machineID *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error)
 	GetClusterRegistrations(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistrations, error)
 	CreateClusterRegistration(ctx context.Context, attributes ClusterRegistrationCreateAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRegistration, error)
 	UpdateClusterRegistration(ctx context.Context, id string, attributes ClusterRegistrationUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRegistration, error)
@@ -20374,8 +20374,8 @@ func (c *Client) KickServiceByHandle(ctx context.Context, cluster string, name s
 	return &res, nil
 }
 
-const GetClusterRegistrationDocument = `query GetClusterRegistration ($id: ID!) {
-	clusterRegistration(id: $id) {
+const GetClusterRegistrationDocument = `query GetClusterRegistration ($id: ID, $machineId: String) {
+	clusterRegistration(id: $id, machineId: $machineId) {
 		... ClusterRegistrationFragment
 	}
 }
@@ -20413,9 +20413,10 @@ fragment TinyProjectFragment on Project {
 }
 `
 
-func (c *Client) GetClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error) {
+func (c *Client) GetClusterRegistration(ctx context.Context, id *string, machineID *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":        id,
+		"machineId": machineID,
 	}
 
 	var res GetClusterRegistration
