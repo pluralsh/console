@@ -20,7 +20,7 @@ export function useDeploymentSettings() {
 export function useLogsEnabled() {
   const ctx = useDeploymentSettings()
 
-  return isValidURL(ctx?.lokiConnection?.host ?? '')
+  return !!ctx?.logging?.enabled
 }
 
 export function useMetricsEnabled() {

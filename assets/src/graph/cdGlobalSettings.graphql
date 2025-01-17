@@ -48,6 +48,10 @@ fragment DeploymentSettings on DeploymentSettings {
   insertedAt
   updatedAt
   agentHelmValues
+  logging {
+    enabled
+    driver
+  }
   lokiConnection {
     ...HttpConnection
   }
