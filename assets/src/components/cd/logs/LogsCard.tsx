@@ -35,7 +35,7 @@ export const LogsCard = memo(function LogsCard({
 }) {
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
-  const [live, setLive] = useState(false)
+  const [live, setLive] = useState(true)
   const [hasNextPage, setHasNextPage] = useState(true)
 
   const { data, loading, error, fetchMore, startPolling, stopPolling } =

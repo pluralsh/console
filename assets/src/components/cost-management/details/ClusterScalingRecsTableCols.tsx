@@ -1,7 +1,9 @@
+import { isNullish } from '@apollo/client/cache/inmemory/helpers'
 import { Button, LinkoutIcon, PrOpenIcon, Toast } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
+import { filesize } from 'filesize'
 import {
   ClusterScalingRecommendationFragment,
   useApplyScalingRecommendationMutation,
@@ -35,8 +37,8 @@ export const ColCpuChange = columnHelper.accessor((rec) => rec, {
 
     return (
       <Body2P css={{ whiteSpace: 'pre-wrap' }}>
-        {`${rec.cpuRequest ?? '--'}  →  `}
-        <BoldTextSC>{`${rec.cpuRecommendation ?? '--'}`}</BoldTextSC>
+        {`${formatCpu(rec.cpuRequest)}  →  `}
+        <BoldTextSC>{`${formatCpu(rec.cpuRecommendation)}`}</BoldTextSC>
       </Body2P>
     )
   },
@@ -50,8 +52,8 @@ export const ColMemoryChange = columnHelper.accessor((rec) => rec, {
 
     return (
       <Body2P css={{ whiteSpace: 'pre-wrap' }}>
-        {`${rec.memoryRequest ? `${Math.round(rec.memoryRequest / (1024 * 1024))}mb` : '--'}  →  `}
-        <BoldTextSC>{`${rec.memoryRecommendation ?? '--'}`}</BoldTextSC>
+        {`${formatMemory(rec.memoryRequest)}  →  `}
+        <BoldTextSC>{`${formatMemory(rec.memoryRecommendation)}`}</BoldTextSC>
       </Body2P>
     )
   },
@@ -107,6 +109,16 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
     )
   },
 })
+
+const formatCpu = (cpu: Nullable<number>) => {
+  if (isNullish(cpu)) return '--'
+  return `${Number((cpu * 1000).toFixed(10))}m`
+}
+
+const formatMemory = (memory: Nullable<number>) => {
+  if (isNullish(memory)) return '--'
+  return filesize(memory, { spacer: '' }).toLowerCase()
+}
 
 const BoldTextSC = styled.strong(({ theme }) => ({
   color: theme.colors.text,

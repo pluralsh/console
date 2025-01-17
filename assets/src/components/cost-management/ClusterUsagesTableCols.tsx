@@ -15,7 +15,7 @@ const columnHelper = createColumnHelper<
   ClusterUsageTinyFragment | ClusterNamespaceUsageFragment
 >()
 
-const dollarize = (cost) => (cost ? `$${cost.toFixed(3)}` : '--')
+const dollarize = (cost) => (cost ? `$${cost.toFixed(2)}` : '--')
 
 export const ColCluster = (
   columnHelper as ColumnHelper<ClusterUsageTinyFragment>
@@ -64,7 +64,7 @@ export const ColNodeCost = (
 
     return (
       <SimpleTextWrapperSC>
-        {nodeCost ? `$${nodeCost.toFixed(3)}` : '--'}
+        {nodeCost ? `$${nodeCost.toFixed(2)}` : '--'}
       </SimpleTextWrapperSC>
     )
   },
@@ -78,7 +78,7 @@ export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
 
     return (
       <SimpleTextWrapperSC>
-        {cpuCost ? `$${cpuCost.toFixed(3)}` : '--'}
+        {cpuCost ? `$${cpuCost.toFixed(2)}` : '--'}
       </SimpleTextWrapperSC>
     )
   },
@@ -159,7 +159,7 @@ export const ColMemoryCost = columnHelper.accessor(
 
       return (
         <SimpleTextWrapperSC>
-          {memoryCost ? `$${memoryCost.toFixed(3)}` : '--'}
+          {memoryCost ? `$${memoryCost.toFixed(2)}` : '--'}
         </SimpleTextWrapperSC>
       )
     },

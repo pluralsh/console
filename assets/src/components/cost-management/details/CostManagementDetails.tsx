@@ -6,9 +6,11 @@ import {
 } from 'components/utils/table/useFetchPaginatedData'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import {
+  ClusterUsageHistoryQuery,
   ClusterUsageNamespacesQuery,
   ClusterUsageScalingRecommendationsQuery,
   ScalingRecommendationType,
+  useClusterUsageHistoryQuery,
   useClusterUsageNamespacesQuery,
   useClusterUsageScalingRecommendationsQuery,
 } from 'generated/graphql'
@@ -22,7 +24,10 @@ import {
 } from 'routes/costManagementRoutesConsts'
 import styled from 'styled-components'
 
+const BIG_PAGE_SIZE = 500
+
 export type CMContextType = {
+  historyQuery: FetchPaginatedDataResult<ClusterUsageHistoryQuery>
   namespacesQuery: FetchPaginatedDataResult<ClusterUsageNamespacesQuery>
   namespaceQ: string
   setNamespaceQ: (q: string) => void
@@ -44,10 +49,19 @@ export function CostManagementDetails() {
     undefined
   )
 
+  const historyQuery = useFetchPaginatedData(
+    {
+      queryHook: useClusterUsageHistoryQuery,
+      pageSize: BIG_PAGE_SIZE,
+      keyPath: ['clusterUsage', 'history'],
+    },
+    { id }
+  )
+
   const namespacesQuery = useFetchPaginatedData(
     {
       queryHook: useClusterUsageNamespacesQuery,
-      pageSize: 500,
+      pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'namespaces'],
     },
     { id, q: throttledNamespaceQ || undefined }
@@ -56,7 +70,7 @@ export function CostManagementDetails() {
   const recommendationsQuery = useFetchPaginatedData(
     {
       queryHook: useClusterUsageScalingRecommendationsQuery,
-      pageSize: 500,
+      pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'recommendations'],
     },
     { id, q: throttledRecommendationsQ || undefined, type: recType }
@@ -64,6 +78,7 @@ export function CostManagementDetails() {
 
   const ctx = useMemo(() => {
     return {
+      historyQuery,
       namespacesQuery,
       namespaceQ,
       setNamespaceQ,
@@ -74,14 +89,12 @@ export function CostManagementDetails() {
       setRecType,
     }
   }, [
+    historyQuery,
     namespacesQuery,
     namespaceQ,
-    setNamespaceQ,
     recommendationsQuery,
     recommendationsQ,
-    setRecommendationsQ,
     recType,
-    setRecType,
   ])
 
   return (
@@ -145,6 +158,7 @@ export function CostManagementDetails() {
 const PageWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'auto',
   gap: theme.spacing.medium,
   padding: theme.spacing.large,
   height: '100%',

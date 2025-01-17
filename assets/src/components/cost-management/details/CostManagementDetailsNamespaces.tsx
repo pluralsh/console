@@ -10,7 +10,6 @@ import {
 } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import { OverlineH1 } from 'components/utils/typography/Text'
 import { ClusterNamespaceUsageFragment } from 'generated/graphql'
@@ -20,10 +19,8 @@ import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   ColCpuCost,
-  ColCpuEfficiency,
   ColLoadBalancerCost,
   ColMemoryCost,
-  ColMemoryEfficiency,
   ColNamespace,
   ColNetworkCost,
 } from '../ClusterUsagesTableCols'
@@ -128,28 +125,27 @@ export function CostManagementDetailsNamespaces() {
             ),
           }}
         >
-          <FullHeightTableWrap>
-            {error ? (
-              <GqlError error={error} />
-            ) : (
-              <Table
-                fillLevel={1}
-                virtualizeRows
-                flush
-                rowBg="base"
-                loading={!data && loading}
-                columns={cols}
-                data={usages}
-                hasNextPage={
-                  data?.clusterUsage?.namespaces?.pageInfo?.hasNextPage
-                }
-                isFetchingNextPage={loading}
-                fetchNextPage={fetchNextPage}
-                reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-                onVirtualSliceChange={setVirtualSlice}
-              />
-            )}
-          </FullHeightTableWrap>
+          {error ? (
+            <GqlError error={error} />
+          ) : (
+            <Table
+              fullHeightWrap
+              fillLevel={1}
+              virtualizeRows
+              flush
+              rowBg="base"
+              loading={!data && loading}
+              columns={cols}
+              data={usages}
+              hasNextPage={
+                data?.clusterUsage?.namespaces?.pageInfo?.hasNextPage
+              }
+              isFetchingNextPage={loading}
+              fetchNextPage={fetchNextPage}
+              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+              onVirtualSliceChange={setVirtualSlice}
+            />
+          )}
         </Card>
       </Flex>
     </Flex>
@@ -163,6 +159,4 @@ const cols = [
   // ColStorageCost,
   ColLoadBalancerCost,
   ColNetworkCost,
-  ColCpuEfficiency,
-  ColMemoryEfficiency,
 ]
