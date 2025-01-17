@@ -5602,6 +5602,8 @@ enum ConfigurationType {
   FUNCTION
   PASSWORD
   ENUM
+  CLUSTER
+  PROJECT
 }
 
 enum Operation {

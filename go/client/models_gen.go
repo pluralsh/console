@@ -6416,6 +6416,8 @@ const (
 	ConfigurationTypeFunction ConfigurationType = "FUNCTION"
 	ConfigurationTypePassword ConfigurationType = "PASSWORD"
 	ConfigurationTypeEnum     ConfigurationType = "ENUM"
+	ConfigurationTypeCluster  ConfigurationType = "CLUSTER"
+	ConfigurationTypeProject  ConfigurationType = "PROJECT"
 )
 
 var AllConfigurationType = []ConfigurationType{
@@ -6428,11 +6430,13 @@ var AllConfigurationType = []ConfigurationType{
 	ConfigurationTypeFunction,
 	ConfigurationTypePassword,
 	ConfigurationTypeEnum,
+	ConfigurationTypeCluster,
+	ConfigurationTypeProject,
 }
 
 func (e ConfigurationType) IsValid() bool {
 	switch e {
-	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum:
+	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum, ConfigurationTypeCluster, ConfigurationTypeProject:
 		return true
 	}
 	return false

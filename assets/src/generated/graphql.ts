@@ -1834,12 +1834,14 @@ export type ConfigMap = {
 export enum ConfigurationType {
   Bool = 'BOOL',
   Bucket = 'BUCKET',
+  Cluster = 'CLUSTER',
   Domain = 'DOMAIN',
   Enum = 'ENUM',
   File = 'FILE',
   Function = 'FUNCTION',
   Int = 'INT',
   Password = 'PASSWORD',
+  Project = 'PROJECT',
   String = 'STRING'
 }
 
