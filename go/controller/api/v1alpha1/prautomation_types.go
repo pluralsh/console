@@ -422,7 +422,7 @@ type PrAutomationConfiguration struct {
 	Name string `json:"name"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD;ENUM
+	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD;ENUM;CLUSTER;PROJECT
 	Type console.ConfigurationType `json:"type"`
 
 	// +kubebuilder:validation:Optional

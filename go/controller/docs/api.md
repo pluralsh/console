@@ -2013,7 +2013,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ |  |  | Required: {} <br /> |
-| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL DOMAIN BUCKET FILE FUNCTION PASSWORD ENUM] <br />Required: {} <br /> |
+| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL DOMAIN BUCKET FILE FUNCTION PASSWORD ENUM CLUSTER PROJECT] <br />Required: {} <br /> |
 | `condition` _[Condition](#condition)_ |  |  | Optional: {} <br /> |
 | `default` _string_ |  |  | Optional: {} <br /> |
 | `documentation` _string_ |  |  | Optional: {} <br /> |

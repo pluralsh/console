@@ -98,7 +98,9 @@ defmodule Console.Schema.Configuration do
     file: 5,
     function: 6,
     password: 7,
-    enum: 8
+    enum: 8,
+    cluster: 9,
+    project: 10
 
   defenum UniqScope, project: 0, cluster: 1
 

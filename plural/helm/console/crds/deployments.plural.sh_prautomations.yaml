@@ -226,6 +226,8 @@ spec:
                       - FUNCTION
                       - PASSWORD
                       - ENUM
+                      - CLUSTER
+                      - PROJECT
                       type: string
                     validation:
                       description: Any additional validations you want to apply to
