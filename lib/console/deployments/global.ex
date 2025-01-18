@@ -1,9 +1,9 @@
 defmodule Console.Deployments.Global do
   use Console.Services.Base
   import Console.Deployments.Policies
-  import Console, only: [clean: 1]
+  import Console, only: [clean: 1, clamp: 1]
   alias Console.PubSub
-  alias Console.Deployments.Services
+  alias Console.Deployments.{Services, Clusters}
   alias Console.Services.Users
   alias Console.Schema.{
     GlobalService,
@@ -337,14 +337,18 @@ defmodule Console.Deployments.Global do
     Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
     |> Cluster.target(global)
     |> Repo.all()
-    |> Enum.map(&add_to_cluster(global, &1, bot))
-    |> Enum.map(fn
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Stream.map(fn
+      {:ok, res} -> res
+      _ -> nil
+    end)
+    |> Stream.map(fn
       {:ok, %Service{id: id}} -> id
       %Service{id: id} -> id
       {:error, {:already_exists, %Service{id: id}}} -> id
       _ -> nil
     end)
-    |> Enum.filter(& &1)
+    |> Stream.filter(& &1)
     |> MapSet.new()
     |> (fn s -> MapSet.difference(service_ids, s) end).()
     |> MapSet.to_list()
@@ -359,15 +363,17 @@ defmodule Console.Deployments.Global do
     Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
     bot = bot()
 
-    Service.for_ids(service_ids)
-    |> Repo.all()
-    |> Repo.preload([:owner])
-    |> Enum.each(fn
-      %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
-        Services.delete_service(svc.id, bot)
-      %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
-        Services.detach_service(svc.id, bot)
-      _ -> :ok
+    batched(service_ids, fn service_ids ->
+      Service.for_ids(service_ids)
+      |> Repo.all()
+      |> Repo.preload([:owner])
+      |> Enum.each(fn
+        %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
+          Services.delete_service(svc.id, bot)
+        %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
+          Services.detach_service(svc.id, bot)
+        _ -> :ok
+      end)
     end)
   end
 
@@ -411,18 +417,27 @@ defmodule Console.Deployments.Global do
 
   @spec maybe_drain([binary], GlobalService.t) :: :ok
   def maybe_drain(service_ids, %GlobalService{cascade: %{delete: true}}) do
-    Service.for_ids(service_ids)
-    |> Repo.update_all(set: [deleted_at: Timex.now()])
+    batched(service_ids, fn ids ->
+      Service.for_ids(ids)
+      |> Repo.update_all(set: [deleted_at: Timex.now()])
+    end)
     :ok
   end
 
   def maybe_drain(service_ids, %GlobalService{cascade: %{detach: true}}) do
-    Service.for_ids(service_ids)
-    |> Repo.delete_all()
+    batched(service_ids, fn ids ->
+      Service.for_ids(ids)
+      |> Repo.delete_all()
+    end)
     :ok
   end
 
   def maybe_drain(_, _), do: :ok
+
+  defp batched(ids, operation) do
+    Stream.chunk_every(ids, 500)
+    |> Enum.each(operation)
+  end
 
   defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name
   defp svc_name(%GlobalService{service: %Service{name: name}}), do: name

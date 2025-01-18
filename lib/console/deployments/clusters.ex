@@ -41,6 +41,9 @@ defmodule Console.Deployments.Clusters do
   @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
   @type reg_resp :: {:ok, ClusterRegistration.t} | Console.error
 
+  @spec count() :: integer
+  def count(), do: Repo.aggregate(Cluster, :count)
+
   @doc """
   True if there's been one cluster that's successfully pinged in the fleet
   """
@@ -149,12 +152,12 @@ defmodule Console.Deployments.Clusters do
 
   def warm(:nodes, %Cluster{id: id} = cluster) do
     with {:ok, nodes} <- fetch_nodes(cluster),
-      do: @local_adapter.put({:nodes, id}, {:ok, nodes}, ttl: @node_ttl)
+      do: @cache_adapter.put({:nodes, id}, {:ok, nodes}, ttl: @node_ttl)
   end
 
   def warm(:node_metrics, %Cluster{id: id} = cluster) do
     with {:ok, metrics} <- fetch_node_metrics(cluster),
-      do: @local_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
+      do: @cache_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
   end
 
   def warm(:cluster_metrics, %Cluster{id: id} = cluster) do

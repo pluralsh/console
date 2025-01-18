@@ -35,6 +35,9 @@ defmodule Console.Deployments.Services do
   @type revision_resp :: {:ok, Revision.t} | Console.error
   @type context_resp :: {:ok, ServiceContext.t} | Console.error
 
+  @spec count_all() :: integer
+  def count_all(), do: Repo.aggregate(Service, :count)
+
   def get_service!(id), do: Console.Repo.get!(Service, id)
 
   def get_service(id), do: Console.Repo.get(Service, id)

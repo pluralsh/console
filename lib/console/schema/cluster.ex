@@ -157,6 +157,14 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: ilike(c.name, ^"#{sq}%") or ilike(c.handle, ^"#{sq}%"))
   end
 
+  def with_insight_components(query \\ __MODULE__) do
+    from(c in query,
+      left_join: ic in assoc(c, :insight_components),
+      where: not is_nil(ic.id),
+      distinct: true
+    )
+  end
+
   def with_backups(query \\ __MODULE__, enabled)
   def with_backups(query, true) do
     from(c in query, left_join: o in assoc(c, :object_store), where: not is_nil(o.id))

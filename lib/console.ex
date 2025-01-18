@@ -5,6 +5,11 @@ defmodule Console do
 
   @type error :: {:error, term}
 
+  def clamp(val, min \\ 5, max \\ 100) do
+    max(val, min)
+    |> min(max)
+  end
+
   def coalesce(nil, val), do: val
   def coalesce(val, _), do: val
 

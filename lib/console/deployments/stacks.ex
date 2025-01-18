@@ -35,6 +35,8 @@ defmodule Console.Deployments.Stacks do
   @type custom_resp :: {:ok, CustomStackRun.t} | error
   @type def_resp :: {:ok, StackDefinition.t} | error
 
+  def count(), do: Repo.aggregate(Stack, :count)
+
   @spec get_stack!(binary) :: Stack.t
   def get_stack!(id), do: Repo.get!(Stack, id)
 
