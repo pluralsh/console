@@ -2875,6 +2875,33 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.10.47
+    created: "2025-01-18T16:18:01.306802778Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.1
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.102
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.10.1
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 061b641322dbae8895e5570e7c67bc0a3d67d5d00a27d4c448b5238f346f5c82
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.83/console-rapid-0.3.83.tgz
+    version: 0.3.83
+  - apiVersion: v2
     appVersion: 0.10.46
     created: "2025-01-16T16:46:46.131127566Z"
     dependencies:
@@ -4034,6 +4061,16 @@ entries:
     version: 0.3.40
   controller:
   - apiVersion: v2
+    appVersion: 0.10.47
+    created: "2025-01-18T16:18:01.444275062Z"
+    description: deploys the deployment operator for plural cd
+    digest: 81f21a228e30aa3a0fecb0c32805f6e19a7f3f13d5e509fb685bc2911d905246
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.102/controller-0.0.102.tgz
+    version: 0.0.102
+  - apiVersion: v2
     appVersion: 0.10.46
     created: "2025-01-09T18:42:30.444850372Z"
     description: deploys the deployment operator for plural cd
@@ -5129,4 +5166,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-16T16:46:46.283994785Z"
+generated: "2025-01-18T16:18:01.444910562Z"
