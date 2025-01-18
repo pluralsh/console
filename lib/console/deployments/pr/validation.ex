@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Pr.Validation do
   alias Console.Repo
   alias Console.Schema.{PrAutomation, Configuration, Project, Cluster}
+  alias Console.Deployments.{Settings, Clusters}
   alias Console.Schema.Configuration.{Validation}
 
   def validate(%PrAutomation{configuration: [_ | _] = config}, ctx) do
@@ -12,6 +13,20 @@ defmodule Console.Deployments.Pr.Validation do
     end)
   end
   def validate(_, _), do: :ok
+
+  defp do_validate(%Configuration{type: :project, name: n}, val) when is_binary(val) do
+    case Settings.get_project_by_name(val) do
+      %Project{} -> :ok
+      _ -> {:error, "field #{n} is not a valid project name"}
+    end
+  end
+
+  defp do_validate(%Configuration{type: :cluster, name: n}, val) when is_binary(val) do
+    case Clusters.get_cluster_by_handle(val) do
+      %Cluster{} -> :ok
+      _ -> {:error, "field #{n} is not a valid cluster handle"}
+    end
+  end
 
   defp do_validate(%Configuration{type: :int}, val) when is_integer(val), do: :ok
   defp do_validate(%Configuration{type: :bool}, val) when is_boolean(val), do: :ok
