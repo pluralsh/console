@@ -33,6 +33,8 @@ defmodule Console.Schema.Stack do
     cancelled: 5,
     pending_approval: 6
 
+  defguard is_terminal(s) when s in ~w(failed cancelled successful)a
+
   def running_states(), do: ~w(pending running pending_approval)a
 
   defmodule Configuration do

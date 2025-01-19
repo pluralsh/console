@@ -49,6 +49,9 @@ defmodule Console.Deployments.Stacks do
   @spec get_run!(binary) :: StackRun.t
   def get_run!(id), do: Repo.get!(StackRun, id)
 
+  @spec get_run(binary) :: StackRun.t | nil
+  def get_run(id), do: Repo.get(StackRun, id)
+
   @spec get_step!(binary) :: RunStep.t
   def get_step!(id), do: Repo.get!(RunStep, id)
 
@@ -86,11 +89,12 @@ defmodule Console.Deployments.Stacks do
   end
 
   def plural_creds(%StackRun{} = run) do
-    case Repo.preload(run, [:actor]) do
-      %StackRun{actor: %User{} = actor} ->
-        with {:ok, token, _} <- Console.Guardian.encode_and_sign(actor, %{}, ttl: {1, :day}),
-          do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
-      _ -> {:ok, nil}
+    with {:actor, %StackRun{actor: %User{} = actor}} <- {:actor, Repo.preload(run, [:actor])},
+         {:ok, token, _} <- Console.Guardian.encode_and_sign(actor, %{run_id: run.id}, ttl: {1, :day}) do
+      {:ok, %{token: token, url: Console.graphql_endpoint()}}
+    else
+      {:actor, _} -> {:ok, nil}
+      err -> err
     end
   end
 

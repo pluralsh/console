@@ -1,7 +1,9 @@
 defmodule Console.Guardian do
   use Guardian, otp_app: :console
+  import Console.Schema.Stack, only: [is_terminal: 1]
   require Logger
-  alias Console.Schema.User
+  alias Console.Schema.{User, StackRun}
+  alias Console.Deployments.Stacks
   use Nebulex.Caching
 
   @ttl :timer.minutes(15)
@@ -9,6 +11,15 @@ defmodule Console.Guardian do
   def subject_for_token(%User{id: id}, _claims),
     do: {:ok, "user:#{id}"}
   def subject_for_token(_, _), do: {:error, :invalid_argument}
+
+  def resource_from_claims(%{"run_id" => run_id} = claims) do
+    case Stacks.get_run(run_id) do
+      %StackRun{status: s} when not is_terminal(s) ->
+        Map.delete(claims, "run_id")
+        |> resource_from_claims()
+      _ -> {:error, :invalid_token}
+    end
+  end
 
   def resource_from_claims(%{"sub" => "user:" <> id} = claims) do
     case possibly_cached(id, claims) do
