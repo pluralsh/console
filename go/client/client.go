@@ -9154,6 +9154,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_Cluster struct {
 	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
 	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetID() string {
@@ -9209,6 +9210,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetKasURL() *st
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
 	}
 	return t.KasURL
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+	}
+	return t.Distro
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_Kustomize struct {
@@ -19256,6 +19263,7 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 			metadata
 			currentVersion
 			kasUrl
+			distro
 		}
 		kustomize {
 			path

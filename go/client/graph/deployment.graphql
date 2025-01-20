@@ -143,6 +143,7 @@ query GetServiceDeploymentForAgent($id: ID!) {
             metadata
             currentVersion
             kasUrl
+            distro
         }
         kustomize {
             path
