@@ -1457,7 +1457,7 @@ export type ClusterRegistration = {
   __typename?: 'ClusterRegistration';
   creator?: Maybe<User>;
   /** the handle to apply to the cluster */
-  handle: Scalars['String']['output'];
+  handle?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a unique machine id for the created cluster */
@@ -1465,7 +1465,7 @@ export type ClusterRegistration = {
   /** additional metadata to apply to the cluster */
   metadata?: Maybe<Scalars['Map']['output']>;
   /** the name to give to the cluster */
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   /** the project the cluster will live in */
   project?: Maybe<Project>;
   /** the tags to apply to the given cluster */

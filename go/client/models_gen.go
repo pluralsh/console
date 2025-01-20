@@ -1152,9 +1152,9 @@ type ClusterRecommendationAttributes struct {
 type ClusterRegistration struct {
 	ID string `json:"id"`
 	// the name to give to the cluster
-	Name string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// the handle to apply to the cluster
-	Handle string `json:"handle"`
+	Handle *string `json:"handle,omitempty"`
 	// a unique machine id for the created cluster
 	MachineID string `json:"machineId"`
 	// the tags to apply to the given cluster

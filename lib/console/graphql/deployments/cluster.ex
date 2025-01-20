@@ -890,8 +890,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   object :cluster_registration do
     field :id,         non_null(:id)
-    field :name,       non_null(:string), description: "the name to give to the cluster"
-    field :handle,     non_null(:string), description: "the handle to apply to the cluster"
+    field :name,       :string, description: "the name to give to the cluster"
+    field :handle,     :string, description: "the handle to apply to the cluster"
     field :machine_id, non_null(:string), description: "a unique machine id for the created cluster"
     field :tags,       list_of(:tag), description: "the tags to apply to the given cluster"
     field :metadata,   :map, description: "additional metadata to apply to the cluster"

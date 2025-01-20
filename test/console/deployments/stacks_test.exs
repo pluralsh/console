@@ -1020,4 +1020,26 @@ defmodule Console.Deployments.StacksSyncTest do
       refute run.git.ref == stack.git.ref
     end
   end
+
+  describe "#plural_creds/1" do
+    test "a stack with an actor can create run-bound creds" do
+      user = insert(:user)
+      run  = insert(:stack_run, actor: user)
+
+      {:ok, %{token: token}} = Stacks.plural_creds(run)
+
+      {:ok, actor, _} = Console.Guardian.resource_from_token(token)
+
+      assert actor.id == user.id
+    end
+
+    test "tokens cannot validate if the stack run has completed" do
+      user = insert(:user)
+      run  = insert(:stack_run, actor: user, status: :successful)
+
+      {:ok, %{token: token}} = Stacks.plural_creds(run)
+
+      {:error, _} = Console.Guardian.resource_from_token(token)
+    end
+  end
 end

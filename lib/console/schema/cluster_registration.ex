@@ -39,6 +39,7 @@ defmodule Console.Schema.ClusterRegistration do
     |> cast(attrs, @valid)
     |> kubernetes_name(:name)
     |> unique_constraint(:handle)
+    |> unique_constraint(:machine_id)
     |> cast_embed(:tags, with: &tag_changeset/2)
     |> backfill_handle()
     |> validate_required(~w(project_id creator_id)a)
