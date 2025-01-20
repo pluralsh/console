@@ -1315,6 +1315,14 @@ defmodule Console.Deployments.ClustersTest do
 
       {:error, _} = Clusters.create_cluster_registration(%{machine_id: "blah", project_id: project.id}, user)
     end
+
+    test "it enforces machine id uniqueness" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, _} = Clusters.create_cluster_registration(%{machine_id: "blah", project_id: project.id}, user)
+      {:error, _} = Clusters.create_cluster_registration(%{machine_id: "blah", project_id: project.id}, user)
+    end
   end
 
   describe "#update_cluster_regstration/3" do

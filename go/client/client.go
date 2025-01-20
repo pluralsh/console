@@ -741,8 +741,8 @@ type ClusterRegistrationFragment struct {
 	InsertedAt *string                "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt  *string                "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
 	MachineID  string                 "json:\"machineId\" graphql:\"machineId\""
-	Name       string                 "json:\"name\" graphql:\"name\""
-	Handle     string                 "json:\"handle\" graphql:\"handle\""
+	Name       *string                "json:\"name,omitempty\" graphql:\"name\""
+	Handle     *string                "json:\"handle,omitempty\" graphql:\"handle\""
 	Metadata   map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Tags       []*ClusterTags         "json:\"tags,omitempty\" graphql:\"tags\""
 	Creator    *UserFragment          "json:\"creator,omitempty\" graphql:\"creator\""
@@ -773,13 +773,13 @@ func (t *ClusterRegistrationFragment) GetMachineID() string {
 	}
 	return t.MachineID
 }
-func (t *ClusterRegistrationFragment) GetName() string {
+func (t *ClusterRegistrationFragment) GetName() *string {
 	if t == nil {
 		t = &ClusterRegistrationFragment{}
 	}
 	return t.Name
 }
-func (t *ClusterRegistrationFragment) GetHandle() string {
+func (t *ClusterRegistrationFragment) GetHandle() *string {
 	if t == nil {
 		t = &ClusterRegistrationFragment{}
 	}

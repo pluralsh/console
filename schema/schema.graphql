@@ -5469,10 +5469,10 @@ type ClusterRegistration {
   id: ID!
 
   "the name to give to the cluster"
-  name: String!
+  name: String
 
   "the handle to apply to the cluster"
-  handle: String!
+  handle: String
 
   "a unique machine id for the created cluster"
   machineId: String!
