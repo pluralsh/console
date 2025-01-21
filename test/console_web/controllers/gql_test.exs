@@ -58,6 +58,7 @@ defmodule ConsoleWeb.GqlTest do
           createCluster(attributes: {name: $name}) {
             id
             handle
+            deployToken
             project { id }
           }
         }
