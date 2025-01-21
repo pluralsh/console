@@ -161,7 +161,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def runtime_services(cluster, _, _), do: {:ok, Clusters.runtime_services(cluster)}
 
   def deploy_token(%{deploy_token: token} = cluster, _, %{context: %{current_user: user}}) do
-    case allow(cluster, user, :write) do
+    case allow(cluster, user, :token) do
       {:ok, _} -> {:ok, token}
       error -> error
     end

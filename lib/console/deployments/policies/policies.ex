@@ -22,6 +22,7 @@ defmodule Console.Deployments.Policies do
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
+  def can?(user, res, :token), do: can?(user, res, :write)
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
