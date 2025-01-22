@@ -4994,6 +4994,11 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 		*out = new(NamespacedName)
 		**out = **in
 	}
+	if in.Git != nil {
+		in, out := &in.Git, &out.Git
+		*out = new(GitRef)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.IgnoreHooks != nil {
 		in, out := &in.IgnoreHooks, &out.IgnoreHooks
 		*out = new(bool)

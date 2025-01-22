@@ -65,6 +65,10 @@ type ServiceHelm struct {
 	// +kubebuilder:validation:Optional
 	Repository *NamespacedName `json:"repository,omitempty"`
 
+	// A reference to a git folder/ref
+	// +kubebuilder:validation:Optional
+	Git *GitRef `json:"git,omitempty"`
+
 	// whether you want to completely ignore any helm hooks when actualizing this service
 	// +kubebuilder:validation:Optional
 	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
