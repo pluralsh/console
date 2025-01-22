@@ -317,6 +317,7 @@ defmodule Console.Deployments.Cron do
     |> Observer.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
     |> Task.async_stream(&Console.Deployments.Observer.Discovery.runner/1, max_concurrency: 50)
+    |> Stream.run()
   end
 
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
