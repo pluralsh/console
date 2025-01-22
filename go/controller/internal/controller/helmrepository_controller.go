@@ -88,19 +88,6 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// TODO: Handle proper resource deletion via finalizer once it will be possible.
-
-	// Check if resource already exists in the API and only sync the ID.
-	exists, err := in.isAlreadyExists(ctx, helmRepository)
-	if err != nil {
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-	if exists {
-		logger.Info("Helm repository already exists in the API, running in read-only mode")
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return in.handleExistingHelmRepository(ctx, helmRepository)
-	}
-
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
@@ -133,7 +120,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return ctrl.Result{}, nil
 }
 
 func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {

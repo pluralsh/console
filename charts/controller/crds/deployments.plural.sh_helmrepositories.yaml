@@ -53,6 +53,26 @@ spec:
                         type: string
                       assumeRoleArn:
                         type: string
+                      secretAccessKeySecretKeyRef:
+                        description: SecretKeySelector selects a key of a Secret.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
                       secretAccessKeySecretRef:
                         description: SecretAccessKeySecretRef is a secret reference
                           that should contain secret access key.
@@ -67,7 +87,12 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      secretKeyRef:
+                    type: object
+                  azure:
+                    properties:
+                      clientId:
+                        type: string
+                      clientSecretSecretKeyRef:
                         description: SecretKeySelector selects a key of a Secret.
                         properties:
                           key:
@@ -87,11 +112,6 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
-                    type: object
-                  azure:
-                    properties:
-                      clientId:
-                        type: string
                       clientSecretSecretRef:
                         description: ClientSecretSecretRef is a secret reference that
                           should contain client secret.
@@ -106,7 +126,14 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      secretKeyRef:
+                      subscriptionId:
+                        type: string
+                      tenantId:
+                        type: string
+                    type: object
+                  basic:
+                    properties:
+                      passwordSecretKeyRef:
                         description: SecretKeySelector selects a key of a Secret.
                         properties:
                           key:
@@ -126,13 +153,6 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
-                      subscriptionId:
-                        type: string
-                      tenantId:
-                        type: string
-                    type: object
-                  basic:
-                    properties:
                       passwordSecretRef:
                         description: |-
                           SecretReference represents a Secret Reference. It has enough information to retrieve secret
@@ -148,26 +168,6 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      secretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            description: |-
-                              Name of the referent.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
-                        x-kubernetes-map-type: atomic
                       username:
                         type: string
                     required:
@@ -175,7 +175,7 @@ spec:
                     type: object
                   bearer:
                     properties:
-                      secretKeyRef:
+                      tokenSecretKeyRef:
                         description: SecretKeySelector selects a key of a Secret.
                         properties:
                           key:
@@ -213,21 +213,7 @@ spec:
                     type: object
                   gcp:
                     properties:
-                      applicationCredentialsSecretRef:
-                        description: ApplicationCredentialsSecretRef is a secret reference
-                          that should contain application credentials.
-                        properties:
-                          name:
-                            description: name is unique within a namespace to reference
-                              a secret resource.
-                            type: string
-                          namespace:
-                            description: namespace defines the space within which
-                              the secret name must be unique.
-                            type: string
-                        type: object
-                        x-kubernetes-map-type: atomic
-                      secretKeyRef:
+                      applicationCredentialsSecretKeyRef:
                         description: SecretKeySelector selects a key of a Secret.
                         properties:
                           key:
@@ -245,6 +231,20 @@ spec:
                             type: boolean
                         required:
                         - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      applicationCredentialsSecretRef:
+                        description: ApplicationCredentialsSecretRef is a secret reference
+                          that should contain application credentials.
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which
+                              the secret name must be unique.
+                            type: string
                         type: object
                         x-kubernetes-map-type: atomic
                     type: object

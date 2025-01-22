@@ -2111,8 +2111,8 @@ func (in *HelmRepositoryAuthAWS) DeepCopyInto(out *HelmRepositoryAuthAWS) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
-	if in.SecretKeyRef != nil {
-		in, out := &in.SecretKeyRef, &out.SecretKeyRef
+	if in.SecretAccessKeySecretKeyRef != nil {
+		in, out := &in.SecretAccessKeySecretKeyRef, &out.SecretAccessKeySecretKeyRef
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
@@ -2146,8 +2146,8 @@ func (in *HelmRepositoryAuthAzure) DeepCopyInto(out *HelmRepositoryAuthAzure) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
-	if in.SecretKeyRef != nil {
-		in, out := &in.SecretKeyRef, &out.SecretKeyRef
+	if in.ClientSecretSecretKeyRef != nil {
+		in, out := &in.ClientSecretSecretKeyRef, &out.ClientSecretSecretKeyRef
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
@@ -2181,8 +2181,8 @@ func (in *HelmRepositoryAuthBasic) DeepCopyInto(out *HelmRepositoryAuthBasic) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
-	if in.SecretKeyRef != nil {
-		in, out := &in.SecretKeyRef, &out.SecretKeyRef
+	if in.PasswordSecretKeyRef != nil {
+		in, out := &in.PasswordSecretKeyRef, &out.PasswordSecretKeyRef
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
@@ -2206,8 +2206,8 @@ func (in *HelmRepositoryAuthBearer) DeepCopyInto(out *HelmRepositoryAuthBearer) 
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
-	if in.SecretKeyRef != nil {
-		in, out := &in.SecretKeyRef, &out.SecretKeyRef
+	if in.TokenSecretKeyRef != nil {
+		in, out := &in.TokenSecretKeyRef, &out.TokenSecretKeyRef
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
@@ -2231,8 +2231,8 @@ func (in *HelmRepositoryAuthGCP) DeepCopyInto(out *HelmRepositoryAuthGCP) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
-	if in.SecretKeyRef != nil {
-		in, out := &in.SecretKeyRef, &out.SecretKeyRef
+	if in.ApplicationCredentialsSecretKeyRef != nil {
+		in, out := &in.ApplicationCredentialsSecretKeyRef, &out.ApplicationCredentialsSecretKeyRef
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}

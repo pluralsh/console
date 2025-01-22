@@ -37,9 +37,9 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 			if helmRepository.Spec.Auth.Basic.PasswordSecretRef != nil {
 				return helmRepository.Spec.Auth.Basic.PasswordSecretRef
 			}
-			if helmRepository.Spec.Auth.Basic.SecretKeyRef != nil {
+			if helmRepository.Spec.Auth.Basic.PasswordSecretKeyRef != nil {
 				return &corev1.SecretReference{
-					Name:      helmRepository.Spec.Auth.Basic.SecretKeyRef.Name,
+					Name:      helmRepository.Spec.Auth.Basic.PasswordSecretKeyRef.Name,
 					Namespace: helmRepository.Namespace,
 				}
 			}
@@ -49,9 +49,9 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 			if helmRepository.Spec.Auth.Bearer.TokenSecretRef != nil {
 				return helmRepository.Spec.Auth.Bearer.TokenSecretRef
 			}
-			if helmRepository.Spec.Auth.Bearer.SecretKeyRef != nil {
+			if helmRepository.Spec.Auth.Bearer.TokenSecretKeyRef != nil {
 				return &corev1.SecretReference{
-					Name:      helmRepository.Spec.Auth.Bearer.SecretKeyRef.Name,
+					Name:      helmRepository.Spec.Auth.Bearer.TokenSecretKeyRef.Name,
 					Namespace: helmRepository.Namespace,
 				}
 			}
@@ -61,9 +61,9 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 			if helmRepository.Spec.Auth.Aws.SecretAccessKeySecretRef != nil {
 				return helmRepository.Spec.Auth.Aws.SecretAccessKeySecretRef
 			}
-			if helmRepository.Spec.Auth.Aws.SecretKeyRef != nil {
+			if helmRepository.Spec.Auth.Aws.SecretAccessKeySecretKeyRef != nil {
 				return &corev1.SecretReference{
-					Name:      helmRepository.Spec.Auth.Aws.SecretKeyRef.Name,
+					Name:      helmRepository.Spec.Auth.Aws.SecretAccessKeySecretKeyRef.Name,
 					Namespace: helmRepository.Namespace,
 				}
 			}
@@ -73,9 +73,9 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 			if helmRepository.Spec.Auth.Azure.ClientSecretSecretRef != nil {
 				return helmRepository.Spec.Auth.Azure.ClientSecretSecretRef
 			}
-			if helmRepository.Spec.Auth.Azure.SecretKeyRef != nil {
+			if helmRepository.Spec.Auth.Azure.ClientSecretSecretKeyRef != nil {
 				return &corev1.SecretReference{
-					Name:      helmRepository.Spec.Auth.Azure.SecretKeyRef.Name,
+					Name:      helmRepository.Spec.Auth.Azure.ClientSecretSecretKeyRef.Name,
 					Namespace: helmRepository.Namespace,
 				}
 			}
@@ -85,7 +85,7 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 			if helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef != nil {
 				return helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef
 			}
-			if helmRepository.Spec.Auth.Gcp.SecretKeyRef != nil {
+			if helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretKeyRef != nil {
 				return &corev1.SecretReference{
 					Name:      helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef.Name,
 					Namespace: helmRepository.Namespace,
@@ -134,14 +134,14 @@ func (in *HelmRepositoryAuth) basicAuthAttributes(ctx context.Context, namespace
 	var pwd []byte
 	var exists bool
 
-	if auth.SecretKeyRef != nil {
-		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretKeyRef.Name, Namespace: namespace})
+	if auth.PasswordSecretKeyRef != nil {
+		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.PasswordSecretKeyRef.Name, Namespace: namespace})
 		if err != nil {
 			return nil, err
 		}
-		pwd, exists = secret.Data[auth.SecretKeyRef.Key]
+		pwd, exists = secret.Data[auth.PasswordSecretKeyRef.Key]
 		if !exists {
-			return nil, in.missingCredentialKeyError(auth.SecretKeyRef.Key)
+			return nil, in.missingCredentialKeyError(auth.PasswordSecretKeyRef.Key)
 		}
 	} else if auth.PasswordSecretRef != nil {
 		secret, err := utils.GetSecret(ctx, in.Client, auth.PasswordSecretRef)
@@ -167,20 +167,20 @@ func (in *HelmRepositoryAuth) bearerAuthAttributes(ctx context.Context, namespac
 		return nil, nil
 	}
 
-	if auth.TokenSecretRef == nil && auth.SecretKeyRef == nil {
+	if auth.TokenSecretRef == nil && auth.TokenSecretKeyRef == nil {
 		return nil, nil
 	}
 
 	var token []byte
 	var exists bool
-	if auth.SecretKeyRef != nil {
-		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretKeyRef.Name, Namespace: namespace})
+	if auth.TokenSecretKeyRef != nil {
+		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.TokenSecretKeyRef.Name, Namespace: namespace})
 		if err != nil {
 			return nil, err
 		}
-		token, exists = secret.Data[auth.SecretKeyRef.Key]
+		token, exists = secret.Data[auth.TokenSecretKeyRef.Key]
 		if !exists {
-			return nil, in.missingCredentialKeyError(auth.SecretKeyRef.Key)
+			return nil, in.missingCredentialKeyError(auth.TokenSecretKeyRef.Key)
 		}
 	} else if auth.TokenSecretRef != nil {
 		secret, err := utils.GetSecret(ctx, in.Client, auth.TokenSecretRef)
@@ -213,14 +213,14 @@ func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, namespace s
 		},
 	}
 
-	if auth.SecretKeyRef != nil {
-		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretKeyRef.Name, Namespace: namespace})
+	if auth.SecretAccessKeySecretKeyRef != nil {
+		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretAccessKeySecretKeyRef.Name, Namespace: namespace})
 		if err != nil {
 			return nil, err
 		}
-		secretAccessKey, exists := secret.Data[auth.SecretKeyRef.Key]
+		secretAccessKey, exists := secret.Data[auth.SecretAccessKeySecretKeyRef.Key]
 		if !exists {
-			return nil, in.missingCredentialKeyError(auth.SecretKeyRef.Key)
+			return nil, in.missingCredentialKeyError(auth.SecretAccessKeySecretKeyRef.Key)
 		}
 		attrs.Aws.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
 
@@ -254,14 +254,14 @@ func (in *HelmRepositoryAuth) azureAuthAttributes(ctx context.Context, namespace
 		},
 	}
 
-	if auth.SecretKeyRef != nil {
-		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretKeyRef.Name, Namespace: namespace})
+	if auth.ClientSecretSecretKeyRef != nil {
+		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.ClientSecretSecretKeyRef.Name, Namespace: namespace})
 		if err != nil {
 			return nil, err
 		}
-		clientSecret, exists := secret.Data[auth.SecretKeyRef.Key]
+		clientSecret, exists := secret.Data[auth.ClientSecretSecretKeyRef.Key]
 		if !exists {
-			return nil, in.missingCredentialKeyError(auth.SecretKeyRef.Key)
+			return nil, in.missingCredentialKeyError(auth.ClientSecretSecretKeyRef.Key)
 		}
 		attrs.Azure.ClientSecret = lo.ToPtr(string(clientSecret))
 	} else if auth.ClientSecretSecretRef != nil {
@@ -285,19 +285,19 @@ func (in *HelmRepositoryAuth) gcpAuthAttributes(ctx context.Context, namespace s
 	if auth == nil {
 		return nil, nil
 	}
-	if auth.SecretKeyRef == nil && auth.ApplicationCredentialsSecretRef == nil {
+	if auth.ApplicationCredentialsSecretKeyRef == nil && auth.ApplicationCredentialsSecretRef == nil {
 		return nil, nil
 	}
 	var appCredentials []byte
 	var exists bool
-	if auth.SecretKeyRef != nil {
-		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.SecretKeyRef.Name, Namespace: namespace})
+	if auth.ApplicationCredentialsSecretKeyRef != nil {
+		secret, err := utils.GetSecret(ctx, in.Client, &corev1.SecretReference{Name: auth.ApplicationCredentialsSecretKeyRef.Name, Namespace: namespace})
 		if err != nil {
 			return nil, err
 		}
-		appCredentials, exists = secret.Data[auth.SecretKeyRef.Key]
+		appCredentials, exists = secret.Data[auth.ApplicationCredentialsSecretKeyRef.Key]
 		if !exists {
-			return nil, in.missingCredentialKeyError(auth.SecretKeyRef.Key)
+			return nil, in.missingCredentialKeyError(auth.ApplicationCredentialsSecretKeyRef.Key)
 		}
 	} else if auth.ApplicationCredentialsSecretRef != nil {
 		secret, err := utils.GetSecret(ctx, in.Client, auth.ApplicationCredentialsSecretRef)

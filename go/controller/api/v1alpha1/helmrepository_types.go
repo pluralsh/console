@@ -121,14 +121,14 @@ type HelmRepositoryAuthBasic struct {
 	PasswordSecretRef *corev1.SecretReference `json:"passwordSecretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	PasswordSecretKeyRef *corev1.SecretKeySelector `json:"passwordSecretKeyRef,omitempty"`
 }
 
 type HelmRepositoryAuthBearer struct {
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	TokenSecretKeyRef *corev1.SecretKeySelector `json:"tokenSecretKeyRef,omitempty"`
 }
 
 type HelmRepositoryAuthAWS struct {
@@ -140,7 +140,7 @@ type HelmRepositoryAuthAWS struct {
 	SecretAccessKeySecretRef *corev1.SecretReference `json:"secretAccessKeySecretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	SecretAccessKeySecretKeyRef *corev1.SecretKeySelector `json:"secretAccessKeySecretKeyRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
@@ -155,7 +155,7 @@ type HelmRepositoryAuthAzure struct {
 	ClientSecretSecretRef *corev1.SecretReference `json:"clientSecretSecretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	ClientSecretSecretKeyRef *corev1.SecretKeySelector `json:"clientSecretSecretKeyRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	TenantID *string `json:"tenantId,omitempty"`
@@ -170,5 +170,5 @@ type HelmRepositoryAuthGCP struct {
 	ApplicationCredentialsSecretRef *corev1.SecretReference `json:"applicationCredentialsSecretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	ApplicationCredentialsSecretKeyRef *corev1.SecretKeySelector `json:"applicationCredentialsSecretKeyRef,omitempty"`
 }
