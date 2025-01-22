@@ -1,3 +1,11 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: HelmRepository
+metadata:
+  name: empty
+  namespace: default
+spec:
+  url: https://github.com/zreigz/k8s-helm.git
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -12,10 +20,46 @@ metadata:
   name: basic
   namespace: default
 spec:
-  url: https://github.com/test/lukasz.git
+  url: https://github.com/test/bearer.git
   provider: BEARER
   auth:
     bearer:
       tokenSecretRef:
         name: basic-secret
+        namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gcp-secret
+  namespace: default
+data:
+  applicationCredentials: dGVzdA==
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: HelmRepository
+metadata:
+  name: gcp
+  namespace: default
+spec:
+  url: https://github.com/test/gcp.git
+  provider: GCP
+  auth:
+    gcp:
+      applicationCredentialsSecretRef:
+        name: gcp-secret
+        namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: HelmRepository
+metadata:
+  name: test
+  namespace: default
+spec:
+  url: https://github.com/test/test.git
+  provider: GCP
+  auth:
+    gcp:
+      applicationCredentialsSecretRef:
+        name: gcp-secret
         namespace: default
