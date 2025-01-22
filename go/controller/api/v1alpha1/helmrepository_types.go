@@ -117,13 +117,18 @@ type HelmRepositoryAuthBasic struct {
 	// +kubebuilder:validation:Required
 	Username string `json:"username"`
 
-	// +kubebuilder:validation:Required
-	PasswordSecretRef corev1.SecretReference `json:"passwordSecretRef"`
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretReference `json:"passwordSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
 type HelmRepositoryAuthBearer struct {
-	// +kubebuilder:validation:Required
-	TokenSecretRef corev1.SecretReference `json:"tokenSecretRef"`
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
 type HelmRepositoryAuthAWS struct {
@@ -133,6 +138,9 @@ type HelmRepositoryAuthAWS struct {
 	// SecretAccessKeySecretRef is a secret reference that should contain secret access key.
 	// +kubebuilder:validation:Optional
 	SecretAccessKeySecretRef *corev1.SecretReference `json:"secretAccessKeySecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
@@ -147,6 +155,9 @@ type HelmRepositoryAuthAzure struct {
 	ClientSecretSecretRef *corev1.SecretReference `json:"clientSecretSecretRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	TenantID *string `json:"tenantId,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -157,4 +168,7 @@ type HelmRepositoryAuthGCP struct {
 	// ApplicationCredentialsSecretRef is a secret reference that should contain application credentials.
 	// +kubebuilder:validation:Optional
 	ApplicationCredentialsSecretRef *corev1.SecretReference `json:"applicationCredentialsSecretRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
