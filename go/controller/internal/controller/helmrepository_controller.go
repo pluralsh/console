@@ -11,7 +11,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -136,48 +135,6 @@ func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepo
 	}
 
 	return utils.TryAddControllerRef(ctx, in.Client, helmRepository, secret, in.Scheme)
-}
-
-func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (bool, error) {
-	if helmRepository.Status.HasReadonlyCondition() {
-		return helmRepository.Status.IsReadonly(), nil
-	}
-
-	_, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
-	if errors.IsNotFound(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-
-	return !helmRepository.Status.HasID(), nil
-}
-
-func (in *HelmRepositoryReconciler) handleExistingHelmRepository(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (ctrl.Result, error) {
-	exists, err := in.ConsoleClient.IsHelmRepositoryExists(ctx, helmRepository.ConsoleName())
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if !exists {
-		helmRepository.Status.ID = nil
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
-	}
-
-	apiHelmRepository, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
-	if err != nil {
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-
-	helmRepository.Status.ID = &apiHelmRepository.ID
-
-	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-
-	return requeue, nil
 }
 
 func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1alpha1.HelmRepository, changed bool) (*console.HelmRepositoryFragment, error) {
