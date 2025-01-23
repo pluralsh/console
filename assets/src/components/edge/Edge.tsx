@@ -1,6 +1,11 @@
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { useTheme } from 'styled-components'
-import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  LoopingLogo,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
@@ -16,9 +21,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from '../utils/table/DateTimeCol.tsx'
 import { GqlError } from '../utils/Alert.tsx'
 
-import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
-
-const crumbs = [{ label: 'edge', url: EDGE_ABS_PATH }]
+import { EDGE_BASE_CRUMBS } from '../../routes/edgeRoutes.tsx'
+import { Flex } from 'honorable'
 
 export const columnHelper = createColumnHelper<ClusterRegistrationFragment>()
 
@@ -38,6 +42,30 @@ const columns = [
     header: 'Handle',
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor((registration) => registration.creator, {
+    id: 'creator',
+    header: 'Creator',
+    cell: ({ getValue }) => {
+      const creator = getValue()
+
+      return (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          {(creator?.profile || creator?.name) && (
+            <AppIcon
+              url={creator?.profile ?? undefined}
+              name={creator?.name}
+              size="xxsmall"
+              spacing="none"
+            />
+          )}
+          {creator?.email}
+        </Flex>
+      )
+    },
+  }),
   columnHelper.accessor((registration) => registration.insertedAt, {
     id: 'insertedAt',
     header: 'Created',
@@ -50,7 +78,7 @@ const columns = [
 export default function Edge() {
   const theme = useTheme()
 
-  useSetBreadcrumbs(crumbs)
+  useSetBreadcrumbs(EDGE_BASE_CRUMBS)
 
   const {
     data,

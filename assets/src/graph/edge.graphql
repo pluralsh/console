@@ -11,7 +11,7 @@ fragment ClusterRegistration on ClusterRegistration {
     value
   }
   creator {
-    ...User
+    ...UserTiny
   }
   project {
     ...ProjectTiny

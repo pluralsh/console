@@ -17,6 +17,12 @@ fragment User on User {
   }
 }
 
+fragment UserTiny on User {
+  name
+  email
+  profile
+}
+
 fragment Invite on Invite {
   secureId
 }
