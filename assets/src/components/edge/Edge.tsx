@@ -23,6 +23,7 @@ import { GqlError } from '../utils/Alert.tsx'
 
 import { EDGE_BASE_CRUMBS } from '../../routes/edgeRoutes.tsx'
 import { Flex } from 'honorable'
+import { StackedText } from '../utils/table/StackedText.tsx'
 
 export const columnHelper = createColumnHelper<ClusterRegistrationFragment>()
 
@@ -32,15 +33,19 @@ const columns = [
     header: 'Machine ID',
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor((registration) => registration.name, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((registration) => registration.handle, {
-    id: 'handle',
-    header: 'Handle',
-    cell: ({ getValue }) => getValue(),
+  columnHelper.accessor(() => null, {
+    id: 'cluster',
+    header: 'Cluster',
+    cell: ({
+      row: {
+        original: { name, handle },
+      },
+    }) => (
+      <StackedText
+        first={name}
+        second={handle ? `handle: ${handle}` : undefined}
+      />
+    ),
   }),
   columnHelper.accessor((registration) => registration.creator, {
     id: 'creator',
