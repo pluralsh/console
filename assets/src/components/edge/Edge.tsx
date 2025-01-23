@@ -17,7 +17,7 @@ import {
   ClusterRegistrationFragment,
   useClusterRegistrationsQuery,
 } from '../../generated/graphql.ts'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { mapExistingNodes } from '../../utils/graphql.ts'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from '../utils/table/DateTimeCol.tsx'
@@ -26,6 +26,7 @@ import { GqlError } from '../utils/Alert.tsx'
 import { EDGE_BASE_CRUMBS } from '../../routes/edgeRoutes.tsx'
 import { Flex } from 'honorable'
 import { StackedText } from '../utils/table/StackedText.tsx'
+import { CreateCompleteClusterRegistrationModal } from './CompleteClusterRegistrationModal.tsx'
 
 const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
 
@@ -114,15 +115,27 @@ const columns = [
         original: { id, name },
       },
     }) {
-      return !name ? (
-        <Button
-          secondary
-          small
-          pulse
-        >
-          Complete
-        </Button>
-      ) : undefined
+      const [open, setOpen] = useState(false)
+
+      return (
+        <>
+          {!name && (
+            <Button
+              secondary
+              small
+              pulse
+              onClick={() => setOpen(true)}
+            >
+              Complete
+            </Button>
+          )}
+          <CreateCompleteClusterRegistrationModal
+            id={id}
+            open={open}
+            onClose={() => setOpen(false)}
+          />
+        </>
+      )
     },
   }),
 ]
