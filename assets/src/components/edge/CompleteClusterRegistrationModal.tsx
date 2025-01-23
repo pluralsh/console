@@ -83,7 +83,7 @@ function CompleteClusterRegistrationModal({
           Provide cluster details to complete registration on machine with{' '}
           {machineId} ID.
         </p>
-        <GqlError error={error} />
+        {error && <GqlError error={error} />}
         <FormField
           label="Name"
           required
