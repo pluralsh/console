@@ -31,11 +31,18 @@ const columns = [
   columnHelper.accessor((registration) => registration.machineId, {
     id: 'machineId',
     header: 'Machine ID',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((registration) => registration.project?.name, {
+    id: 'project',
+    header: 'Project',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   }),
   columnHelper.accessor(() => null, {
     id: 'cluster',
     header: 'Cluster',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
     cell: ({
       row: {
         original: { name, handle },
@@ -50,6 +57,7 @@ const columns = [
   columnHelper.accessor((registration) => registration.creator, {
     id: 'creator',
     header: 'Creator',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
     cell: ({ getValue }) => {
       const creator = getValue()
 
