@@ -1,0 +1,75 @@
+fragment ClusterRegistration on ClusterRegistration {
+  id
+  insertedAt
+  updatedAt
+  machineId
+  name
+  handle
+  metadata
+  tags {
+    ...Tag
+  }
+  creator {
+    ...UserTiny
+  }
+  project {
+    ...ProjectTiny
+  }
+}
+
+fragment Tag on Tag {
+  name
+  value
+}
+
+query ClusterRegistration($id: ID, $machineId: String) {
+  clusterRegistration(id: $id, machineId: $machineId) {
+    ...ClusterRegistration
+  }
+}
+
+query ClusterRegistrations(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  clusterRegistrations(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterRegistration
+      }
+    }
+  }
+}
+
+mutation CreateClusterRegistration(
+  $attributes: ClusterRegistrationCreateAttributes!
+) {
+  createClusterRegistration(attributes: $attributes) {
+    ...ClusterRegistration
+  }
+}
+
+mutation UpdateClusterRegistration(
+  $id: ID!
+  $attributes: ClusterRegistrationUpdateAttributes!
+) {
+  updateClusterRegistration(id: $id, attributes: $attributes) {
+    ...ClusterRegistration
+  }
+}
+
+mutation DeleteClusterRegistration($id: ID!) {
+  deleteClusterRegistration(id: $id) {
+    ...ClusterRegistration
+  }
+}

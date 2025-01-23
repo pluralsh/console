@@ -21,6 +21,7 @@ import {
   WarningShieldIcon,
   setThemeColorMode,
   useThemeColorMode,
+  RamIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -52,6 +53,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
+import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -168,6 +170,13 @@ export function useCommands(): CommandGroup[] {
             callback: () => navigate(AI_ABS_PATH),
             deps: [navigate],
             hotkeys: ['shift A', '5'],
+          },
+          {
+            label: 'Edge',
+            icon: RamIcon,
+            callback: () => navigate(EDGE_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift E'],
           },
           {
             label: 'Service catalog',

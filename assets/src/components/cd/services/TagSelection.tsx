@@ -83,7 +83,7 @@ export function TagSelection({
           css={{ '&&': { flexGrow: 0 } }}
           type="secondary"
           tooltip={tagIsValid ? 'Add tag' : 'Tag is incomplete or invalid'}
-          size="medium"
+          size="large"
           clickable={tagIsValid}
           icon={
             <PlusIcon
