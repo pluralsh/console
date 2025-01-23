@@ -11,11 +11,13 @@ function CompleteClusterRegistrationModal({
   machineId,
   open,
   onClose,
+  refetch,
 }: {
   id: string
   machineId: string
   open: boolean
   onClose: () => void
+  refetch?: () => void
 }) {
   const theme = useTheme()
   const [name, setName] = useState('')
@@ -23,7 +25,10 @@ function CompleteClusterRegistrationModal({
   const [tags, setTags] = useState<Record<string, string>>({})
 
   const [mutation, { loading, error }] = useUpdateClusterRegistrationMutation({
-    onCompleted: onClose,
+    onCompleted: () => {
+      onClose()
+      refetch?.()
+    },
   })
 
   return (

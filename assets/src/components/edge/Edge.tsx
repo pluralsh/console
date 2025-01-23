@@ -114,7 +114,9 @@ const columns = [
       row: {
         original: { id, machineId, name },
       },
+      table,
     }) {
+      const { refetch } = table.options.meta as { refetch?: () => void }
       const [open, setOpen] = useState(false)
 
       return (
@@ -134,6 +136,7 @@ const columns = [
             machineId={machineId}
             open={open}
             onClose={() => setOpen(false)}
+            refetch={refetch}
           />
         </>
       )
