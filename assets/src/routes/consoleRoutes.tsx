@@ -17,6 +17,7 @@ import { secretsRoutes } from './secretsRoute'
 import { securityRoutes } from './securityRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
+import { edgeRoutes } from './edgeRoutes.tsx'
 
 const profileRoutes = [
   <Route
@@ -56,6 +57,7 @@ const profileRoutes = [
 ]
 
 export const consoleComponentRoutes = [
+  ...edgeRoutes,
   ...catalogRoutes,
   ...stacksRoutes,
   // ...incidentsRoutes,
