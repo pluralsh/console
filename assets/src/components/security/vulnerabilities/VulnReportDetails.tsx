@@ -7,7 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { StackedText } from 'components/utils/table/StackedText'
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import { useClusterQuery, useVulnerabilityReportQuery } from 'generated/graphql'
@@ -67,28 +66,24 @@ export function VulnerabilityReportDetails() {
           />
         </Flex>
       </HeaderWrapperSC>
-      <FullHeightTableWrap>
-        <Table
-          virtualizeRows
-          fillLevel={1}
-          rowBg="base"
-          data={data?.vulnerabilityReport?.vulnerabilities ?? []}
-          columns={columns}
-          loading={loading && !data}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          getRowCanExpand={() => true}
-          renderExpanded={VulnerabilityExpansionPanel}
-          onRowClick={(_e, row) => row.getToggleExpandedHandler()()}
-          emptyStateProps={{ message: 'No vulnerabilities found.' }}
-          css={{
-            maxHeight: '100%',
-            // hacky, for targeting the expander row. should build this into table
-            'tr:has(td[colspan]) td': {
-              background: theme.colors['fill-two'],
-            },
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        virtualizeRows
+        fillLevel={1}
+        rowBg="base"
+        data={data?.vulnerabilityReport?.vulnerabilities ?? []}
+        columns={columns}
+        loading={loading && !data}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        getRowCanExpand={() => true}
+        renderExpanded={VulnerabilityExpansionPanel}
+        onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+        emptyStateProps={{ message: 'No vulnerabilities found.' }}
+        css={{
+          // hacky, for targeting the expander row. should build this into table
+          'tr:has(td[colspan]) td': { background: theme.colors['fill-two'] },
+        }}
+      />
     </WrapperSC>
   )
 }

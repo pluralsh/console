@@ -35,7 +35,7 @@ export const CLUSTER_ADDONS_PARAM_ID = 'addOnId' as const
 export const CLUSTER_PRS_REL_PATH = 'prs' as const
 export const CLUSTER_VCLUSTERS_REL_PATH = 'vclusters' as const
 export const CLUSTER_LOGS_PATH = 'logs' as const
-
+export const CLUSTER_ALERTS_REL_PATH = 'alerts' as const
 export const NODE_PARAM_NAME = 'name' as const
 export const NODE_PARAM_CLUSTER = 'clusterId' as const
 

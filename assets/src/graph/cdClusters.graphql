@@ -317,6 +317,14 @@ fragment Cluster on Cluster {
   insightComponents {
     ...ClusterInsightComponent
   }
+  alerts(first: 500) {
+    # just to get the count
+    edges {
+      node {
+        id
+      }
+    }
+  }
 }
 
 query Clusters(

@@ -92,6 +92,7 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 import {
   CD_REL_PATH,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_ALERTS_REL_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_INSIGHTS_SUMMARY_PATH,
@@ -129,6 +130,8 @@ import { pipelineRoutes } from './pipelineRoutes'
 import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 import styled from 'styled-components'
+import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
+import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -342,6 +345,10 @@ const clusterDetailsRoutes = [
       />
     </Route>
     <Route
+      path={CLUSTER_ALERTS_REL_PATH}
+      element={<ClusterAlerts />}
+    />
+    <Route
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
     />
@@ -515,6 +522,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceDryRun />}
       path="dryrun"
+    />
+    <Route
+      element={<ServiceAlerts />}
+      path="alerts"
     />
     <Route
       element={<ServiceInsights />}
