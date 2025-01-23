@@ -1,12 +1,11 @@
-import { Button, FormField, Modal, Input2 } from '@pluralsh/design-system'
+import { Button, FormField, Modal, Input } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
-
 import { useUpdateClusterRegistrationMutation } from 'generated/graphql'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from '../utils/Alert.tsx'
-
+import { TagSelection } from '../cd/services/TagSelection.tsx'
+import { tagsToNameValue } from '../cd/services/CreateGlobalService.tsx'
 function CompleteClusterRegistrationModal({
   id,
   machineId,
@@ -21,6 +20,7 @@ function CompleteClusterRegistrationModal({
   const theme = useTheme()
   const [name, setName] = useState('')
   const [handle, setHandle] = useState('')
+  const [tags, setTags] = useState<Record<string, string>>({})
 
   const [mutation, { loading, error }] = useUpdateClusterRegistrationMutation({
     onCompleted: onClose,
@@ -38,6 +38,7 @@ function CompleteClusterRegistrationModal({
             attributes: {
               name,
               handle,
+              tags: tagsToNameValue(tags),
             },
           },
         })
@@ -88,15 +89,24 @@ function CompleteClusterRegistrationModal({
           label="Name"
           required
         >
-          <Input2
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </FormField>
         <FormField label="Handle">
-          <Input2
+          <Input
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Tags">
+          <TagSelection
+            {...{
+              setTags,
+              tags,
+              theme,
+            }}
           />
         </FormField>
       </div>

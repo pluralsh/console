@@ -7,8 +7,7 @@ fragment ClusterRegistration on ClusterRegistration {
   handle
   metadata
   tags {
-    name
-    value
+    ...Tag
   }
   creator {
     ...UserTiny
@@ -16,6 +15,11 @@ fragment ClusterRegistration on ClusterRegistration {
   project {
     ...ProjectTiny
   }
+}
+
+fragment Tag on Tag {
+  name
+  value
 }
 
 query ClusterRegistration($id: ID, $machineId: String) {

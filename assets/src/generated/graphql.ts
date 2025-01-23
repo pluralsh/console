@@ -10749,6 +10749,8 @@ export type ApplyScalingRecommendationMutation = { __typename?: 'RootMutationTyp
 
 export type ClusterRegistrationFragment = { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
+export type TagFragment = { __typename?: 'Tag', name: string, value: string };
+
 export type ClusterRegistrationQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
   machineId?: InputMaybe<Scalars['String']['input']>;
@@ -13567,6 +13569,12 @@ export const ClusterScalingRecommendationFragmentDoc = gql`
   }
 }
     ${ServiceDeploymentTinyFragmentDoc}`;
+export const TagFragmentDoc = gql`
+    fragment Tag on Tag {
+  name
+  value
+}
+    `;
 export const UserTinyFragmentDoc = gql`
     fragment UserTiny on User {
   name
@@ -13584,8 +13592,7 @@ export const ClusterRegistrationFragmentDoc = gql`
   handle
   metadata
   tags {
-    name
-    value
+    ...Tag
   }
   creator {
     ...UserTiny
@@ -13594,7 +13601,8 @@ export const ClusterRegistrationFragmentDoc = gql`
     ...ProjectTiny
   }
 }
-    ${UserTinyFragmentDoc}
+    ${TagFragmentDoc}
+${UserTinyFragmentDoc}
 ${ProjectTinyFragmentDoc}`;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
@@ -25714,6 +25722,7 @@ export const namedOperations = {
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     ClusterRegistration: 'ClusterRegistration',
+    Tag: 'Tag',
     GroupMember: 'GroupMember',
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',
