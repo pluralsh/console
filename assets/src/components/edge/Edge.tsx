@@ -2,6 +2,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { useTheme } from 'styled-components'
 import {
   AppIcon,
+  ChipList,
   LoopingLogo,
   Table,
   useSetBreadcrumbs,
@@ -24,6 +25,8 @@ import { GqlError } from '../utils/Alert.tsx'
 import { EDGE_BASE_CRUMBS } from '../../routes/edgeRoutes.tsx'
 import { Flex } from 'honorable'
 import { StackedText } from '../utils/table/StackedText.tsx'
+
+const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
 
 export const columnHelper = createColumnHelper<ClusterRegistrationFragment>()
 
@@ -51,6 +54,21 @@ const columns = [
       <StackedText
         first={name}
         second={handle ? `handle: ${handle}` : undefined}
+      />
+    ),
+  }),
+  columnHelper.accessor((registration) => registration.tags ?? [], {
+    id: 'tags',
+    header: 'Tags',
+    cell: ({ getValue }) => (
+      <ChipList
+        size="small"
+        limit={1}
+        values={getValue()}
+        transformValue={renderTag}
+        tooltip
+        truncateWidth={150}
+        emptyState={null}
       />
     ),
   }),
