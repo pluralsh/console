@@ -311,6 +311,12 @@ spec:
                     items:
                       description: PrAutomationTemplate ...
                       properties:
+                        context:
+                          description: Additional context overrides to apply to this
+                            template, will be merged into the user-provided configuration
+                            options
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
                         destination:
                           description: The destination to write the file to
                           type: string

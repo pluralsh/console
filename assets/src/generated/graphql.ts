@@ -4822,6 +4822,7 @@ export type PrAutomationEdge = {
 
 /** templates to apply in this pr */
 export type PrAutomationTemplateAttributes = {
+  context?: InputMaybe<Scalars['Json']['input']>;
   destination: Scalars['String']['input'];
   /** whether the source template is sourced from an external git repo bound to this automation */
   external: Scalars['Boolean']['input'];
@@ -4942,6 +4943,7 @@ export enum PrStatus {
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
   __typename?: 'PrTemplateSpec';
+  context?: Maybe<Scalars['Map']['output']>;
   destination: Scalars['String']['output'];
   external: Scalars['Boolean']['output'];
   source: Scalars['String']['output'];

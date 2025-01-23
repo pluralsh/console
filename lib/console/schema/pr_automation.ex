@@ -37,6 +37,7 @@ defmodule Console.Schema.PrAutomation do
         field :source,      :string
         field :destination, :string
         field :external,    :boolean
+        field :context,     :map
       end
     end
 
@@ -161,7 +162,7 @@ defmodule Console.Schema.PrAutomation do
 
   defp template_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(source destination external)a)
+    |> cast(attrs, ~w(source destination external context)a)
     |> validate_required(~w(source destination)a)
   end
 
