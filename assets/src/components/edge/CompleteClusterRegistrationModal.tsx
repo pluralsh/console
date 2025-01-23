@@ -5,6 +5,7 @@ import { useTheme } from 'styled-components'
 import { useUpdateClusterRegistrationMutation } from 'generated/graphql'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { GqlError } from '../utils/Alert.tsx'
 
 function CompleteClusterRegistrationModal({
   id,
@@ -82,6 +83,7 @@ function CompleteClusterRegistrationModal({
           Provide cluster details to complete registration on machine with{' '}
           {machineId} ID.
         </p>
+        <GqlError error={error} />
         <FormField
           label="Name"
           required
