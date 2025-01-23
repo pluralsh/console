@@ -2,6 +2,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { useTheme } from 'styled-components'
 import {
   AppIcon,
+  Button,
   ChipList,
   LoopingLogo,
   Table,
@@ -103,6 +104,26 @@ const columns = [
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }),
+  columnHelper.accessor(() => null, {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: function Cell({
+      row: {
+        original: { id, name },
+      },
+    }) {
+      return !name ? (
+        <Button
+          secondary
+          small
+          pulse
+        >
+          Complete
+        </Button>
+      ) : undefined
+    },
   }),
 ]
 
