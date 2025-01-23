@@ -13,6 +13,7 @@ fragment Alert on Alert {
     name
     value
   }
+  updatedAt
 }
 
 query ClusterAlerts(

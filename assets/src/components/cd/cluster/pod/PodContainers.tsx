@@ -70,25 +70,17 @@ export const ColStatus = columnHelper.accessor(
 export const ColExpander = {
   id: 'expander',
   header: () => {},
-  meta: { gridTemplate: 'min-content' },
+  meta: { gridTemplate: '48px' },
   cell: ({ row }) =>
     row.getCanExpand() && (
       <CollapseIcon
         size={8}
         cursor="pointer"
-        style={
-          row.getIsExpanded()
-            ? {
-                transform: 'rotate(270deg)',
-                transitionDuration: '.2s',
-                transitionProperty: 'transform',
-              }
-            : {
-                transform: 'rotate(180deg)',
-                transitionDuration: '.2s',
-                transitionProperty: 'transform',
-              }
-        }
+        style={{
+          alignSelf: 'center',
+          transform: `rotate(${row.getIsExpanded() ? 270 : 180}deg)`,
+          transition: 'transform .2s',
+        }}
         onClick={(e) => {
           e.stopPropagation()
           row.getToggleExpandedHandler()()

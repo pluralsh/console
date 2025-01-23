@@ -283,7 +283,7 @@ function ServiceDetailsBase() {
   )
 
   return (
-    <ResponsiveLayoutPage>
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer>
         <div
           css={{

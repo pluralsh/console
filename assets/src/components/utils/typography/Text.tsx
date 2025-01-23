@@ -1,4 +1,5 @@
 import { SemanticColorKey } from '@pluralsh/design-system'
+import { ComponentPropsWithRef, ReactNode } from 'react'
 import styled from 'styled-components'
 
 type TextProps = {
@@ -45,7 +46,27 @@ export const Title2H1 = styled.h1<TextProps>(({ theme, $color }) => ({
   ...theme.partials.text.title2,
   color: $color && theme.colors[$color],
 }))
-export const A = styled.a``
-export const TabularNums = styled.span({
-  fontVariantNumeric: 'tabular-nums',
-})
+
+const StandardUrlSC = styled.a(({ theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  color: theme.colors['text-primary-accent'],
+}))
+export function StandardUrl({
+  href,
+  children,
+  ...props
+}: {
+  href: Nullable<string>
+  children: ReactNode
+} & Omit<ComponentPropsWithRef<typeof StandardUrlSC>, 'children' | 'href'>) {
+  return (
+    <StandardUrlSC
+      href={href || ''}
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    >
+      {children}
+    </StandardUrlSC>
+  )
+}

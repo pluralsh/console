@@ -11,7 +11,6 @@ import {
 } from 'generated/graphql'
 
 export function VulnDetailExpanded({ v }: { v: VulnerabilityFragment }) {
-  const theme = useTheme()
   if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss) {
     return <VulnerabilityDetailSC>No details available.</VulnerabilityDetailSC>
   }
@@ -19,9 +18,9 @@ export function VulnDetailExpanded({ v }: { v: VulnerabilityFragment }) {
   return (
     <VulnerabilityDetailSC>
       <StackedText
-        css={{ color: theme.colors['text'] }}
         first={v.title}
         firstPartialType="body2Bold"
+        firstColor="text"
         second={v.description}
         secondPartialType="body2"
       />
@@ -100,9 +99,10 @@ function CVSSSection({
     >
       {source && score && (
         <StackedText
-          css={{ color: theme.colors['text'], marginTop: theme.spacing.medium }}
+          css={{ marginTop: theme.spacing.medium }}
           first={`CVSS Vector (source ${source}, score: ${score})`}
           firstPartialType="body2Bold"
+          firstColor="text"
           second="Each metric is ordered from low to high severity."
           secondPartialType="body2"
         />
