@@ -326,7 +326,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <PageHeaderContext.Provider value={pageHeaderContext}>
+        <PageHeaderContext value={pageHeaderContext}>
           <Suspense fallback={<LoadingIndicator />}>
             <Outlet
               context={
@@ -340,13 +340,13 @@ export default function Cluster() {
               }
             />
           </Suspense>
-        </PageHeaderContext.Provider>
+        </PageHeaderContext>
       </TabPanel>
     </ResponsivePageFullWidth>
   )
 }
 
-type ClusterContextType = {
+export type ClusterContextType = {
   cluster: ClusterFragment
   clusterLoading: boolean
   refetch: () => void

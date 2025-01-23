@@ -89,7 +89,10 @@ export const ColExpander = {
                 transitionProperty: 'transform',
               }
         }
-        onClick={row.getToggleExpandedHandler()}
+        onClick={(e) => {
+          e.stopPropagation()
+          row.getToggleExpandedHandler()()
+        }}
       />
     ),
 }
