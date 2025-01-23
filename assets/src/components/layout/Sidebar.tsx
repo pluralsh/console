@@ -24,6 +24,7 @@ import {
   StackIcon,
   Tooltip,
   WarningShieldIcon,
+  RamIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
 import { Avatar, Flex, Menu, MenuItem } from 'honorable'
@@ -53,6 +54,7 @@ import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { MARK_READ } from './queries'
+import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 
 type MenuItem = {
   text: string
@@ -92,6 +94,13 @@ function getMenuItems({
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
       hotkeys: ['shift C', '2'],
+    },
+    {
+      text: 'Edge',
+      expandedLabel: 'Edge',
+      icon: <RamIcon />,
+      path: EDGE_ABS_PATH,
+      hotkeys: ['shift E'],
     },
     {
       text: 'Stacks',
