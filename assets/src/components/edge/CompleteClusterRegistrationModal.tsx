@@ -8,10 +8,12 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 function CompleteClusterRegistrationModal({
   id,
+  machineId,
   open,
   onClose,
 }: {
   id: string
+  machineId: string
   open: boolean
   onClose: () => void
 }) {
@@ -20,9 +22,7 @@ function CompleteClusterRegistrationModal({
   const [handle, setHandle] = useState('')
 
   const [mutation, { loading, error }] = useUpdateClusterRegistrationMutation({
-    onCompleted: (data) => {
-      console.log(data)
-    },
+    onCompleted: onClose,
   })
 
   return (
@@ -78,6 +78,10 @@ function CompleteClusterRegistrationModal({
           gap: theme.spacing.large,
         }}
       >
+        <p>
+          Provide cluster details to complete registration on machine with{' '}
+          {machineId} ID.
+        </p>
         <FormField
           label="Name"
           required

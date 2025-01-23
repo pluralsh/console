@@ -112,7 +112,7 @@ const columns = [
     meta: { gridTemplate: `fit-content(100px)` },
     cell: function Cell({
       row: {
-        original: { id, name },
+        original: { id, machineId, name },
       },
     }) {
       const [open, setOpen] = useState(false)
@@ -131,6 +131,7 @@ const columns = [
           )}
           <CreateCompleteClusterRegistrationModal
             id={id}
+            machineId={machineId}
             open={open}
             onClose={() => setOpen(false)}
           />
