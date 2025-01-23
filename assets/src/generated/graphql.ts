@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -10747,6 +10747,48 @@ export type ApplyScalingRecommendationMutationVariables = Exact<{
 
 export type ApplyScalingRecommendationMutation = { __typename?: 'RootMutationType', applyScalingRecommendation?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
+export type ClusterRegistrationFragment = { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type ClusterRegistrationQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  machineId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterRegistrationQuery = { __typename?: 'RootQueryType', clusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type ClusterRegistrationsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterRegistrationsQuery = { __typename?: 'RootQueryType', clusterRegistrations?: { __typename?: 'ClusterRegistrationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterRegistrationEdge', node?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
+
+export type CreateClusterRegistrationMutationVariables = Exact<{
+  attributes: ClusterRegistrationCreateAttributes;
+}>;
+
+
+export type CreateClusterRegistrationMutation = { __typename?: 'RootMutationType', createClusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type UpdateClusterRegistrationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterRegistrationUpdateAttributes;
+}>;
+
+
+export type UpdateClusterRegistrationMutation = { __typename?: 'RootMutationType', updateClusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type DeleteClusterRegistrationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteClusterRegistrationMutation = { __typename?: 'RootMutationType', deleteClusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null };
@@ -13523,6 +13565,28 @@ export const ClusterScalingRecommendationFragmentDoc = gql`
   }
 }
     ${ServiceDeploymentTinyFragmentDoc}`;
+export const ClusterRegistrationFragmentDoc = gql`
+    fragment ClusterRegistration on ClusterRegistration {
+  id
+  insertedAt
+  updatedAt
+  machineId
+  name
+  handle
+  metadata
+  tags {
+    name
+    value
+  }
+  creator {
+    ...User
+  }
+  project {
+    ...ProjectTiny
+  }
+}
+    ${UserFragmentDoc}
+${ProjectTinyFragmentDoc}`;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -20855,6 +20919,198 @@ export function useApplyScalingRecommendationMutation(baseOptions?: Apollo.Mutat
 export type ApplyScalingRecommendationMutationHookResult = ReturnType<typeof useApplyScalingRecommendationMutation>;
 export type ApplyScalingRecommendationMutationResult = Apollo.MutationResult<ApplyScalingRecommendationMutation>;
 export type ApplyScalingRecommendationMutationOptions = Apollo.BaseMutationOptions<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>;
+export const ClusterRegistrationDocument = gql`
+    query ClusterRegistration($id: ID, $machineId: String) {
+  clusterRegistration(id: $id, machineId: $machineId) {
+    ...ClusterRegistration
+  }
+}
+    ${ClusterRegistrationFragmentDoc}`;
+
+/**
+ * __useClusterRegistrationQuery__
+ *
+ * To run a query within a React component, call `useClusterRegistrationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterRegistrationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterRegistrationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      machineId: // value for 'machineId'
+ *   },
+ * });
+ */
+export function useClusterRegistrationQuery(baseOptions?: Apollo.QueryHookOptions<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>(ClusterRegistrationDocument, options);
+      }
+export function useClusterRegistrationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>(ClusterRegistrationDocument, options);
+        }
+export function useClusterRegistrationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>(ClusterRegistrationDocument, options);
+        }
+export type ClusterRegistrationQueryHookResult = ReturnType<typeof useClusterRegistrationQuery>;
+export type ClusterRegistrationLazyQueryHookResult = ReturnType<typeof useClusterRegistrationLazyQuery>;
+export type ClusterRegistrationSuspenseQueryHookResult = ReturnType<typeof useClusterRegistrationSuspenseQuery>;
+export type ClusterRegistrationQueryResult = Apollo.QueryResult<ClusterRegistrationQuery, ClusterRegistrationQueryVariables>;
+export const ClusterRegistrationsDocument = gql`
+    query ClusterRegistrations($after: String, $first: Int, $before: String, $last: Int) {
+  clusterRegistrations(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterRegistration
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterRegistrationFragmentDoc}`;
+
+/**
+ * __useClusterRegistrationsQuery__
+ *
+ * To run a query within a React component, call `useClusterRegistrationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterRegistrationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterRegistrationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterRegistrationsQuery(baseOptions?: Apollo.QueryHookOptions<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>(ClusterRegistrationsDocument, options);
+      }
+export function useClusterRegistrationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>(ClusterRegistrationsDocument, options);
+        }
+export function useClusterRegistrationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>(ClusterRegistrationsDocument, options);
+        }
+export type ClusterRegistrationsQueryHookResult = ReturnType<typeof useClusterRegistrationsQuery>;
+export type ClusterRegistrationsLazyQueryHookResult = ReturnType<typeof useClusterRegistrationsLazyQuery>;
+export type ClusterRegistrationsSuspenseQueryHookResult = ReturnType<typeof useClusterRegistrationsSuspenseQuery>;
+export type ClusterRegistrationsQueryResult = Apollo.QueryResult<ClusterRegistrationsQuery, ClusterRegistrationsQueryVariables>;
+export const CreateClusterRegistrationDocument = gql`
+    mutation CreateClusterRegistration($attributes: ClusterRegistrationCreateAttributes!) {
+  createClusterRegistration(attributes: $attributes) {
+    ...ClusterRegistration
+  }
+}
+    ${ClusterRegistrationFragmentDoc}`;
+export type CreateClusterRegistrationMutationFn = Apollo.MutationFunction<CreateClusterRegistrationMutation, CreateClusterRegistrationMutationVariables>;
+
+/**
+ * __useCreateClusterRegistrationMutation__
+ *
+ * To run a mutation, you first call `useCreateClusterRegistrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClusterRegistrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClusterRegistrationMutation, { data, loading, error }] = useCreateClusterRegistrationMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateClusterRegistrationMutation(baseOptions?: Apollo.MutationHookOptions<CreateClusterRegistrationMutation, CreateClusterRegistrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateClusterRegistrationMutation, CreateClusterRegistrationMutationVariables>(CreateClusterRegistrationDocument, options);
+      }
+export type CreateClusterRegistrationMutationHookResult = ReturnType<typeof useCreateClusterRegistrationMutation>;
+export type CreateClusterRegistrationMutationResult = Apollo.MutationResult<CreateClusterRegistrationMutation>;
+export type CreateClusterRegistrationMutationOptions = Apollo.BaseMutationOptions<CreateClusterRegistrationMutation, CreateClusterRegistrationMutationVariables>;
+export const UpdateClusterRegistrationDocument = gql`
+    mutation UpdateClusterRegistration($id: ID!, $attributes: ClusterRegistrationUpdateAttributes!) {
+  updateClusterRegistration(id: $id, attributes: $attributes) {
+    ...ClusterRegistration
+  }
+}
+    ${ClusterRegistrationFragmentDoc}`;
+export type UpdateClusterRegistrationMutationFn = Apollo.MutationFunction<UpdateClusterRegistrationMutation, UpdateClusterRegistrationMutationVariables>;
+
+/**
+ * __useUpdateClusterRegistrationMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterRegistrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterRegistrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterRegistrationMutation, { data, loading, error }] = useUpdateClusterRegistrationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterRegistrationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterRegistrationMutation, UpdateClusterRegistrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterRegistrationMutation, UpdateClusterRegistrationMutationVariables>(UpdateClusterRegistrationDocument, options);
+      }
+export type UpdateClusterRegistrationMutationHookResult = ReturnType<typeof useUpdateClusterRegistrationMutation>;
+export type UpdateClusterRegistrationMutationResult = Apollo.MutationResult<UpdateClusterRegistrationMutation>;
+export type UpdateClusterRegistrationMutationOptions = Apollo.BaseMutationOptions<UpdateClusterRegistrationMutation, UpdateClusterRegistrationMutationVariables>;
+export const DeleteClusterRegistrationDocument = gql`
+    mutation DeleteClusterRegistration($id: ID!) {
+  deleteClusterRegistration(id: $id) {
+    ...ClusterRegistration
+  }
+}
+    ${ClusterRegistrationFragmentDoc}`;
+export type DeleteClusterRegistrationMutationFn = Apollo.MutationFunction<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>;
+
+/**
+ * __useDeleteClusterRegistrationMutation__
+ *
+ * To run a mutation, you first call `useDeleteClusterRegistrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteClusterRegistrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteClusterRegistrationMutation, { data, loading, error }] = useDeleteClusterRegistrationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteClusterRegistrationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>(DeleteClusterRegistrationDocument, options);
+      }
+export type DeleteClusterRegistrationMutationHookResult = ReturnType<typeof useDeleteClusterRegistrationMutation>;
+export type DeleteClusterRegistrationMutationResult = Apollo.MutationResult<DeleteClusterRegistrationMutation>;
+export type DeleteClusterRegistrationMutationOptions = Apollo.BaseMutationOptions<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -25171,6 +25427,8 @@ export const namedOperations = {
     ClusterUsageHistory: 'ClusterUsageHistory',
     ClusterUsageNamespaces: 'ClusterUsageNamespaces',
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
+    ClusterRegistration: 'ClusterRegistration',
+    ClusterRegistrations: 'ClusterRegistrations',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -25300,6 +25558,9 @@ export const namedOperations = {
     SelfManage: 'SelfManage',
     KickService: 'KickService',
     ApplyScalingRecommendation: 'ApplyScalingRecommendation',
+    CreateClusterRegistration: 'CreateClusterRegistration',
+    UpdateClusterRegistration: 'UpdateClusterRegistration',
+    DeleteClusterRegistration: 'DeleteClusterRegistration',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
@@ -25443,6 +25704,7 @@ export const namedOperations = {
     ClusterUsageHistory: 'ClusterUsageHistory',
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
+    ClusterRegistration: 'ClusterRegistration',
     GroupMember: 'GroupMember',
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',
