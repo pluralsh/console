@@ -96,13 +96,6 @@ function getMenuItems({
       hotkeys: ['shift C', '2'],
     },
     {
-      text: 'Edge',
-      expandedLabel: 'Edge',
-      icon: <RamIcon />,
-      path: EDGE_ABS_PATH,
-      hotkeys: ['shift E'],
-    },
-    {
       text: 'Stacks',
       expandedLabel: 'Stacks',
       icon: <StackIcon />,
@@ -130,6 +123,13 @@ function getMenuItems({
       icon: <AiSparkleOutlineIcon />,
       path: `${AI_ABS_PATH}`,
       hotkeys: ['shift A', '6'],
+    },
+    {
+      text: 'Edge',
+      expandedLabel: 'Edge',
+      icon: <RamIcon />,
+      path: EDGE_ABS_PATH,
+      hotkeys: ['shift E'],
     },
     {
       text: 'PRs',

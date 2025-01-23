@@ -151,13 +151,6 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['shift C', '2'],
           },
           {
-            label: 'Edge',
-            icon: RamIcon,
-            callback: () => navigate(EDGE_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift E'],
-          },
-          {
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
@@ -177,6 +170,13 @@ export function useCommands(): CommandGroup[] {
             callback: () => navigate(AI_ABS_PATH),
             deps: [navigate],
             hotkeys: ['shift A', '5'],
+          },
+          {
+            label: 'Edge',
+            icon: RamIcon,
+            callback: () => navigate(EDGE_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift E'],
           },
           {
             label: 'Service catalog',
