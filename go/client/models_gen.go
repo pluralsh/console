@@ -734,6 +734,22 @@ type ChatTypeAttributes struct {
 	File *ChatFile `json:"file,omitempty"`
 }
 
+type CloudAddon struct {
+	ID         string        `json:"id"`
+	Distro     ClusterDistro `json:"distro"`
+	Name       string        `json:"name"`
+	Version    string        `json:"version"`
+	Cluster    *Cluster      `json:"cluster,omitempty"`
+	InsertedAt *string       `json:"insertedAt,omitempty"`
+	UpdatedAt  *string       `json:"updatedAt,omitempty"`
+}
+
+type CloudAddonAttributes struct {
+	Distro  *ClusterDistro `json:"distro,omitempty"`
+	Name    *string        `json:"name,omitempty"`
+	Version *string        `json:"version,omitempty"`
+}
+
 type CloudProviderSettingsAttributes struct {
 	Aws   *AwsSettingsAttributes   `json:"aws,omitempty"`
 	Gcp   *GcpSettingsAttributes   `json:"gcp,omitempty"`
@@ -837,6 +853,8 @@ type Cluster struct {
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
+	// any upgrade insights provided by your cloud provider that have been discovered by our agent
+	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// A summation of the metrics utilization of the current cluster
 	MetricsSummary *ClusterMetricsSummary `json:"metricsSummary,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null

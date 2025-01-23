@@ -717,7 +717,7 @@ type RootMutationType {
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
 
   "agent api to persist upgrade insights for its cluster"
-  saveUpgradeInsights(insights: [UpgradeInsightAttributes]): [UpgradeInsight]
+  saveUpgradeInsights(insights: [UpgradeInsightAttributes], addons: [CloudAddonAttributes]): [UpgradeInsight]
 
   upsertVirtualCluster(attributes: ClusterAttributes!, parentId: ID!): Cluster
 
@@ -4543,6 +4543,12 @@ input UpgradeInsightAttributes {
   details: [UpgradeInsightDetailAttributes]
 }
 
+input CloudAddonAttributes {
+  distro: ClusterDistro
+  name: String
+  version: String
+}
+
 input UpgradeInsightDetailAttributes {
   status: UpgradeInsightStatus
 
@@ -4877,6 +4883,9 @@ type Cluster {
 
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   upgradeInsights: [UpgradeInsight]
+
+  "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+  cloudAddons: [CloudAddon]
 
   "A summation of the metrics utilization of the current cluster"
   metricsSummary: ClusterMetricsSummary
@@ -5490,6 +5499,16 @@ type ClusterRegistration {
 
   insertedAt: DateTime
 
+  updatedAt: DateTime
+}
+
+type CloudAddon {
+  id: ID!
+  distro: ClusterDistro!
+  name: String!
+  version: String!
+  cluster: Cluster
+  insertedAt: DateTime
   updatedAt: DateTime
 }
 

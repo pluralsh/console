@@ -24,7 +24,8 @@ defmodule Console.Deployments.Clusters do
     UpgradeInsight,
     ClusterInsightComponent,
     ClusterUsage,
-    ClusterRegistration
+    ClusterRegistration,
+    CloudAddon
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -1012,29 +1013,40 @@ defmodule Console.Deployments.Clusters do
   Saves upgrade insights for a cluster
   """
   @spec save_upgrade_insights([map], Cluster.t) :: {:ok, [UpgradeInsight.t]} | Console.error
-  def save_upgrade_insights(insights, %Cluster{id: id}) do
-    xact = add_operation(start_transaction(), :prune, fn _ ->
-      UpgradeInsight.for_cluster(id)
-      |> Repo.delete_all()
-      |> ok()
+  def save_upgrade_insights(%{insights: insights} = attrs, %Cluster{id: id}) do
+    start_transaction()
+    |> add_operation(:insights, fn _ ->
+      prune_and_save(UpgradeInsight, insights, id)
     end)
-
-    Enum.with_index(insights)
-    |> Enum.reduce(xact, fn {insight, ind}, xact ->
-      add_operation(xact, {:insight, ind}, fn _ ->
-        %UpgradeInsight{cluster_id: id}
-        |> UpgradeInsight.changeset(insight)
-        |> Repo.insert()
-      end)
+    |> add_operation(:addons, fn _ ->
+      prune_and_save(CloudAddon, attrs[:addons] || [], id)
     end)
-    |> execute()
+    |> execute(extract: :insights)
     |> when_ok(fn res ->
       Enum.filter(res, fn
-        {{:insight, _}, _} -> true
+        {{:record, _}, _} -> true
         _ -> false
       end)
       |> Enum.map(fn {_, v} -> v end)
     end)
+  end
+
+  defp prune_and_save(schema, records, cluster_id) do
+    xact = add_operation(start_transaction(), :prune, fn _ ->
+      schema.for_cluster(cluster_id)
+      |> Repo.delete_all()
+      |> ok()
+    end)
+
+    Enum.with_index(records)
+    |> Enum.reduce(xact, fn {attrs, ind}, xact ->
+      add_operation(xact, {:record, ind}, fn _ ->
+        struct(schema, %{cluster_id: cluster_id})
+        |> schema.changeset(attrs)
+        |> Repo.insert()
+      end)
+    end)
+    |> execute()
   end
 
   def kas_url() do

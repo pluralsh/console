@@ -255,8 +255,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def delete_pinned_custom_resource(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_pinned_custom_resource(id, user)
 
-  def save_upgrade_insights(%{insights: insights}, %{context: %{cluster: cluster}}),
-    do: Clusters.save_upgrade_insights(insights, cluster)
+  def save_upgrade_insights(attrs, %{context: %{cluster: cluster}}),
+    do: Clusters.save_upgrade_insights(attrs, cluster)
 
   def create_cluster_registration(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_cluster_registration(attrs, user)

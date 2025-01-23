@@ -69,7 +69,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     VulnerabilityReport,
     Vulnerability,
     ClusterInsightComponent,
-    ServiceConfiguration
+    ServiceConfiguration,
+    CloudAddon
   }
 
   def query(Project, _), do: Project
@@ -130,6 +131,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ObservabilityProvider, _), do: ObservabilityProvider
   def query(UpgradeInsight, _), do: UpgradeInsight
   def query(UpgradeInsightDetail, _), do: UpgradeInsightDetail
+  def query(CloudAddon, _), do: CloudAddon
   def query(AiInsight, _), do: AiInsight
   def query(ServiceVuln, _), do: ServiceVuln
   def query(NamespaceVuln, _), do: NamespaceVuln

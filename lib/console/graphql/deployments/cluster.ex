@@ -220,6 +220,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :details, list_of(:upgrade_insight_detail_attributes)
   end
 
+  input_object :cloud_addon_attributes do
+    field :distro,  :cluster_distro
+    field :name,    :string
+    field :version, :string
+  end
+
   input_object :upgrade_insight_detail_attributes do
     field :status,      :upgrade_insight_status
     field :used,        :string, description: "a possibly deprecated API"
@@ -413,6 +419,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :pinned_custom_resources, list_of(:pinned_custom_resource), description: "custom resources with dedicated views for this cluster",
       resolve: &Deployments.list_pinned_custom_resources/3
     field :upgrade_insights, list_of(:upgrade_insight),
+      resolve: dataloader(Deployments),
+      description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+    field :cloud_addons, list_of(:cloud_addon),
       resolve: dataloader(Deployments),
       description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
 
@@ -902,6 +911,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  object :cloud_addon do
+    field :id,      non_null(:id)
+    field :distro,  non_null(:cluster_distro)
+    field :name,    non_null(:string)
+    field :version, non_null(:string)
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -945,6 +965,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :save_upgrade_insights, list_of(:upgrade_insight) do
       middleware ClusterAuthenticated
       arg :insights, list_of(:upgrade_insight_attributes)
+      arg :addons,   list_of(:cloud_addon_attributes)
 
       resolve &Deployments.save_upgrade_insights/2
     end

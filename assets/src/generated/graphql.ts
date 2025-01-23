@@ -927,6 +927,23 @@ export type ChatTypeAttributes = {
   file?: Maybe<ChatFile>;
 };
 
+export type CloudAddon = {
+  __typename?: 'CloudAddon';
+  cluster?: Maybe<Cluster>;
+  distro: ClusterDistro;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type CloudAddonAttributes = {
+  distro?: InputMaybe<ClusterDistro>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  version?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CloudProviderSettingsAttributes = {
   aws?: InputMaybe<AwsSettingsAttributes>;
   azure?: InputMaybe<AzureSettingsAttributes>;
@@ -957,6 +974,8 @@ export type Cluster = {
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   auditLogs?: Maybe<ClusterAuditLogConnection>;
+  /** any upgrade insights provided by your cloud provider that have been discovered by our agent */
+  cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
   /** a custom credential to use when provisioning this cluster */
@@ -6180,6 +6199,7 @@ export type RootMutationTypeSaveServiceContextArgs = {
 
 
 export type RootMutationTypeSaveUpgradeInsightsArgs = {
+  addons?: InputMaybe<Array<InputMaybe<CloudAddonAttributes>>>;
   insights?: InputMaybe<Array<InputMaybe<UpgradeInsightAttributes>>>;
 };
 
