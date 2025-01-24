@@ -35,6 +35,7 @@ import {
   CD_ABS_PATH,
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_ALERTS_REL_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
@@ -61,6 +62,7 @@ import ClusterSelector from '../utils/ClusterSelector'
 import { ClusterPermissionsModal } from './ClusterPermissions'
 import { ClusterSettingsModal } from './ClusterSettings.tsx'
 import { InsightsTabLabel } from 'components/utils/AiInsights.tsx'
+import { DirLabelWithChip } from '../services/service/ServiceDetails.tsx'
 
 const getDirectory = ({ cluster }: { cluster: Nullable<ClusterFragment> }) =>
   [
@@ -70,6 +72,15 @@ const getDirectory = ({ cluster }: { cluster: Nullable<ClusterFragment> }) =>
     {
       path: CLUSTER_INSIGHTS_PATH,
       label: <InsightsTabLabel insight={cluster?.insight} />,
+    },
+    {
+      path: CLUSTER_ALERTS_REL_PATH,
+      label: (
+        <DirLabelWithChip
+          count={cluster?.alerts?.edges?.length}
+          type="Alerts"
+        />
+      ),
     },
     { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
     { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
@@ -315,7 +326,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <PageHeaderContext.Provider value={pageHeaderContext}>
+        <PageHeaderContext value={pageHeaderContext}>
           <Suspense fallback={<LoadingIndicator />}>
             <Outlet
               context={
@@ -329,13 +340,13 @@ export default function Cluster() {
               }
             />
           </Suspense>
-        </PageHeaderContext.Provider>
+        </PageHeaderContext>
       </TabPanel>
     </ResponsivePageFullWidth>
   )
 }
 
-type ClusterContextType = {
+export type ClusterContextType = {
   cluster: ClusterFragment
   clusterLoading: boolean
   refetch: () => void

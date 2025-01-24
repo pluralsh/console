@@ -11,6 +11,7 @@ import {
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
+import { PageInfoFragment } from 'generated/graphql'
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
@@ -35,17 +36,19 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   skip?: boolean
 }
 
+export type VirtualSlice = {
+  start: VirtualItem | undefined
+  end: VirtualItem | undefined
+}
+
 export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
   loading: boolean
   error: any
   refetch: () => Promise<any>
-  pageInfo: any
+  pageInfo: PageInfoFragment
   fetchNextPage: () => void
-  setVirtualSlice: (slice: {
-    start: VirtualItem | undefined
-    end: VirtualItem | undefined
-  }) => void
+  setVirtualSlice: (slice: VirtualSlice) => void
 }
 
 export function useFetchPaginatedData<
@@ -55,13 +58,7 @@ export function useFetchPaginatedData<
   options: FetchDataOptions<TQueryType, TVariables>,
   variables: TVariables = {} as TVariables
 ): FetchPaginatedDataResult<TQueryType> {
-  const [virtualSlice, setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
+  const [virtualSlice, setVirtualSlice] = useState<VirtualSlice | undefined>()
 
   const queryKey = useMemo(
     () => options.keyPath[options.keyPath.length - 1],

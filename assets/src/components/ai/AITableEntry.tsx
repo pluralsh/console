@@ -27,14 +27,9 @@ import {
   ReactNode,
   useCallback,
 } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime.ts'
-import { useChatbot } from './AIContext.tsx'
-import { ClusterProviderIcon } from '../utils/Provider.tsx'
-import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
-import { MoreMenuTrigger } from '../utils/MoreMenu.tsx'
-import { AITableActions } from './AITableActions.tsx'
-import { useNavigate, useLocation } from 'react-router-dom'
 import {
   getClusterDetailsPath,
   getServiceComponentPath,
@@ -44,6 +39,11 @@ import {
   getStackRunsAbsPath,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts.tsx'
+import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
+import { MoreMenuTrigger } from '../utils/MoreMenu.tsx'
+import { ClusterProviderIcon } from '../utils/Provider.tsx'
+import { useChatbot } from './AIContext.tsx'
+import { AITableActions } from './AITableActions.tsx'
 
 const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -173,7 +173,6 @@ export function AIEntryLabel({
   isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
-  const theme = useTheme()
   return (
     <Flex
       alignItems="center"
@@ -198,8 +197,8 @@ export function AIEntryLabel({
           isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
         }
         second={<TableEntryResourceLink {...getInsightPathInfo(insight)} />}
-        css={{ color: theme.colors['text'] }}
         firstPartialType="body2"
+        firstColor="text"
         secondPartialType="caption"
       />
     </Flex>

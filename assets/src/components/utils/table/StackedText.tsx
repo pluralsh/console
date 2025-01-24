@@ -2,6 +2,7 @@ import { ComponentProps, ReactNode, memo } from 'react'
 import styled, { DefaultTheme } from 'styled-components'
 
 import { TRUNCATE } from '../truncate'
+import { SemanticColorKey } from '@pluralsh/design-system'
 
 type PartialType = keyof DefaultTheme['partials']['text']
 
@@ -15,12 +16,19 @@ export const StackedTextSC = styled.div<{ $truncate?: boolean }>(
 const FirstSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
-  $color?: string
-}>(({ theme, $truncate, $partialType = 'body2LooseLineHeight', $color }) => ({
-  ...theme.partials.text[$partialType],
-  ...($truncate ? TRUNCATE : {}),
-  color: $color,
-}))
+  $color?: SemanticColorKey
+}>(
+  ({
+    theme,
+    $truncate,
+    $partialType = 'body2LooseLineHeight',
+    $color = 'text-light',
+  }) => ({
+    ...theme.partials.text[$partialType],
+    ...($truncate ? TRUNCATE : {}),
+    color: theme.colors[$color],
+  })
+)
 const SecondSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
@@ -47,8 +55,8 @@ export const StackedText = memo(
     truncate?: boolean
     firstPartialType?: PartialType
     secondPartialType?: PartialType
-    firstColor?: string
-    secondColor?: string
+    firstColor?: SemanticColorKey
+    secondColor?: SemanticColorKey
   } & ComponentProps<typeof StackedTextSC>) => (
     <StackedTextSC
       $truncate={truncate}

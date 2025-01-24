@@ -184,10 +184,10 @@ function FacetsCard({
       <StackedText
         first="labels"
         firstPartialType="overline"
-        firstColor={theme.colors['text-xlight']}
+        firstColor="text-xlight"
         second="Select a label below to apply a filter"
         secondPartialType="body2LooseLineHeight"
-        secondColor={theme.colors['text-light']}
+        secondColor="text-light"
         css={{ padding: theme.spacing.medium }}
       />
       <Flex direction="column">

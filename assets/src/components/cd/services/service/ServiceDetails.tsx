@@ -7,7 +7,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
@@ -51,8 +51,8 @@ import ServiceSelector from '../ServiceSelector'
 import { useProjectId } from '../../../contexts/ProjectsContext'
 
 import { InsightsTabLabel } from 'components/utils/AiInsights'
-import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
+import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 // function getDocsData(
 //   docs:
@@ -126,22 +126,23 @@ export const getServiceDetailsBreadcrumbs = ({
     : []),
 ]
 
-const ErrorsLabelSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  columnGap: theme.spacing.small,
-}))
-
-const ErrorsLabel = memo(({ count }: { count: Nullable<number> }) => (
-  <ErrorsLabelSC>
-    Errors
-    <Chip
-      size="small"
-      severity={(count || 0) > 0 ? 'danger' : 'success'}
-    >
-      {count || 0}
-    </Chip>
-  </ErrorsLabelSC>
-))
+export const DirLabelWithChip = memo(
+  ({ count, type }: { count: Nullable<number>; type: 'Error' | 'Alerts' }) => {
+    const severity =
+      type === 'Error' ? ((count || 0) > 0 ? 'danger' : 'success') : 'neutral'
+    return (
+      <Flex gap="small">
+        {type}
+        <Chip
+          size="small"
+          severity={severity}
+        >
+          {count || 0}
+        </Chip>
+      </Flex>
+    )
+  }
+)
 
 export const getDirectory = ({
   serviceDeployment,
@@ -179,7 +180,22 @@ export const getDirectory = ({
     },
     {
       path: 'errors',
-      label: <ErrorsLabel count={serviceDeployment.errors?.length} />,
+      label: (
+        <DirLabelWithChip
+          count={serviceDeployment.errors?.length}
+          type="Error"
+        />
+      ),
+      enabled: true,
+    },
+    {
+      path: 'alerts',
+      label: (
+        <DirLabelWithChip
+          count={serviceDeployment.alerts?.edges?.length}
+          type="Alerts"
+        />
+      ),
       enabled: true,
     },
     {
@@ -267,7 +283,7 @@ function ServiceDetailsBase() {
   )
 
   return (
-    <ResponsiveLayoutPage>
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer>
         <div
           css={{
