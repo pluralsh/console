@@ -165,7 +165,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 	}
 	if helm := observer.Spec.Target.Helm; helm != nil {
 		var helmAuthAttr *console.HelmAuthAttributes
-		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, helm.Provider, helm.Auth)
+		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, helm.Provider, helm.Auth)
 		if err != nil {
 			return target, actions, projectID, err
 		}
@@ -193,7 +193,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 
 	if oci := observer.Spec.Target.OCI; oci != nil {
 		var helmAuthAttr *console.HelmAuthAttributes
-		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, oci.Provider, oci.Auth)
+		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, oci.Provider, oci.Auth)
 		if err != nil {
 			return target, actions, projectID, err
 		}

@@ -61,7 +61,7 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 					Provider: lo.ToPtr(gqlclient.HelmAuthProviderBearer),
 					Auth: &v1alpha1.HelmRepositoryAuth{
 						Bearer: &v1alpha1.HelmRepositoryAuthBearer{
-							TokenSecretRef: corev1.SecretReference{
+							TokenSecretRef: &corev1.SecretReference{
 								Name:      secretName,
 								Namespace: namespace,
 							},
