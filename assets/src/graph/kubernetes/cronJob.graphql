@@ -13,6 +13,16 @@ fragment CronJob on CronJob {
   raw
 }
 
+fragment CronJobJob on Job {
+  metadata {
+    name
+    namespace
+  }
+  status {
+    ...JobStatus
+  }
+}
+
 query CronJob($name: String!, $namespace: String!, $serviceId: ID) {
   cronJob(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...CronJob
@@ -20,13 +30,7 @@ query CronJob($name: String!, $namespace: String!, $serviceId: ID) {
       ...Event
     }
     jobs {
-      metadata {
-        name
-        namespace
-      }
-      status {
-        ...JobStatus
-      }
+      ...CronJobJob
     }
   }
 }

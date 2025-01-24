@@ -35,14 +35,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     }
   }
   cluster {
-    id
-    name
-    handle
-    provider {
-      name
-      cloud
-    }
-    distro
+    ...ClusterMinimal
   }
   helmRepository {
     spec {

@@ -1,17 +1,17 @@
 import { Table, Tooltip } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
+import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { useMemo } from 'react'
-
-import { ServiceDeploymentComponentFragment } from 'generated/graphql'
-import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 
 import { ComponentDetailsContext } from '../ComponentDetails'
 
+import { Kind } from 'components/kubernetes/common/types'
+import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts'
 import { DeleteJob } from './Job'
 import { InfoSection, PaddedCard, PropWideBold } from './common'
+import { CronJobJobFragment, CronJobQuery } from 'generated/graphql'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -79,90 +79,55 @@ const getColumns = (namespace, refetch) => [
   }),
 ]
 
-export function getJobPath({
-  serviceId,
-  serviceComponents,
+function CronJobJobs({
+  jobs,
   namespace,
-  name,
-  clusterName,
+  refetch,
 }: {
-  serviceId: string | undefined
-  serviceComponents:
-    | (ServiceDeploymentComponentFragment | null | undefined)[]
-    | null
-    | undefined
-  namespace: string | null | undefined
-  name: string
-  clusterName: string | undefined
+  jobs: Nullable<CronJobJobFragment>[]
+  namespace: Nullable<string>
+  refetch: () => void
 }) {
-  let jobPath = ''
-
-  if (serviceId) {
-    const job = serviceComponents?.find(
-      (component) =>
-        component?.kind.toLowerCase() === 'job' &&
-        (component?.namespace || '') === (namespace || '') &&
-        (component?.name || '') === (name || '')
-    )
-
-    if (job && clusterName) {
-      jobPath = getServiceComponentPath({
-        serviceId,
-        clusterId: clusterName,
-        componentId: job.id,
-      })
-    }
-  } else {
-    jobPath = `/apps/${namespace}/components/job/${name}`
-  }
-
-  return jobPath
-}
-
-function CronJobJobs({ jobs, namespace, refetch }) {
   const navigate = useNavigate()
   const columns = useMemo(
     () => getColumns(namespace, refetch),
     [namespace, refetch]
   )
-  const { serviceComponents, serviceId, clusterName } =
-    useOutletContext<ComponentDetailsContext>()
+  const { cluster } = useOutletContext<ComponentDetailsContext>()
+
+  const filteredJobs = jobs.filter((job): job is CronJobJobFragment => !!job)
 
   return (
     <Table
-      data={jobs}
+      data={filteredJobs}
       columns={columns}
-      onRowClick={(_e, { original }: Row<any>) => {
-        const jobPath = getJobPath({
-          serviceId,
-          serviceComponents,
-          namespace,
-          name: original?.metadata.name,
-          clusterName,
-        })
-
-        // TODO: Verify CD links are correct when we have CD CronJobs to test
-        if (jobPath) {
-          navigate(jobPath)
-        }
+      onRowClick={(_e, { original }: Row<CronJobJobFragment>) => {
+        const jobPath = getResourceDetailsAbsPath(
+          cluster?.id,
+          Kind.CronJob,
+          original?.metadata.name,
+          namespace
+        )
+        if (jobPath) navigate(jobPath)
       }}
     />
   )
 }
 
 export default function CronJob() {
-  const { data, refetch, component } = useOutletContext<any>()
+  const { data, refetch, component } =
+    useOutletContext<ComponentDetailsContext>()
   const namespace = component.namespace?.toLowerCase()
 
   if (!data?.cronJob) return null
 
-  const { cronJob } = data
+  const { cronJob } = data as CronJobQuery
 
   return (
     <>
       <InfoSection title="Jobs">
         <CronJobJobs
-          jobs={cronJob.jobs}
+          jobs={cronJob?.jobs ?? []}
           namespace={namespace}
           refetch={refetch}
         />
@@ -170,20 +135,20 @@ export default function CronJob() {
       <InfoSection title="Status">
         <PaddedCard>
           <PropWideBold title="Last scheduled">
-            {cronJob.status?.lastScheduleTime || 0}
+            {cronJob?.status?.lastScheduleTime || 0}
           </PropWideBold>
         </PaddedCard>
       </InfoSection>
       <InfoSection title="Spec">
         <PaddedCard>
           <PropWideBold title="Schedule">
-            {cronJob.spec?.schedule || '-'}
+            {cronJob?.spec?.schedule || '-'}
           </PropWideBold>
           <PropWideBold title="Concurrency">
-            {cronJob.spec?.concurrencyPolicy || '-'}
+            {cronJob?.spec?.concurrencyPolicy || '-'}
           </PropWideBold>
           <PropWideBold title="Suspended">
-            {cronJob.spec?.suspend ? 'Yes' : 'No'}
+            {cronJob?.spec?.suspend ? 'Yes' : 'No'}
           </PropWideBold>
         </PaddedCard>
       </InfoSection>

@@ -355,6 +355,7 @@ fragment ClusterMinimal on Cluster {
   name
   handle
   provider {
+    name
     cloud
   }
   distro

@@ -120,9 +120,9 @@ export default function Job(): ReactElement<any> {
 }
 
 export function JobConditions(): ReactElement<any> {
-  const { jobStatus } = useOutletContext() as JobT
+  const ctx = useOutletContext<JobT>()
 
-  return <Conditions conditions={jobStatus?.conditions} />
+  return <Conditions conditions={ctx?.jobStatus?.conditions} />
 }
 
 export function JobPods(): ReactElement<any> {
