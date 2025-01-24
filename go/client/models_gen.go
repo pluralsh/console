@@ -4005,8 +4005,9 @@ type PrAutomationEdge struct {
 
 // templates to apply in this pr
 type PrAutomationTemplateAttributes struct {
-	Source      string `json:"source"`
-	Destination string `json:"destination"`
+	Source      string  `json:"source"`
+	Destination string  `json:"destination"`
+	Context     *string `json:"context,omitempty"`
 	// whether the source template is sourced from an external git repo bound to this automation
 	External bool `json:"external"`
 }
@@ -4104,9 +4105,10 @@ type PrDeleteSpec struct {
 
 // the details of where to find and place a templated file
 type PrTemplateSpec struct {
-	Source      string `json:"source"`
-	Destination string `json:"destination"`
-	External    bool   `json:"external"`
+	Source      string                 `json:"source"`
+	Destination string                 `json:"destination"`
+	Context     map[string]interface{} `json:"context,omitempty"`
+	External    bool                   `json:"external"`
 }
 
 // existing file updates that can be performed in a PR

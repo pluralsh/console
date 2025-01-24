@@ -232,6 +232,7 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :pr_automation_template_attributes do
     field :source,      non_null(:string)
     field :destination, non_null(:string)
+    field :context,     :json
     field :external,    non_null(:boolean),
       description: "whether the source template is sourced from an external git repo bound to this automation"
   end
@@ -515,6 +516,7 @@ defmodule Console.GraphQl.Deployments.Git do
   object :pr_template_spec do
     field :source,      non_null(:string)
     field :destination, non_null(:string)
+    field :context,     :map
     field :external,    non_null(:boolean)
   end
 

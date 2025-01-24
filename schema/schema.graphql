@@ -5946,6 +5946,8 @@ input PrAutomationTemplateAttributes {
 
   destination: String!
 
+  context: Json
+
   "whether the source template is sourced from an external git repo bound to this automation"
   external: Boolean!
 }
@@ -6317,6 +6319,7 @@ type PrDeleteSpec {
 type PrTemplateSpec {
   source: String!
   destination: String!
+  context: Map
   external: Boolean!
 }
 

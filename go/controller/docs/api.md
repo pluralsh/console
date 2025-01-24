@@ -941,6 +941,7 @@ GitRef ...
 _Appears in:_
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
 - [ServiceTemplate](#servicetemplate)
 
@@ -2146,6 +2147,7 @@ _Appears in:_
 | `destination` _string_ | The destination to write the file to |  | Required: {} <br /> |
 | `external` _boolean_ | Whether it is being sourced from an external git repository |  | Required: {} <br /> |
 | `source` _string_ | The source file to use for templating |  | Optional: {} <br /> |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Additional context overrides to apply to this template, will be merged into the user-provided configuration options |  | Optional: {} <br /> |
 
 
 #### PrAutomationTrigger
@@ -2542,6 +2544,7 @@ _Appears in:_
 | `chart` _string_ | chart to use |  | Optional: {} <br /> |
 | `version` _string_ | chart version to use |  | Optional: {} <br /> |
 | `repository` _[NamespacedName](#namespacedname)_ | pointer to the FluxCD helm repository to use |  | Optional: {} <br /> |
+| `git` _[GitRef](#gitref)_ | A reference to a git folder/ref |  | Optional: {} <br /> |
 | `ignoreHooks` _boolean_ | whether you want to completely ignore any helm hooks when actualizing this service |  | Optional: {} <br /> |
 
 

@@ -192,6 +192,25 @@ spec:
                   chart:
                     description: chart to use
                     type: string
+                  git:
+                    description: A reference to a git folder/ref
+                    properties:
+                      files:
+                        description: Optional files to add to the manifests for this
+                          service
+                        items:
+                          type: string
+                        type: array
+                      folder:
+                        description: Folder ...
+                        type: string
+                      ref:
+                        description: Ref ...
+                        type: string
+                    required:
+                    - folder
+                    - ref
+                    type: object
                   ignoreHooks:
                     description: whether you want to completely ignore any helm hooks
                       when actualizing this service

@@ -8,6 +8,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	console "github.com/pluralsh/console/go/client"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/yaml"
 )
 
 func init() {
@@ -264,6 +267,10 @@ type PrAutomationTemplate struct {
 	// The source file to use for templating
 	// +kubebuilder:validation:Optional
 	Source string `json:"source"`
+
+	// Additional context overrides to apply to this template, will be merged into the user-provided configuration options
+	// +kubebuilder:validation:Optional
+	Context *runtime.RawExtension `json:"context,omitempty"`
 }
 
 func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttributes {
@@ -271,10 +278,18 @@ func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttrib
 		return nil
 	}
 
+	var context *string
+	if in.Context != nil {
+		if out, err := yaml.Marshal(in.Context); err == nil {
+			context = lo.ToPtr(string(out))
+		}
+	}
+
 	return &console.PrAutomationTemplateAttributes{
 		Source:      in.Source,
 		Destination: in.Destination,
 		External:    in.External,
+		Context:     context,
 	}
 }
 
