@@ -104,7 +104,7 @@ function CronJobJobs({
       onRowClick={(_e, { original }: Row<CronJobJobFragment>) => {
         const jobPath = getResourceDetailsAbsPath(
           cluster?.id,
-          Kind.CronJob,
+          Kind.Job,
           original?.metadata.name,
           namespace
         )
