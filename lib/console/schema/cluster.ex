@@ -18,7 +18,8 @@ defmodule Console.Schema.Cluster do
     Project,
     UpgradeInsight,
     AiInsight,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    CloudAddon
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -124,6 +125,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :parent_cluster, __MODULE__
 
     has_many :upgrade_insights, UpgradeInsight
+    has_many :cloud_addons, CloudAddon
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service

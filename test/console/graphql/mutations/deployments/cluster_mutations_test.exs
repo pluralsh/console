@@ -429,8 +429,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       cluster = insert(:cluster)
 
       {:ok, %{data: %{"saveUpgradeInsights" => [_ | _]}}} = run_query("""
-        mutation Insights($insights: [UpgradeInsightAttributes]) {
-          saveUpgradeInsights(insights: $insights) { id }
+        mutation Insights($insights: [UpgradeInsightAttributes], $addons: [CloudAddonAttributes!]) {
+          saveUpgradeInsights(insights: $insights, addons: $addons) { id }
         }
       """, %{
         "insights" => [%{
@@ -445,12 +445,13 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
             "replacedIn" => "1.25",
             "removedIn" => "1.28"
           }]
-        }]
+        }],
+        "addons" => [%{"distro" => "EKS", "name" => "coredns", "version" => "1.29"}]
       }, %{cluster: cluster})
 
       {:ok, %{data: %{"saveUpgradeInsights" => [_ | _]}}} = run_query("""
-        mutation Insights($insights: [UpgradeInsightAttributes]) {
-          saveUpgradeInsights(insights: $insights) { id }
+        mutation Insights($insights: [UpgradeInsightAttributes], $addons: [CloudAddonAttributes!]) {
+          saveUpgradeInsights(insights: $insights, addons: $addons) { id }
         }
       """, %{
         "insights" => [%{
@@ -465,11 +466,16 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
             "replacedIn" => "1.25",
             "removedIn" => "1.28"
           }]
-        }]
+        }],
+        "addons" => [%{"distro" => "EKS", "name" => "coredns", "version" => "1.29"}]
       }, %{cluster: cluster})
 
-      %{upgrade_insights: [%{details: [_]}]} =
-        Console.Repo.preload(cluster, [upgrade_insights: :details], force: true)
+      %{upgrade_insights: [%{details: [_]}], cloud_addons: [addon]} =
+        Console.Repo.preload(cluster, [:cloud_addons, upgrade_insights: :details], force: true)
+
+      assert addon.name == "coredns"
+      assert addon.version == "1.29"
+      assert addon.distro == :eks
 
       {:ok, %{data: %{"cluster" => found}}} = run_query("""
         query Cluster($id: ID!) {
