@@ -20,6 +20,7 @@ import {
   ArgoRolloutDocument,
   CanaryDocument,
   CertificateDocument,
+  ClusterMinimalFragment,
   CronJobDocument,
   DaemonSetDocument,
   DeploymentDocument,
@@ -63,7 +64,7 @@ export type ComponentDetailsContext = {
   data: any
   loading: boolean
   clusterName?: string
-  cluster?: any
+  cluster?: Nullable<ClusterMinimalFragment>
   serviceId?: string
   serviceComponents?:
     | (ServiceDeploymentComponentFragment | null | undefined)[]
