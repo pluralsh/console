@@ -10,7 +10,6 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/yaml"
 )
 
 func init() {
@@ -280,9 +279,7 @@ func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttrib
 
 	var context *string
 	if in.Context != nil {
-		if out, err := yaml.Marshal(in.Context); err == nil {
-			context = lo.ToPtr(string(out))
-		}
+		context = lo.ToPtr(string(in.Context.Raw))
 	}
 
 	return &console.PrAutomationTemplateAttributes{
