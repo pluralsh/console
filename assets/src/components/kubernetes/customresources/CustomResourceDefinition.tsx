@@ -109,7 +109,7 @@ export default function CustomResourceDefinition(): ReactElement<any> {
 
 const columnHelper = createColumnHelper<CustomResourceT>()
 
-export function CustomRersourceDefinitionObjects(): ReactElement<any> {
+export function CustomResourceDefinitionObjects(): ReactElement<any> {
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd?.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()

@@ -20,21 +20,31 @@ import {
 import { useTransition } from 'react-spring'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 
+const ARBITRARY_VALUE_NAME = 'expander'
+
 export function IconExpander({
   icon,
   active,
+  startOpen = false,
+  showIndicator = false,
   onClear,
+  tooltip,
   children,
   ...cssProps
 }: {
   icon: ReactElement<any>
   active?: boolean
+  startOpen?: boolean
+  showIndicator?: boolean
   onClear?: () => void
+  tooltip?: ReactNode
   children: ReactNode
 } & CSSProperties) {
   const theme = useTheme()
   // will hold the item's randomly assigned id if open, empty string if closed
-  const [openItem, setOpenItem] = useState('')
+  const [openItem, setOpenItem] = useState(
+    startOpen ? ARBITRARY_VALUE_NAME : ''
+  )
   const transitions = useTransition(active && !openItem ? [true] : [], {
     from: { opacity: 0, scale: `40%` },
     enter: { opacity: 1, scale: '100%' },
@@ -73,11 +83,24 @@ export function IconExpander({
         }}
       >
         <AccordionItem
+          value={ARBITRARY_VALUE_NAME}
           caret="none"
           padding="none"
           paddingArea="trigger-only"
           css={{ height: '40px' }}
-          trigger={<BlendedIconFrameSC icon={icon} />}
+          trigger={
+            <WrapWithIf
+              condition={!!tooltip && !openItem}
+              wrapper={
+                <Tooltip
+                  placement="top"
+                  label={tooltip}
+                />
+              }
+            >
+              <BlendedIconFrameSC icon={icon} />
+            </WrapWithIf>
+          }
         >
           <div css={{ display: 'flex', height: '100%' }}>
             {children}
@@ -106,7 +129,7 @@ export function IconExpander({
           </div>
         </AccordionItem>
       </Accordion>
-      {indicator}
+      {showIndicator && indicator}
     </div>
   )
 }

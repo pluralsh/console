@@ -36,6 +36,8 @@ export const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
       flexShrink: 1,
+      border: 'none',
+      height: '100%',
     },
   })
 )
@@ -93,6 +95,7 @@ export function useComponentKindSelect(
   config?: { width?: number }
 ): {
   selectedKinds: Set<string>
+  setSelectedKinds: (kinds: Set<string>) => void
   allKinds: Set<string>
   kindSelector: ReactElement<any>
 } {
@@ -104,6 +107,7 @@ export function useComponentKindSelect(
   return useMemo(
     () => ({
       selectedKinds,
+      setSelectedKinds,
       allKinds: new Set(kinds),
       kindSelector: (
         <ComponentKindSelect
@@ -152,7 +156,10 @@ function ComponentKindSelect({
     <Select
       label="All components"
       triggerButton={
-        <FilterTrigger $width={width}>
+        <FilterTrigger
+          $width={width}
+          showArrow={false}
+        >
           {allSelected
             ? 'All components'
             : sortedSelectedKinds.length === 0
@@ -200,7 +207,7 @@ export function ComponentStateFilter({
       selectedKey={selectedState}
       onSelectionChange={setSelectedState}
       triggerButton={
-        <FilterTrigger>
+        <FilterTrigger showArrow={false}>
           {selectedState ? (
             <ComponentStateChip state={selectedState as ComponentState} />
           ) : (
