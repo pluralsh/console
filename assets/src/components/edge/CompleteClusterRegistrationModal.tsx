@@ -22,7 +22,7 @@ function CompleteClusterRegistrationModal({
   const theme = useTheme()
   const [name, setName] = useState('')
   const [handle, setHandle] = useState('')
-  const [tags, setTags] = useState<Record<string, string>>({})
+  const [tags, setTags] = useState<Record<string, string>>({ plural: 'edge' })
 
   const [mutation, { loading, error }] = useUpdateClusterRegistrationMutation({
     onCompleted: () => {
