@@ -12,7 +12,6 @@ import { usePullRequestsQuery } from 'generated/graphql'
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useThrottle } from 'components/hooks/useThrottle'
 
 import { GqlError } from 'components/utils/Alert'
@@ -91,19 +90,18 @@ export default function OutstandingPrs() {
           css={{ flexGrow: 1 }}
         />
       </div>
-      <FullHeightTableWrap>
-        <Table
-          columns={prColumns}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.pullRequests?.edges || []}
-          virtualizeRows
-          reactTableOptions={reactTableOptions}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={prColumns}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={data?.pullRequests?.edges || []}
+        virtualizeRows
+        reactTableOptions={reactTableOptions}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </div>
   )
 }

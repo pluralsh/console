@@ -13,7 +13,6 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
@@ -88,9 +87,5 @@ export default function ClusterRoleBinding(): ReactElement<any> {
 export function ClusterRoleBindingSubjects(): ReactElement<any> {
   const crb = useOutletContext() as ClusterRoleBindingT
 
-  return (
-    <FullHeightTableWrap>
-      <Subjects subjects={crb?.subjects} />
-    </FullHeightTableWrap>
-  )
+  return <Subjects subjects={crb?.subjects} />
 }

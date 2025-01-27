@@ -3,7 +3,6 @@ import { useTheme } from 'styled-components'
 
 import { useScmWebhooksQuery } from 'generated/graphql'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { GqlError } from 'components/utils/Alert'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
@@ -77,19 +76,18 @@ export default function ScmWebhooks() {
         height: '100%',
       }}
     >
-      <FullHeightTableWrap>
-        <Table
-          columns={columns}
-          reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.scmWebhooks?.edges || []}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={columns}
+        reactTableOptions={{ meta: { refetch } }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={data?.scmWebhooks?.edges || []}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </div>
   )
 }

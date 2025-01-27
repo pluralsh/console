@@ -1,6 +1,5 @@
 import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { Violation } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 
@@ -62,30 +61,29 @@ export default function PolicyAffectedResources() {
         scrollable={false}
         heading={policyName}
       >
-        <FullHeightTableWrap>
-          <Table
-            virtualizeRows
-            data={violations || []}
-            columns={columns}
-            onRowClick={(
-              _e,
-              {
-                original: { group, version, kind, name, namespace },
-              }: Row<Violation>
-            ) => {
-              const path = getKubernetesResourcePath({
-                clusterId,
-                group,
-                version,
-                kind,
-                name,
-                namespace,
-              })
+        <Table
+          fullHeightWrap
+          virtualizeRows
+          data={violations || []}
+          columns={columns}
+          onRowClick={(
+            _e,
+            {
+              original: { group, version, kind, name, namespace },
+            }: Row<Violation>
+          ) => {
+            const path = getKubernetesResourcePath({
+              clusterId,
+              group,
+              version,
+              kind,
+              name,
+              namespace,
+            })
 
-              if (path) navigate(path)
-            }}
-          />
-        </FullHeightTableWrap>
+            if (path) navigate(path)
+          }}
+        />
       </ScrollablePage>
     </div>
   )

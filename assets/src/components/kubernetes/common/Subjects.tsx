@@ -54,6 +54,7 @@ export default function Subjects({
 }): ReactElement<any> {
   return (
     <Table
+      fullHeightWrap
       data={subjects || []}
       columns={columns}
     />
