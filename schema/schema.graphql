@@ -4884,9 +4884,6 @@ type Cluster {
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   upgradeInsights: [UpgradeInsight]
 
-  "any upgrade insights provided by your cloud provider that have been discovered by our agent"
-  cloudAddons: [CloudAddon]
-
   "A summation of the metrics utilization of the current cluster"
   metricsSummary: ClusterMetricsSummary
 
@@ -4934,6 +4931,9 @@ type Cluster {
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
+
+  "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+  cloudAddons: [CloudAddon]
 
   "whether the current user can edit this cluster"
   editable: Boolean
@@ -5507,9 +5507,26 @@ type CloudAddon {
   distro: ClusterDistro!
   name: String!
   version: String!
+  info: CloudAddonInformation
+  versionInfo: CloudAddonVersionInformation
   cluster: Cluster
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type CloudAddonInformation {
+  name: String
+  publisher: String
+  versions: [CloudAddonVersionInformation]
+}
+
+type CloudAddonVersionInformation {
+  version: String
+
+  compatibilities: [String]
+
+  "checks if this is blocking a specific kubernetes upgrade"
+  blocking(kubeVersion: String!): Boolean
 }
 
 type ClusterConnection {

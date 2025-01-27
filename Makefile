@@ -132,3 +132,6 @@ latest-version:
 install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
 	@git config --local core.hooksPath ${GIT_HOOKS_PATH}/
 	@echo Successfully configured git hooks, \'core.hooksPath\' now points to \'${GIT_HOOKS_PATH}\'.
+
+scrape-addons: ## scrapes cloud addon information and prints to a common format in-repo
+	@python3 utils/addons/main.py

@@ -830,6 +830,15 @@ defmodule Console.Factory do
     }
   end
 
+  def cloud_addon_factory do
+    %Schema.CloudAddon{
+      cluster: build(:cluster),
+      name: "ebs-csi-driver",
+      version: "v1.38.1-eksbuild.2",
+      distro: :eks
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
