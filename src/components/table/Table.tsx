@@ -15,11 +15,12 @@ import {
 } from '@tanstack/react-table'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Div, type DivProps } from 'honorable'
 import { isEmpty, isNil } from 'lodash-es'
 import {
+  type CSSProperties,
   Fragment,
   type MouseEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -51,7 +52,11 @@ import { Th } from './Th'
 import { Thead } from './Thead'
 import { Tr } from './Tr'
 
-export type TableProps = DivProps & {
+export type TableProps = Omit<CSSProperties, keyof TableBaseProps> &
+  TableBaseProps
+
+type TableBaseProps = {
+  ref?: RefObject<HTMLDivElement>
   data: any[]
   columns: any[]
   loading?: boolean
@@ -308,34 +313,18 @@ function Table({
       condition={fullHeightWrap}
       wrapper={<FullHeightWrapSC />}
     >
-      <Div
-        position="relative"
-        maxHeight="100%"
-        width={width}
+      <TableWrapSC
+        ref={forwardedRef}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        ref={forwardedRef}
+        $width={width}
       >
-        <Div
-          backgroundColor={tableFillLevelToBg[fillLevel]}
-          border={
-            flush
-              ? 'none'
-              : `1px solid ${tableFillLevelToBorderColor[fillLevel]}`
-          }
-          borderRadius={
-            flush
-              ? `0 0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px`
-              : 'large'
-          }
-          overflow="auto"
-          ref={tableContainerRef as DivProps['ref']}
-          onScroll={({ target }: { target: HTMLDivElement }) =>
-            setScrollTop(target?.scrollTop)
-          }
-          width="100%"
-          height="100%"
-          {...props}
+        <TableSC
+          ref={tableContainerRef}
+          onScroll={(e) => setScrollTop(e.currentTarget?.scrollTop)}
+          $fillLevel={fillLevel}
+          $flush={flush}
+          css={props}
         >
           <T $gridTemplateColumns={gridTemplateColumns}>
             <Thead>
@@ -531,7 +520,7 @@ function Table({
               {...emptyStateProps}
             />
           )}
-        </Div>
+        </TableSC>
         {hover && scrollTop > scrollTopMargin && (
           <Button
             small
@@ -551,7 +540,7 @@ function Table({
             Back to top
           </Button>
         )}
-      </Div>
+      </TableWrapSC>
     </WrapWithIf>
   )
 }
@@ -562,5 +551,29 @@ const FullHeightWrapSC = styled.div({
   height: '100%',
   overflow: 'hidden',
 })
+
+const TableWrapSC = styled.div<{
+  $width?: TableProps['width']
+}>(({ $width }) => ({
+  maxHeight: '100%',
+  position: 'relative',
+  width: $width,
+}))
+
+const TableSC = styled.div<{
+  $flush?: TableProps['flush']
+  $fillLevel?: TableProps['fillLevel']
+}>(({ theme, $flush, $fillLevel }) => ({
+  backgroundColor: theme.colors[tableFillLevelToBg[$fillLevel]],
+  border: $flush
+    ? 'none'
+    : `1px solid ${theme.colors[tableFillLevelToBorderColor[$fillLevel]]}`,
+  borderRadius: $flush
+    ? `0 0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px`
+    : theme.borderRadiuses.large,
+  height: '100%',
+  overflow: 'auto',
+  width: '100%',
+}))
 
 export default Table
