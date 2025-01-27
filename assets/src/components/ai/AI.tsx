@@ -24,15 +24,14 @@ import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
+import { isEmpty } from 'lodash'
+import { CSSProperties, useTheme } from 'styled-components'
+import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { AITable } from './AITable.tsx'
 import { sortThreadsOrPins } from './AITableEntry.tsx'
-import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
-import { CSSProperties, useTheme } from 'styled-components'
-import { Body1BoldP } from '../utils/typography/Text.tsx'
-import { isEmpty } from 'lodash'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
 export const breadcrumbs = [{ label: 'plural ai' }]
 
@@ -153,25 +152,23 @@ function PinnedSection({
         first="Pins"
         firstPartialType="subtitle2"
       />
-      <FullHeightTableWrap>
-        {isEmpty(filteredPins) && pinsQuery.data ? (
-          <AIEmptyState
-            icon={
-              <PushPinFilledIcon
-                color="icon-primary"
-                size={24}
-              />
-            }
-            message="No pinned threads or insights"
-            description="Click on the pin icon of any thread or insight to access it here."
-          />
-        ) : (
-          <AITable
-            query={pinsQuery}
-            rowData={filteredPins}
-          />
-        )}
-      </FullHeightTableWrap>
+      {isEmpty(filteredPins) && pinsQuery.data ? (
+        <AIEmptyState
+          icon={
+            <PushPinFilledIcon
+              color="icon-primary"
+              size={24}
+            />
+          }
+          message="No pinned threads or insights"
+          description="Click on the pin icon of any thread or insight to access it here."
+        />
+      ) : (
+        <AITable
+          query={pinsQuery}
+          rowData={filteredPins}
+        />
+      )}
     </Flex>
   )
 }
@@ -195,25 +192,23 @@ function ThreadsSection({
         first="Other threads"
         firstPartialType="subtitle2"
       />
-      <FullHeightTableWrap>
-        {isEmpty(filteredThreads) && threadsQuery.data ? (
-          <AIEmptyState
-            icon={
-              <ChatOutlineIcon
-                color="icon-primary"
-                size={24}
-              />
-            }
-            message="No threads or insights"
-            description="Insights will be automatically created and appear here when potential fixes are found."
-          />
-        ) : (
-          <AITable
-            query={threadsQuery}
-            rowData={filteredThreads}
-          />
-        )}
-      </FullHeightTableWrap>
+      {isEmpty(filteredThreads) && threadsQuery.data ? (
+        <AIEmptyState
+          icon={
+            <ChatOutlineIcon
+              color="icon-primary"
+              size={24}
+            />
+          }
+          message="No threads or insights"
+          description="Insights will be automatically created and appear here when potential fixes are found."
+        />
+      ) : (
+        <AITable
+          query={threadsQuery}
+          rowData={filteredThreads}
+        />
+      )}
     </Flex>
   )
 }

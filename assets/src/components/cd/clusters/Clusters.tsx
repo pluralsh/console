@@ -9,7 +9,6 @@ import {
 import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
 import chroma from 'chroma-js'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -70,8 +69,12 @@ export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
 type TableWrapperSCProps = {
   $blurred: boolean
 }
-export const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
+export const TableWrapperSC = styled.div<TableWrapperSCProps>(
   ({ theme, $blurred }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
     '&&': {
       ...($blurred
         ? {

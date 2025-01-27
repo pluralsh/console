@@ -5,7 +5,6 @@ import {
 } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   AiInsightFragment,
@@ -22,6 +21,7 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
+import { isEmpty } from 'lodash'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -144,18 +144,17 @@ function ChatbotPanelInner({
             fullscreen={fullscreen}
           />
         ) : (
-          <FullHeightTableWrap
-            css={{ backgroundColor: theme.colors['fill-one'] }}
-          >
+          <ChatbotTableWrapperSC $fullscreen={fullscreen}>
             <AITable
               modal
-              flush={!fullscreen}
               query={threadsQuery}
               rowData={rows}
-              borderBottom={theme.borders['fill-two']}
+              borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
+              border="none"
+              fillLevel={1}
               borderRadius={0}
             />
-          </FullHeightTableWrap>
+          </ChatbotTableWrapperSC>
         )}
       </ChatbotFrameSC>
     </FillLevelProvider>
@@ -180,5 +179,17 @@ const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
     overflow: 'hidden',
     height: '100%',
     width: $fullscreen ? '75vw' : 768,
+  })
+)
+
+const ChatbotTableWrapperSC = styled.div<{ $fullscreen?: boolean }>(
+  ({ $fullscreen, theme }) => ({
+    height: '100%',
+    overflow: 'hidden',
+    backgroundColor: theme.colors['fill-one'],
+    ...($fullscreen && {
+      border: theme.borders['fill-two'],
+      borderRadius: theme.borderRadiuses.large,
+    }),
   })
 )

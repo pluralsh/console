@@ -56,6 +56,7 @@ export function AITable({
 
   return (
     <Table
+      fullHeightWrap
       virtualizeRows
       padCells={false}
       data={rowData}

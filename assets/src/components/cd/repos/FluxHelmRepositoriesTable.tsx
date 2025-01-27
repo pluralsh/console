@@ -26,6 +26,7 @@ export function FluxHelmRepositoriesTable({
 
   return !isEmpty(repos) ? (
     <Table
+      fullHeightWrap
       data={data?.fluxHelmRepositories || []}
       columns={fluxHelmRepoColumns}
       reactTableOptions={reactTableOptions}
