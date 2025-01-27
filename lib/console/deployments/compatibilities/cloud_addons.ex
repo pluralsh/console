@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
 
   @table :clouds_addons
   @poll :timer.minutes(30)
-  @url "/pluralsh/console/scrape-eks-cloud-addons/static/addons/"
+  @url "/pluralsh/console/master/static/addons/"
 
   defmodule State do
     defstruct [:table, :url, :static, ready: false]

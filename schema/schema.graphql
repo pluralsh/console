@@ -3487,8 +3487,11 @@ type JobGateSpec {
   "the service account the pod will use"
   serviceAccount: String
 
-  "requests overrides for cases where direct container configuration is unnecessary"
+  "equivalent to resources, present for backwards compatibility"
   requests: ContainerResources
+
+  "requests overrides for cases where direct container configuration is unnecessary"
+  resources: ContainerResources
 }
 
 "a shortform spec for job containers, designed for ease-of-use"

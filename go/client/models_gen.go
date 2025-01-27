@@ -2605,8 +2605,10 @@ type JobGateSpec struct {
 	Annotations map[string]interface{} `json:"annotations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
-	// requests overrides for cases where direct container configuration is unnecessary
+	// equivalent to resources, present for backwards compatibility
 	Requests *ContainerResources `json:"requests,omitempty"`
+	// requests overrides for cases where direct container configuration is unnecessary
+	Resources *ContainerResources `json:"resources,omitempty"`
 }
 
 type JobReference struct {

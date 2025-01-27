@@ -3175,8 +3175,10 @@ export type JobGateSpec = {
   namespace: Scalars['String']['output'];
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
-  /** requests overrides for cases where direct container configuration is unnecessary */
+  /** equivalent to resources, present for backwards compatibility */
   requests?: Maybe<ContainerResources>;
+  /** requests overrides for cases where direct container configuration is unnecessary */
+  resources?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
 };
