@@ -116,7 +116,7 @@ defmodule Console.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.7"},
       {:cowboy, "~> 2.12"},
-      {:uniq, "~> 0.4"},
+      {:uniq, "~> 0.6"},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
       {:absinthe, "~> 1.7.5"},
