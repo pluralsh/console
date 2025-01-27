@@ -10,7 +10,6 @@ import {
 } from 'generated/graphql'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
@@ -110,34 +109,29 @@ export default function ServicesTable() {
         {!data ? (
           <LoadingIndicator />
         ) : !isEmpty(data?.serviceDeployments?.edges) ? (
-          <FullHeightTableWrap>
-            <Table
-              virtualizeRows
-              data={data?.serviceDeployments?.edges || []}
-              columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-              onRowClick={(
-                _e,
-                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-              ) =>
-                navigate(
-                  getServiceDetailsPath({
-                    clusterId: original.node?.cluster?.id,
-                    serviceId: original.node?.id,
-                  })
-                )
-              }
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactTableOptions={reactTableOptions}
-              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-              onVirtualSliceChange={setVirtualSlice}
-            />
-          </FullHeightTableWrap>
+          <Table
+            fullHeightWrap
+            virtualizeRows
+            data={data?.serviceDeployments?.edges || []}
+            columns={columns}
+            onRowClick={(
+              _e,
+              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+            ) =>
+              navigate(
+                getServiceDetailsPath({
+                  clusterId: original.node?.cluster?.id,
+                  serviceId: original.node?.id,
+                })
+              )
+            }
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactTableOptions={reactTableOptions}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
+          />
         ) : (
           <div css={{ height: '100%' }}>
             {statusCounts.ALL || 0 > 0 ? (

@@ -9,7 +9,6 @@ import {
   Table,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   ClusterScalingRecommendationFragment,
   ScalingRecommendationType,
@@ -87,27 +86,26 @@ export function CostManagementDetailsRecommendations() {
           ))}
         </Select>
       </Flex>
-      <FullHeightTableWrap>
-        {error ? (
-          <GqlError error={error} />
-        ) : (
-          <Table
-            virtualizeRows
-            fillLevel={1}
-            rowBg="base"
-            columns={cols}
-            data={recs}
-            loading={!data && loading}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            hasNextPage={
-              data?.clusterUsage?.recommendations?.pageInfo?.hasNextPage
-            }
-            isFetchingNextPage={loading}
-            fetchNextPage={fetchNextPage}
-            setVirtualSlice={setVirtualSlice}
-          />
-        )}
-      </FullHeightTableWrap>
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <Table
+          fullHeightWrap
+          virtualizeRows
+          fillLevel={1}
+          rowBg="base"
+          columns={cols}
+          data={recs}
+          loading={!data && loading}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          hasNextPage={
+            data?.clusterUsage?.recommendations?.pageInfo?.hasNextPage
+          }
+          isFetchingNextPage={loading}
+          fetchNextPage={fetchNextPage}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+      )}
     </Flex>
   )
 }

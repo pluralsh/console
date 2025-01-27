@@ -48,12 +48,9 @@ export default function PolicyRules({
 }): ReactElement<any> {
   return (
     <Table
+      fullHeightWrap
       data={rules}
       columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

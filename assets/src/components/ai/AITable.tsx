@@ -56,6 +56,7 @@ export function AITable({
 
   return (
     <Table
+      fullHeightWrap
       virtualizeRows
       padCells={false}
       data={rowData}
@@ -67,12 +68,10 @@ export function AITable({
       onVirtualSliceChange={query.setVirtualSlice}
       reactTableOptions={reactTableOptions}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-      css={{
-        height: '100%',
-        overflowX: 'hidden',
-        border: theme.borders['fill-two'],
-      }}
       emptyStateProps={{ message: 'No entries found.' }}
+      border={theme.borders['fill-two']}
+      height={'100%'}
+      overflowX={'hidden'}
       {...props}
     />
   )

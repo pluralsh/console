@@ -16,7 +16,6 @@ import styled, { useTheme } from 'styled-components'
 import { useVClustersQuery } from '../../../generated/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { GqlError } from '../../utils/Alert'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
@@ -78,18 +77,17 @@ export default function VClusters(): ReactNode {
         setQueryString={setSearchString}
         tabStateRef={tabStateRef}
       />
-      <FullHeightTableWrap>
-        <ClustersTable
-          data={data?.clusters?.edges ?? []}
-          refetch={refetch}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FullHeightTableWrap>
+      <ClustersTable
+        fullHeightWrap
+        data={data?.clusters?.edges ?? []}
+        refetch={refetch}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </div>
   )
 }

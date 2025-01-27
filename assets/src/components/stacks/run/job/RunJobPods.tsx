@@ -14,7 +14,6 @@ import {
   PodWithId,
   PodsList,
 } from 'components/cd/cluster/pod/PodsList'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
@@ -62,20 +61,15 @@ export default function RunJobPods() {
       scrollable={false}
       heading="Pods"
     >
-      <FullHeightTableWrap>
-        <PodsList
-          pods={podsWithId}
-          clusterId={clusterId}
-          linkToK8sDashboard
-          columns={columns}
-          refetch={refetch}
-          // reactTableOptions={reactTableOptions}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      </FullHeightTableWrap>
+      <PodsList
+        fullHeightWrap
+        pods={podsWithId}
+        clusterId={clusterId}
+        linkToK8sDashboard
+        columns={columns}
+        refetch={refetch}
+        // reactTableOptions={reactTableOptions}
+      />
     </ScrollablePage>
   )
 }

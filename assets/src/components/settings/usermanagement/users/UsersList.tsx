@@ -66,9 +66,7 @@ export default function UsersList() {
             onVirtualSliceChange={setVirtualSlice}
             reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             reactTableOptions={reactTableOptions}
-            css={{
-              height: '100%',
-            }}
+            height={'100%'}
           />
         </GridTableWrapper>
       ) : (

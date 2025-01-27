@@ -1,7 +1,6 @@
 import { Chip, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   AuthMethod,
   FluxHelmRepositoriesQuery,
@@ -36,13 +35,13 @@ import { RepoKind, RepoKindSelector } from '../utils/RepoKindSelector'
 import { FluxHelmRepositoriesTable } from './FluxHelmRepositoriesTable'
 import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesTable } from './GitRepositoriesTable'
+import { HelmRepositoriesTable } from './HelmRepositoriesTable'
 import {
   RepositoriesFilters,
   countsFromFluxHelmRepos,
   countsFromGitRepos,
   countsFromHelmRepos,
 } from './RepositoriesFilters'
-import { HelmRepositoriesTable } from './HelmRepositoriesTable'
 
 const crumbs = [
   ...CD_BASE_CRUMBS,
@@ -223,24 +222,22 @@ export default function Repositories() {
           setFilterString={setFilterString}
         />
       </div>
-      <FullHeightTableWrap>
-        {repoKind === RepoKind.Git ? (
-          <GitRepositoriesTable
-            data={data as GitRepositoriesQuery}
-            reactTableOptions={tableOptions}
-          />
-        ) : repoKind === RepoKind.Helm ? (
-          <HelmRepositoriesTable
-            data={data as HelmRepositoriesQuery}
-            reactTableOptions={tableOptions}
-          />
-        ) : (
-          <FluxHelmRepositoriesTable
-            data={data as FluxHelmRepositoriesQuery}
-            reactTableOptions={tableOptions}
-          />
-        )}
-      </FullHeightTableWrap>
+      {repoKind === RepoKind.Git ? (
+        <GitRepositoriesTable
+          data={data as GitRepositoriesQuery}
+          reactTableOptions={tableOptions}
+        />
+      ) : repoKind === RepoKind.Helm ? (
+        <HelmRepositoriesTable
+          data={data as HelmRepositoriesQuery}
+          reactTableOptions={tableOptions}
+        />
+      ) : (
+        <FluxHelmRepositoriesTable
+          data={data as FluxHelmRepositoriesQuery}
+          reactTableOptions={tableOptions}
+        />
+      )}
     </div>
   )
 }

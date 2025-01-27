@@ -12,7 +12,6 @@ import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../utils/table/useFetchPaginatedData.tsx'
-import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap.tsx'
 import {
   ClusterRegistrationFragment,
   useClusterRegistrationsQuery,
@@ -180,23 +179,18 @@ export default function Edge() {
         </div>
       }
     >
-      <FullHeightTableWrap>
-        <Table
-          columns={columns}
-          reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={clusterRegistrations}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={columns}
+        reactTableOptions={{ meta: { refetch } }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={clusterRegistrations}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </ResponsivePageFullWidth>
   )
 }

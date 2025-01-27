@@ -15,8 +15,6 @@ import { CaretRightIcon, Table } from '@pluralsh/design-system'
 
 import styled, { useTheme } from 'styled-components'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { StackedText } from 'components/utils/table/StackedText'
 
 import { StepName } from './StackCustomRunModal'
@@ -59,27 +57,26 @@ export function StackCustomRunChooseTemplate({
         overflow: 'hidden',
       }}
     >
-      <FullHeightTableWrap>
-        <Table
-          virtualizeRows
-          data={customRuns || []}
-          columns={tableColumns}
-          hideHeader
-          padCells={false}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          css={{
-            height: '100%',
-          }}
-          onRowClick={(_, { original }) => {
-            setStep(StepName.Settings)
-            setType('prebaked')
-            setSelectedCustomRun(original)
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        virtualizeRows
+        data={customRuns || []}
+        columns={tableColumns}
+        hideHeader
+        padCells={false}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        css={{
+          height: '100%',
+        }}
+        onRowClick={(_, { original }) => {
+          setStep(StepName.Settings)
+          setType('prebaked')
+          setSelectedCustomRun(original)
+        }}
+      />
 
       <ManualOptionSC
         onClick={() => {

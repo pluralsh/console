@@ -22,7 +22,6 @@ import {
 import { mapExistingNodes } from 'utils/graphql'
 
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
@@ -92,21 +91,17 @@ export default function ServiceRevisions() {
       {isEmpty(revisions) ? (
         <EmptyState message="No revisions" />
       ) : (
-        <FullHeightTableWrap>
-          <Table
-            data={revisions}
-            columns={columns}
-            css={{
-              height: '100%',
-            }}
-            reactTableOptions={{
-              meta: {
-                refetch,
-                currentRevision,
-              },
-            }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          data={revisions}
+          columns={columns}
+          reactTableOptions={{
+            meta: {
+              refetch,
+              currentRevision,
+            },
+          }}
+        />
       )}
     </Flex>
   )

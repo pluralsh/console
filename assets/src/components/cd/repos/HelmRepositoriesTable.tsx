@@ -24,12 +24,9 @@ export function HelmRepositoriesTable({
 
   return !isEmpty(edges) ? (
     <Table
+      fullHeightWrap
       data={edges || []}
       columns={helmRepoColumns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       reactTableOptions={reactTableOptions}
     />
   ) : (

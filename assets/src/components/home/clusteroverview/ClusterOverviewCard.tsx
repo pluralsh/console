@@ -67,7 +67,7 @@ export function ClusterOverviewCard() {
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         width="100%"
-        css={{ height: '100%' }}
+        height="100%"
       />
     </div>
   )

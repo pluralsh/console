@@ -1,6 +1,5 @@
 import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
@@ -51,29 +50,28 @@ export const VulneratbilityReportsTable = memo(
     if (error) return <GqlError error={error} />
 
     return (
-      <FullHeightTableWrap css={{ flex: 1 }}>
-        <Table
-          virtualizeRows
-          data={data?.vulnerabilityReports?.edges || []}
-          columns={columns}
-          loading={!data && loading}
-          css={{ maxHeight: '100%' }}
-          onRowClick={(_e, row) => {
-            navigate(
-              getVulnerabilityReportDetailsPath({
-                clusterId,
-                vulnerabilityReportId: row.original.node?.id,
-              })
-            )
-          }}
-          hasNextPage={data?.vulnerabilityReports?.pageInfo?.hasNextPage}
-          isFetchingNextPage={loading}
-          fetchNextPage={fetchNextPage}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          onVirtualSliceChange={setVirtualSlice}
-          emptyStateProps={{ message: 'No vulnerability reports found.' }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        virtualizeRows
+        data={data?.vulnerabilityReports?.edges || []}
+        columns={columns}
+        loading={!data && loading}
+        css={{ maxHeight: '100%' }}
+        onRowClick={(_e, row) => {
+          navigate(
+            getVulnerabilityReportDetailsPath({
+              clusterId,
+              vulnerabilityReportId: row.original.node?.id,
+            })
+          )
+        }}
+        hasNextPage={data?.vulnerabilityReports?.pageInfo?.hasNextPage}
+        isFetchingNextPage={loading}
+        fetchNextPage={fetchNextPage}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No vulnerability reports found.' }}
+      />
     )
   }
 )

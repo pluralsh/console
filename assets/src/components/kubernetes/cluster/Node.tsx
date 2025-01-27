@@ -1,4 +1,3 @@
-import { ReactElement, useMemo } from 'react'
 import {
   Card,
   Chip,
@@ -7,10 +6,10 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { filesize } from 'filesize'
-import { createColumnHelper } from '@tanstack/react-table'
 
 import {
   Common_EventList as EventListT,
@@ -31,16 +30,15 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
-import { SubTitle } from '../../utils/SubTitle'
-import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { GaugeWrap } from '../../cluster/Gauges'
-import { usePodsColumns } from '../workloads/Pods'
-import Conditions from '../common/Conditions'
-import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+import RadialBarChart from '../../utils/RadialBarChart'
+import { SubTitle } from '../../utils/SubTitle'
+import Conditions from '../common/Conditions'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+import { ResourceList } from '../common/ResourceList'
+import { usePodsColumns } from '../workloads/Pods'
 
 import { useCluster } from '../Cluster'
 
@@ -48,8 +46,10 @@ import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 
 import { Kind } from '../common/types'
 
-import { getBreadcrumbs } from './Nodes'
+import { filesize } from 'filesize'
+import { useMemo } from 'react'
 import { useEventsColumns } from './Events'
+import { getBreadcrumbs } from './Nodes'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -60,7 +60,7 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function Node(): ReactElement<any> {
+export default function Node() {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNodeQuery({
@@ -117,7 +117,7 @@ export default function Node(): ReactElement<any> {
   )
 }
 
-export function NodeInfo(): ReactElement<any> {
+export function NodeInfo() {
   const theme = useTheme()
   const node = useOutletContext() as NodeT
 
@@ -270,17 +270,10 @@ export function NodeInfo(): ReactElement<any> {
   )
 }
 
-export function NodeConditions(): ReactElement<any> {
+export function NodeConditions() {
   const node = useOutletContext() as NodeT
 
-  return (
-    <FullHeightTableWrap>
-      <Conditions
-        conditions={node.conditions}
-        maxHeight="unset"
-      />
-    </FullHeightTableWrap>
-  )
+  return <Conditions conditions={node.conditions} />
 }
 
 const columnHelper = createColumnHelper<string>()
@@ -293,23 +286,18 @@ const columns = [
   }),
 ]
 
-export function NodeContainerImages(): ReactElement<any> {
+export function NodeContainerImages() {
   const node = useOutletContext() as NodeT
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={node.containerImages}
-        columns={columns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={node.containerImages}
+      columns={columns}
+    />
   )
 }
-export function NodePods(): ReactElement<any> {
+export function NodePods() {
   const { name } = useParams()
   const columns = usePodsColumns()
 
@@ -327,7 +315,7 @@ export function NodePods(): ReactElement<any> {
   )
 }
 
-export function NodeEvents(): ReactElement<any> {
+export function NodeEvents() {
   const { name } = useParams()
   const columns = useEventsColumns()
 

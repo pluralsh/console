@@ -14,7 +14,6 @@ import {
   SERVICE_PARAM_ID,
 } from 'routes/cdRoutesConsts'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { columns } from '../ServiceDependenciesColumns'
@@ -55,16 +54,11 @@ export default function ServiceDependencies() {
       {isEmpty(service.dependencies) ? (
         <EmptyState message="No dependencies" />
       ) : (
-        <FullHeightTableWrap>
-          <Table
-            data={service?.dependencies || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          data={service?.dependencies || []}
+          columns={columns}
+        />
       )}
     </ScrollablePage>
   )

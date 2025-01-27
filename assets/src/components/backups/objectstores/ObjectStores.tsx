@@ -21,7 +21,6 @@ import {
   BACKUPS_ABS_PATH,
   OBJECT_STORES_REL_PATH,
 } from '../../../routes/backupRoutesConsts'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { useObjectStoresQuery } from '../../../generated/graphql'
 
 import { GqlError } from '../../utils/Alert'
@@ -82,24 +81,19 @@ export default function ObjectStores() {
       }}
     >
       {!isEmpty(objectStores?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            loose
-            columns={columns}
-            reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            data={objectStores?.edges || []}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          loose
+          columns={columns}
+          reactTableOptions={{ meta: { refetch } }}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          data={objectStores?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
       ) : (
         <EmptyState message="Looks like you don't have any object storage connections yet." />
       )}

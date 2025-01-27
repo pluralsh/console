@@ -18,7 +18,6 @@ import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import PolicyRules from '../common/PolicyRules'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
@@ -75,9 +74,5 @@ export default function Role(): ReactElement<any> {
 export function RolePolicyRules(): ReactElement<any> {
   const role = useOutletContext() as RoleT
 
-  return (
-    <FullHeightTableWrap>
-      <PolicyRules rules={role.rules} />
-    </FullHeightTableWrap>
-  )
+  return <PolicyRules rules={role.rules} />
 }

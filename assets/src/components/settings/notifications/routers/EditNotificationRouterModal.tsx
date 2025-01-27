@@ -285,10 +285,6 @@ function RouterSinksTable({
       data={sinkEdges || []}
       reactTableOptions={{ meta: { removeSink } }}
       emptyStateProps={{ message: 'No sinks assigned yet' }}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

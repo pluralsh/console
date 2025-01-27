@@ -11,7 +11,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   AccessTokenAudit,
   AccessTokenFragment,
@@ -120,16 +119,11 @@ function TokenAudits({ tokenId }: { tokenId: string }) {
   }
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-        data={edges}
-        columns={auditColumns}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={edges}
+      columns={auditColumns}
+    />
   )
 }
 
@@ -343,17 +337,12 @@ export function AccessTokens() {
     >
       {!isInSettings && headingContent}
       {!isEmpty(tokensList) ? (
-        <FullHeightTableWrap>
-          <Table
-            virtualizeRows
-            data={tokensList}
-            columns={tokenColumns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          virtualizeRows
+          data={tokensList}
+          columns={tokenColumns}
+        />
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
           <Button

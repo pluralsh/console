@@ -3,8 +3,6 @@
 import { ReactNode } from 'react'
 import styled, { CSSObject, DefaultTheme } from 'styled-components'
 
-import { FullHeightTableWrap } from './FullHeightTableWrap'
-
 function gridLayoutWithSideNavStyle(
   theme: DefaultTheme,
   hideSidecar: boolean = true
@@ -47,9 +45,18 @@ export function GridTableWrapper({ children }: { children: ReactNode }) {
   // should revisit at some point
   return (
     <div css={{ flex: 1, position: 'relative' }}>
-      <FullHeightTableWrap css={{ position: 'absolute', width: '100%' }}>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden',
+          position: 'absolute',
+          width: '100%',
+        }}
+      >
         {children}
-      </FullHeightTableWrap>
+      </div>
     </div>
   )
 }

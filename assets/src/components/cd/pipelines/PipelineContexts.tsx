@@ -129,6 +129,7 @@ export function PipelineContexts({
 
   return (
     <Table
+      fullHeightWrap
       loose
       data={tableData}
       columns={columns}
@@ -138,10 +139,6 @@ export function PipelineContexts({
         )
       }
       emptyStateProps={{ message: 'No contexts available.' }}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

@@ -12,7 +12,6 @@ import { coerce, compare } from 'semver'
 
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useOutletContext } from 'react-router-dom'
 
 import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
@@ -159,21 +158,16 @@ export default function ClusterAddOnCompatibility() {
     return <EmptyState message="No version info found." />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={addOn?.addon?.versions || []}
-        columns={columns}
-        stickyColumn
-        highlightedRowId={addOn.addonVersion?.version ?? ''}
-        reactTableOptions={{
-          getRowId: (row) => row.version,
-          meta: { kubeVersion, version: addOn?.addonVersion?.version },
-        }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={addOn?.addon?.versions || []}
+      columns={columns}
+      stickyColumn
+      highlightedRowId={addOn.addonVersion?.version ?? ''}
+      reactTableOptions={{
+        getRowId: (row) => row.version,
+        meta: { kubeVersion, version: addOn?.addonVersion?.version },
+      }}
+    />
   )
 }

@@ -3,8 +3,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { PullRequestEdge, useStackPrsQuery } from 'generated/graphql'
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
@@ -50,25 +48,24 @@ export function StackPrs() {
   if (!prs) return <LoadingIndicator />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        virtualizeRows
-        data={prs}
-        padCells={false}
-        columns={cols}
-        hideHeader
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-        reactTableOptions={reactTableOptions}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        css={{ height: '100%' }}
-        emptyStateProps={{
-          message: 'No PRs found.',
-        }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      virtualizeRows
+      data={prs}
+      padCells={false}
+      columns={cols}
+      hideHeader
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      reactTableOptions={reactTableOptions}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+      css={{ height: '100%' }}
+      emptyStateProps={{
+        message: 'No PRs found.',
+      }}
+    />
   )
 }
 

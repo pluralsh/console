@@ -1,6 +1,5 @@
 import { Modal, Table } from '@pluralsh/design-system'
 import { prColumns } from 'components/pr/queue/PrQueueColumns'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { PullRequestFragment } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 
@@ -25,9 +24,7 @@ export function PipelinePullRequestsModal({
       size="custom"
       {...props}
     >
-      <FullHeightTableWrap>
-        <PipelinePullRequestsTable pullRequestEdges={pullRequestEdges} />
-      </FullHeightTableWrap>
+      <PipelinePullRequestsTable pullRequestEdges={pullRequestEdges} />
     </Modal>
   )
 }
@@ -39,14 +36,11 @@ export function PipelinePullRequestsTable({
 }) {
   return (
     <Table
+      fullHeightWrap
       columns={prColumns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={pullRequestEdges || []}
       virtualizeRows
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

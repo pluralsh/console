@@ -34,12 +34,9 @@ export function GitRepositoriesTable({
 
   return !isEmpty(edges) ? (
     <Table
+      fullHeightWrap
       data={edges || []}
       columns={gitRepoColumns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       reactTableOptions={reactTableOptions}
     />
   ) : (

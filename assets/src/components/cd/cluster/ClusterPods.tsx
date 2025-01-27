@@ -14,7 +14,6 @@ import { useDebounce } from '@react-hooks-library/core'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   ColContainers,
   ColCpuReservation,
@@ -240,26 +239,21 @@ export default function ClusterPods() {
       {!pods || pods.length === 0 ? (
         <EmptyState message="No pods match your selection" />
       ) : (
-        <FullHeightTableWrap>
-          <PodsList
-            pods={pods}
-            columns={columns}
-            reactTableOptions={reactTableOptions}
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            refetch={refetch}
-            linkBasePath={getPodDetailsPath({
-              clusterId,
-              isRelative: false,
-            })}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
+        <PodsList
+          fullHeightWrap
+          pods={pods}
+          columns={columns}
+          reactTableOptions={reactTableOptions}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+          refetch={refetch}
+          linkBasePath={getPodDetailsPath({
+            clusterId,
+            isRelative: false,
+          })}
+        />
       )}
     </div>
   )

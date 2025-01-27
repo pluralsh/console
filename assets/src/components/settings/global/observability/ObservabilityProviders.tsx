@@ -1,5 +1,4 @@
 import { Button, LoopingLogo, Table } from '@pluralsh/design-system'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
@@ -52,23 +51,19 @@ export default function ObservabilityProviders() {
           overflow: 'hidden',
         }}
       >
-        <FullHeightTableWrap>
-          <Table
-            columns={columns}
-            reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            data={data?.observabilityProviders?.edges || []}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            css={{
-              height: '100%',
-            }}
-            emptyStateProps={{ message: 'No providers found.' }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          columns={columns}
+          reactTableOptions={{ meta: { refetch } }}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          data={data?.observabilityProviders?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+          emptyStateProps={{ message: 'No providers found.' }}
+        />
       </div>
     </div>
   )

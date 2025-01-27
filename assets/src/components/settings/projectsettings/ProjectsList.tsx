@@ -47,9 +47,6 @@ export function ProjectsList() {
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        css={{
-          height: '100%',
-        }}
       />
     </GridTableWrapper>
   ) : (

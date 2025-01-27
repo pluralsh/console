@@ -68,10 +68,6 @@ export function PersonasList() {
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </GridTableWrapper>
   ) : (

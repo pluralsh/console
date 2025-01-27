@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { TabularNumbers } from 'components/cluster/TableElements'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import isEmpty from 'lodash/isEmpty'
 
 import { useOutletContext } from 'react-router-dom'
@@ -52,16 +51,11 @@ export default function ClusterAddOnReleases() {
   if (isEmpty(releases)) return <EmptyState message="No releases found." />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={releases}
-        columns={columns}
-        reactTableOptions={{ getRowId: (row) => row.version }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={releases}
+      columns={columns}
+      reactTableOptions={{ getRowId: (row) => row.version }}
+    />
   )
 }

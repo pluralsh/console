@@ -1,4 +1,3 @@
-import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
@@ -47,18 +46,13 @@ const columns = [
   }),
 ]
 
-export default function Conditions({
-  conditions,
-  maxHeight = '500px',
-}: ConditionsProps): ReactElement<any> {
+export default function ConditionsTable({ conditions }: ConditionsProps) {
   return (
     <Table
+      fullHeightWrap
       data={conditions ?? []}
       columns={columns}
-      css={{
-        height: '100%',
-        ...(maxHeight ? { maxHeight } : {}),
-      }}
+      maxHeight="500px"
       emptyStateProps={{
         message: 'No conditions found.',
       }}

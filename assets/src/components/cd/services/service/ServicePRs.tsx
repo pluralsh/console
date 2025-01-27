@@ -16,7 +16,6 @@ import {
   SERVICE_PRS_PATH,
 } from 'routes/cdRoutesConsts'
 import { usePullRequestsQuery } from 'generated/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useTheme } from 'styled-components'
 
@@ -135,23 +134,18 @@ export default function ServicePRs() {
         {isEmpty(data?.pullRequests?.edges) ? (
           <EmptyState message="No pull requests found" />
         ) : (
-          <FullHeightTableWrap>
-            <Table
-              columns={columns}
-              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-              data={data?.pullRequests?.edges || []}
-              virtualizeRows
-              reactTableOptions={reactTableOptions}
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              onVirtualSliceChange={setVirtualSlice}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-            />
-          </FullHeightTableWrap>
+          <Table
+            fullHeightWrap
+            columns={columns}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+            data={data?.pullRequests?.edges || []}
+            virtualizeRows
+            reactTableOptions={reactTableOptions}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
         )}
       </div>
     </ScrollablePage>

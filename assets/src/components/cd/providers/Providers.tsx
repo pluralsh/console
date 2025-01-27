@@ -4,7 +4,6 @@ import { useTheme } from 'styled-components'
 import type { TableState } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useClusterProvidersQuery } from 'generated/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -75,17 +74,12 @@ export default function Providers() {
       }}
     >
       {!isEmpty(data?.clusterProviders?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            data={data?.clusterProviders?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            reactTableOptions={reactTableOptions}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          data={data?.clusterProviders?.edges || []}
+          columns={columns}
+          reactTableOptions={reactTableOptions}
+        />
       ) : (
         <EmptyState message="Looks like you don't have any providers yet." />
       )}

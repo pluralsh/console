@@ -16,8 +16,6 @@ import { Pod, usePodLogsQuery } from '../../../../../generated/graphql'
 import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel, useBorderColor } from '../../../logs/LogLine'
 
-import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
-
 import { SinceSecondsOptions } from './Logs'
 
 const columnHelper = createColumnHelper<string>()
@@ -174,21 +172,16 @@ export function ContainerLogsTable({
         ' .thSortIndicatorWrap > div': { width: '100%' },
       }}
     >
-      <FullHeightTableWrap>
-        <Table
-          height={containerHeight}
-          reactTableOptions={{ meta: { refetch, container, loading } }}
-          virtualizeRows
-          onRowClick={() => {}}
-          columns={columns}
-          data={logs}
-          emptyStateProps={{ message: 'No logs found to display' }}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        height={containerHeight}
+        reactTableOptions={{ meta: { refetch, container, loading } }}
+        virtualizeRows
+        onRowClick={() => {}}
+        columns={columns}
+        data={logs}
+        emptyStateProps={{ message: 'No logs found to display' }}
+      />
     </div>
   )
 }

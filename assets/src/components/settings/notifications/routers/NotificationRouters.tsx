@@ -9,8 +9,6 @@ import { useTheme } from 'styled-components'
 
 import { useNotificationRoutersQuery } from 'generated/graphql'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
@@ -92,23 +90,18 @@ export default function NotificationRouters() {
         height: '100%',
       }}
     >
-      <FullHeightTableWrap>
-        <Table
-          columns={columns}
-          reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.notificationRouters?.edges || []}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={columns}
+        reactTableOptions={{ meta: { refetch } }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={data?.notificationRouters?.edges || []}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </div>
   )
 }

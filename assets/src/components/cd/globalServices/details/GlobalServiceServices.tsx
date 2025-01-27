@@ -2,7 +2,6 @@ import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
 
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   ServiceDeployment,
@@ -56,34 +55,29 @@ export function GlobalServiceServices({
   if (!data) return <LoadingIndicator />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        virtualizeRows
-        data={services || []}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-        columns={columns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-        onRowClick={(
-          _e,
-          { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-        ) =>
-          navigate(
-            getServiceDetailsPath({
-              clusterId: original.node?.cluster?.id,
-              serviceId: original.node?.id,
-            })
-          )
-        }
-        reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        emptyStateProps={{ message: 'No services found.' }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      virtualizeRows
+      data={services || []}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      columns={columns}
+      onRowClick={(
+        _e,
+        { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+      ) =>
+        navigate(
+          getServiceDetailsPath({
+            clusterId: original.node?.cluster?.id,
+            serviceId: original.node?.id,
+          })
+        )
+      }
+      reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+      emptyStateProps={{ message: 'No services found.' }}
+    />
   )
 }

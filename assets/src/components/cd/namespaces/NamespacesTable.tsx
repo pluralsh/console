@@ -6,7 +6,6 @@ import type { Row } from '@tanstack/react-table'
 import { ManagedNamespace, useManagedNamespacesQuery } from 'generated/graphql'
 import { getNamespacesDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
@@ -69,33 +68,28 @@ export function NamespacesTable() {
       {!data ? (
         <LoadingIndicator />
       ) : (
-        <FullHeightTableWrap>
-          <Table
-            virtualizeRows
-            data={data?.managedNamespaces?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            onRowClick={(_e, { original }: Row<Edge<ManagedNamespace>>) =>
-              navigate(
-                getNamespacesDetailsPath({
-                  namespaceId: original.node?.id,
-                })
-              )
-            }
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            reactTableOptions={reactTableOptions}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            onVirtualSliceChange={setVirtualSlice}
-            emptyStateProps={{
-              message: "Looks like you don't have any namespaces yet",
-            }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          virtualizeRows
+          data={data?.managedNamespaces?.edges || []}
+          columns={columns}
+          onRowClick={(_e, { original }: Row<Edge<ManagedNamespace>>) =>
+            navigate(
+              getNamespacesDetailsPath({
+                namespaceId: original.node?.id,
+              })
+            )
+          }
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          reactTableOptions={reactTableOptions}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          onVirtualSliceChange={setVirtualSlice}
+          emptyStateProps={{
+            message: "Looks like you don't have any namespaces yet",
+          }}
+        />
       )}
     </div>
   )

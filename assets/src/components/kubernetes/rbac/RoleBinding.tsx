@@ -18,7 +18,6 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
 
 import { useCluster } from '../Cluster'
@@ -104,9 +103,5 @@ export default function RoleBinding(): ReactElement<any> {
 export function RoleBindingSubjects(): ReactElement<any> {
   const rb = useOutletContext() as RoleBindingT
 
-  return (
-    <FullHeightTableWrap>
-      <Subjects subjects={rb?.subjects} />
-    </FullHeightTableWrap>
-  )
+  return <Subjects subjects={rb?.subjects} />
 }
