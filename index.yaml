@@ -33,6 +33,34 @@ entries:
     version: 0.1.0
   console:
   - apiVersion: v2
+    appVersion: 0.10.48
+    created: "2025-01-27T04:06:28.386561776Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.1
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.104
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.10.1
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 4a12f6d884acc6b721d72643e5f80f86e5c3200df4faf00cb3f6459364e07f51
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.76/console-0.3.76.tgz
+    version: 0.3.76
+  - apiVersion: v2
     appVersion: 0.10.47
     created: "2025-01-19T16:10:15.504049377Z"
     dependencies:
@@ -5268,4 +5296,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-25T18:28:16.78509607Z"
+generated: "2025-01-27T04:06:28.387137891Z"
