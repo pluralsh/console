@@ -1,5 +1,5 @@
-mutation SaveUpgradeInsights($insights: [UpgradeInsightAttributes]) {
-  saveUpgradeInsights(insights: $insights) {
+mutation SaveUpgradeInsights($insights: [UpgradeInsightAttributes], $addons: [CloudAddonAttributes]) {
+  saveUpgradeInsights(insights: $insights, addons: $addons) {
     id
     name
     version
