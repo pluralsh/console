@@ -105,7 +105,7 @@ defmodule Console.MixProject do
       {:cowboy_telemetry, "~> 0.4"},
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
-      {:finch, "~> 0.16"},
+      {:finch, "~> 0.19"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", branch: "master", override: true},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
