@@ -104,7 +104,7 @@ export function CostManagementDetailsRecommendations() {
             }
             isFetchingNextPage={loading}
             fetchNextPage={fetchNextPage}
-            setVirtualSlice={setVirtualSlice}
+            onVirtualSliceChange={setVirtualSlice}
           />
         )}
       </FullHeightTableWrap>
