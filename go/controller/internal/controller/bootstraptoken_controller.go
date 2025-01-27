@@ -57,7 +57,9 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := in.Get(ctx, req.NamespacedName, bootstrapToken); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	scope, err := NewDefaultScope(ctx, in.Client, bootstrapToken)
 	if err != nil {
@@ -81,11 +83,10 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// Check if token already exists and return early.
 	if !lo.IsEmpty(bootstrapToken.ConsoleID()) {
+		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 		return ctrl.Result{}, nil
 	}
-
-	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Create token and generate secret
 	apiBootstrapToken, err := in.ensure(ctx, bootstrapToken)
