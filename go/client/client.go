@@ -194,7 +194,7 @@ type ConsoleClient interface {
 	TokenExchange(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*TokenExchange, error)
 	CreateAccessToken(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*CreateAccessToken, error)
 	DeleteAccessToken(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*DeleteAccessToken, error)
-	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
+	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, addons []*CloudAddonAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
@@ -28157,8 +28157,8 @@ func (c *Client) DeleteAccessToken(ctx context.Context, token string, intercepto
 	return &res, nil
 }
 
-const SaveUpgradeInsightsDocument = `mutation SaveUpgradeInsights ($insights: [UpgradeInsightAttributes]) {
-	saveUpgradeInsights(insights: $insights) {
+const SaveUpgradeInsightsDocument = `mutation SaveUpgradeInsights ($insights: [UpgradeInsightAttributes], $addons: [CloudAddonAttributes]) {
+	saveUpgradeInsights(insights: $insights, addons: $addons) {
 		id
 		name
 		version
@@ -28166,9 +28166,10 @@ const SaveUpgradeInsightsDocument = `mutation SaveUpgradeInsights ($insights: [U
 }
 `
 
-func (c *Client) SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error) {
+func (c *Client) SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, addons []*CloudAddonAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error) {
 	vars := map[string]any{
 		"insights": insights,
+		"addons":   addons,
 	}
 
 	var res SaveUpgradeInsights
