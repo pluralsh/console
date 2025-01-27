@@ -100,6 +100,7 @@ export function DataSelectInputs({
       <IconExpander
         icon={<SearchIcon />}
         active={!!filter}
+        onClear={() => setFilter('')}
       >
         <ExpandedInput
           inputValue={filter}
@@ -110,6 +111,7 @@ export function DataSelectInputs({
         <IconExpander
           icon={<FiltersIcon />}
           active={!!namespace}
+          onClear={() => setNamespace('')}
         >
           <NamespaceFilter
             namespaces={namespaces}

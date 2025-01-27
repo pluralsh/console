@@ -5,6 +5,8 @@ import {
   CloseIcon,
   IconFrame,
   Input,
+  Tooltip,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import {
@@ -15,19 +17,19 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { CSSProperties, useTheme } from 'styled-components'
 import { useTransition } from 'react-spring'
+import styled, { CSSProperties, useTheme } from 'styled-components'
 
 export function IconExpander({
   icon,
   active,
-  hideCloseIcon = false,
+  onClear,
   children,
   ...cssProps
 }: {
   icon: ReactElement<any>
   active?: boolean
-  hideCloseIcon?: boolean
+  onClear?: () => void
   children: ReactNode
 } & CSSProperties) {
   const theme = useTheme()
@@ -79,11 +81,28 @@ export function IconExpander({
         >
           <div css={{ display: 'flex', height: '100%' }}>
             {children}
-            {!hideCloseIcon && (
-              <EndIconButtonSC onClick={() => setOpenItem('')}>
-                <CloseIcon />
-              </EndIconButtonSC>
-            )}
+            <WrapWithIf
+              condition={!!active}
+              wrapper={
+                <Tooltip
+                  placement="top"
+                  label="Clear"
+                />
+              }
+            >
+              <BlendedIconFrameSC
+                $active={!!active}
+                onClick={() => onClear?.()}
+                icon={
+                  <CloseIcon
+                    style={{
+                      opacity: active ? 1 : 0.2,
+                      transition: 'opacity 0.1s ease-out',
+                    }}
+                  />
+                }
+              />
+            </WrapWithIf>
           </div>
         </AccordionItem>
       </Accordion>
@@ -115,34 +134,22 @@ export function ExpandedInput({
       placeholder="Filter by name"
       value={inputValue}
       width={250}
-      inputProps={{
-        height: '100%',
-      }}
       onChange={(e) => onChange(e.currentTarget.value)}
       {...props}
     />
   )
 }
 
-const EndIconButtonSC = styled.button(({ theme }) => ({
-  background: theme.colors['fill-two'],
-  border: 'none',
-  color: theme.colors['icon-default'],
-  padding: theme.spacing.small,
-  '&:hover': {
-    background: theme.colors['fill-two-hover'],
-    cursor: 'pointer',
-  },
-}))
-
-const BlendedIconFrameSC = styled(IconFrame).attrs({
-  type: 'floating',
-})(({ theme }) => ({
-  height: '100%',
-  width: '40px',
-  border: 'none',
-  borderRadius: 0,
-  '&:hover': {
-    background: theme.colors['fill-two-hover'],
-  },
-}))
+const BlendedIconFrameSC = styled(IconFrame)<{ $active?: boolean }>(
+  ({ theme, $active = true }) => ({
+    background: theme.colors['fill-two'],
+    height: '100%',
+    width: '40px',
+    border: 'none',
+    borderRadius: 0,
+    '&:hover': {
+      background: $active ? theme.colors['fill-two-hover'] : undefined,
+      cursor: $active ? 'pointer' : undefined,
+    },
+  })
+)
