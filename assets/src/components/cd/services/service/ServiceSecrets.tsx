@@ -446,10 +446,6 @@ export default function ServiceSecrets() {
             <Table
               data={data.serviceDeployment?.configuration || []}
               columns={secretsColumns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
               reactTableOptions={{
                 state: { globalFilter: debouncedFilterString },
               }}

@@ -301,10 +301,6 @@ export function NodeContainerImages(): ReactElement<any> {
       <Table
         data={node.containerImages}
         columns={columns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

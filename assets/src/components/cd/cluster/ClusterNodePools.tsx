@@ -24,10 +24,6 @@ export function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
     <Table
       data={cluster.nodePools || []}
       columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

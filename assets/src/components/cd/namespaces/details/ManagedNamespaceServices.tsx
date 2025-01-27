@@ -70,10 +70,6 @@ export function ManagedNamespaceServices() {
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         columns={columns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
         onRowClick={(
           _e,
           { original }: Row<Edge<ServiceDeploymentsRowFragment>>

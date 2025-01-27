@@ -57,10 +57,6 @@ export default function ClusterAddOnReleases() {
         data={releases}
         columns={columns}
         reactTableOptions={{ getRowId: (row) => row.version }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

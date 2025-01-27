@@ -47,10 +47,6 @@ export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No PR automations found.' }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

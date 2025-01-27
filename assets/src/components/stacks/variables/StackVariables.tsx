@@ -94,7 +94,6 @@ export default function StackVariables() {
           <Table
             data={variables}
             columns={columns}
-            css={{ maxHeight: 'unset', height: '100%' }}
             reactTableOptions={{
               state: { globalFilter: debouncedFilterString },
             }}

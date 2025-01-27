@@ -36,10 +36,6 @@ export function GitRepositoriesTable({
     <Table
       data={edges || []}
       columns={gitRepoColumns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       reactTableOptions={reactTableOptions}
     />
   ) : (

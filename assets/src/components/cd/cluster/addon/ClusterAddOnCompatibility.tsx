@@ -169,10 +169,6 @@ export default function ClusterAddOnCompatibility() {
           getRowId: (row) => row.version,
           meta: { kubeVersion, version: addOn?.addonVersion?.version },
         }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

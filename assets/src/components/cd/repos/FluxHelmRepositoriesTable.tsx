@@ -28,10 +28,6 @@ export function FluxHelmRepositoriesTable({
     <Table
       data={data?.fluxHelmRepositories || []}
       columns={fluxHelmRepoColumns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       reactTableOptions={reactTableOptions}
     />
   ) : (

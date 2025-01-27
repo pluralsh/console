@@ -74,10 +74,6 @@ export function NamespacesTable() {
             virtualizeRows
             data={data?.managedNamespaces?.edges || []}
             columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
             onRowClick={(_e, { original }: Row<Edge<ManagedNamespace>>) =>
               navigate(
                 getNamespacesDetailsPath({

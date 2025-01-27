@@ -58,7 +58,7 @@ export function PrCard() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        css={{ maxHeight: '350px' }}
+        maxHeight="350px"
       />
     </div>
   )

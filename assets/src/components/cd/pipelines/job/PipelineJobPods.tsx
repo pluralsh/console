@@ -71,10 +71,6 @@ export default function PipelineJobLogs() {
           columns={columns}
           refetch={refetch}
           //   reactTableOptions={reactTableOptions}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
         />
       </FullHeightTableWrap>
     </ScrollablePage>

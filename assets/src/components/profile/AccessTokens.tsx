@@ -122,10 +122,6 @@ function TokenAudits({ tokenId }: { tokenId: string }) {
   return (
     <FullHeightTableWrap>
       <Table
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
         data={edges}
         columns={auditColumns}
       />
@@ -348,10 +344,6 @@ export function AccessTokens() {
             virtualizeRows
             data={tokensList}
             columns={tokenColumns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       ) : (

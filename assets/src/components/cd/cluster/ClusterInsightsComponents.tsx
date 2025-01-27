@@ -26,9 +26,9 @@ export default function ClusterInsightsComponents(): ReactNode {
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       css={{
         height: '100%',
-        overflowX: 'hidden',
-        border: theme.borders['fill-one'],
       }}
+      border={theme.borders['fill-one']}
+      overflowX={'hidden'}
       emptyStateProps={{ message: 'No entries found.' }}
       onRowClick={(_e, { original }: Row<ClusterInsightComponentAPI>) =>
         navigate(original.id)

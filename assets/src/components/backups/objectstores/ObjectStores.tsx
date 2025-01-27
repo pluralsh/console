@@ -94,10 +94,6 @@ export default function ObjectStores() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       ) : (

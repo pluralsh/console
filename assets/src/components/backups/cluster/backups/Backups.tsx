@@ -113,10 +113,6 @@ export default function Backups() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       ) : (

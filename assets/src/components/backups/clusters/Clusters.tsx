@@ -97,10 +97,6 @@ export default function Clusters() {
             onRowClick={(_e, { original: { node } }) =>
               navigate(getBackupsClusterAbsPath(node?.id))
             }
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       ) : (

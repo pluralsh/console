@@ -73,10 +73,6 @@ export function PoliciesTable({
           data={data?.policyConstraints?.edges || []}
           loading={!data && loading}
           columns={caret ? columnsWithActions : columns}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
           onRowClick={(_e, { original }: Row<Edge<PolicyConstraint>>) =>
             navigate(
               getPolicyPath({

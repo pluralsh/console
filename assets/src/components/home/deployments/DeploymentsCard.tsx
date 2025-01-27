@@ -72,7 +72,7 @@ export function DeploymentsCard() {
         isFetchingNextPage={loading}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
-        css={{ maxHeight: HOME_CARD_MAX_HEIGHT }}
+        maxHeight={HOME_CARD_MAX_HEIGHT}
       />
     </div>
   )

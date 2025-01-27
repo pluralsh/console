@@ -59,10 +59,6 @@ export default function StackFiles() {
       <Table
         data={files ?? []}
         columns={columns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
         emptyStateProps={{ message: 'No files found.' }}
       />
     </FullHeightTableWrap>

@@ -79,10 +79,6 @@ export default function Providers() {
           <Table
             data={data?.clusterProviders?.edges || []}
             columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
             reactTableOptions={reactTableOptions}
           />
         </FullHeightTableWrap>

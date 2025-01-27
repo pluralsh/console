@@ -152,11 +152,8 @@ function ChatbotPanelInner({
               flush={!fullscreen}
               query={threadsQuery}
               rowData={rows}
-              css={{
-                border: 'none',
-                borderBottom: theme.borders['fill-two'],
-                borderRadius: 0,
-              }}
+              borderBottom={theme.borders['fill-two']}
+              borderRadius={0}
             />
           </FullHeightTableWrap>
         )}

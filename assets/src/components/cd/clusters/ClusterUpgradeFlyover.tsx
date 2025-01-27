@@ -112,10 +112,6 @@ function FlyoverContent({ open, cluster, refetch }) {
       <Table
         data={[cluster]}
         columns={clusterUpgradeColumns}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
         reactTableOptions={{
           meta: { refetch, setError, data },
         }}

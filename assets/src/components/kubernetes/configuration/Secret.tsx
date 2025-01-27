@@ -196,10 +196,6 @@ export function SecretData(): ReactElement<any> {
         data={data}
         columns={columns}
         reactTableOptions={{ meta: { revealAll } }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

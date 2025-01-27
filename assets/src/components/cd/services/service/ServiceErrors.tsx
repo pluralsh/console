@@ -113,13 +113,7 @@ export default function ServiceErrors() {
         <EmptyState message="No errors" />
       ) : (
         <FullHeightTableWrap>
-          <ServiceErrorsTable
-            errors={service.errors}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
+          <ServiceErrorsTable errors={service.errors} />
         </FullHeightTableWrap>
       )}
     </ScrollablePage>

@@ -103,10 +103,6 @@ export default function NotificationRouters() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
         />
       </FullHeightTableWrap>
     </div>

@@ -297,10 +297,6 @@ export default function Observers() {
         emptyStateProps={{
           message: "Looks like you don't have any observers yet",
         }}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
       />
     </FullHeightTableWrap>
   )

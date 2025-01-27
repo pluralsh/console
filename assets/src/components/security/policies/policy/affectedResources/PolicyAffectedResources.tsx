@@ -67,10 +67,6 @@ export default function PolicyAffectedResources() {
             virtualizeRows
             data={violations || []}
             columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
             onRowClick={(
               _e,
               {

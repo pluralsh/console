@@ -85,10 +85,6 @@ export default function ScmConnections() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
         />
       </FullHeightTableWrap>
     </div>

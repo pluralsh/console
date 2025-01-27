@@ -50,10 +50,6 @@ export default function PolicyRules({
     <Table
       data={rules}
       columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

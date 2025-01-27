@@ -254,10 +254,6 @@ export default function ClusterPods() {
               clusterId,
               isRelative: false,
             })}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       )}

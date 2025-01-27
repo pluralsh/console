@@ -56,10 +56,6 @@ export default function Subjects({
     <Table
       data={subjects || []}
       columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

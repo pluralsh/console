@@ -59,10 +59,6 @@ export default function ServiceDependencies() {
           <Table
             data={service?.dependencies || []}
             columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
           />
         </FullHeightTableWrap>
       )}

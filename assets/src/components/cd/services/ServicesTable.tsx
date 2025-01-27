@@ -115,10 +115,6 @@ export default function ServicesTable() {
               virtualizeRows
               data={data?.serviceDeployments?.edges || []}
               columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
               onRowClick={(
                 _e,
                 { original }: Row<Edge<ServiceDeploymentsRowFragment>>

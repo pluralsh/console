@@ -43,10 +43,6 @@ export function PipelinePullRequestsTable({
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={pullRequestEdges || []}
       virtualizeRows
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
     />
   )
 }

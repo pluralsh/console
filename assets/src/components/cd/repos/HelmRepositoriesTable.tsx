@@ -26,10 +26,6 @@ export function HelmRepositoriesTable({
     <Table
       data={edges || []}
       columns={helmRepoColumns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       reactTableOptions={reactTableOptions}
     />
   ) : (

@@ -150,10 +150,6 @@ export default function StackOutput() {
         <Table
           data={output || []}
           columns={columns}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
           reactTableOptions={{
             state: { globalFilter: debouncedFilterString },
           }}

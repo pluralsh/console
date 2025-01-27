@@ -174,10 +174,6 @@ export default function StackEnvironment() {
           <Table
             data={stack.environment || []}
             columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
             reactTableOptions={{
               state: { globalFilter: debouncedFilterString },
             }}

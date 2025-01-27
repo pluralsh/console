@@ -204,10 +204,6 @@ export function ModalForm({
               <Table
                 data={revisions}
                 columns={selectableColumns}
-                css={{
-                  maxHeight: 'unset',
-                  height: '100%',
-                }}
                 onRowClick={(_e, row) => {
                   const original =
                     row.original as ServiceDeploymentRevisionFragment

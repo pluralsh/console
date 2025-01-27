@@ -73,13 +73,11 @@ export function AiThreads() {
             query={threadsQuery}
             rowData={threads}
             hidePins
-            css={{
-              border: 'none',
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              maxHeight: HOME_CARD_CONTENT_HEIGHT,
-            }}
             hasNextPage={false} // Prevent from loading more items than on the first page.
+            border="none"
+            borderTopLeftRadius={0}
+            borderTopRightRadius={0}
+            maxHeight={HOME_CARD_CONTENT_HEIGHT}
           />
         )
       ) : (

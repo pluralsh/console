@@ -273,10 +273,6 @@ export function ClustersTable({
       data={data || []}
       columns={cdClustersColumns}
       reactTableOptions={reactTableOptions}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
       onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
         navigate(
           getClusterDetailsPath({

@@ -94,10 +94,6 @@ export default function PipelineList() {
           onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
             navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
           }}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
         />
       </FullHeightTableWrap>
     </div>
