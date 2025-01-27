@@ -118,7 +118,7 @@ defmodule Console.MixProject do
       {:cowboy, "~> 2.12"},
       {:uniq, "~> 0.4"},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.8", only: [:dev, :test]},
+      {:sobelow, "~> 0.13", only: [:dev, :test]},
       {:absinthe, "~> 1.7.5"},
       {:absinthe_relay, "~> 1.5.2"},
       {:absinthe_plug, "~> 1.5", git: "https://github.com/absinthe-graphql/absinthe_plug.git", commit: "3a984cc341ebb32c79e7ae58b4ebd116d5c62f9e", override: true},
