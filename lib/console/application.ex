@@ -37,6 +37,7 @@ defmodule Console.Application do
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
+      Console.Deployments.Compatibilities.CloudAddOns,
       Console.Buffers.Supervisor,
       Console.Bootstrapper,
       {Absinthe.Subscription, ConsoleWeb.Endpoint},

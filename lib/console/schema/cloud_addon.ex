@@ -7,6 +7,9 @@ defmodule Console.Schema.CloudAddon do
     field :name,    :string
     field :version, :string
 
+    field :info,         :map, virtual: true
+    field :version_info, :map, virtual: true
+
     belongs_to :cluster, Cluster
 
     timestamps()

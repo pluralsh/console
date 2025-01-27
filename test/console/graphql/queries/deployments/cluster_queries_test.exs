@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   use Console.DataCase, async: true
+  alias Console.Deployments.Compatibilities
   use Mimic
 
   describe "clusters" do
@@ -201,6 +202,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
       runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
 
+      wait(Compatibilities.CloudAddOns)
+
       {:ok, %{data: %{"cluster" => found}}} = run_query("""
         query Cluster($id: ID!) {
           cluster(id: $id) {
@@ -259,6 +262,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
       runtime = insert(:runtime_service, cluster: cluster, name: "cert-manager", version: "1.13.1")
 
+      wait(Compatibilities.Table)
+
       {:ok, %{data: %{"cluster" => found}}} = run_query("""
         query Cluster($id: ID!) {
           cluster(id: $id) {
@@ -285,6 +290,43 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert svc["version"] == "1.13.1"
       refute svc["addonVersion"]["blocking"]
       assert svc["addonVersion"]["kube"] == ~w(1.27 1.26 1.25 1.24 1.23 1.22 1.21)
+    end
+
+    test "it can fetch cloud addons" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.29")
+      addon = insert(:cloud_addon, cluster: cluster, name: "splunk_splunk-otel-collector-chart", version: "v0.86.0-eksbuild.1")
+
+      wait(Compatibilities.CloudAddOns)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            cloudAddons {
+              id
+              name
+              version
+              info {
+                versions { version compatibilities }
+              }
+              versionInfo {
+                version
+                compatibilities
+                blocking(kubeVersion: "1.28")
+              }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      [ca] = found["cloudAddons"]
+      assert ca["id"] == addon.id
+      assert ca["name"] == "splunk_splunk-otel-collector-chart"
+      assert ca["versionInfo"]["blocking"]
+      assert MapSet.new(ca["versionInfo"]["compatibilities"])
+             |> MapSet.equal?(MapSet.new(~w(1.24 1.25 1.26 1.27 1.28)))
     end
 
     test "it can fetch cluster metrics" do
@@ -788,5 +830,15 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert from_connection(found)
              |> ids_equal(regs)
     end
+  end
+
+  defp wait(module) do
+    Stream.repeatedly(fn -> module.ping() end)
+    |> Stream.take(10)
+    |> Stream.map(fn v ->
+      :timer.sleep(200)
+      v
+    end)
+    |> Enum.find(& &1)
   end
 end

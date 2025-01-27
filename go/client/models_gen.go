@@ -735,19 +735,34 @@ type ChatTypeAttributes struct {
 }
 
 type CloudAddon struct {
-	ID         string        `json:"id"`
-	Distro     ClusterDistro `json:"distro"`
-	Name       string        `json:"name"`
-	Version    string        `json:"version"`
-	Cluster    *Cluster      `json:"cluster,omitempty"`
-	InsertedAt *string       `json:"insertedAt,omitempty"`
-	UpdatedAt  *string       `json:"updatedAt,omitempty"`
+	ID          string                        `json:"id"`
+	Distro      ClusterDistro                 `json:"distro"`
+	Name        string                        `json:"name"`
+	Version     string                        `json:"version"`
+	Info        *CloudAddonInformation        `json:"info,omitempty"`
+	VersionInfo *CloudAddonVersionInformation `json:"versionInfo,omitempty"`
+	Cluster     *Cluster                      `json:"cluster,omitempty"`
+	InsertedAt  *string                       `json:"insertedAt,omitempty"`
+	UpdatedAt   *string                       `json:"updatedAt,omitempty"`
 }
 
 type CloudAddonAttributes struct {
 	Distro  *ClusterDistro `json:"distro,omitempty"`
 	Name    *string        `json:"name,omitempty"`
 	Version *string        `json:"version,omitempty"`
+}
+
+type CloudAddonInformation struct {
+	Name      *string                         `json:"name,omitempty"`
+	Publisher *string                         `json:"publisher,omitempty"`
+	Versions  []*CloudAddonVersionInformation `json:"versions,omitempty"`
+}
+
+type CloudAddonVersionInformation struct {
+	Version         *string   `json:"version,omitempty"`
+	Compatibilities []*string `json:"compatibilities,omitempty"`
+	// checks if this is blocking a specific kubernetes upgrade
+	Blocking *bool `json:"blocking,omitempty"`
 }
 
 type CloudProviderSettingsAttributes struct {
@@ -853,8 +868,6 @@ type Cluster struct {
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
-	// any upgrade insights provided by your cloud provider that have been discovered by our agent
-	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// A summation of the metrics utilization of the current cluster
 	MetricsSummary *ClusterMetricsSummary `json:"metricsSummary,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
@@ -873,6 +886,8 @@ type Cluster struct {
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
+	// any upgrade insights provided by your cloud provider that have been discovered by our agent
+	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
 	Editable   *bool                      `json:"editable,omitempty"`
 	AuditLogs  *ClusterAuditLogConnection `json:"auditLogs,omitempty"`

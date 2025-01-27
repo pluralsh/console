@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -932,16 +932,38 @@ export type CloudAddon = {
   cluster?: Maybe<Cluster>;
   distro: ClusterDistro;
   id: Scalars['ID']['output'];
+  info?: Maybe<CloudAddonInformation>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   version: Scalars['String']['output'];
+  versionInfo?: Maybe<CloudAddonVersionInformation>;
 };
 
 export type CloudAddonAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   name?: InputMaybe<Scalars['String']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CloudAddonInformation = {
+  __typename?: 'CloudAddonInformation';
+  name?: Maybe<Scalars['String']['output']>;
+  publisher?: Maybe<Scalars['String']['output']>;
+  versions?: Maybe<Array<Maybe<CloudAddonVersionInformation>>>;
+};
+
+export type CloudAddonVersionInformation = {
+  __typename?: 'CloudAddonVersionInformation';
+  /** checks if this is blocking a specific kubernetes upgrade */
+  blocking?: Maybe<Scalars['Boolean']['output']>;
+  compatibilities?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+
+export type CloudAddonVersionInformationBlockingArgs = {
+  kubeVersion: Scalars['String']['input'];
 };
 
 export type CloudProviderSettingsAttributes = {

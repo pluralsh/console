@@ -11,7 +11,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   @url "/pluralsh/console/master/static/compatibilities/"
 
   defmodule State do
-    defstruct [:table, :url, :static]
+    defstruct [:table, :url, :static, :ready]
   end
 
   def start_link(opt \\ :ok) do
@@ -24,6 +24,8 @@ defmodule Console.Deployments.Compatibilities.Table do
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
+
+  def ping(), do: GenServer.call(__MODULE__, :ping)
 
   def fetch(%RuntimeService{name: name, version: vsn}) do
     vsn = clean_version(vsn)
@@ -38,9 +40,11 @@ defmodule Console.Deployments.Compatibilities.Table do
     end
   end
 
+  def handle_call(:ping, _, state), do: {:reply, state.ready, state}
+
   def handle_info(:poll, %State{table: table, static: true} = state) do
     table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put!(&2, &1.name, &1))
-    {:noreply, %{state | table: table}}
+    {:noreply, %{state | table: table, ready: true}}
   end
 
   def handle_info(:poll, %State{table: table, url: url} = state) do
@@ -53,7 +57,7 @@ defmodule Console.Deployments.Compatibilities.Table do
             table
         end
       end)
-      {:noreply, %{state | table: table}}
+      {:noreply, %{state | table: table, ready: true}}
     else
       err ->
         Logger.error "failed to fetch kubernetes addon manifest: #{inspect(err)}"

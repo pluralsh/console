@@ -6,8 +6,10 @@ defmodule Console.Deployments.Static do
   alias Console.Deployments
 
   @compatibilities Deployments.Compatibilities.Table.static()
+  @cloud_addons Deployments.Compatibilities.CloudAddOns.static()
   @deprecations Deployments.Deprecations.Table.static()
 
   def compatibilities(), do: @compatibilities
   def deprecations(), do: @deprecations
+  def cloud_addons(), do: @cloud_addons
 end

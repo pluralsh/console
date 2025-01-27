@@ -421,9 +421,6 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :upgrade_insights, list_of(:upgrade_insight),
       resolve: dataloader(Deployments),
       description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
-    field :cloud_addons, list_of(:cloud_addon),
-      resolve: dataloader(Deployments),
-      description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
 
     field :metrics_summary, :cluster_metrics_summary,
       resolve: &Deployments.metrics_summary/3,
@@ -490,6 +487,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
+
+    @desc "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+    field :cloud_addons, list_of(:cloud_addon), resolve: &Deployments.cloud_addons/3
 
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
 
@@ -917,9 +917,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,    non_null(:string)
     field :version, non_null(:string)
 
+    field :info,         :cloud_addon_information
+    field :version_info, :cloud_addon_version_information
+
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :cloud_addon_information do
+    field :name,      :string
+    field :publisher, :string
+    field :versions,  list_of(:cloud_addon_version_information)
+  end
+
+  object :cloud_addon_version_information do
+    field :version,         :string
+    field :compatibilities, list_of(:string)
+
+    @desc "checks if this is blocking a specific kubernetes upgrade"
+    field :blocking, :boolean do
+      arg :kube_version, non_null(:string)
+      resolve fn me, %{kube_version: vsn}, _ -> {:ok, Compatibilities.CloudAddOn.Version.blocking?(me, vsn)} end
+    end
   end
 
   connection node_type: :cluster

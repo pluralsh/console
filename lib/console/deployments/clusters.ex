@@ -6,7 +6,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.Commands.Tee
   alias Console.Deployments.{Services, Git, Providers.Configuration, Settings}
   alias Console.Deployments.Providers.Versions
-  alias Console.Deployments.Compatibilities.{Table, AddOn, Version}
+  alias Console.Deployments.Compatibilities.{Table, AddOn, Version, CloudAddOns}
   alias Console.Deployments.Ecto.Validations
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
@@ -899,6 +899,15 @@ defmodule Console.Deployments.Clusters do
     do: {:ok, String.replace(release, "{vsn}", vsn)}
   def release(%AddOn{}, _vsn), do: {:ok, nil}
 
+  @spec cloud_addons(Cluster.t | binary) :: [CloudAddon.t]
+  def cloud_addons(%Cluster{id: id}), do: cloud_addons(id)
+  def cloud_addons(id) when is_binary(id) do
+    CloudAddon.for_cluster(id)
+    |> CloudAddon.ordered()
+    |> Repo.all()
+    |> Enum.map(&with_addon/1)
+  end
+
   @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
   def runtime_services(%Cluster{id: id}), do: runtime_services(id)
   def runtime_services(id) when is_binary(id) do
@@ -919,6 +928,16 @@ defmodule Console.Deployments.Clusters do
       _ -> svc
     end
   end
+
+  defp with_addon(%CloudAddon{} = addon) do
+    case CloudAddOns.fetch(addon) do
+      %Compatibilities.CloudAddOn{} = cloud ->
+        vsn = Compatibilities.CloudAddOn.find_version(cloud, addon.version)
+        Map.merge(addon, %{info: cloud, version_info: vsn})
+      _ -> addon
+    end
+  end
+
   defp with_addon(pass), do: pass
 
   @doc """
