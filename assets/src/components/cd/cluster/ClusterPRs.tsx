@@ -2,7 +2,6 @@ import { useTheme } from 'styled-components'
 import { Input, LoopingLogo, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   ColActions,
   ColCreator,
@@ -84,19 +83,18 @@ export default function ClusterPRs() {
           css={{ flexGrow: 1 }}
         />
       </div>
-      <FullHeightTableWrap>
-        <Table
-          columns={columns}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.pullRequests?.edges || []}
-          virtualizeRows
-          reactTableOptions={reactTableOptions}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={columns}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={data?.pullRequests?.edges || []}
+        virtualizeRows
+        reactTableOptions={reactTableOptions}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </div>
   )
 }

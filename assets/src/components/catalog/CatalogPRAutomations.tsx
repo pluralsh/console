@@ -7,7 +7,6 @@ import {
 import { usePrAutomationsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { mapExistingNodes } from '../../utils/graphql.ts'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
@@ -35,19 +34,18 @@ export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
   if (!prAutomations && loading) return <LoadingIndicator />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        columns={columns}
-        reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        data={prAutomations}
-        virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'No PR automations found.' }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      columns={columns}
+      reactTableOptions={{ meta: { refetch } }}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+      data={prAutomations}
+      virtualizeRows
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'No PR automations found.' }}
+    />
   )
 }

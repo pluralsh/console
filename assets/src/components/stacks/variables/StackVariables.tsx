@@ -9,7 +9,6 @@ import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
@@ -90,16 +89,15 @@ export default function StackVariables() {
             onChange={(e) => setFilterString(e.currentTarget.value)}
           />
         </div>
-        <FullHeightTableWrap>
-          <Table
-            data={variables}
-            columns={columns}
-            reactTableOptions={{
-              state: { globalFilter: debouncedFilterString },
-            }}
-            emptyStateProps={{ message: 'No variables set.' }}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          data={variables}
+          columns={columns}
+          reactTableOptions={{
+            state: { globalFilter: debouncedFilterString },
+          }}
+          emptyStateProps={{ message: 'No variables set.' }}
+        />
       </div>
     </div>
   )

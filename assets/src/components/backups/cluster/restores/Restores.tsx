@@ -25,7 +25,6 @@ import {
   useClusterRestoresQuery,
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
-import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
 import { Edge } from '../../../../utils/graphql'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 import { DynamicClusterIcon } from '../../../cd/clusters/DynamicClusterIcon'
@@ -188,20 +187,19 @@ export default function Restores() {
       }}
     >
       {!isEmpty(data?.clusterRestores?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            loose
-            columns={columns}
-            reactTableOptions={{ meta: { refetch, cluster } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            data={data?.clusterRestores?.edges || []}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          loose
+          columns={columns}
+          reactTableOptions={{ meta: { refetch, cluster } }}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          data={data?.clusterRestores?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
       ) : (
         <EmptyState message="Looks like this cluster doesn't have any restores yet." />
       )}

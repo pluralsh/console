@@ -231,18 +231,17 @@ export default function Clusters() {
             stateRef={tabStateRef}
             css={{ height: '100%', overflow: 'hidden' }}
           >
-            <FullHeightTableWrap>
-              <ClustersTable
-                data={tableData || []}
-                refetch={refetch}
-                virtualizeRows
-                hasNextPage={pageInfo?.hasNextPage}
-                fetchNextPage={fetchNextPage}
-                isFetchingNextPage={loading}
-                reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-                onVirtualSliceChange={setVirtualSlice}
-              />
-            </FullHeightTableWrap>
+            <ClustersTable
+              fullHeightWrap
+              data={tableData || []}
+              refetch={refetch}
+              virtualizeRows
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              isFetchingNextPage={loading}
+              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+              onVirtualSliceChange={setVirtualSlice}
+            />
           </TabPanel>
         </div>
       ) : (

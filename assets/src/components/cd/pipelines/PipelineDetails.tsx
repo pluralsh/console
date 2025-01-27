@@ -29,8 +29,6 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { SplitPane } from 'components/utils/SplitPane'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { Pipeline } from './PipelineGraph'
@@ -209,11 +207,7 @@ function PipelineDetailsBase() {
     />
   )
 
-  const contentContexts = (
-    <FullHeightTableWrap>
-      <PipelineContexts pipeline={pipeline} />
-    </FullHeightTableWrap>
-  )
+  const contentContexts = <PipelineContexts pipeline={pipeline} />
 
   let content = contentGraph
 

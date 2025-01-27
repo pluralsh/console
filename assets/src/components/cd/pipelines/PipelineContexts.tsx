@@ -129,6 +129,7 @@ export function PipelineContexts({
 
   return (
     <Table
+      fullHeightWrap
       loose
       data={tableData}
       columns={columns}

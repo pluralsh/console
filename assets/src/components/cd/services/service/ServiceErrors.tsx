@@ -9,7 +9,6 @@ import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import {
@@ -112,9 +111,10 @@ export default function ServiceErrors() {
       {isEmpty(service.errors) ? (
         <EmptyState message="No errors" />
       ) : (
-        <FullHeightTableWrap>
-          <ServiceErrorsTable errors={service.errors} />
-        </FullHeightTableWrap>
+        <ServiceErrorsTable
+          fullHeightWrap
+          errors={service.errors}
+        />
       )}
     </ScrollablePage>
   )
