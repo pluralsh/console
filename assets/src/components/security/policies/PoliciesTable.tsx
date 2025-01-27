@@ -1,5 +1,5 @@
 import { ComponentProps, useEffect, useMemo } from 'react'
-import { Button, Table } from '@pluralsh/design-system'
+import { Button, Table, TableProps } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
@@ -29,6 +29,16 @@ const columnsWithActions = [
   ColActions,
 ]
 
+type PoliciesTableProps = {
+  caret?: boolean
+  setRefetch?: (refetch: () => () => void) => void
+  refetch: () => void
+  data?: PolicyConstraintsQuery
+  loading: boolean
+  setVirtualSlice: any
+  resetFilters?: () => void
+}
+
 export function PoliciesTable({
   caret = false,
   setRefetch,
@@ -38,15 +48,8 @@ export function PoliciesTable({
   setVirtualSlice,
   resetFilters,
   ...props
-}: {
-  caret?: boolean
-  setRefetch?: (refetch: () => () => void) => void
-  refetch: () => void
-  data?: PolicyConstraintsQuery
-  loading: boolean
-  setVirtualSlice: any
-  resetFilters?: () => void
-} & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
+}: PoliciesTableProps &
+  Omit<TableProps, keyof PoliciesTableProps | 'data' | 'columns'>) {
   const theme = useTheme()
   const navigate = useNavigate()
 
