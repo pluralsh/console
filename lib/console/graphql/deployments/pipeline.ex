@@ -242,7 +242,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :labels,          :map, description: "any pod labels to apply"
     field :annotations,     :map, description: "any pod annotations to apply"
     field :service_account, :string, description: "the service account the pod will use"
-    field :requests,        :container_resources, description: "requests overrides for cases where direct container configuration is unnecessary"
+
+    @desc "equivalent to resources, present for backwards compatibility"
+    field :requests,        :container_resources , resolve: fn %{resources: res}, _, _ -> {:ok, res} end
+
+    @desc "requests overrides for cases where direct container configuration is unnecessary"
+    field :resources,       :container_resources
   end
 
   @desc "a shortform spec for job containers, designed for ease-of-use"
