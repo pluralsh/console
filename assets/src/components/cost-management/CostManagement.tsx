@@ -11,7 +11,6 @@ import { Row } from '@tanstack/react-table'
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
@@ -146,29 +145,28 @@ export function CostManagement() {
           ),
         }}
       >
-        <FullHeightTableWrap>
-          {error ? (
-            <GqlError error={error} />
-          ) : (
-            <Table
-              fillLevel={1}
-              virtualizeRows
-              flush
-              rowBg="base"
-              loading={!data && loading}
-              columns={cols}
-              data={usages}
-              onRowClick={(_, row: Row<ClusterUsageTinyFragment>) =>
-                navigate(`details/${row.original?.id}`)
-              }
-              hasNextPage={data?.clusterUsages?.pageInfo?.hasNextPage}
-              isFetchingNextPage={loading}
-              fetchNextPage={fetchNextPage}
-              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-              onVirtualSliceChange={setVirtualSlice}
-            />
-          )}
-        </FullHeightTableWrap>
+        {error ? (
+          <GqlError error={error} />
+        ) : (
+          <Table
+            fullHeightWrap
+            fillLevel={1}
+            virtualizeRows
+            flush
+            rowBg="base"
+            loading={!data && loading}
+            columns={cols}
+            data={usages}
+            onRowClick={(_, row: Row<ClusterUsageTinyFragment>) =>
+              navigate(`details/${row.original?.id}`)
+            }
+            hasNextPage={data?.clusterUsages?.pageInfo?.hasNextPage}
+            isFetchingNextPage={loading}
+            fetchNextPage={fetchNextPage}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        )}
       </Card>
     </WrapperSC>
   )
