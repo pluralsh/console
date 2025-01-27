@@ -21,6 +21,7 @@ import {
   Fragment,
   type MouseEvent,
   type RefObject,
+  type UIEventHandler,
   useCallback,
   useEffect,
   useMemo,
@@ -85,6 +86,7 @@ type TableBaseProps = {
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
   onVirtualSliceChange?: (slice: VirtualSlice) => void
+  onScrollCapture?: UIEventHandler<HTMLDivElement>
 }
 
 export type TableFillLevel = Exclude<FillLevel, 3>
@@ -163,6 +165,7 @@ function Table({
   isFetchingNextPage,
   fetchNextPage,
   onVirtualSliceChange,
+  onScrollCapture,
   ...props
 }: TableProps) {
   const theme = useTheme()
@@ -322,6 +325,7 @@ function Table({
         <TableSC
           ref={tableContainerRef}
           onScroll={(e) => setScrollTop(e.currentTarget?.scrollTop)}
+          onScrollCapture={onScrollCapture}
           $fillLevel={fillLevel}
           $flush={flush}
           css={props}
