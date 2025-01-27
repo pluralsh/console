@@ -297,12 +297,11 @@ export function NodeContainerImages(): ReactElement<any> {
   const node = useOutletContext() as NodeT
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={node.containerImages}
-        columns={columns}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={node.containerImages}
+      columns={columns}
+    />
   )
 }
 export function NodePods(): ReactElement<any> {

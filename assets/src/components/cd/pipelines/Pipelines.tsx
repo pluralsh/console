@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
@@ -82,20 +81,19 @@ export default function PipelineList() {
           css={{ flexGrow: 1 }}
         />
       </div>
-      <FullHeightTableWrap>
-        <Table
-          columns={columns}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.pipelines?.edges || []}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
-            navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        columns={columns}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+        data={data?.pipelines?.edges || []}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
+          navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
+        }}
+      />
     </div>
   )
 }

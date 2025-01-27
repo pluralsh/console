@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
@@ -116,46 +115,45 @@ export function ResourceList<
   return (
     <>
       <ErrorToast errors={resourceList?.errors} />
-      <FullHeightTableWrap>
-        <Table
-          data={items}
-          columns={columns}
-          loading={isLoading}
-          hasNextPage={hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          reactTableOptions={{
-            ...reactTableOptions,
-            ...{ meta: { ...reactTableOptions.meta, refetch } },
-          }}
-          virtualizeRows
-          onRowClick={
-            disableOnRowClick || loading
-              ? undefined
-              : (_, row: Row<ResourceT>) => {
-                  navigate(
-                    customResource
-                      ? getCustomResourceDetailsAbsPath(
-                          cluster?.id,
-                          row.original.typeMeta.kind!,
-                          row.original.objectMeta.name!,
-                          row.original.objectMeta.namespace
-                        )
-                      : getResourceDetailsAbsPath(
-                          cluster?.id,
-                          toKind(row.original.typeMeta.kind!),
-                          row.original.objectMeta.name!,
-                          row.original.objectMeta.namespace
-                        )
-                  )
-                }
-          }
-          css={{
-            maxHeight: maxHeight ?? 'unset',
-            height: '100%',
-          }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        data={items}
+        columns={columns}
+        loading={isLoading}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        reactTableOptions={{
+          ...reactTableOptions,
+          ...{ meta: { ...reactTableOptions.meta, refetch } },
+        }}
+        virtualizeRows
+        onRowClick={
+          disableOnRowClick || loading
+            ? undefined
+            : (_, row: Row<ResourceT>) => {
+                navigate(
+                  customResource
+                    ? getCustomResourceDetailsAbsPath(
+                        cluster?.id,
+                        row.original.typeMeta.kind!,
+                        row.original.objectMeta.name!,
+                        row.original.objectMeta.namespace
+                      )
+                    : getResourceDetailsAbsPath(
+                        cluster?.id,
+                        toKind(row.original.typeMeta.kind!),
+                        row.original.objectMeta.name!,
+                        row.original.objectMeta.namespace
+                      )
+                )
+              }
+        }
+        css={{
+          maxHeight: maxHeight ?? 'unset',
+          height: '100%',
+        }}
+      />
     </>
   )
 }

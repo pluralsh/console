@@ -12,7 +12,6 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   ObserverFragment,
   ObserverTargetType,
@@ -285,19 +284,18 @@ export default function Observers() {
   if (!data) return <LoopingLogo />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        columns={columns}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        data={data?.observers?.edges || []}
-        virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        emptyStateProps={{
-          message: "Looks like you don't have any observers yet",
-        }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      columns={columns}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+      data={data?.observers?.edges || []}
+      virtualizeRows
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      emptyStateProps={{
+        message: "Looks like you don't have any observers yet",
+      }}
+    />
   )
 }

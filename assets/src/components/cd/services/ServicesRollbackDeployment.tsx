@@ -25,8 +25,6 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { StepBody } from '../ModalAlt'
 
 import { selectableColumns } from './ServiceRevisionColumns'
@@ -200,22 +198,21 @@ export function ModalForm({
             <StepBody>
               Select a revision to roll back to from the list below.
             </StepBody>
-            <FullHeightTableWrap>
-              <Table
-                data={revisions}
-                columns={selectableColumns}
-                onRowClick={(_e, row) => {
-                  const original =
-                    row.original as ServiceDeploymentRevisionFragment
+            <Table
+              fullHeightWrap
+              data={revisions}
+              columns={selectableColumns}
+              onRowClick={(_e, row) => {
+                const original =
+                  row.original as ServiceDeploymentRevisionFragment
 
-                  setRevisionId(original.id)
-                }}
-                reactTableOptions={{
-                  enableRowSelection: true,
-                  state: { rowSelection: { [revisionId]: true } },
-                }}
-              />
-            </FullHeightTableWrap>
+                setRevisionId(original.id)
+              }}
+              reactTableOptions={{
+                enableRowSelection: true,
+                state: { rowSelection: { [revisionId]: true } },
+              }}
+            />
           </div>
           {mutationError && (
             <GqlError

@@ -30,7 +30,6 @@ import {
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import { Kind } from '../common/types'
 
@@ -191,12 +190,11 @@ export function SecretData(): ReactElement<any> {
   )
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={data}
-        columns={columns}
-        reactTableOptions={{ meta: { revealAll } }}
-      />
-    </FullHeightTableWrap>
+    <Table
+      fullHeightWrap
+      data={data}
+      columns={columns}
+      reactTableOptions={{ meta: { revealAll } }}
+    />
   )
 }

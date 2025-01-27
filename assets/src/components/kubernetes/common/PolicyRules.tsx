@@ -48,6 +48,7 @@ export default function PolicyRules({
 }): ReactElement<any> {
   return (
     <Table
+      fullHeightWrap
       data={rules}
       columns={columns}
     />

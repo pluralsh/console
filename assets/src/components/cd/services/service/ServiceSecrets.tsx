@@ -34,7 +34,6 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { Confirm } from 'components/utils/Confirm'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import ModalAlt from 'components/cd/ModalAlt'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
@@ -442,15 +441,14 @@ export default function ServiceSecrets() {
         {isEmpty(data?.serviceDeployment?.configuration) ? (
           <EmptyState message="No secrets" />
         ) : (
-          <FullHeightTableWrap>
-            <Table
-              data={data.serviceDeployment?.configuration || []}
-              columns={secretsColumns}
-              reactTableOptions={{
-                state: { globalFilter: debouncedFilterString },
-              }}
-            />
-          </FullHeightTableWrap>
+          <Table
+            fullHeightWrap
+            data={data.serviceDeployment?.configuration || []}
+            columns={secretsColumns}
+            reactTableOptions={{
+              state: { globalFilter: debouncedFilterString },
+            }}
+          />
         )}
       </div>
     </ScrollablePage>

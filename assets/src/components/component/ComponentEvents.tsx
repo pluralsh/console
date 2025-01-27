@@ -1,8 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 import { Event as EventT } from 'generated/graphql'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import EventsTable from '../utils/EventsTable'
 
 export default function ComponentEvents() {
@@ -17,12 +15,11 @@ export default function ComponentEvents() {
   const events: EventT[] = value?.events || []
 
   return (
-    <FullHeightTableWrap>
-      <EventsTable
-        events={events}
-        marginBottom="0"
-        maxHeight="100%"
-      />
-    </FullHeightTableWrap>
+    <EventsTable
+      fullHeightWrap
+      events={events}
+      marginBottom="0"
+      maxHeight="100%"
+    />
   )
 }

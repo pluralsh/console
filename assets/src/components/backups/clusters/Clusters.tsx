@@ -23,7 +23,6 @@ import {
 import { useClustersObjectStoresQuery } from '../../../generated/graphql'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { GqlError } from '../../utils/Alert'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { ColActions, ColCluster, ColName, ColProvider } from './ClusterColumns'
@@ -82,23 +81,22 @@ export default function Clusters() {
       }}
     >
       {!isEmpty(clusters?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            loose
-            columns={columns}
-            reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            data={clusters?.edges || []}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            onRowClick={(_e, { original: { node } }) =>
-              navigate(getBackupsClusterAbsPath(node?.id))
-            }
-          />
-        </FullHeightTableWrap>
+        <Table
+          fullHeightWrap
+          loose
+          columns={columns}
+          reactTableOptions={{ meta: { refetch } }}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          data={clusters?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+          onRowClick={(_e, { original: { node } }) =>
+            navigate(getBackupsClusterAbsPath(node?.id))
+          }
+        />
       ) : (
         <EmptyState message="Looks like you don't have any clusters with backups yet." />
       )}

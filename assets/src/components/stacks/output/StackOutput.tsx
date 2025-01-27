@@ -12,7 +12,6 @@ import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import CopyButton from 'components/utils/CopyButton'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 
@@ -146,16 +145,15 @@ export default function StackOutput() {
           css={{ flexGrow: 1 }}
         />
       </div>
-      <FullHeightTableWrap>
-        <Table
-          data={output || []}
-          columns={columns}
-          reactTableOptions={{
-            state: { globalFilter: debouncedFilterString },
-          }}
-          emptyStateProps={{ message: 'No outputs found.' }}
-        />
-      </FullHeightTableWrap>
+      <Table
+        fullHeightWrap
+        data={output || []}
+        columns={columns}
+        reactTableOptions={{
+          state: { globalFilter: debouncedFilterString },
+        }}
+        emptyStateProps={{ message: 'No outputs found.' }}
+      />
     </div>
   )
 }

@@ -8,7 +8,6 @@ import {
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ConstraintViolationField,
@@ -162,20 +161,19 @@ export function Policies() {
         )}
       </div>
       <div css={{ gridArea: 'table', overflow: 'hidden' }}>
-        <FullHeightTableWrap>
-          <PoliciesTable
-            data={data}
-            loading={loading}
-            refetch={refetch}
-            fetchNextPage={fetchNextPage}
-            setVirtualSlice={setVirtualSlice}
-            resetFilters={() => {
-              setSelectedKinds([])
-              setSelectedNamespaces([])
-              setSelectedClusters([])
-            }}
-          />
-        </FullHeightTableWrap>
+        <PoliciesTable
+          fullHeightWrap
+          data={data}
+          loading={loading}
+          refetch={refetch}
+          fetchNextPage={fetchNextPage}
+          setVirtualSlice={setVirtualSlice}
+          resetFilters={() => {
+            setSelectedKinds([])
+            setSelectedNamespaces([])
+            setSelectedClusters([])
+          }}
+        />
       </div>
     </PoliciesContainer>
   )
