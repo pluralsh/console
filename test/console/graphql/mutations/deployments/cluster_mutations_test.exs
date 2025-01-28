@@ -613,4 +613,71 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       refute refetch(reg)
     end
   end
+
+  describe "createClusterIsoImage" do
+    test "can create a new iso" do
+      user = bootstrap_user()
+
+      {:ok, %{data: %{"createClusterIsoImage" => iso}}} = run_query("""
+        mutation Create($attrs: ClusterIsoImageAttributes!) {
+          createClusterIsoImage(attributes: $attrs) {
+            id
+            image
+            registry
+            project { id }
+          }
+        }
+      """, %{"attrs" => %{"image" => "iso:latest", "registry" => "dkr.plural.sh"}}, %{current_user: user})
+
+      assert iso["id"]
+      assert iso["image"] == "iso:latest"
+      assert iso["registry"] == "dkr.plural.sh"
+      assert iso["project"]["id"] == user.bootstrap.project_id
+    end
+  end
+
+  describe "updateClusterIsoImage" do
+    test "can update a new iso" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      iso  = insert(:cluster_iso_image, project: project)
+
+      {:ok, %{data: %{"updateClusterIsoImage" => upd}}} = run_query("""
+        mutation Update($id: ID!, $attrs: ClusterIsoImageAttributes!) {
+          updateClusterIsoImage(id: $id, attributes: $attrs) {
+            id
+            image
+            registry
+          }
+        }
+      """, %{"attrs" => %{
+        "image" => "iso:latest",
+        "registry" => "dkr.plural.sh"
+      }, "id" => iso.id}, %{current_user: user})
+
+      assert upd["id"]    == iso.id
+      assert upd["image"] == "iso:latest"
+      assert upd["registry"] == "dkr.plural.sh"
+    end
+  end
+
+  describe "deleteClusterIsoImage" do
+    test "can delete a new iso" do
+      user    = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      iso     = insert(:cluster_iso_image, project: project, image: "iso:latest")
+
+      {:ok, %{data: %{"deleteClusterIsoImage" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteClusterIsoImage(id: $id) {
+            id
+            image
+          }
+        }
+      """, %{"id" => iso.id}, %{current_user: user})
+
+      assert del["id"] == iso.id
+      refute refetch(iso)
+    end
+  end
 end

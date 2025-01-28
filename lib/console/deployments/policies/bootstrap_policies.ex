@@ -1,6 +1,8 @@
 defmodule Console.Deployments.BootstrapPolicies do
   use Piazza.Policy
-  alias Console.Schema.{User, BootstrapToken, Project, Cluster, ClusterRegistration}
+  alias Console.Schema.{User, BootstrapToken, Project, Cluster, ClusterRegistration, ClusterISOImage}
+
+  def can?(%User{id: id, bootstrap: %BootstrapToken{project_id: pid}}, %ClusterISOImage{creator_id: id, project_id: pid}, _), do: :pass
 
   def can?(%User{id: id}, %ClusterRegistration{creator_id: id}, _), do: :pass
 

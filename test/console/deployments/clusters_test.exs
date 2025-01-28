@@ -1395,4 +1395,83 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.delete_cluster_registration(reg.id, user)
     end
   end
+
+  describe "#create_cluster_iso_image/2" do
+    test "project writers can create isos" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, iso} = Clusters.create_cluster_iso_image(%{
+        image: "image:1.2",
+        registry: "dkr.plural.sh",
+        project_id: project.id
+      }, user)
+
+      assert iso.project_id == project.id
+      assert iso.image == "image:1.2"
+      assert iso.registry == "dkr.plural.sh"
+    end
+
+    test "nonwriters cannot create" do
+      user = insert(:user)
+      project = insert(:project)
+
+      {:error, _} = Clusters.create_cluster_iso_image(%{
+        image: "image:1.2",
+        registry: "dkr.plural.sh",
+        project_id: project.id
+      }, user)
+    end
+  end
+
+  describe "#update_cluster_iso_image/3" do
+    test "project writers can update registrations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      iso = insert(:cluster_iso_image, project: project)
+
+      {:ok, iso} = Clusters.update_cluster_iso_image(%{image: "image:latest"}, iso.id, user)
+
+      assert iso.image == "image:latest"
+    end
+
+    test "nonwriters cannot update" do
+      user = insert(:user)
+      project = insert(:project)
+      iso = insert(:cluster_iso_image, project: project)
+
+      {:error, _} = Clusters.update_cluster_iso_image(%{image: "image:latest"}, iso.id, user)
+    end
+  end
+
+  describe "#delete_cluster_iso_image/2" do
+    test "creators can delete" do
+      user = bootstrap_user()
+      iso  = insert(:cluster_iso_image, creator: user, project: user.bootstrap.project)
+
+      {:ok, del} = Clusters.delete_cluster_iso_image(iso.id, user)
+
+      assert del.id == iso.id
+      refute refetch(iso)
+    end
+
+    test "project writers can delete" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      iso = insert(:cluster_iso_image, project: project)
+
+      {:ok, del} = Clusters.delete_cluster_iso_image(iso.id, user)
+
+      assert del.id == iso.id
+      refute refetch(iso)
+    end
+
+    test "nonwriters cannot delete" do
+      user = insert(:user)
+      project = insert(:project)
+      iso = insert(:cluster_iso_image, project: project)
+
+      {:error, _} = Clusters.delete_cluster_iso_image(iso.id, user)
+    end
+  end
 end

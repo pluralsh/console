@@ -830,6 +830,15 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_iso_image_factory do
+    %Schema.ClusterISOImage{
+      image: sequence(:iso, & "iso:#{&1}"),
+      registry: "dkr.plural.sh",
+      project: build(:project),
+      creator: build(:user)
+    }
+  end
+
   def cloud_addon_factory do
     %Schema.CloudAddon{
       cluster: build(:cluster),

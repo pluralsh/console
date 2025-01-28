@@ -832,6 +832,66 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     end
   end
 
+  describe "clusterIsoImage" do
+    test "bootstrap token creators can read" do
+      user = bootstrap_user()
+      reg  = insert(:cluster_iso_image, creator: user, project: user.bootstrap.project)
+
+      {:ok, %{data: %{"clusterIsoImage" => found}}} = run_query("""
+        query ISO($id: ID!) {
+          clusterIsoImage(id: $id) { id }
+        }
+      """, %{"id" => reg.id}, %{current_user: user})
+
+      assert found["id"] == reg.id
+    end
+
+    test "bootstrap token creators can read by machine id" do
+      user = bootstrap_user()
+      iso  = insert(:cluster_iso_image, creator: user, project: user.bootstrap.project)
+
+      {:ok, %{data: %{"clusterIsoImage" => found}}} = run_query("""
+        query ISO($image: String!) {
+          clusterIsoImage(image: $image) { id }
+        }
+      """, %{"image" => iso.image}, %{current_user: user})
+
+      assert found["id"] == iso.id
+    end
+  end
+
+  describe "clusterIsoImages" do
+    test "project writers can list" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      isos = insert_list(3, :cluster_iso_image, project: project)
+      insert_list(2, :cluster_iso_image)
+
+      {:ok, %{data: %{"clusterIsoImages" => found}}} = run_query("""
+        query {
+          clusterIsoImages(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(isos)
+    end
+
+    test "non-project writers cannot list" do
+      insert_list(3, :cluster_iso_image)
+
+      {:ok, %{data: %{"clusterIsoImages" => %{"edges" => []}}}} = run_query("""
+        query {
+          clusterIsoImages(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+    end
+  end
+
   defp wait(module) do
     Stream.repeatedly(fn -> module.ping() end)
     |> Stream.take(10)

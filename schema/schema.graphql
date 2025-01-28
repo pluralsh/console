@@ -215,6 +215,10 @@ type RootQueryType {
 
   clusterRegistrations(after: String, first: Int, before: String, last: Int): ClusterRegistrationConnection
 
+  clusterIsoImage(id: ID, image: String): ClusterIsoImage
+
+  clusterIsoImages(after: String, first: Int, before: String, last: Int): ClusterIsoImageConnection
+
   serviceDeployments(
     after: String
 
@@ -600,6 +604,12 @@ type RootMutationType {
   updateClusterRegistration(id: ID!, attributes: ClusterRegistrationUpdateAttributes!): ClusterRegistration
 
   deleteClusterRegistration(id: ID!): ClusterRegistration
+
+  createClusterIsoImage(attributes: ClusterIsoImageAttributes!): ClusterIsoImage
+
+  updateClusterIsoImage(id: ID!, attributes: ClusterIsoImageAttributes!): ClusterIsoImage
+
+  deleteClusterIsoImage(id: ID!): ClusterIsoImage
 
   createServiceDeployment(
     clusterId: ID
@@ -4692,6 +4702,23 @@ input ClusterRegistrationUpdateAttributes {
   metadata: Json
 }
 
+input ClusterIsoImageAttributes {
+  "the image this iso was pushed to"
+  image: String!
+
+  "the registry holding the image"
+  registry: String!
+
+  "ssh username for the new device"
+  user: String
+
+  "ssh password for the new device"
+  password: String
+
+  "the project this cluster will live in (can be inferred from bootstrap token)"
+  projectId: ID
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -5505,6 +5532,30 @@ type ClusterRegistration {
   updatedAt: DateTime
 }
 
+"A reference to a built ISO image to be used for flashing new edge clusters"
+type ClusterIsoImage {
+  id: ID!
+
+  "the image this iso was pushed to"
+  image: String!
+
+  "the registry holding the image"
+  registry: String!
+
+  "ssh username for the new device"
+  user: String
+
+  "ssh password for the new device"
+  password: String
+
+  "the project this cluster will live in (can be inferred from bootstrap token)"
+  project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type CloudAddon {
   id: ID!
   distro: ClusterDistro!
@@ -5580,6 +5631,11 @@ type ClusterAuditLogConnection {
 type ClusterRegistrationConnection {
   pageInfo: PageInfo!
   edges: [ClusterRegistrationEdge]
+}
+
+type ClusterIsoImageConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterIsoImageEdge]
 }
 
 enum AuthMethod {
@@ -8233,6 +8289,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ClusterIsoImageEdge {
+  node: ClusterIsoImage
   cursor: String
 }
 

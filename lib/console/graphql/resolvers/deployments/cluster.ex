@@ -13,7 +13,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterNamespaceUsage,
     ClusterScalingRecommendation,
     ClusterAuditLog,
-    ClusterRegistration
+    ClusterRegistration,
+    ClusterISOImage
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -54,6 +55,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def resolve_cluster_registration(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster_registration!(id)
     |> allow(user, :read)
+  end
+
+  def resolve_cluster_iso_image(%{image: id}, %{context: %{current_user: user}}) do
+    Clusters.get_iso_image_by_image!(id)
+    |> allow(user, :write)
+  end
+  def resolve_cluster_iso_image(%{id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_cluster_iso_image!(id)
+    |> allow(user, :write)
   end
 
   defp get_provider(%{id: id}) when is_binary(id), do: Clusters.get_provider!(id)
@@ -155,6 +165,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def list_cluster_registrations(args, _) do
     ClusterRegistration.ordered()
+    |> paginate(args)
+  end
+
+  def list_cluster_iso_images(args, %{context: %{current_user: user}}) do
+    ClusterISOImage.ordered()
+    |> ClusterISOImage.for_user(user)
     |> paginate(args)
   end
 
@@ -268,6 +284,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def delete_cluster_registration(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_cluster_registration(id, user)
+
+  def create_cluster_iso_image(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.create_cluster_iso_image(attrs, user)
+
+  def update_cluster_iso_image(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.update_cluster_iso_image(attrs, id, user)
+
+  def delete_cluster_iso_image(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_cluster_iso_image(id, user)
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)

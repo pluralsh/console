@@ -25,6 +25,7 @@ defmodule Console.Deployments.Clusters do
     ClusterInsightComponent,
     ClusterUsage,
     ClusterRegistration,
+    ClusterISOImage,
     CloudAddon
   }
   alias Console.Deployments.Compatibilities
@@ -41,6 +42,7 @@ defmodule Console.Deployments.Clusters do
   @type runtime_service_resp :: {:ok, RuntimeService.t} | Console.error
   @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
   @type reg_resp :: {:ok, ClusterRegistration.t} | Console.error
+  @type iso_resp :: {:ok, ClusterISOImage.t} | Console.error
 
   @spec count() :: integer
   def count(), do: Repo.aggregate(Cluster, :count)
@@ -80,6 +82,9 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_registration!(id), do: Repo.get!(ClusterRegistration, id)
   def get_registration_by_machine_id!(id), do: Repo.get_by!(ClusterRegistration, machine_id: id)
+
+  def get_cluster_iso_image!(id), do: Repo.get!(ClusterISOImage, id)
+  def get_iso_image_by_image!(img), do: Repo.get_by!(ClusterISOImage, image: img)
 
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)
@@ -829,6 +834,38 @@ defmodule Console.Deployments.Clusters do
   @spec delete_cluster_registration(binary, User.t) :: reg_resp
   def delete_cluster_registration(id, %User{} = user) do
     Repo.get!(ClusterRegistration, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+  Creates a new cluster registration, with inferred project id if necessary
+  """
+  @spec create_cluster_iso_image(map, User.t) :: iso_resp
+  def create_cluster_iso_image(attrs, %User{} = user) do
+    %ClusterISOImage{creator_id: user.id}
+    |> ClusterISOImage.changeset(Settings.add_project_id(attrs, user))
+    |> allow(user, :create)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Adds cluster data to the registration, eg name/handle/tags and tests for validity
+  """
+  @spec update_cluster_iso_image(map, binary, %User{}) :: iso_resp
+  def update_cluster_iso_image(attrs, id, %User{} = user) do
+    Repo.get!(ClusterISOImage, id)
+    |> ClusterISOImage.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Removes the registration if allowed
+  """
+  @spec delete_cluster_iso_image(binary, User.t) :: iso_resp
+  def delete_cluster_iso_image(id, %User{} = user) do
+    Repo.get!(ClusterISOImage, id)
     |> allow(user, :write)
     |> when_ok(:delete)
   end
