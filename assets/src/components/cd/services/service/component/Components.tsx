@@ -28,19 +28,20 @@ export function FilterFooter({ allSelected = true, ...props }) {
   )
 }
 
-export const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
-  ({ $width }) => ({
-    width: $width || 220,
-    '&, *': {
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
-      flexShrink: 1,
-      border: 'none',
-      height: '100%',
-    },
-  })
-)
+export const FilterTrigger = styled(SelectButton)<{
+  $width?: number
+  $border?: boolean
+}>(({ $width, $border = false }) => ({
+  width: $width || 220,
+  '&, *': {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    flexShrink: 1,
+    border: $border ? undefined : 'none',
+    height: '100%',
+  },
+}))
 
 const KIND_ORDER = [
   'deployment',

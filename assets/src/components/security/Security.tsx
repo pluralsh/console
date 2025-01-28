@@ -1,13 +1,13 @@
 import { Flex, SubTab } from '@pluralsh/design-system'
 import { PageHeaderProvider } from 'components/cd/ContinuousDeployment'
-import { useMemo, ReactNode, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import {
   POLICIES_REL_PATH,
   SECURITY_OVERVIEW_REL_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from 'routes/securityRoutesConsts'
+import styled from 'styled-components'
 
 const directory = [
   { path: SECURITY_OVERVIEW_REL_PATH, label: 'Security overview' },
@@ -24,13 +24,11 @@ export function Security() {
   return (
     <PageHeaderProvider value={ctx}>
       <WrapperSC>
-        <Flex
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <HeaderWrapperSC>
           <Flex>
             {directory.map(({ path, label }) => (
               <SubTab
+                css={{ width: 'max-content' }}
                 key={path}
                 active={route?.includes(path)}
                 onClick={() => {
@@ -42,12 +40,21 @@ export function Security() {
             ))}
           </Flex>
           {headerContent}
-        </Flex>
+        </HeaderWrapperSC>
         <Outlet />
       </WrapperSC>
     </PageHeaderProvider>
   )
 }
+
+const HeaderWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  minHeight: 'fit-content',
+  alignItems: 'center',
+  gap: theme.spacing.medium,
+  overflow: 'auto',
+}))
 
 const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',

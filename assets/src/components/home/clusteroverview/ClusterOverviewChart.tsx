@@ -1,18 +1,16 @@
 import { RadialBar } from '@nivo/radial-bar'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import {
-  COLOR_MAP,
+  CHART_COLOR_MAP,
   createCenteredMetric,
 } from 'components/utils/RadialBarChart'
 import { UpgradeStatisticsQuery } from 'generated/graphql'
 
-import { useMemo } from 'react'
-
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
+import { ClusterIcon } from '@pluralsh/design-system'
 import { CustomLegend } from '../CustomLegend'
 import { HomeCard } from '../HomeCard.tsx'
-import { ClusterIcon } from '@pluralsh/design-system'
 
 const CHART_SIZE = 240
 
@@ -21,14 +19,7 @@ export function ClusterOverviewChart({
 }: {
   data: UpgradeStatisticsQuery | undefined
 }) {
-  const chartColors = {
-    green: COLOR_MAP.green,
-    red: COLOR_MAP.red,
-    blue: COLOR_MAP['blue-light'],
-    purple: COLOR_MAP['purple-light'],
-    yellow: COLOR_MAP['yellow-light'],
-  }
-  const { chartData, legendData } = useChartData(data || {}, chartColors)
+  const chartData = getChartData(data || {})
 
   const CenterLabel = createCenteredMetric(
     `${data?.upgradeStatistics?.count ?? '-'}`,
@@ -39,20 +30,11 @@ export function ClusterOverviewChart({
     <HomeCard
       icon={<ClusterIcon />}
       title="Cluster Overview"
-      tooltip={
-        <div>
-          {legendData.map((legend, index) => (
-            <CustomLegend
-              key={index}
-              data={legend}
-            />
-          ))}
-        </div>
-      }
+      tooltip={<CustomLegend data={chartData.toReversed()} />}
     >
       {data?.upgradeStatistics ? (
         <RadialBar
-          colors={(item) => chartColors[item.data.color]}
+          colors={(item) => item.data.color}
           endAngle={360}
           cornerRadius={5}
           padAngle={2}
@@ -77,52 +59,40 @@ export function ClusterOverviewChart({
   )
 }
 
-const useChartData = (
-  data: UpgradeStatisticsQuery,
-  colorMap: Record<string, string>
-) => {
+const getChartData = (data: UpgradeStatisticsQuery) => {
   const { count, compliant, latest, upgradeable } = data.upgradeStatistics || {}
 
-  return useMemo(() => {
-    const chartData = [
-      {
-        id: 'version-compliant',
-        data: [
-          { color: 'blue', x: 'Latest', y: latest || 0 },
-          {
-            color: 'purple',
-            x: 'Version compliant',
-            y: (compliant || 0) - (latest || 0),
-          },
-          {
-            color: 'yellow',
-            x: 'Not version compliant',
-            y: (count || 0) - (compliant || 0),
-          },
-        ],
-      },
-      {
-        id: 'upgradeable',
-        data: [
-          { color: 'green', x: 'Upgradeable', y: upgradeable || 0 },
-          {
-            color: 'red',
-            x: 'Not upgradeable',
-            y: (count || 0) - (upgradeable || 0),
-          },
-        ],
-      },
-    ]
-    const legendData = chartData
-      .map((legend) =>
-        legend.data.map((val) => ({
-          label: val.x,
-          value: val.y,
-          color: colorMap[val.color],
-        }))
-      )
-      .reverse()
-
-    return { chartData, legendData }
-  }, [upgradeable, count, compliant, latest, colorMap])
+  return [
+    {
+      id: 'version-compliant',
+      data: [
+        { color: CHART_COLOR_MAP['blue-light'], x: 'Latest', y: latest || 0 },
+        {
+          color: CHART_COLOR_MAP['purple-light'],
+          x: 'Version compliant',
+          y: (compliant || 0) - (latest || 0),
+        },
+        {
+          color: CHART_COLOR_MAP['yellow-light'],
+          x: 'Not version compliant',
+          y: (count || 0) - (compliant || 0),
+        },
+      ],
+    },
+    {
+      id: 'upgradeable',
+      data: [
+        {
+          color: CHART_COLOR_MAP.green,
+          x: 'Upgradeable',
+          y: upgradeable || 0,
+        },
+        {
+          color: CHART_COLOR_MAP.red,
+          x: 'Not upgradeable',
+          y: (count || 0) - (upgradeable || 0),
+        },
+      ],
+    },
+  ]
 }

@@ -1,40 +1,39 @@
+import { SecurityChartData } from 'components/security/overview/useSecurityOverviewChartsData'
 import { useTheme } from 'styled-components'
 
-export function CustomLegend({
-  data,
-}: {
-  data: { label: string; value?: number; color: string }[]
-}) {
+export function CustomLegend({ data }: { data: SecurityChartData }) {
   const theme = useTheme()
   return (
     <div>
-      {data.map((item, index) => (
-        <div
-          css={{ display: 'flex', alignItems: 'center' }}
-          key={index}
-        >
+      {data.map((layer) =>
+        layer.data.map((item, index) => (
           <div
-            css={{
-              backgroundColor: item.color,
-              borderRadius: '50%',
-              height: 12,
-              width: 12,
-            }}
-          />
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.small,
-              justifyContent: 'space-between',
-              marginLeft: theme.spacing.xsmall,
-              width: '100%',
-            }}
+            css={{ display: 'flex', alignItems: 'center' }}
+            key={index}
           >
-            <div css={{ color: theme.colors['text-light'] }}>{item.label}</div>
-            <div css={{ color: theme.colors['text'] }}>{item.value}</div>
+            <div
+              css={{
+                backgroundColor: item.color,
+                borderRadius: '50%',
+                height: 12,
+                width: 12,
+              }}
+            />
+            <div
+              css={{
+                display: 'flex',
+                gap: theme.spacing.small,
+                justifyContent: 'space-between',
+                marginLeft: theme.spacing.xsmall,
+                width: '100%',
+              }}
+            >
+              <div css={{ color: theme.colors['text-light'] }}>{item.x}</div>
+              <div css={{ color: theme.colors['text'] }}>{item.y}</div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   )
 }
