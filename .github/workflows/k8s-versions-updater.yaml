@@ -6,6 +6,28 @@ on:
     branches:
       - "**" # TODO: Remove before merging.
 jobs:
+  latest-k8s-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Get latest K8s version
+        run: make find-k8s-version
+      - name: Get current version
+        id: version
+        run: echo "VERSION=$(cat KUBE_VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: Update KUBE_VERSION to ${{ steps.date.outputs.VERSION }}
+          commit-message: Update KUBE_VERSION
+          branch: k8s-version-${{ steps.date.outputs.VERSION }}
+          labels: chore
+          base: master
   update-k8s-versions:
     runs-on: ubuntu-latest
     permissions:
@@ -26,5 +48,5 @@ jobs:
         title: Update K8s versions
         commit-message: Update K8s versions
         branch: k8s-versions-update-${{ steps.date.outputs.DATE }}
-        labels: enhancement
+        labels: chore
         base: master
