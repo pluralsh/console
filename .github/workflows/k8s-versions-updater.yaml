@@ -4,7 +4,7 @@ on:
     - cron: '0 0 * * *'
   pull_request:
     branches:
-      - "**" # TODO
+      - "**" # TODO: Remove before merging.
 jobs:
   update-k8s-versions:
     runs-on: ubuntu-latest
@@ -16,7 +16,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Update versions
-      run: make find-versions
+      run: make find-versions-aws
     - name: Get current date
       id: date
       run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
