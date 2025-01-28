@@ -23,9 +23,9 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v5
         with:
-          title: Update KUBE_VERSION to ${{ steps.date.outputs.VERSION }}
+          title: Update KUBE_VERSION to ${{ steps.version.outputs.VERSION }}
           commit-message: Update KUBE_VERSION
-          branch: k8s-version-${{ steps.date.outputs.VERSION }}
+          branch: k8s-version-${{ steps.version.outputs.VERSION }}
           labels: chore
           base: master
   update-k8s-versions:
