@@ -1325,6 +1325,49 @@ export type ClusterInsightComponentAttributes = {
   version: Scalars['String']['input'];
 };
 
+/** A reference to a built ISO image to be used for flashing new edge clusters */
+export type ClusterIsoImage = {
+  __typename?: 'ClusterIsoImage';
+  id: Scalars['ID']['output'];
+  /** the image this iso was pushed to */
+  image: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** ssh password for the new device */
+  password?: Maybe<Scalars['String']['output']>;
+  /** the project this cluster will live in (can be inferred from bootstrap token) */
+  project?: Maybe<Project>;
+  /** the registry holding the image */
+  registry: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** ssh username for the new device */
+  user?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterIsoImageAttributes = {
+  /** the image this iso was pushed to */
+  image: Scalars['String']['input'];
+  /** ssh password for the new device */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** the project this cluster will live in (can be inferred from bootstrap token) */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** the registry holding the image */
+  registry: Scalars['String']['input'];
+  /** ssh username for the new device */
+  user?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ClusterIsoImageConnection = {
+  __typename?: 'ClusterIsoImageConnection';
+  edges?: Maybe<Array<Maybe<ClusterIsoImageEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterIsoImageEdge = {
+  __typename?: 'ClusterIsoImageEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterIsoImage>;
+};
+
 export type ClusterMetrics = {
   __typename?: 'ClusterMetrics';
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
@@ -5399,6 +5442,7 @@ export type RootMutationType = {
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
   createClusterBackup?: Maybe<ClusterBackup>;
+  createClusterIsoImage?: Maybe<ClusterIsoImage>;
   createClusterProvider?: Maybe<ClusterProvider>;
   createClusterRegistration?: Maybe<ClusterRegistration>;
   createClusterRestore?: Maybe<ClusterRestore>;
@@ -5441,6 +5485,7 @@ export type RootMutationType = {
   /** deletes a chat from a users history */
   deleteChat?: Maybe<Chat>;
   deleteCluster?: Maybe<Cluster>;
+  deleteClusterIsoImage?: Maybe<ClusterIsoImage>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
@@ -5536,6 +5581,7 @@ export type RootMutationType = {
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
   updateCluster?: Maybe<Cluster>;
+  updateClusterIsoImage?: Maybe<ClusterIsoImage>;
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateClusterRegistration?: Maybe<ClusterRegistration>;
   updateClusterRestore?: Maybe<ClusterRestore>;
@@ -5678,6 +5724,11 @@ export type RootMutationTypeCreateClusterArgs = {
 
 export type RootMutationTypeCreateClusterBackupArgs = {
   attributes: BackupAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterIsoImageArgs = {
+  attributes: ClusterIsoImageAttributes;
 };
 
 
@@ -5882,6 +5933,11 @@ export type RootMutationTypeDeleteChatArgs = {
 
 
 export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterIsoImageArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6281,6 +6337,12 @@ export type RootMutationTypeUpdateClusterArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterIsoImageArgs = {
+  attributes: ClusterIsoImageAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateClusterProviderArgs = {
   attributes: ClusterProviderUpdateAttributes;
   id: Scalars['ID']['input'];
@@ -6546,6 +6608,8 @@ export type RootQueryType = {
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
   clusterInsightComponent?: Maybe<ClusterInsightComponent>;
+  clusterIsoImage?: Maybe<ClusterIsoImage>;
+  clusterIsoImages?: Maybe<ClusterIsoImageConnection>;
   clusterManagedNamespaces?: Maybe<ManagedNamespaceConnection>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;
@@ -6840,6 +6904,20 @@ export type RootQueryTypeClusterGateArgs = {
 
 export type RootQueryTypeClusterInsightComponentArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterIsoImageArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  image?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeClusterIsoImagesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

@@ -308,6 +308,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata, :json, description: "additional metadata to apply to the cluster"
   end
 
+  input_object :cluster_iso_image_attributes do
+    field :image,    non_null(:string), description: "the image this iso was pushed to"
+    field :registry, non_null(:string), description: "the registry holding the image"
+    field :user,     :string, description: "ssh username for the new device"
+    field :password, :string, description: "ssh password for the new device"
+    field :project_id, :id, description: "the project this cluster will live in (can be inferred from bootstrap token)"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -911,6 +919,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  @desc "A reference to a built ISO image to be used for flashing new edge clusters"
+  object :cluster_iso_image do
+    field :id,       non_null(:id)
+    field :image,    non_null(:string), description: "the image this iso was pushed to"
+    field :registry, non_null(:string), description: "the registry holding the image"
+    field :user,     :string, description: "ssh username for the new device"
+    field :password, :string, description: "ssh password for the new device"
+    field :project,  :project, resolve: dataloader(Deployments), description: "the project this cluster will live in (can be inferred from bootstrap token)"
+
+    timestamps()
+  end
+
   object :cloud_addon do
     field :id,      non_null(:id)
     field :distro,  non_null(:cluster_distro)
@@ -952,6 +972,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_usage_history
   connection node_type: :cluster_audit_log
   connection node_type: :cluster_registration
+  connection node_type: :cluster_iso_image
 
   delta :cluster
   delta :cluster_provider
@@ -1145,6 +1166,20 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.list_cluster_registrations/2
     end
+
+    field :cluster_iso_image, :cluster_iso_image do
+      middleware Authenticated
+      arg :id,         :id
+      arg :image,      :string
+
+      resolve &Deployments.resolve_cluster_iso_image/2
+    end
+
+    connection field :cluster_iso_images, node_type: :cluster_iso_image do
+      middleware Authenticated
+
+      resolve &Deployments.list_cluster_iso_images/2
+    end
   end
 
   object :cluster_mutations do
@@ -1282,6 +1317,28 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_cluster_registration/2
+    end
+
+    field :create_cluster_iso_image, :cluster_iso_image do
+      middleware Authenticated
+      arg :attributes, non_null(:cluster_iso_image_attributes)
+
+      resolve &Deployments.create_cluster_iso_image/2
+    end
+
+    field :update_cluster_iso_image, :cluster_iso_image do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:cluster_iso_image_attributes)
+
+      resolve &Deployments.update_cluster_iso_image/2
+    end
+
+    field :delete_cluster_iso_image, :cluster_iso_image do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_cluster_iso_image/2
     end
   end
 end

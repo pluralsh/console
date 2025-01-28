@@ -1028,6 +1028,46 @@ type ClusterInsightComponentAttributes struct {
 	Name      string  `json:"name"`
 }
 
+// A reference to a built ISO image to be used for flashing new edge clusters
+type ClusterIsoImage struct {
+	ID string `json:"id"`
+	// the image this iso was pushed to
+	Image string `json:"image"`
+	// the registry holding the image
+	Registry string `json:"registry"`
+	// ssh username for the new device
+	User *string `json:"user,omitempty"`
+	// ssh password for the new device
+	Password *string `json:"password,omitempty"`
+	// the project this cluster will live in (can be inferred from bootstrap token)
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type ClusterIsoImageAttributes struct {
+	// the image this iso was pushed to
+	Image string `json:"image"`
+	// the registry holding the image
+	Registry string `json:"registry"`
+	// ssh username for the new device
+	User *string `json:"user,omitempty"`
+	// ssh password for the new device
+	Password *string `json:"password,omitempty"`
+	// the project this cluster will live in (can be inferred from bootstrap token)
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
+type ClusterIsoImageConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*ClusterIsoImageEdge `json:"edges,omitempty"`
+}
+
+type ClusterIsoImageEdge struct {
+	Node   *ClusterIsoImage `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
 type ClusterMetrics struct {
 	CPU            []*MetricResponse `json:"cpu,omitempty"`
 	Memory         []*MetricResponse `json:"memory,omitempty"`
