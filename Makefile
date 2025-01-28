@@ -17,11 +17,16 @@ GIT_HOOKS_PATH = .githooks
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-find-versions:
-	gcloud container get-server-config --zone=us-central1-f --format=json > static/k8s-versions/gke.json
+find-versions: find-versions-aws find-versions-azure find-versions-gcloud
+
+find-versions-aws:
 	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > static/k8s-versions/eks.json
+
+find-versions-azure:
 	az aks get-versions --location eastus --output json > static/k8s-versions/aks.json
 
+find-versions-gcloud:
+	gcloud container get-server-config --zone=us-central1-f --format=json > static/k8s-versions/gke.json
 
 pull-ollama-helm-chart: ## update ollama Helm chart
 	helm repo add ollama-helm https://otwld.github.io/ollama-helm/
