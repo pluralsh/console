@@ -17,6 +17,9 @@ GIT_HOOKS_PATH = .githooks
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+find-k8s-version:
+	curl -Ls https://dl.k8s.io/release/stable.txt | tr -d v | cut -d '.' -f 1,2 > KUBE_VERSION
+
 find-versions: find-versions-aws find-versions-azure find-versions-gcloud
 
 find-versions-aws:
