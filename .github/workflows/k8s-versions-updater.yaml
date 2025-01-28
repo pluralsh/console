@@ -1,0 +1,30 @@
+name: K8s versions update
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  pull_request:
+    branches:
+      - "**" # TODO
+jobs:
+  update-k8s-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Update versions
+      run: make find-versions
+    - name: Get current date
+      id: date
+      run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: Update K8s versions
+        commit-message: Update K8s versions
+        branch: k8s-versions-update-${{ steps.date.outputs.DATE }}
+        labels: enhancement
+        base: master
