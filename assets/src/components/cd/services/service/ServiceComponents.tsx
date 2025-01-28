@@ -1,17 +1,21 @@
 import {
+  ArrowScroll,
   type Breadcrumb,
   Callout,
+  ComponentsIcon,
   Flex,
+  SearchIcon,
+  UpdatesIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { type Key } from '@react-types/shared'
 import {
   ComponentState,
   useServiceDeploymentComponentsQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
-import { type Key } from '@react-types/shared'
+import styled from 'styled-components'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
@@ -26,17 +30,19 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { useThrottle } from 'components/hooks/useThrottle.tsx'
+import { ExpandedInput, IconExpander } from 'components/utils/IconExpander.tsx'
+import { ComponentList } from './component/ComponentList.tsx'
+import {
+  ComponentStateFilter,
+  useComponentKindSelect,
+} from './component/Components.tsx'
 import { countDeprecations } from './deprecationUtils'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
-import { ComponentList } from './component/ComponentList.tsx'
-import {
-  ComponentStateFilter,
-  useComponentKindSelect,
-} from './component/Components.tsx'
 
 export const getServiceComponentsBreadcrumbs = ({
   service,
@@ -53,12 +59,13 @@ export const getServiceComponentsBreadcrumbs = ({
 ]
 
 export default function ServiceComponents() {
-  const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
   const outletContext = useServiceContext()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const throttledSearchQuery = useThrottle(searchQuery, 250)
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
@@ -73,10 +80,10 @@ export default function ServiceComponents() {
   )
 
   useSetBreadcrumbs(breadcrumbs)
-  const { kindSelector, selectedKinds, allKinds } = useComponentKindSelect(
-    data?.serviceDeployment?.components,
-    { width: 320 }
-  )
+  const { kindSelector, selectedKinds, setSelectedKinds, allKinds } =
+    useComponentKindSelect(data?.serviceDeployment?.components, {
+      width: 320,
+    })
   const deprecationCount = useMemo(
     () => countDeprecations(data?.serviceDeployment?.components),
     [data?.serviceDeployment?.components]
@@ -98,28 +105,49 @@ export default function ServiceComponents() {
       scrollable
       heading="Components"
       headingContent={
-        <Flex gap="medium">
-          {kindSelector}
-          <ComponentStateFilter
-            selectedState={selectedState}
-            setSelectedState={setSelectedState}
-          />
-        </Flex>
+        <ArrowScroll>
+          <FiltersWrapperSC>
+            <IconExpander
+              startOpen
+              tooltip="Search components"
+              icon={<SearchIcon />}
+              active={!!searchQuery}
+              onClear={() => setSearchQuery('')}
+            >
+              <ExpandedInput
+                width={320}
+                inputValue={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search components"
+              />
+            </IconExpander>
+            <IconExpander
+              tooltip="Filter by component kind"
+              icon={<ComponentsIcon />}
+              active={!!selectedKinds.size}
+              onClear={() => setSelectedKinds(new Set())}
+            >
+              {kindSelector}
+            </IconExpander>
+            <IconExpander
+              tooltip="Filter by component state"
+              icon={<UpdatesIcon />}
+              active={!!selectedState}
+              onClear={() => setSelectedState(null)}
+            >
+              <ComponentStateFilter
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
+              />
+            </IconExpander>
+          </FiltersWrapperSC>
+        </ArrowScroll>
       }
     >
-      <ModalMountTransition open={showDeprecations}>
-        <ServiceDeprecationsModal
-          open={showDeprecations}
-          onClose={() => setShowDeprecations(false)}
-          components={components}
-        />
-      </ModalMountTransition>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.large,
-        }}
+      <Flex
+        direction="column"
+        gap="medium"
+        overflow="hidden"
       >
         {deprecationCount > 0 && (
           <Callout
@@ -151,8 +179,24 @@ export default function ServiceComponents() {
           components={components}
           selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
           selectedState={selectedState as ComponentState | null}
+          searchQuery={throttledSearchQuery}
         />
-      </div>
+      </Flex>
+      <ModalMountTransition open={showDeprecations}>
+        <ServiceDeprecationsModal
+          open={showDeprecations}
+          onClose={() => setShowDeprecations(false)}
+          components={components}
+        />
+      </ModalMountTransition>
     </ScrollablePage>
   )
 }
+
+const FiltersWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  overflowX: 'auto',
+  width: '100%',
+  gap: theme.spacing.medium,
+  paddingRight: theme.spacing.large,
+}))

@@ -8,9 +8,7 @@ import {
   useState,
 } from 'react'
 
-import { useTheme } from 'styled-components'
-
-import { FiltersIcon, SearchIcon } from '@pluralsh/design-system'
+import { FiltersIcon, Flex, SearchIcon } from '@pluralsh/design-system'
 
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 
@@ -71,7 +69,6 @@ export function DataSelectInputs({
 }: {
   dataSelect: DataSelectContextT
 }) {
-  const theme = useTheme()
   const namespaces = useNamespaces()
   const {
     namespaced,
@@ -90,16 +87,12 @@ export function DataSelectInputs({
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.medium,
-        justifyContent: 'flex-end',
-      }}
-    >
+    <Flex gap="medium">
       <IconExpander
+        showIndicator
         icon={<SearchIcon />}
         active={!!filter}
+        onClear={() => setFilter('')}
       >
         <ExpandedInput
           inputValue={filter}
@@ -108,8 +101,10 @@ export function DataSelectInputs({
       </IconExpander>
       {namespaced && (
         <IconExpander
+          showIndicator
           icon={<FiltersIcon />}
           active={!!namespace}
+          onClear={() => setNamespace('')}
         >
           <NamespaceFilter
             namespaces={namespaces}
@@ -118,6 +113,6 @@ export function DataSelectInputs({
           />
         </IconExpander>
       )}
-    </div>
+    </Flex>
   )
 }

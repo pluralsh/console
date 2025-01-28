@@ -19,7 +19,7 @@ import ClusterRoleBinding, {
   ClusterRoleBindingSubjects,
 } from 'components/kubernetes/rbac/ClusterRoleBinding'
 import CustomResourceDefinition, {
-  CustomRersourceDefinitionObjects,
+  CustomResourceDefinitionObjects,
   CustomResourceDefinitionConditions,
 } from 'components/kubernetes/customresources/CustomResourceDefinition'
 
@@ -889,7 +889,7 @@ export const kubernetesRoutes = (
       <Route
         index
         path=""
-        element={<CustomRersourceDefinitionObjects />}
+        element={<CustomResourceDefinitionObjects />}
       />
       <Route
         path="conditions"
