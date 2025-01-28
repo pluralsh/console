@@ -27,6 +27,7 @@ import styled from 'styled-components'
 const BIG_PAGE_SIZE = 500
 
 export type CMContextType = {
+  clusterName?: string
   historyQuery: FetchPaginatedDataResult<ClusterUsageHistoryQuery>
   namespacesQuery: FetchPaginatedDataResult<ClusterUsageNamespacesQuery>
   namespaceQ: string
@@ -78,6 +79,7 @@ export function CostManagementDetails() {
 
   const ctx = useMemo(() => {
     return {
+      clusterName: namespacesQuery?.data?.clusterUsage?.cluster?.name,
       historyQuery,
       namespacesQuery,
       namespaceQ,

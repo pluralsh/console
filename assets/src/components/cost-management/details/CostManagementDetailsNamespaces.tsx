@@ -7,6 +7,7 @@ import {
   RamIcon,
   SearchIcon,
   Table,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
@@ -16,6 +17,10 @@ import { ClusterNamespaceUsageFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 
 import { useOutletContext } from 'react-router-dom'
+import {
+  COST_MANAGEMENT_ABS_PATH,
+  COST_MANAGEMENT_REL_PATH,
+} from 'routes/costManagementRoutesConsts'
 import { useTheme } from 'styled-components'
 import {
   ColCpuCost,
@@ -32,11 +37,21 @@ import {
 } from '../CostManagementTreeMap'
 import { CMContextType } from './CostManagementDetails'
 
+const getBreadcrumbs = (clusterName: string) => [
+  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: clusterName },
+  { label: 'namespaces' },
+]
+
 export function CostManagementDetailsNamespaces() {
   const theme = useTheme()
 
-  const { namespacesQuery, namespaceQ, setNamespaceQ } =
+  const { namespacesQuery, namespaceQ, setNamespaceQ, clusterName } =
     useOutletContext<CMContextType>()
+
+  useSetBreadcrumbs(
+    useMemo(() => getBreadcrumbs(clusterName ?? ''), [clusterName])
+  )
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     namespacesQuery

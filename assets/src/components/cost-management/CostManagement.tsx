@@ -6,6 +6,7 @@ import {
   RamIcon,
   Table,
   TagMultiSelectProps,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
@@ -40,10 +41,19 @@ import {
   cpuCostByCluster,
   memoryCostByCluster,
 } from './CostManagementTreeMap'
+import {
+  COST_MANAGEMENT_REL_PATH,
+  COST_MANAGEMENT_ABS_PATH,
+} from 'routes/costManagementRoutesConsts'
 
 export const CM_TREE_MAP_CARD_HEIGHT = 300
 
+const breadcrumbs = [
+  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+]
+
 export function CostManagement() {
+  useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()

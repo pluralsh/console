@@ -9,21 +9,34 @@ import {
   Flex,
   LoadingSpinner,
   RamIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { HOME_CARD_MAX_HEIGHT } from 'components/home/HomeCard'
 import { GqlError } from 'components/utils/Alert'
 import { Body1P, Title1H1 } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import {
+  COST_MANAGEMENT_ABS_PATH,
+  COST_MANAGEMENT_REL_PATH,
+} from 'routes/costManagementRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { CMContextType } from './CostManagementDetails'
 import { CostTimeSeriesGraph } from './CostTimeSeriesGraph'
-import { HOME_CARD_MAX_HEIGHT } from 'components/home/HomeCard'
+
+const getBreadcrumbs = (clusterName: string) => [
+  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: clusterName },
+  { label: 'overview' },
+]
 
 export function CostManagementDetailsOverview() {
-  const { historyQuery } = useOutletContext<CMContextType>()
-
+  const { historyQuery, clusterName } = useOutletContext<CMContextType>()
+  useSetBreadcrumbs(
+    useMemo(() => getBreadcrumbs(clusterName ?? ''), [clusterName])
+  )
   const { data, loading, error } = historyQuery
   const usageData = data?.clusterUsage
 
