@@ -18,9 +18,9 @@ help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 find-versions:
-	gcloud container get-server-config --zone=us-central1-f --format=json > k8s-versions/gke.json
-	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > k8s-versions/eks.json
-	az aks get-versions --location eastus --output json > k8s-versions/aks.json
+	gcloud container get-server-config --zone=us-central1-f --format=json > static/k8s-versions/gke.json
+	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > static/k8s-versions/eks.json
+	az aks get-versions --location eastus --output json > static/k8s-versions/aks.json
 
 
 pull-ollama-helm-chart: ## update ollama Helm chart
