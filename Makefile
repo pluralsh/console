@@ -20,7 +20,7 @@ help:
 find-versions: find-versions-aws find-versions-azure find-versions-gcloud
 
 find-versions-aws:
-	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > static/k8s-versions/eks.json
+	aws eks describe-addon-versions --region=eu-west-1 | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > static/k8s-versions/eks.json
 
 find-versions-azure:
 	az aks get-versions --location eastus --output json > static/k8s-versions/aks.json
