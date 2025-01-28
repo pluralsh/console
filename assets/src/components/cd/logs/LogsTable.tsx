@@ -13,6 +13,7 @@ export function LogsTable({
   fetchMore,
   hasNextPage = false,
   onRowClick,
+  onScrollCapture,
 }: {
   data: LogLineFragment[]
   loading?: boolean
@@ -20,6 +21,7 @@ export function LogsTable({
   fetchMore?: () => void
   hasNextPage?: boolean
   onRowClick?: (_e: any, row: Row<LogLineFragment>) => void
+  onScrollCapture?: (e: React.UIEvent<HTMLDivElement>) => void
 }) {
   const theme = useTheme()
   return (
@@ -38,6 +40,7 @@ export function LogsTable({
       fetchNextPage={fetchMore}
       loading={!!initialLoading}
       padCells={!!initialLoading}
+      onScrollCapture={onScrollCapture}
       css={{
         '& td *': { maxWidth: 'unset' }, // stretches the skeleton loaders out to the end
         background: data.length
