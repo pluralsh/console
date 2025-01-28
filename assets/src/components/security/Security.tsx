@@ -5,14 +5,22 @@ import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import {
   POLICIES_REL_PATH,
+  SECURITY_OVERVIEW_REL_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from 'routes/securityRoutesConsts'
+
+const directory = [
+  { path: SECURITY_OVERVIEW_REL_PATH, label: 'Security overview' },
+  { path: POLICIES_REL_PATH, label: 'Policies' },
+  { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerability reports' },
+]
 
 export function Security() {
   const navigate = useNavigate()
   const route = useParams()['*']
   const [headerContent, setHeaderContent] = useState<ReactNode>(null)
   const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
+
   return (
     <PageHeaderProvider value={ctx}>
       <WrapperSC>
@@ -21,28 +29,18 @@ export function Security() {
           alignItems="center"
         >
           <Flex>
-            <SubTab
-              active={route?.includes(POLICIES_REL_PATH)}
-              onClick={() => {
-                if (!route?.includes(POLICIES_REL_PATH)) {
-                  navigate(`${POLICIES_REL_PATH}`)
-                }
-              }}
-            >
-              Policies
-            </SubTab>
-            <SubTab
-              active={route?.includes(VULNERABILITY_REPORTS_REL_PATH)}
-              onClick={() => {
-                if (!route?.includes(VULNERABILITY_REPORTS_REL_PATH)) {
-                  navigate(`${VULNERABILITY_REPORTS_REL_PATH}`)
-                }
-              }}
-            >
-              Vulnerability reports
-            </SubTab>
+            {directory.map(({ path, label }) => (
+              <SubTab
+                key={path}
+                active={route?.includes(path)}
+                onClick={() => {
+                  if (!route?.includes(path)) navigate(`${path}`)
+                }}
+              >
+                {label}
+              </SubTab>
+            ))}
           </Flex>
-
           {headerContent}
         </Flex>
         <Outlet />
