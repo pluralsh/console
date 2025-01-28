@@ -137,7 +137,11 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
+	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
+	if result != nil {
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
+		return *result, nil // If the result is set, then error is ignored to requeue.
+	}
 	if err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -243,10 +247,10 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 	}
 }
 
-func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, *ctrl.Result, error) {
 	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	attr := &console.ServiceDeploymentAttributes{
@@ -262,6 +266,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
 		SyncConfig:      syncConfigAttributes,
+		Configuration:   make([]*console.ConfigAttributes, 0),
 	}
 
 	if id, ok := service.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
@@ -273,50 +278,32 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, err
-			}
-			if stackID == nil {
-				return nil, fmt.Errorf("stack ID is missing")
+				return nil, &requeue, fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
 	}
 
 	if service.Spec.ConfigurationRef != nil {
-		attr.Configuration = make([]*console.ConfigAttributes, 0)
 		secret := &corev1.Secret{}
-		name := types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}
-		err := r.Get(ctx, name, secret)
-		if err != nil {
-			return nil, err
+		if err = r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
+			return nil, &requeue, fmt.Errorf("error while getting configuration secret: %s", err.Error())
 		}
 		for k, v := range secret.Data {
-			value := string(v)
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{
-				Name:  k,
-				Value: &value,
-			})
+			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(string(v))})
 		}
 	}
 
 	if len(service.Spec.Configuration) > 0 {
-		if attr.Configuration == nil {
-			attr.Configuration = make([]*console.ConfigAttributes, 0)
-		}
-
 		for k, v := range service.Spec.Configuration {
-			value := v
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{
-				Name:  k,
-				Value: lo.ToPtr(value),
-			})
+			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
 		}
 	}
 
 	for _, contextName := range service.Spec.Contexts {
 		sc, err := r.ConsoleClient.GetServiceContext(contextName)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
 	}
@@ -346,12 +333,12 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		if service.Spec.RepositoryRef != nil {
 			ref := service.Spec.RepositoryRef
 			var repo v1alpha1.GitRepository
-			if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, err
+			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
+				return nil, &requeue, fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
 			if repo.Status.ID == nil {
-				return nil, fmt.Errorf("GitRepository %s/%s is not yet ready", ref.Namespace, ref.Name)
+				return nil, &requeue, fmt.Errorf("repository is not ready yet")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -360,7 +347,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
-				return nil, err
+				return nil, &requeue, fmt.Errorf("error while getting values config map: %s", err.Error())
 			}
 			attr.Helm.Values = &val
 		}
@@ -368,13 +355,13 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		if service.Spec.Helm.ValuesFrom != nil || service.Spec.Helm.Values != nil {
 			values, err := r.MergeHelmValues(ctx, service.Spec.Helm.ValuesFrom, service.Spec.Helm.Values)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			attr.Helm.Values = values
 		}
 	}
 
-	return attr, nil
+	return attr, nil, nil
 }
 
 func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
