@@ -116,10 +116,9 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Get Project ID from the reference if it is set and ensure that controller reference is set properly.
-	projectId, result, err := r.getProjectIdAndSetOwnerRef(ctx, cluster)
-	if result != nil || err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "")
-		return *result, err
+	projectId, res, err := r.getProjectIdAndSetOwnerRef(ctx, cluster)
+	if res != nil || err != nil {
+		return handleRequeue(res, err, cluster.SetCondition)
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
@@ -308,24 +307,25 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 }
 
 func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (*string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	if !cluster.Spec.HasProjectRef() {
 		return nil, nil, nil
 	}
 
 	project := &v1alpha1.Project{}
 	if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProjectRef.Name}, project); err != nil {
-		return nil, &ctrl.Result{}, fmt.Errorf("could not get project: %+v", err)
+		if errors.IsNotFound(err) {
+			return nil, &waitForResources, err
+		}
+
+		return nil, nil, err
 	}
 
 	if !project.Status.HasID() {
-		logger.Info("project does not have ID set yet")
-		return nil, &requeue, nil
+		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, cluster, r.Scheme); err != nil {
-		return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
+		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
 	}
 
 	return project.Status.ID, nil, nil
