@@ -58,3 +58,23 @@ defmodule Console.GraphQl.Resolvers.UserLoader do
     |> Map.new(& {&1.email, &1})
   end
 end
+
+defmodule Console.GraphQl.Resolvers.ClusterLoader do
+  alias Console.Schema.Cluster
+
+  def data(_) do
+    Dataloader.KV.new(&query/2, max_concurrency: 1)
+  end
+
+  def query(_, ids) do
+    clusters = fetch_clusters(ids)
+    Map.new(ids, & {&1, clusters[&1]})
+  end
+
+  def fetch_clusters(ids) do
+    MapSet.to_list(ids)
+    |> Cluster.for_ids()
+    |> Console.Repo.all()
+    |> Map.new(& {&1.id, &1})
+  end
+end

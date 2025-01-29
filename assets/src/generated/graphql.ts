@@ -1837,6 +1837,12 @@ export type ClusterUsageHistoryEdge = {
   node?: Maybe<ClusterUsageHistory>;
 };
 
+export type ClusterVulnAggregate = {
+  __typename?: 'ClusterVulnAggregate';
+  cluster?: Maybe<Cluster>;
+  count: Scalars['Int']['output'];
+};
+
 export type CommandAttributes = {
   args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cmd: Scalars['String']['input'];
@@ -4908,6 +4914,7 @@ export type PrAutomationEdge = {
 
 /** templates to apply in this pr */
 export type PrAutomationTemplateAttributes = {
+  condition?: InputMaybe<Scalars['String']['input']>;
   context?: InputMaybe<Scalars['Json']['input']>;
   destination: Scalars['String']['input'];
   /** whether the source template is sourced from an external git repo bound to this automation */
@@ -5029,6 +5036,7 @@ export enum PrStatus {
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
   __typename?: 'PrTemplateSpec';
+  condition?: Maybe<Scalars['String']['output']>;
   context?: Maybe<Scalars['Map']['output']>;
   destination: Scalars['String']['output'];
   external: Scalars['Boolean']['output'];
@@ -6626,6 +6634,7 @@ export type RootQueryType = {
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   clusterUsage?: Maybe<ClusterUsage>;
   clusterUsages?: Maybe<ClusterUsageConnection>;
+  clusterVulnerabilityAggregate?: Maybe<Array<Maybe<ClusterVulnAggregate>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
@@ -7000,6 +7009,11 @@ export type RootQueryTypeClusterUsagesArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tagQuery?: InputMaybe<TagQuery>;
+};
+
+
+export type RootQueryTypeClusterVulnerabilityAggregateArgs = {
+  grade: VulnReportGrade;
 };
 
 
@@ -8186,6 +8200,7 @@ export type ServiceDeployment = {
   revision?: Maybe<Revision>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
+  scalingRecommendations?: Maybe<Array<Maybe<ClusterScalingRecommendation>>>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   /** A summary status enum for the health of this service */

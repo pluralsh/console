@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters}
-  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport}
+  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, }
 
   def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_vulnerability(id)
@@ -67,6 +67,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> maybe_search(VulnerabilityReport, args)
     |> vuln_filters(args)
     |> VulnerabilityReport.grades()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def cluster_vuln_aggregate(%{grade: grade}, %{context: %{current_user: user}}) do
+    VulnerabilityReport.aggregate(user, grade)
     |> Console.Repo.all()
     |> ok()
   end

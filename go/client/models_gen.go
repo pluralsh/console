@@ -1473,6 +1473,11 @@ type ClusterUsageHistoryEdge struct {
 	Cursor *string              `json:"cursor,omitempty"`
 }
 
+type ClusterVulnAggregate struct {
+	Cluster *Cluster `json:"cluster,omitempty"`
+	Count   int64    `json:"count"`
+}
+
 type CommandAttributes struct {
 	Cmd  string    `json:"cmd"`
 	Args []*string `json:"args,omitempty"`
@@ -4083,6 +4088,7 @@ type PrAutomationTemplateAttributes struct {
 	Source      string  `json:"source"`
 	Destination string  `json:"destination"`
 	Context     *string `json:"context,omitempty"`
+	Condition   *string `json:"condition,omitempty"`
 	// whether the source template is sourced from an external git repo bound to this automation
 	External bool `json:"external"`
 }
@@ -4184,6 +4190,7 @@ type PrTemplateSpec struct {
 	Destination string                 `json:"destination"`
 	Context     map[string]interface{} `json:"context,omitempty"`
 	External    bool                   `json:"external"`
+	Condition   *string                `json:"condition,omitempty"`
 }
 
 // existing file updates that can be performed in a PR
@@ -4889,8 +4896,9 @@ type ServiceDeployment struct {
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service
-	Alerts           *AlertConnection         `json:"alerts,omitempty"`
-	ComponentMetrics *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
+	Alerts                 *AlertConnection                `json:"alerts,omitempty"`
+	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
+	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
