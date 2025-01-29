@@ -39,6 +39,7 @@ defmodule Mix.Tasks.ElasticsearchSetup do
       {:error, reason} ->
         IO.puts("Error: #{reason}")
         false
+      _ -> false
     end
   end
 
@@ -48,6 +49,7 @@ defmodule Mix.Tasks.ElasticsearchSetup do
       {:error, reason} ->
         IO.puts("Error: #{reason}")
         false
+      _ -> false
     end
   end
 end
