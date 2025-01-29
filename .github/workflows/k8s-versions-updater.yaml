@@ -59,7 +59,7 @@ jobs:
       - uses: 'google-github-actions/setup-gcloud@v2'
         with:
           version: '>= 363.0.0'
-      - run: make find-versions
+      - run: make find-versions-azure # TODO
       - name: Get current date
         id: date
         run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
