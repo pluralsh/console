@@ -85,7 +85,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	if exists {
-		logger.Info("repository already exists in the API, running in read-only mode")
+		logger.V(9).Info("repository already exists, running in read-only mode", "name", repo.Name, "namespace", repo.Namespace)
 		return r.handleExistingRepo(ctx, repo)
 	}
 
@@ -95,7 +95,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	if err != nil {
 		if errors.IsNotFound(err) {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
@@ -117,17 +117,16 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		logger.Info("repository created")
 		apiRepo = resp.CreateGitRepository
+		logger.V(9).Info("created repository", "id", apiRepo.ID, "name", repo.Name, "namespace", repo.Namespace)
 	}
 
 	if repo.Status.HasSHA() && !repo.Status.IsSHAEqual(sha) {
-		_, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, *attrs)
-		if err != nil {
+		if _, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, *attrs); err != nil {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		logger.Info("repository updated")
+		logger.V(9).Info("updated repository", "id", apiRepo.ID, "name", repo.Name, "namespace", repo.Namespace)
 	}
 
 	repo.Status.Message = apiRepo.Error
@@ -191,13 +190,11 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 	if repo.Spec.CredentialsRef != nil {
 		secret := &corev1.Secret{}
 		name := types.NamespacedName{Name: repo.Spec.CredentialsRef.Name, Namespace: repo.Spec.CredentialsRef.Namespace}
-		err := r.Get(ctx, name, secret)
-		if err != nil {
+		if err := r.Get(ctx, name, secret); err != nil {
 			return nil, err
 		}
 
-		err = utils.TryAddOwnerRef(ctx, r.Client, repo, secret, r.Scheme)
-		if err != nil {
+		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, secret, r.Scheme); err != nil {
 			return nil, err
 		}
 

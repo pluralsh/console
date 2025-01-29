@@ -95,14 +95,14 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if cluster.Status.ID == nil {
 		logger.Info("Cluster is not ready")
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return RequeueAfter(requeueWaitForResources), nil
+		return waitForResources, nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return RequeueAfter(requeueWaitForResources), err
+			return waitForResources, err
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -110,25 +110,25 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 
 		if repository.Status.ID == nil {
 			logger.Info("Repository is not ready")
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			logger.Info("Repository is not healthy")
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 	}
 
 	err = r.ensureService(service)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return RequeueAfter(requeueWaitForResources), nil
+		return waitForResources, nil
 	}
 
 	if err != nil {
@@ -208,7 +208,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
-		return RequeueAfter(requeueWaitForResources), nil
+		return waitForResources, nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 

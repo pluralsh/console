@@ -111,7 +111,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return RequeueAfter(requeueWaitForResources), nil
+				return waitForResources, nil
 			}
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -132,7 +132,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if err != nil {
 			if errors.IsNotFound(err) {
 				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return RequeueAfter(requeueWaitForResources), nil
+				return waitForResources, nil
 			}
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return requeue, err

@@ -108,7 +108,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 
 		if err := controllerutil.SetOwnerReference(project, pipeline, r.Scheme); err != nil {
@@ -125,7 +125,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		}
 		if apierrors.IsNotFound(err) {
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return RequeueAfter(requeueWaitForResources), nil
+			return waitForResources, nil
 		}
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

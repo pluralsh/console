@@ -114,7 +114,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	err = r.ensureNotificationSink(notificationSink)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return RequeueAfter(requeueWaitForResources), nil
+		return waitForResources, nil
 	}
 	if err != nil {
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
