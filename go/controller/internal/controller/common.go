@@ -9,6 +9,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,6 +33,25 @@ var (
 	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
+
+// handleRequeue allows avoiding rate limiting when some errors occur,
+// i.e., when a resource is not created yet, or when it is waiting for an ID.
+//
+// If the result is set, then any potential error will be saved in a condition
+// and ignored in the return to avoid rate limiting.
+//
+// It is important that at least one from a result or an error have to be non-nil.
+func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
+	if result != nil {
+		utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
+			v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
+		return *result, nil
+	}
+
+	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
+		v1alpha1.SynchronizedConditionReasonError, err.Error())
+	return ctrl.Result{}, err
+}
 
 func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, bool, error) {
 	requeue := false
