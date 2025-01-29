@@ -137,13 +137,8 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
-	if result != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
-		return *result, nil // If the result is set, then error is ignored to requeue.
-	}
-	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	if result != nil || err != nil {
+		return handleRequeue(result, err, service.SetCondition)
 	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
