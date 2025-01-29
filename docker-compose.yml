@@ -8,6 +8,16 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
     - database_data:/var/lib/postgresql/data
+  es:
+    image: elasticsearch:8.8.0
+    restart: always
+    ports:
+    - 9200:9200
+    environment:
+    - node.name=es01
+    - cluster.name=docker-es-cluster
+    - cluster.initial_master_nodes=es01
+    - xpack.security.enabled=false
 volumes:
   database_data:
     driver: local
