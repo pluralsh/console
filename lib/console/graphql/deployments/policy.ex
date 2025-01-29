@@ -278,6 +278,14 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :count, non_null(:integer)
   end
 
+  object :cluster_vuln_aggregate do
+    field :cluster, :cluster, resolve: fn
+      %{cluster_id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.ClusterLoader, :pipeline, id)
+    end
+    field :count,   non_null(:integer)
+  end
+
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report
 
@@ -346,6 +354,13 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :q,          :string
 
       resolve &Deployments.vulnerability_statistics/2
+    end
+
+    field :cluster_vulnerability_aggregate, list_of(:cluster_vuln_aggregate) do
+      middleware Authenticated
+      arg :grade, non_null(:vuln_report_grade)
+
+      resolve &Deployments.cluster_vuln_aggregate/2
     end
   end
 

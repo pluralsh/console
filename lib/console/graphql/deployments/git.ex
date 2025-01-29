@@ -233,6 +233,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :source,      non_null(:string)
     field :destination, non_null(:string)
     field :context,     :json
+    field :condition,   :string
     field :external,    non_null(:boolean),
       description: "whether the source template is sourced from an external git repo bound to this automation"
   end
@@ -518,6 +519,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :destination, non_null(:string)
     field :context,     :map
     field :external,    non_null(:boolean)
+    field :condition,   :string
   end
 
   @desc "a fully specified regex/replace flow"

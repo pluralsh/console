@@ -263,4 +263,32 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert uninstalled["count"] == 3
     end
   end
+
+  describe "clusterVulnerabilityAggregate" do
+    test "it will fetch counts for grades" do
+      admin = admin_user()
+      cluster1 = insert(:cluster)
+      insert_list(3, :vulnerability_report, grade: :f, cluster: cluster1)
+      insert_list(2, :vulnerability_report, grade: :d, cluster: cluster1)
+      insert_list(3, :vulnerability_report, grade: :c, cluster: cluster1)
+      cluster2 = insert(:cluster)
+      insert_list(3, :vulnerability_report, grade: :f, cluster: cluster2)
+      cluster3 = insert(:cluster)
+      insert_list(3, :vulnerability_report, grade: :a, cluster: cluster3)
+
+      {:ok, %{data: %{"clusterVulnerabilityAggregate" => result}}} = run_query("""
+        query {
+          clusterVulnerabilityAggregate(grade: D) {
+            cluster { id }
+            count
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      by_id = Map.new(result, & {&1["cluster"]["id"], &1})
+      assert by_id[cluster1.id]["count"] == 5
+      assert by_id[cluster2.id]["count"] == 3
+      assert by_id[cluster3.id]["count"] == 0
+    end
+  end
 end
