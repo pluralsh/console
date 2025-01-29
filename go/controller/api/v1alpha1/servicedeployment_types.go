@@ -3,12 +3,13 @@ package v1alpha1
 import (
 	"encoding/json"
 
-	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -159,7 +160,6 @@ type ServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 	// ConfigurationRef is a secret reference which should contain service configuration.
 	// +kubebuilder:validation:Optional
