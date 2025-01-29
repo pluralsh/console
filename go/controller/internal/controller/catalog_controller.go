@@ -12,10 +12,8 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -104,15 +102,11 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 	if changed {
-		project, err := r.getProject(ctx, catalog)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return waitForResources, nil
-			}
-			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-			return ctrl.Result{}, err
+		project, res, err := r.getProject(ctx, catalog)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, catalog.SetCondition)
 		}
+
 		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalog.Attributes(project.Status.ID))
 		if err != nil {
 			logger.Error(err, "unable to create or update catalog")
@@ -128,25 +122,27 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	return ctrl.Result{}, nil
 }
 
-func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Catalog) (*v1alpha1.Project, error) {
-	logger := log.FromContext(ctx)
+func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Catalog) (*v1alpha1.Project, *ctrl.Result, error) {
 	project := &v1alpha1.Project{}
 	if catalog.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: catalog.Spec.ProjectRef.Name}, project); err != nil {
-			return project, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 
 		if project.Status.ID == nil {
-			logger.Info("Project is not ready")
-			return project, apierrors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, catalog.Spec.ProjectRef.Name)
+			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {
-			return project, fmt.Errorf("could not set catalog owner reference, got error: %+v", err)
+			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
 		}
 	}
 
-	return project, nil
+	return project, nil, nil
 }
 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {

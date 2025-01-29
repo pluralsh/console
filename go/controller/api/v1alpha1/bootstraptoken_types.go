@@ -38,7 +38,7 @@ type BootstrapTokenSpec struct {
 	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty"`
 
-	// ProjectRef is the optional project that all clusters spawned by generated bootstrap token will belong to
+	// ProjectRef is the project that all clusters spawned by generated bootstrap token will belong to
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Project is immutable"
 	// +kubebuilder:validation:Required
 	ProjectRef v1.ObjectReference `json:"projectRef,omitempty"`
