@@ -42,15 +42,18 @@ var (
 //
 // It is important that at least one from a result or an error have to be non-nil.
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
-	if result != nil {
-		utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
-			v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
-		return *result, nil
+	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
+		v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
+	return lo.FromPtr(result), lo.Ternary(result != nil, nil, err)
+}
+
+// defaultErrMessage extracts error message if error is non-nil, otherwise it returns default message.
+func defaultErrMessage(err error, defaultMessage string) string {
+	if err != nil {
+		return err.Error()
 	}
 
-	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
-		v1alpha1.SynchronizedConditionReasonError, err.Error())
-	return ctrl.Result{}, err
+	return defaultMessage
 }
 
 func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, bool, error) {
@@ -316,14 +319,6 @@ func mergeHelmValues(ctx context.Context, c runtimeclient.Client, secretRef *cor
 		return nil, err
 	}
 	return lo.ToPtr(string(out)), nil
-}
-
-func defaultErrMessage(err error, defaultMessage string) string {
-	if err != nil {
-		return err.Error()
-	}
-
-	return defaultMessage
 }
 
 func notFoundOrReadyErrorMessage(err error) string {
