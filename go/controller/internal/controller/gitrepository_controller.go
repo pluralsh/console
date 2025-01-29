@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -200,25 +201,10 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, err
 		}
 
-		privateKey := string(secret.Data[privateKey])
-		passphrase := string(secret.Data[passphrase])
-		username := string(secret.Data[username])
-		password := string(secret.Data[password])
-		if privateKey != "" {
-			attrs.PrivateKey = &privateKey
-		}
-
-		if passphrase != "" {
-			attrs.Passphrase = &passphrase
-		}
-
-		if username != "" {
-			attrs.Username = &username
-		}
-
-		if password != "" {
-			attrs.Password = &password
-		}
+		attrs.PrivateKey = lo.EmptyableToPtr(string(secret.Data[privateKey]))
+		attrs.Passphrase = lo.EmptyableToPtr(string(secret.Data[passphrase]))
+		attrs.Username = lo.EmptyableToPtr(string(secret.Data[username]))
+		attrs.Password = lo.EmptyableToPtr(string(secret.Data[password]))
 	}
 
 	return &attrs, nil
