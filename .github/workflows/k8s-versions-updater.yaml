@@ -38,12 +38,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-east-2
-          role-to-assume: arn:aws:iam::312272277431:role/github-actions/console-actions
-          role-session-name: plural-console
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-region: us-east-2
+#          role-to-assume: arn:aws:iam::312272277431:role/github-actions/console-actions
+#          role-session-name: plural-console
       - name: Login to Azure
         uses: azure/login@v2
         with:
