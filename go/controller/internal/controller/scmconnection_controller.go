@@ -59,7 +59,6 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	scope, err := NewDefaultScope(ctx, r.Client, scm)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}

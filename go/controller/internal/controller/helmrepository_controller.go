@@ -62,7 +62,6 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 
 	scope, err := NewDefaultScope(ctx, in.Client, helmRepository)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}

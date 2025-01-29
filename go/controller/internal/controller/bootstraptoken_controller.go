@@ -63,7 +63,6 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	scope, err := NewDefaultScope(ctx, in.Client, bootstrapToken)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}

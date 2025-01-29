@@ -60,7 +60,6 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	scope, err := NewDefaultScope(ctx, in.Client, project)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
