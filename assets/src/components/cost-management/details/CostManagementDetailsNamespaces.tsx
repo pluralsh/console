@@ -74,7 +74,6 @@ export function CostManagementDetailsNamespaces() {
         <Card
           css={{
             padding: theme.spacing.large,
-
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -90,6 +89,7 @@ export function CostManagementDetailsNamespaces() {
           <CostManagementTreeMap
             enableParentLabel={false}
             colorScheme="blue"
+            loading={loading}
             data={cpuCostByNamespace(usages)}
             dataSize={usages.length}
           />
@@ -112,6 +112,7 @@ export function CostManagementDetailsNamespaces() {
           <CostManagementTreeMap
             enableParentLabel={false}
             colorScheme="purple"
+            loading={loading}
             data={memoryCostByNamespace(usages)}
             dataSize={usages.length}
           />

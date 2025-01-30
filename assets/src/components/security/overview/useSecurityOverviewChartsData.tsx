@@ -8,7 +8,7 @@ import {
 import { useMemo } from 'react'
 
 import { CHART_COLOR_MAP } from 'components/utils/RadialBarChart'
-import { POLL_INTERVAL } from '../policies/Policies'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 export type SecurityChartDatum = {
   x: string

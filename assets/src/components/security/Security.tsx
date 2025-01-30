@@ -59,7 +59,7 @@ const HeaderWrapperSC = styled.div(({ theme }) => ({
 const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
-  overflow: 'hidden',
+  overflow: 'auto',
   display: 'flex',
   flexDirection: 'column',
   margin: 'auto',

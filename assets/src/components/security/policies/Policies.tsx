@@ -33,8 +33,6 @@ const breadcrumbs = [
   { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
 ]
 
-export const POLL_INTERVAL = 10_000
-
 export enum ViolationFilter {
   All = 'All',
   Passing = 'Passing',
