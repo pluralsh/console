@@ -11,13 +11,19 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { ClusterIcon } from '@pluralsh/design-system'
 import { CustomLegend } from '../CustomLegend'
 import { HomeCard } from '../HomeCard.tsx'
+import { ApolloError } from '@apollo/client'
+import { GqlError } from 'components/utils/Alert.tsx'
 
 const CHART_SIZE = 240
 
 export function ClusterOverviewChart({
   data,
+  loading,
+  error,
 }: {
   data: UpgradeStatisticsQuery | undefined
+  loading: boolean
+  error?: Nullable<ApolloError>
 }) {
   const chartData = getChartData(data || {})
 
@@ -32,6 +38,7 @@ export function ClusterOverviewChart({
       title="Cluster Overview"
       tooltip={<CustomLegend data={chartData.toReversed()} />}
     >
+      {error && <GqlError error={error} />}
       {data?.upgradeStatistics ? (
         <RadialBar
           colors={(item) => item.data.color}
@@ -52,9 +59,9 @@ export function ClusterOverviewChart({
           height={CHART_SIZE}
           width={CHART_SIZE}
         />
-      ) : (
+      ) : loading ? (
         <ChartSkeleton scale={0.87} />
-      )}
+      ) : null}
     </HomeCard>
   )
 }
