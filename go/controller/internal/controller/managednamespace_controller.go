@@ -20,8 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -108,13 +106,9 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	if !exists {
 		logger.Info("create managed namespace", "name", managedNamespace.Name)
-		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return waitForResources, nil
-			}
-			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, managedNamespace.SetCondition)
 		}
 
 		ns, err := r.ConsoleClient.CreateNamespace(ctx, *attr)
@@ -128,15 +122,11 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	if exists && !managedNamespace.Status.IsSHAEqual(sha) {
 		logger.Info("update managed namespace", "name", managedNamespace.Name)
-		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return waitForResources, nil
-			}
-			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, err
+		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, managedNamespace.SetCondition)
 		}
+
 		if !managedNamespace.Status.HasID() {
 			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
 			if err != nil {
@@ -145,6 +135,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
 		}
+
 		_, err = r.ConsoleClient.UpdateNamespace(ctx, managedNamespace.Status.GetID(), *attr)
 		if err != nil {
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -208,8 +199,7 @@ func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namesp
 	return true, nil
 }
 
-func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*console.ManagedNamespaceAttributes, error) {
-	logger := log.FromContext(ctx)
+func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*console.ManagedNamespaceAttributes, *ctrl.Result, error) {
 	attr := &console.ManagedNamespaceAttributes{
 		Name:        ns.NamespaceName(),
 		Namespace:   ns.Spec.Name,
@@ -234,7 +224,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		if ns.Spec.Target.Tags != nil {
 			result, err := json.Marshal(ns.Spec.Target.Tags)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			rawTags := string(result)
 			attr.Target.Tags = &rawTags
@@ -244,7 +234,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	if ns.Spec.Annotations != nil {
 		result, err := json.Marshal(ns.Spec.Annotations)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		rawAnnotations := string(result)
 		attr.Annotations = &rawAnnotations
@@ -252,7 +242,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	if ns.Spec.Labels != nil {
 		result, err := json.Marshal(ns.Spec.Labels)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		rawLabels := string(result)
 		attr.Labels = &rawLabels
@@ -264,14 +254,15 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	}
 	if ns.Spec.Service != nil {
 		srv := ns.Spec.Service
-		repository, err := r.getRepository(ctx, ns)
-		if err != nil {
-			return nil, err
+		repository, result, err := r.getRepository(ctx, ns)
+		if result != nil || err != nil {
+			return nil, result, err
 		}
+
 		namespace := ns.GetNamespace()
 		st, err := genServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		if st.Name == nil {
@@ -285,42 +276,56 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		attr.Service = st
 	}
 
-	project := &v1alpha1.Project{}
-	if ns.Spec.ProjectRef != nil {
-		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
-			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return nil, err
-		}
-
-		if project.Status.ID == nil {
-			logger.Info("Project is not ready")
-			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-			return nil, errors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, ns.Spec.ProjectRef.Name)
-		}
-
-		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
-			return nil, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
-		}
+	project, result, err := r.getProject(ctx, ns)
+	if result != nil || err != nil {
+		return nil, result, err
 	}
-
 	attr.ProjectID = project.Status.ID
 
-	return attr, nil
+	return attr, nil, nil
 }
 
-func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.GitRepository, error) {
+func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.GitRepository, *ctrl.Result, error) {
 	repository := &v1alpha1.GitRepository{}
 	if ns.Spec.Service.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Service.RepositoryRef.Name, Namespace: ns.Spec.Service.RepositoryRef.Namespace}, repository); err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
+
 		if repository.Status.ID == nil {
-			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return nil, errors.NewNotFound(schema.GroupResource{Resource: "GitRepository", Group: "deployments.plural.sh"}, ns.Spec.Service.RepositoryRef.Name)
+			return nil, &waitForResources, fmt.Errorf("repository is not ready yet")
 		}
+
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
-			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
+			return nil, nil, fmt.Errorf("repository %s is not healthy", repository.Name)
 		}
 	}
-	return repository, nil
+	return repository, nil, nil
+}
+
+func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.Project, *ctrl.Result, error) {
+	project := &v1alpha1.Project{}
+	if ns.Spec.ProjectRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
+		}
+
+		if project.Status.ID == nil {
+			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		}
+
+		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
+			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
+		}
+	}
+
+	return project, nil, nil
 }
