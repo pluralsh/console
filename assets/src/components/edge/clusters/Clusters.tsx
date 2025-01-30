@@ -116,9 +116,7 @@ const columns = [
         <>
           {!name && (
             <Button
-              secondary
               small
-              pulse
               onClick={() => setOpen(true)}
             >
               Complete
