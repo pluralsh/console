@@ -102,7 +102,6 @@ export function CostManagement() {
         <Card
           css={{
             padding: theme.spacing.large,
-            paddingTop: 0,
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -117,6 +116,7 @@ export function CostManagement() {
         >
           <CostManagementTreeMap
             colorScheme="blue"
+            loading={loading}
             data={cpuCostByCluster(usages)}
             dataSize={usages.length}
           />
@@ -124,7 +124,6 @@ export function CostManagement() {
         <Card
           css={{
             padding: theme.spacing.large,
-            paddingTop: 0,
             height: CM_TREE_MAP_CARD_HEIGHT,
           }}
           header={{
@@ -139,6 +138,7 @@ export function CostManagement() {
         >
           <CostManagementTreeMap
             colorScheme="purple"
+            loading={loading}
             data={memoryCostByCluster(usages)}
             dataSize={usages.length}
           />

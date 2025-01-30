@@ -84,24 +84,27 @@ fragment DeploymentSettings on DeploymentSettings {
   }
 }
 
-mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
-  updateDeploymentSettings(attributes: $attributes) {
-    ...DeploymentSettings
-  }
-}
-
-query DeploymentSettings {
-  deploymentSettings {
-    ...DeploymentSettings
-  }
-}
-
 fragment ObservabilityProvider on ObservabilityProvider {
   id
   name
   type
   insertedAt
   updatedAt
+}
+
+fragment ObservabilityWebhook on ObservabilityWebhook {
+  id
+  name
+  type
+  url
+  insertedAt
+  updatedAt
+}
+
+query DeploymentSettings {
+  deploymentSettings {
+    ...DeploymentSettings
+  }
 }
 
 query ObservabilityProviders($first: Int, $after: String) {
@@ -117,6 +120,25 @@ query ObservabilityProviders($first: Int, $after: String) {
   }
 }
 
+query ObservabilityWebhooks($first: Int, $after: String) {
+  observabilityWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        ...ObservabilityWebhook
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+  updateDeploymentSettings(attributes: $attributes) {
+    ...DeploymentSettings
+  }
+}
+
 mutation UpsertObservabilityProvider(
   $attributes: ObservabilityProviderAttributes!
 ) {
@@ -125,8 +147,22 @@ mutation UpsertObservabilityProvider(
   }
 }
 
+mutation UpsertObservabilityWebhook(
+  $attributes: ObservabilityWebhookAttributes!
+) {
+  upsertObservabilityWebhook(attributes: $attributes) {
+    ...ObservabilityWebhook
+  }
+}
+
 mutation DeleteObservabilityProvider($id: ID!) {
   deleteObservabilityProvider(id: $id) {
     ...ObservabilityProvider
+  }
+}
+
+mutation DeleteObservabilityWebhook($id: ID!) {
+  deleteObservabilityWebhook(id: $id) {
+    ...ObservabilityWebhook
   }
 }

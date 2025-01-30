@@ -1,5 +1,10 @@
-import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
-import { CheckIcon, CopyIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  CheckIcon,
+  CopyIcon,
+  IconFrame,
+  Tooltip,
+} from '@pluralsh/design-system'
+import { useCallback, useEffect, useState } from 'react'
 
 type CopyButtonProps = {
   text?: string | null | undefined
@@ -7,10 +12,7 @@ type CopyButtonProps = {
   tooltip?: string
 }
 
-function CopyButtonRef(
-  { text, type = 'floating', tooltip }: CopyButtonProps,
-  ref: Ref<any>
-) {
+function CopyButton({ text, type = 'floating', tooltip }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -30,18 +32,19 @@ function CopyButtonRef(
   )
 
   return (
-    <IconFrame
-      clickable
-      icon={copied ? <CheckIcon /> : <CopyIcon />}
-      onClick={() => handleCopy()}
-      ref={ref}
-      textValue={text ?? undefined}
-      tooltip={tooltip !== undefined ? tooltip : true}
-      type={type}
-    />
+    <Tooltip
+      label={copied ? 'Copied!' : tooltip || text}
+      placement="top"
+    >
+      <IconFrame
+        clickable
+        icon={copied ? <CheckIcon /> : <CopyIcon />}
+        onClick={() => handleCopy()}
+        textValue={text ?? undefined}
+        type={type}
+      />
+    </Tooltip>
   )
 }
-
-const CopyButton = forwardRef(CopyButtonRef)
 
 export default CopyButton

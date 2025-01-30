@@ -21,7 +21,10 @@ export function NamespaceMultiSelect({
     <Select
       label="All namespaces"
       triggerButton={
-        <FilterTrigger $width={280}>
+        <FilterTrigger
+          $width={280}
+          $border
+        >
           {sortedSelectedNamespaces.length === 0
             ? 'Select namespaces'
             : allSelected

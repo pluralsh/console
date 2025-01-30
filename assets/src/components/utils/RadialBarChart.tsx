@@ -8,12 +8,13 @@ import styled, { useTheme } from 'styled-components'
 import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
-export const COLOR_MAP = {
+export const CHART_COLOR_MAP = {
   blue: '#99DAFF',
   orange: '#D596F4',
-  green: '#99F5D5',
+  green: '#6AF1C2',
   purple: '#9FA3F9',
   red: '#F599A8',
+  yellow: '#FFF59E',
 
   'yellow-light': '#FFF9C2',
   'blue-light': '#C2E9FF',
@@ -42,10 +43,10 @@ export const COLOR_MAP = {
 }
 
 const chartColors = {
-  used: COLOR_MAP.red,
-  available: COLOR_MAP.green,
-  requests: COLOR_MAP.orange,
-  limits: COLOR_MAP.blue,
+  used: CHART_COLOR_MAP.red,
+  available: CHART_COLOR_MAP.green,
+  requests: CHART_COLOR_MAP.orange,
+  limits: CHART_COLOR_MAP.blue,
   track: 'transparent',
 } as const satisfies Record<string, string>
 
@@ -70,25 +71,24 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
           textAnchor="middle"
           dominantBaseline="alphabetic"
           style={{
-            ...theme.partials.text.h4,
-            display: 'block',
-            fontFamily: 'monospace',
-            fontSize: 27,
+            fontFamily: 'Monument Semi-Mono',
+            fontSize: 26,
+            fontStyle: 'normal',
+            fontWeight: 500,
           }}
         >
           {displayVal}
           {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
         </text>
         <text
-          fill={theme.colors['text-xlight']}
+          fill={theme.colors['text-light']}
           x="0"
           y="5.5"
           textAnchor="middle"
           dominantBaseline="hanging"
           style={{
-            ...theme.partials.text.overline,
-            display: 'block',
-            fontSize: 10,
+            ...theme.partials.text.body2,
+            fontSize: 12,
           }}
         >
           {label}

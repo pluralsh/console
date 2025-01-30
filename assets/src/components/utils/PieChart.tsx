@@ -5,7 +5,7 @@ import { useTheme } from 'styled-components'
 import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
-export type PieChartData = {
+type PieChartData = {
   label?: string
   id: string
   value: number
