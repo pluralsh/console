@@ -92,6 +92,13 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_facets(q, _), do: q
 
   defp facets(resp) do
+    # make sure that kubernetes.node has at least an empty map
+    # typically actual log files have a fully populated kubernetes.node map but in case it doesn't
+    resp = case resp do
+      %{"kubernetes" => %{"node" => %{}}} -> resp
+      _ -> put_in(resp, ~w(kubernetes node), %{})
+    end
+
     put_in(resp, ~w(kubernetes node labels), nil)
     |> put_in(~w(kubernetes labels), nil)
     |>  Map.take(~w(kubernetes cloud container cluster))

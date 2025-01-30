@@ -3,8 +3,12 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
   alias Kube.Dashboard
   use Mimic
   import KubernetesScaffolds
+  alias ElasticsearchHelper, as: ES
 
   setup :set_mimic_global
+
+  @elastic_cluster_url Application.compile_env(:elasticsearch_test, :cluster_url)
+  @elastic_index_name Application.compile_env(:elasticsearch_test, :index_name)
 
   describe "dashboards" do
     test "it can list dashboards for a repo" do
@@ -190,6 +194,54 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       """, %{"serviceId" => svc.id}, %{current_user: user})
 
       assert line["log"] == "a log"
+    end
+
+    test "it can fetch logs from an elasticsearch index" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      # We want a fresh index so delete the index if it already exists
+      # Just in case test fails we want to make sure next run doesn't reuse old index
+      with true <- ES.index_exists?(@elastic_cluster_url, @elastic_index_name) do
+        ES.delete_index(@elastic_cluster_url, @elastic_index_name)
+      end
+
+      ES.create_index(@elastic_cluster_url, @elastic_index_name)
+
+      ES.index_documents(@elastic_cluster_url, @elastic_index_name, [
+        %{
+          "@timestamp" => Timex.now(),
+          "message" => "valid log message",
+          "kubernetes" => %{
+            "namespace" => svc.namespace
+          },
+          "cluster" => %{
+            "handle" => svc.cluster.handle
+          }
+        },
+        %{
+          "@timestamp" => Timex.now(),
+          "log" => "NOT a valid log message"
+        }
+      ])
+
+      # Instead of using expect to mock the logs provider, we use the elasticsearch index
+      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
+        host: @elastic_cluster_url,
+        index: @elastic_index_name
+      }})
+
+
+      {:ok, %{data: %{"logAggregation" => [line]}}} = run_query("""
+        query Logs($serviceId: ID!) {
+          logAggregation(serviceId: $serviceId) { timestamp log }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      # Delete index, otherwise it will just use resources until next test run
+      ES.delete_index(@elastic_cluster_url, @elastic_index_name)
+
+      assert line["log"] == "valid log message"
     end
 
     test "it will authz" do
