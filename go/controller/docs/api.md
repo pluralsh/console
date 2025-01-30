@@ -1108,6 +1108,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `accessKey` _string_ |  |  | Optional: {} <br /> |
 | `secretAccessKeySecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretAccessKeySecretRef is a secret reference that should contain secret access key. |  | Optional: {} <br /> |
+| `secretAccessKeySecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 | `assumeRoleArn` _string_ |  |  | Optional: {} <br /> |
 
 
@@ -1126,6 +1127,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `clientId` _string_ |  |  | Optional: {} <br /> |
 | `clientSecretSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ClientSecretSecretRef is a secret reference that should contain client secret. |  | Optional: {} <br /> |
+| `clientSecretSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 | `tenantId` _string_ |  |  | Optional: {} <br /> |
 | `subscriptionId` _string_ |  |  | Optional: {} <br /> |
 
@@ -1144,7 +1146,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `username` _string_ |  |  | Required: {} <br /> |
-| `passwordSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Required: {} <br /> |
+| `passwordSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `passwordSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 #### HelmRepositoryAuthBearer
@@ -1160,7 +1163,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Required: {} <br /> |
+| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `tokenSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 #### HelmRepositoryAuthGCP
@@ -1177,6 +1181,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `applicationCredentialsSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ApplicationCredentialsSecretRef is a secret reference that should contain application credentials. |  | Optional: {} <br /> |
+| `applicationCredentialsSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 #### HelmRepositorySpec
@@ -2148,6 +2153,7 @@ _Appears in:_
 | `external` _boolean_ | Whether it is being sourced from an external git repository |  | Required: {} <br /> |
 | `source` _string_ | The source file to use for templating |  | Optional: {} <br /> |
 | `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Additional context overrides to apply to this template, will be merged into the user-provided configuration options |  | Optional: {} <br /> |
+| `condition` _string_ | Condition string that will be evaluated to determine if source files should be copied or not. |  | Optional: {} <br /> |
 
 
 #### PrAutomationTrigger
