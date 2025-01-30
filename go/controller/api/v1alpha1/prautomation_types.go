@@ -270,6 +270,10 @@ type PrAutomationTemplate struct {
 	// Additional context overrides to apply to this template, will be merged into the user-provided configuration options
 	// +kubebuilder:validation:Optional
 	Context *runtime.RawExtension `json:"context,omitempty"`
+
+	// Condition string that will be evaluated to determine if source files should be copied or not.
+	// +kubebuilder:validation:Optional
+	Condition *string `json:"condition,omitempty"`
 }
 
 func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttributes {
@@ -287,6 +291,7 @@ func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttrib
 		Destination: in.Destination,
 		External:    in.External,
 		Context:     context,
+		Condition:   in.Condition,
 	}
 }
 
