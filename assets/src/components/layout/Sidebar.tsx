@@ -24,7 +24,7 @@ import {
   StackIcon,
   Tooltip,
   WarningShieldIcon,
-  RamIcon,
+  EdgeComputeIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
 import { Avatar, Flex, Menu, MenuItem } from 'honorable'
@@ -127,7 +127,7 @@ function getMenuItems({
     {
       text: 'Edge',
       expandedLabel: 'Edge',
-      icon: <RamIcon />,
+      icon: <EdgeComputeIcon />,
       path: EDGE_ABS_PATH,
       hotkeys: ['shift E'],
     },

@@ -21,7 +21,7 @@ import {
   WarningShieldIcon,
   setThemeColorMode,
   useThemeColorMode,
-  RamIcon,
+  EdgeComputeIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -173,7 +173,7 @@ export function useCommands(): CommandGroup[] {
           },
           {
             label: 'Edge',
-            icon: RamIcon,
+            icon: EdgeComputeIcon,
             callback: () => navigate(EDGE_ABS_PATH),
             deps: [navigate],
             hotkeys: ['shift E'],
