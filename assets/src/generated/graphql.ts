@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9957,7 +9957,8 @@ export type ClusterSelectorQueryVariables = Exact<{
 export type ClusterSelectorQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null };
 
 export type ClusterQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -17303,8 +17304,8 @@ export type ClusterSelectorLazyQueryHookResult = ReturnType<typeof useClusterSel
 export type ClusterSelectorSuspenseQueryHookResult = ReturnType<typeof useClusterSelectorSuspenseQuery>;
 export type ClusterSelectorQueryResult = Apollo.QueryResult<ClusterSelectorQuery, ClusterSelectorQueryVariables>;
 export const ClusterDocument = gql`
-    query Cluster($id: ID!) {
-  cluster(id: $id) {
+    query Cluster($id: ID, $handle: String) {
+  cluster(id: $id, handle: $handle) {
     ...Cluster
   }
 }
@@ -17323,10 +17324,11 @@ export const ClusterDocument = gql`
  * const { data, loading, error } = useClusterQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      handle: // value for 'handle'
  *   },
  * });
  */
-export function useClusterQuery(baseOptions: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+export function useClusterQuery(baseOptions?: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
       }

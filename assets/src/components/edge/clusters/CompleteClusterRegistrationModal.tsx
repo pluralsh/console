@@ -1,11 +1,11 @@
 import { Button, FormField, Modal, Input } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useUpdateClusterRegistrationMutation } from 'generated/graphql'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { GqlError } from '../utils/Alert.tsx'
-import { TagSelection } from '../cd/services/TagSelection.tsx'
-import { tagsToNameValue } from '../cd/services/CreateGlobalService.tsx'
+import { useUpdateClusterRegistrationMutation } from 'generated/graphql.ts'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition.tsx'
+import { GqlError } from '../../utils/Alert.tsx'
+import { TagSelection } from '../../cd/services/TagSelection.tsx'
+import { tagsToNameValue } from '../../cd/services/CreateGlobalService.tsx'
 function CompleteClusterRegistrationModal({
   id,
   machineId,
