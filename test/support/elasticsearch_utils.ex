@@ -8,9 +8,7 @@ defmodule ElasticsearchHelper do
   require Tesla
 
   def index_exists?(base_url, index_name) do
-    resp = Tesla.get!(base_url <> "/#{index_name}")
-    IO.inspect(resp.status)
-    resp.status == 200
+    Tesla.get!(base_url <> "/#{index_name}").status == 200
   end
 
   def delete_index(base_url, index_name) do
