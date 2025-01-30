@@ -4,26 +4,34 @@ import styled from 'styled-components'
 
 import { getGlobalSettingsBreadcrumbs } from '../GlobalSettings'
 
-import ObservabilityProviders from './ObservabilityProviders'
-import ObservabilitySettings from './ObservabilitySettings'
+import { SettingsPageHeader } from 'components/settings/Settings'
+import { SubTabs } from 'components/utils/SubTabs'
+import { Outlet, useOutletContext } from 'react-router-dom'
 
 const breadcrumbs = getGlobalSettingsBreadcrumbs('observability')
 
+const directory = [
+  { path: 'providers', label: 'Providers' },
+  { path: 'webhooks', label: 'Webhooks' },
+]
+
 export default function Observability() {
   useSetBreadcrumbs(breadcrumbs)
+  const curContext = useOutletContext()
 
   return (
     <ObservabilityWrapperSC>
-      <ObservabilityProviders />
-      <ObservabilitySettings />
+      <SettingsPageHeader heading="Observability">
+        <SubTabs directory={directory} />
+      </SettingsPageHeader>
+      <Outlet context={curContext} />
     </ObservabilityWrapperSC>
   )
 }
 
-const ObservabilityWrapperSC = styled.div(({ theme }) => ({
+const ObservabilityWrapperSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
   overflow: 'auto',
   paddingRight: '8px',
-}))
+})
