@@ -11924,6 +11924,8 @@ export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, 
 
 export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade };
 
+export type ClusterVulnAggregateFragment = { __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null };
+
 export type CvssBundleFragment = { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
 
 export type VulnerabilityReportsQueryVariables = Exact<{
@@ -11953,6 +11955,13 @@ export type VulnerabilityStatisticsQueryVariables = Exact<{
 
 
 export type VulnerabilityStatisticsQuery = { __typename?: 'RootQueryType', vulnerabilityStatistics?: Array<{ __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade } | null> | null };
+
+export type ClusterVulnerabilityAggregateQueryVariables = Exact<{
+  grade: VulnReportGrade;
+}>;
+
+
+export type ClusterVulnerabilityAggregateQuery = { __typename?: 'RootQueryType', clusterVulnerabilityAggregate?: Array<{ __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null };
 
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
@@ -15146,6 +15155,19 @@ export const VulnerabilityStatisticFragmentDoc = gql`
     fragment VulnerabilityStatistic on VulnerabilityStatistic {
   count
   grade
+}
+    `;
+export const ClusterVulnAggregateFragmentDoc = gql`
+    fragment ClusterVulnAggregate on ClusterVulnAggregate {
+  cluster {
+    id
+    name
+    handle
+    project {
+      name
+    }
+  }
+  count
 }
     `;
 export const AiCompletionDocument = gql`
@@ -25824,6 +25846,46 @@ export type VulnerabilityStatisticsQueryHookResult = ReturnType<typeof useVulner
 export type VulnerabilityStatisticsLazyQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsLazyQuery>;
 export type VulnerabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsSuspenseQuery>;
 export type VulnerabilityStatisticsQueryResult = Apollo.QueryResult<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>;
+export const ClusterVulnerabilityAggregateDocument = gql`
+    query ClusterVulnerabilityAggregate($grade: VulnReportGrade!) {
+  clusterVulnerabilityAggregate(grade: $grade) {
+    ...ClusterVulnAggregate
+  }
+}
+    ${ClusterVulnAggregateFragmentDoc}`;
+
+/**
+ * __useClusterVulnerabilityAggregateQuery__
+ *
+ * To run a query within a React component, call `useClusterVulnerabilityAggregateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterVulnerabilityAggregateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterVulnerabilityAggregateQuery({
+ *   variables: {
+ *      grade: // value for 'grade'
+ *   },
+ * });
+ */
+export function useClusterVulnerabilityAggregateQuery(baseOptions: Apollo.QueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+      }
+export function useClusterVulnerabilityAggregateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+        }
+export function useClusterVulnerabilityAggregateSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+        }
+export type ClusterVulnerabilityAggregateQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateQuery>;
+export type ClusterVulnerabilityAggregateLazyQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateLazyQuery>;
+export type ClusterVulnerabilityAggregateSuspenseQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateSuspenseQuery>;
+export type ClusterVulnerabilityAggregateQueryResult = Apollo.QueryResult<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>;
 export const namedOperations = {
   Query: {
     AICompletion: 'AICompletion',
@@ -25966,7 +26028,8 @@ export const namedOperations = {
     Refresh: 'Refresh',
     VulnerabilityReports: 'VulnerabilityReports',
     VulnerabilityReport: 'VulnerabilityReport',
-    VulnerabilityStatistics: 'VulnerabilityStatistics'
+    VulnerabilityStatistics: 'VulnerabilityStatistics',
+    ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate'
   },
   Mutation: {
     CreateAIPin: 'CreateAIPin',
@@ -26270,6 +26333,7 @@ export const namedOperations = {
     VulnerabilityReport: 'VulnerabilityReport',
     Vulnerability: 'Vulnerability',
     VulnerabilityStatistic: 'VulnerabilityStatistic',
+    ClusterVulnAggregate: 'ClusterVulnAggregate',
     CvssBundle: 'CvssBundle'
   }
 }

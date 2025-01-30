@@ -5,6 +5,7 @@ import {
   Flex,
   Input,
   SearchIcon,
+  SemanticColorKey,
   SubTab,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -46,6 +47,14 @@ export const gradeToSeverityMap: Record<
   [VulnReportGrade.D]: 'danger',
   [VulnReportGrade.F]: 'critical',
   All: 'neutral',
+}
+
+export const gradeToTextColorMap: Record<VulnReportGrade, SemanticColorKey> = {
+  [VulnReportGrade.A]: 'text-success',
+  [VulnReportGrade.B]: 'text',
+  [VulnReportGrade.C]: 'text-warning',
+  [VulnReportGrade.D]: 'text-danger-light',
+  [VulnReportGrade.F]: 'text-danger',
 }
 
 export function VulnerabilityReports() {

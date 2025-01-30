@@ -1,9 +1,10 @@
+import { type Theme as NivoThemeType } from '@nivo/core'
 import { ResponsiveLine } from '@nivo/line'
 import { Card, Flex } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
 import { last } from 'lodash'
 import { Key, useMemo, useState } from 'react'
-import styled, { DefaultTheme, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { CaptionP } from './typography/Text'
 
@@ -11,28 +12,36 @@ export function dateFormat(date) {
   return dayjs(date).format('MM/DD h:mm:ss a')
 }
 
-export const graphTheme = (theme: DefaultTheme) => ({
-  axis: {
-    ticks: {
-      text: {
-        fill: theme.colors['text-xlight'],
-      },
-      line: {
-        stroke: theme.colors.border,
-      },
-    },
-    legend: {
-      text: {
-        fill: theme.colors['text-light'],
+export function useGraphTheme(): NivoThemeType {
+  const { colors, boxShadows } = useTheme()
+  return {
+    tooltip: {
+      container: {
+        background: colors['fill-two'],
+        color: colors['text-light'],
+        boxShadow: boxShadows.moderate,
       },
     },
-  },
-  grid: {
-    line: {
-      stroke: theme.colors.border,
+    legends: {
+      text: { fill: colors['text-light'] },
+      title: { text: { fill: colors['text-light'] } },
+      ticks: {
+        text: { fill: colors['text-xlight'] },
+        line: { stroke: colors['text-xlight'] },
+      },
     },
-  },
-})
+    axis: {
+      ticks: {
+        text: { fill: colors['text-xlight'] },
+        line: { stroke: colors['text-xlight'] },
+      },
+      legend: {
+        text: { fill: colors['text-light'] },
+      },
+    },
+    grid: { line: { stroke: colors.border } },
+  }
+}
 
 const SliceTootipWrapperSC = styled(Card)(({ theme }) => ({
   ...theme.partials.text.caption,
@@ -68,7 +77,8 @@ export function Graph({
   yFormat: any
   tickRotation?: number
 }) {
-  const theme = useTheme()
+  const graphTheme = useGraphTheme()
+  const { colors } = useTheme()
   const [selected, setSelected] = useState<Key | null>(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
@@ -146,19 +156,19 @@ export function Graph({
           itemHeight: 20,
           symbolSize: 12,
           symbolShape: 'circle',
-          itemTextColor: theme.colors['text-xlight'],
+          itemTextColor: colors['text-xlight'],
           effects: [
             {
               on: 'hover',
               style: {
                 itemBackground: 'rgba(0, 0, 0, .03)',
-                itemTextColor: theme.colors['text-light'],
+                itemTextColor: colors['text-light'],
               },
             },
           ],
         },
       ]}
-      theme={graphTheme(theme)}
+      theme={graphTheme}
     />
   )
 }
