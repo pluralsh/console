@@ -1,4 +1,4 @@
-import { Button, LoopingLogo, Table } from '@pluralsh/design-system'
+import { Button, Card, Flex, PlusIcon, Table } from '@pluralsh/design-system'
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
@@ -11,14 +11,13 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 
-import { SettingsPageHeader } from 'components/settings/Settings'
-
 import { EditObservabilityProviderModal } from './EditObservabilityProvider'
 import { columns } from './ObservabilityProvidersColumns'
+import ObservabilitySettings from './ObservabilitySettings'
 
 const OBSERVABILITY_PROVIDERS_TABLE_HEIGHT = '224px'
 
-export default function ObservabilityProviders() {
+export function ObservabilityProviders() {
   const {
     data,
     loading,
@@ -32,27 +31,36 @@ export default function ObservabilityProviders() {
     keyPath: ['observabilityProviders'],
   })
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoopingLogo />
-  }
+  if (error) return <GqlError error={error} />
 
   return (
-    <div>
-      <SettingsPageHeader heading="Observability Providers">
-        <AddProviderButton refetch={refetch} />
-      </SettingsPageHeader>
-      <div
-        css={{
-          height: '100%',
-          maxHeight: OBSERVABILITY_PROVIDERS_TABLE_HEIGHT,
-          overflow: 'hidden',
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <Card
+        header={{
+          size: 'large',
+          content: (
+            <Flex
+              justify="space-between"
+              alignItems="center"
+              gap="medium"
+              width="100%"
+            >
+              <span>Providers</span>
+              <AddProviderButton refetch={refetch} />
+            </Flex>
+          ),
         }}
+        css={{ maxHeight: OBSERVABILITY_PROVIDERS_TABLE_HEIGHT }}
       >
         <Table
+          flush
           fullHeightWrap
+          fillLevel={1}
+          loadingSkeletonRows={3}
+          loading={!data && loading}
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
@@ -64,8 +72,9 @@ export default function ObservabilityProviders() {
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{ message: 'No providers found.' }}
         />
-      </div>
-    </div>
+      </Card>
+      <ObservabilitySettings />
+    </Flex>
   )
 }
 
@@ -75,12 +84,12 @@ function AddProviderButton({ refetch }: { refetch: () => void }) {
   return (
     <>
       <Button
+        small
         floating
-        onClick={() => {
-          setOpen(true)
-        }}
+        startIcon={<PlusIcon />}
+        onClick={() => setOpen(true)}
       >
-        Add Provider
+        Add provider
       </Button>
       <EditObservabilityProviderModal
         open={open}

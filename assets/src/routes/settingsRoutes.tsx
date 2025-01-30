@@ -36,6 +36,9 @@ import NotificationSinks from '../components/settings/notifications/sinks/Notifi
 
 import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
 
+import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider'
+import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
+import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
 import { RequireCdEnabled } from './cdRoutes'
 import {
   AUDITS_REL_PATH,
@@ -48,7 +51,6 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
-import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider'
 
 const userManagementRoutes = (
   <Route
@@ -127,7 +129,25 @@ const globalSettingsRoutes = (
     <Route
       path="observability"
       element={<Observability />}
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="providers"
+          />
+        }
+      />
+      <Route
+        path="providers"
+        element={<ObservabilityProviders />}
+      />
+      <Route
+        path="webhooks"
+        element={<ObservabilityWebhooks />}
+      />
+    </Route>
     <Route
       path="smtp"
       element={<GlobalSettingsSMTP />}
