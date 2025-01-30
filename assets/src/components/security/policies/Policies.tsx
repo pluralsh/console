@@ -137,42 +137,31 @@ export function Policies() {
   if (error) return <GqlError error={error} />
 
   return (
-    <PoliciesContainer>
-      <div
-        css={{
-          gridArea: 'filter',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
+    <PoliciesContainerSC>
+      <PoliciesTable
+        fullHeightWrap
+        data={data}
+        loading={loading}
+        refetch={refetch}
+        fetchNextPage={fetchNextPage}
+        setVirtualSlice={setVirtualSlice}
+        resetFilters={() => {
+          setSelectedKinds([])
+          setSelectedNamespaces([])
+          setSelectedClusters([])
         }}
-      >
-        <PoliciesFilter
-          selectedNamespaces={selectedNamespaces}
-          setSelectedNamespaces={setSelectedNamespaces}
-          selectedKinds={selectedKinds}
-          setSelectedKinds={setSelectedKinds}
-          selectedClusters={selectedClusters}
-          setSelectedClusters={setSelectedClusters}
-          kindsData={kindsData}
-          namespacesData={namespacesData}
-        />
-      </div>
-      <div css={{ gridArea: 'table', overflow: 'hidden' }}>
-        <PoliciesTable
-          fullHeightWrap
-          data={data}
-          loading={loading}
-          refetch={refetch}
-          fetchNextPage={fetchNextPage}
-          setVirtualSlice={setVirtualSlice}
-          resetFilters={() => {
-            setSelectedKinds([])
-            setSelectedNamespaces([])
-            setSelectedClusters([])
-          }}
-        />
-      </div>
-    </PoliciesContainer>
+      />
+      <PoliciesFilter
+        selectedNamespaces={selectedNamespaces}
+        setSelectedNamespaces={setSelectedNamespaces}
+        selectedKinds={selectedKinds}
+        setSelectedKinds={setSelectedKinds}
+        selectedClusters={selectedClusters}
+        setSelectedClusters={setSelectedClusters}
+        kindsData={kindsData}
+        namespacesData={namespacesData}
+      />
+    </PoliciesContainerSC>
   )
 }
 
@@ -182,14 +171,9 @@ const FiltersWrapperSC = styled.div(({ theme }) => ({
   overflow: 'auto',
 }))
 
-const PoliciesContainer = styled.div(({ theme }) => ({
+const PoliciesContainerSC = styled.div(({ theme }) => ({
   display: 'grid',
+  gridTemplateColumns: '1fr 250px',
+  gap: theme.spacing.medium,
   overflow: 'hidden',
-  gridTemplateColumns: 'auto 250px',
-  gridTemplateRows: 'auto 1fr',
-  gap: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-  gridTemplateAreas: `
-    "violations filter"
-    "table filter"
-  `,
 }))
