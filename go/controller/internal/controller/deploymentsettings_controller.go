@@ -211,6 +211,9 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		if settings.Spec.Stacks.ConnectionRef != nil {
 			connection := &v1alpha1.ScmConnection{}
 			if err := r.Get(ctx, types.NamespacedName{Name: settings.Spec.Stacks.ConnectionRef.Name, Namespace: settings.Spec.Stacks.ConnectionRef.Namespace}, connection); err != nil {
+				if errors.IsNotFound(err) {
+					return nil, operrors.ErrReferenceNotFound
+				}
 				return nil, err
 			}
 			connectionID = connection.Status.ID
@@ -229,6 +232,29 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		attr.CreateBindings = policyBindings(settings.Spec.Bindings.Create)
 		attr.GitBindings = policyBindings(settings.Spec.Bindings.Git)
 	}
+
+	if settings.Spec.DeploymentRepositoryRef != nil {
+		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.DeploymentRepositoryRef)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return nil, operrors.ErrReferenceNotFound
+			}
+			return nil, err
+		}
+		attr.DeployerRepositoryID = id
+	}
+
+	if settings.Spec.ScaffoldsRepositoryRef != nil {
+		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.ScaffoldsRepositoryRef)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return nil, operrors.ErrReferenceNotFound
+			}
+			return nil, err
+		}
+		attr.ArtifactRepositoryID = id
+	}
+
 	return attr, nil
 }
 

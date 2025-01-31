@@ -465,6 +465,19 @@ spec:
                     format: int64
                     type: integer
                 type: object
+              deploymentRepositoryRef:
+                description: pointer to the deployment GIT repository to use
+                properties:
+                  name:
+                    description: Name is a resource name.
+                    type: string
+                  namespace:
+                    description: Namespace is a resource namespace.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
               logging:
                 description: Settings for connections to log aggregation datastores
                 properties:
@@ -626,6 +639,19 @@ spec:
                     type: string
                 required:
                 - host
+                type: object
+              scaffoldsRepositoryRef:
+                description: pointer to the Scaffolds GIT repository to use
+                properties:
+                  name:
+                    description: Name is a resource name.
+                    type: string
+                  namespace:
+                    description: Namespace is a resource namespace.
+                    type: string
+                required:
+                - name
+                - namespace
                 type: object
               stacks:
                 description: Stacks global configuration for stack execution
