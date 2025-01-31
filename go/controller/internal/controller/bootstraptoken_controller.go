@@ -161,9 +161,8 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bo
 }
 
 func (in *BootstrapTokenReconciler) ensure(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken, project v1alpha1.Project) (*consoleapi.BootstrapTokenBase, error) {
-	attributes := consoleapi.BootstrapTokenAttributes{}
+	attributes := consoleapi.BootstrapTokenAttributes{ProjectID: lo.FromPtr(project.ConsoleID())}
 
-	// Configure optional user binding
 	if !lo.IsEmpty(bootstrapToken.Spec.User) {
 		userID, err := in.UserGroupCache.GetUserID(*bootstrapToken.Spec.User)
 		if errors.IsNotFound(err) {
@@ -177,10 +176,6 @@ func (in *BootstrapTokenReconciler) ensure(ctx context.Context, bootstrapToken *
 		attributes.UserID = lo.ToPtr(userID)
 	}
 
-	// Configure required project binding
-	attributes.ProjectID = lo.FromPtr(project.ConsoleID())
-
-	// Create the token
 	apiBootstrapToken, err := in.ConsoleClient.CreateBootstrapToken(ctx, attributes)
 	if err != nil {
 		return nil, err
