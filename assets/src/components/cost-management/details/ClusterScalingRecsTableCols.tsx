@@ -1,6 +1,13 @@
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { Button, LinkoutIcon, PrOpenIcon, Toast } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  LinkoutIcon,
+  PrOpenIcon,
+  Toast,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
 import { filesize } from 'filesize'
@@ -8,7 +15,9 @@ import {
   ClusterScalingRecommendationFragment,
   useApplyScalingRecommendationMutation,
 } from 'generated/graphql'
-import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import styled, { useTheme } from 'styled-components'
 
 const columnHelper = createColumnHelper<ClusterScalingRecommendationFragment>()
 
@@ -23,20 +32,25 @@ export const ColName = columnHelper.accessor((rec) => rec, {
       <StackedText
         css={{ whiteSpace: 'pre-wrap' }}
         first={`${rec.namespace ?? '--'}  >  ${rec.name ?? '--'}`}
-        second={rec.container}
+        second={rec.type?.toLowerCase()}
       />
     )
   },
 })
 
+export const ColContainer = columnHelper.accessor((rec) => rec.container, {
+  id: 'container',
+  header: 'Container',
+})
+
 export const ColCpuChange = columnHelper.accessor((rec) => rec, {
   id: 'cpuChange',
   header: 'CPU change',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
-
     return (
-      <Body2P css={{ whiteSpace: 'pre-wrap' }}>
+      <Body2P css={{ whiteSpace: 'pre-wrap', alignSelf: 'flex-end' }}>
         {`${formatCpu(rec.cpuRequest)}  →  `}
         <BoldTextSC>{`${formatCpu(rec.cpuRecommendation)}`}</BoldTextSC>
       </Body2P>
@@ -47,11 +61,11 @@ export const ColCpuChange = columnHelper.accessor((rec) => rec, {
 export const ColMemoryChange = columnHelper.accessor((rec) => rec, {
   id: 'memoryChange',
   header: 'Memory change',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
-
     return (
-      <Body2P css={{ whiteSpace: 'pre-wrap' }}>
+      <Body2P css={{ whiteSpace: 'pre-wrap', alignSelf: 'flex-end' }}>
         {`${formatMemory(rec.memoryRequest)}  →  `}
         <BoldTextSC>{`${formatMemory(rec.memoryRecommendation)}`}</BoldTextSC>
       </Body2P>
@@ -59,9 +73,51 @@ export const ColMemoryChange = columnHelper.accessor((rec) => rec, {
   },
 })
 
+export const ColService = columnHelper.accessor((rec) => rec.service, {
+  id: 'service',
+  header: 'Service',
+  cell: function Cell({ getValue }) {
+    const service = getValue()
+    const theme = useTheme()
+    const navigate = useNavigate()
+    if (!service) return null
+    return (
+      <a
+        onClick={() =>
+          navigate(
+            getServiceDetailsPath({
+              clusterId: service.cluster?.id,
+              serviceId: service.id,
+            })
+          )
+        }
+        css={{
+          color: theme.colors['text-light'],
+          cursor: 'pointer',
+          display: 'flex',
+          gap: theme.spacing.xsmall,
+          alignSelf: 'flex-end',
+          alignItems: 'center',
+          '&:hover': { textDecoration: 'underline' },
+        }}
+      >
+        <DistroProviderIconFrame
+          background="fill-two"
+          type="secondary"
+          distro={service.cluster?.distro}
+          provider={service.cluster?.provider?.cloud}
+        />
+        {service.name}
+        <ArrowTopRightIcon />
+      </a>
+    )
+  },
+})
+
 export const ColScalingPr = columnHelper.accessor((rec) => rec, {
   id: 'scalingPr',
-  header: 'Create PR',
+  header: '',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
     const [mutation, { data, loading, error }] =
@@ -85,7 +141,7 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
         )}
         {data?.applyScalingRecommendation?.id ? (
           <Button
-            primary
+            small
             type="button"
             endIcon={<LinkoutIcon />}
             as="a"
@@ -97,8 +153,9 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
           </Button>
         ) : (
           <Button
-            secondary
-            startIcon={<PrOpenIcon />}
+            small
+            floating
+            endIcon={<PrOpenIcon />}
             onClick={mutation}
             loading={loading}
           >

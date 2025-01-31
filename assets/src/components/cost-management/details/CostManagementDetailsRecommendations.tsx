@@ -19,10 +19,12 @@ import {
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import {
+  ColContainer,
   ColCpuChange,
   ColMemoryChange,
   ColName,
   ColScalingPr,
+  ColService,
 } from './ClusterScalingRecsTableCols'
 import { CMContextType } from './CostManagementDetails'
 
@@ -127,4 +129,11 @@ export function CostManagementDetailsRecommendations() {
   )
 }
 
-const cols = [ColName, ColCpuChange, ColMemoryChange, ColScalingPr]
+const cols = [
+  ColName,
+  ColContainer,
+  ColCpuChange,
+  ColMemoryChange,
+  ColService,
+  ColScalingPr,
+]

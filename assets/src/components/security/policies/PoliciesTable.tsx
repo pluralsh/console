@@ -67,6 +67,7 @@ export function PoliciesTable({
         gap: theme.spacing.small,
         height: '100%',
         width: '100%',
+        overflow: 'hidden',
       }}
     >
       <Table
