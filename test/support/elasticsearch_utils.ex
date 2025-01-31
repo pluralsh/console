@@ -7,25 +7,26 @@ defmodule ElasticsearchHelper do
 
   require Tesla
 
-  def index_exists?(base_url, index_name) do
-    Tesla.get!(base_url <> "/#{index_name}").status == 200
+  def log_document(service, message) do
+    %{
+      "@timestamp" => Timex.now(),
+      "message" => message,
+      "kubernetes" => %{
+        "namespace" => service.namespace
+      },
+      "cluster" => %{
+        "handle" => service.cluster.handle
+      }
+    }
   end
 
-  def delete_index(base_url, index_name) do
-    Tesla.delete!(base_url <> "/#{index_name}")
+  def index_doc(doc, base_url, index_name) do
+    HTTPoison.post!(base_url <> "/#{index_name}/_doc", Jason.encode!(doc),
+      "Content-Type": "application/json"
+    )
   end
 
-  def create_index(base_url, index_name) do
-    HTTPoison.put(base_url <> "/#{index_name}", "", [])
-  end
-
-  def index_documents(base_url, index_name, docs_json) do
-    Enum.each(docs_json, fn doc ->
-      HTTPoison.post!(base_url <> "/#{index_name}/_doc", Jason.encode!(doc),
-        "Content-Type": "application/json"
-      )
-    end)
-
+  def refresh(base_url, index_name) do
     HTTPoison.post!(base_url <> "/#{index_name}/_refresh", "")
   end
 end
