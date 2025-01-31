@@ -122,69 +122,72 @@ query GetServiceDeploymentComponents($id: ID!) {
     }
 }
 
-query GetServiceDeploymentForAgent($id: ID!) {
-    serviceDeployment(id: $id) {
+fragment ServiceDeploymentForAgent on ServiceDeployment {
+    id
+    name
+    namespace
+    version
+    tarball
+    deletedAt
+    dryRun
+    templated
+    sha
+    cluster {
         id
         name
-        namespace
+        handle
+        self
         version
-        tarball
-        deletedAt
-        dryRun
-        templated
-        sha
-        cluster {
+        pingedAt
+        metadata
+        currentVersion
+        kasUrl
+        distro
+    }
+    kustomize {
+        path
+    }
+    helm {
+        release
+        valuesFiles
+        ignoreHooks
+    }
+    configuration {
+        name
+        value
+    }
+    contexts {
+        name
+        configuration
+    }
+    syncConfig {
+        createNamespace
+        enforceNamespace
+        namespaceMetadata {
+            labels
+            annotations
+        }
+    }
+    revision {
+        id
+    }
+    imports {
+        id
+        stack {
             id
             name
-            handle
-            self
-            version
-            pingedAt
-            metadata
-            currentVersion
-            kasUrl
-            distro
         }
-        kustomize {
-            path
-        }
-        helm {
-            release
-            valuesFiles
-            ignoreHooks
-        }
-        configuration {
+        outputs {
             name
             value
+            secret
         }
-        contexts {
-            name
-            configuration
-        }
-        syncConfig {
-            createNamespace
-            enforceNamespace
-            namespaceMetadata {
-                labels
-                annotations
-            }
-        }
-        revision {
-            id
-        }
-        imports {
-            id
-            stack {
-                id
-                name
-            }
-            outputs {
-                name
-                value
-                secret
-            }
+    }
+}
 
-        }
+query GetServiceDeploymentForAgent($id: ID!) {
+    serviceDeployment(id: $id) {
+        ...ServiceDeploymentForAgent
     }
 }
 
@@ -207,6 +210,15 @@ query PagedClusterServices($after: String, $first: Int, $before: String, $last: 
         pageInfo { ...PageInfoFragment}
         edges {
             ...ServiceDeploymentEdgeFragment
+        }
+    }
+}
+
+query PagedClusterServicesForAgent($after: String, $first: Int, $before: String, $last: Int){
+    pagedClusterServices(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...ServiceDeploymentEdgeFragmentForAgent
         }
     }
 }
