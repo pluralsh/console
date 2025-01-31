@@ -24,7 +24,7 @@ import {
   StackIcon,
   Tooltip,
   WarningShieldIcon,
-  RamIcon,
+  EdgeComputeIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
 import { Avatar, Flex, Menu, MenuItem } from 'honorable'
@@ -103,33 +103,33 @@ function getMenuItems({
       hotkeys: ['shift S', '3'],
     },
     {
-      text: 'Service catalog',
-      expandedLabel: 'Service catalog',
-      icon: <CatalogIcon />,
-      path: CATALOGS_ABS_PATH,
-      hotkeys: ['4'],
-    },
-    {
       text: 'Kubernetes',
       expandedLabel: 'Kubernetes',
       icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['shift K', '5'],
+      hotkeys: ['shift K', '4'],
     },
     {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
       path: `${AI_ABS_PATH}`,
-      hotkeys: ['shift A', '6'],
+      hotkeys: ['shift A', '5'],
     },
     {
       text: 'Edge',
       expandedLabel: 'Edge',
-      icon: <RamIcon />,
+      icon: <EdgeComputeIcon />,
       path: EDGE_ABS_PATH,
-      hotkeys: ['shift E'],
+      hotkeys: ['shift E', '6'],
+    },
+    {
+      text: 'Service catalog',
+      expandedLabel: 'Service catalog',
+      icon: <CatalogIcon />,
+      path: CATALOGS_ABS_PATH,
+      hotkeys: ['7'],
     },
     {
       text: 'PRs',
@@ -140,7 +140,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P', '7'],
+      hotkeys: ['shift P', '8'],
     },
     {
       text: 'Security',
@@ -148,14 +148,14 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['8'],
+      hotkeys: ['9'],
     },
     {
       text: 'Cost Management',
       expandedLabel: 'Cost Management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
-      hotkeys: ['shift C+M', '9'],
+      hotkeys: ['shift C+M', '0'],
     },
     // {
     //   text: 'Backups',
@@ -175,7 +175,6 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-      hotkeys: ['0'],
     },
   ].filter((item) => item.enabled !== false)
 }
