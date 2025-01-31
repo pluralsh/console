@@ -20,32 +20,25 @@ export function ClusterOverviewCard() {
   const projectId = useProjectId()
   const {
     data: tableData,
-    loading,
+    loading: tableLoading,
     error: tableError,
     refetch,
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClustersQuery,
-      keyPath: ['clusters'],
-    },
-    {
-      projectId,
-    }
+    { queryHook: useClustersQuery, keyPath: ['clusters'] },
+    { projectId }
   )
 
-  const { data: chartData, error: chartError } = useUpgradeStatisticsQuery({
+  const {
+    data: chartData,
+    loading: chartLoading,
+    error: chartError,
+  } = useUpgradeStatisticsQuery({
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
-
-  if (chartError) {
-    return <GqlError error={chartError} />
-  }
-  if (tableError) {
-    return <GqlError error={tableError} />
-  }
 
   return (
     <div
@@ -55,20 +48,28 @@ export function ClusterOverviewCard() {
         maxHeight: HOME_CARD_MAX_HEIGHT,
       }}
     >
-      <ClusterOverviewChart data={chartData} />
-      <ClusterOverViewTable
-        data={tableData?.clusters?.edges ?? []}
-        loading={!tableData && loading}
-        refetch={refetch}
-        virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        onVirtualSliceChange={setVirtualSlice}
-        width="100%"
-        height="100%"
+      <ClusterOverviewChart
+        data={chartData}
+        loading={chartLoading}
+        error={chartError}
       />
+      {tableError ? (
+        <GqlError error={tableError} />
+      ) : (
+        <ClusterOverViewTable
+          data={tableData?.clusters?.edges ?? []}
+          loading={!tableData && tableLoading}
+          refetch={refetch}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={tableLoading}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          onVirtualSliceChange={setVirtualSlice}
+          width="100%"
+          height="100%"
+        />
+      )}
     </div>
   )
 }

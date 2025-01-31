@@ -1,7 +1,7 @@
 import {
+  ArrowScroll,
   FillLevelProvider,
   Flex,
-  Input,
   SearchIcon,
   SubTab,
   useSetBreadcrumbs,
@@ -24,16 +24,14 @@ import {
 import styled from 'styled-components'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
-import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
   { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
 ]
-
-export const POLL_INTERVAL = 10_000
 
 export enum ViolationFilter {
   All = 'All',
@@ -80,7 +78,6 @@ export function Policies() {
       { queryHook: usePolicyConstraintsQuery, keyPath: ['policyConstraints'] },
       policyQFilters
     )
-  const policies = data?.policyConstraints?.edges
 
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: { field: ConstraintViolationField.Kind },
@@ -91,41 +88,46 @@ export function Policies() {
 
   const header = useMemo(
     () => (
-      <Flex gap="large">
-        <Input
-          placeholder="Search policies"
-          startIcon={<SearchIcon />}
-          value={searchString}
-          width="320px"
-          onChange={(e) => {
-            setSearchString?.(e.currentTarget.value)
-          }}
-        />
-        <FillLevelProvider value={1}>
-          <Flex>
-            {Object.values(ViolationFilter)?.map((label) => (
-              <SubTab
-                key={label}
-                textValue={label}
-                active={violationFilter === label}
-                onClick={() => {
-                  setViolationFilter(label as ViolationFilter)
-                }}
-              >
-                <Flex gap="small">
-                  {label}
-                  {/* TODO: add back when back end supports */}
-                  {/* <AggregatedPolicyStatsChip
+      <ArrowScroll>
+        <FiltersWrapperSC>
+          <IconExpander
+            tooltip="Search policies"
+            icon={<SearchIcon />}
+            active={!!searchString}
+            onClear={() => setSearchString('')}
+          >
+            <ExpandedInput
+              inputValue={searchString}
+              onChange={setSearchString}
+              placeholder="Search policies"
+            />
+          </IconExpander>
+          <FillLevelProvider value={1}>
+            <Flex>
+              {Object.values(ViolationFilter)?.map((label) => (
+                <SubTab
+                  key={label}
+                  textValue={label}
+                  active={violationFilter === label}
+                  onClick={() => {
+                    setViolationFilter(label as ViolationFilter)
+                  }}
+                >
+                  <Flex gap="small">
+                    {label}
+                    {/* TODO: add back when back end supports */}
+                    {/* <AggregatedPolicyStatsChip
                     violationFilter={label as ViolationFilter}
                     kindsData={kindsData}
                     namespacesData={namespacesData}
                   /> */}
-                </Flex>
-              </SubTab>
-            ))}
-          </Flex>
-        </FillLevelProvider>
-      </Flex>
+                  </Flex>
+                </SubTab>
+              ))}
+            </Flex>
+          </FillLevelProvider>
+        </FiltersWrapperSC>
+      </ArrowScroll>
     ),
     [searchString, violationFilter]
   )
@@ -155,11 +157,6 @@ export function Policies() {
           namespacesData={namespacesData}
         />
       </div>
-      <div css={{ gridArea: 'violations' }}>
-        {policies && policies?.length > 0 && (
-          <PoliciesViolationsGauge filters={policyQFilters} />
-        )}
-      </div>
       <div css={{ gridArea: 'table', overflow: 'hidden' }}>
         <PoliciesTable
           fullHeightWrap
@@ -178,6 +175,12 @@ export function Policies() {
     </PoliciesContainer>
   )
 }
+
+const FiltersWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
+  overflow: 'auto',
+}))
 
 const PoliciesContainer = styled.div(({ theme }) => ({
   display: 'grid',
