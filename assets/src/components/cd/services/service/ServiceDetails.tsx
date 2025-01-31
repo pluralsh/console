@@ -127,7 +127,13 @@ export const getServiceDetailsBreadcrumbs = ({
 ]
 
 export const DirLabelWithChip = memo(
-  ({ count, type }: { count: Nullable<number>; type: 'Error' | 'Alerts' }) => {
+  ({
+    count,
+    type,
+  }: {
+    count: Nullable<number>
+    type: 'Error' | 'Alerts' | 'Recommendations'
+  }) => {
     const severity =
       type === 'Error' ? ((count || 0) > 0 ? 'danger' : 'success') : 'neutral'
     return (
@@ -194,6 +200,16 @@ export const getDirectory = ({
         <DirLabelWithChip
           count={serviceDeployment.alerts?.edges?.length}
           type="Alerts"
+        />
+      ),
+      enabled: true,
+    },
+    {
+      path: 'recommendations',
+      label: (
+        <DirLabelWithChip
+          count={serviceDeployment.scalingRecommendations?.length}
+          type="Recommendations"
         />
       ),
       enabled: true,

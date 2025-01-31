@@ -132,6 +132,7 @@ import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 import styled from 'styled-components'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
+import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -526,6 +527,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceAlerts />}
       path="alerts"
+    />
+    <Route
+      element={<ServiceScalingRecs />}
+      path="recommendations"
     />
     <Route
       element={<ServiceInsights />}

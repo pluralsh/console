@@ -46,6 +46,7 @@ export const ColContainer = columnHelper.accessor((rec) => rec.container, {
 export const ColCpuChange = columnHelper.accessor((rec) => rec, {
   id: 'cpuChange',
   header: 'CPU change',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
     return (
@@ -60,6 +61,7 @@ export const ColCpuChange = columnHelper.accessor((rec) => rec, {
 export const ColMemoryChange = columnHelper.accessor((rec) => rec, {
   id: 'memoryChange',
   header: 'Memory change',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
     return (
@@ -115,6 +117,7 @@ export const ColService = columnHelper.accessor((rec) => rec.service, {
 export const ColScalingPr = columnHelper.accessor((rec) => rec, {
   id: 'scalingPr',
   header: '',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     const rec = getValue()
     const [mutation, { data, loading, error }] =
