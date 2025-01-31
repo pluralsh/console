@@ -159,6 +159,10 @@ fragment ServiceDeploymentEdgeFragment on ServiceDeploymentEdge {
     node { ...ServiceDeploymentBaseFragment }
 }
 
+fragment ServiceDeploymentEdgeFragmentForAgent on ServiceDeploymentEdge {
+    node { ...ServiceDeploymentForAgent }
+}
+
 fragment ServiceDeploymentIdEdgeFragment on ServiceDeploymentEdge {
     node { ...ServiceDeploymentIdFragment }
 }
