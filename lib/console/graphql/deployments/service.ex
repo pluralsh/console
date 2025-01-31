@@ -215,6 +215,8 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.list_alerts/3
     end
 
+    field :scaling_recommendations, list_of(:cluster_scaling_recommendation), resolve: dataloader(Deployments)
+
     field :component_metrics, :service_component_metrics do
       arg :component_id, non_null(:id)
       arg :start,        :datetime

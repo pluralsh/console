@@ -24,3 +24,6 @@ assets/.yarn/*
 !assets/.yarn/releases
 !assets/.yarn/sdks
 !assets/.yarn/versions
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

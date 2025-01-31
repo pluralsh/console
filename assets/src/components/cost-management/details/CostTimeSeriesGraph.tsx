@@ -1,24 +1,28 @@
 import { ResponsiveLine } from '@nivo/line'
-import { ClusterUsageHistoryFragment } from 'generated/graphql'
-import styled, { useTheme } from 'styled-components'
-import { graphTheme, SliceTooltip } from '../../utils/Graph'
-import dayjs from 'dayjs'
-import { COLORS } from 'utils/color'
+import { EmptyState } from '@pluralsh/design-system'
 import { HOME_CARD_MAX_HEIGHT } from 'components/home/HomeCard'
+import dayjs from 'dayjs'
+import { ClusterUsageHistoryFragment } from 'generated/graphql'
+import styled from 'styled-components'
+import { COLORS } from 'utils/color'
+import { SliceTooltip, useGraphTheme } from '../../utils/Graph'
 
 export function CostTimeSeriesGraph({
   history,
 }: {
   history: ClusterUsageHistoryFragment[]
 }) {
-  const theme = useTheme()
+  const graphTheme = useGraphTheme()
   const data = getGraphData(history)
+
+  if (!data) return <EmptyState message="No time-series data available" />
+
   return (
     <GraphWrapperSC>
       <ResponsiveLine
         // @ts-ignore, best for this to just be a fixed size
         height={HOME_CARD_MAX_HEIGHT}
-        theme={graphTheme(theme)}
+        theme={graphTheme}
         data={data}
         tooltip={SliceTooltip}
         colors={COLORS}
@@ -124,7 +128,10 @@ const getGraphData = (history: ClusterUsageHistoryFragment[]) => {
     })
   })
 
-  return [cpuData, memoryData, storageData]
+  const data = [cpuData, memoryData, storageData]
+
+  // return null instead of empty arrays if there's no data at all
+  return data.some((obj) => obj.data.length > 0) ? data : null
 }
 
 const GraphWrapperSC = styled.div((_) => ({

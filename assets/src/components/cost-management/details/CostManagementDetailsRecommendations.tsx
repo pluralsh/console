@@ -8,11 +8,15 @@ import {
   SelectButton,
   Table,
   TrashCanIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import {
   ClusterScalingRecommendationFragment,
   ScalingRecommendationType,
 } from 'generated/graphql'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import {
   ColCpuChange,
@@ -21,9 +25,17 @@ import {
   ColScalingPr,
 } from './ClusterScalingRecsTableCols'
 import { CMContextType } from './CostManagementDetails'
-import { useMemo } from 'react'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
-import { GqlError } from 'components/utils/Alert'
+
+import {
+  COST_MANAGEMENT_ABS_PATH,
+  COST_MANAGEMENT_REL_PATH,
+} from 'routes/costManagementRoutesConsts'
+
+const getBreadcrumbs = (clusterName: string) => [
+  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: clusterName },
+  { label: 'recommendations' },
+]
 
 export function CostManagementDetailsRecommendations() {
   const {
@@ -32,7 +44,12 @@ export function CostManagementDetailsRecommendations() {
     setRecommendationsQ,
     recType,
     setRecType,
+    clusterName,
   } = useOutletContext<CMContextType>()
+
+  useSetBreadcrumbs(
+    useMemo(() => getBreadcrumbs(clusterName ?? ''), [clusterName])
+  )
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     recommendationsQuery

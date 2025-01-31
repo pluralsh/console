@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -1835,6 +1835,12 @@ export type ClusterUsageHistoryEdge = {
   __typename?: 'ClusterUsageHistoryEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ClusterUsageHistory>;
+};
+
+export type ClusterVulnAggregate = {
+  __typename?: 'ClusterVulnAggregate';
+  cluster?: Maybe<Cluster>;
+  count: Scalars['Int']['output'];
 };
 
 export type CommandAttributes = {
@@ -4908,6 +4914,7 @@ export type PrAutomationEdge = {
 
 /** templates to apply in this pr */
 export type PrAutomationTemplateAttributes = {
+  condition?: InputMaybe<Scalars['String']['input']>;
   context?: InputMaybe<Scalars['Json']['input']>;
   destination: Scalars['String']['input'];
   /** whether the source template is sourced from an external git repo bound to this automation */
@@ -5029,6 +5036,7 @@ export enum PrStatus {
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
   __typename?: 'PrTemplateSpec';
+  condition?: Maybe<Scalars['String']['output']>;
   context?: Maybe<Scalars['Map']['output']>;
   destination: Scalars['String']['output'];
   external: Scalars['Boolean']['output'];
@@ -6626,6 +6634,7 @@ export type RootQueryType = {
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   clusterUsage?: Maybe<ClusterUsage>;
   clusterUsages?: Maybe<ClusterUsageConnection>;
+  clusterVulnerabilityAggregate?: Maybe<Array<Maybe<ClusterVulnAggregate>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
@@ -7000,6 +7009,11 @@ export type RootQueryTypeClusterUsagesArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tagQuery?: InputMaybe<TagQuery>;
+};
+
+
+export type RootQueryTypeClusterVulnerabilityAggregateArgs = {
+  grade: VulnReportGrade;
 };
 
 
@@ -8186,6 +8200,7 @@ export type ServiceDeployment = {
   revision?: Maybe<Revision>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
+  scalingRecommendations?: Maybe<Array<Maybe<ClusterScalingRecommendation>>>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   /** A summary status enum for the health of this service */
@@ -10035,7 +10050,8 @@ export type ClusterSelectorQueryVariables = Exact<{
 export type ClusterSelectorQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null };
 
 export type ClusterQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -10340,19 +10356,14 @@ export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean 
 
 export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
-export type UpdateDeploymentSettingsMutationVariables = Exact<{
-  attributes: DeploymentSettingsAttributes;
-}>;
+export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
-
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null };
 
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
-
-export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -10362,6 +10373,21 @@ export type ObservabilityProvidersQueryVariables = Exact<{
 
 export type ObservabilityProvidersQuery = { __typename?: 'RootQueryType', observabilityProviders?: { __typename?: 'ObservabilityProviderConnection', edges?: Array<{ __typename?: 'ObservabilityProviderEdge', node?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type ObservabilityWebhooksQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ObservabilityWebhooksQuery = { __typename?: 'RootQueryType', observabilityWebhooks?: { __typename?: 'ObservabilityWebhookConnection', edges?: Array<{ __typename?: 'ObservabilityWebhookEdge', node?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type UpdateDeploymentSettingsMutationVariables = Exact<{
+  attributes: DeploymentSettingsAttributes;
+}>;
+
+
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type UpsertObservabilityProviderMutationVariables = Exact<{
   attributes: ObservabilityProviderAttributes;
 }>;
@@ -10369,12 +10395,26 @@ export type UpsertObservabilityProviderMutationVariables = Exact<{
 
 export type UpsertObservabilityProviderMutation = { __typename?: 'RootMutationType', upsertObservabilityProvider?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type UpsertObservabilityWebhookMutationVariables = Exact<{
+  attributes: ObservabilityWebhookAttributes;
+}>;
+
+
+export type UpsertObservabilityWebhookMutation = { __typename?: 'RootMutationType', upsertObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type DeleteObservabilityProviderMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
 export type DeleteObservabilityProviderMutation = { __typename?: 'RootMutationType', deleteObservabilityProvider?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteObservabilityWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteObservabilityWebhookMutation = { __typename?: 'RootMutationType', deleteObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, description?: string | null, labels?: Record<string, unknown> | null, annotations?: Record<string, unknown> | null, pullSecrets?: Array<string | null> | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: Record<string, unknown> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
 
@@ -11884,6 +11924,8 @@ export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, 
 
 export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade };
 
+export type ClusterVulnAggregateFragment = { __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null };
+
 export type CvssBundleFragment = { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
 
 export type VulnerabilityReportsQueryVariables = Exact<{
@@ -11913,6 +11955,13 @@ export type VulnerabilityStatisticsQueryVariables = Exact<{
 
 
 export type VulnerabilityStatisticsQuery = { __typename?: 'RootQueryType', vulnerabilityStatistics?: Array<{ __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade } | null> | null };
+
+export type ClusterVulnerabilityAggregateQueryVariables = Exact<{
+  grade: VulnReportGrade;
+}>;
+
+
+export type ClusterVulnerabilityAggregateQuery = { __typename?: 'RootQueryType', clusterVulnerabilityAggregate?: Array<{ __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null };
 
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
@@ -12919,6 +12968,16 @@ export const ObservabilityProviderFragmentDoc = gql`
   id
   name
   type
+  insertedAt
+  updatedAt
+}
+    `;
+export const ObservabilityWebhookFragmentDoc = gql`
+    fragment ObservabilityWebhook on ObservabilityWebhook {
+  id
+  name
+  type
+  url
   insertedAt
   updatedAt
 }
@@ -15096,6 +15155,19 @@ export const VulnerabilityStatisticFragmentDoc = gql`
     fragment VulnerabilityStatistic on VulnerabilityStatistic {
   count
   grade
+}
+    `;
+export const ClusterVulnAggregateFragmentDoc = gql`
+    fragment ClusterVulnAggregate on ClusterVulnAggregate {
+  cluster {
+    id
+    name
+    handle
+    project {
+      name
+    }
+  }
+  count
 }
     `;
 export const AiCompletionDocument = gql`
@@ -17381,8 +17453,8 @@ export type ClusterSelectorLazyQueryHookResult = ReturnType<typeof useClusterSel
 export type ClusterSelectorSuspenseQueryHookResult = ReturnType<typeof useClusterSelectorSuspenseQuery>;
 export type ClusterSelectorQueryResult = Apollo.QueryResult<ClusterSelectorQuery, ClusterSelectorQueryVariables>;
 export const ClusterDocument = gql`
-    query Cluster($id: ID!) {
-  cluster(id: $id) {
+    query Cluster($id: ID, $handle: String) {
+  cluster(id: $id, handle: $handle) {
     ...Cluster
   }
 }
@@ -17401,10 +17473,11 @@ export const ClusterDocument = gql`
  * const { data, loading, error } = useClusterQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      handle: // value for 'handle'
  *   },
  * });
  */
-export function useClusterQuery(baseOptions: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+export function useClusterQuery(baseOptions?: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
       }
@@ -18797,39 +18870,6 @@ export function useSyncGlobalServiceMutation(baseOptions?: Apollo.MutationHookOp
 export type SyncGlobalServiceMutationHookResult = ReturnType<typeof useSyncGlobalServiceMutation>;
 export type SyncGlobalServiceMutationResult = Apollo.MutationResult<SyncGlobalServiceMutation>;
 export type SyncGlobalServiceMutationOptions = Apollo.BaseMutationOptions<SyncGlobalServiceMutation, SyncGlobalServiceMutationVariables>;
-export const UpdateDeploymentSettingsDocument = gql`
-    mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
-  updateDeploymentSettings(attributes: $attributes) {
-    ...DeploymentSettings
-  }
-}
-    ${DeploymentSettingsFragmentDoc}`;
-export type UpdateDeploymentSettingsMutationFn = Apollo.MutationFunction<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
-
-/**
- * __useUpdateDeploymentSettingsMutation__
- *
- * To run a mutation, you first call `useUpdateDeploymentSettingsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateDeploymentSettingsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateDeploymentSettingsMutation, { data, loading, error }] = useUpdateDeploymentSettingsMutation({
- *   variables: {
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useUpdateDeploymentSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>(UpdateDeploymentSettingsDocument, options);
-      }
-export type UpdateDeploymentSettingsMutationHookResult = ReturnType<typeof useUpdateDeploymentSettingsMutation>;
-export type UpdateDeploymentSettingsMutationResult = Apollo.MutationResult<UpdateDeploymentSettingsMutation>;
-export type UpdateDeploymentSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
 export const DeploymentSettingsDocument = gql`
     query DeploymentSettings {
   deploymentSettings {
@@ -18918,6 +18958,88 @@ export type ObservabilityProvidersQueryHookResult = ReturnType<typeof useObserva
 export type ObservabilityProvidersLazyQueryHookResult = ReturnType<typeof useObservabilityProvidersLazyQuery>;
 export type ObservabilityProvidersSuspenseQueryHookResult = ReturnType<typeof useObservabilityProvidersSuspenseQuery>;
 export type ObservabilityProvidersQueryResult = Apollo.QueryResult<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>;
+export const ObservabilityWebhooksDocument = gql`
+    query ObservabilityWebhooks($first: Int, $after: String) {
+  observabilityWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        ...ObservabilityWebhook
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${ObservabilityWebhookFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useObservabilityWebhooksQuery__
+ *
+ * To run a query within a React component, call `useObservabilityWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObservabilityWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObservabilityWebhooksQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useObservabilityWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>(ObservabilityWebhooksDocument, options);
+      }
+export function useObservabilityWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>(ObservabilityWebhooksDocument, options);
+        }
+export function useObservabilityWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>(ObservabilityWebhooksDocument, options);
+        }
+export type ObservabilityWebhooksQueryHookResult = ReturnType<typeof useObservabilityWebhooksQuery>;
+export type ObservabilityWebhooksLazyQueryHookResult = ReturnType<typeof useObservabilityWebhooksLazyQuery>;
+export type ObservabilityWebhooksSuspenseQueryHookResult = ReturnType<typeof useObservabilityWebhooksSuspenseQuery>;
+export type ObservabilityWebhooksQueryResult = Apollo.QueryResult<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>;
+export const UpdateDeploymentSettingsDocument = gql`
+    mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+  updateDeploymentSettings(attributes: $attributes) {
+    ...DeploymentSettings
+  }
+}
+    ${DeploymentSettingsFragmentDoc}`;
+export type UpdateDeploymentSettingsMutationFn = Apollo.MutationFunction<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
+
+/**
+ * __useUpdateDeploymentSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateDeploymentSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateDeploymentSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateDeploymentSettingsMutation, { data, loading, error }] = useUpdateDeploymentSettingsMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateDeploymentSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>(UpdateDeploymentSettingsDocument, options);
+      }
+export type UpdateDeploymentSettingsMutationHookResult = ReturnType<typeof useUpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationResult = Apollo.MutationResult<UpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
 export const UpsertObservabilityProviderDocument = gql`
     mutation UpsertObservabilityProvider($attributes: ObservabilityProviderAttributes!) {
   upsertObservabilityProvider(attributes: $attributes) {
@@ -18951,6 +19073,39 @@ export function useUpsertObservabilityProviderMutation(baseOptions?: Apollo.Muta
 export type UpsertObservabilityProviderMutationHookResult = ReturnType<typeof useUpsertObservabilityProviderMutation>;
 export type UpsertObservabilityProviderMutationResult = Apollo.MutationResult<UpsertObservabilityProviderMutation>;
 export type UpsertObservabilityProviderMutationOptions = Apollo.BaseMutationOptions<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>;
+export const UpsertObservabilityWebhookDocument = gql`
+    mutation UpsertObservabilityWebhook($attributes: ObservabilityWebhookAttributes!) {
+  upsertObservabilityWebhook(attributes: $attributes) {
+    ...ObservabilityWebhook
+  }
+}
+    ${ObservabilityWebhookFragmentDoc}`;
+export type UpsertObservabilityWebhookMutationFn = Apollo.MutationFunction<UpsertObservabilityWebhookMutation, UpsertObservabilityWebhookMutationVariables>;
+
+/**
+ * __useUpsertObservabilityWebhookMutation__
+ *
+ * To run a mutation, you first call `useUpsertObservabilityWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertObservabilityWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertObservabilityWebhookMutation, { data, loading, error }] = useUpsertObservabilityWebhookMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertObservabilityWebhookMutation(baseOptions?: Apollo.MutationHookOptions<UpsertObservabilityWebhookMutation, UpsertObservabilityWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertObservabilityWebhookMutation, UpsertObservabilityWebhookMutationVariables>(UpsertObservabilityWebhookDocument, options);
+      }
+export type UpsertObservabilityWebhookMutationHookResult = ReturnType<typeof useUpsertObservabilityWebhookMutation>;
+export type UpsertObservabilityWebhookMutationResult = Apollo.MutationResult<UpsertObservabilityWebhookMutation>;
+export type UpsertObservabilityWebhookMutationOptions = Apollo.BaseMutationOptions<UpsertObservabilityWebhookMutation, UpsertObservabilityWebhookMutationVariables>;
 export const DeleteObservabilityProviderDocument = gql`
     mutation DeleteObservabilityProvider($id: ID!) {
   deleteObservabilityProvider(id: $id) {
@@ -18984,6 +19139,39 @@ export function useDeleteObservabilityProviderMutation(baseOptions?: Apollo.Muta
 export type DeleteObservabilityProviderMutationHookResult = ReturnType<typeof useDeleteObservabilityProviderMutation>;
 export type DeleteObservabilityProviderMutationResult = Apollo.MutationResult<DeleteObservabilityProviderMutation>;
 export type DeleteObservabilityProviderMutationOptions = Apollo.BaseMutationOptions<DeleteObservabilityProviderMutation, DeleteObservabilityProviderMutationVariables>;
+export const DeleteObservabilityWebhookDocument = gql`
+    mutation DeleteObservabilityWebhook($id: ID!) {
+  deleteObservabilityWebhook(id: $id) {
+    ...ObservabilityWebhook
+  }
+}
+    ${ObservabilityWebhookFragmentDoc}`;
+export type DeleteObservabilityWebhookMutationFn = Apollo.MutationFunction<DeleteObservabilityWebhookMutation, DeleteObservabilityWebhookMutationVariables>;
+
+/**
+ * __useDeleteObservabilityWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteObservabilityWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteObservabilityWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteObservabilityWebhookMutation, { data, loading, error }] = useDeleteObservabilityWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteObservabilityWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteObservabilityWebhookMutation, DeleteObservabilityWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteObservabilityWebhookMutation, DeleteObservabilityWebhookMutationVariables>(DeleteObservabilityWebhookDocument, options);
+      }
+export type DeleteObservabilityWebhookMutationHookResult = ReturnType<typeof useDeleteObservabilityWebhookMutation>;
+export type DeleteObservabilityWebhookMutationResult = Apollo.MutationResult<DeleteObservabilityWebhookMutation>;
+export type DeleteObservabilityWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteObservabilityWebhookMutation, DeleteObservabilityWebhookMutationVariables>;
 export const ManagedNamespacesDocument = gql`
     query ManagedNamespaces($first: Int, $after: String, $projectId: ID) {
   managedNamespaces(first: $first, after: $after, projectId: $projectId) {
@@ -25658,6 +25846,46 @@ export type VulnerabilityStatisticsQueryHookResult = ReturnType<typeof useVulner
 export type VulnerabilityStatisticsLazyQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsLazyQuery>;
 export type VulnerabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsSuspenseQuery>;
 export type VulnerabilityStatisticsQueryResult = Apollo.QueryResult<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>;
+export const ClusterVulnerabilityAggregateDocument = gql`
+    query ClusterVulnerabilityAggregate($grade: VulnReportGrade!) {
+  clusterVulnerabilityAggregate(grade: $grade) {
+    ...ClusterVulnAggregate
+  }
+}
+    ${ClusterVulnAggregateFragmentDoc}`;
+
+/**
+ * __useClusterVulnerabilityAggregateQuery__
+ *
+ * To run a query within a React component, call `useClusterVulnerabilityAggregateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterVulnerabilityAggregateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterVulnerabilityAggregateQuery({
+ *   variables: {
+ *      grade: // value for 'grade'
+ *   },
+ * });
+ */
+export function useClusterVulnerabilityAggregateQuery(baseOptions: Apollo.QueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+      }
+export function useClusterVulnerabilityAggregateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+        }
+export function useClusterVulnerabilityAggregateSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>(ClusterVulnerabilityAggregateDocument, options);
+        }
+export type ClusterVulnerabilityAggregateQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateQuery>;
+export type ClusterVulnerabilityAggregateLazyQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateLazyQuery>;
+export type ClusterVulnerabilityAggregateSuspenseQueryHookResult = ReturnType<typeof useClusterVulnerabilityAggregateSuspenseQuery>;
+export type ClusterVulnerabilityAggregateQueryResult = Apollo.QueryResult<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>;
 export const namedOperations = {
   Query: {
     AICompletion: 'AICompletion',
@@ -25709,6 +25937,7 @@ export const namedOperations = {
     GetGlobalServiceServices: 'GetGlobalServiceServices',
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
+    ObservabilityWebhooks: 'ObservabilityWebhooks',
     ManagedNamespaces: 'ManagedNamespaces',
     GetManagedNamespaceName: 'GetManagedNamespaceName',
     GetManagedNamespace: 'GetManagedNamespace',
@@ -25799,7 +26028,8 @@ export const namedOperations = {
     Refresh: 'Refresh',
     VulnerabilityReports: 'VulnerabilityReports',
     VulnerabilityReport: 'VulnerabilityReport',
-    VulnerabilityStatistics: 'VulnerabilityStatistics'
+    VulnerabilityStatistics: 'VulnerabilityStatistics',
+    ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate'
   },
   Mutation: {
     CreateAIPin: 'CreateAIPin',
@@ -25846,7 +26076,9 @@ export const namedOperations = {
     SyncGlobalService: 'SyncGlobalService',
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
     UpsertObservabilityProvider: 'UpsertObservabilityProvider',
+    UpsertObservabilityWebhook: 'UpsertObservabilityWebhook',
     DeleteObservabilityProvider: 'DeleteObservabilityProvider',
+    DeleteObservabilityWebhook: 'DeleteObservabilityWebhook',
     UpsertObserver: 'UpsertObserver',
     DeleteObserver: 'DeleteObserver',
     deletePipeline: 'deletePipeline',
@@ -25978,6 +26210,7 @@ export const namedOperations = {
     AiSettings: 'AiSettings',
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProvider: 'ObservabilityProvider',
+    ObservabilityWebhook: 'ObservabilityWebhook',
     ManagedNamespace: 'ManagedNamespace',
     ServiceTemplate: 'ServiceTemplate',
     Observer: 'Observer',
@@ -26100,6 +26333,7 @@ export const namedOperations = {
     VulnerabilityReport: 'VulnerabilityReport',
     Vulnerability: 'Vulnerability',
     VulnerabilityStatistic: 'VulnerabilityStatistic',
+    ClusterVulnAggregate: 'ClusterVulnAggregate',
     CvssBundle: 'CvssBundle'
   }
 }

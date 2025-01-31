@@ -2153,6 +2153,7 @@ _Appears in:_
 | `external` _boolean_ | Whether it is being sourced from an external git repository |  | Required: {} <br /> |
 | `source` _string_ | The source file to use for templating |  | Optional: {} <br /> |
 | `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Additional context overrides to apply to this template, will be merged into the user-provided configuration options |  | Optional: {} <br /> |
+| `condition` _string_ | Condition string that will be evaluated to determine if source files should be copied or not. |  | Optional: {} <br /> |
 
 
 #### PrAutomationTrigger

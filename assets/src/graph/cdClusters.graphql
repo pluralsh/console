@@ -458,8 +458,8 @@ query ClusterSelector(
   }
 }
 
-query Cluster($id: ID!) {
-  cluster(id: $id) {
+query Cluster($id: ID, $handle: String) {
+  cluster(id: $id, handle: $handle) {
     ...Cluster
   }
 }

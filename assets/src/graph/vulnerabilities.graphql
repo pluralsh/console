@@ -56,6 +56,18 @@ fragment VulnerabilityStatistic on VulnerabilityStatistic {
   grade
 }
 
+fragment ClusterVulnAggregate on ClusterVulnAggregate {
+  cluster {
+    id
+    name
+    handle
+    project {
+      name
+    }
+  }
+  count
+}
+
 fragment CvssBundle on CvssBundle {
   attackComplexity
   attackVector
@@ -122,5 +134,11 @@ query VulnerabilityStatistics(
 ) {
   vulnerabilityStatistics(clusters: $clusters, namespaces: $namespaces, q: $q) {
     ...VulnerabilityStatistic
+  }
+}
+
+query ClusterVulnerabilityAggregate($grade: VulnReportGrade!) {
+  clusterVulnerabilityAggregate(grade: $grade) {
+    ...ClusterVulnAggregate
   }
 }

@@ -187,6 +187,7 @@ export const ColActions = columnHelper.display({
           open={menuKey === MenuItemKey.Edit}
           onClose={() => setMenuKey('')}
           operationType="update"
+          refetch={() => table.options.meta?.refetch?.()}
         />
         <DeleteObservabilityProviderModal
           observabilityProvider={observabilityProvider}

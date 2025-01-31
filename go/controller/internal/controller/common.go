@@ -324,3 +324,11 @@ func mergeHelmValues(ctx context.Context, c runtimeclient.Client, secretRef *cor
 func notFoundOrReadyErrorMessage(err error) string {
 	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
 }
+
+func getGitRepoID(ctx context.Context, c runtimeclient.Client, namespacedName v1alpha1.NamespacedName) (*string, error) {
+	gitRepo := &v1alpha1.GitRepository{}
+	if err := c.Get(ctx, types.NamespacedName{Name: namespacedName.Name, Namespace: namespacedName.Namespace}, gitRepo); err != nil {
+		return nil, err
+	}
+	return gitRepo.Status.ID, nil
+}

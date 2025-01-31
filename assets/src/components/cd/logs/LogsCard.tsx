@@ -69,7 +69,6 @@ export const LogsCard = memo(function LogsCard({
 
   const fetchOlderLogs = useCallback(() => {
     if (loading || !hasNextPage) return
-    if (live) toggleLive()
     fetchMore({
       variables: {
         limit: limit || LIMIT,
@@ -88,18 +87,18 @@ export const LogsCard = memo(function LogsCard({
         return { logAggregation: [...(prev.logAggregation ?? []), ...newLogs] }
       },
     })
-  }, [
-    loading,
-    hasNextPage,
-    live,
-    toggleLive,
-    fetchMore,
-    limit,
-    logs,
-    time?.duration,
-  ])
+  }, [loading, hasNextPage, fetchMore, limit, logs, time?.duration])
 
   const initialLoading = !data && loading
+
+  const onScrollCapture = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const scrollTop = e.currentTarget.scrollTop
+      if (scrollTop === 0 && !live) toggleLive()
+      else if (scrollTop > 0 && live) toggleLive()
+    },
+    [live, toggleLive]
+  )
 
   return error ? (
     <GqlError error={error} />
@@ -127,6 +126,7 @@ export const LogsCard = memo(function LogsCard({
           setLogLine(row.original)
           setContextPanelOpen(true)
         }}
+        onScrollCapture={onScrollCapture}
       />
       {logLine && (
         <Flyover

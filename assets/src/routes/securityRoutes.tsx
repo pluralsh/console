@@ -12,6 +12,7 @@ import {
   POLICIES_DETAILS_PATH,
   POLICIES_REL_PATH,
   POLICY_PARAM_ID,
+  SECURITY_OVERVIEW_ABS_PATH,
   SECURITY_REL_PATH,
   VULNERABILITY_REPORT_PARAM_ID,
   VULNERABILITY_REPORTS_ABS_PATH,
@@ -21,6 +22,7 @@ import PolicyDetails from 'components/security/policies/policy/details/PolicyDet
 import PolicyAffectedResources from 'components/security/policies/policy/affectedResources/PolicyAffectedResources'
 import { KUBERNETES_PARAM_CLUSTER } from './kubernetesRoutesConsts'
 import Cluster from 'components/kubernetes/Cluster'
+import { SecurityOverview } from 'components/security/overview/SecurityOverview'
 
 export const securityRoutes = [
   <Route
@@ -32,9 +34,13 @@ export const securityRoutes = [
       element={
         <Navigate
           replace
-          to={POLICIES_ABS_PATH}
+          to={SECURITY_OVERVIEW_ABS_PATH}
         />
       }
+    />
+    <Route
+      path={SECURITY_OVERVIEW_ABS_PATH}
+      element={<SecurityOverview />}
     />
     <Route
       path={POLICIES_REL_PATH}

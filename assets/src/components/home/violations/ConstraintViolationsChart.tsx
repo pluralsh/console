@@ -1,7 +1,7 @@
 import { RadialBar } from '@nivo/radial-bar'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import {
-  COLOR_MAP,
+  CHART_COLOR_MAP,
   createCenteredMetric,
 } from 'components/utils/RadialBarChart'
 import { PolicyStatisticsQuery } from 'generated/graphql'
@@ -22,11 +22,7 @@ export function ConstraintViolationsChart({
 }: {
   data: PolicyStatisticsQuery | undefined
 }) {
-  const chartColors = {
-    green: COLOR_MAP.green,
-    red: COLOR_MAP.red,
-  }
-  const { chartData, legendData } = useChartData(data || {}, chartColors)
+  const { chartData } = useChartData(data || {})
 
   const CenterLabel = createCenteredMetric(
     `${data ? getPercentCompliance(data) : '-'}%`,
@@ -37,21 +33,12 @@ export function ConstraintViolationsChart({
     <HomeCard
       icon={<WarningShieldIcon />}
       title="Policy overview"
-      tooltip={
-        <div>
-          {legendData.map((legend, index) => (
-            <CustomLegend
-              key={index}
-              data={legend}
-            />
-          ))}
-        </div>
-      }
+      tooltip={<CustomLegend data={chartData} />}
       link={POLICIES_ABS_PATH}
     >
       {data?.policyStatistics ? (
         <RadialBar
-          colors={(item) => chartColors[item.data.color]}
+          colors={(item) => item.data.color}
           endAngle={360}
           cornerRadius={5}
           padAngle={2}
@@ -76,10 +63,7 @@ export function ConstraintViolationsChart({
   )
 }
 
-const useChartData = (
-  data: PolicyStatisticsQuery,
-  colorMap: Record<string, string>
-) => {
+const useChartData = (data: PolicyStatisticsQuery) => {
   const numWithViolations =
     data?.policyStatistics?.find((stat) => stat?.aggregate === 'exists')
       ?.count ?? 0
@@ -93,30 +77,21 @@ const useChartData = (
         id: 'compliance',
         data: [
           {
-            color: 'red',
+            color: CHART_COLOR_MAP.red,
             x: 'With violations',
             y: numWithViolations,
           },
           {
-            color: 'green',
+            color: CHART_COLOR_MAP.green,
             x: 'Without violations',
             y: numWithoutViolations || 0,
           },
         ],
       },
     ]
-    const legendData = chartData
-      .map((legend) =>
-        legend.data.map((val) => ({
-          label: val.x,
-          value: val.y,
-          color: colorMap[val.color],
-        }))
-      )
-      .reverse()
 
-    return { chartData, legendData }
-  }, [numWithViolations, numWithoutViolations, colorMap])
+    return { chartData }
+  }, [numWithViolations, numWithoutViolations])
 }
 
 const getPercentCompliance = (data: PolicyStatisticsQuery) => {
