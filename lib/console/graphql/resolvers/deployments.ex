@@ -70,7 +70,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Vulnerability,
     ClusterInsightComponent,
     ServiceConfiguration,
-    CloudAddon
+    CloudAddon,
+    ClusterScalingRecommendation
   }
 
   def query(Project, _), do: Project
@@ -139,6 +140,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Vulnerability, _), do: Vulnerability
   def query(ClusterInsightComponent, _), do: ClusterInsightComponent
   def query(ServiceConfiguration, _), do: ServiceConfiguration
+  def query(ClusterScalingRecommendation, _), do: ClusterScalingRecommendation
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

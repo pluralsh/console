@@ -15,6 +15,7 @@ defmodule Console.Deployments.Pr.Validation do
   def validate(_, _), do: :ok
 
   defp do_validate(%Configuration{optional: true}, nil), do: :ok
+  defp do_validate(%Configuration{optional: true}, ""), do: :ok
 
   defp do_validate(%Configuration{type: :project, name: n}, val) when is_binary(val) do
     case Settings.get_project_by_name(val) do

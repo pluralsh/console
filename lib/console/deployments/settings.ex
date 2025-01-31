@@ -8,8 +8,8 @@ defmodule Console.Deployments.Settings do
   alias Console.Deployments.{Clusters, Services}
   alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken}
 
-  @agent_vsn File.read!("AGENT_VERSION")
-  @kube_vsn File.read!("KUBE_VERSION")
+  @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
+  @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 
