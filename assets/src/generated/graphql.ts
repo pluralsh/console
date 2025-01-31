@@ -10877,7 +10877,7 @@ export type ClusterUsageHistoryFragment = { __typename?: 'ClusterUsageHistory', 
 
 export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
 
-export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
+export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null } | null };
 
 export type ClusterUsagesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -10926,7 +10926,7 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type ApplyScalingRecommendationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13789,6 +13789,16 @@ export const ClusterScalingRecommendationFragmentDoc = gql`
   memoryRecommendation
   service {
     ...ServiceDeploymentTiny
+    cluster {
+      distro
+      provider {
+        id
+        cloud
+        name
+        namespace
+        supportedVersions
+      }
+    }
   }
 }
     ${ServiceDeploymentTinyFragmentDoc}`;

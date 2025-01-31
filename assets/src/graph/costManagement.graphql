@@ -59,6 +59,16 @@ fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   memoryRecommendation
   service {
     ...ServiceDeploymentTiny
+    cluster {
+      distro
+      provider {
+        id
+        cloud
+        name
+        namespace
+        supportedVersions
+      }
+    }
   }
 }
 
