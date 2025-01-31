@@ -108,6 +108,14 @@ type DeploymentSettingsSpec struct {
 	//
 	// +kubebuilder:validation:Optional
 	Cost *CostSettings `json:"cost,omitempty"`
+
+	// pointer to the deployment GIT repository to use
+	// +kubebuilder:validation:Optional
+	DeploymentRepositoryRef *NamespacedName `json:"deploymentRepositoryRef,omitempty"`
+
+	// pointer to the Scaffolds GIT repository to use
+	// +kubebuilder:validation:Optional
+	ScaffoldsRepositoryRef *NamespacedName `json:"scaffoldsRepositoryRef,omitempty"`
 }
 
 type LoggingSettings struct {
