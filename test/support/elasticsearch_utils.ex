@@ -1,4 +1,4 @@
-defmodule ElasticsearchHelper do
+defmodule ElasticsearchUtils do
   @moduledoc """
   Helper functions for elasticsearch. This uses Tesla and HTTPoison to directly make the HTTP requests.
   In all cases, base_url is the url for the cluster (ex. if running locally, something like "http://localhost:9200"),

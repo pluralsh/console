@@ -3,7 +3,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
   alias Kube.Dashboard
   use Mimic
   import KubernetesScaffolds
-  import ElasticsearchHelper
+  import ElasticsearchUtils
 
   setup :set_mimic_global
 
