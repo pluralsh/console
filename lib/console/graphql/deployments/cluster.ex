@@ -316,6 +316,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :project_id, :id, description: "the project this cluster will live in (can be inferred from bootstrap token)"
   end
 
+  input_object :operational_layout_attributes do
+    field :namespaces, :cluster_namespaces_attributes
+  end
+
+  input_object :cluster_namespaces_attributes do
+    field :external_dns,   list_of(:string)
+    field :cert_manager,   :string
+    field :istio,          :string
+    field :linkerd,        :string
+    field :cilium,         :string
+    field :ebs_csi_driver, :string
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -997,6 +1010,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :register_runtime_services, :integer do
       middleware ClusterAuthenticated
       arg :services,   list_of(:runtime_service_attributes)
+      arg :layout,     :operational_layout_attributes
       arg :service_id, :id
 
       resolve &Deployments.create_runtime_services/2

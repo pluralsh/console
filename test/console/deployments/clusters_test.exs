@@ -144,7 +144,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
-        version: "1.25.12",
+        version: "1.31.4",
         provider_id: provider.id,
         cloud_settings: %{gcp: %{project: "test-project", network: "test", region: "us-east1"}},
         node_pools: [
@@ -153,7 +153,7 @@ defmodule Console.Deployments.ClustersTest do
       }, user)
 
       assert cluster.name == "test"
-      assert cluster.version == "1.25.12"
+      assert cluster.version == "1.31.4"
 
       %{service: svc} = Console.Repo.preload(cluster, [:service])
       {:ok, secrets} = Services.configuration(svc)
@@ -170,7 +170,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
-        version: "1.25.11",
+        version: "1.30.0",
         provider_id: provider.id,
         cloud_settings: %{azure: %{location: "test", network: "test", resource_group: "test group", subscription_id: "test-subscription"}},
         node_pools: [
@@ -179,7 +179,7 @@ defmodule Console.Deployments.ClustersTest do
       }, user)
 
       assert cluster.name == "test"
-      assert cluster.version == "1.25.11"
+      assert cluster.version == "1.30.0"
 
       %{service: svc} = Console.Repo.preload(cluster, [:service])
       {:ok, secrets} = Services.configuration(svc)
@@ -985,29 +985,29 @@ defmodule Console.Deployments.ClustersTest do
     test "it can create runtime services at cluster scope and overwrite at service scope" do
       cluster = insert(:cluster)
 
-      {:ok, 1} = Clusters.create_runtime_services([
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
         %{name: "ingress-nginx", version: "1.8.1"},
         %{name: "bogus", version: "2.0.0"}
-      ], nil, cluster)
+      ]}, nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
       assert runtime.name == "ingress-nginx"
       assert runtime.version == "1.8.1"
 
-      {:ok, 1} = Clusters.create_runtime_services([
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
         %{name: "ingress-nginx", version: "1.9.1"},
         %{name: "bogus", version: "2.0.0"}
-      ], nil, cluster)
+      ]}, nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
       assert runtime.name == "ingress-nginx"
       assert runtime.version == "1.9.1"
 
       svc = insert(:service, cluster: cluster)
-      {:ok, 1} = Clusters.create_runtime_services([
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
         %{name: "ingress-nginx", version: "1.9.1"},
         %{name: "bogus", version: "2.0.0"}
-      ], svc.id, cluster)
+      ]}, svc.id, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
       assert runtime.name == "ingress-nginx"
@@ -1019,10 +1019,10 @@ defmodule Console.Deployments.ClustersTest do
       cluster = insert(:cluster)
       prune = insert(:runtime_service, name: "pruned", cluster: cluster)
 
-      {:ok, 1} = Clusters.create_runtime_services([
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
         %{name: "ingress-nginx", version: "1.8.1"},
         %{name: "bogus", version: "2.0.0"}
-      ], nil, cluster)
+      ]}, nil, cluster)
 
       refute refetch(prune)
     end
@@ -1030,10 +1030,10 @@ defmodule Console.Deployments.ClustersTest do
     test "it can create with goofy semvers" do
       cluster = insert(:cluster)
 
-      {:ok, 1} = Clusters.create_runtime_services([
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
         %{name: "ingress-nginx", version: "v1.9.1"},
         %{name: "bogus", version: "2.0.0"}
-      ], nil, cluster)
+      ]}, nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
       assert runtime.name == "ingress-nginx"

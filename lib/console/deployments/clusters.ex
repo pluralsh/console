@@ -588,7 +588,7 @@ defmodule Console.Deployments.Clusters do
   @spec ping(map, Cluster.t) :: cluster_resp
   def ping(attrs, %Cluster{id: id}) do
     cluster = get_cluster(id)
-              |> Repo.preload([:insight_components])
+              |> Repo.preload([:insight_components, :operational_layout])
     attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
 
     cluster
@@ -597,10 +597,14 @@ defmodule Console.Deployments.Clusters do
     |> notify(:ping)
   end
 
-  defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing}) do
+  defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing} = cluster) do
     key = fn %{group: g, version: v, kind: k, name: n} = attrs -> {g, v, k, Map.get(attrs, :namespace), n} end
     by_key = Map.new(existing, & {key.(&1), &1.id})
     Map.put(attrs, :insight_components, Enum.map(new, &Map.put(&1, :id, by_key[key.(&1)])))
+    |> Console.put_path([:operational_layout, :id], case cluster do
+      %Cluster{operational_layout: %{id: id}} -> id
+      _ -> nil
+    end)
   end
   defp stabilize_insight_components(attrs, _), do: attrs
 
@@ -980,8 +984,8 @@ defmodule Console.Deployments.Clusters do
   @doc """
   Upserts a list of runtime service entries for a cluster (and optionally labels their service id)
   """
-  @spec create_runtime_services([map], binary, Cluster.t) :: {:ok, integer} | Console.error
-  def create_runtime_services(svcs, service_id, %Cluster{id: id}) do
+  @spec create_runtime_services(%{services: [map]}, binary, Cluster.t) :: {:ok, integer} | Console.error
+  def create_runtime_services(%{services: svcs} = args, service_id, %Cluster{id: id} = cluster) do
     replace = if is_nil(service_id),
                 do: [:name, :version],
                 else: [:name, :version, :service_id]
@@ -990,28 +994,24 @@ defmodule Console.Deployments.Clusters do
                     do: merge_attrs,
                     else: Map.put(merge_attrs, :service_id, service_id)
 
-    Enum.filter(svcs, fn
-      %{name: n} -> Table.fetch(n)
-      _ -> false
-    end)
-    |> Enum.map(fn
-      %{version: v} = map when is_binary(v) ->
-        Map.put(map, :version, Validations.clean_version(v))
-      m -> m
-    end)
-    |> Enum.map(&Map.merge(&1, merge_attrs))
+    svcs = for svc <- svcs, Table.fetch(svc.name) do
+      Map.put(svc, :version, Validations.clean_version(svc.version))
+      |> Map.merge(merge_attrs)
+    end
+
+    Map.put(args, :services, svcs)
+    |> insert_and_prune_runtime(cluster, replace)
     |> case do
-      [_ | _] = services ->
-        with {:ok, {count, del_count}} = insert_and_prune_runtime(id, services, replace) do
-          Logger.info "persisted #{count} runtime services and pruned #{del_count} services"
-          {:ok, count}
-        end
+      {:ok, {count, del_count}} ->
+        Logger.info "persisted #{count} runtime services and pruned #{del_count} services"
+        {:ok, count}
       _ -> {:ok, 0}
     end
   end
 
-  defp insert_and_prune_runtime(cluster_id, services, replace) do
+  defp insert_and_prune_runtime(%{services: [_ | _] = services} = args, %Cluster{id: cluster_id} = cluster, replace) do
     start_transaction()
+    |> add_operation(:layout, fn _ -> maybe_persist_layout(cluster, args) end)
     |> add_operation(:insert, fn _ ->
       {count, created} = Repo.insert_all(
         RuntimeService,
@@ -1043,6 +1043,14 @@ defmodule Console.Deployments.Clusters do
       err -> err
     end
   end
+
+  defp maybe_persist_layout(%Cluster{} = cluster, %{layout: %{} = layout}) do
+    cluster = Repo.preload(cluster, [:operational_layout])
+    cluster
+    |> Cluster.changeset(%{operational_layout: Map.put(layout, :id, Console.deep_get(cluster, [:operational_layout, :id]))})
+    |> Repo.update()
+  end
+  defp maybe_persist_layout(cluster, _), do: {:ok, cluster}
 
   @doc """
   Creates a new pinned custom resource, can be cluster or global scoped

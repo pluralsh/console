@@ -1131,6 +1131,15 @@ type ClusterNamespaceUsageEdge struct {
 	Cursor *string                `json:"cursor,omitempty"`
 }
 
+type ClusterNamespacesAttributes struct {
+	ExternalDNS  []*string `json:"externalDns,omitempty"`
+	CertManager  *string   `json:"certManager,omitempty"`
+	Istio        *string   `json:"istio,omitempty"`
+	Linkerd      *string   `json:"linkerd,omitempty"`
+	Cilium       *string   `json:"cilium,omitempty"`
+	EbsCsiDriver *string   `json:"ebsCsiDriver,omitempty"`
+}
+
 type ClusterNodeMetrics struct {
 	CPU         []*MetricResponse `json:"cpu,omitempty"`
 	Memory      []*MetricResponse `json:"memory,omitempty"`
@@ -3433,6 +3442,10 @@ type OpenaiSettingsAttributes struct {
 	Model       *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+}
+
+type OperationalLayoutAttributes struct {
+	Namespaces *ClusterNamespacesAttributes `json:"namespaces,omitempty"`
 }
 
 type PageInfo struct {

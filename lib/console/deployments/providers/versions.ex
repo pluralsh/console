@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Providers.Versions do
-  alias Console.Schema.Cluster
+  alias Console.Schema.{Cluster, ClusterProvider}
   import Console.Deployments.Providers.Parsers
 
   @eks File.read!("static/k8s-versions/eks.json") |> String.split(~r/\R/)
@@ -17,7 +17,7 @@ defmodule Console.Deployments.Providers.Versions do
 
   def gke(), do: @gke
 
-  def validate?(%Cluster{version: v, provider: %{cloud: c}}) do
+  def validate?(%Cluster{version: v, provider: %ClusterProvider{cloud: c}}) do
     case versions(c) do
       :any -> true
       versions when is_list(versions) -> Enum.member?(versions, v)
