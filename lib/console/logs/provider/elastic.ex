@@ -92,6 +92,12 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_facets(q, _), do: q
 
   defp facets(resp) do
+    # this populates kubernetes.node field with an empty map if doesn't already exist
+    resp = case resp do
+      %{"kubernetes" => %{"node" => %{}}} -> resp
+      _ -> put_in(resp, ~w(kubernetes node), %{})
+    end
+
     put_in(resp, ~w(kubernetes node labels), nil)
     |> put_in(~w(kubernetes labels), nil)
     |>  Map.take(~w(kubernetes cloud container cluster))
