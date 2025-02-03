@@ -7,8 +7,8 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
   setup :set_mimic_global
 
-  @elastic_cluster_url Application.compile_env(:elasticsearch_test, :cluster_url)
-  @elastic_index_name Application.compile_env(:elasticsearch_test, :index_name)
+  @host Application.compile_env(:elasticsearch, :host)
+  @index Application.compile_env(:elasticsearch, :index)
 
   describe "dashboards" do
     test "it can list dashboards for a repo" do
@@ -207,8 +207,8 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
       # Instead of using expect to mock the logs provider, we use the elasticsearch index
       deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
-        host: @elastic_cluster_url,
-        index: @elastic_index_name
+        host: @host,
+        index: @index
       }})
 
 

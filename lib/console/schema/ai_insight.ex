@@ -7,6 +7,7 @@ defmodule Console.Schema.AiInsight do
     StackRun,
     StackState,
     ServiceComponent,
+    AiInsightEvidence,
     ClusterInsightComponent
   }
 
@@ -31,6 +32,8 @@ defmodule Console.Schema.AiInsight do
 
     has_one :service_component, ServiceComponent, foreign_key: :insight_id
     has_one :cluster_insight_component, ClusterInsightComponent, foreign_key: :insight_id
+
+    has_many :evidence, AiInsightEvidence, foreign_key: :insight_id
 
     timestamps()
   end
@@ -64,6 +67,7 @@ defmodule Console.Schema.AiInsight do
     model
     |> cast(attrs, ~w(sha summary text)a)
     |> cast_embed(:error, with: &error_changeset/2)
+    |> cast_assoc(:evidence)
   end
 
   defp error_changeset(model, attrs) do

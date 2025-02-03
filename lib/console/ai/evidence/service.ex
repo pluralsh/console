@@ -2,6 +2,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   use Console.AI.Evidence.Base
   alias Console.Repo
   alias Console.AI.Worker
+  alias Console.AI.Evidence.{Logs, Context}
   alias Console.Schema.{AiInsight, Service, ServiceComponent, ServiceError, Cluster}
 
   require Logger
@@ -22,12 +23,18 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
                     nil
                  end)
                  |> Enum.filter(& &1)
-    {:ok, description(service) ++ service_errors(service) ++ component_statuses(components)}
+    (
+      description(service) ++
+      service_errors(service) ++
+      component_statuses(components)
+    )
+    |> Logs.with_logging(service)
+    |> Context.result()
   end
 
   def insight(%Service{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:insight, :cluster, :errors, :repository])
+  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, insight: :evidence])
 
   defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster} = c} = svc) do
     [

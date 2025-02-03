@@ -1043,6 +1043,7 @@ defmodule Console.Deployments.Clusters do
       err -> err
     end
   end
+  defp insert_and_prune_runtime(_, _, _), do: {:ok, 0}
 
   defp maybe_persist_layout(%Cluster{} = cluster, %{layout: %{} = layout}) do
     cluster = Repo.preload(cluster, [:operational_layout])

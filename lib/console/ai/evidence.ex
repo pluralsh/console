@@ -1,5 +1,5 @@
 defprotocol Console.AI.Evidence do
-  @spec generate(term) :: {:ok, Console.AI.Provider.history} | :ok
+  @spec generate(term) :: {:ok, Console.AI.Provider.history, map} | :ok
   def generate(struct)
 
 

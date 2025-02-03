@@ -188,6 +188,7 @@ export type AiInsight = {
   clusterInsightComponent?: Maybe<ClusterInsightComponent>;
   /** any errors generated when compiling this insight */
   error?: Maybe<Array<Maybe<ServiceError>>>;
+  evidence?: Maybe<Array<Maybe<AiInsightEvidence>>>;
   freshness?: Maybe<InsightFreshness>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -202,6 +203,15 @@ export type AiInsight = {
   summary?: Maybe<Scalars['String']['output']>;
   /** the text of this insight */
   text?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AiInsightEvidence = {
+  __typename?: 'AiInsightEvidence';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  logs?: Maybe<LogsEvidence>;
+  type: EvidenceType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -1963,6 +1973,7 @@ export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
   byok?: Maybe<Scalars['Boolean']['output']>;
   cloud?: Maybe<Scalars['Boolean']['output']>;
+  consoleVersion?: Maybe<Scalars['String']['output']>;
   externalOidc?: Maybe<Scalars['Boolean']['output']>;
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
@@ -2512,6 +2523,11 @@ export type Event = {
   reason?: Maybe<Scalars['String']['output']>;
   type?: Maybe<Scalars['String']['output']>;
 };
+
+export enum EvidenceType {
+  Log = 'LOG',
+  Pr = 'PR'
+}
 
 /** a Flux crd representation of a Helm repository */
 export type FluxHelmRepository = {
@@ -3375,6 +3391,13 @@ export type LoginInfo = {
   external?: Maybe<Scalars['Boolean']['output']>;
   oidcName?: Maybe<Scalars['String']['output']>;
   oidcUri?: Maybe<Scalars['String']['output']>;
+};
+
+export type LogsEvidence = {
+  __typename?: 'LogsEvidence';
+  clusterId?: Maybe<Scalars['ID']['output']>;
+  lines?: Maybe<Array<Maybe<LogLine>>>;
+  serviceId?: Maybe<Scalars['ID']['output']>;
 };
 
 export type LokiLabelFilter = {

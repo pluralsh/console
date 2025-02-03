@@ -34,6 +34,7 @@ defmodule Console.GraphQl.Configuration do
 
   object :console_configuration do
     field :git_commit,      :string
+    field :console_version, :string, resolve: fn _, _, _ -> {:ok, Console.version()} end
     field :is_demo_project, :boolean
     field :is_sandbox,      :boolean
     field :plural_login,    :boolean

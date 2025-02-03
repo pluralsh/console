@@ -17,7 +17,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
     |> Enum.concat(fetch_code(run))
     |> prepend(plan(run))
     |> prepend(step_description(run))
-    |> ok()
+    |> history()
   end
 
   def insight(%StackRun{insight: insight}), do: insight

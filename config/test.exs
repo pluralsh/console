@@ -155,6 +155,6 @@ config :console, Console.Deployments.Metrics.Provider.NewRelic,
 
 config :bamboo, :refute_timeout, 10
 
-config :elasticsearch_test,
-  cluster_url: "http://localhost:9200",
-  index_name: "testindex"
+config :elasticsearch,
+  host: "http://localhost:9200",
+  index: "testindex"
