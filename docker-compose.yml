@@ -18,6 +18,10 @@ services:
     - cluster.name=docker-es-cluster
     - cluster.initial_master_nodes=es01
     - xpack.security.enabled=false
+    volumes:
+    - es_data:/usr/share/elasticsearch/data
 volumes:
   database_data:
+    driver: local
+  es_data:
     driver: local

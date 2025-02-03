@@ -201,8 +201,8 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       svc = insert(:service, read_bindings: [%{user_id: user.id}])
 
       # the index gets set up using a mix task before the test is run, so we can index directly
-      log_document(svc, "valid log message") |> index_doc(@elastic_cluster_url, @elastic_index_name)
-      log_document(svc, "another valid log message") |> index_doc(@elastic_cluster_url, @elastic_index_name)
+      log_document(svc, "valid log message") |> index_doc()
+      log_document(svc, "another valid log message") |> index_doc()
       refresh(@elastic_cluster_url, @elastic_index_name)
 
       # Instead of using expect to mock the logs provider, we use the elasticsearch index

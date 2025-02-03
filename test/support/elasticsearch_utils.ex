@@ -7,6 +7,9 @@ defmodule ElasticsearchUtils do
 
   require Tesla
 
+  @default_cluster_url Application.compile_env(:elasticsearch_test, :cluster_url)
+  @default_index_name Application.compile_env(:elasticsearch_test, :index_name)
+
   def log_document(service, message) do
     %{
       "@timestamp" => Timex.now(),
@@ -20,13 +23,13 @@ defmodule ElasticsearchUtils do
     }
   end
 
-  def index_doc(doc, base_url, index_name) do
+  def index_doc(doc, base_url \\ @default_cluster_url, index_name \\ @default_index_name) do
     HTTPoison.post!(base_url <> "/#{index_name}/_doc", Jason.encode!(doc),
       "Content-Type": "application/json"
     )
   end
 
-  def refresh(base_url, index_name) do
+  def refresh(base_url \\ @default_cluster_url, index_name \\ @default_index_name) do
     HTTPoison.post!(base_url <> "/#{index_name}/_refresh", "")
   end
 end

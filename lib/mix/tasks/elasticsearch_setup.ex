@@ -1,4 +1,3 @@
-# lib/mix/tasks/elasticsearch_setup.ex
 defmodule Mix.Tasks.ElasticsearchSetup do
   use Mix.Task
   require Tesla

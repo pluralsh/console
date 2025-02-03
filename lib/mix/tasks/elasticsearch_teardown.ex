@@ -1,4 +1,3 @@
-# lib/mix/tasks/elasticsearch_teardown.ex
 defmodule Mix.Tasks.ElasticsearchTeardown do
   use Mix.Task
   require Tesla
