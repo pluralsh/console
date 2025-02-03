@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -1434,6 +1434,15 @@ export type ClusterNamespaceUsageEdge = {
   __typename?: 'ClusterNamespaceUsageEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ClusterNamespaceUsage>;
+};
+
+export type ClusterNamespacesAttributes = {
+  certManager?: InputMaybe<Scalars['String']['input']>;
+  cilium?: InputMaybe<Scalars['String']['input']>;
+  ebsCsiDriver?: InputMaybe<Scalars['String']['input']>;
+  externalDns?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  istio?: InputMaybe<Scalars['String']['input']>;
+  linkerd?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ClusterNodeMetrics = {
@@ -4175,6 +4184,10 @@ export enum Operation {
   Suffix = 'SUFFIX'
 }
 
+export type OperationalLayoutAttributes = {
+  namespaces?: InputMaybe<ClusterNamespacesAttributes>;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   /** When paginating forwards, the cursor to continue. */
@@ -6246,6 +6259,7 @@ export type RootMutationTypeReconfigureRenovateArgs = {
 
 
 export type RootMutationTypeRegisterRuntimeServicesArgs = {
+  layout?: InputMaybe<OperationalLayoutAttributes>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
 };

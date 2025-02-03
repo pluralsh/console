@@ -14,7 +14,6 @@ defmodule Mix.Tasks.ElasticsearchSetup do
     end
 
     create_index(@elastic_cluster_url, @elastic_index_name)
-    IO.puts("Created fresh index #{@elastic_index_name} at #{@elastic_cluster_url}")
   end
 
   def index_exists?(base_url, index_name) do

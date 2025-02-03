@@ -54,6 +54,7 @@ defmodule Console.Logs.Provider.Elastic do
       query: maybe_query(str)
              |> add_terms(q)
              |> add_range(q)
+             |> add_namespaces(q)
              |> add_facets(q),
       sort: sort(q),
       size: Query.limit(q),
@@ -69,6 +70,9 @@ defmodule Console.Logs.Provider.Elastic do
     ])
   end
   defp add_terms(query, _), do: query
+
+  defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}), do: add_filter(query, %{terms: %{"kubernetes.namespace.keyword" => ns}})
+  defp add_namespaces(query, _), do: query
 
   defp add_range(q, %Query{time: %Time{after: aft, before: bef}}) when not is_nil(aft) and not is_nil(bef),
     do: add_filter(q, %{range: %{"@timestamp": %{gt: aft, lt: bef}}})
@@ -105,8 +109,8 @@ defmodule Console.Logs.Provider.Elastic do
     |> Line.facets()
   end
 
-  defp add_filter(%{bool: %{filter: fs}} = q, range) when is_list(fs), do: put_in(q[:bool][:filter], [range | fs])
-  defp add_filter(q, range), do: put_in(q[:bool][:filter], [range])
+  defp add_filter(%{bool: %{filter: fs}} = q, f) when is_list(fs), do: put_in(q[:bool][:filter], [f | fs])
+  defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
   defp maybe_query(q) when is_binary(q) and byte_size(q) > 0,
     do: %{bool: %{must: %{match: %{message: q}}}}

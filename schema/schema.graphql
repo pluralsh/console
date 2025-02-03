@@ -726,7 +726,7 @@ type RootMutationType {
   ingestClusterCost(costs: CostIngestAttributes!): Boolean
 
   "registers a list of runtime services discovered for the current cluster"
-  registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
+  registerRuntimeServices(services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, serviceId: ID): Int
 
   "agent api to persist upgrade insights for its cluster"
   saveUpgradeInsights(insights: [UpgradeInsightAttributes], addons: [CloudAddonAttributes]): [UpgradeInsight]
@@ -4726,6 +4726,19 @@ input ClusterIsoImageAttributes {
 
   "the project this cluster will live in (can be inferred from bootstrap token)"
   projectId: ID
+}
+
+input OperationalLayoutAttributes {
+  namespaces: ClusterNamespacesAttributes
+}
+
+input ClusterNamespacesAttributes {
+  externalDns: [String]
+  certManager: String
+  istio: String
+  linkerd: String
+  cilium: String
+  ebsCsiDriver: String
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"

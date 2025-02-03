@@ -19,7 +19,8 @@ defmodule Console.Schema.Cluster do
     UpgradeInsight,
     AiInsight,
     ClusterInsightComponent,
-    CloudAddon
+    CloudAddon,
+    OperationalLayout
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -123,6 +124,8 @@ defmodule Console.Schema.Cluster do
     belongs_to :project,        Project
     belongs_to :insight,        AiInsight
     belongs_to :parent_cluster, __MODULE__
+
+    has_one :operational_layout, OperationalLayout, on_replace: :update
 
     has_many :upgrade_insights, UpgradeInsight
     has_many :cloud_addons, CloudAddon
@@ -370,6 +373,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
     |> cast_assoc(:insight)
+    |> cast_assoc(:operational_layout)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
