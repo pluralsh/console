@@ -203,7 +203,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       # the index gets set up using a mix task before the test is run, so we can index directly
       log_document(svc, "valid log message") |> index_doc()
       log_document(svc, "another valid log message") |> index_doc()
-      refresh(@elastic_cluster_url, @elastic_index_name)
+      refresh()
 
       # Instead of using expect to mock the logs provider, we use the elasticsearch index
       deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
