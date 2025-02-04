@@ -30,7 +30,7 @@ type BedrockProxy struct {
 	bedrockClient *bedrockruntime.Client
 }
 
-func NewBedrockProxy(region string) (api.BedrockAIProxy, error) {
+func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
 	ctx := context.Background()
 	sdkConfig, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {

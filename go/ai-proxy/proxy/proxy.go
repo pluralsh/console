@@ -32,7 +32,7 @@ func NewOpenAIProxy(p api.Provider, host, token string) (api.OpenAIProxy, error)
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewBedrockProxy(p api.Provider, region string) (api.BedrockAIProxy, error) {
+func NewBedrockProxy(p api.Provider, region string) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockProxy(region)
