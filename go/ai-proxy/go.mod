@@ -21,6 +21,22 @@ require (
 	cloud.google.com/go/iam v1.2.1 // indirect
 	cloud.google.com/go/longrunning v0.6.1 // indirect
 	cloud.google.com/go/vertexai v0.13.2 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.36.0 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.8 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.29.3 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.56 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.26 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.31 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.31 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/bedrock v1.26.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.24.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.11 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.24.13 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.11 // indirect
+	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/bytedance/sonic v1.12.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect

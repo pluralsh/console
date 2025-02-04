@@ -14,3 +14,7 @@ type TranslationProxy interface {
 type OpenAIProxy interface {
 	Proxy() http.HandlerFunc
 }
+
+type BedrockAIProxy interface {
+	Proxy() http.HandlerFunc
+}

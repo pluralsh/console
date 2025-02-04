@@ -34,6 +34,7 @@ const (
 	ProviderAnthropic Provider = "anthropic"
 	ProviderOllama    Provider = "ollama"
 	ProviderVertex    Provider = "vertex"
+	ProviderBedrock   Provider = "bedrock"
 )
 
 type OllamaAPI string
