@@ -68,6 +68,10 @@ if get_env("CONSOLE_QPS") do
   config :console, :qps, String.to_integer(get_env("CONSOLE_QPS"))
 end
 
+if get_env("CONSOLE_VERSION") do
+  config :console, :version, get_env("CONSOLE_VERSION")
+end
+
 config :elixir, :ansi_enabled, true
 
 config :ra,

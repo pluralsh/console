@@ -16,7 +16,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
     |> Worker.await()
     |> run_insight()
     |> prepend(stack_description(stack))
-    |> ok()
+    |> history()
   end
 
   def insight(%Stack{insight: insight}), do: insight

@@ -136,6 +136,7 @@ config :console, Console.PromEx,
   manual_metrics_start_delay: :no_delay,
   drop_metrics_groups: [],
   grafana: :disabled,
-  metrics_server: :disabled
+  metrics_server: :disabled,
+  version: "0.11.0"
 
 import_config "#{Mix.env()}.exs"

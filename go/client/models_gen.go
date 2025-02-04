@@ -145,9 +145,18 @@ type AiInsight struct {
 	StackRun                *StackRun                `json:"stackRun,omitempty"`
 	ServiceComponent        *ServiceComponent        `json:"serviceComponent,omitempty"`
 	StackState              *StackState              `json:"stackState,omitempty"`
+	Evidence                []*AiInsightEvidence     `json:"evidence,omitempty"`
 	ClusterInsightComponent *ClusterInsightComponent `json:"clusterInsightComponent,omitempty"`
 	InsertedAt              *string                  `json:"insertedAt,omitempty"`
 	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
+}
+
+type AiInsightEvidence struct {
+	ID         string        `json:"id"`
+	Type       EvidenceType  `json:"type"`
+	Logs       *LogsEvidence `json:"logs,omitempty"`
+	InsertedAt *string       `json:"insertedAt,omitempty"`
+	UpdatedAt  *string       `json:"updatedAt,omitempty"`
 }
 
 // A saved item for future ai-based investigation
@@ -1566,11 +1575,12 @@ type ConfigurationValidationAttributes struct {
 }
 
 type ConsoleConfiguration struct {
-	GitCommit     *string `json:"gitCommit,omitempty"`
-	IsDemoProject *bool   `json:"isDemoProject,omitempty"`
-	IsSandbox     *bool   `json:"isSandbox,omitempty"`
-	PluralLogin   *bool   `json:"pluralLogin,omitempty"`
-	VpnEnabled    *bool   `json:"vpnEnabled,omitempty"`
+	GitCommit      *string `json:"gitCommit,omitempty"`
+	ConsoleVersion *string `json:"consoleVersion,omitempty"`
+	IsDemoProject  *bool   `json:"isDemoProject,omitempty"`
+	IsSandbox      *bool   `json:"isSandbox,omitempty"`
+	PluralLogin    *bool   `json:"pluralLogin,omitempty"`
+	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
 	Installed    *bool              `json:"installed,omitempty"`
 	Cloud        *bool              `json:"cloud,omitempty"`
@@ -2776,6 +2786,12 @@ type LoginInfo struct {
 	OidcURI  *string `json:"oidcUri,omitempty"`
 	External *bool   `json:"external,omitempty"`
 	OidcName *string `json:"oidcName,omitempty"`
+}
+
+type LogsEvidence struct {
+	ServiceID *string    `json:"serviceId,omitempty"`
+	ClusterID *string    `json:"clusterId,omitempty"`
+	Lines     []*LogLine `json:"lines,omitempty"`
 }
 
 type LokiLabelFilter struct {
@@ -6768,6 +6784,47 @@ func (e *Delta) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Delta) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EvidenceType string
+
+const (
+	EvidenceTypeLog EvidenceType = "LOG"
+	EvidenceTypePr  EvidenceType = "PR"
+)
+
+var AllEvidenceType = []EvidenceType{
+	EvidenceTypeLog,
+	EvidenceTypePr,
+}
+
+func (e EvidenceType) IsValid() bool {
+	switch e {
+	case EvidenceTypeLog, EvidenceTypePr:
+		return true
+	}
+	return false
+}
+
+func (e EvidenceType) String() string {
+	return string(e)
+}
+
+func (e *EvidenceType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EvidenceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EvidenceType", str)
+	}
+	return nil
+}
+
+func (e EvidenceType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

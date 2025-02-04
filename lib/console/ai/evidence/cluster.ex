@@ -18,13 +18,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.Cluster do
                     nil
                  end)
                  |> Enum.filter(& &1)
-    {:ok, description(cluster) ++ component_statuses(components)}
+    description(cluster)
+    |> Enum.concat(component_statuses(components))
+    |> history()
   end
   def generate(_), do: {:ok, []}
 
   def insight(%Cluster{insight: insight}), do: insight
 
-  def preload(comp), do: Repo.preload(comp, [:insight, insight_components: [:cluster, :insight]])
+  def preload(comp), do: Repo.preload(comp, [:insight, insight_components: [:cluster, insight: :evidence]])
 
   defp description(%Cluster{distro: d, name: n, version: v}) do
     [

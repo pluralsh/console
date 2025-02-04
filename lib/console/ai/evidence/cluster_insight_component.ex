@@ -1,5 +1,6 @@
 defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
   use Console.AI.Evidence.Base
+  alias Console.AI.Evidence.{Logs, Context}
   alias Console.AI.Evidence.Component.Resource
   alias Console.Schema.{ClusterInsightComponent, ServiceComponent}
 
@@ -13,7 +14,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
     with {:ok, resource} <- Resource.resource(to_svc_component(comp), cluster),
          {:ok, events} <- Resource.events(resource),
          {:ok, hydration} <- Resource.hydrate(resource) do
-      {:ok, [{:user, """
+      (
+        [{:user, """
           The kubernetes resource #{component(comp)}.  It is deployed on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} with version #{cluster.version}
 
           The raw json object itself is as follows:
@@ -25,13 +27,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
         }]
         ++ tpl_events(events)
         ++ tpl_hydration(hydration)
-      }
+      )
+      |> Logs.with_logging(comp)
+      |> Context.result()
     end
   end
 
   def insight(%{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:insight, :cluster])
+  def preload(comp), do: Console.Repo.preload(comp, [:cluster, insight: :evidence])
 
   defp tpl_hydration([_ | _] = hydration) do
     prepend(
