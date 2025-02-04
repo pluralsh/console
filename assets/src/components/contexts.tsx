@@ -1,19 +1,19 @@
 import {
-  ComponentProps,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react'
-import { jwtDecode } from 'jwt-decode'
-import {
   fetchRefreshToken,
   fetchToken,
   setToken,
   wipeRefreshToken,
   wipeToken,
 } from 'helpers/auth'
+import { jwtDecode } from 'jwt-decode'
+import {
+  ComponentProps,
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
 
 import {
   MeQuery,
@@ -41,7 +41,7 @@ const DEFAULT_LOGIN = {
 } as const satisfies Partial<Login>
 const LoginContext = createContext<Partial<Login>>(DEFAULT_LOGIN)
 
-export const useLogin = () => useContext(LoginContext)
+export const useLogin = () => use(LoginContext)
 export const useIsManager = () => {
   const { me } = useLogin()
 
@@ -115,7 +115,7 @@ export function LoginContextProvider({
   )
 
   return (
-    <LoginContext.Provider
+    <LoginContext
       value={value}
       {...props}
     />
