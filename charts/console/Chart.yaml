@@ -6,7 +6,7 @@ appVersion: 0.11.0
 version: 0.3.77
 dependencies:
   - name: kas
-    version: 0.1.1
+    version: 0.1.2
     repository: file://../../plural/helm/kas
   - name: controller
     version: 0.0.105
