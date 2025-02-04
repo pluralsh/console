@@ -25,6 +25,7 @@ import {
   SidebarSection,
   StackIcon,
   Tooltip,
+  useSidebar,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
@@ -56,6 +57,7 @@ import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { MARK_READ } from './queries'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 
 type MenuItem = {
   text: string
@@ -379,11 +381,9 @@ export default function Sidebar() {
               size={32}
             />
           </SidebarItem>
-          <Tooltip label={`Console version: ${configuration?.consoleVersion}`}>
-            <ConsoleVersionSC>
-              {configuration?.consoleVersion ?? '--'}
-            </ConsoleVersionSC>
-          </Tooltip>
+          {configuration?.consoleVersion && (
+            <ConsoleVersion version={configuration.consoleVersion} />
+          )}
         </SidebarSection>
         {/* ---
         NOTIFICATIONS PANEL
@@ -443,12 +443,23 @@ export default function Sidebar() {
   )
 }
 
-const ConsoleVersionSC = styled.span(({ theme }) => ({
-  cursor: 'default',
-  width: '32px',
-  alignSelf: 'flex-start',
-  margin: theme.spacing.xxsmall,
-  fontFamily: theme.fontFamilies.sans,
-  fontSize: 10,
-  letterSpacing: '-0.35px',
-}))
+function ConsoleVersion({ version }: { version: string }) {
+  const { isExpanded } = useSidebar()
+  return (
+    <ConsoleVersionSC $isExpanded={isExpanded}>
+      {isExpanded ? 'Console version: v' : 'v'}
+      {version}
+    </ConsoleVersionSC>
+  )
+}
+const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    ...TRUNCATE,
+    width: '100%',
+    textAlign: $isExpanded ? 'left' : 'center',
+    padding: theme.spacing.xxsmall,
+    fontFamily: theme.fontFamilies.sans,
+    fontSize: 10,
+    letterSpacing: '-0.35px',
+  })
+)
