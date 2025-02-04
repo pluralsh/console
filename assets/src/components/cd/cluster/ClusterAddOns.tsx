@@ -70,6 +70,13 @@ export default function ClusterAddOns() {
     [data?.cluster?.runtimeServices]
   )
 
+  const cloudAddons = useMemo(
+    () => data?.cluster?.cloudAddons?.filter(isNonNullable) || [],
+    [data?.cluster?.cloudAddons]
+  )
+
+  console.log(cloudAddons) // TODO
+
   const hasAddons = !isEmpty(addOns)
 
   const { data: addOnData, error: addOnError } = useRuntimeServiceQuery({
