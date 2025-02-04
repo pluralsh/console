@@ -111,15 +111,15 @@ export const getServiceDetailsBreadcrumbs = ({
   ...getClusterBreadcrumbs({ cluster }),
   {
     label: 'services',
-    url: `${getClusterDetailsPath({ clusterId: cluster.id })}/services`,
+    url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
   },
-  ...(service.id && cluster.id
+  ...(service?.id && cluster?.id
     ? [
         {
           label: service?.name || service?.id,
           url: getServiceDetailsPath({
-            clusterId: cluster.id,
-            serviceId: service.id,
+            clusterId: cluster?.id,
+            serviceId: service?.id,
           }),
         },
       ]

@@ -49,7 +49,12 @@ import {
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
-import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
+import {
+  ClusterFragment,
+  ClusterMinimalFragment,
+  MakeOptional,
+  useClusterQuery,
+} from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MoreMenu } from '../../utils/MoreMenu.tsx'
 import {
@@ -110,24 +115,20 @@ export const getClusterBreadcrumbs = ({
   cluster,
   tab,
 }: {
-  cluster: {
-    name?: Nullable<string>
-    handle?: Nullable<string>
-    id: Nullable<string>
-  }
+  cluster?: Nullable<MakeOptional<ClusterMinimalFragment, 'name'>>
   tab?: string
 }) => {
   const clustersPath = `${CD_ABS_PATH}/${CLUSTERS_REL_PATH}` as const
-  const clusterPath = `${clustersPath}/${cluster.id}` as const
+  const clusterPath = `${clustersPath}/${cluster?.id}` as const
   const tabPath = `${clusterPath}/${tab || ''}` as const
 
   return [
     ...CD_BASE_CRUMBS,
     { label: 'clusters', url: clustersPath },
-    ...(cluster.id
+    ...(cluster?.id
       ? [
           {
-            label: cluster?.handle || cluster?.name || cluster.id,
+            label: cluster?.handle || cluster?.name || cluster?.id,
             url: clusterPath,
           },
           ...(tab ? [{ label: tab, url: tabPath }] : []),

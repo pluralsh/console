@@ -4,7 +4,6 @@ import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
 
 import { InfoSection } from './info/common'
-import { ComponentStatusChip } from '../cd/services/service/component/misc.tsx'
 
 export default function MetadataOutlet() {
   const { component, data } = useOutletContext<any>()
@@ -55,11 +54,6 @@ export function MetadataBase({
             <>
               {component?.group || 'v1'}/{component?.kind}
             </>
-          </MetadataItem>
-        )}
-        {component?.status && typeof component?.status === 'string' && (
-          <MetadataItem heading="Status">
-            <ComponentStatusChip status={component?.status} />
           </MetadataItem>
         )}
       </MetadataGrid>
