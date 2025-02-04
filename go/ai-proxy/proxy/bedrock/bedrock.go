@@ -150,10 +150,10 @@ func (b *BedrockProxy) handleStreamingBedrock(
 			flusher.Flush()
 
 		case *types.UnknownUnionMember:
-			log.Println("Unknown streaming response:", v.Tag)
+			klog.Infof("Unknown streaming response: %v", v.Tag)
 
 		default:
-			log.Println("Unexpected response type from Bedrock stream")
+			klog.Info("Unexpected response type from Bedrock stream")
 		}
 	}
 
@@ -166,7 +166,6 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 	w http.ResponseWriter,
 	req *openai.ChatCompletionRequest,
 ) {
-
 	var text string
 
 	switch {
