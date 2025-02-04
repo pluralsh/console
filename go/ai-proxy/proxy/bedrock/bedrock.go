@@ -210,7 +210,11 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		klog.Errorf("Error encoding response: %v", err)
+		return
+	}
+
 }
 
 func (b *BedrockProxy) chatCompletions(prompt interface{}, model string) (*bedrockruntime.InvokeModelOutput, error) {
