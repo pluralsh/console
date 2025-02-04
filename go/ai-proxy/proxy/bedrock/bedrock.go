@@ -116,7 +116,7 @@ func (b *BedrockProxy) handleStreamingBedrock(
 		}
 
 	default:
-		fmt.Errorf("invalid model: %s", req.Model)
+		klog.Errorf("invalid model: %s", req.Model)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (b *BedrockProxy) handleStreamingBedrock(
 			}
 
 			payload, _ := json.Marshal(chunkResp)
-			fmt.Fprintf(w, "data: %s\n\n", payload)
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
 			flusher.Flush()
 
 		case *types.UnknownUnionMember:
@@ -158,7 +158,7 @@ func (b *BedrockProxy) handleStreamingBedrock(
 	}
 
 	// Send OpenAI's `[DONE]` event to signal end of stream
-	fmt.Fprintf(w, "data: [DONE]\n\n")
+	_, _ = fmt.Fprintf(w, "data: [DONE]\n\n")
 	flusher.Flush()
 }
 
@@ -191,7 +191,7 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 		text = response.Completion
 
 	default:
-		fmt.Errorf("invalid model: %s", req.Model)
+		klog.Errorf("invalid model: %s", req.Model)
 		return
 	}
 
