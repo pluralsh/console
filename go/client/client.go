@@ -163,6 +163,7 @@ type ConsoleClient interface {
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
+	ListClusterMinimalStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterMinimalStacks, error)
 	ListInfrastructureStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListInfrastructureStacks, error)
 	GetStackRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunMinimal, error)
 	GetStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRun, error)
@@ -3526,6 +3527,17 @@ func (t *StackRunEdgeFragment) GetNode() *StackRunFragment {
 	return t.Node
 }
 
+type MinimalStackRunEdgeFragment struct {
+	Node *StackRunMinimalFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *MinimalStackRunEdgeFragment) GetNode() *StackRunMinimalFragment {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment{}
+	}
+	return t.Node
+}
+
 type StackRunIDEdgeFragment struct {
 	Node *StackRunIDFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -6399,6 +6411,42 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -11699,6 +11747,60 @@ func (t *ListClusterStackIds_ClusterStackRuns) GetEdges() []*StackRunIDEdgeFragm
 	return t.Edges
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type ListClusterMinimalStacks_ClusterStackRuns struct {
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*MinimalStackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns{}
+	}
+	return &t.PageInfo
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns) GetEdges() []*MinimalStackRunEdgeFragment {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns{}
+	}
+	return t.Edges
+}
+
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14941,6 +15043,17 @@ type ListClusterStackIds struct {
 func (t *ListClusterStackIds) GetClusterStackRuns() *ListClusterStackIds_ClusterStackRuns {
 	if t == nil {
 		t = &ListClusterStackIds{}
+	}
+	return t.ClusterStackRuns
+}
+
+type ListClusterMinimalStacks struct {
+	ClusterStackRuns *ListClusterMinimalStacks_ClusterStackRuns "json:\"clusterStackRuns,omitempty\" graphql:\"clusterStackRuns\""
+}
+
+func (t *ListClusterMinimalStacks) GetClusterStackRuns() *ListClusterMinimalStacks_ClusterStackRuns {
+	if t == nil {
+		t = &ListClusterMinimalStacks{}
 	}
 	return t.ClusterStackRuns
 }
@@ -25994,6 +26107,113 @@ func (c *Client) ListClusterStackIds(ctx context.Context, after *string, first *
 	return &res, nil
 }
 
+const ListClusterMinimalStacksDocument = `query ListClusterMinimalStacks ($after: String, $first: Int, $before: String, $last: Int) {
+	clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... MinimalStackRunEdgeFragment
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment MinimalStackRunEdgeFragment on StackRunEdge {
+	node {
+		... StackRunMinimalFragment
+	}
+}
+fragment StackRunMinimalFragment on StackRun {
+	id
+	type
+	status
+	approval
+	approvedAt
+	tarball
+	workdir
+	manageState
+	jobSpec {
+		... JobSpecFragment
+	}
+	configuration {
+		... StackConfigurationFragment
+	}
+}
+fragment JobSpecFragment on JobGateSpec {
+	namespace
+	raw
+	containers {
+		... ContainerSpecFragment
+	}
+	labels
+	annotations
+	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
+}
+fragment ContainerSpecFragment on ContainerSpec {
+	image
+	args
+	env {
+		name
+		value
+	}
+	envFrom {
+		configMap
+		secret
+	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
+}
+fragment StackConfigurationFragment on StackConfiguration {
+	image
+	version
+	tag
+	hooks {
+		... StackHookFragment
+	}
+}
+fragment StackHookFragment on StackHook {
+	cmd
+	args
+	afterStage
+}
+`
+
+func (c *Client) ListClusterMinimalStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterMinimalStacks, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListClusterMinimalStacks
+	if err := c.Client.Post(ctx, "ListClusterMinimalStacks", ListClusterMinimalStacksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListInfrastructureStacksDocument = `query ListInfrastructureStacks ($after: String, $first: Int, $before: String, $last: Int) {
 	infrastructureStacks(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -29496,6 +29716,7 @@ var DocumentOperationNames = map[string]string{
 	ShareSecretDocument:                               "ShareSecret",
 	ListClusterStacksDocument:                         "ListClusterStacks",
 	ListClusterStackIdsDocument:                       "ListClusterStackIds",
+	ListClusterMinimalStacksDocument:                  "ListClusterMinimalStacks",
 	ListInfrastructureStacksDocument:                  "ListInfrastructureStacks",
 	GetStackRunMinimalDocument:                        "GetStackRunMinimal",
 	GetStackRunDocument:                               "GetStackRun",

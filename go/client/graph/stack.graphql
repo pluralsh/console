@@ -6,6 +6,10 @@ fragment StackRunEdgeFragment on StackRunEdge {
     node { ...StackRunFragment}
 }
 
+fragment MinimalStackRunEdgeFragment on StackRunEdge {
+    node { ...StackRunMinimalFragment}
+}
+
 fragment StackRunIdEdgeFragment on StackRunEdge {
     node { ...StackRunIdFragment}
 }
@@ -206,6 +210,15 @@ query ListClusterStackIds($after: String, $first: Int, $before: String, $last: I
         pageInfo { ...PageInfoFragment}
         edges {
             ...StackRunIdEdgeFragment
+        }
+    }
+}
+
+query ListClusterMinimalStacks($after: String, $first: Int, $before: String, $last: Int) {
+    clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...MinimalStackRunEdgeFragment
         }
     }
 }
