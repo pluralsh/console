@@ -3,6 +3,32 @@
     {
       "capabilities": {
         "supportPlan": [
+          "KubernetesOfficial"
+        ]
+      },
+      "isDefault": null,
+      "isPreview": null,
+      "patchVersions": {
+        "1.31.1": {
+          "upgrades": [
+            "1.31.3",
+            "1.31.2"
+          ]
+        },
+        "1.31.2": {
+          "upgrades": [
+            "1.31.3"
+          ]
+        },
+        "1.31.3": {
+          "upgrades": []
+        }
+      },
+      "version": "1.31"
+    },
+    {
+      "capabilities": {
+        "supportPlan": [
           "KubernetesOfficial",
           "AKSLongTermSupport"
         ]
@@ -470,32 +496,6 @@
         }
       },
       "version": "1.28"
-    },
-    {
-      "capabilities": {
-        "supportPlan": [
-          "KubernetesOfficial"
-        ]
-      },
-      "isDefault": null,
-      "isPreview": null,
-      "patchVersions": {
-        "1.31.1": {
-          "upgrades": [
-            "1.31.3",
-            "1.31.2"
-          ]
-        },
-        "1.31.2": {
-          "upgrades": [
-            "1.31.3"
-          ]
-        },
-        "1.31.3": {
-          "upgrades": []
-        }
-      },
-      "version": "1.31"
     },
     {
       "capabilities": {
