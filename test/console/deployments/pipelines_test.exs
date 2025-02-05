@@ -335,6 +335,98 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
     end
 
+    test "it will handle a new promotion via pipeline context" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      pipeline = insert(:pipeline)
+      ctx = insert(:pipeline_context,
+        pipeline: pipeline,
+        context: %{name: "context"},
+        inserted_at: Timex.now() |> Timex.shift(minutes: -1)
+      )
+      stage = insert(:pipeline_stage, context: ctx, pipeline: pipeline)
+      prod = insert(:pipeline_stage)
+      insert(:pipeline_edge, from: stage)
+      insert(:stage_service, stage: stage, service: svc)
+      edge = insert(:pipeline_edge, from: stage, to: prod)
+      %{id: gate_id} = gate = insert(:pipeline_gate,
+        edge: edge,
+        state: :open,
+        updated_at: Timex.now() |> Timex.shift(hours: -2)
+      )
+
+      {:ok, promo} = Pipelines.build_promotion(stage)
+
+      assert promo.stage_id == stage.id
+      assert promo.revised_at
+      assert promo.context_id == ctx.id
+      [service] = promo.services
+      assert service.service_id == svc.id
+      assert service.revision_id == svc.revision_id
+
+      assert refetch(gate).state == :pending
+
+      assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
+    end
+
+    test "it will not revise promotions if gates are unchanged" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+      svc = Console.Repo.preload(svc, [:revision])
+
+      pipeline = insert(:pipeline)
+      ctx = insert(:pipeline_context,
+        pipeline: pipeline,
+        context: %{name: "context"},
+        inserted_at: Timex.now() |> Timex.shift(minutes: -1)
+      )
+      stage = insert(:pipeline_stage, pipeline: pipeline, context: ctx)
+      prod = insert(:pipeline_stage, pipeline: pipeline)
+      insert(:pipeline_edge, from: stage)
+      insert(:stage_service, stage: stage, service: svc)
+      edge = insert(:pipeline_edge, from: stage, to: prod)
+      gate = insert(:pipeline_gate,
+        edge: edge,
+        state: :open,
+        updated_at: Timex.now()
+      )
+      promo = insert(:pipeline_promotion,
+        stage: stage,
+        revised_at: Timex.now()  |> Timex.shift(minutes: -1),
+        context: ctx,
+        promoted_at: Timex.now()
+      )
+      insert(:promotion_service, promotion: promo, service: svc, revision: svc.revision)
+
+      {:ok, promo} = Pipelines.build_promotion(stage)
+
+      assert promo.stage_id == stage.id
+      assert promo.revised_at
+      assert promo.context_id == ctx.id
+      [service] = promo.services
+      assert service.service_id == svc.id
+      assert service.revision_id == svc.revision_id
+
+      assert refetch(gate).state == :open
+    end
+
     test "it will revise a promotion if there is a change" do
       admin = admin_user()
       git = insert(:git_repository)

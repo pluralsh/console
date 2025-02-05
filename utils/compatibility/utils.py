@@ -91,7 +91,7 @@ def validate_semver(version_str):
 
 def latest_kube_version():
     url = (
-        "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+        "https://cdn.dl.k8s.io/release/stable.txt"
     )
     response = requests.get(url)
     if response.status_code == 200:
