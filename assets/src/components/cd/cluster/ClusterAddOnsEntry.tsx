@@ -1,7 +1,6 @@
 import { AppIcon, Chip } from '@pluralsh/design-system'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { RuntimeServiceFragment } from '../../../generated/graphql'
 import {
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
@@ -10,13 +9,19 @@ import {
 import { TRUNCATE } from '../../utils/truncate'
 
 export default function ClusterAddOnsEntry({
-  addon,
+  id,
+  name,
+  icon,
+  blocking,
   active,
-  first,
+  cloudAddon,
 }: {
-  addon: RuntimeServiceFragment
+  id: string
+  name: string
+  icon?: string | null
+  blocking?: boolean | null
   active: boolean
-  first: boolean
+  cloudAddon: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -30,7 +35,8 @@ export default function ClusterAddOnsEntry({
           navigate(
             getClusterAddOnDetailsPath({
               clusterId,
-              addOnId: addon.id,
+              addOnId: id,
+              cloudAddons: cloudAddon,
             })
           )
       }}
@@ -38,7 +44,6 @@ export default function ClusterAddOnsEntry({
         padding: theme.spacing.medium,
         borderLeft: theme.borders.default,
         borderRight: theme.borders.default,
-        borderTop: first ? theme.borders.default : undefined,
 
         ...(active
           ? {
@@ -63,9 +68,9 @@ export default function ClusterAddOnsEntry({
           gap: theme.spacing.small,
         }}
       >
-        {addon?.addon?.icon ? (
+        {icon ? (
           <AppIcon
-            url={addon?.addon.icon}
+            url={icon}
             size="xxsmall"
             css={{
               backgroundColor: active
@@ -89,9 +94,9 @@ export default function ClusterAddOnsEntry({
             flexGrow: 1,
           }}
         >
-          {addon.name}
+          {name}
         </div>
-        {addon.addonVersion?.blocking === true && (
+        {blocking && (
           <Chip
             size="small"
             severity="danger"
