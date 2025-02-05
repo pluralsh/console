@@ -11,6 +11,7 @@ import {
 import { type Key } from '@react-types/shared'
 import {
   ComponentState,
+  ServiceDeploymentComponentFragment,
   useServiceDeploymentComponentsQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
@@ -43,6 +44,7 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
+import { GqlError } from 'components/utils/Alert.tsx'
 
 export const getServiceComponentsBreadcrumbs = ({
   service,
@@ -52,8 +54,8 @@ export const getServiceComponentsBreadcrumbs = ({
   {
     label: 'components',
     url: `${getServiceDetailsPath({
-      clusterId: cluster.id,
-      serviceId: service.id,
+      clusterId: cluster?.id,
+      serviceId: service?.id,
     })}/components`,
   },
 ]
@@ -73,8 +75,8 @@ export default function ServiceComponents() {
   const breadcrumbs: Breadcrumb[] = useMemo(
     () =>
       getServiceComponentsBreadcrumbs({
-        cluster: outletContext?.service?.cluster as any,
-        service: outletContext?.service as any,
+        cluster: outletContext?.service?.cluster,
+        service: outletContext?.service,
       }),
     [outletContext.service]
   )
@@ -88,17 +90,13 @@ export default function ServiceComponents() {
     () => countDeprecations(data?.serviceDeployment?.components),
     [data?.serviceDeployment?.components]
   )
-  const components = useMemo(
-    () => data?.serviceDeployment?.components?.filter(isNonNullable) || [],
+  const components: ServiceDeploymentComponentFragment[] = useMemo(
+    () => data?.serviceDeployment?.components?.filter(isNonNullable) ?? [],
     [data?.serviceDeployment?.components]
   )
 
-  if (error) {
-    return null
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data) return <LoadingIndicator />
 
   return (
     <ScrollablePage

@@ -1,13 +1,15 @@
 import { useOutletContext } from 'react-router-dom'
 
 import { InfoSection, PaddedCard, PropWideBold } from './common'
+import { ComponentDetailsContext } from '../ComponentDetails'
+import dayjs from 'dayjs'
 
 export default function Certificate() {
-  const { data } = useOutletContext<any>()
+  const { componentDetails: certificate } =
+    useOutletContext<ComponentDetailsContext>()
 
-  if (!data?.certificate) return null
+  if (certificate?.__typename !== 'Certificate') return null
 
-  const { certificate } = data
   const issuer = certificate.spec?.issuerRef
 
   return (
@@ -15,13 +17,15 @@ export default function Certificate() {
       <InfoSection title="Status">
         <PaddedCard>
           <PropWideBold title="Renewal date">
-            {certificate.status?.renewalTime || '-'}
+            {dayjs(certificate.status?.renewalTime).format(
+              'MM/DD/YYYY, h:mm A'
+            )}
           </PropWideBold>
           <PropWideBold title="Not before">
-            {certificate.status?.notBefore || '-'}
+            {dayjs(certificate.status?.notBefore).format('MM/DD/YYYY, h:mm A')}
           </PropWideBold>
           <PropWideBold title="Not after">
-            {certificate.status?.notAfter || '-'}
+            {dayjs(certificate.status?.notAfter).format('MM/DD/YYYY, h:mm A')}
           </PropWideBold>
         </PaddedCard>
       </InfoSection>

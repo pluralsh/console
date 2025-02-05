@@ -20,16 +20,16 @@ fragment Service on Service {
     }
   }
   raw
+  pods {
+    ...Pod
+  }
+  events {
+    ...Event
+  }
 }
 
 query Service($name: String!, $namespace: String!, $serviceId: ID) {
   service(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Service
-    pods {
-      ...Pod
-    }
-    events {
-      ...Event
-    }
   }
 }

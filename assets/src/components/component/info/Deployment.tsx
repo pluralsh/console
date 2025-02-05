@@ -7,6 +7,7 @@ import { DeploymentFragment } from 'generated/graphql'
 
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
 import { ConditionsTable } from './Conditions'
+import { ComponentDetailsContext } from '../ComponentDetails'
 
 export function StatusChart({
   green,
@@ -63,9 +64,13 @@ export function StatusChart({
 }
 
 export default function DeploymentOutlet() {
-  const { data } = useOutletContext<any>()
+  const { componentDetails } = useOutletContext<ComponentDetailsContext>()
 
-  return <DeploymentBase deployment={data?.deployment} />
+  return (
+    componentDetails?.__typename === 'Deployment' && (
+      <DeploymentBase deployment={componentDetails} />
+    )
+  )
 }
 
 export function DeploymentBase({

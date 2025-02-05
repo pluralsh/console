@@ -1,21 +1,17 @@
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
-import { StatusChart } from './Deployment'
-import { ConditionsTable } from './Conditions'
 import { ComponentDetailsContext } from '../ComponentDetails'
-import { StatefulSetQuery } from 'generated/graphql'
+import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
+import { ConditionsTable } from './Conditions'
+import { StatusChart } from './Deployment'
 
 export default function StatefulSet() {
   const theme = useTheme()
-  const {
-    data: { statefulSet },
-  } = useOutletContext<ComponentDetailsContext>() as {
-    data: StatefulSetQuery
-  }
+  const { componentDetails: statefulSet } =
+    useOutletContext<ComponentDetailsContext>()
 
-  if (!statefulSet) return null
+  if (statefulSet?.__typename !== 'StatefulSet') return null
 
   const {
     spec,

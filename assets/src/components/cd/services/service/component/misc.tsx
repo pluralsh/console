@@ -24,15 +24,6 @@ export const statusToSeverity = {
   [Readiness.Completed]: 'success',
 } as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
-const statusToDisplay = {
-  [Readiness.Ready]: 'Ready',
-  [Readiness.Running]: 'Ready',
-  [Readiness.InProgress]: 'In progress',
-  [Readiness.Failed]: 'Failed',
-  [Readiness.Complete]: 'Complete',
-  [Readiness.Completed]: 'Complete',
-} as const satisfies Record<ReadinessT, string>
-
 export const stateToDisplay = {
   [ComponentState.Running]: 'Running',
   [ComponentState.Pending]: 'In progress',
@@ -50,36 +41,13 @@ const stateToSeverity = {
   ComponentProps<typeof Chip>['severity']
 >
 
-export function ComponentStatusChip({
-  status,
-  className,
-}: {
-  className?: string
-  status?: string | null
-}) {
-  if (!status) {
-    status = Readiness.InProgress
-  }
-
-  return (
-    <div className={className}>
-      <Chip
-        size="small"
-        severity={statusToSeverity[status]}
-      >
-        {statusToDisplay[status]}
-      </Chip>
-    </div>
-  )
-}
-
 export function ComponentStateChip({
   state,
   className,
   ...props
 }: {
   className?: string
-  state?: ComponentState | null | undefined
+  state?: Nullable<ComponentState>
 } & ChipProps) {
   if (!state) {
     return null
