@@ -136,6 +136,7 @@ import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
+import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -409,7 +410,7 @@ const clusterDetailsRoutes = [
       </Route>
       <Route
         path={`${CLUSTER_CLOUD_ADDONS_REL_PATH}/:addOnId?`}
-        element={<ClusterAddOns />}
+        element={<ClusterCloudAddon />}
       >
         <Route
           index

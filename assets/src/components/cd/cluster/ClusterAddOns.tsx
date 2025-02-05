@@ -2,13 +2,19 @@ import { EmptyState, Tab, TabList } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   CloudAddonFragment,
-  RuntimeServiceDetailsFragment,
+  ClusterFragment,
   RuntimeServiceFragment,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useRef } from 'react'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useMatch,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -25,15 +31,16 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
-import { useClusterContext } from './Cluster'
-
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'
+import { useClusterContext } from './Cluster.tsx'
 
-export const versionPlaceholder = '_VSN_PLACEHOLDER_'
+export type AddonContextType = {
+  cluster: ClusterFragment
+  cloudAddon?: CloudAddonFragment
+}
 
-export type ClusterAddOnOutletContextT = {
-  addOn: Nullable<RuntimeServiceDetailsFragment>
-  kubeVersion: Nullable<string>
+export function useAddonsContext() {
+  return useOutletContext<AddonContextType>()
 }
 
 const directory = [
@@ -44,8 +51,8 @@ const directory = [
 export default function ClusterAddOns() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const context = useClusterContext()
-  const kubeVersion = getClusterKubeVersion(context.cluster)
+  const { cluster } = useClusterContext()
+  const kubeVersion = getClusterKubeVersion(cluster)
   const tabStateRef = useRef<any>(null)
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
@@ -73,6 +80,11 @@ export default function ClusterAddOns() {
     [isAllAddons, data?.cluster?.cloudAddons, data?.cluster?.runtimeServices]
   )
 
+  const addOn = useMemo(
+    () => addOns.find((a) => a.id === addOnId),
+    [addOnId, addOns]
+  )
+
   const hasAddons = !isEmpty(addOns)
 
   useEffect(() => {
@@ -85,6 +97,15 @@ export default function ClusterAddOns() {
         })
       )
   }, [addOns, addOnId, navigate, clusterId, hasAddons, isAllAddons])
+
+  const context = useMemo(
+    () =>
+      ({
+        cluster,
+        cloudAddon: !isAllAddons ? addOn : undefined, // Update once there is a separate query to get a single cloud addon.
+      }) as AddonContextType,
+    [addOn, cluster, isAllAddons]
+  )
 
   if (error) return <GqlError error={error} />
 

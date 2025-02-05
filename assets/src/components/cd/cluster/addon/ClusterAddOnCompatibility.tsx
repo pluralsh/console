@@ -13,8 +13,7 @@ import { coerce, compare } from 'semver'
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { useOutletContext } from 'react-router-dom'
-
-import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
+import { ClusterAddOnOutletContextT } from '../ClusterAddon.tsx'
 
 const Compatibility = memo(
   ({

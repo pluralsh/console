@@ -1,9 +1,6 @@
 import { Chip, SubTab, TabList } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import {
-  RuntimeServiceDetailsFragment,
-  useRuntimeServiceQuery,
-} from 'generated/graphql'
+import { CloudAddonFragment } from 'generated/graphql'
 import { useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -13,7 +10,6 @@ import {
   getClusterAddOnDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 import { toNiceVersion } from '../../../utils/semver'
-import { GqlError } from '../../utils/Alert'
 import PropCard from '../../utils/PropCard.tsx'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
@@ -21,10 +17,8 @@ import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 import { useSetPageHeaderContent } from '../ContinuousDeployment'
 import { useAddonsContext } from './ClusterAddOns.tsx'
 
-export const versionPlaceholder = '_VSN_PLACEHOLDER_'
-
-export type ClusterAddOnOutletContextT = {
-  addOn: Nullable<RuntimeServiceDetailsFragment>
+export type ClusterCloudAddOnOutletContextT = {
+  cloudAddon: Nullable<CloudAddonFragment>
   kubeVersion: Nullable<string>
 }
 
@@ -34,9 +28,9 @@ const directory = [
   { path: 'readme', label: 'README' },
 ]
 
-export default function ClusterAddon() {
+export default function ClusterCloudAddon() {
   const theme = useTheme()
-  const { cluster } = useAddonsContext()
+  const { cluster, cloudAddon } = useAddonsContext()
   const kubeVersion = getClusterKubeVersion(cluster)
   const tabStateRef = useRef<any>(null)
   const params = useParams()
@@ -52,24 +46,10 @@ export default function ClusterAddon() {
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data: addOnData, error: addOnError } = useRuntimeServiceQuery({
-    skip: !addOnId,
-    variables: {
-      id: addOnId,
-      version: versionPlaceholder,
-      kubeVersion,
-      hasKubeVersion: !!kubeVersion,
-    },
-  })
-
-  const addOn = useMemo(
-    () => addOnData?.runtimeService,
-    [addOnData?.runtimeService]
-  )
-
   const context = useMemo(
-    () => ({ addOn, kubeVersion }) satisfies ClusterAddOnOutletContextT,
-    [addOn, kubeVersion]
+    () =>
+      ({ cloudAddon, kubeVersion }) satisfies ClusterCloudAddOnOutletContextT,
+    [cloudAddon, kubeVersion]
   )
 
   useSetPageHeaderContent(
@@ -112,9 +92,7 @@ export default function ClusterAddon() {
     )
   )
 
-  if (addOnError) return <GqlError error={addOnError} />
-
-  if (!addOn) return <LoadingIndicator />
+  if (!cloudAddon) return <LoadingIndicator />
 
   return (
     <div
@@ -142,7 +120,7 @@ export default function ClusterAddon() {
             gridGap: theme.spacing.small,
           }}
         >
-          <PropCard title="Add-on">{addOn?.name}</PropCard>
+          <PropCard title="Add-on">{cloudAddon?.name}</PropCard>
           <PropCard title="Add-on version">
             <div
               css={{
@@ -151,8 +129,8 @@ export default function ClusterAddon() {
                 justifyContent: 'space-between',
               }}
             >
-              {toNiceVersion(addOn?.addonVersion?.version)}
-              {addOn?.addonVersion?.blocking === true && (
+              {toNiceVersion(cloudAddon?.version)}
+              {cloudAddon?.versionInfo?.blocking === true && (
                 <Chip severity="danger">Blocking</Chip>
               )}
             </div>
