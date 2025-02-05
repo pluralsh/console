@@ -5,8 +5,9 @@ defmodule Console.Schema.ClusterAuditLog do
   @expires [days: -30]
 
   schema "cluster_audit_logs" do
-    field :method, :string
-    field :path,   :string
+    field :method,        :string
+    field :path,          :string
+    field :response_code, :integer
 
     belongs_to :cluster, Cluster
     belongs_to :actor,    User
@@ -27,13 +28,13 @@ defmodule Console.Schema.ClusterAuditLog do
     from(al in query, order_by: ^order)
   end
 
-  @valid ~w(method path cluster_id actor_id)a
+  @valid ~w(method path response_code cluster_id actor_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:cluster_id)
-    |> validate_required(@valid)
+    |> validate_required(~w(method path cluster_id actor_id)a)
   end
 end

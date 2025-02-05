@@ -291,9 +291,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_audit_attributes do
-    field :cluster_id, non_null(:id),     description: "the cluster this request was made on"
-    field :method,     non_null(:string), description: "the http method from the given request"
-    field :path,       non_null(:string), description: "the path made for the given request"
+    field :cluster_id,    non_null(:id),     description: "the cluster this request was made on"
+    field :method,        non_null(:string), description: "the http method from the given request"
+    field :path,          non_null(:string), description: "the path made for the given request"
+    field :response_code, :integer
   end
 
   input_object :cluster_registration_create_attributes do
@@ -908,12 +909,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster_audit_log do
-    field :id,     non_null(:id)
-    field :method, non_null(:string)
-    field :path,   non_null(:string)
+    field :id,            non_null(:id)
+    field :method,        non_null(:string)
+    field :path,          non_null(:string)
+    field :response_code, :integer
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
-    field :user,    :user,    resolve: dataloader(User)
+    field :actor,   :user,    resolve: dataloader(User)
 
     timestamps()
   end
