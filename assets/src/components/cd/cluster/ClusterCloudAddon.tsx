@@ -1,5 +1,4 @@
 import { Chip, SubTab, TabList } from '@pluralsh/design-system'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { CloudAddonFragment } from 'generated/graphql'
 import { useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
@@ -92,7 +91,7 @@ export default function ClusterCloudAddon() {
     )
   )
 
-  if (!cloudAddon) return <LoadingIndicator />
+  if (!cloudAddon) return null // Update once there is a separate query to get a single cloud addon.
 
   return (
     <div

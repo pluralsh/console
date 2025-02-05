@@ -1,4 +1,4 @@
-import { EmptyState, Tab, TabList } from '@pluralsh/design-system'
+import { Tab, TabList } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   CloudAddonFragment,
@@ -179,9 +179,14 @@ export default function ClusterAddOns() {
               />
             ))
           ) : (
-            <EmptyState
-              message={`No ${isAllAddons ? '' : 'cloud '}add-ons found.`}
-            />
+            <div
+              css={{
+                border: theme.borders.default,
+                borderTop: 'none',
+                padding: theme.spacing.xlarge,
+                textAlign: 'center',
+              }}
+            >{`No ${isAllAddons ? '' : 'cloud '}add-ons found.`}</div>
           )}
         </div>
       </div>
