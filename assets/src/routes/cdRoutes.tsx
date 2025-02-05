@@ -137,6 +137,7 @@ import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
 import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
+import ClusterCloudAddOnCompatibility from '../components/cd/cluster/addon/ClusterCloudAddOnCompatibility.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -423,7 +424,7 @@ const clusterDetailsRoutes = [
         />
         <Route
           path="compatibility"
-          element={<ClusterAddOnCompatibility />}
+          element={<ClusterCloudAddOnCompatibility />}
         />
       </Route>
     </Route>
