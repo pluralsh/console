@@ -28,7 +28,7 @@ type ConsoleClient interface {
 	UpdateClusterProvider(ctx context.Context, id string, attributes ClusterProviderUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterProvider, error)
 	DeleteClusterProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterProvider, error)
 	PingCluster(ctx context.Context, attributes ClusterPing, interceptors ...clientv2.RequestInterceptor) (*PingCluster, error)
-	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
+	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
 	ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error)
 	GetCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetCluster, error)
 	GetTinyCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetTinyCluster, error)
@@ -16742,14 +16742,15 @@ func (c *Client) PingCluster(ctx context.Context, attributes ClusterPing, interc
 	return &res, nil
 }
 
-const RegisterRuntimeServicesDocument = `mutation RegisterRuntimeServices ($services: [RuntimeServiceAttributes], $serviceId: ID) {
-	registerRuntimeServices(services: $services, serviceId: $serviceId)
+const RegisterRuntimeServicesDocument = `mutation RegisterRuntimeServices ($services: [RuntimeServiceAttributes], $layout: OperationalLayoutAttributes, $serviceId: ID) {
+	registerRuntimeServices(services: $services, layout: $layout, serviceId: $serviceId)
 }
 `
 
-func (c *Client) RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error) {
+func (c *Client) RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error) {
 	vars := map[string]any{
 		"services":  services,
+		"layout":    layout,
 		"serviceId": serviceID,
 	}
 

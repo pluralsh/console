@@ -130,8 +130,8 @@ mutation PingCluster($attributes: ClusterPing!) {
     }
 }
 
-mutation RegisterRuntimeServices($services: [RuntimeServiceAttributes], $serviceId: ID) {
-    registerRuntimeServices(services: $services, serviceId: $serviceId)
+mutation RegisterRuntimeServices($services: [RuntimeServiceAttributes], $layout: OperationalLayoutAttributes, $serviceId: ID) {
+    registerRuntimeServices(services: $services, layout: $layout, serviceId: $serviceId)
 }
 
 query ListClusters($cursor: String, $before: String, $last: Int) {
