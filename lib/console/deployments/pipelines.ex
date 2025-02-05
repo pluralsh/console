@@ -522,7 +522,7 @@ defmodule Console.Deployments.Pipelines do
 
   defp gates_stale?(%PipelineStage{context: %{inserted_at: at}, from_edges: edges}) do
     Enum.flat_map(edges, & &1.gates)
-    |> Enum.all?(&Timex.after?(coalesce(&1.updated_at, &1.inserted_at), at))
+    |> Enum.any?(&Timex.before?(coalesce(&1.updated_at, &1.inserted_at), at))
   end
   defp gates_stale?(_), do: true
 
