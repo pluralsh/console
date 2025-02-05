@@ -1,8 +1,11 @@
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { ReactNode, useMemo } from 'react'
+import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { useServiceDeploymentQuery } from 'generated/graphql'
+import {
+  ServiceDeploymentComponentFragment,
+  useServiceDeploymentQuery,
+} from 'generated/graphql'
 
 import {
   COMPONENT_PARAM_ID,
@@ -12,15 +15,16 @@ import {
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ComponentDetails } from 'components/component/ComponentDetails'
 import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
+import { isNonNullable } from 'utils/isNonNullable'
 
-export const getServiceComponentBreadcrumbs = ({
+const getServiceComponentBreadcrumbs = ({
   service,
   cluster,
   componentName,
@@ -38,41 +42,12 @@ export const getServiceComponentBreadcrumbs = ({
   {
     label: componentName || componentId || '',
     url: getServiceComponentPath({
-      clusterId: cluster.id,
-      serviceId: service.id,
+      clusterId: cluster?.id,
+      serviceId: service?.id,
       componentId,
     }),
   },
 ]
-
-function BreadcrumbWrapper({
-  cluster,
-  service,
-  componentId,
-  componentName,
-  children,
-}: {
-  cluster: any
-  service: any
-  componentId: string | undefined
-  componentName: string | undefined
-  children: ReactNode
-}) {
-  useSetBreadcrumbs(
-    useMemo(
-      () =>
-        getServiceComponentBreadcrumbs({
-          cluster,
-          service,
-          componentId,
-          componentName,
-        }),
-      [cluster, service, componentId, componentName]
-    )
-  )
-
-  return <>{children}</>
-}
 
 export default function ServiceComponent() {
   const params = useParams()
@@ -81,42 +56,46 @@ export default function ServiceComponent() {
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const settings = useDeploymentSettings()
-  const { data, error } = useServiceDeploymentQuery({
+  const { data, loading, error } = useServiceDeploymentQuery({
     variables: { id: serviceId || '' },
   })
 
   const serviceDeployment = data?.serviceDeployment
-  const components = data?.serviceDeployment?.components
-
-  const component = components?.find(
-    (component) => component?.id === componentId
+  const components = useMemo(
+    () => serviceDeployment?.components?.filter(isNonNullable) ?? [],
+    [serviceDeployment?.components]
   )
+
+  const component: Nullable<ServiceDeploymentComponentFragment> =
+    data?.serviceDeployment?.components?.find(
+      (component) => component?.id === componentId
+    )
   const componentName = component?.name
 
-  const breadcrumbProps = {
-    cluster: serviceDeployment?.cluster || { id: serviceId },
-    service: serviceDeployment || { id: clusterId },
-    componentId,
-    componentName,
-  }
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        getServiceComponentBreadcrumbs({
+          cluster: serviceDeployment?.cluster || { id: serviceId },
+          service: serviceDeployment || { id: clusterId },
+          componentId,
+          componentName,
+        }),
+      [serviceDeployment, serviceId, clusterId, componentId, componentName]
+    )
+  )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!component) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data && loading) return <LoadingIndicator />
+  if (!component) return <EmptyState message="Component not found" />
 
   return (
-    <BreadcrumbWrapper {...breadcrumbProps}>
-      <ComponentDetails
-        component={component}
-        serviceComponents={components}
-        service={data?.serviceDeployment}
-        hasPrometheus={!!settings?.prometheusConnection}
-        pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
-        cdView
-      />
-    </BreadcrumbWrapper>
+    <ComponentDetails
+      component={component}
+      serviceComponents={components}
+      service={data?.serviceDeployment}
+      hasPrometheus={!!settings?.prometheusConnection}
+      pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
+    />
   )
 }

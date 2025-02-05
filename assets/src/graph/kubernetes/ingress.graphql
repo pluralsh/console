@@ -32,13 +32,13 @@ fragment Ingress on Ingress {
     ...Certificate
   }
   raw
+  events {
+    ...Event
+  }
 }
 
 query Ingress($name: String!, $namespace: String!, $serviceId: ID) {
   ingress(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Ingress
-    events {
-      ...Event
-    }
   }
 }

@@ -8,10 +8,10 @@ import { useTheme } from 'styled-components'
 import { ComponentDetailsContext } from '../ComponentDetails'
 
 import { Kind } from 'components/kubernetes/common/types'
+import { CronJobJobFragment } from 'generated/graphql'
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts'
 import { DeleteJob } from './Job'
 import { InfoSection, PaddedCard, PropWideBold } from './common'
-import { CronJobJobFragment, CronJobQuery } from 'generated/graphql'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -115,13 +115,14 @@ function CronJobJobs({
 }
 
 export default function CronJob() {
-  const { data, refetch, component } =
-    useOutletContext<ComponentDetailsContext>()
+  const {
+    componentDetails: cronJob,
+    refetch,
+    component,
+  } = useOutletContext<ComponentDetailsContext>()
   const namespace = component.namespace?.toLowerCase()
 
-  if (!data?.cronJob) return null
-
-  const { cronJob } = data as CronJobQuery
+  if (cronJob?.__typename !== 'CronJob') return null
 
   return (
     <>

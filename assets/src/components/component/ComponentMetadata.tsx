@@ -1,27 +1,18 @@
-import { useOutletContext } from 'react-router-dom'
-import { useMemo } from 'react'
 import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
+import { useOutletContext } from 'react-router-dom'
 
+import { ComponentDetailsContext } from './ComponentDetails'
 import { InfoSection } from './info/common'
 
 export default function MetadataOutlet() {
-  const { component, data } = useOutletContext<any>()
-
-  // To avoid mapping between component types and fields of data returned by API
-  // we are picking first available value from API object for now.
-  const value: any = useMemo(
-    () =>
-      data ? Object.values(data).find((value) => value !== undefined) : null,
-    [data]
-  )
-
-  const metadata: Record<string, any> | null | undefined = value?.metadata
+  const { component, componentDetails } =
+    useOutletContext<ComponentDetailsContext>()
 
   return (
     <MetadataBase
       component={component}
-      metadata={metadata}
+      metadata={componentDetails?.metadata}
     />
   )
 }

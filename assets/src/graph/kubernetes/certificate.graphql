@@ -35,13 +35,13 @@ fragment Certificate on Certificate {
     ...CertificateSpec
   }
   raw
+  events {
+    ...Event
+  }
 }
 
 query Certificate($name: String!, $namespace: String!, $serviceId: ID) {
   certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Certificate
-    events {
-      ...Event
-    }
   }
 }

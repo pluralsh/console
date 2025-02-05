@@ -20,6 +20,8 @@ import {
   ColRestarts,
   PodsList,
 } from '../../cd/cluster/pod/PodsList.tsx'
+import { PodFragment } from 'generated/graphql.ts'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 
 const columns = [
   ColName,
@@ -37,7 +39,7 @@ const columns = [
   ColDelete,
 ]
 
-export default function Pods({ pods }) {
+export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const { refetch, component, ...rest } =
     useOutletContext<ComponentDetailsContext>()
@@ -46,6 +48,8 @@ export default function Pods({ pods }) {
   const linkToK8sDashboard =
     component.kind.toLowerCase() === 'job' ||
     component.kind.toLowerCase() === 'cronjob'
+
+  const filteredPods = pods.filter(isNonNullable)
 
   return (
     <div
@@ -59,7 +63,7 @@ export default function Pods({ pods }) {
         Pods
       </InfoSectionH2>
       <PodsList
-        pods={pods}
+        pods={filteredPods}
         columns={columns}
         linkToK8sDashboard={linkToK8sDashboard}
         clusterId={clusterId}

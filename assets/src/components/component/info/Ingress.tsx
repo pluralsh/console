@@ -16,6 +16,7 @@ import {
   PaddedCard,
   PropWideBold,
 } from './common'
+import { ComponentDetailsContext } from '../ComponentDetails'
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
@@ -74,11 +75,11 @@ function Routes({ rules }) {
 }
 
 export default function IngressOutlet() {
-  const { data } = useOutletContext<any>()
+  const { componentDetails } = useOutletContext<ComponentDetailsContext>()
 
-  const ingress = data?.ingress as Nullable<IngressFragment>
-
-  return ingress ? <IngressBase ingress={ingress} /> : null
+  return componentDetails?.__typename === 'Ingress' ? (
+    <IngressBase ingress={componentDetails} />
+  ) : null
 }
 
 export function IngressBase({ ingress }: { ingress: IngressFragment }) {

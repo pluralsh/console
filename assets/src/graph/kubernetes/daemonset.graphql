@@ -24,13 +24,13 @@ fragment DaemonSet on DaemonSet {
     ...Pod
   }
   raw
+  events {
+    ...Event
+  }
 }
 
 query DaemonSet($name: String!, $namespace: String!, $serviceId: ID) {
   daemonSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...DaemonSet
-    events {
-      ...Event
-    }
   }
 }

@@ -1,19 +1,20 @@
+import { Chip, Modal, Table } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { createColumnHelper } from '@tanstack/react-table'
-import { Chip, Modal, Table } from '@pluralsh/design-system'
 
-import { Canary, Deployment, Ingress } from 'generated/graphql'
+import { CanaryFragment, Deployment, Ingress } from 'generated/graphql'
 
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { MetadataBase } from '../ComponentMetadata'
 
+import { ComponentDetailsContext } from '../ComponentDetails'
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
 import { ConditionsTable } from './Conditions'
-import { IngressBase } from './Ingress'
 import { DeploymentBase } from './Deployment'
+import { IngressBase } from './Ingress'
 
 const deploymentHelper = createColumnHelper<Deployment>()
 const ingressHelper = createColumnHelper<Ingress>()
@@ -167,7 +168,7 @@ const ColIngClass = ingressHelper.accessor(
 
 const ingressColumns = [ColIngName, ColIngStatus, ColIngClass]
 
-function CanaryDeployments({ canary }: { canary: Canary }) {
+function CanaryDeployments({ canary }: { canary: CanaryFragment }) {
   return (
     <InfoSection
       title="Deployments"
@@ -183,7 +184,7 @@ function CanaryDeployments({ canary }: { canary: Canary }) {
   )
 }
 
-function CanaryIngresses({ canary }: { canary: Canary }) {
+function CanaryIngresses({ canary }: { canary: CanaryFragment }) {
   const ingresses = useMemo(
     () => [canary.ingress, canary.ingressCanary].filter((v) => !!v),
     [canary.ingress, canary.ingressCanary]
@@ -204,10 +205,10 @@ function CanaryIngresses({ canary }: { canary: Canary }) {
 
 export default function CanaryInfo() {
   const theme = useTheme()
-  const { data } = useOutletContext<any>()
-  const canary = data?.canary as Nullable<Canary>
+  const { componentDetails: canary } =
+    useOutletContext<ComponentDetailsContext>()
 
-  if (!canary) return null
+  if (canary?.__typename !== 'Canary') return null
 
   const { status } = canary
 

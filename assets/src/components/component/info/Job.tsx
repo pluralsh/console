@@ -5,6 +5,7 @@ import { useOutletContext } from 'react-router-dom'
 
 import { InfoSection, PaddedCard, PropWideBold } from './common'
 import { useDeleteJobMutation } from '../../../generated/graphql.ts'
+import { ComponentDetailsContext } from '../ComponentDetails.tsx'
 
 export function DeleteJob({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
@@ -40,11 +41,9 @@ export function DeleteJob({ name, namespace, refetch }) {
 }
 
 export default function Job() {
-  const { data } = useOutletContext<any>()
+  const { componentDetails: job } = useOutletContext<ComponentDetailsContext>()
 
-  if (!data?.job) return null
-
-  const { job } = data
+  if (job?.__typename !== 'Job') return null
 
   return (
     <>

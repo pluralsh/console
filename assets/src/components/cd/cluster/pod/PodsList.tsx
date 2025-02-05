@@ -4,8 +4,9 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router-dom'
-import { Row, createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
+import { filesize } from 'filesize'
+import { isEmpty } from 'lodash'
 import {
   ComponentProps,
   createContext,
@@ -14,10 +15,9 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { filesize } from 'filesize'
-import { isEmpty } from 'lodash'
+import { useNavigate } from 'react-router-dom'
 
-import { Maybe, Pod, useDeletePodMutation } from 'generated/graphql'
+import { Pod, PodFragment, useDeletePodMutation } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
 import { Confirm } from 'components/utils/Confirm'
@@ -25,6 +25,8 @@ import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/Truncate'
 
 import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts'
+import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
+import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import {
   LabelWithIcon,
   numishSort,
@@ -33,9 +35,7 @@ import {
   Usage,
 } from '../../../cluster/TableElements.tsx'
 import { DateTimeCol } from '../../../utils/table/DateTimeCol.tsx'
-import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import { getPodResources } from './getPodResources.tsx'
-import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
 
 export const PODS_TABLE_MAX_HEIGHT = '256px'
 
@@ -289,11 +289,8 @@ export const ColDelete = columnHelper.display({
   header: '',
 })
 
-export type PodWithId = Pod & {
-  id?: Maybe<string>
-}
 type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
-  pods?: Maybe<PodWithId>[] & PodWithId[]
+  pods?: PodFragment[]
   refetch: Nullable<() => void>
   columns: any[]
   linkToK8sDashboard?: boolean
@@ -301,6 +298,8 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   clusterId?: string | null
   serviceId?: string | null
 }
+
+export type PodWithId = PodFragment & { id: string }
 
 function getRestarts(status: Pod['status']) {
   return (status.containerStatuses || []).reduce(

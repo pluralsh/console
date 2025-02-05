@@ -1,23 +1,27 @@
-import { useOutletContext } from 'react-router-dom'
 import { useMemo, type JSX } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
 import styled, { useTheme } from 'styled-components'
 
-import Pods from './info/Pods'
-import Job from './info/Job'
-import CronJob from './info/CronJob'
-import Certificate from './info/Certificate'
-import Service from './info/Service'
-import Ingress from './info/Ingress'
-import Deployment from './info/Deployment'
-import StatefulSet from './info/StatefulSet'
 import { ComponentDetailsContext } from './ComponentDetails'
-import DaemonSet from './info/Daemonset'
 import CanaryInfo from './info/Canary'
+import Certificate from './info/Certificate'
+import CronJob from './info/CronJob'
+import DaemonSet from './info/Daemonset'
+import Deployment from './info/Deployment'
+import Ingress from './info/Ingress'
+import Job from './info/Job'
 import PluralServiceDeployment from './info/PluralServiceDeployment'
+import Pods from './info/Pods'
 import { Rollout } from './info/rollout/Rollout'
+import Service from './info/Service'
+import StatefulSet from './info/StatefulSet'
+import {
+  ComponentDetailsWithPodsT,
+  StructuredComponentKind,
+} from './useFetchComponentDetails'
 
-const componentsWithPods: string[] = [
+const componentsWithPods: StructuredComponentKind[] = [
   'deployment',
   'job',
   'service',
@@ -26,13 +30,16 @@ const componentsWithPods: string[] = [
   'rollout',
 ]
 
-export const componentsWithLogs: string[] = ['deployment', 'statefulset']
+export const componentsWithLogs: StructuredComponentKind[] = [
+  'deployment',
+  'statefulset',
+]
 
 function hasPods(kind: string): boolean {
-  return componentsWithPods.includes(kind)
+  return componentsWithPods.includes(kind as StructuredComponentKind)
 }
 
-const componentInfoMap: { [key: string]: JSX.Element } = {
+const componentInfoMap: Record<StructuredComponentKind, JSX.Element> = {
   certificate: <Certificate />,
   cronjob: <CronJob />,
   deployment: <Deployment />,
@@ -50,26 +57,13 @@ function getInfo(kind: string): JSX.Element | undefined {
   return componentInfoMap[kind]
 }
 
-export function isUnstructured(kind: string): boolean {
-  return componentInfoMap[kind.toLowerCase()] === undefined
-}
-
 export default function ComponentInfo() {
   const theme = useTheme()
   const {
-    data,
+    componentDetails,
     component: { kind },
   } = useOutletContext<ComponentDetailsContext>()
   const componentKind = kind.toLowerCase()
-
-  // To avoid mapping between component types and fields of data returned by API
-  // we are picking first available value from API object for now.
-  const value: any = useMemo(
-    () =>
-      data ? Object.values(data).find((value) => value !== undefined) : null,
-    [data]
-  )
-
   const info = useMemo(() => getInfo(componentKind), [componentKind])
 
   return (
@@ -81,8 +75,12 @@ export default function ComponentInfo() {
         paddingBottom: theme.spacing.xxlarge,
       }}
     >
-      {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      {info && value && <InfoWrapperSC>{info}</InfoWrapperSC>}
+      {hasPods(componentKind) && (
+        <Pods
+          pods={(componentDetails as ComponentDetailsWithPodsT)?.pods ?? []}
+        />
+      )}
+      {info && componentDetails && <InfoWrapperSC>{info}</InfoWrapperSC>}
     </div>
   )
 }

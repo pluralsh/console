@@ -30,25 +30,25 @@ fragment Canary on Canary {
     ...CanarySpec
   }
   raw
+  canaryDeployment {
+    ...Deployment
+  }
+  primaryDeployment {
+    ...Deployment
+  }
+  ingress {
+    ...Ingress
+  }
+  ingressCanary {
+    ...Ingress
+  }
+  events {
+    ...Event
+  }
 }
 
 query Canary($name: String!, $namespace: String!, $serviceId: ID) {
   canary(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Canary
-    canaryDeployment {
-      ...Deployment
-    }
-    primaryDeployment {
-      ...Deployment
-    }
-    ingress {
-      ...Ingress
-    }
-    ingressCanary {
-      ...Ingress
-    }
-    events {
-      ...Event
-    }
   }
 }
