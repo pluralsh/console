@@ -21,12 +21,12 @@ import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 import { useSetPageHeaderContent } from '../ContinuousDeployment'
 import { useAddonsContext } from './ClusterAddOns.tsx'
 
-export const versionPlaceholder = '_VSN_PLACEHOLDER_'
-
 export type ClusterAddOnOutletContextT = {
   addOn: Nullable<RuntimeServiceDetailsFragment>
   kubeVersion: Nullable<string>
 }
+
+export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 const directory = [
   { path: 'compatibility', label: 'Compatibility' },
@@ -68,7 +68,11 @@ export default function ClusterAddon() {
   )
 
   const context = useMemo(
-    () => ({ addOn, kubeVersion }) satisfies ClusterAddOnOutletContextT,
+    () =>
+      ({
+        addOn,
+        kubeVersion,
+      }) as ClusterAddOnOutletContextT,
     [addOn, kubeVersion]
   )
 

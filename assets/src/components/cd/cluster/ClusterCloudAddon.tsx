@@ -22,11 +22,7 @@ export type ClusterCloudAddOnOutletContextT = {
   kubeVersion: Nullable<string>
 }
 
-const directory = [
-  { path: 'compatibility', label: 'Compatibility' },
-  { path: 'releases', label: 'Releases' },
-  { path: 'readme', label: 'README' },
-]
+const directory = [{ path: 'compatibility', label: 'Compatibility' }]
 
 export default function ClusterCloudAddon() {
   const theme = useTheme()
@@ -39,6 +35,7 @@ export default function ClusterCloudAddon() {
   const pathPrefix = getClusterAddOnDetailsPath({
     clusterId,
     addOnId,
+    cloudAddons: true,
   })
   const pathMatch = useMatch(
     `${getClusterAddOnDetailsPath({ clusterId, addOnId })}/:tab`
@@ -48,7 +45,10 @@ export default function ClusterCloudAddon() {
 
   const context = useMemo(
     () =>
-      ({ cloudAddon, kubeVersion }) satisfies ClusterCloudAddOnOutletContextT,
+      ({
+        cloudAddon,
+        kubeVersion,
+      }) as ClusterCloudAddOnOutletContextT,
     [cloudAddon, kubeVersion]
   )
 

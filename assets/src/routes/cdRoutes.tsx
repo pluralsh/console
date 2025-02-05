@@ -425,14 +425,6 @@ const clusterDetailsRoutes = [
           path="compatibility"
           element={<ClusterAddOnCompatibility />}
         />
-        <Route
-          path="readme"
-          element={<ClusterAddOnReadme />}
-        />
-        <Route
-          path="releases"
-          element={<ClusterAddOnReleases />}
-        />
       </Route>
     </Route>
   </Route>,
