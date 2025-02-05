@@ -37,6 +37,9 @@ spec:
             name: console-migration-env
         env:
         {{ include "console.env" . | nindent 8 }}
+        {{- if  .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /opt/app/var
           name: scratch
@@ -45,6 +48,11 @@ spec:
         {{ if .Values.cloud.pgRootCert }}
         - mountPath: /opt/app/certs
           name: pg-cert
+        {{ end }}
+        {{ if not .Values.disableAdditionalVolumes }}
+        {{ if .Values.global.additionalVolumeMounts }}
+        {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
         {{ end }}
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
@@ -64,5 +72,8 @@ spec:
       - name: pg-cert
         secret:
           secretName: pg-root-cert
+      {{ end }}
+      {{ if .Values.global.additionalVolumes }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
   backoffLimit: 5
