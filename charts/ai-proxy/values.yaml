@@ -115,3 +115,8 @@ affinity: {}
 env: []
 
 envFrom: []
+
+serviceAccount:
+  create: true
+  name: 'ai-proxy'
+  annotations: {}
