@@ -33,7 +33,13 @@ type BedrockProxy struct {
 
 func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
 	ctx := context.Background()
-	sdkConfig, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
+
+	var loadOptions []func(options *config.LoadOptions) error
+	if region != "" {
+		loadOptions = append(loadOptions, config.WithRegion(region))
+	}
+
+	sdkConfig, err := config.LoadDefaultConfig(ctx, loadOptions...)
 	if err != nil {
 		klog.ErrorS(err, "Couldn't load default configuration. Have you set up your AWS account?")
 		return nil, err
@@ -41,7 +47,6 @@ func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
 	bedrockClient := bedrockruntime.NewFromConfig(sdkConfig)
 	return &BedrockProxy{
 		bedrockClient: bedrockClient,
-		region:        region,
 	}, nil
 }
 
@@ -49,7 +54,7 @@ func (b *BedrockProxy) Proxy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var openAIReq openai.ChatCompletionRequest
 		if err := json.NewDecoder(r.Body).Decode(&openAIReq); err != nil {
-			klog.ErrorS(err, "failed to parse openai request")
+			http.Error(w, "failed to parse openai request", http.StatusBadRequest)
 			return
 		}
 
