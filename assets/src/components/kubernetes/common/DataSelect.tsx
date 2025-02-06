@@ -24,6 +24,8 @@ export type DataSelectT = {
 }
 
 export type DataSelectContextT = {
+  enabled: boolean
+  setEnabled: Dispatch<SetStateAction<boolean>>
   namespaced: boolean
   setNamespaced: Dispatch<SetStateAction<boolean>>
   namespace: string
@@ -41,10 +43,13 @@ export function useDataSelect(defaults?: DataSelectT) {
   const [namespaced, setNamespaced] = useState<boolean>(false)
   const [namespace, setNamespace] = useState(defaults?.namespace ?? '')
   const [filter, setFilter] = useState(defaults?.filter ?? '')
+  const [enabled, setEnabled] = useState<boolean>(true)
 
   return useMemo(
     () =>
       context ?? {
+        enabled,
+        setEnabled,
         namespaced,
         setNamespaced,
         namespace,
@@ -53,6 +58,8 @@ export function useDataSelect(defaults?: DataSelectT) {
         setFilter,
       },
     [
+      enabled,
+      setEnabled,
       context,
       namespaced,
       setNamespaced,
