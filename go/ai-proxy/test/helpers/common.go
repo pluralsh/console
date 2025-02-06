@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/api/bedrock"
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
@@ -22,6 +23,7 @@ import (
 func SetupServer() (*httptest.Server, error) {
 	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 	if err != nil {
+		fmt.Println("Failed")
 		return nil, err
 	}
 
@@ -29,9 +31,16 @@ func SetupServer() (*httptest.Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	bp, err := proxy.NewBedrockProxy(api.ProviderBedrock, args.ProviderCredentials())
+	if err != nil {
+		return nil, err
+	}
+
 	router := mux.NewRouter()
 	router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	router.HandleFunc(openai.EndpointChat, op.Proxy())
+	router.HandleFunc(bedrock.EndpointChat, bp.Proxy())
 
 	return httptest.NewServer(router), nil
 }

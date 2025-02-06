@@ -17,6 +17,7 @@ import (
 const (
 	envProviderToken          = "PROVIDER_TOKEN"
 	envProviderServiceAccount = "PROVIDER_SERVICE_ACCOUNT"
+	envProviderAWSRegion      = "PROVIDER_AWS_REGION"
 
 	defaultPort     = 8000
 	defaultProvider = api.ProviderOllama
@@ -28,6 +29,7 @@ var (
 	argProviderHost           = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
 	argProviderToken          = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "Provider token used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
 	argProviderServiceAccount = pflag.String("provider-service-account", helpers.GetPluralEnv(envProviderServiceAccount, ""), "Provider service account file used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_SERVICE_ACCOUNT env var.")
+	argsProviderAWSRegion     = pflag.String("provider-aws-region", helpers.GetPluralEnv(envProviderAWSRegion, ""), "Provider AWS region used to connect to BedRock API.")
 	argPort                   = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
 	argAddress                = pflag.IP("address", net.ParseIP(defaultAddress), "The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).")
 )
@@ -77,6 +79,10 @@ func ProviderCredentials() string {
 
 	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
 		return *argProviderServiceAccount
+	}
+
+	if len(*argsProviderAWSRegion) > 0 && Provider() == api.ProviderBedrock {
+		return *argsProviderAWSRegion
 	}
 
 	if Provider() == defaultProvider {

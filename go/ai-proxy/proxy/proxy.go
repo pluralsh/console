@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/proxy/bedrock"
 	"github.com/pluralsh/console/go/ai-proxy/proxy/openai"
 	"github.com/pluralsh/console/go/ai-proxy/proxy/provider"
 )
@@ -27,6 +28,14 @@ func NewOpenAIProxy(p api.Provider, host, token string) (api.OpenAIProxy, error)
 	switch p {
 	case api.ProviderOpenAI:
 		return openai.NewOpenAIProxy(host, token)
+	}
+	return nil, fmt.Errorf("invalid provider: %s", p)
+}
+
+func NewBedrockProxy(p api.Provider, region string) (api.OpenAIProxy, error) {
+	switch p {
+	case api.ProviderBedrock:
+		return bedrock.NewBedrockProxy(region)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
