@@ -31,8 +31,7 @@ build: fmt vet ## build manager binary
 .PHONY: run
 run: fmt vet ## run a proxy locally
 	go run ./ \
-		--provider=bedrock \
-		--provider-aws-region=us-east-2 \
+		--provider=${PROVIDER} \
 		--provider-host=${PROVIDER_API_HOST} \
 		--provider-token=${PROVIDER_TOKEN} \
 		--v=4
