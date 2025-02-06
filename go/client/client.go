@@ -10,6 +10,7 @@ import (
 )
 
 type ConsoleClient interface {
+	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	CreateClusterBackup(ctx context.Context, attributes BackupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterBackup, error)
 	GetClusterBackup(ctx context.Context, id *string, clusterID *string, namespace *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterBackup, error)
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
@@ -13407,6 +13408,17 @@ func (t *DeleteGroupMember_DeleteGroupMember_GroupMemberFragment_Group) GetID() 
 	return t.ID
 }
 
+type AddClusterAuditLog struct {
+	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
+}
+
+func (t *AddClusterAuditLog) GetAddClusterAuditLog() *bool {
+	if t == nil {
+		t = &AddClusterAuditLog{}
+	}
+	return t.AddClusterAuditLog
+}
+
 type CreateClusterBackup struct {
 	CreateClusterBackup *ClusterBackupFragment "json:\"createClusterBackup,omitempty\" graphql:\"createClusterBackup\""
 }
@@ -15583,6 +15595,28 @@ func (t *UpsertVulnerabilities) GetUpsertVulnerabilities() *int64 {
 		t = &UpsertVulnerabilities{}
 	}
 	return t.UpsertVulnerabilities
+}
+
+const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($attributes: ClusterAuditAttributes!) {
+	addClusterAuditLog(audit: $attributes)
+}
+`
+
+func (c *Client) AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res AddClusterAuditLog
+	if err := c.Client.Post(ctx, "AddClusterAuditLog", AddClusterAuditLogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 const CreateClusterBackupDocument = `mutation CreateClusterBackup ($attributes: BackupAttributes!) {
@@ -29805,6 +29839,7 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 }
 
 var DocumentOperationNames = map[string]string{
+	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
