@@ -1221,17 +1221,19 @@ export type ClusterAuditAttributes = {
   method: Scalars['String']['input'];
   /** the path made for the given request */
   path: Scalars['String']['input'];
+  responseCode?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ClusterAuditLog = {
   __typename?: 'ClusterAuditLog';
+  actor?: Maybe<User>;
   cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   method: Scalars['String']['output'];
   path: Scalars['String']['output'];
+  responseCode?: Maybe<Scalars['Int']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  user?: Maybe<User>;
 };
 
 export type ClusterAuditLogConnection = {

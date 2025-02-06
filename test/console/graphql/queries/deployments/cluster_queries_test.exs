@@ -365,14 +365,16 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         query cluster($id: ID!) {
           cluster(id: $id) {
             auditLogs(first: 5) {
-              edges { node { id } }
+              edges { node { id actor { id } } }
             }
           }
         }
       """, %{"id" => cluster.id}, %{current_user: user})
 
-      assert from_connection(found["auditLogs"])
-             |> ids_equal(audits)
+      logs = from_connection(found["auditLogs"])
+      assert ids_equal(logs, audits)
+      assert Enum.map(logs, & &1["actor"]["id"])
+             |> ids_equal(Enum.map(audits, & &1.actor_id))
     end
 
     test "it can fetch cluster node metrics" do

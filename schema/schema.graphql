@@ -4687,6 +4687,8 @@ input ClusterAuditAttributes {
 
   "the path made for the given request"
   path: String!
+
+  responseCode: Int
 }
 
 input ClusterRegistrationCreateAttributes {
@@ -5520,8 +5522,9 @@ type ClusterAuditLog {
   id: ID!
   method: String!
   path: String!
+  responseCode: Int
   cluster: Cluster
-  user: User
+  actor: User
   insertedAt: DateTime
   updatedAt: DateTime
 }

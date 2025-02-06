@@ -942,17 +942,19 @@ type ClusterAuditAttributes struct {
 	// the http method from the given request
 	Method string `json:"method"`
 	// the path made for the given request
-	Path string `json:"path"`
+	Path         string `json:"path"`
+	ResponseCode *int64 `json:"responseCode,omitempty"`
 }
 
 type ClusterAuditLog struct {
-	ID         string   `json:"id"`
-	Method     string   `json:"method"`
-	Path       string   `json:"path"`
-	Cluster    *Cluster `json:"cluster,omitempty"`
-	User       *User    `json:"user,omitempty"`
-	InsertedAt *string  `json:"insertedAt,omitempty"`
-	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+	ID           string   `json:"id"`
+	Method       string   `json:"method"`
+	Path         string   `json:"path"`
+	ResponseCode *int64   `json:"responseCode,omitempty"`
+	Cluster      *Cluster `json:"cluster,omitempty"`
+	Actor        *User    `json:"actor,omitempty"`
+	InsertedAt   *string  `json:"insertedAt,omitempty"`
+	UpdatedAt    *string  `json:"updatedAt,omitempty"`
 }
 
 type ClusterAuditLogConnection struct {
