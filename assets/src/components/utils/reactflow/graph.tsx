@@ -1,30 +1,42 @@
-import styled, { useTheme } from 'styled-components'
-import ReactFlow, {
-  Background,
-  BackgroundVariant,
-  ReactFlowProps,
-} from 'reactflow'
 import {
   CloseIcon,
   IconFrame,
   LinkoutIcon,
   ReloadIcon,
-  WrapWithIf,
 } from '@pluralsh/design-system'
-import chroma from 'chroma-js'
-import { useState } from 'react'
 import { useKeyDown } from '@react-hooks-library/core'
+import { useCallback, useLayoutEffect, useState } from 'react'
+import FocusLock from 'react-focus-lock'
+import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  Edge,
+  ReactFlowProps,
+  useReactFlow,
+  type Node as FlowNode,
+} from 'reactflow'
+import styled, { useTheme } from 'styled-components'
 
-import { MarkerDefs } from './markers'
+import {
+  DagreDirection,
+  useLayoutNodes,
+} from 'components/cd/pipelines/utils/nodeLayouter'
 import { edgeTypes } from './edges'
+import { MarkerDefs } from './markers'
 
-const ReactFlowFullScreenWrapperSC = styled.div(({ theme }) => ({
-  position: 'fixed',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: theme.zIndexes.modal,
+const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
+  $fullscreen?: boolean
+}>(({ theme, $fullscreen }) => ({
+  ...($fullscreen
+    ? {
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: theme.zIndexes.modal,
+      }
+    : { display: 'contents' }),
 }))
 
 const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
@@ -71,39 +83,66 @@ const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
 }))
 
 export function ReactFlowGraph({
+  baseNodes,
+  baseEdges,
+  direction = 'LR',
   resetView,
   allowFullscreen = false,
   ...props
 }: {
+  baseNodes: FlowNode[]
+  baseEdges: Edge[]
+  direction?: DagreDirection
   resetView?: () => void
   allowFullscreen?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
+  const { fitView } = useReactFlow()
+
+  const defaultResetView = useCallback(
+    () => fitView({ duration: 500 }),
+    [fitView]
+  )
+
+  const { nodes, edges, layoutNodes } = useLayoutNodes({
+    baseNodes,
+    baseEdges,
+    direction,
+  })
+
+  // initial layout
+  useLayoutEffect(() => {
+    layoutNodes()
+  }, [layoutNodes, defaultResetView])
 
   useKeyDown('Escape', () => setFullscreen(false))
 
   return (
-    <WrapWithIf
-      condition={fullscreen}
-      wrapper={<ReactFlowFullScreenWrapperSC />}
+    <ReactFlowFullScreenWrapperSC
+      disabled={!fullscreen} // controls focus lock
+      $fullscreen={fullscreen}
     >
       <ReactFlowAreaSC $fullscreen={fullscreen}>
         <ReactFlowWrapperSC>
           <ReactFlow
-            edgeTypes={edgeTypes}
+            fitView
             draggable
+            minZoom={0.08}
+            edgeTypes={edgeTypes}
             edgesFocusable={false}
             edgesUpdatable={false}
             nodesDraggable={false}
             nodesConnectable={false}
             {...props}
+            nodes={nodes}
+            edges={edges}
           >
             <Background
               variant={BackgroundVariant.Dots}
               gap={theme.spacing.large}
               size={1}
-              color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
+              color={theme.colors['border-fill-three']}
             />
             <MarkerDefs />
           </ReactFlow>
@@ -119,20 +158,18 @@ export function ReactFlowGraph({
                 Fullscreen
               </IconFrame>
             )}
-            {resetView && (
-              <IconFrame
-                clickable
-                type="floating"
-                icon={<ReloadIcon />}
-                tooltip="Reset view"
-                onClick={resetView}
-              >
-                Reset view
-              </IconFrame>
-            )}
+            <IconFrame
+              clickable
+              type="floating"
+              icon={<ReloadIcon />}
+              tooltip="Reset view"
+              onClick={resetView || defaultResetView}
+            >
+              Reset view
+            </IconFrame>
           </ReactFlowActionWrapperSC>
         </ReactFlowWrapperSC>
       </ReactFlowAreaSC>
-    </WrapWithIf>
+    </ReactFlowFullScreenWrapperSC>
   )
 }

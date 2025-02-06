@@ -1939,6 +1939,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.12.13":
+  version: 7.26.7
+  resolution: "@babel/runtime@npm:7.26.7"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: a1664a08f3f4854b895b540cca2f5f5c6c1993b5fb788c9615d70fc201e16bb254df8e0550c83eaf2749a14d87775e11a7c9ded6161203e9da7a4a323d546925
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.18.10, @babel/template@npm:^7.22.15, @babel/template@npm:^7.25.9":
   version: 7.25.9
   resolution: "@babel/template@npm:7.25.9"
@@ -10327,8 +10336,8 @@ __metadata:
     react-error-boundary: 4.0.11
     react-file-icon: 1.3.0
     react-file-picker: 0.0.6
+    react-focus-lock: 2.13.5
     react-merge-refs: 2.1.1
-    react-portal: 4.2.2
     react-resize-detector: 9.1.0
     react-router-dom: 6.28.1
     react-spring: 9.7.1
@@ -13095,6 +13104,15 @@ __metadata:
   version: 0.2.8
   resolution: "flow-static-land@npm:0.2.8"
   checksum: 601041728f26baac08de972301360877407109d9b7cb78241126d9bf787ecc97eb48b978c58711208a4a83a1a2faab70700de99a4a517d6f129fb92f3493a0d1
+  languageName: node
+  linkType: hard
+
+"focus-lock@npm:^1.3.5":
+  version: 1.3.6
+  resolution: "focus-lock@npm:1.3.6"
+  dependencies:
+    tslib: ^2.0.3
+  checksum: c1fb33976a6451b8957e6ac7ae9aff96d84b39c66b596fb74a8b0325d08c7a40b02492a6a8782a83bb850d9960d8b08be9380a1ffb56ca73adee6961478a9a7d
   languageName: node
   linkType: hard
 
@@ -17691,7 +17709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.8, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -17915,6 +17933,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-clientside-effect@npm:^1.2.6":
+  version: 1.2.7
+  resolution: "react-clientside-effect@npm:1.2.7"
+  dependencies:
+    "@babel/runtime": ^7.12.13
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: acbbf3c923aebeeaf7b37683eb6188a1eb5a30ac1ae7fe6701e073b0445eb1419fcf2f53fde389a1af0021453a97dd31f98da206afec6ddb0cfd049cfbfc4d7f
+  languageName: node
+  linkType: hard
+
 "react-copy-to-clipboard@npm:5.1.0":
   version: 5.1.0
   resolution: "react-copy-to-clipboard@npm:5.1.0"
@@ -18017,6 +18046,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-focus-lock@npm:2.13.5":
+  version: 2.13.5
+  resolution: "react-focus-lock@npm:2.13.5"
+  dependencies:
+    "@babel/runtime": ^7.0.0
+    focus-lock: ^1.3.5
+    prop-types: ^15.6.2
+    react-clientside-effect: ^1.2.6
+    use-callback-ref: ^1.3.2
+    use-sidecar: ^1.1.2
+  peerDependencies:
+    "@types/react": "*"
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 90be296a9782195b1242a826cfb4b30d6dd9ded2f19be3a6c36c01d6639e751473a8652eb38e4313014ea33583a2f5c6572f1186b208cf823bef95f5108c916d
+  languageName: node
+  linkType: hard
+
 "react-instagram-embed@npm:^1.5.0":
   version: 1.5.0
   resolution: "react-instagram-embed@npm:1.5.0"
@@ -18088,18 +18137,6 @@ __metadata:
   peerDependencies:
     react: "*"
   checksum: f61a261b8a82e4ddd5a4a156de3e31993fc8800d53c50ea6fcfeec8818c4df3e8aa1cafb5effd405a324dfebb8dc184b015a6533305a8c5c86e2d761157bf9b6
-  languageName: node
-  linkType: hard
-
-"react-portal@npm:4.2.2":
-  version: 4.2.2
-  resolution: "react-portal@npm:4.2.2"
-  dependencies:
-    prop-types: ^15.5.8
-  peerDependencies:
-    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
-    react-dom: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
-  checksum: dc7cd0c6907d1859c0eca4571108934ac791eb9eaf020529a26d4732b7bb556a53bf7e87e868f9918bd60c58f512cc36a49aef5671c964d0a49494168fb2abe0
   languageName: node
   linkType: hard
 
@@ -21229,7 +21266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-callback-ref@npm:^1.3.0":
+"use-callback-ref@npm:^1.3.0, use-callback-ref@npm:^1.3.2":
   version: 1.3.3
   resolution: "use-callback-ref@npm:1.3.3"
   dependencies:

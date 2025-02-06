@@ -1,5 +1,12 @@
-import { type Node as FlowNode } from 'reactflow'
 import Dagre from '@dagrejs/dagre'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  Edge,
+  FitViewOptions,
+  useReactFlow,
+  type Node as FlowNode,
+} from 'reactflow'
+import { useTheme } from 'styled-components'
 
 function measureNode(node: FlowNode, zoom) {
   let domNode
@@ -22,21 +29,25 @@ function measureNode(node: FlowNode, zoom) {
 }
 export type DagreDirection = 'LR' | 'RL' | 'TB' | 'BT'
 export const getLayoutedElements = (
-  nodes,
-  edges,
-  options: {
-    direction: DagreDirection
-    zoom: number
-    gridGap: number
-    margin: number
+  nodes: FlowNode[],
+  edges: Edge[],
+  options?: {
+    direction?: DagreDirection
+    zoom?: number
+    gridGap?: number
+    margin?: number
   }
 ) => {
   const dagre = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
-  const { direction, zoom, gridGap, margin } = options
-
+  const {
+    direction = 'LR',
+    zoom = 1,
+    gridGap = 24,
+    margin = 24,
+  } = options ?? {}
   dagre.setGraph({
     rankdir: direction,
-    align: 'UL',
+    // align: 'UL',
     marginx: margin,
     marginy: margin,
     nodesep: gridGap,
@@ -67,4 +78,45 @@ export const getLayoutedElements = (
     }),
     edges,
   }
+}
+
+export function useLayoutNodes({
+  baseNodes,
+  baseEdges,
+  direction = 'LR',
+}: {
+  baseNodes: FlowNode[]
+  baseEdges: Edge[]
+  direction?: DagreDirection
+}) {
+  const theme = useTheme()
+  const { getViewport } = useReactFlow()
+  const [nodes, setNodes] = useState(baseNodes)
+  const [edges, setEdges] = useState(baseEdges)
+
+  const layoutNodes = useCallback(() => {
+    const { nodes, edges } = getLayoutedElements(baseNodes, baseEdges, {
+      direction,
+      zoom: getViewport().zoom,
+      gridGap: theme.spacing.large,
+      margin: theme.spacing.large,
+    })
+    setNodes(nodes)
+    setEdges(edges)
+  }, [baseNodes, baseEdges, direction, getViewport, theme.spacing.large])
+
+  return { nodes, edges, layoutNodes }
+}
+
+// for cases where the fitView done on initial load seems to be too early
+export function useFitViewAfterLayout(options?: FitViewOptions) {
+  const { fitView } = useReactFlow()
+  useEffect(() => {
+    // double requestAnimationFrame ensures all layout calculations are completed before refitting
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        fitView(options)
+      })
+    })
+  }, [fitView, options])
 }

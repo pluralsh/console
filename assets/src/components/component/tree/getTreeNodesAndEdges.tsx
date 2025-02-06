@@ -51,11 +51,11 @@ function flattenMetadata(
 }
 
 export function getTreeNodesAndEdges(
-  tree: Nullable<ComponentTreeFragment>,
+  tree: ComponentTreeFragment,
   rootKind: string
 ) {
   const edges =
-    tree?.edges?.flatMap((edge) => {
+    tree.edges?.flatMap((edge) => {
       if (!edge) return []
 
       return {
@@ -64,16 +64,14 @@ export function getTreeNodesAndEdges(
         source: edge.from,
         target: edge.to,
       }
-    }) || []
+    }) ?? []
 
-  const nodes = flattenMetadata(tree, rootKind).map(
-    ({ kind, metadata, raw }) => {
+  const nodes = flattenMetadata(tree, rootKind)
+    .map(({ kind, metadata, raw }) => {
       // Gate types that get their own node
       const nodeId = metadata?.uid
 
-      if (!nodeId) {
-        return []
-      }
+      if (!nodeId) return null
 
       return {
         id: nodeId,
@@ -85,8 +83,8 @@ export function getTreeNodesAndEdges(
           raw,
         },
       }
-    }
-  )
+    })
+    .filter(isNonNullable)
 
   return {
     nodes,
