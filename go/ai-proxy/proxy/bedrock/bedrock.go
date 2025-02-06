@@ -27,12 +27,10 @@ const (
 )
 
 type BedrockProxy struct {
-	region        string // might not be necessary but check
 	bedrockClient *bedrockruntime.Client
 }
 
 func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
-	fmt.Println("REGION", region)
 	ctx := context.Background()
 
 	var loadOptions []func(options *config.LoadOptions) error
