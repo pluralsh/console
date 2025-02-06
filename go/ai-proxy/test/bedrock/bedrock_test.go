@@ -20,7 +20,7 @@ import (
 func init() {
 	_ = pflag.Set("provider", "bedrock")
 	_ = pflag.Set("provider-host", "localhost:8081")
-	_ = pflag.Set("provider-region", "test")
+	_ = pflag.Set("provider-aws-region", "test")
 }
 
 var (

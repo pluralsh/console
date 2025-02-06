@@ -32,6 +32,7 @@ type BedrockProxy struct {
 }
 
 func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
+	fmt.Println("REGION", region)
 	ctx := context.Background()
 
 	var loadOptions []func(options *config.LoadOptions) error
