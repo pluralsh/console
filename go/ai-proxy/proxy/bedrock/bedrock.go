@@ -1,20 +1,20 @@
 package bedrock
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"strings"
+	"reflect"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/google/uuid"
+	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
 	"k8s.io/klog/v2"
 
@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	anthropicClaude = "anthropic.claude-v2"
+	ChatCompletionObject      = "chat.completion"
+	ChatCompletionChunkObject = "chat.completion.chunk"
 )
 
 type BedrockProxy struct {
@@ -60,19 +61,6 @@ func (b *BedrockProxy) Proxy() http.HandlerFunc {
 	}
 }
 
-type ClaudeRequest struct {
-	Prompt            string   `json:"prompt"`
-	MaxTokensToSample int      `json:"max_tokens_to_sample"`
-	Temperature       float64  `json:"temperature,omitempty"`
-	TopP              float64  `json:"top_p,omitempty"`
-	TopK              int      `json:"top_k,omitempty"`
-	StopSequences     []string `json:"stop_sequences,omitempty"`
-}
-
-type ClaudeResponse struct {
-	Completion string `json:"completion"`
-}
-
 func (b *BedrockProxy) handleStreamingBedrock(
 	w http.ResponseWriter,
 	req *openai.ChatCompletionRequest,
@@ -88,58 +76,31 @@ func (b *BedrockProxy) handleStreamingBedrock(
 		return
 	}
 
-	var output *bedrockruntime.InvokeModelWithResponseStreamOutput
+	input, err := convertOpenAIToBedrockStreamInput(req)
+	if err != nil {
+		klog.ErrorS(err, "failed to convert bedrock request")
+		return
+	}
 
-	switch {
-	case strings.Contains(req.Model, anthropicClaude):
-		input, err := toClaudeChatRequest(req)
-		if err != nil {
-			klog.ErrorS(err, "failed to convert bedrock request")
-			return
-		}
-
-		body, err := json.Marshal(input)
-		if err != nil {
-			klog.ErrorS(err, "failed to marshal bedrock request")
-			return
-		}
-
-		output, err = b.bedrockClient.InvokeModelWithResponseStream(context.Background(), &bedrockruntime.InvokeModelWithResponseStreamInput{
-			Body:        body,
-			ModelId:     aws.String(req.Model),
-			ContentType: aws.String("application/json"),
-		})
-
-		if err != nil {
-			klog.ErrorS(err, "Bedrock invoke error: "+err.Error())
-			return
-		}
-
-	default:
-		klog.Errorf("invalid model: %s", req.Model)
+	output, err := b.bedrockClient.ConverseStream(context.Background(), input)
+	if err != nil {
+		klog.ErrorS(err, "call to bedrock failed")
 		return
 	}
 
 	for event := range output.GetStream().Events() {
 		switch v := event.(type) {
-		case *types.ResponseStreamMemberChunk:
-			var resp ClaudeResponse
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
-				log.Printf("Error decoding response chunk: %v", err)
-				continue
-			}
-
-			chunkResp := openai.ChatCompletion{
+		case *types.ConverseStreamOutputMemberMessageStart:
+			chunkResp := openai.ChatCompletionChunk{
 				Id:      uuid.NewString(),
+				Object:  ChatCompletionChunkObject,
 				Created: time.Now().Unix(),
 				Model:   req.Model,
-				Choices: []openai.Choice{
+				Choices: []openai.ChunkChoice{
 					{
 						Index: 0,
-						Message: openai.Message{
-							Role:    "assistant",
-							Content: resp.Completion,
+						Delta: openai.Message{
+							Role: string(v.Value.Role),
 						},
 					},
 				},
@@ -148,15 +109,51 @@ func (b *BedrockProxy) handleStreamingBedrock(
 			payload, _ := json.Marshal(chunkResp)
 			_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
 			flusher.Flush()
+		case *types.ConverseStreamOutputMemberContentBlockDelta:
+			chunkResp := openai.ChatCompletionChunk{
+				Id:      uuid.NewString(),
+				Object:  ChatCompletionChunkObject,
+				Created: time.Now().Unix(),
+				Model:   req.Model,
+			}
 
+			switch v.Value.Delta.(type) {
+			case *types.ContentBlockDeltaMemberText:
+				textResponse := v.Value.Delta.(*types.ContentBlockDeltaMemberText)
+				chunkResp.Choices = []openai.ChunkChoice{
+					{
+						Index: 0,
+						Delta: openai.Message{
+							Role:    "assistant",
+							Content: textResponse.Value,
+						},
+					},
+				}
+			case *types.ContentBlockDeltaMemberToolUse:
+				textResponse := v.Value.Delta.(*types.ContentBlockDeltaMemberToolUse)
+				chunkResp.Choices = []openai.ChunkChoice{
+					{
+						Index: 0,
+						Delta: openai.Message{
+							Role:    "assistant",
+							Content: *textResponse.Value.Input,
+						},
+					},
+				}
+
+			default:
+				klog.Infof("unknown content block delta type: %v", v.Value.Delta)
+			}
+
+			payload, _ := json.Marshal(chunkResp)
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
+			flusher.Flush()
 		case *types.UnknownUnionMember:
-			klog.Infof("Unknown streaming response: %v", v.Tag)
-
+			klog.Infof("unknown tag: %v", v.Tag)
 		default:
-			klog.Info("Unexpected response type from Bedrock stream")
+			klog.Errorf("Unexpected response type from Bedrock stream: %v", reflect.TypeOf(event))
 		}
 	}
-
 	// Send OpenAI's `[DONE]` event to signal end of stream
 	_, _ = fmt.Fprintf(w, "data: [DONE]\n\n")
 	flusher.Flush()
@@ -166,47 +163,23 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 	w http.ResponseWriter,
 	req *openai.ChatCompletionRequest,
 ) {
-	var text string
 
-	switch {
-	case strings.Contains(req.Model, anthropicClaude):
-		input, err := toClaudeChatRequest(req)
-		if err != nil {
-			klog.ErrorS(err, "failed to convert bedrock request")
-			return
-		}
-
-		output, err := b.chatCompletions(input, req.Model)
-		if err != nil {
-			klog.ErrorS(err, "call to bedrock failed")
-			return
-		}
-
-		var response ClaudeResponse
-		if err := json.Unmarshal(output.Body, &response); err != nil {
-			klog.Fatal("failed to unmarshal", err)
-		}
-
-		text = response.Completion
-
-	default:
-		klog.Errorf("invalid model: %s", req.Model)
+	input, err := convertOpenAIToBedrockInput(req)
+	if err != nil {
+		klog.ErrorS(err, "failed to convert bedrock request")
 		return
 	}
 
-	response := openai.ChatCompletion{
-		Id:      uuid.NewString(),
-		Created: time.Now().Unix(),
-		Model:   req.Model,
-		Choices: []openai.Choice{
-			{
-				Index: 0,
-				Message: openai.Message{
-					Role:    "assistant",
-					Content: text,
-				},
-			},
-		},
+	output, err := b.bedrockClient.Converse(context.Background(), input)
+	if err != nil {
+		klog.ErrorS(err, "call to bedrock failed")
+		return
+	}
+
+	response, err := convertBedrockToOpenAI(output, req.Model, false)
+	if err != nil {
+		klog.ErrorS(err, "failed to convert bedrock response to openai format")
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -214,61 +187,173 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 		klog.Errorf("Error encoding response: %v", err)
 		return
 	}
-
 }
 
-func (b *BedrockProxy) chatCompletions(prompt interface{}, model string) (*bedrockruntime.InvokeModelOutput, error) {
-	body, err := json.Marshal(prompt)
+func convertMessages(messages []openai.Message) []types.Message {
+	var bedrockMessages []types.Message
+
+	for _, msg := range messages {
+		var role types.ConversationRole
+		if msg.Role == "user" {
+			role = types.ConversationRoleUser
+		} else {
+			continue
+		}
+
+		bedrockMessages = append(bedrockMessages, types.Message{
+			Role: role,
+			Content: []types.ContentBlock{
+				&types.ContentBlockMemberText{
+					Value: msg.Content.(string),
+				},
+			},
+		})
+	}
+
+	return bedrockMessages
+}
+
+func convertBedrockToOpenAI(output *bedrockruntime.ConverseOutput, model string, stream bool) (*openai.ChatCompletion, error) {
+	response, _ := output.Output.(*types.ConverseOutputMemberMessage)
+	responseContentBlock := response.Value.Content[0]
+	text, _ := responseContentBlock.(*types.ContentBlockMemberText)
+
+	return &openai.ChatCompletion{
+		Id:      uuid.NewString(),
+		Model:   model,
+		Created: time.Now().Unix(),
+		Object:  ChatCompletionObject,
+		Choices: []openai.Choice{
+			{
+				Index: 0,
+				Message: openai.Message{
+					Role:    string(response.Value.Role),
+					Content: text.Value,
+				},
+			},
+		},
+	}, nil
+}
+
+func convertOpenAIToBedrockInput(openAIReq *openai.ChatCompletionRequest) (*bedrockruntime.ConverseInput, error) {
+	bedrockReq := &bedrockruntime.ConverseInput{
+		ModelId: aws.String(openAIReq.Model),
+	}
+
+	messages, inferenceCfg, toolCfg, err := buildBedrockComponents(openAIReq)
 	if err != nil {
 		return nil, err
 	}
 
-	invokeInput := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(model),
-		ContentType: aws.String("application/json"),
-		Body:        body,
+	bedrockReq.Messages = messages
+	bedrockReq.InferenceConfig = inferenceCfg
+
+	if len(toolCfg.Tools) > 0 {
+		bedrockReq.ToolConfig = toolCfg
 	}
 
-	output, err := b.bedrockClient.InvokeModel(context.Background(), invokeInput)
-	if err != nil {
-		return nil, fmt.Errorf("bedrock invoke error: %w", err)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to invoke bedrock")
-	}
-
-	return output, nil
+	return bedrockReq, nil
 }
 
-func toClaudeChatRequest(req *openai.ChatCompletionRequest) (ClaudeRequest, error) {
-	prompt := formatClaudePrompt(req.Messages)
-
-	claudeReq := ClaudeRequest{
-		Prompt:            prompt,
-		MaxTokensToSample: *req.MaxTokens,
-		Temperature:       *req.Temperature,
-		TopP:              *req.TopP,
-		StopSequences:     []string{"\n\nHuman:"},
+func convertOpenAIToBedrockStreamInput(openAIReq *openai.ChatCompletionRequest) (*bedrockruntime.ConverseStreamInput, error) {
+	bedrockReq := &bedrockruntime.ConverseStreamInput{
+		ModelId: aws.String(openAIReq.Model),
 	}
 
-	return claudeReq, nil
+	messages, inferenceCfg, toolCfg, err := buildBedrockComponents(openAIReq)
+	if err != nil {
+		return nil, err
+	}
+
+	bedrockReq.Messages = messages
+	bedrockReq.InferenceConfig = inferenceCfg
+
+	if len(toolCfg.Tools) > 0 {
+		bedrockReq.ToolConfig = toolCfg
+	}
+
+	return bedrockReq, nil
 }
 
-func formatClaudePrompt(messages []openai.Message) string {
-	var sb strings.Builder
+func buildBedrockComponents(
+	openAIReq *openai.ChatCompletionRequest,
+) (messages []types.Message,
+	inferenceConfig *types.InferenceConfiguration,
+	toolConfig *types.ToolConfiguration,
+	err error) {
 
-	for _, msg := range messages {
-		switch msg.Role {
-		case "system":
-			sb.WriteString(fmt.Sprintf("[System message: %s]\n", msg.Content)) // Claude doesn’t officially support system messages
-		case "user":
-			sb.WriteString(fmt.Sprintf("\n\nHuman: %s", msg.Content))
-		case "assistant":
-			sb.WriteString(fmt.Sprintf("\n\nAssistant: %s", msg.Content))
+	bedrockMessages := convertMessages(openAIReq.Messages)
+
+	var temp, topP *float32
+	var maxTokens *int32
+	if openAIReq.Temperature != nil {
+		temp = aws.Float32(float32(*openAIReq.Temperature))
+	}
+	if openAIReq.TopP != nil {
+		topP = aws.Float32(float32(*openAIReq.TopP))
+	}
+	if openAIReq.MaxTokens != nil {
+		maxTokens = aws.Int32(int32(*openAIReq.MaxTokens))
+	}
+
+	stopSequences, ok := openAIReq.Stop.([]string)
+	if !ok {
+		stopSequences = []string{}
+	}
+
+	inferenceConfig = &types.InferenceConfiguration{
+		Temperature:   temp,
+		TopP:          topP,
+		MaxTokens:     maxTokens,
+		StopSequences: stopSequences,
+	}
+
+	tConfig := &types.ToolConfiguration{
+		ToolChoice: &types.ToolChoiceMemberAuto{
+			Value: types.AutoToolChoice{},
+		},
+	}
+
+	if len(openAIReq.Tools) > 0 {
+		var tools []types.Tool
+		for _, tool := range openAIReq.Tools {
+			schemaMap := buildBedrockToolSchema(tool)
+			inputSchemaDoc := document.NewLazyDocument(schemaMap)
+
+			bedrockTool := &types.ToolMemberToolSpec{
+				Value: types.ToolSpecification{
+					InputSchema: &types.ToolInputSchemaMemberJson{
+						Value: inputSchemaDoc,
+					},
+					Name:        aws.String(tool.Function.Name),
+					Description: aws.String(tool.Function.Description),
+				},
+			}
+			tools = append(tools, bedrockTool)
 		}
+		tConfig.Tools = tools
 	}
 
-	sb.WriteString("\n\nAssistant:") // Ensure the prompt ends with `Assistant:` for Claude's expected format
-	return sb.String()
+	return bedrockMessages, inferenceConfig, tConfig, nil
+}
+
+func buildBedrockToolSchema(tool ollamaapi.Tool) map[string]interface{} {
+	schemaMap := map[string]interface{}{
+		"type":     tool.Function.Parameters.Type,
+		"required": tool.Function.Parameters.Required,
+	}
+
+	propsMap := make(map[string]interface{})
+	for fieldName, fieldDef := range tool.Function.Parameters.Properties {
+		prop := map[string]interface{}{
+			"type":        fieldDef.Type,
+			"description": fieldDef.Description,
+		}
+		if len(fieldDef.Enum) > 0 {
+			prop["enum"] = fieldDef.Enum
+		}
+		propsMap[fieldName] = prop
+	}
+	schemaMap["properties"] = propsMap
+	return schemaMap
 }
