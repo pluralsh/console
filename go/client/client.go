@@ -84,6 +84,7 @@ type ConsoleClient interface {
 	CreateClusterIsoImage(ctx context.Context, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterIsoImage, error)
 	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
+	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
 	GetClusterGates(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetClusterGates, error)
 	PagedClusterGates(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGates, error)
 	PagedClusterGateIDs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGateIDs, error)
@@ -14220,6 +14221,17 @@ func (t *DeleteClusterIsoImage) GetDeleteClusterIsoImage() *ClusterIsoImageFragm
 	return t.DeleteClusterIsoImage
 }
 
+type GetClusterIsoImage struct {
+	ClusterIsoImage *ClusterIsoImageFragment "json:\"clusterIsoImage,omitempty\" graphql:\"clusterIsoImage\""
+}
+
+func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
+	if t == nil {
+		t = &GetClusterIsoImage{}
+	}
+	return t.ClusterIsoImage
+}
+
 type GetClusterGates struct {
 	ClusterGates []*PipelineGateFragment "json:\"clusterGates,omitempty\" graphql:\"clusterGates\""
 }
@@ -21923,6 +21935,45 @@ func (c *Client) DeleteClusterIsoImage(ctx context.Context, id string, intercept
 
 	var res DeleteClusterIsoImage
 	if err := c.Client.Post(ctx, "DeleteClusterIsoImage", DeleteClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterIsoImageDocument = `query GetClusterIsoImage ($id: ID, $image: String) {
+	clusterIsoImage(id: $id, image: $image) {
+		... ClusterIsoImageFragment
+	}
+}
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+	id
+	image
+	project {
+		... TinyProjectFragment
+	}
+	registry
+	user
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error) {
+	vars := map[string]any{
+		"id":    id,
+		"image": image,
+	}
+
+	var res GetClusterIsoImage
+	if err := c.Client.Post(ctx, "GetClusterIsoImage", GetClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -29828,6 +29879,7 @@ var DocumentOperationNames = map[string]string{
 	CreateClusterIsoImageDocument:                     "CreateClusterIsoImage",
 	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
+	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
 	GetClusterGatesDocument:                           "GetClusterGates",
 	PagedClusterGatesDocument:                         "PagedClusterGates",
 	PagedClusterGateIDsDocument:                       "PagedClusterGateIDs",

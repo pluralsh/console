@@ -72,6 +72,12 @@ mutation DeleteClusterIsoImage($id: ID!) {
     }
 }
 
+query GetClusterIsoImage($id: ID, $image: String) {
+    clusterIsoImage(id: $id, image: $image) {
+        ...ClusterIsoImageFragment
+    }
+}
+
 fragment ClusterIsoImageFragment on ClusterIsoImage {
     id
     image
