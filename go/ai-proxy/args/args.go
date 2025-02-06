@@ -17,7 +17,7 @@ import (
 const (
 	envProviderToken          = "PROVIDER_TOKEN"
 	envProviderServiceAccount = "PROVIDER_SERVICE_ACCOUNT"
-	envProviderRegion         = "PROVIDER_REGION"
+	envProviderRegion         = "AWS_PROVIDER_REGION"
 
 	defaultPort     = 8000
 	defaultProvider = api.ProviderOllama
