@@ -1,0 +1,3 @@
+mutation AddClusterAuditLog($attributes: ClusterAuditAttributes!) {
+  addClusterAuditLog(audit: $attributes)
+}
