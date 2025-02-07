@@ -156,9 +156,11 @@ export default function ClusterAddon() {
               }}
             >
               {toNiceVersion(addOn?.addonVersion?.version)}
-              {addOn?.addonVersion?.blocking === true && (
-                <Chip severity="danger">Blocking</Chip>
-              )}
+              <Chip
+                severity={addOn?.addonVersion?.blocking ? 'danger' : 'success'}
+              >
+                {addOn?.addonVersion?.blocking ? 'Blocking' : 'Not blocking'}
+              </Chip>
             </div>
           </PropCard>
           <PropCard title="Kubernetes version">
