@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CloseIcon,
+  Flex,
   GearTrainIcon,
   IconFrame,
   Table,
@@ -66,19 +67,20 @@ export function NotificationsPanel({
     <>
       <Card
         fillLevel={1}
-        css={{ border: theme.borders.input, flexGrow: 1, overflow: 'hidden' }}
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          border: theme.borders.input,
+          minHeight: 0,
+          width: 480,
+        }}
         {...props}
       >
-        <div
-          css={{
-            alignItems: 'center',
-            borderBottom: theme.borders.input,
-            display: 'flex',
-            flexGrow: 1,
-            gap: theme.spacing.small,
-            height: 64,
-            padding: theme.spacing.medium,
-          }}
+        <Flex
+          align="center"
+          gap="small"
+          padding="medium"
+          borderBottom={theme.borders.input}
         >
           <span
             css={{
@@ -113,18 +115,23 @@ export function NotificationsPanel({
             onClick={onClose}
             tooltip="Close"
           />
-        </div>
+        </Flex>
         {isEmpty(notifications) ? (
           <div
             css={{
               color: theme.colors['text-light'],
               padding: theme.spacing.medium,
+              height: 240,
             }}
           >
             You do not have any notifications yet.
           </div>
         ) : (
           <Table
+            flush
+            hideHeader
+            fullHeightWrap
+            rowBg="base"
             columns={columns}
             data={notifications}
             reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
@@ -133,15 +140,6 @@ export function NotificationsPanel({
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            hideHeader
-            css={{
-              border: 'none',
-              borderRadius: 0,
-              height: '100%',
-              maxHeight: 574,
-              td: { padding: 0 },
-              'tr:not(:first-child) td': { borderTop: theme.borders.input },
-            }}
           />
         )}
       </Card>
