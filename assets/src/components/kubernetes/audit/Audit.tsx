@@ -9,6 +9,7 @@ import { GqlError } from '../../utils/Alert.tsx'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage.tsx'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
+import UserInfo from '../../utils/UserInfo.tsx'
 import { useCluster } from '../Cluster.tsx'
 import { useDataSelect } from '../common/DataSelect.tsx'
 
@@ -37,7 +38,14 @@ const insertedAtColumn = columnHelper.accessor((log) => log?.insertedAt, {
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
 })
 
-const columns = [pathColumn, methodColumn, insertedAtColumn]
+const userColumn = columnHelper.accessor((log) => log?.actor, {
+  id: 'user',
+  header: 'User',
+  enableSorting: true,
+  cell: ({ getValue }) => <UserInfo user={getValue() ?? {}} />,
+})
+
+const columns = [userColumn, pathColumn, methodColumn, insertedAtColumn]
 
 export default function Audit() {
   const cluster = useCluster()

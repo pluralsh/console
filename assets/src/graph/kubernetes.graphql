@@ -49,7 +49,7 @@ query KubernetesClusterAuditLogs(
           insertedAt
           method
           path
-          user {
+          actor {
             name
             email
           }

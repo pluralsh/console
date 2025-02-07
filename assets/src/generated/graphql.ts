@@ -11129,7 +11129,7 @@ export type KubernetesClusterAuditLogsQueryVariables = Exact<{
 }>;
 
 
-export type KubernetesClusterAuditLogsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', auditLogs?: { __typename?: 'ClusterAuditLogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterAuditLogEdge', node?: { __typename?: 'ClusterAuditLog', id: string, insertedAt?: string | null, method: string, path: string, user?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+export type KubernetesClusterAuditLogsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', auditLogs?: { __typename?: 'ClusterAuditLogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterAuditLogEdge', node?: { __typename?: 'ClusterAuditLog', id: string, insertedAt?: string | null, method: string, path: string, actor?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type PinCustomResourceMutationVariables = Exact<{
   attributes: PinnedCustomResourceAttributes;
@@ -22284,7 +22284,7 @@ export const KubernetesClusterAuditLogsDocument = gql`
           insertedAt
           method
           path
-          user {
+          actor {
             name
             email
           }
