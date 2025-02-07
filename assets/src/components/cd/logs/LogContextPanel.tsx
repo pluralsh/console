@@ -27,7 +27,7 @@ export function LogContextPanel({
 }: {
   logLine: LogLineFragment
   addLabel?: (key: string, value: string) => void
-  queryVars: Omit<LogAggregationQueryVariables, 'limit' | 'time'>
+  queryVars: Omit<LogAggregationQueryVariables, 'limit' | 'time' | 'query'>
   curDuration: string
 }) {
   const [isShowingMore, setIsShowingMore] = useState(false)
