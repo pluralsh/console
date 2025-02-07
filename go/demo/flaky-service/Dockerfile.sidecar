@@ -1,0 +1,15 @@
+# Use an appropriate base image for your sidecar (you can adjust this as needed)
+FROM alpine:3.18
+
+# Install any dependencies your shell script might need (e.g., bash, curl, etc.)
+RUN apk update && apk add --no-cache bash curl
+
+# Copy the shell script from the host to the container
+COPY api_caller.sh ./api_caller.sh
+
+# Make sure the script is executable
+RUN chmod +x ./api_caller.sh
+
+# Set the default command to run the shell script with the provided arguments
+CMD ["./api_caller.sh", "-e", "localhost:8080/api", "-m", "localhost:8081/metrics", "-t", "1.34"]
+
