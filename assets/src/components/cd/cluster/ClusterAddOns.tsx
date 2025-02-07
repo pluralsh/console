@@ -190,7 +190,7 @@ export default function ClusterAddOns() {
           )}
         </div>
       </div>
-      <Outlet context={context} />
+      {addOn && <Outlet context={context} />}
     </div>
   )
 }
