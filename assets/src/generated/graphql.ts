@@ -10978,6 +10978,8 @@ export type ClusterRegistrationFragment = { __typename?: 'ClusterRegistration', 
 
 export type TagFragment = { __typename?: 'Tag', name: string, value: string };
 
+export type IsoImageFragment = { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null };
+
 export type ClusterRegistrationQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
   machineId?: InputMaybe<Scalars['String']['input']>;
@@ -11017,6 +11019,16 @@ export type DeleteClusterRegistrationMutationVariables = Exact<{
 
 
 export type DeleteClusterRegistrationMutation = { __typename?: 'RootMutationType', deleteClusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type ClusterIsoImagesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterIsoImagesQuery = { __typename?: 'RootQueryType', clusterIsoImages?: { __typename?: 'ClusterIsoImageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterIsoImageEdge', node?: { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -13837,6 +13849,19 @@ export const ClusterRegistrationFragmentDoc = gql`
     ${TagFragmentDoc}
 ${UserTinyFragmentDoc}
 ${ProjectTinyFragmentDoc}`;
+export const IsoImageFragmentDoc = gql`
+    fragment IsoImage on ClusterIsoImage {
+  id
+  user
+  password
+  registry
+  image
+  insertedAt
+  project {
+    name
+  }
+}
+    `;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -21742,6 +21767,57 @@ export function useDeleteClusterRegistrationMutation(baseOptions?: Apollo.Mutati
 export type DeleteClusterRegistrationMutationHookResult = ReturnType<typeof useDeleteClusterRegistrationMutation>;
 export type DeleteClusterRegistrationMutationResult = Apollo.MutationResult<DeleteClusterRegistrationMutation>;
 export type DeleteClusterRegistrationMutationOptions = Apollo.BaseMutationOptions<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>;
+export const ClusterIsoImagesDocument = gql`
+    query ClusterISOImages($after: String, $first: Int, $before: String, $last: Int) {
+  clusterIsoImages(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...IsoImage
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${IsoImageFragmentDoc}`;
+
+/**
+ * __useClusterIsoImagesQuery__
+ *
+ * To run a query within a React component, call `useClusterIsoImagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterIsoImagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterIsoImagesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterIsoImagesQuery(baseOptions?: Apollo.QueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+      }
+export function useClusterIsoImagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+        }
+export function useClusterIsoImagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+        }
+export type ClusterIsoImagesQueryHookResult = ReturnType<typeof useClusterIsoImagesQuery>;
+export type ClusterIsoImagesLazyQueryHookResult = ReturnType<typeof useClusterIsoImagesLazyQuery>;
+export type ClusterIsoImagesSuspenseQueryHookResult = ReturnType<typeof useClusterIsoImagesSuspenseQuery>;
+export type ClusterIsoImagesQueryResult = Apollo.QueryResult<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -26024,6 +26100,7 @@ export const namedOperations = {
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
     ClusterRegistration: 'ClusterRegistration',
     ClusterRegistrations: 'ClusterRegistrations',
+    ClusterISOImages: 'ClusterISOImages',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -26306,6 +26383,7 @@ export const namedOperations = {
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     ClusterRegistration: 'ClusterRegistration',
     Tag: 'Tag',
+    IsoImage: 'IsoImage',
     GroupMember: 'GroupMember',
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',
