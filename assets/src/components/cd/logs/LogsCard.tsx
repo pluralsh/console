@@ -142,7 +142,6 @@ export const LogsCard = memo(function LogsCard({
             queryVars={{
               clusterId,
               serviceId,
-              query,
               facets: labels,
             }}
           />
