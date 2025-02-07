@@ -217,7 +217,7 @@ type AiSettingsAttributes struct {
 
 type Alert struct {
 	ID          string                   `json:"id"`
-	Provider    ObservabilityWebhookType `json:"provider"`
+	Type        ObservabilityWebhookType `json:"type"`
 	Severity    AlertSeverity            `json:"severity"`
 	State       AlertState               `json:"state"`
 	Title       *string                  `json:"title,omitempty"`

@@ -302,7 +302,6 @@ export type Alert = {
   message?: Maybe<Scalars['String']['output']>;
   /** the project this alert was associated with */
   project?: Maybe<Project>;
-  provider: ObservabilityWebhookType;
   /** the service this alert was associated with */
   service?: Maybe<Service>;
   severity: AlertSeverity;
@@ -310,6 +309,7 @@ export type Alert = {
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   title?: Maybe<Scalars['String']['output']>;
+  type: ObservabilityWebhookType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   url?: Maybe<Scalars['String']['output']>;
 };
@@ -9712,7 +9712,7 @@ export type AiChatStreamSubscriptionVariables = Exact<{
 
 export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, content: string } | null };
 
-export type AlertFragment = { __typename?: 'Alert', id: string, provider: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null };
+export type AlertFragment = { __typename?: 'Alert', id: string, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null };
 
 export type ClusterAlertsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -9723,7 +9723,7 @@ export type ClusterAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, provider: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type ServiceAlertsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -9734,7 +9734,7 @@ export type ServiceAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, provider: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, title?: string | null, message?: string | null, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type AuditFragment = { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
@@ -12223,7 +12223,7 @@ ${AiInsightFragmentDoc}`;
 export const AlertFragmentDoc = gql`
     fragment Alert on Alert {
   id
-  provider
+  type
   severity
   state
   title
