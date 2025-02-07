@@ -16,6 +16,7 @@ import {
   ChipProps,
 } from '@pluralsh/design-system'
 import {
+  ClusterDistro,
   ClustersRowFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
@@ -37,12 +38,18 @@ import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from './UpgradeInsights'
+import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
 export enum DeprecationType {
   GitOps = 'gitOps',
   CloudProvider = 'cloudProvider',
+}
+
+export enum AddonType {
+  All = 'all',
+  Cloud = 'cloud',
 }
 
 function DeprecationCountChip({
@@ -90,6 +97,8 @@ function FlyoverContent({ open, cluster, refetch }) {
   const upgradeIssues = upgradeInsights?.filter(
     (i) => i?.status && statesWithIssues.includes(i.status)
   )
+
+  const supportsCloudAddons = cluster.distro === ClusterDistro.Eks
 
   return (
     <div
@@ -236,6 +245,47 @@ function FlyoverContent({ open, cluster, refetch }) {
             />
           }
         >
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+            }}
+          >
+            {supportsCloudAddons && (
+              <TabList
+                css={{ flexGrow: 1 }}
+                stateRef={tabStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: deprecationType,
+                  onSelectionChange: setDeprecationType as any,
+                }}
+              >
+                <Tab
+                  key={AddonType.All}
+                  innerProps={{
+                    flexGrow: 1,
+                    gap: 'xsmall',
+                    justifyContent: 'center',
+                  }}
+                  css={{ display: 'flex', flexGrow: 1 }}
+                >
+                  All add-ons
+                </Tab>
+                <Tab
+                  key={AddonType.Cloud}
+                  innerProps={{
+                    flexGrow: 1,
+                    gap: 'xsmall',
+                    justifyContent: 'center',
+                  }}
+                  css={{ display: 'flex', flexGrow: 1 }}
+                >
+                  {ClusterDistroShortNames[cluster.distro]} add-ons
+                </Tab>
+              </TabList>
+            )}
+          </div>
           {!isEmpty(runtimeServices) ? (
             <RuntimeServices
               flush

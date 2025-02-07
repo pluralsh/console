@@ -2,6 +2,7 @@ import { Tab, TabList } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   CloudAddonFragment,
+  ClusterDistro,
   ClusterFragment,
   RuntimeServiceFragment,
   useRuntimeServicesQuery,
@@ -87,6 +88,8 @@ export default function ClusterAddOns() {
 
   const hasAddons = !isEmpty(addOns)
 
+  const supportsCloudAddons = cluster.distro === ClusterDistro.Eks
+
   useEffect(() => {
     if (hasAddons && !addOnId)
       navigate(
@@ -129,28 +132,33 @@ export default function ClusterAddOns() {
           overflow: 'hidden',
         }}
       >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {directory.map(({ path, label }) => (
-            <LinkTabWrap
-              key={path}
-              textValue={label}
-              to={path}
-              css={{ width: '100%' }}
-            >
-              <Tab key={path}>
-                <div css={{ textAlign: 'center', width: '100%' }}>{label}</div>
-              </Tab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
+        {supportsCloudAddons && (
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
+            }}
+          >
+            {directory.map(({ path, label }) => (
+              <LinkTabWrap
+                key={path}
+                textValue={label}
+                to={path}
+                css={{ width: '100%' }}
+              >
+                <Tab key={path}>
+                  <div css={{ textAlign: 'center', width: '100%' }}>
+                    {label}
+                  </div>
+                </Tab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+        )}
         <div
           css={{
+            borderTop: supportsCloudAddons ? undefined : theme.borders.default,
             flexShrink: 0,
             overflowY: 'auto',
             height: '100%',
