@@ -93,6 +93,8 @@ import {
   CD_REL_PATH,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_ALERTS_REL_PATH,
+  CLUSTER_ALL_ADDONS_REL_PATH,
+  CLUSTER_CLOUD_ADDONS_REL_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_INSIGHTS_SUMMARY_PATH,
@@ -133,6 +135,9 @@ import styled from 'styled-components'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
+import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
+import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
+import ClusterCloudAddOnCompatibility from '../components/cd/cluster/addon/ClusterCloudAddOnCompatibility.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -366,7 +371,7 @@ const clusterDetailsRoutes = [
       element={<ClusterLogs />}
     />
     <Route
-      path={`${CLUSTER_ADDONS_REL_PATH}/:addOnId?`}
+      path={`${CLUSTER_ADDONS_REL_PATH}`}
       element={<ClusterAddOns />}
     >
       <Route
@@ -374,22 +379,54 @@ const clusterDetailsRoutes = [
         element={
           <Navigate
             replace
-            to="compatibility"
+            to={CLUSTER_ALL_ADDONS_REL_PATH}
           />
         }
       />
       <Route
-        path="compatibility"
-        element={<ClusterAddOnCompatibility />}
-      />
+        path={`${CLUSTER_ALL_ADDONS_REL_PATH}/:addOnId?`}
+        element={<ClusterAddon />}
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to="compatibility"
+            />
+          }
+        />
+        <Route
+          path="compatibility"
+          element={<ClusterAddOnCompatibility />}
+        />
+        <Route
+          path="readme"
+          element={<ClusterAddOnReadme />}
+        />
+        <Route
+          path="releases"
+          element={<ClusterAddOnReleases />}
+        />
+      </Route>
       <Route
-        path="readme"
-        element={<ClusterAddOnReadme />}
-      />
-      <Route
-        path="releases"
-        element={<ClusterAddOnReleases />}
-      />
+        path={`${CLUSTER_CLOUD_ADDONS_REL_PATH}/:addOnId?`}
+        element={<ClusterCloudAddon />}
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to="compatibility"
+            />
+          }
+        />
+        <Route
+          path="compatibility"
+          element={<ClusterCloudAddOnCompatibility />}
+        />
+      </Route>
     </Route>
   </Route>,
 ]

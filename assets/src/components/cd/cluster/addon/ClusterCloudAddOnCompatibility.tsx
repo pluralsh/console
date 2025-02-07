@@ -4,13 +4,13 @@ import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
-import { AddonVersion } from 'generated/graphql'
+import { CloudAddonVersionInformation } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { useOutletContext } from 'react-router-dom'
-import { ClusterAddOnOutletContextT } from '../ClusterAddon.tsx'
+import { ClusterCloudAddOnOutletContextT } from '../ClusterCloudAddon.tsx'
 import { Compatibility } from './Compatibility.tsx'
 
-const columnHelper = createColumnHelper<AddonVersion>()
+const columnHelper = createColumnHelper<CloudAddonVersionInformation>()
 
 const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
   const semverColVersion = coerce(kubeVersion)
@@ -20,7 +20,7 @@ const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
     semverCurrentVersion?.minor === semverColVersion?.minor
 
   return columnHelper.accessor(
-    (row) => row?.kube?.some((k) => k?.trim() === kubeVersion),
+    (row) => row?.compatibilities?.some((k) => k?.trim() === kubeVersion),
     {
       id: `compat-${kubeVersion}`,
       header: () => (
@@ -43,48 +43,49 @@ const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
         table: {
           options: { meta },
         },
-      }) => (
-        <Compatibility
-          isCompatible={!!getValue()}
-          isCurrentVersion={
-            original.version === (meta as any)?.version && highlight
-          }
-        />
-      ),
+      }) => {
+        console.log(original.version)
+        console.log(highlight)
+        console.log(kubeVersion)
+
+        return (
+          <Compatibility
+            isCompatible={!!getValue()}
+            isCurrentVersion={
+              original.version === (meta as any)?.version && highlight
+            }
+          />
+        )
+      },
     }
   )
 }
 
-const colVersion = columnHelper.accessor((row) => row, {
+const colVersion = columnHelper.accessor((row) => row.version, {
   id: 'version',
   header: 'Version',
-  meta: { tooltip: 'App version shown on top, chart version shown on bottom' },
-  cell: function Cell({
-    row: {
-      original: { version, chartVersion },
-    },
-  }) {
+  cell: function Cell({ getValue }) {
     const theme = useTheme()
 
     return (
       <TabularNumbers>
         <div css={{ ...theme.partials.text.body2LooseLineHeight }}>
-          {version}
+          {getValue()}
         </div>
-        <div css={{ color: theme.colors['text-xlight'] }}>{chartVersion}</div>
       </TabularNumbers>
     )
   },
 })
 
-export default function ClusterAddOnCompatibility() {
-  const { addOn, kubeVersion } = useOutletContext<ClusterAddOnOutletContextT>()
+export default function ClusterCloudAddOnCompatibility() {
+  const { cloudAddon, kubeVersion } =
+    useOutletContext<ClusterCloudAddOnOutletContextT>()
 
   const kubeVersions = useMemo(() => {
     const kubeVs = new Set<string>()
 
-    addOn?.addon?.versions?.forEach((v) => {
-      v?.kube?.forEach((k) => {
+    cloudAddon?.info?.versions?.forEach((v) => {
+      v?.compatibilities?.forEach((k) => {
         if (k) kubeVs.add(k.trim())
       })
     })
@@ -92,7 +93,7 @@ export default function ClusterAddOnCompatibility() {
     return [...kubeVs].sort(
       (a, b) => -compare(coerce(a) || '', coerce(b) || '')
     )
-  }, [addOn?.addon?.versions])
+  }, [cloudAddon?.info?.versions])
 
   const columns = useMemo(
     () => [
@@ -104,19 +105,19 @@ export default function ClusterAddOnCompatibility() {
     [kubeVersions, kubeVersion]
   )
 
-  if (!addOn?.addon?.versions)
+  if (!cloudAddon?.info?.versions)
     return <EmptyState message="No version info found." />
 
   return (
     <Table
       fullHeightWrap
-      data={addOn?.addon?.versions || []}
+      data={cloudAddon?.info?.versions || []}
       columns={columns}
       stickyColumn
-      highlightedRowId={addOn.addonVersion?.version ?? ''}
+      highlightedRowId={cloudAddon?.version ?? ''}
       reactTableOptions={{
         getRowId: (row) => row.version,
-        meta: { kubeVersion, version: addOn?.addonVersion?.version },
+        meta: { kubeVersion, version: cloudAddon?.version },
       }}
     />
   )

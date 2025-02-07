@@ -327,6 +327,33 @@ fragment Cluster on Cluster {
   }
 }
 
+fragment CloudAddon on CloudAddon {
+  id
+  insertedAt
+  updatedAt
+  name
+  distro
+  info {
+    name
+    publisher
+    versions {
+      version
+      compatibilities
+      ...CloudAddonVersionInformation @include(if: $hasKubeVersion)
+    }
+  }
+  version
+  versionInfo {
+    version
+    compatibilities
+    ...CloudAddonVersionInformation @include(if: $hasKubeVersion)
+  }
+}
+
+fragment CloudAddonVersionInformation on CloudAddonVersionInformation {
+  blocking(kubeVersion: $kubeVersion)
+}
+
 query Clusters(
   $first: Int
   $after: String
@@ -557,6 +584,9 @@ query RuntimeServices(
     }
     upgradeInsights {
       ...UpgradeInsight
+    }
+    cloudAddons {
+      ...CloudAddon
     }
   }
 }

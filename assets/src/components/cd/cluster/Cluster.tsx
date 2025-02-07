@@ -36,6 +36,7 @@ import {
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_ALERTS_REL_PATH,
+  CLUSTER_ALL_ADDONS_REL_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
@@ -229,7 +230,9 @@ export default function Cluster() {
               showUpgrades={tab === 'addons'}
               onClusterChange={(c) => {
                 if (c?.id) {
-                  navigate(`/cd/clusters/${c.id}/${tab}`)
+                  navigate(
+                    `/cd/clusters/${c.id}/${tab}/${tab === 'addons' ? CLUSTER_ALL_ADDONS_REL_PATH : ''}`
+                  )
                 }
               }}
             />

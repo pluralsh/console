@@ -31,6 +31,8 @@ export const CLUSTER_INSIGHTS_SUMMARY_PATH = '' as const
 export const CLUSTER_INSIGHTS_COMPONENTS_PATH = 'components' as const
 export const CLUSTER_METADATA_PATH = 'metadata' as const
 export const CLUSTER_ADDONS_REL_PATH = 'addons' as const
+export const CLUSTER_ALL_ADDONS_REL_PATH = 'all' as const
+export const CLUSTER_CLOUD_ADDONS_REL_PATH = 'cloud' as const
 export const CLUSTER_ADDONS_PARAM_ID = 'addOnId' as const
 export const CLUSTER_PRS_REL_PATH = 'prs' as const
 export const CLUSTER_VCLUSTERS_REL_PATH = 'vclusters' as const
@@ -165,14 +167,16 @@ export function getNamespacesDetailsPath({
 export function getClusterAddOnDetailsPath({
   clusterId,
   addOnId,
+  isCloudAddon = false,
   isRelative = false,
 }: Parameters<typeof getClusterDetailsPath>[0] & {
   addOnId: string | null | undefined
+  isCloudAddon?: boolean
 }) {
   return `${getClusterDetailsPath({
     clusterId,
     isRelative,
-  })}/${CLUSTER_ADDONS_REL_PATH}/${encodeSlashes(addOnId || '')}`
+  })}/${CLUSTER_ADDONS_REL_PATH}/${isCloudAddon ? CLUSTER_CLOUD_ADDONS_REL_PATH : CLUSTER_ALL_ADDONS_REL_PATH}/${encodeSlashes(addOnId || '')}`
 }
 
 export function getServiceComponentPath({

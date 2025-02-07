@@ -10,7 +10,7 @@ import { InlineLink } from '../../../utils/typography/InlineLink'
 import {
   ClusterAddOnOutletContextT,
   versionPlaceholder,
-} from '../ClusterAddOns'
+} from '../ClusterAddon.tsx'
 
 type Release = {
   version: string
