@@ -7,22 +7,29 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { GateState, PipelineStageEdgeFragment } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
 import {
+  cloneElement,
   ComponentProps,
   ComponentPropsWithoutRef,
   ReactElement,
   ReactNode,
-  cloneElement,
+  use,
   useMemo,
 } from 'react'
-import { type Node, type NodeProps, Position, useNodes } from 'reactflow'
+import { type Node, type NodeProps, useNodes } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
+import { GraphLayoutCtx } from 'components/utils/reactflow/graph'
+import {
+  directionToSourcePosition,
+  directionToTargetPosition,
+  NodeBaseCard,
+  NodeHandle,
+} from '../../../utils/reactflow/nodes'
 import { reduceGateStates } from '../utils/reduceGateStatuses'
-import { NodeBaseCard, NodeHandle } from '../../../utils/reactflow/nodes'
 
 export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
 
@@ -87,6 +94,7 @@ export function BaseNode({
   >) {
   const { incomers, outgoers } = useNodeEdges(id)
   const nodes = useNodes()
+  const { rankdir = 'LR' } = use(GraphLayoutCtx) ?? {}
 
   const reducedInState = useMemo(() => {
     const incomingNodes = nodes.filter((node) =>
@@ -107,7 +115,7 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
         $isOpen={reducedInState === GateState.Open}
-        position={Position.Left}
+        position={directionToTargetPosition[rankdir]}
       />
       {children}
       <NodeHandle
@@ -115,7 +123,7 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
         $isOpen={meta.state === GateState.Open}
-        position={Position.Right}
+        position={directionToSourcePosition[rankdir]}
       />
     </BaseNodeSC>
   )

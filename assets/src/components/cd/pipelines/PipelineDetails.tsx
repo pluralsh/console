@@ -1,16 +1,17 @@
-import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ComboBox,
   EmptyState,
+  Flex,
   ListBoxItem,
   PrOpenIcon,
   SubTab,
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import { ReactFlowProvider } from 'reactflow'
+import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ReactFlowProvider } from 'reactflow'
+import { useTheme } from 'styled-components'
 
 import {
   PipelineFragment,
@@ -21,8 +22,6 @@ import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { mapExistingNodes } from 'utils/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -31,9 +30,9 @@ import { SplitPane } from 'components/utils/SplitPane'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
+import { PipelineContexts } from './PipelineContexts'
 import { Pipeline } from './PipelineGraph'
 import { PIPELINES_CRUMBS } from './Pipelines'
-import { PipelineContexts } from './PipelineContexts'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -43,10 +42,10 @@ function PipelineHeading({
   pipeline: Nullable<PipelineFragment>
 }) {
   return (
-    <>
+    <Flex justify="space-between">
       <PipelineSelector pipeline={pipeline} />
       <PipelineTabs />
-    </>
+    </Flex>
   )
 }
 
@@ -107,7 +106,7 @@ function PipelineSelector({
   const [isOpen, setIsOpen] = useState(false)
   const { data } = usePipelinesQuery({
     variables: { first: 20, q: throttledInputValue, projectId },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'no-cache',
   })
   const navigate = useNavigate()
 
@@ -235,11 +234,13 @@ function PipelineDetailsBase() {
   }
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={false}
-      // heading={`Pipeline — ${pipeline?.name}`}
-      headingContent={<PipelineHeading pipeline={pipeline} />}
+    <Flex
+      direction="column"
+      height="100%"
+      gap="medium"
+      padding="large"
     >
+      <PipelineHeading pipeline={pipeline} />
       {pipeline && (
         <div
           css={{
@@ -251,7 +252,7 @@ function PipelineDetailsBase() {
           {content}
         </div>
       )}
-    </ResponsivePageFullWidth>
+    </Flex>
   )
 }
 

@@ -151,6 +151,7 @@ function PrsButton({
       <div css={{ position: 'relative' }}>
         <PrCountBadgeSC count={numOpenPrs} />
         <IconFrame
+          as="div"
           clickable
           onClick={(e) => {
             setOpen(true)
