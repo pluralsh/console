@@ -8,6 +8,7 @@ import {
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import { ComponentTreeNode } from './ComponentTreeNode'
 import { getTreeNodesAndEdges } from './getTreeNodesAndEdges'
+import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
 
 const nodeTypes = {
   component: ComponentTreeNode,
@@ -29,7 +30,12 @@ export function ComponentTreeGraph({
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
+      dagreOptions={options}
       nodeTypes={nodeTypes}
     />
   )
+}
+
+const options: DagreGraphOptions = {
+  ranksep: 50,
 }

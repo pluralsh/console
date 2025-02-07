@@ -1,122 +1,98 @@
-import Dagre from '@dagrejs/dagre'
-import { useCallback, useEffect, useState } from 'react'
-import {
-  Edge,
-  FitViewOptions,
-  useReactFlow,
-  type Node as FlowNode,
-} from 'reactflow'
-import { useTheme } from 'styled-components'
+import Dagre, { GraphLabel } from '@dagrejs/dagre'
+import { useCallback, useState } from 'react'
+import { Edge, type Node as FlowNode } from 'reactflow'
 
-function measureNode(node: FlowNode, zoom) {
-  let domNode
-
-  try {
-    domNode = document.querySelector(`[data-id="${CSS.escape(node.id)}"]`)
-  } catch (e) {
-    console.error(e)
-
-    return
-  }
-
-  const rect = domNode?.getBoundingClientRect()
-
-  return {
-    ...node,
-    width: (rect?.width || 200) / zoom,
-    height: (rect?.height || 200) / zoom,
-  }
-}
 export type DagreDirection = 'LR' | 'RL' | 'TB' | 'BT'
+export type DagreGraphOptions = GraphLabel & {
+  rankdir?: DagreDirection
+}
+
+const DEFAULT_NODE_WIDTH = 240
+const DEFAULT_NODE_HEIGHT = 80
+
+const DEFAULT_DAGRE_OPTIONS: DagreGraphOptions = {
+  rankdir: 'LR',
+  nodesep: 25,
+  ranksep: 25,
+  edgesep: 10,
+  ranker: 'tight-tree',
+}
+
 export const getLayoutedElements = (
   nodes: FlowNode[],
   edges: Edge[],
-  options?: {
-    direction?: DagreDirection
-    zoom?: number
-    gridGap?: number
-    margin?: number
-  }
+  options: DagreGraphOptions = {}
 ) => {
-  const dagre = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
-  const {
-    direction = 'LR',
-    zoom = 1,
-    gridGap = 24,
-    margin = 24,
-  } = options ?? {}
-  dagre.setGraph({
-    rankdir: direction,
-    // align: 'UL',
-    marginx: margin,
-    marginy: margin,
-    nodesep: gridGap,
-    ranksep: gridGap * 4,
+  const dagreGraph = new Dagre.graphlib.Graph()
+  dagreGraph.setDefaultEdgeLabel(() => ({}))
+
+  dagreGraph.setGraph({
+    ...DEFAULT_DAGRE_OPTIONS,
+    ...options,
   })
 
-  edges.forEach((edge) => dagre.setEdge(edge.source, edge.target))
-  nodes.forEach((node) => {
-    const measuredNode = measureNode(node, zoom)
+  // add nodes and edges to dagre
+  edges.forEach((edge) => dagreGraph.setEdge(edge.source, edge.target))
+  nodes.forEach((node) => dagreGraph.setNode(node.id, measureNode(node)))
 
-    if (measuredNode) {
-      dagre.setNode(node.id, measuredNode)
+  Dagre.layout(dagreGraph)
+
+  const positionedNodes = nodes.map((node) => {
+    const { x, y, width, height } = dagreGraph.node(node.id)
+    return {
+      ...node,
+      position: {
+        x: x - width / 2,
+        y: y - height / 2,
+      },
     }
   })
 
-  Dagre.layout(dagre)
-
-  return {
-    nodes: nodes.map((node) => {
-      const dagreNode = dagre.node(node.id)
-
-      if (!dagreNode) return node
-
-      const { x, y, width, height } = dagreNode
-
-      // Dagre returns center of node, but react-flow expects top/left
-      return { ...node, position: { x: x - width / 2, y: y - height / 2 } }
-    }),
-    edges,
-  }
+  return { nodes: positionedNodes, edges }
 }
 
 export function useLayoutNodes({
   baseNodes,
   baseEdges,
-  direction = 'LR',
+  options,
 }: {
   baseNodes: FlowNode[]
   baseEdges: Edge[]
-  direction?: DagreDirection
+  options?: DagreGraphOptions
 }) {
-  const theme = useTheme()
-  const { getViewport } = useReactFlow()
   const [nodes, setNodes] = useState(baseNodes)
   const [edges, setEdges] = useState(baseEdges)
 
   const layoutNodes = useCallback(() => {
-    const { nodes, edges } = getLayoutedElements(baseNodes, baseEdges, {
-      direction,
-      zoom: getViewport().zoom,
-      gridGap: theme.spacing.large,
-      margin: theme.spacing.large,
-    })
+    const { nodes, edges } = getLayoutedElements(baseNodes, baseEdges, options)
     setNodes(nodes)
     setEdges(edges)
-  }, [baseNodes, baseEdges, direction, getViewport, theme.spacing.large])
+  }, [baseNodes, baseEdges, options])
 
   return { nodes, edges, layoutNodes }
 }
 
-// for cases where the fitView done on initial load seems to be too early
-export function useFitViewAfterLayout(options?: FitViewOptions) {
-  const { fitView } = useReactFlow()
-  useEffect(() => {
-    // double requestAnimationFrame ensures all layout calculations are completed before refitting
+// useful for initially fitting the view after layouts
+// default fitView on React Flow seems to fire too early in some cases
+export function runAfterLayout(fn: () => void) {
+  // double requestAnimationFrame ensures all browser layout calculations are completed before executing
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        fitView(options)
-      })
+      fn()
     })
-  }, [fitView, options])
+  })
+}
+
+function measureNode(node: FlowNode) {
+  const element = document.querySelector(
+    `[data-id="${CSS.escape(node.id)}"]`
+  ) as HTMLElement
+  // using offsetWidth/offsetHeight since they're independent of CSS transform scaling
+  const width = element?.offsetWidth ?? DEFAULT_NODE_WIDTH
+  const height = element?.offsetHeight ?? DEFAULT_NODE_HEIGHT
+  return {
+    ...node,
+    width,
+    height,
+  }
 }

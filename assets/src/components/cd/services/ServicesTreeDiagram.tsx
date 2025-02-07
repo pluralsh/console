@@ -16,6 +16,7 @@ import {
   ServiceNodeType,
   nodeTypes,
 } from './ServicesTreeDiagramNodes'
+import { DagreGraphOptions } from '../pipelines/utils/nodeLayouter'
 
 const isNotDeploymentOperatorService = (
   service: Pick<ServiceDeployment, 'name'>
@@ -121,7 +122,13 @@ export function ServicesTreeDiagram({
       allowFullscreen
       baseNodes={baseNodes}
       baseEdges={baseEdges}
+      dagreOptions={options}
+      minZoom={0.01}
       nodeTypes={nodeTypes}
     />
   )
+}
+
+const options: DagreGraphOptions = {
+  // rankdir: 'TB',
 }

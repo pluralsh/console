@@ -1,5 +1,4 @@
 import { useResizeObserver } from '@pluralsh/design-system'
-import { useFitViewAfterLayout } from 'components/cd/pipelines/utils/nodeLayouter'
 import usePersistedState from 'components/hooks/usePersistedState'
 import {
   ComponentProps,
@@ -120,8 +119,6 @@ export function SplitPane({
     0.5,
     (val) => (typeof val === 'number' ? Math.min(1, Math.max(0, val)) : 0.5)
   )
-
-  useFitViewAfterLayout()
 
   useResizeObserver(
     wrapperRef,

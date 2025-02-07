@@ -129,8 +129,9 @@ export function PipelineContexts({
 
   return (
     <Table
-      fullHeightWrap
       loose
+      fullHeightWrap
+      virtualizeRows
       data={tableData}
       columns={columns}
       onRowClick={(_e, { original }: Row<RowData>) =>

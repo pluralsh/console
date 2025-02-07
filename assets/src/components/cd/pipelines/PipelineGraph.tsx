@@ -10,6 +10,7 @@ import { JobNode } from './nodes/JobNode'
 import { StageNode } from './nodes/StageNode'
 import { TestsNode } from './nodes/TestsNode'
 import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
+import { DagreGraphOptions } from './utils/nodeLayouter'
 
 const nodeTypes = {
   [NodeType.Stage]: StageNode,
@@ -28,7 +29,12 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
+      dagreOptions={options}
       nodeTypes={nodeTypes}
     />
   )
+}
+
+const options: DagreGraphOptions = {
+  ranksep: 50,
 }

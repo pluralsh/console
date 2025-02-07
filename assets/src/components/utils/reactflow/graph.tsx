@@ -5,7 +5,7 @@ import {
   ReloadIcon,
 } from '@pluralsh/design-system'
 import { useKeyDown } from '@react-hooks-library/core'
-import { useCallback, useLayoutEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useState } from 'react'
 import FocusLock from 'react-focus-lock'
 import ReactFlow, {
   Background,
@@ -18,11 +18,16 @@ import ReactFlow, {
 import styled, { useTheme } from 'styled-components'
 
 import {
-  DagreDirection,
+  DagreGraphOptions,
+  runAfterLayout,
   useLayoutNodes,
 } from 'components/cd/pipelines/utils/nodeLayouter'
 import { edgeTypes } from './edges'
 import { MarkerDefs } from './markers'
+
+export const GraphLayoutCtx = createContext<DagreGraphOptions | undefined>(
+  undefined
+)
 
 const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
   $fullscreen?: boolean
@@ -85,91 +90,98 @@ const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
 export function ReactFlowGraph({
   baseNodes,
   baseEdges,
-  direction = 'LR',
+  dagreOptions,
   resetView,
   allowFullscreen = false,
   ...props
 }: {
   baseNodes: FlowNode[]
   baseEdges: Edge[]
-  direction?: DagreDirection
+  dagreOptions?: DagreGraphOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
   resetView?: () => void
   allowFullscreen?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
   const { fitView } = useReactFlow()
-
-  const defaultResetView = useCallback(
-    () => fitView({ duration: 500 }),
-    [fitView]
-  )
-
   const { nodes, edges, layoutNodes } = useLayoutNodes({
     baseNodes,
     baseEdges,
-    direction,
+    options: dagreOptions,
   })
 
-  // initial layout
-  useLayoutEffect(() => {
+  const defaultResetView = useCallback(() => {
     layoutNodes()
-  }, [layoutNodes, defaultResetView])
+    fitView({ duration: 500 })
+  }, [fitView, layoutNodes])
 
-  useKeyDown('Escape', () => setFullscreen(false))
+  // initial layout
+  useEffect(() => {
+    layoutNodes()
+    runAfterLayout(fitView)
+  }, [layoutNodes, fitView])
+
+  const toggleFullscreen = useCallback(() => {
+    setFullscreen(!fullscreen)
+    runAfterLayout(() => fitView({ duration: 500 }))
+  }, [fitView, fullscreen])
+
+  useKeyDown('Escape', () => fullscreen && toggleFullscreen())
 
   return (
-    <ReactFlowFullScreenWrapperSC
-      disabled={!fullscreen} // controls focus lock
-      $fullscreen={fullscreen}
-    >
-      <ReactFlowAreaSC $fullscreen={fullscreen}>
-        <ReactFlowWrapperSC>
-          <ReactFlow
-            fitView
-            draggable
-            minZoom={0.08}
-            edgeTypes={edgeTypes}
-            edgesFocusable={false}
-            edgesUpdatable={false}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            {...props}
-            nodes={nodes}
-            edges={edges}
-          >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={theme.spacing.large}
-              size={1}
-              color={theme.colors['border-fill-three']}
-            />
-            <MarkerDefs />
-          </ReactFlow>
-          <ReactFlowActionWrapperSC>
-            {allowFullscreen && (
+    <GraphLayoutCtx value={dagreOptions}>
+      <ReactFlowFullScreenWrapperSC
+        disabled={!fullscreen} // controls focus lock
+        $fullscreen={fullscreen}
+      >
+        <ReactFlowAreaSC $fullscreen={fullscreen}>
+          <ReactFlowWrapperSC>
+            <ReactFlow
+              fitView
+              draggable
+              minZoom={0.08}
+              edgeTypes={edgeTypes}
+              edgesFocusable={false}
+              edgesUpdatable={false}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              {...props}
+              nodes={nodes}
+              edges={edges}
+            >
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={theme.spacing.large}
+                size={1}
+                color={theme.colors['border-fill-three']}
+              />
+              <MarkerDefs />
+            </ReactFlow>
+            <ReactFlowActionWrapperSC>
+              {allowFullscreen && (
+                <IconFrame
+                  clickable
+                  type="floating"
+                  icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
+                  tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                  onClick={toggleFullscreen}
+                >
+                  Fullscreen
+                </IconFrame>
+              )}
               <IconFrame
                 clickable
                 type="floating"
-                icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
-                tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                onClick={() => setFullscreen(!fullscreen)}
+                icon={<ReloadIcon />}
+                tooltip="Reset view"
+                onClick={resetView || defaultResetView}
               >
-                Fullscreen
+                Reset view
               </IconFrame>
-            )}
-            <IconFrame
-              clickable
-              type="floating"
-              icon={<ReloadIcon />}
-              tooltip="Reset view"
-              onClick={resetView || defaultResetView}
-            >
-              Reset view
-            </IconFrame>
-          </ReactFlowActionWrapperSC>
-        </ReactFlowWrapperSC>
-      </ReactFlowAreaSC>
-    </ReactFlowFullScreenWrapperSC>
+            </ReactFlowActionWrapperSC>
+          </ReactFlowWrapperSC>
+        </ReactFlowAreaSC>
+      </ReactFlowFullScreenWrapperSC>
+    </GraphLayoutCtx>
   )
 }

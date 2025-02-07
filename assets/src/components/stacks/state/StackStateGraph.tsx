@@ -9,6 +9,7 @@ import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import { EdgeType } from '../../utils/reactflow/edges'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
+import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
@@ -48,10 +49,19 @@ export function StackStateGraph({ state }: { state: StackState }) {
 
   return (
     <ReactFlowGraph
+      dagreOptions={options}
       allowFullscreen
       baseNodes={baseNodes}
       baseEdges={baseEdges}
       nodeTypes={nodeTypes}
     />
   )
+}
+
+const options: DagreGraphOptions = {
+  align: 'UL',
+  nodesep: 16,
+  ranksep: 16,
+  edgesep: 5,
+  ranker: 'longest-path',
 }
