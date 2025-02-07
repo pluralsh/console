@@ -39,6 +39,7 @@ import {
   upgradeInsightsColumns,
 } from './UpgradeInsights'
 import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
+import CloudAddons from './runtime/CloudAddons.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -75,6 +76,7 @@ const statesWithIssues = [
 function FlyoverContent({ open, cluster, refetch }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
@@ -91,6 +93,7 @@ function FlyoverContent({ open, cluster, refetch }) {
   })
 
   const runtimeServices = data?.cluster?.runtimeServices
+  const cloudAddons = data?.cluster?.cloudAddons
   const apiDeprecations = data?.cluster?.apiDeprecations
   const upgradeInsights = data?.cluster?.upgradeInsights
 
@@ -257,8 +260,8 @@ function FlyoverContent({ open, cluster, refetch }) {
                 stateRef={tabStateRef}
                 stateProps={{
                   orientation: 'horizontal',
-                  selectedKey: deprecationType,
-                  onSelectionChange: setDeprecationType as any,
+                  selectedKey: addonType,
+                  onSelectionChange: setAddonType as any,
                 }}
               >
                 <Tab
@@ -286,13 +289,29 @@ function FlyoverContent({ open, cluster, refetch }) {
               </TabList>
             )}
           </div>
-          {!isEmpty(runtimeServices) ? (
-            <RuntimeServices
-              flush
-              data={data}
-            />
-          ) : (
-            <EmptyState description="No known add-ons found" />
+          {addonType === AddonType.All && (
+            <div>
+              {!isEmpty(runtimeServices) ? (
+                <RuntimeServices
+                  flush
+                  data={data}
+                />
+              ) : (
+                <EmptyState description="No known add-ons found" />
+              )}
+            </div>
+          )}
+          {addonType === AddonType.Cloud && (
+            <div>
+              {!isEmpty(cloudAddons) ? (
+                <CloudAddons
+                  flush
+                  data={data}
+                />
+              ) : (
+                <EmptyState description="No known cloud add-ons found" />
+              )}
+            </div>
           )}
         </AccordionItem>
       </Accordion>
