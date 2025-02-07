@@ -106,12 +106,13 @@ defmodule Console.Deployments.Observability do
   """
   @spec persist_alert([map]) :: {:ok, Alert.t} | error
   def persist_alert(alerts) when is_list(alerts) do
+    IO.inspect(alerts)
     Enum.with_index(alerts)
     |> Enum.reduce(start_transaction(), fn
       {%{fingerprint: fp} = attrs, ind}, acc when is_binary(fp) ->
         add_operation(acc, {:alert, ind}, fn _ ->
           case Repo.get_by(Alert, fingerprint: fp) do
-            %Alert{} = alert -> alert
+            %Alert{} = alert -> Repo.preload(alert, [:tags])
             nil -> %Alert{fingerprint: fp}
           end
           |> Alert.changeset(attrs)

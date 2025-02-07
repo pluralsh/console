@@ -1573,7 +1573,7 @@ type ObservabilityWebhook {
 type Alert {
   id: ID!
 
-  provider: ObservabilityWebhookType!
+  type: ObservabilityWebhookType!
 
   severity: AlertSeverity!
 

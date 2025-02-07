@@ -1,4 +1,4 @@
-import { AlertFragment, useServiceAlertsQuery } from 'generated/graphql'
+import { useServiceAlertsQuery } from 'generated/graphql'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { AlertsTable } from 'components/utils/AlertsTable'
@@ -6,6 +6,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
+import { mapExistingNodes } from 'utils/graphql'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
@@ -35,15 +36,16 @@ export function ServiceAlerts() {
       },
       { serviceId: service?.id ?? '' }
     )
-  const alerts =
-    data?.serviceDeployment?.alerts?.edges
-      ?.map((edge) => edge?.node)
-      .filter((alert): alert is AlertFragment => !!alert) ?? []
+
+  const alerts = useMemo(
+    () => mapExistingNodes(data?.serviceDeployment?.alerts),
+    [data?.serviceDeployment?.alerts]
+  )
 
   return (
     <AlertsTable
       alerts={alerts}
-      loading={loading}
+      loading={!data && loading}
       error={error}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}

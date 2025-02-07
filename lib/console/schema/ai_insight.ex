@@ -33,7 +33,7 @@ defmodule Console.Schema.AiInsight do
     has_one :service_component, ServiceComponent, foreign_key: :insight_id
     has_one :cluster_insight_component, ClusterInsightComponent, foreign_key: :insight_id
 
-    has_many :evidence, AiInsightEvidence, foreign_key: :insight_id
+    has_many :evidence, AiInsightEvidence, foreign_key: :insight_id, on_replace: :delete
 
     timestamps()
   end
