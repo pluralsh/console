@@ -65,7 +65,7 @@ export default function ClusterAddOns() {
   )
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-  const isAllAddons = currentTab?.path === CLUSTER_ALL_ADDONS_REL_PATH
+  const isCloudAddon = currentTab?.path !== CLUSTER_ALL_ADDONS_REL_PATH
 
   const { data, error } = useRuntimeServicesQuery({
     variables: { kubeVersion, hasKubeVersion: !!kubeVersion, id: clusterId },
@@ -75,10 +75,10 @@ export default function ClusterAddOns() {
 
   const addOns: RuntimeServiceFragment[] | CloudAddonFragment[] = useMemo(
     () =>
-      (isAllAddons
-        ? data?.cluster?.runtimeServices?.filter(isNonNullable)
-        : data?.cluster?.cloudAddons?.filter(isNonNullable)) || [],
-    [isAllAddons, data?.cluster?.cloudAddons, data?.cluster?.runtimeServices]
+      (isCloudAddon
+        ? data?.cluster?.cloudAddons?.filter(isNonNullable)
+        : data?.cluster?.runtimeServices?.filter(isNonNullable)) || [],
+    [isCloudAddon, data?.cluster?.cloudAddons, data?.cluster?.runtimeServices]
   )
 
   const addOn = useMemo(
@@ -96,18 +96,18 @@ export default function ClusterAddOns() {
         getClusterAddOnDetailsPath({
           clusterId,
           addOnId: addOns[0].id,
-          cloudAddons: !isAllAddons,
+          isCloudAddon,
         })
       )
-  }, [addOns, addOnId, navigate, clusterId, hasAddons, isAllAddons])
+  }, [addOns, addOnId, navigate, clusterId, hasAddons, isCloudAddon])
 
   const context = useMemo(
     () =>
       ({
         cluster,
-        cloudAddon: !isAllAddons ? addOn : undefined, // Update once there is a separate query to get a single cloud addon.
+        cloudAddon: isCloudAddon ? addOn : undefined, // Update once there is a separate query to get a single cloud addon.
       }) as AddonContextType,
-    [addOn, cluster, isAllAddons]
+    [addOn, cluster, isCloudAddon]
   )
 
   if (error) return <GqlError error={error} />
@@ -194,7 +194,7 @@ export default function ClusterAddOns() {
                 padding: theme.spacing.xlarge,
                 textAlign: 'center',
               }}
-            >{`No ${isAllAddons ? '' : 'cloud '}add-ons found.`}</div>
+            >{`No ${isCloudAddon ? 'cloud ' : ''}add-ons found.`}</div>
           )}
         </div>
       </div>

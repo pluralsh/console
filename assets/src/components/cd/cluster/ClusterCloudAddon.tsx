@@ -34,7 +34,7 @@ export default function ClusterCloudAddon() {
   const pathPrefix = getClusterAddOnDetailsPath({
     clusterId,
     addOnId,
-    cloudAddons: true,
+    isCloudAddon: true,
   })
   const pathMatch = useMatch(
     `${getClusterAddOnDetailsPath({ clusterId, addOnId })}/:tab`

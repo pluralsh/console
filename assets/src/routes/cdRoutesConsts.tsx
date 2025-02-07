@@ -167,16 +167,16 @@ export function getNamespacesDetailsPath({
 export function getClusterAddOnDetailsPath({
   clusterId,
   addOnId,
-  cloudAddons = false,
+  isCloudAddon = false,
   isRelative = false,
 }: Parameters<typeof getClusterDetailsPath>[0] & {
   addOnId: string | null | undefined
-  cloudAddons?: boolean
+  isCloudAddon?: boolean
 }) {
   return `${getClusterDetailsPath({
     clusterId,
     isRelative,
-  })}/${CLUSTER_ADDONS_REL_PATH}/${cloudAddons ? CLUSTER_CLOUD_ADDONS_REL_PATH : CLUSTER_ALL_ADDONS_REL_PATH}/${encodeSlashes(addOnId || '')}`
+  })}/${CLUSTER_ADDONS_REL_PATH}/${isCloudAddon ? CLUSTER_CLOUD_ADDONS_REL_PATH : CLUSTER_ALL_ADDONS_REL_PATH}/${encodeSlashes(addOnId || '')}`
 }
 
 export function getServiceComponentPath({

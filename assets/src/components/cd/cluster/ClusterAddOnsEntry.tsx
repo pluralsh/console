@@ -36,7 +36,7 @@ export default function ClusterAddOnsEntry({
             getClusterAddOnDetailsPath({
               clusterId,
               addOnId: id,
-              cloudAddons: cloudAddon,
+              isCloudAddon: cloudAddon,
             })
           )
       }}
