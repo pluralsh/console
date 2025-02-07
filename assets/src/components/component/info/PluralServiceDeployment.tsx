@@ -1,11 +1,11 @@
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { PluralServiceDeploymentFragment } from 'generated/graphql'
 
 import { useMemo } from 'react'
 
 import { RawYaml } from '../ComponentRaw'
 
+import { ComponentDetailsContext } from '../ComponentDetails'
 import { InfoSection } from './common'
 import { ConditionsTable } from './Conditions'
 
@@ -23,17 +23,16 @@ function getSpecRaw(componentRaw: Nullable<string>) {
 
 export default function PluralServiceDeployment() {
   const theme = useTheme()
-  const { data } = useOutletContext<any>()
-
-  const serviceDeployment =
-    data?.pluralServiceDeployment as Nullable<PluralServiceDeploymentFragment>
+  const { componentDetails: serviceDeployment } =
+    useOutletContext<ComponentDetailsContext>()
 
   const specRaw = useMemo(
-    () => getSpecRaw(serviceDeployment?.raw),
-    [serviceDeployment?.raw]
+    () =>
+      serviceDeployment?.__typename === 'PluralServiceDeployment' &&
+      getSpecRaw(serviceDeployment?.raw),
+    [serviceDeployment]
   )
-
-  if (!serviceDeployment) return null
+  if (serviceDeployment?.__typename !== 'PluralServiceDeployment') return null
   const status = serviceDeployment?.status
 
   return (

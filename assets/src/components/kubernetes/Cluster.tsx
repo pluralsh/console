@@ -92,7 +92,7 @@ export default function Cluster() {
   const navigate = useNavigate()
 
   const { data, error, refetch, loading } = useKubernetesClustersQuery({
-    pollInterval: 120_000,
+    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
     variables: { projectId },
   })
@@ -109,7 +109,11 @@ export default function Cluster() {
     [clusterId, clusters]
   )
 
-  const { data: namespacesData } = useNamespacesQuery({
+  const {
+    data: namespacesData,
+    error: namespacesError,
+    refetch: refetchNamespaces,
+  } = useNamespacesQuery({
     client: KubernetesClient(clusterId!),
     skip: !clusterId,
   })
@@ -149,6 +153,10 @@ export default function Cluster() {
     }
   }, [clusters, navigate, search, clusterId, hasCurrentClusterId])
 
+  useEffect(() => {
+    refetchNamespaces()
+  }, [refetchNamespaces, cluster])
+
   if (error)
     return (
       <div css={{ padding: theme.spacing.large }}>
@@ -159,7 +167,17 @@ export default function Cluster() {
       </div>
     )
 
-  if (loading) return <LoadingIndicator />
+  if (namespacesError)
+    return (
+      <div css={{ padding: theme.spacing.large }}>
+        <GqlError
+          header="Cannot load namespaces"
+          error={namespacesError}
+        />
+      </div>
+    )
+
+  if (loading && !data) return <LoadingIndicator />
 
   if (!cluster) return <EmptyState message="No clusters found." />
 

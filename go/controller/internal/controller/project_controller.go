@@ -160,6 +160,10 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 }
 
 func (in *ProjectReconciler) isAlreadyExists(ctx context.Context, project *v1alpha1.Project) (bool, error) {
+	if project.Status.HasReadonlyCondition() {
+		return project.Status.IsReadonly(), nil
+	}
+
 	_, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if errors.IsNotFound(err) {
 		return false, nil

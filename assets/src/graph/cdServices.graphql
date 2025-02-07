@@ -112,6 +112,9 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
       }
     }
   }
+  scalingRecommendations {
+    ...ClusterScalingRecommendation
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {

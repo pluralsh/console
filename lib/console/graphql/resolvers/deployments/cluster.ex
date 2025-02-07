@@ -261,8 +261,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def delete_provider_credential(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_provider_credential(id, user)
 
-  def create_runtime_services(%{services: svcs} = args, %{context: %{cluster: cluster}}),
-    do: Clusters.create_runtime_services(svcs, args[:service_id], cluster)
+  def create_runtime_services(args, %{context: %{cluster: cluster}}),
+    do: Clusters.create_runtime_services(args, args[:service_id], cluster)
 
   def create_agent_migration(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_agent_migration(attrs, user)

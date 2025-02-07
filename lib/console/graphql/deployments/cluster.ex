@@ -291,9 +291,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_audit_attributes do
-    field :cluster_id, non_null(:id),     description: "the cluster this request was made on"
-    field :method,     non_null(:string), description: "the http method from the given request"
-    field :path,       non_null(:string), description: "the path made for the given request"
+    field :cluster_id,    non_null(:id),     description: "the cluster this request was made on"
+    field :method,        non_null(:string), description: "the http method from the given request"
+    field :path,          non_null(:string), description: "the path made for the given request"
+    field :response_code, :integer
   end
 
   input_object :cluster_registration_create_attributes do
@@ -314,6 +315,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :user,     :string, description: "ssh username for the new device"
     field :password, :string, description: "ssh password for the new device"
     field :project_id, :id, description: "the project this cluster will live in (can be inferred from bootstrap token)"
+  end
+
+  input_object :operational_layout_attributes do
+    field :namespaces, :cluster_namespaces_attributes
+  end
+
+  input_object :cluster_namespaces_attributes do
+    field :external_dns,   list_of(:string)
+    field :cert_manager,   :string
+    field :istio,          :string
+    field :linkerd,        :string
+    field :cilium,         :string
+    field :ebs_csi_driver, :string
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -895,12 +909,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster_audit_log do
-    field :id,     non_null(:id)
-    field :method, non_null(:string)
-    field :path,   non_null(:string)
+    field :id,            non_null(:id)
+    field :method,        non_null(:string)
+    field :path,          non_null(:string)
+    field :response_code, :integer
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
-    field :user,    :user,    resolve: dataloader(User)
+    field :actor,   :user,    resolve: dataloader(User)
 
     timestamps()
   end
@@ -997,6 +1012,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :register_runtime_services, :integer do
       middleware ClusterAuthenticated
       arg :services,   list_of(:runtime_service_attributes)
+      arg :layout,     :operational_layout_attributes
       arg :service_id, :id
 
       resolve &Deployments.create_runtime_services/2

@@ -4,18 +4,12 @@ import { useOutletContext } from 'react-router-dom'
 
 import { stringify } from 'yaml'
 import isEmpty from 'lodash/isEmpty'
+import { ComponentDetailsContext } from './ComponentDetails'
 
 export default function ComponentRaw() {
-  const { data } = useOutletContext<any>()
-  const raw = useMemo(() => {
-    const v: any = data
-      ? Object.values(data).find((value) => value !== undefined)
-      : null
+  const { componentDetails } = useOutletContext<ComponentDetailsContext>()
 
-    return v?.raw
-  }, [data])
-
-  return <RawYaml raw={raw} />
+  return <RawYaml raw={componentDetails?.raw} />
 }
 
 export function RawYaml({ raw }: { raw?: object | string | null | undefined }) {

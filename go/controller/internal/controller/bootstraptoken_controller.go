@@ -76,7 +76,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	// Check if token already exists and return early.
-	if !lo.IsEmpty(bootstrapToken.ConsoleID()) {
+	if bootstrapToken.Status.HasID() {
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 		return ctrl.Result{}, nil
@@ -88,7 +88,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	// Create token and generate secret
-	apiBootstrapToken, err := in.ensure(ctx, bootstrapToken, *project)
+	apiBootstrapToken, err := in.sync(ctx, bootstrapToken, *project)
 	if err != nil {
 		if goerrors.Is(err, operrors.ErrRetriable) {
 			utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -160,7 +160,7 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bo
 	return &ctrl.Result{}
 }
 
-func (in *BootstrapTokenReconciler) ensure(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken, project v1alpha1.Project) (*consoleapi.BootstrapTokenBase, error) {
+func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken, project v1alpha1.Project) (*consoleapi.BootstrapTokenBase, error) {
 	attributes := consoleapi.BootstrapTokenAttributes{ProjectID: lo.FromPtr(project.ConsoleID())}
 
 	if !lo.IsEmpty(bootstrapToken.Spec.User) {

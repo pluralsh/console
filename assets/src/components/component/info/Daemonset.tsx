@@ -3,19 +3,19 @@ import { useTheme } from 'styled-components'
 
 import { StatusChart } from './Deployment'
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
+import { ComponentDetailsContext } from '../ComponentDetails'
 
 export default function DaemonSet() {
   const theme = useTheme()
-  const { data } = useOutletContext<any>()
+  const { componentDetails: daemonSet } =
+    useOutletContext<ComponentDetailsContext>()
 
-  if (!data?.daemonSet) return null
+  if (daemonSet?.__typename !== 'DaemonSet') return null
 
-  const {
-    daemonSet: {
-      spec,
-      status: { desiredNumberScheduled, numberReady, currentNumberScheduled },
-    },
-  } = data
+  const { spec, status } = daemonSet
+  const desiredNumberScheduled = status?.desiredNumberScheduled ?? NaN
+  const numberReady = status?.numberReady ?? NaN
+  const currentNumberScheduled = status?.currentNumberScheduled ?? NaN
 
   return (
     <>

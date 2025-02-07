@@ -53,3 +53,37 @@ mutation DeleteClusterRegistration($id: ID!) {
         ...ClusterRegistrationFragment
     }
 }
+
+mutation CreateClusterIsoImage($attributes: ClusterIsoImageAttributes!) {
+    createClusterIsoImage(attributes: $attributes) {
+        ...ClusterIsoImageFragment
+    }
+}
+
+mutation UpdateClusterIsoImage($id: ID!, $attributes: ClusterIsoImageAttributes!) {
+    updateClusterIsoImage(id: $id, attributes: $attributes) {
+        ...ClusterIsoImageFragment
+    }
+}
+
+mutation DeleteClusterIsoImage($id: ID!) {
+    deleteClusterIsoImage(id: $id) {
+        ...ClusterIsoImageFragment
+    }
+}
+
+query GetClusterIsoImage($id: ID, $image: String) {
+    clusterIsoImage(id: $id, image: $image) {
+        ...ClusterIsoImageFragment
+    }
+}
+
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+    id
+    image
+    project {
+        ...TinyProjectFragment
+    }
+    registry
+    user
+}

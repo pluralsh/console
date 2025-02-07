@@ -37,6 +37,7 @@ export default function Edge(): ReactNode {
   return (
     <ResponsivePageFullWidth
       scrollable={false}
+      maxContentWidth={1440}
       headingContent={
         <div
           css={{

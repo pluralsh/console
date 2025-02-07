@@ -365,14 +365,16 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         query cluster($id: ID!) {
           cluster(id: $id) {
             auditLogs(first: 5) {
-              edges { node { id } }
+              edges { node { id actor { id } } }
             }
           }
         }
       """, %{"id" => cluster.id}, %{current_user: user})
 
-      assert from_connection(found["auditLogs"])
-             |> ids_equal(audits)
+      logs = from_connection(found["auditLogs"])
+      assert ids_equal(logs, audits)
+      assert Enum.map(logs, & &1["actor"]["id"])
+             |> ids_equal(Enum.map(audits, & &1.actor_id))
     end
 
     test "it can fetch cluster node metrics" do
@@ -655,9 +657,15 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   describe "upgradeStatistics" do
     test "it can aggregate statuses for all visible clusters" do
       admin = admin_user()
-      insert_list(2, :cluster, current_version: "1.30", pinged_at: Timex.now(), upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
-      insert_list(3, :cluster, current_version: "1.31", pinged_at: Timex.now() |> Timex.shift(days: -1))
-      insert_list(2, :cluster, current_version: "1.28")
+      vsn = Console.Deployments.Settings.kube_vsn()
+      %{minor: min} = parsed = Version.parse!("#{vsn}.0")
+      insert_list(2, :cluster,
+        current_version: Version.to_string(%{parsed | minor: min -  1}),
+        pinged_at: Timex.now(),
+        upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true}
+      )
+      insert_list(3, :cluster, current_version: Version.to_string(parsed), pinged_at: Timex.now() |> Timex.shift(days: -1))
+      insert_list(2, :cluster, current_version: Version.to_string(%{parsed | minor: min -  2}))
 
       {:ok, %{data: %{"upgradeStatistics" => res}}} = run_query("""
         query {

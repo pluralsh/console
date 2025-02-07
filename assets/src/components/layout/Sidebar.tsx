@@ -8,6 +8,8 @@ import {
   CatalogIcon,
   CostManagementIcon,
   Sidebar as DSSidebar,
+  EdgeComputeIcon,
+  Flex,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -23,11 +25,11 @@ import {
   SidebarSection,
   StackIcon,
   Tooltip,
+  useSidebar,
   WarningShieldIcon,
-  RamIcon,
 } from '@pluralsh/design-system'
 import { ME_Q } from 'components/graphql/users'
-import { Avatar, Flex, Menu, MenuItem } from 'honorable'
+import { Avatar, Menu, MenuItem } from 'honorable'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -51,10 +53,11 @@ import HelpLauncher from '../help/HelpLauncher'
 
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { MARK_READ } from './queries'
-import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 
 type MenuItem = {
   text: string
@@ -127,9 +130,9 @@ function getMenuItems({
     {
       text: 'Edge',
       expandedLabel: 'Edge',
-      icon: <RamIcon />,
+      icon: <EdgeComputeIcon />,
       path: EDGE_ABS_PATH,
-      hotkeys: ['shift E'],
+      hotkeys: ['shift E', '7'],
     },
     {
       text: 'PRs',
@@ -140,7 +143,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P', '7'],
+      hotkeys: ['shift P', '8'],
     },
     {
       text: 'Security',
@@ -148,14 +151,14 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['8'],
+      hotkeys: ['9'],
     },
     {
       text: 'Cost Management',
       expandedLabel: 'Cost Management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
-      hotkeys: ['shift C+M', '9'],
+      hotkeys: ['shift C+M', '0'],
     },
     // {
     //   text: 'Backups',
@@ -175,7 +178,6 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-      hotkeys: ['0'],
     },
   ].filter((item) => item.enabled !== false)
 }
@@ -290,11 +292,7 @@ export default function Sidebar() {
   return (
     <SidebarSC variant="console">
       <SidebarExpandWrapper pathname={pathname}>
-        <SidebarSection
-          grow={1}
-          shrink={1}
-          border="none"
-        >
+        <SidebarSection flex={1}>
           {menuItems.map((item, i) => (
             <Tooltip
               key={i}
@@ -323,7 +321,7 @@ export default function Sidebar() {
               </SidebarItem>
             </Tooltip>
           ))}
-          <Flex grow={1} />
+          <Flex flex={1} />
           <SidebarExpandButton />
           <SidebarItem
             tooltip="GitHub"
@@ -383,6 +381,9 @@ export default function Sidebar() {
               size={32}
             />
           </SidebarItem>
+          {configuration?.consoleVersion && (
+            <ConsoleVersion version={configuration.consoleVersion} />
+          )}
         </SidebarSection>
         {/* ---
         NOTIFICATIONS PANEL
@@ -424,7 +425,7 @@ export default function Sidebar() {
             >
               <ScrollIcon marginRight="xsmall" />
               Docs
-              <Flex flexGrow={1} />
+              <Flex flex={1} />
               <ArrowTopRightIcon />
             </MenuItem>
             <MenuItem
@@ -441,3 +442,24 @@ export default function Sidebar() {
     </SidebarSC>
   )
 }
+
+function ConsoleVersion({ version }: { version: string }) {
+  const { isExpanded } = useSidebar()
+  return (
+    <ConsoleVersionSC $isExpanded={isExpanded}>
+      {isExpanded ? 'Console version: v' : 'v'}
+      {version}
+    </ConsoleVersionSC>
+  )
+}
+const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    ...TRUNCATE,
+    width: '100%',
+    textAlign: $isExpanded ? 'left' : 'center',
+    padding: theme.spacing.xxsmall,
+    fontFamily: theme.fontFamilies.sans,
+    fontSize: 10,
+    letterSpacing: '-0.35px',
+  })
+)

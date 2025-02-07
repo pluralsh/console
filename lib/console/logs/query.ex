@@ -9,7 +9,7 @@ defmodule Console.Logs.Query do
   @type t :: %__MODULE__{time: Time.t}
   @type direction :: :gte | :lte | :gt | :lt
 
-  defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time, :facets]
+  defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time, :facets, :namespaces]
 
   def new(args) do
     %__MODULE__{

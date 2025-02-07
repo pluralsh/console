@@ -13,7 +13,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
     with {:ok, resource} <- Resource.resource(comp, cluster),
          {:ok, events} <- Resource.events(resource),
          {:ok, hydration} <- Resource.hydrate(resource) do
-      {:ok, [{:user, """
+      history(
+        [{:user, """
           The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.  It is deployed
           on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} using Plural's GitOps tooling.
 
@@ -26,7 +27,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
         }]
         ++ tpl_events(events)
         ++ tpl_hydration(hydration)
-      }
+      )
     end
   end
 

@@ -10,6 +10,7 @@ import (
 )
 
 type ConsoleClient interface {
+	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	CreateClusterBackup(ctx context.Context, attributes BackupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterBackup, error)
 	GetClusterBackup(ctx context.Context, id *string, clusterID *string, namespace *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterBackup, error)
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
@@ -28,7 +29,7 @@ type ConsoleClient interface {
 	UpdateClusterProvider(ctx context.Context, id string, attributes ClusterProviderUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterProvider, error)
 	DeleteClusterProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterProvider, error)
 	PingCluster(ctx context.Context, attributes ClusterPing, interceptors ...clientv2.RequestInterceptor) (*PingCluster, error)
-	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
+	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
 	ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error)
 	GetCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetCluster, error)
 	GetTinyCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetTinyCluster, error)
@@ -65,6 +66,7 @@ type ConsoleClient interface {
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
 	PagedClusterServices(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServices, error)
+	PagedClusterServicesForAgent(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServicesForAgent, error)
 	PagedClusterServiceIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServiceIds, error)
 	ListServiceDeploymentByHandle(ctx context.Context, after *string, before *string, last *int64, cluster *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeploymentByHandle, error)
 	GetServiceContext(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceContext, error)
@@ -80,6 +82,10 @@ type ConsoleClient interface {
 	CreateClusterRegistration(ctx context.Context, attributes ClusterRegistrationCreateAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRegistration, error)
 	UpdateClusterRegistration(ctx context.Context, id string, attributes ClusterRegistrationUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRegistration, error)
 	DeleteClusterRegistration(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterRegistration, error)
+	CreateClusterIsoImage(ctx context.Context, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterIsoImage, error)
+	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
+	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
+	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
 	GetClusterGates(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetClusterGates, error)
 	PagedClusterGates(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGates, error)
 	PagedClusterGateIDs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGateIDs, error)
@@ -162,6 +168,7 @@ type ConsoleClient interface {
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
+	ListClusterMinimalStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterMinimalStacks, error)
 	ListInfrastructureStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListInfrastructureStacks, error)
 	GetStackRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunMinimal, error)
 	GetStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRun, error)
@@ -736,6 +743,129 @@ func (t *ClusterConditionFragment) GetReason() *string {
 	return t.Reason
 }
 
+type ServiceDeploymentForAgent struct {
+	ID            string                                     "json:\"id\" graphql:\"id\""
+	Name          string                                     "json:\"name\" graphql:\"name\""
+	Namespace     string                                     "json:\"namespace\" graphql:\"namespace\""
+	Version       string                                     "json:\"version\" graphql:\"version\""
+	Tarball       *string                                    "json:\"tarball,omitempty\" graphql:\"tarball\""
+	DeletedAt     *string                                    "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	DryRun        *bool                                      "json:\"dryRun,omitempty\" graphql:\"dryRun\""
+	Templated     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
+	Sha           *string                                    "json:\"sha,omitempty\" graphql:\"sha\""
+	Cluster       *ServiceDeploymentForAgent_Cluster         "json:\"cluster,omitempty\" graphql:\"cluster\""
+	Kustomize     *ServiceDeploymentForAgent_Kustomize       "json:\"kustomize,omitempty\" graphql:\"kustomize\""
+	Helm          *ServiceDeploymentForAgent_Helm            "json:\"helm,omitempty\" graphql:\"helm\""
+	Configuration []*ServiceDeploymentForAgent_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Contexts      []*ServiceDeploymentForAgent_Contexts      "json:\"contexts,omitempty\" graphql:\"contexts\""
+	SyncConfig    *ServiceDeploymentForAgent_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
+	Revision      *ServiceDeploymentForAgent_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
+	Imports       []*ServiceDeploymentForAgent_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
+}
+
+func (t *ServiceDeploymentForAgent) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentForAgent) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentForAgent) GetNamespace() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Namespace
+}
+func (t *ServiceDeploymentForAgent) GetVersion() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Version
+}
+func (t *ServiceDeploymentForAgent) GetTarball() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Tarball
+}
+func (t *ServiceDeploymentForAgent) GetDeletedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.DeletedAt
+}
+func (t *ServiceDeploymentForAgent) GetDryRun() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.DryRun
+}
+func (t *ServiceDeploymentForAgent) GetTemplated() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Templated
+}
+func (t *ServiceDeploymentForAgent) GetSha() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Sha
+}
+func (t *ServiceDeploymentForAgent) GetCluster() *ServiceDeploymentForAgent_Cluster {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Cluster
+}
+func (t *ServiceDeploymentForAgent) GetKustomize() *ServiceDeploymentForAgent_Kustomize {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Kustomize
+}
+func (t *ServiceDeploymentForAgent) GetHelm() *ServiceDeploymentForAgent_Helm {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Helm
+}
+func (t *ServiceDeploymentForAgent) GetConfiguration() []*ServiceDeploymentForAgent_Configuration {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Configuration
+}
+func (t *ServiceDeploymentForAgent) GetContexts() []*ServiceDeploymentForAgent_Contexts {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Contexts
+}
+func (t *ServiceDeploymentForAgent) GetSyncConfig() *ServiceDeploymentForAgent_SyncConfig {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.SyncConfig
+}
+func (t *ServiceDeploymentForAgent) GetRevision() *ServiceDeploymentForAgent_Revision {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Revision
+}
+func (t *ServiceDeploymentForAgent) GetImports() []*ServiceDeploymentForAgent_Imports {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Imports
+}
+
 type ClusterRegistrationFragment struct {
 	ID         string                 "json:\"id\" graphql:\"id\""
 	InsertedAt *string                "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
@@ -808,6 +938,45 @@ func (t *ClusterRegistrationFragment) GetProject() *TinyProjectFragment {
 		t = &ClusterRegistrationFragment{}
 	}
 	return t.Project
+}
+
+type ClusterIsoImageFragment struct {
+	ID       string               "json:\"id\" graphql:\"id\""
+	Image    string               "json:\"image\" graphql:\"image\""
+	Project  *TinyProjectFragment "json:\"project,omitempty\" graphql:\"project\""
+	Registry string               "json:\"registry\" graphql:\"registry\""
+	User     *string              "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *ClusterIsoImageFragment) GetID() string {
+	if t == nil {
+		t = &ClusterIsoImageFragment{}
+	}
+	return t.ID
+}
+func (t *ClusterIsoImageFragment) GetImage() string {
+	if t == nil {
+		t = &ClusterIsoImageFragment{}
+	}
+	return t.Image
+}
+func (t *ClusterIsoImageFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &ClusterIsoImageFragment{}
+	}
+	return t.Project
+}
+func (t *ClusterIsoImageFragment) GetRegistry() string {
+	if t == nil {
+		t = &ClusterIsoImageFragment{}
+	}
+	return t.Registry
+}
+func (t *ClusterIsoImageFragment) GetUser() *string {
+	if t == nil {
+		t = &ClusterIsoImageFragment{}
+	}
+	return t.User
 }
 
 type PipelineGateIDsEdgeFragment struct {
@@ -1974,6 +2143,17 @@ type ServiceDeploymentEdgeFragment struct {
 func (t *ServiceDeploymentEdgeFragment) GetNode() *ServiceDeploymentBaseFragment {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragment{}
+	}
+	return t.Node
+}
+
+type ServiceDeploymentEdgeFragmentForAgent struct {
+	Node *ServiceDeploymentForAgent "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent) GetNode() *ServiceDeploymentForAgent {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent{}
 	}
 	return t.Node
 }
@@ -3391,6 +3571,17 @@ func (t *StackRunEdgeFragment) GetNode() *StackRunFragment {
 	return t.Node
 }
 
+type MinimalStackRunEdgeFragment struct {
+	Node *StackRunMinimalFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *MinimalStackRunEdgeFragment) GetNode() *StackRunMinimalFragment {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment{}
+	}
+	return t.Node
+}
+
 type StackRunIDEdgeFragment struct {
 	Node *StackRunIDFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -4676,6 +4867,274 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration
 	return t.Value
 }
 
+type ServiceDeploymentForAgent_Cluster struct {
+	ID             string                 "json:\"id\" graphql:\"id\""
+	Name           string                 "json:\"name\" graphql:\"name\""
+	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+}
+
+func (t *ServiceDeploymentForAgent_Cluster) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Self
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Version
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.PingedAt
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+
+type ServiceDeploymentForAgent_Kustomize struct {
+	Path string "json:\"path\" graphql:\"path\""
+}
+
+func (t *ServiceDeploymentForAgent_Kustomize) GetPath() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Kustomize{}
+	}
+	return t.Path
+}
+
+type ServiceDeploymentForAgent_Helm struct {
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+}
+
+func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
+}
+func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreHooks
+}
+
+type ServiceDeploymentForAgent_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ServiceDeploymentForAgent_Configuration) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentForAgent_Configuration) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Value
+}
+
+type ServiceDeploymentForAgent_Contexts struct {
+	Name          string                 "json:\"name\" graphql:\"name\""
+	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Configuration
+}
+
+type ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ServiceDeploymentForAgent_SyncConfig struct {
+	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+}
+
+func (t *ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+
+type ServiceDeploymentForAgent_Revision struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *ServiceDeploymentForAgent_Revision) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Revision{}
+	}
+	return t.ID
+}
+
+type ServiceDeploymentForAgent_Imports_Stack struct {
+	ID   *string "json:\"id,omitempty\" graphql:\"id\""
+	Name string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *ServiceDeploymentForAgent_Imports_Stack) GetID() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentForAgent_Imports_Stack) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.Name
+}
+
+type ServiceDeploymentForAgent_Imports_Outputs struct {
+	Name   string "json:\"name\" graphql:\"name\""
+	Value  string "json:\"value\" graphql:\"value\""
+	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+}
+
+func (t *ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
+func (t *ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Secret
+}
+
+type ServiceDeploymentForAgent_Imports struct {
+	ID      string                                       "json:\"id\" graphql:\"id\""
+	Stack   *ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
+	Outputs []*ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+}
+
+func (t *ServiceDeploymentForAgent_Imports) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
+}
+func (t *ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentForAgent_Imports_Outputs {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Outputs
+}
+
 type PipelineGateIDsEdgeFragment_Node_ struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -5200,6 +5659,274 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
 	}
 	return t.Value
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
+	ID             string                 "json:\"id\" graphql:\"id\""
+	Name           string                 "json:\"name\" graphql:\"name\""
+	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Self
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Version
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.PingedAt
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize struct {
+	Path string "json:\"path\" graphql:\"path\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize) GetPath() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize{}
+	}
+	return t.Path
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreHooks
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Value
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
+	Name          string                 "json:\"name\" graphql:\"name\""
+	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Configuration
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
+	CreateNamespace   *bool                                                                                              "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision{}
+	}
+	return t.ID
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack struct {
+	ID   *string "json:\"id,omitempty\" graphql:\"id\""
+	Name string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack) GetID() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.Name
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs struct {
+	Name   string "json:\"name\" graphql:\"name\""
+	Value  string "json:\"value\" graphql:\"value\""
+	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Secret
+}
+
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports struct {
+	ID      string                                                                                  "json:\"id\" graphql:\"id\""
+	Stack   *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
+	Outputs []*ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Outputs
 }
 
 type GlobalServiceFragment_Provider struct {
@@ -5728,6 +6455,42 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -9144,7 +9907,7 @@ func (t *GetServiceDeploymentComponents_ServiceDeployment) GetComponents() []*Ge
 	return t.Components
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Cluster struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster struct {
 	ID             string                 "json:\"id\" graphql:\"id\""
 	Name           string                 "json:\"name\" graphql:\"name\""
 	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
@@ -9157,382 +9920,259 @@ type GetServiceDeploymentForAgent_ServiceDeployment_Cluster struct {
 	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetID() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetID() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.ID
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetName() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetName() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetHandle() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Handle
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetSelf() *bool {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Self
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetVersion() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Version
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetPingedAt() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.PingedAt
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetMetadata() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Metadata
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetCurrentVersion() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.CurrentVersion
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetKasURL() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.KasURL
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Cluster) GetDistro() *ClusterDistro {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Cluster{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Distro
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Kustomize struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize struct {
 	Path string "json:\"path\" graphql:\"path\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Kustomize) GetPath() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize) GetPath() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Kustomize{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize{}
 	}
 	return t.Path
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Helm struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetRelease() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Helm{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.Release
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetValuesFiles() []*string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Helm{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.ValuesFiles
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetIgnoreHooks() *bool {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Helm{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Configuration struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Configuration) GetName() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration) GetName() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Configuration{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration{}
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Configuration) GetValue() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration) GetValue() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Configuration{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration{}
 	}
 	return t.Value
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Contexts struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts struct {
 	Name          string                 "json:\"name\" graphql:\"name\""
 	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Contexts) GetName() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetName() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Contexts{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Contexts) GetConfiguration() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Contexts{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Configuration
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
 	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig struct {
-	CreateNamespace   *bool                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
-	EnforceNamespace  *bool                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
-	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                  "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig) GetCreateNamespace() *bool {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.CreateNamespace
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig) GetEnforceNamespace() *bool {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig_NamespaceMetadata {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.NamespaceMetadata
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Revision struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Revision struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Revision) GetID() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Revision) GetID() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Revision{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Revision{}
 	}
 	return t.ID
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack struct {
 	ID   *string "json:\"id,omitempty\" graphql:\"id\""
 	Name string  "json:\"name\" graphql:\"name\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack) GetID() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack) GetID() *string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack{}
 	}
 	return t.ID
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack) GetName() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack) GetName() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack{}
 	}
 	return t.Name
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs struct {
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
 	Value  string "json:\"value\" graphql:\"value\""
 	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetName() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetValue() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Value
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetSecret() *bool {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Secret
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_Imports struct {
-	ID      string                                                            "json:\"id\" graphql:\"id\""
-	Stack   *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
-	Outputs []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports struct {
+	ID      string                                                                                      "json:\"id\" graphql:\"id\""
+	Stack   *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
+	Outputs []*GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetID() string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetID() string {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.ID
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetStack() *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetStack() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Stack
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetOutputs() []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetOutputs() []*GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs {
 	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
-}
-
-type GetServiceDeploymentForAgent_ServiceDeployment struct {
-	ID            string                                                          "json:\"id\" graphql:\"id\""
-	Name          string                                                          "json:\"name\" graphql:\"name\""
-	Namespace     string                                                          "json:\"namespace\" graphql:\"namespace\""
-	Version       string                                                          "json:\"version\" graphql:\"version\""
-	Tarball       *string                                                         "json:\"tarball,omitempty\" graphql:\"tarball\""
-	DeletedAt     *string                                                         "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	DryRun        *bool                                                           "json:\"dryRun,omitempty\" graphql:\"dryRun\""
-	Templated     *bool                                                           "json:\"templated,omitempty\" graphql:\"templated\""
-	Sha           *string                                                         "json:\"sha,omitempty\" graphql:\"sha\""
-	Cluster       *GetServiceDeploymentForAgent_ServiceDeployment_Cluster         "json:\"cluster,omitempty\" graphql:\"cluster\""
-	Kustomize     *GetServiceDeploymentForAgent_ServiceDeployment_Kustomize       "json:\"kustomize,omitempty\" graphql:\"kustomize\""
-	Helm          *GetServiceDeploymentForAgent_ServiceDeployment_Helm            "json:\"helm,omitempty\" graphql:\"helm\""
-	Configuration []*GetServiceDeploymentForAgent_ServiceDeployment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
-	Contexts      []*GetServiceDeploymentForAgent_ServiceDeployment_Contexts      "json:\"contexts,omitempty\" graphql:\"contexts\""
-	SyncConfig    *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
-	Revision      *GetServiceDeploymentForAgent_ServiceDeployment_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
-	Imports       []*GetServiceDeploymentForAgent_ServiceDeployment_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
-}
-
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetID() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.ID
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetName() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Name
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetNamespace() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Namespace
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetVersion() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Version
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetTarball() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Tarball
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetDeletedAt() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.DeletedAt
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetDryRun() *bool {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.DryRun
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetTemplated() *bool {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Templated
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetSha() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Sha
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetCluster() *GetServiceDeploymentForAgent_ServiceDeployment_Cluster {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Cluster
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetKustomize() *GetServiceDeploymentForAgent_ServiceDeployment_Kustomize {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Kustomize
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetHelm() *GetServiceDeploymentForAgent_ServiceDeployment_Helm {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Helm
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetConfiguration() []*GetServiceDeploymentForAgent_ServiceDeployment_Configuration {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Configuration
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetContexts() []*GetServiceDeploymentForAgent_ServiceDeployment_Contexts {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Contexts
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetSyncConfig() *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.SyncConfig
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetRevision() *GetServiceDeploymentForAgent_ServiceDeployment_Revision {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Revision
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetImports() []*GetServiceDeploymentForAgent_ServiceDeployment_Imports {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
-	}
-	return t.Imports
 }
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -9663,6 +10303,292 @@ func (t *PagedClusterServices_PagedClusterServices) GetPageInfo() *PageInfoFragm
 func (t *PagedClusterServices_PagedClusterServices) GetEdges() []*ServiceDeploymentEdgeFragment {
 	if t == nil {
 		t = &PagedClusterServices_PagedClusterServices{}
+	}
+	return t.Edges
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
+	ID             string                 "json:\"id\" graphql:\"id\""
+	Name           string                 "json:\"name\" graphql:\"name\""
+	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.ID
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Name
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Self
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Version
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.PingedAt
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize struct {
+	Path string "json:\"path\" graphql:\"path\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize) GetPath() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize{}
+	}
+	return t.Path
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreHooks
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Name
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration) GetValue() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration{}
+	}
+	return t.Value
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
+	Name          string                 "json:\"name\" graphql:\"name\""
+	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Configuration
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision) GetID() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision{}
+	}
+	return t.ID
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack struct {
+	ID   *string "json:\"id,omitempty\" graphql:\"id\""
+	Name string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack) GetID() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.ID
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack{}
+	}
+	return t.Name
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs struct {
+	Name   string "json:\"name\" graphql:\"name\""
+	Value  string "json:\"value\" graphql:\"value\""
+	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Name
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Secret
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports struct {
+	ID      string                                                                                                                                          "json:\"id\" graphql:\"id\""
+	Stack   *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
+	Outputs []*PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetID() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.ID
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetOutputs() []*PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Outputs
+}
+
+type PagedClusterServicesForAgent_PagedClusterServices struct {
+	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ServiceDeploymentEdgeFragmentForAgent "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices{}
+	}
+	return &t.PageInfo
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices) GetEdges() []*ServiceDeploymentEdgeFragmentForAgent {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices{}
 	}
 	return t.Edges
 }
@@ -10861,6 +11787,60 @@ func (t *ListClusterStackIds_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
 func (t *ListClusterStackIds_ClusterStackRuns) GetEdges() []*StackRunIDEdgeFragment {
 	if t == nil {
 		t = &ListClusterStackIds_ClusterStackRuns{}
+	}
+	return t.Edges
+}
+
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type ListClusterMinimalStacks_ClusterStackRuns struct {
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*MinimalStackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns{}
+	}
+	return &t.PageInfo
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns) GetEdges() []*MinimalStackRunEdgeFragment {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns{}
 	}
 	return t.Edges
 }
@@ -12428,6 +13408,17 @@ func (t *DeleteGroupMember_DeleteGroupMember_GroupMemberFragment_Group) GetID() 
 	return t.ID
 }
 
+type AddClusterAuditLog struct {
+	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
+}
+
+func (t *AddClusterAuditLog) GetAddClusterAuditLog() *bool {
+	if t == nil {
+		t = &AddClusterAuditLog{}
+	}
+	return t.AddClusterAuditLog
+}
+
 type CreateClusterBackup struct {
 	CreateClusterBackup *ClusterBackupFragment "json:\"createClusterBackup,omitempty\" graphql:\"createClusterBackup\""
 }
@@ -12990,10 +13981,10 @@ func (t *GetServiceDeploymentComponents) GetServiceDeployment() *GetServiceDeplo
 }
 
 type GetServiceDeploymentForAgent struct {
-	ServiceDeployment *GetServiceDeploymentForAgent_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+	ServiceDeployment *ServiceDeploymentForAgent "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
 }
 
-func (t *GetServiceDeploymentForAgent) GetServiceDeployment() *GetServiceDeploymentForAgent_ServiceDeployment {
+func (t *GetServiceDeploymentForAgent) GetServiceDeployment() *ServiceDeploymentForAgent {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent{}
 	}
@@ -13029,6 +14020,17 @@ type PagedClusterServices struct {
 func (t *PagedClusterServices) GetPagedClusterServices() *PagedClusterServices_PagedClusterServices {
 	if t == nil {
 		t = &PagedClusterServices{}
+	}
+	return t.PagedClusterServices
+}
+
+type PagedClusterServicesForAgent struct {
+	PagedClusterServices *PagedClusterServicesForAgent_PagedClusterServices "json:\"pagedClusterServices,omitempty\" graphql:\"pagedClusterServices\""
+}
+
+func (t *PagedClusterServicesForAgent) GetPagedClusterServices() *PagedClusterServicesForAgent_PagedClusterServices {
+	if t == nil {
+		t = &PagedClusterServicesForAgent{}
 	}
 	return t.PagedClusterServices
 }
@@ -13196,6 +14198,50 @@ func (t *DeleteClusterRegistration) GetDeleteClusterRegistration() *ClusterRegis
 		t = &DeleteClusterRegistration{}
 	}
 	return t.DeleteClusterRegistration
+}
+
+type CreateClusterIsoImage struct {
+	CreateClusterIsoImage *ClusterIsoImageFragment "json:\"createClusterIsoImage,omitempty\" graphql:\"createClusterIsoImage\""
+}
+
+func (t *CreateClusterIsoImage) GetCreateClusterIsoImage() *ClusterIsoImageFragment {
+	if t == nil {
+		t = &CreateClusterIsoImage{}
+	}
+	return t.CreateClusterIsoImage
+}
+
+type UpdateClusterIsoImage struct {
+	UpdateClusterIsoImage *ClusterIsoImageFragment "json:\"updateClusterIsoImage,omitempty\" graphql:\"updateClusterIsoImage\""
+}
+
+func (t *UpdateClusterIsoImage) GetUpdateClusterIsoImage() *ClusterIsoImageFragment {
+	if t == nil {
+		t = &UpdateClusterIsoImage{}
+	}
+	return t.UpdateClusterIsoImage
+}
+
+type DeleteClusterIsoImage struct {
+	DeleteClusterIsoImage *ClusterIsoImageFragment "json:\"deleteClusterIsoImage,omitempty\" graphql:\"deleteClusterIsoImage\""
+}
+
+func (t *DeleteClusterIsoImage) GetDeleteClusterIsoImage() *ClusterIsoImageFragment {
+	if t == nil {
+		t = &DeleteClusterIsoImage{}
+	}
+	return t.DeleteClusterIsoImage
+}
+
+type GetClusterIsoImage struct {
+	ClusterIsoImage *ClusterIsoImageFragment "json:\"clusterIsoImage,omitempty\" graphql:\"clusterIsoImage\""
+}
+
+func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
+	if t == nil {
+		t = &GetClusterIsoImage{}
+	}
+	return t.ClusterIsoImage
 }
 
 type GetClusterGates struct {
@@ -14100,6 +15146,17 @@ func (t *ListClusterStackIds) GetClusterStackRuns() *ListClusterStackIds_Cluster
 	return t.ClusterStackRuns
 }
 
+type ListClusterMinimalStacks struct {
+	ClusterStackRuns *ListClusterMinimalStacks_ClusterStackRuns "json:\"clusterStackRuns,omitempty\" graphql:\"clusterStackRuns\""
+}
+
+func (t *ListClusterMinimalStacks) GetClusterStackRuns() *ListClusterMinimalStacks_ClusterStackRuns {
+	if t == nil {
+		t = &ListClusterMinimalStacks{}
+	}
+	return t.ClusterStackRuns
+}
+
 type ListInfrastructureStacks struct {
 	InfrastructureStacks *ListInfrastructureStacks_InfrastructureStacks "json:\"infrastructureStacks,omitempty\" graphql:\"infrastructureStacks\""
 }
@@ -14538,6 +15595,28 @@ func (t *UpsertVulnerabilities) GetUpsertVulnerabilities() *int64 {
 		t = &UpsertVulnerabilities{}
 	}
 	return t.UpsertVulnerabilities
+}
+
+const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($attributes: ClusterAuditAttributes!) {
+	addClusterAuditLog(audit: $attributes)
+}
+`
+
+func (c *Client) AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res AddClusterAuditLog
+	if err := c.Client.Post(ctx, "AddClusterAuditLog", AddClusterAuditLogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 const CreateClusterBackupDocument = `mutation CreateClusterBackup ($attributes: BackupAttributes!) {
@@ -15784,14 +16863,15 @@ func (c *Client) PingCluster(ctx context.Context, attributes ClusterPing, interc
 	return &res, nil
 }
 
-const RegisterRuntimeServicesDocument = `mutation RegisterRuntimeServices ($services: [RuntimeServiceAttributes], $serviceId: ID) {
-	registerRuntimeServices(services: $services, serviceId: $serviceId)
+const RegisterRuntimeServicesDocument = `mutation RegisterRuntimeServices ($services: [RuntimeServiceAttributes], $layout: OperationalLayoutAttributes, $serviceId: ID) {
+	registerRuntimeServices(services: $services, layout: $layout, serviceId: $serviceId)
 }
 `
 
-func (c *Client) RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error) {
+func (c *Client) RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error) {
 	vars := map[string]any{
 		"services":  services,
+		"layout":    layout,
 		"serviceId": serviceID,
 	}
 
@@ -19244,65 +20324,68 @@ func (c *Client) GetServiceDeploymentComponents(ctx context.Context, id string, 
 
 const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent ($id: ID!) {
 	serviceDeployment(id: $id) {
+		... ServiceDeploymentForAgent
+	}
+}
+fragment ServiceDeploymentForAgent on ServiceDeployment {
+	id
+	name
+	namespace
+	version
+	tarball
+	deletedAt
+	dryRun
+	templated
+	sha
+	cluster {
 		id
 		name
-		namespace
+		handle
+		self
 		version
-		tarball
-		deletedAt
-		dryRun
-		templated
-		sha
-		cluster {
+		pingedAt
+		metadata
+		currentVersion
+		kasUrl
+		distro
+	}
+	kustomize {
+		path
+	}
+	helm {
+		release
+		valuesFiles
+		ignoreHooks
+	}
+	configuration {
+		name
+		value
+	}
+	contexts {
+		name
+		configuration
+	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+	}
+	revision {
+		id
+	}
+	imports {
+		id
+		stack {
 			id
 			name
-			handle
-			self
-			version
-			pingedAt
-			metadata
-			currentVersion
-			kasUrl
-			distro
 		}
-		kustomize {
-			path
-		}
-		helm {
-			release
-			valuesFiles
-			ignoreHooks
-		}
-		configuration {
+		outputs {
 			name
 			value
-		}
-		contexts {
-			name
-			configuration
-		}
-		syncConfig {
-			createNamespace
-			enforceNamespace
-			namespaceMetadata {
-				labels
-				annotations
-			}
-		}
-		revision {
-			id
-		}
-		imports {
-			id
-			stack {
-				id
-				name
-			}
-			outputs {
-				name
-				value
-				secret
-			}
+			secret
 		}
 	}
 }
@@ -19649,6 +20732,109 @@ func (c *Client) PagedClusterServices(ctx context.Context, after *string, first 
 
 	var res PagedClusterServices
 	if err := c.Client.Post(ctx, "PagedClusterServices", PagedClusterServicesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const PagedClusterServicesForAgentDocument = `query PagedClusterServicesForAgent ($after: String, $first: Int, $before: String, $last: Int) {
+	pagedClusterServices(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... ServiceDeploymentEdgeFragmentForAgent
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ServiceDeploymentEdgeFragmentForAgent on ServiceDeploymentEdge {
+	node {
+		... ServiceDeploymentForAgent
+	}
+}
+fragment ServiceDeploymentForAgent on ServiceDeployment {
+	id
+	name
+	namespace
+	version
+	tarball
+	deletedAt
+	dryRun
+	templated
+	sha
+	cluster {
+		id
+		name
+		handle
+		self
+		version
+		pingedAt
+		metadata
+		currentVersion
+		kasUrl
+		distro
+	}
+	kustomize {
+		path
+	}
+	helm {
+		release
+		valuesFiles
+		ignoreHooks
+	}
+	configuration {
+		name
+		value
+	}
+	contexts {
+		name
+		configuration
+	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+	}
+	revision {
+		id
+	}
+	imports {
+		id
+		stack {
+			id
+			name
+		}
+		outputs {
+			name
+			value
+			secret
+		}
+	}
+}
+`
+
+func (c *Client) PagedClusterServicesForAgent(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServicesForAgent, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res PagedClusterServicesForAgent
+	if err := c.Client.Post(ctx, "PagedClusterServicesForAgent", PagedClusterServicesForAgentDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -20668,6 +21854,160 @@ func (c *Client) DeleteClusterRegistration(ctx context.Context, id string, inter
 
 	var res DeleteClusterRegistration
 	if err := c.Client.Post(ctx, "DeleteClusterRegistration", DeleteClusterRegistrationDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateClusterIsoImageDocument = `mutation CreateClusterIsoImage ($attributes: ClusterIsoImageAttributes!) {
+	createClusterIsoImage(attributes: $attributes) {
+		... ClusterIsoImageFragment
+	}
+}
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+	id
+	image
+	project {
+		... TinyProjectFragment
+	}
+	registry
+	user
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) CreateClusterIsoImage(ctx context.Context, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterIsoImage, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateClusterIsoImage
+	if err := c.Client.Post(ctx, "CreateClusterIsoImage", CreateClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateClusterIsoImageDocument = `mutation UpdateClusterIsoImage ($id: ID!, $attributes: ClusterIsoImageAttributes!) {
+	updateClusterIsoImage(id: $id, attributes: $attributes) {
+		... ClusterIsoImageFragment
+	}
+}
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+	id
+	image
+	project {
+		... TinyProjectFragment
+	}
+	registry
+	user
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateClusterIsoImage
+	if err := c.Client.Post(ctx, "UpdateClusterIsoImage", UpdateClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteClusterIsoImageDocument = `mutation DeleteClusterIsoImage ($id: ID!) {
+	deleteClusterIsoImage(id: $id) {
+		... ClusterIsoImageFragment
+	}
+}
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+	id
+	image
+	project {
+		... TinyProjectFragment
+	}
+	registry
+	user
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteClusterIsoImage
+	if err := c.Client.Post(ctx, "DeleteClusterIsoImage", DeleteClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterIsoImageDocument = `query GetClusterIsoImage ($id: ID, $image: String) {
+	clusterIsoImage(id: $id, image: $image) {
+		... ClusterIsoImageFragment
+	}
+}
+fragment ClusterIsoImageFragment on ClusterIsoImage {
+	id
+	image
+	project {
+		... TinyProjectFragment
+	}
+	registry
+	user
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error) {
+	vars := map[string]any{
+		"id":    id,
+		"image": image,
+	}
+
+	var res GetClusterIsoImage
+	if err := c.Client.Post(ctx, "GetClusterIsoImage", GetClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -25043,6 +26383,113 @@ func (c *Client) ListClusterStackIds(ctx context.Context, after *string, first *
 	return &res, nil
 }
 
+const ListClusterMinimalStacksDocument = `query ListClusterMinimalStacks ($after: String, $first: Int, $before: String, $last: Int) {
+	clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... MinimalStackRunEdgeFragment
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment MinimalStackRunEdgeFragment on StackRunEdge {
+	node {
+		... StackRunMinimalFragment
+	}
+}
+fragment StackRunMinimalFragment on StackRun {
+	id
+	type
+	status
+	approval
+	approvedAt
+	tarball
+	workdir
+	manageState
+	jobSpec {
+		... JobSpecFragment
+	}
+	configuration {
+		... StackConfigurationFragment
+	}
+}
+fragment JobSpecFragment on JobGateSpec {
+	namespace
+	raw
+	containers {
+		... ContainerSpecFragment
+	}
+	labels
+	annotations
+	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
+}
+fragment ContainerSpecFragment on ContainerSpec {
+	image
+	args
+	env {
+		name
+		value
+	}
+	envFrom {
+		configMap
+		secret
+	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
+}
+fragment StackConfigurationFragment on StackConfiguration {
+	image
+	version
+	tag
+	hooks {
+		... StackHookFragment
+	}
+}
+fragment StackHookFragment on StackHook {
+	cmd
+	args
+	afterStage
+}
+`
+
+func (c *Client) ListClusterMinimalStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterMinimalStacks, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListClusterMinimalStacks
+	if err := c.Client.Post(ctx, "ListClusterMinimalStacks", ListClusterMinimalStacksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListInfrastructureStacksDocument = `query ListInfrastructureStacks ($after: String, $first: Int, $before: String, $last: Int) {
 	infrastructureStacks(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -28392,6 +29839,7 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 }
 
 var DocumentOperationNames = map[string]string{
+	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
@@ -28447,6 +29895,7 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",
 	PagedClusterServicesDocument:                      "PagedClusterServices",
+	PagedClusterServicesForAgentDocument:              "PagedClusterServicesForAgent",
 	PagedClusterServiceIdsDocument:                    "PagedClusterServiceIds",
 	ListServiceDeploymentByHandleDocument:             "ListServiceDeploymentByHandle",
 	GetServiceContextDocument:                         "GetServiceContext",
@@ -28462,6 +29911,10 @@ var DocumentOperationNames = map[string]string{
 	CreateClusterRegistrationDocument:                 "CreateClusterRegistration",
 	UpdateClusterRegistrationDocument:                 "UpdateClusterRegistration",
 	DeleteClusterRegistrationDocument:                 "DeleteClusterRegistration",
+	CreateClusterIsoImageDocument:                     "CreateClusterIsoImage",
+	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
+	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
+	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
 	GetClusterGatesDocument:                           "GetClusterGates",
 	PagedClusterGatesDocument:                         "PagedClusterGates",
 	PagedClusterGateIDsDocument:                       "PagedClusterGateIDs",
@@ -28544,6 +29997,7 @@ var DocumentOperationNames = map[string]string{
 	ShareSecretDocument:                               "ShareSecret",
 	ListClusterStacksDocument:                         "ListClusterStacks",
 	ListClusterStackIdsDocument:                       "ListClusterStackIds",
+	ListClusterMinimalStacksDocument:                  "ListClusterMinimalStacks",
 	ListInfrastructureStacksDocument:                  "ListInfrastructureStacks",
 	GetStackRunMinimalDocument:                        "GetStackRunMinimal",
 	GetStackRunDocument:                               "GetStackRun",

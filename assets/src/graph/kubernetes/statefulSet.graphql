@@ -16,16 +16,16 @@ fragment StatefulSet on StatefulSet {
     serviceName
   }
   raw
+  pods {
+    ...Pod
+  }
+  events {
+    ...Event
+  }
 }
 
 query StatefulSet($name: String!, $namespace: String!, $serviceId: ID) {
   statefulSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...StatefulSet
-    pods {
-      ...Pod
-    }
-    events {
-      ...Event
-    }
   }
 }

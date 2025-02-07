@@ -82,6 +82,7 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 75
 
 secrets:
+  create: true
   api: ""
   privateapi: ""
   redis: ""

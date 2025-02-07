@@ -38,7 +38,7 @@ export function ServiceAlerts() {
   const alerts =
     data?.serviceDeployment?.alerts?.edges
       ?.map((edge) => edge?.node)
-      .filter((alert): alert is AlertFragment => alert !== null) ?? []
+      .filter((alert): alert is AlertFragment => !!alert) ?? []
 
   return (
     <AlertsTable

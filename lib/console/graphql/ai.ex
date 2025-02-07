@@ -5,6 +5,7 @@ defmodule Console.GraphQl.AI do
   alias Console.GraphQl.Resolvers.{User, AI, Deployments}
 
   ecto_enum :chat_type, Console.Schema.Chat.Type
+  ecto_enum :evidence_type, Console.Schema.AiInsightEvidence.Type
 
   @desc "A role to pass to an LLM, modeled after OpenAI's chat api roles"
   enum :ai_role do
@@ -115,9 +116,25 @@ defmodule Console.GraphQl.AI do
     field :service_component, :service_component,    resolve: dataloader(Deployments)
     field :stack_state,       :stack_state,          resolve: dataloader(Deployments)
 
+    field :evidence, list_of(:ai_insight_evidence),  resolve: dataloader(AI)
+
     field :cluster_insight_component, :cluster_insight_component, resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :ai_insight_evidence do
+    field :id,    non_null(:id)
+    field :type,  non_null(:evidence_type)
+    field :logs,  :logs_evidence
+
+    timestamps()
+  end
+
+  object :logs_evidence do
+    field :service_id, :id
+    field :cluster_id, :id
+    field :lines, list_of(:log_line)
   end
 
   @desc "A kubernetes object used in the course of generating a cluster insight"

@@ -2,18 +2,20 @@ import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
+import { isNonNullable } from 'utils/isNonNullable'
+import { ComponentDetailsContext } from '../ComponentDetails'
 import { InfoSection, PaddedCard, PropWideBold } from './common'
 
 export default function Service() {
   const theme = useTheme()
-  const { data } = useOutletContext<any>()
+  const { componentDetails: service } =
+    useOutletContext<ComponentDetailsContext>()
 
-  if (!data?.service) return null
+  if (service?.__typename !== 'Service') return null
 
-  const { service } = data
   const loadBalancer = service.status?.loadBalancer
   const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
-  const ports = service.spec?.ports || []
+  const ports = service.spec?.ports?.filter(isNonNullable) ?? []
   const hasPorts = !isEmpty(ports)
 
   return (
@@ -21,7 +23,9 @@ export default function Service() {
       {hasIngress && (
         <InfoSection title="Status">
           <PaddedCard>
-            <PropWideBold title="IP">{loadBalancer.ingress[0].ip}</PropWideBold>
+            <PropWideBold title="IP">
+              {loadBalancer?.ingress?.[0]?.ip}
+            </PropWideBold>
           </PaddedCard>
         </InfoSection>
       )}

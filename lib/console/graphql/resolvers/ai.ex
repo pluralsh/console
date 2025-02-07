@@ -3,13 +3,14 @@ defmodule Console.GraphQl.Resolvers.AI do
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
   alias Console.AI.{Provider, Fixer}
-  alias Console.Schema.{Chat, ChatThread, AiPin}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
   def query(Chat, _), do: Chat
   def query(ChatThread, _), do: ChatThread
   def query(AiPin, _), do: AiPin
+  def query(AiInsightEvidence, _), do: AiInsightEvidence
   def query(_, _), do: AiInsight
 
   def resolve_pin(args, %{context: %{current_user: user}}) do

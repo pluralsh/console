@@ -3,9 +3,10 @@ import { asQuery } from 'components/utils/query'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 
 import { componentsWithLogs } from './ComponentInfo'
+import { StructuredComponentKind } from './useFetchComponentDetails'
 
 function hasLogs(kind: string): boolean {
-  return componentsWithLogs.includes(kind)
+  return componentsWithLogs.includes(kind as StructuredComponentKind)
 }
 
 function getLogUrl({ name, namespace, labels }) {

@@ -145,9 +145,18 @@ type AiInsight struct {
 	StackRun                *StackRun                `json:"stackRun,omitempty"`
 	ServiceComponent        *ServiceComponent        `json:"serviceComponent,omitempty"`
 	StackState              *StackState              `json:"stackState,omitempty"`
+	Evidence                []*AiInsightEvidence     `json:"evidence,omitempty"`
 	ClusterInsightComponent *ClusterInsightComponent `json:"clusterInsightComponent,omitempty"`
 	InsertedAt              *string                  `json:"insertedAt,omitempty"`
 	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
+}
+
+type AiInsightEvidence struct {
+	ID         string        `json:"id"`
+	Type       EvidenceType  `json:"type"`
+	Logs       *LogsEvidence `json:"logs,omitempty"`
+	InsertedAt *string       `json:"insertedAt,omitempty"`
+	UpdatedAt  *string       `json:"updatedAt,omitempty"`
 }
 
 // A saved item for future ai-based investigation
@@ -933,17 +942,19 @@ type ClusterAuditAttributes struct {
 	// the http method from the given request
 	Method string `json:"method"`
 	// the path made for the given request
-	Path string `json:"path"`
+	Path         string `json:"path"`
+	ResponseCode *int64 `json:"responseCode,omitempty"`
 }
 
 type ClusterAuditLog struct {
-	ID         string   `json:"id"`
-	Method     string   `json:"method"`
-	Path       string   `json:"path"`
-	Cluster    *Cluster `json:"cluster,omitempty"`
-	User       *User    `json:"user,omitempty"`
-	InsertedAt *string  `json:"insertedAt,omitempty"`
-	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+	ID           string   `json:"id"`
+	Method       string   `json:"method"`
+	Path         string   `json:"path"`
+	ResponseCode *int64   `json:"responseCode,omitempty"`
+	Cluster      *Cluster `json:"cluster,omitempty"`
+	Actor        *User    `json:"actor,omitempty"`
+	InsertedAt   *string  `json:"insertedAt,omitempty"`
+	UpdatedAt    *string  `json:"updatedAt,omitempty"`
 }
 
 type ClusterAuditLogConnection struct {
@@ -1129,6 +1140,15 @@ type ClusterNamespaceUsageConnection struct {
 type ClusterNamespaceUsageEdge struct {
 	Node   *ClusterNamespaceUsage `json:"node,omitempty"`
 	Cursor *string                `json:"cursor,omitempty"`
+}
+
+type ClusterNamespacesAttributes struct {
+	ExternalDNS  []*string `json:"externalDns,omitempty"`
+	CertManager  *string   `json:"certManager,omitempty"`
+	Istio        *string   `json:"istio,omitempty"`
+	Linkerd      *string   `json:"linkerd,omitempty"`
+	Cilium       *string   `json:"cilium,omitempty"`
+	EbsCsiDriver *string   `json:"ebsCsiDriver,omitempty"`
 }
 
 type ClusterNodeMetrics struct {
@@ -1557,11 +1577,12 @@ type ConfigurationValidationAttributes struct {
 }
 
 type ConsoleConfiguration struct {
-	GitCommit     *string `json:"gitCommit,omitempty"`
-	IsDemoProject *bool   `json:"isDemoProject,omitempty"`
-	IsSandbox     *bool   `json:"isSandbox,omitempty"`
-	PluralLogin   *bool   `json:"pluralLogin,omitempty"`
-	VpnEnabled    *bool   `json:"vpnEnabled,omitempty"`
+	GitCommit      *string `json:"gitCommit,omitempty"`
+	ConsoleVersion *string `json:"consoleVersion,omitempty"`
+	IsDemoProject  *bool   `json:"isDemoProject,omitempty"`
+	IsSandbox      *bool   `json:"isSandbox,omitempty"`
+	PluralLogin    *bool   `json:"pluralLogin,omitempty"`
+	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
 	Installed    *bool              `json:"installed,omitempty"`
 	Cloud        *bool              `json:"cloud,omitempty"`
@@ -2769,6 +2790,12 @@ type LoginInfo struct {
 	OidcName *string `json:"oidcName,omitempty"`
 }
 
+type LogsEvidence struct {
+	ServiceID *string    `json:"serviceId,omitempty"`
+	ClusterID *string    `json:"clusterId,omitempty"`
+	Lines     []*LogLine `json:"lines,omitempty"`
+}
+
 type LokiLabelFilter struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -3433,6 +3460,10 @@ type OpenaiSettingsAttributes struct {
 	Model       *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+}
+
+type OperationalLayoutAttributes struct {
+	Namespaces *ClusterNamespacesAttributes `json:"namespaces,omitempty"`
 }
 
 type PageInfo struct {
@@ -6755,6 +6786,47 @@ func (e *Delta) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Delta) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EvidenceType string
+
+const (
+	EvidenceTypeLog EvidenceType = "LOG"
+	EvidenceTypePr  EvidenceType = "PR"
+)
+
+var AllEvidenceType = []EvidenceType{
+	EvidenceTypeLog,
+	EvidenceTypePr,
+}
+
+func (e EvidenceType) IsValid() bool {
+	switch e {
+	case EvidenceTypeLog, EvidenceTypePr:
+		return true
+	}
+	return false
+}
+
+func (e EvidenceType) String() string {
+	return string(e)
+}
+
+func (e *EvidenceType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EvidenceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EvidenceType", str)
+	}
+	return nil
+}
+
+func (e EvidenceType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -154,3 +154,7 @@ config :console, Console.Deployments.Metrics.Provider.NewRelic,
   plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}
 
 config :bamboo, :refute_timeout, 10
+
+config :elasticsearch,
+  host: "http://localhost:9200",
+  index: "testindex"

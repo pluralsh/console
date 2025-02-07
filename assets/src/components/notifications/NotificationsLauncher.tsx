@@ -48,13 +48,12 @@ export default function NotificationsLauncher() {
     <AnimatedDiv
       css={{
         display: 'flex',
-        minHeight: 240,
+        flexDirection: 'column',
         pointerEvents: 'none',
         position: 'absolute',
         right: 0,
+        height: '70vh',
         top: 32 + theme.spacing.xsmall,
-        width: 480,
-
         '& > *': { pointerEvents: 'auto' },
       }}
       style={{
@@ -73,10 +72,7 @@ export default function NotificationsLauncher() {
     <div
       ref={ref}
       css={{
-        display: 'flex',
         position: 'relative',
-        alignItems: 'end',
-        justifyContent: 'end',
         pointerEvents: 'none',
         '& > *': {
           pointerEvents: 'auto',

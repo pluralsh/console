@@ -17,7 +17,8 @@ defmodule Console.AI.Tool do
   def actor(), do: Process.get({__MODULE__, :actor})
 
   def validate(tool, input) do
-    tool.changeset(struct(tool, %{}), input)
+    struct(tool, %{})
+    |> tool.changeset(input)
     |> Ecto.Changeset.apply_action(:update)
   end
 

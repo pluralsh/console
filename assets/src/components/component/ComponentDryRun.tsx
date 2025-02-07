@@ -3,9 +3,10 @@ import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 
 import DiffViewer from '../utils/DiffViewer'
+import { ComponentDetailsContext } from './ComponentDetails'
 
 export default function ComponentDryRun() {
-  const { component } = useOutletContext<any>()
+  const { component } = useOutletContext<ComponentDetailsContext>()
 
   const [live, desired] = useMemo(
     () => [component?.content?.live ?? '', component?.content?.desired ?? ''],

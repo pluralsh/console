@@ -55,16 +55,16 @@ fragment ArgoRollout on ArgoRollout {
     ...ArgoRolloutSpec
   }
   raw
+  events {
+    ...Event
+  }
+  pods {
+    ...Pod
+  }
 }
 
 query ArgoRollout($name: String!, $namespace: String!, $serviceId: ID) {
   argoRollout(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...ArgoRollout
-    pods {
-      ...Pod
-    }
-    events {
-      ...Event
-    }
   }
 }

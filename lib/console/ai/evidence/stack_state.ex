@@ -8,7 +8,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackState do
   def custom(_), do: true
 
   def generate(%StackState{run: %StackRun{} = run} = state),
-    do: {:ok, [state_description(state) | fetch_code(run)]}
+    do: history([state_description(state) | fetch_code(run)])
 
   def insight(%StackState{insight: insight}), do: insight
 

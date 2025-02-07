@@ -110,6 +110,7 @@ query Me {
     externalOidc
     cloud
     installed
+    consoleVersion
     manifest {
       ...Manifest
     }

@@ -726,7 +726,7 @@ type RootMutationType {
   ingestClusterCost(costs: CostIngestAttributes!): Boolean
 
   "registers a list of runtime services discovered for the current cluster"
-  registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
+  registerRuntimeServices(services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, serviceId: ID): Int
 
   "agent api to persist upgrade insights for its cluster"
   saveUpgradeInsights(insights: [UpgradeInsightAttributes], addons: [CloudAddonAttributes]): [UpgradeInsight]
@@ -4687,6 +4687,8 @@ input ClusterAuditAttributes {
 
   "the path made for the given request"
   path: String!
+
+  responseCode: Int
 }
 
 input ClusterRegistrationCreateAttributes {
@@ -4726,6 +4728,19 @@ input ClusterIsoImageAttributes {
 
   "the project this cluster will live in (can be inferred from bootstrap token)"
   projectId: ID
+}
+
+input OperationalLayoutAttributes {
+  namespaces: ClusterNamespacesAttributes
+}
+
+input ClusterNamespacesAttributes {
+  externalDns: [String]
+  certManager: String
+  istio: String
+  linkerd: String
+  cilium: String
+  ebsCsiDriver: String
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -5507,8 +5522,9 @@ type ClusterAuditLog {
   id: ID!
   method: String!
   path: String!
+  responseCode: Int
   cluster: Cluster
-  user: User
+  actor: User
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -6716,6 +6732,11 @@ enum ChatType {
   FILE
 }
 
+enum EvidenceType {
+  LOG
+  PR
+}
+
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
 enum AiRole {
   SYSTEM
@@ -6839,11 +6860,27 @@ type AiInsight {
 
   stackState: StackState
 
+  evidence: [AiInsightEvidence]
+
   clusterInsightComponent: ClusterInsightComponent
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type AiInsightEvidence {
+  id: ID!
+  type: EvidenceType!
+  logs: LogsEvidence
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type LogsEvidence {
+  serviceId: ID
+  clusterId: ID
+  lines: [LogLine]
 }
 
 "A kubernetes object used in the course of generating a cluster insight"
@@ -8118,6 +8155,8 @@ type AvailableFeatures {
 
 type ConsoleConfiguration {
   gitCommit: String
+
+  consoleVersion: String
 
   isDemoProject: Boolean
 

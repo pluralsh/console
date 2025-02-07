@@ -5,6 +5,8 @@ defmodule Console do
 
   @type error :: {:error, term}
 
+  def version(), do: conf(:version)
+
   def clamp(val, min \\ 5, max \\ 100) do
     max(val, min)
     |> min(max)

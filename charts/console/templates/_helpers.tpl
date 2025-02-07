@@ -63,6 +63,8 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 - name: EXT_HOST
   value: {{ .Values.externalIngress.hostname | quote }}
 {{- end }}
+- name: CONSOLE_VERSION
+  value: {{ .Chart.AppVersion | quote }}
 - name: KAS_DNS
   value: {{ .Values.ingress.kas_dns }}
 - name: NAMESPACE

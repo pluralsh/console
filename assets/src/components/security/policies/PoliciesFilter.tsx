@@ -118,6 +118,7 @@ function PoliciesFilter({
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        maxHeight: 'fit-content',
       }}
     >
       <AccordionItem

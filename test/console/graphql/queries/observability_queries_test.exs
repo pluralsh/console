@@ -3,8 +3,12 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
   alias Kube.Dashboard
   use Mimic
   import KubernetesScaffolds
+  import ElasticsearchUtils
 
   setup :set_mimic_global
+
+  @host Application.compile_env(:elasticsearch, :host)
+  @index Application.compile_env(:elasticsearch, :index)
 
   describe "dashboards" do
     test "it can list dashboards for a repo" do
@@ -190,6 +194,33 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       """, %{"serviceId" => svc.id}, %{current_user: user})
 
       assert line["log"] == "a log"
+    end
+
+    test "it can fetch logs from an elasticsearch index" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      # the index gets set up using a mix task before the test is run, so we can index directly
+      log_document(svc, "valid log message") |> index_doc()
+      log_document(svc, "another valid log message") |> index_doc()
+      refresh()
+
+      # Instead of using expect to mock the logs provider, we use the elasticsearch index
+      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
+        host: @host,
+        index: @index
+      }})
+
+
+      {:ok, %{data: %{"logAggregation" => [first_line, second_line]}}} = run_query("""
+        query Logs($serviceId: ID!) {
+          logAggregation(serviceId: $serviceId) { timestamp log }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      # reverse chronological order
+      assert first_line["log"] == "another valid log message"
+      assert second_line["log"] == "valid log message"
     end
 
     test "it will authz" do

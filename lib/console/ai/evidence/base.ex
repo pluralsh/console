@@ -17,6 +17,8 @@ defmodule Console.AI.Evidence.Base do
     end
   end
 
+  def history(msgs, claims \\ %{}), do: {:ok, msgs, claims}
+
   def default_empty({:ok, res}, fun), do: {:ok, fun.(res)}
   def default_empty(_, _), do: {:ok, []}
 

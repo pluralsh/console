@@ -1,43 +1,47 @@
 import { EmptyState } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import Fuse from 'fuse.js'
 
-import { ComponentState } from 'generated/graphql'
-import ComponentCard, { type Component } from './ComponentCard'
+import {
+  ComponentState,
+  ServiceDeploymentComponentFragment,
+} from 'generated/graphql'
+import { isEmpty } from 'lodash'
+import ComponentCard from './ComponentCard'
 import { compareComponents } from './Components.tsx'
 
-const searchOptions: Fuse.IFuseOptions<Component> = {
+const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentFragment> = {
   keys: ['name', 'kind', 'group'],
   threshold: 0.25,
   ignoreLocation: true,
 }
 
-export function ComponentList<C extends Component>({
+export function ComponentList({
   components,
   selectedKinds,
   selectedState,
   setUrl,
   searchQuery,
 }: {
-  components: C[] | null | undefined
-  selectedKinds: any
+  components: ServiceDeploymentComponentFragment[]
+  selectedKinds: Set<string>
   selectedState?: ComponentState | null
-  setUrl: (component: C) => string | undefined
+  setUrl: (component: ServiceDeploymentComponentFragment) => string | undefined
   searchQuery?: string
 }) {
   const theme = useTheme()
   const filteredComponents = useMemo(() => {
     const filtered = components
-      ?.filter((comp) => selectedKinds.has(comp?.kind))
+      .filter((comp) => selectedKinds.has(comp.kind))
       .filter(
         (comp) =>
           !selectedState ||
-          (!comp?.state && selectedState === ComponentState.Running) ||
-          selectedState === comp?.state
+          (!comp.state && selectedState === ComponentState.Running) ||
+          selectedState === comp.state
       )
 
-    if (!filtered?.length) return []
+    if (!filtered.length) return []
 
     if (!searchQuery) return filtered.sort(compareComponents)
 
@@ -48,7 +52,7 @@ export function ComponentList<C extends Component>({
       .sort(compareComponents)
   }, [components, selectedKinds, selectedState, searchQuery])
 
-  return (filteredComponents || []).length === 0 ? (
+  return isEmpty(filteredComponents) ? (
     <EmptyState message="No components match your selection" />
   ) : (
     <div

@@ -5,11 +5,6 @@ import (
 	goerrors "errors"
 	"fmt"
 
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,6 +13,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -172,6 +173,10 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 }
 
 func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alpha1.Catalog) (bool, error) {
+	if catalog.Status.HasReadonlyCondition() {
+		return catalog.Status.IsReadonly(), nil
+	}
+
 	_, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 	if errors.IsNotFound(err) {
 		return false, nil
@@ -181,7 +186,7 @@ func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alph
 	}
 
 	if !catalog.Status.HasID() {
-		log.FromContext(ctx).Info("Catalog already exists r the API, running r read-only mode")
+		log.FromContext(ctx).Info("Catalog already exists in the API, running in read-only mode")
 		return true, nil
 	}
 

@@ -14,14 +14,14 @@ fragment Job on Job {
     ...Pod
   }
   raw
+  events {
+    ...Event
+  }
 }
 
 query Job($name: String!, $namespace: String!, $serviceId: ID) {
   job(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Job
-    events {
-      ...Event
-    }
   }
 }
 

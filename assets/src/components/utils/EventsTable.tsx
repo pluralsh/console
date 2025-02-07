@@ -1,13 +1,13 @@
 import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { Event as EventT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps } from 'react'
 
 import { DateTimeCol } from './table/DateTimeCol'
+import { EventFragment } from 'generated/graphql'
 
-const COLUMN_HELPER = createColumnHelper<EventT>()
+const COLUMN_HELPER = createColumnHelper<EventFragment>()
 
 const columns = [
   COLUMN_HELPER.accessor((event) => event.type, {
@@ -40,10 +40,11 @@ const columns = [
 export default function EventsTable({
   events,
   ...props
-}: { events?: (EventT | null)[] } & Partial<ComponentProps<typeof Table>>) {
-  if (!events || isEmpty(events)) {
+}: { events?: Nullable<EventFragment>[] } & Partial<
+  ComponentProps<typeof Table>
+>) {
+  if (!events || isEmpty(events))
     return <EmptyState message="No events available." />
-  }
 
   return (
     <Table

@@ -14,7 +14,7 @@ import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 
 import { useDebounce } from 'usehooks-ts'
 
-import { useNamespaces } from '../Cluster'
+import { useCluster, useNamespaces } from '../Cluster'
 
 import { NamespaceFilter } from './NamespaceFilter'
 
@@ -69,6 +69,7 @@ export function DataSelectInputs({
 }: {
   dataSelect: DataSelectContextT
 }) {
+  const cluster = useCluster()
   const namespaces = useNamespaces()
   const {
     namespaced,
@@ -85,6 +86,8 @@ export function DataSelectInputs({
     () => setContextFilter(debouncedFilter),
     [debouncedFilter, setContextFilter]
   )
+
+  useEffect(() => setNamespace(''), [cluster, setNamespace])
 
   return (
     <Flex gap="medium">
