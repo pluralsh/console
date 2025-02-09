@@ -7,7 +7,8 @@ defmodule Console.AI.Evidence.Component.Resource do
     Ingress,
     CronJob,
     Job,
-    Raw
+    Raw,
+    Certificate
   }
   alias Console.Schema.ServiceComponent
 
@@ -81,6 +82,7 @@ defmodule Console.AI.Evidence.Component.Resource do
   def hydrate(%NetworkingV1.Ingress{} = ing), do: Ingress.hydrate(ing)
   def hydrate(%BatchV1.CronJob{} = cj), do: CronJob.hydrate(cj)
   def hydrate(%BatchV1.Job{} = cj), do: Job.hydrate(cj)
+  def hydrate(%Kube.Certificate{} = cert), do: Certificate.hydrate(cert)
   def hydrate(%{"metadata" => _} = raw), do: Raw.hydrate(raw)
   def hydrate(_), do: {:ok, []}
 

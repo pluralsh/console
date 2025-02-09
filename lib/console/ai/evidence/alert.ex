@@ -5,7 +5,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Alert do
   alias Console.Repo
 
   def generate(%Alert{state: :firing, service: %Service{} = service} = alert) do
-    [alert_prompt(alert)]
+    [{:user, alert_prompt(alert)}]
     |> Logs.with_logging(service, force: true, lines: 100)
     |> Context.prompt({:user, "Please use the data I've listed above to give a clear root cause analysis of this issue."})
     |> Context.result()

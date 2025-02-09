@@ -63,6 +63,12 @@ defmodule Console.Deployments.Cron do
     |> Repo.delete_all()
   end
 
+  @concurrency [
+    ordered: false,
+    timeout: :timer.seconds(120),
+    on_timeout: :kill_task
+  ]
+
   def cache_warm() do
     Task.async(fn -> Git.warm_helm_cache() end)
     Cluster.stream()
@@ -79,7 +85,7 @@ defmodule Console.Deployments.Cron do
           Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
           Logger.error(Exception.format(:error, e, __STACKTRACE__))
       end
-    end, max_concurrency: clamp(Clusters.count()), ordered: false, timeout: :timer.seconds(30), on_timeout: :kill_task)
+    end, [max_concurrency: clamp(Clusters.count())] ++ @concurrency)
     |> Stream.run()
   end
 

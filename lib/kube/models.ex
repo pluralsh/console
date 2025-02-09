@@ -3,6 +3,7 @@ require Kube.Parser
 # external crds
 Kube.Parser.parse(path: "static/crds/postgresql.yaml", module: Kube.Postgresql)
 Kube.Parser.parse(path: "static/crds/cert-manager.yaml", module: Kube.Certificate)
+Kube.Parser.parse(path: "static/crds/certificate-request.yaml", module: Kube.CertificateRequest)
 Kube.Parser.parse(path: "static/crds/application.yaml", module: Kube.Application)
 Kube.Parser.parse(path: "static/crds/clusters.cluster.x-k8s.io.yaml", module: Kube.Cluster)
 Kube.Parser.parse(path: "static/crds/helmrepository.yaml", module: Kube.HelmRepository)

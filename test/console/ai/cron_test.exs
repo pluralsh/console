@@ -43,6 +43,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
@@ -80,6 +81,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
@@ -123,6 +125,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(ExAws, :request, 4, fn
         %ExAws.Operation.JSON{
@@ -162,6 +165,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
@@ -188,6 +192,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
