@@ -184,6 +184,7 @@ export type AiDelta = {
 /** A representation of a LLM-derived insight */
 export type AiInsight = {
   __typename?: 'AiInsight';
+  alert?: Maybe<Alert>;
   cluster?: Maybe<Cluster>;
   clusterInsightComponent?: Maybe<ClusterInsightComponent>;
   /** any errors generated when compiling this insight */
@@ -299,6 +300,8 @@ export type Alert = {
   fingerprint?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this alert */
+  insight?: Maybe<AiInsight>;
   message?: Maybe<Scalars['String']['output']>;
   /** the project this alert was associated with */
   project?: Maybe<Project>;

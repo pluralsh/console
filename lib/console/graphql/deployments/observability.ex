@@ -83,9 +83,10 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
 
-    field :cluster, :cluster, resolve: dataloader(Deployments), description: "the cluster this alert was associated with"
-    field :service, :service, resolve: dataloader(Deployments), description: "the service this alert was associated with"
-    field :project, :project, resolve: dataloader(Deployments), description: "the project this alert was associated with"
+    field :insight, :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this alert"
+    field :cluster, :cluster,    resolve: dataloader(Deployments), description: "the cluster this alert was associated with"
+    field :service, :service,    resolve: dataloader(Deployments), description: "the service this alert was associated with"
+    field :project, :project,    resolve: dataloader(Deployments), description: "the project this alert was associated with"
 
     timestamps()
   end

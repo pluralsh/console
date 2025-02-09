@@ -63,3 +63,9 @@ defimpl Console.AI.PubSub.Insightful, for: Console.PubSub.StackUpdated do
   def resource(%@for{item: %Stack{status: :failed} = stack}), do: {:ok, stack}
   def resource(_), do: :ok
 end
+
+defimpl Console.AI.PubSub.Insightful, for: Console.PubSub.AlertCreated do
+  alias Console.Schema.Alert
+  def resource(%@for{item: %Alert{state: :firing} = alert}), do: {:ok, alert}
+  def resource(_), do: :ok
+end

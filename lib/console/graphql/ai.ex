@@ -106,9 +106,13 @@ defmodule Console.GraphQl.AI do
     field :sha,       :string, description: "a deduplication sha for this insight"
     field :text,      :string, description: "the text of this insight"
     field :summary,   :string, description: "a shortish summary of this insight"
-    field :freshness, :insight_freshness, resolve: fn insight, _, _ -> {:ok, Console.Schema.AiInsight.freshness(insight)} end
     field :error,     list_of(:service_error), description: "any errors generated when compiling this insight"
 
+    field :freshness, :insight_freshness, resolve: fn insight, _, _ ->
+      {:ok, Console.Schema.AiInsight.freshness(insight)}
+    end
+
+    field :alert,             :alert,                resolve: dataloader(Deployments)
     field :service,           :service_deployment,   resolve: dataloader(Deployments)
     field :stack,             :infrastructure_stack, resolve: dataloader(Deployments)
     field :cluster,           :cluster,              resolve: dataloader(Deployments)

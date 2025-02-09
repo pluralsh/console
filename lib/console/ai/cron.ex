@@ -4,6 +4,7 @@ defmodule Console.AI.Cron do
   alias Console.AI.{Worker, Chat}
   alias Console.Deployments.Settings
   alias Console.Schema.{
+    Alert,
     AiInsight,
     Stack,
     Service,
@@ -60,6 +61,18 @@ defmodule Console.AI.Cron do
       |> Console.throttle()
       |> Stream.chunk_every(@chunk)
       |> Stream.map(&batch_insight(PubSub.ClusterInsight, &1))
+      |> Stream.run()
+    end)
+  end
+
+  def alerts() do
+    if_enabled(fn ->
+      Alert.firing()
+      |> Alert.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.chunk_every(@chunk)
+      |> Stream.map(&batch_insight(PubSub.AlertInsight, &1))
       |> Stream.run()
     end)
   end

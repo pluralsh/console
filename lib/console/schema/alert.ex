@@ -1,6 +1,13 @@
 defmodule Console.Schema.Alert do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Project, Cluster, Service, Tag, ObservabilityWebhook}
+  alias Console.Schema.{
+    Project,
+    Cluster,
+    Service,
+    Tag,
+    ObservabilityWebhook,
+    AiInsight
+  }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
   defenum State, firing: 0, resolved: 1
@@ -18,6 +25,7 @@ defmodule Console.Schema.Alert do
     field :annotations, :map
     field :url,         :string
 
+    belongs_to :insight, AiInsight
     belongs_to :project, Project
     belongs_to :cluster, Cluster
     belongs_to :service, Service
@@ -25,6 +33,10 @@ defmodule Console.Schema.Alert do
     has_many :tags, Tag, on_replace: :delete
 
     timestamps()
+  end
+
+  def firing(query \\ __MODULE__) do
+    from(a in query, where: a.state == :firing)
   end
 
   def for_service(query \\ __MODULE__, id) do
@@ -50,15 +62,17 @@ defmodule Console.Schema.Alert do
   end
   def ordered(query, order), do: from(a in query, order_by: ^order)
 
-  @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id service_id)a
+  @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id insight_id service_id)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:tags)
+    |> cast_assoc(:insight)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
+    |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(type title state severity message fingerprint)a)
   end
 end

@@ -135,10 +135,11 @@ type AiInsight struct {
 	// the text of this insight
 	Text *string `json:"text,omitempty"`
 	// a shortish summary of this insight
-	Summary   *string           `json:"summary,omitempty"`
-	Freshness *InsightFreshness `json:"freshness,omitempty"`
+	Summary *string `json:"summary,omitempty"`
 	// any errors generated when compiling this insight
 	Error                   []*ServiceError          `json:"error,omitempty"`
+	Freshness               *InsightFreshness        `json:"freshness,omitempty"`
+	Alert                   *Alert                   `json:"alert,omitempty"`
 	Service                 *ServiceDeployment       `json:"service,omitempty"`
 	Stack                   *InfrastructureStack     `json:"stack,omitempty"`
 	Cluster                 *Cluster                 `json:"cluster,omitempty"`
@@ -227,6 +228,8 @@ type Alert struct {
 	URL         *string                  `json:"url,omitempty"`
 	// key/value tags to filter clusters
 	Tags []*Tag `json:"tags,omitempty"`
+	// an insight explaining the state of this alert
+	Insight *AiInsight `json:"insight,omitempty"`
 	// the cluster this alert was associated with
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the service this alert was associated with

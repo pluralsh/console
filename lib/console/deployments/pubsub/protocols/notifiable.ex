@@ -173,6 +173,23 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ClusterInsigh
   def message(_), do: :ok
 end
 
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertInsight do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.AiInsight
+  require Logger
+
+  def message(%{item: {alert, %AiInsight{text: t, sha: sha} = insight}}) when byte_size(t) > 0 do
+    Utils.nested_dedupe([
+      {{:insight_sha, sha}, [ttl: :timer.hours(24)]},
+      {:alert_insight, alert.id}
+    ], fn ->
+      alert = Console.Repo.preload(alert, [:service])
+      {"alert.insight", Utils.filters(alert), %{alert: alert, insight: insight, text: Utils.insight(insight)}}
+    end)
+  end
+  def message(_), do: :ok
+end
+
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated do
   alias Console.Deployments.Notifications.Utils
 
