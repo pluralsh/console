@@ -98,10 +98,9 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, fmt.Errorf("the spec.serviceRef and spec.template can't be null")
 	}
 
-	service, res, err := r.getService(ctx, globalService)
-	if res != nil {
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, "service is not ready"))
-		return *res, err
+	service, result, err := r.getService(ctx, globalService)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
 	provider, result, err := r.getProvider(ctx, globalService)
@@ -190,21 +189,24 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
-		return service, &ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			return nil, &waitForResources, err
+		}
+
+		return nil, nil, err
 	}
 
 	logger := log.FromContext(ctx)
 	if !service.DeletionTimestamp.IsZero() {
 		logger.Info("deleting global service after service deployment deletion")
 		if err := r.Delete(ctx, globalService); err != nil {
-			return nil, &ctrl.Result{}, err
+			return nil, nil, err
 		}
-		return service, lo.ToPtr(waitForResources), nil
+		return nil, &waitForResources, nil
 	}
 
 	if service.Status.ID == nil {
-		logger.Info("service is not ready")
-		return service, lo.ToPtr(waitForResources), nil
+		return nil, &waitForResources, fmt.Errorf("service is not ready yet")
 	}
 
 	return service, nil, nil
