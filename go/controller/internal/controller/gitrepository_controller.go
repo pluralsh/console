@@ -84,7 +84,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	if exists {
 		logger.V(9).Info("repository already exists, running in read-only mode", "name", repo.Name, "namespace", repo.Namespace)
-		return r.handleExistingRepo(ctx, repo)
+		return r.handleExistingRepo(repo)
 	}
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
@@ -239,7 +239,7 @@ func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitReposi
 	return !repository.Status.HasID(), nil
 }
 
-func (r *GitRepositoryReconciler) handleExistingRepo(ctx context.Context, repo *v1alpha1.GitRepository) (reconcile.Result, error) {
+func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepository) (reconcile.Result, error) {
 	existingRepo, err := r.getRepository(repo.Spec.Url)
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
