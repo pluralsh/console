@@ -20,9 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -107,14 +104,9 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return *res, err
 	}
 
-	provider, err := r.getProvider(ctx, globalService)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return waitForResources, nil
-		}
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	provider, result, err := r.getProvider(ctx, globalService)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
 	project, result, err := r.getProject(ctx, globalService)
@@ -218,20 +210,22 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 	return service, nil, nil
 }
 
-func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, error) {
-	logger := log.FromContext(ctx)
+func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, *ctrl.Result, error) {
 	provider := &v1alpha1.Provider{}
 	if globalService.Spec.ProviderRef != nil {
 		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
-			return provider, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 		if provider.Status.ID == nil {
-			logger.Info("Provider is not ready")
-			return provider, apierrors.NewNotFound(schema.GroupResource{Resource: "Provider", Group: "deployments.plural.sh"}, globalService.Spec.ProviderRef.Name)
+			return nil, &waitForResources, fmt.Errorf("provider is not ready yet")
 		}
 	}
 
-	return provider, nil
+	return provider, nil, nil
 }
 
 func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Project, *ctrl.Result, error) {
