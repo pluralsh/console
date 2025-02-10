@@ -16,6 +16,7 @@ import {
   ChipProps,
 } from '@pluralsh/design-system'
 import {
+  ClusterDistro,
   ClustersRowFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
@@ -37,12 +38,19 @@ import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from './UpgradeInsights'
+import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
+import CloudAddons from './runtime/CloudAddons.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
 export enum DeprecationType {
   GitOps = 'gitOps',
   CloudProvider = 'cloudProvider',
+}
+
+export enum AddonType {
+  All = 'all',
+  Cloud = 'cloud',
 }
 
 function DeprecationCountChip({
@@ -68,6 +76,7 @@ const statesWithIssues = [
 function FlyoverContent({ open, cluster, refetch }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
@@ -84,12 +93,15 @@ function FlyoverContent({ open, cluster, refetch }) {
   })
 
   const runtimeServices = data?.cluster?.runtimeServices
+  const cloudAddons = data?.cluster?.cloudAddons
   const apiDeprecations = data?.cluster?.apiDeprecations
   const upgradeInsights = data?.cluster?.upgradeInsights
 
   const upgradeIssues = upgradeInsights?.filter(
     (i) => i?.status && statesWithIssues.includes(i.status)
   )
+
+  const supportsCloudAddons = cluster.distro === ClusterDistro.Eks
 
   return (
     <div
@@ -236,13 +248,70 @@ function FlyoverContent({ open, cluster, refetch }) {
             />
           }
         >
-          {!isEmpty(runtimeServices) ? (
-            <RuntimeServices
-              flush
-              data={data}
-            />
-          ) : (
-            <EmptyState description="No known add-ons found" />
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+            }}
+          >
+            {supportsCloudAddons && (
+              <TabList
+                css={{ flexGrow: 1 }}
+                stateRef={tabStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: addonType,
+                  onSelectionChange: setAddonType as any,
+                }}
+              >
+                <Tab
+                  key={AddonType.All}
+                  innerProps={{
+                    flexGrow: 1,
+                    gap: 'xsmall',
+                    justifyContent: 'center',
+                  }}
+                  css={{ display: 'flex', flexGrow: 1 }}
+                >
+                  All add-ons
+                </Tab>
+                <Tab
+                  key={AddonType.Cloud}
+                  innerProps={{
+                    flexGrow: 1,
+                    gap: 'xsmall',
+                    justifyContent: 'center',
+                  }}
+                  css={{ display: 'flex', flexGrow: 1 }}
+                >
+                  {ClusterDistroShortNames[cluster.distro]} add-ons
+                </Tab>
+              </TabList>
+            )}
+          </div>
+          {addonType === AddonType.All && (
+            <div>
+              {!isEmpty(runtimeServices) ? (
+                <RuntimeServices
+                  flush
+                  data={data}
+                />
+              ) : (
+                <EmptyState description="No known add-ons found" />
+              )}
+            </div>
+          )}
+          {addonType === AddonType.Cloud && (
+            <div>
+              {!isEmpty(cloudAddons) ? (
+                <CloudAddons
+                  flush
+                  data={data}
+                />
+              ) : (
+                <EmptyState description="No known cloud add-ons found" />
+              )}
+            </div>
           )}
         </AccordionItem>
       </Accordion>

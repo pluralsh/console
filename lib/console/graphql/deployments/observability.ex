@@ -71,7 +71,7 @@ defmodule Console.GraphQl.Deployments.Observability do
 
   object :alert do
     field :id,       non_null(:id)
-    field :provider, non_null(:observability_webhook_type)
+    field :type,     non_null(:observability_webhook_type)
     field :severity, non_null(:alert_severity)
     field :state,    non_null(:alert_state)
 

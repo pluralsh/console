@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: flaky-service-monitor
+  labels:
+    app: flaky-service
+spec:
+  namespaceSelector:
+    matchNames:
+    - flaky
+  selector:
+    matchLabels:
+      app: flaky-service
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: flaky-service-alerts
+spec:
+  groups:
+  - name: flaky-service.rules
+    rules:
+    - alert: InternalServerError
+      expr: rate(http_requests_total{code="500"}[1m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Internal server error detected
+        description: The number of internal server errors in the past minute is greater than 0.

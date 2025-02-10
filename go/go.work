@@ -1,6 +1,4 @@
-go 1.23.0
-
-toolchain go1.23.2
+go 1.23.4
 
 use (
 	./ai-proxy
@@ -8,4 +6,5 @@ use (
 	./controller // github.com/pluralsh/console/go/controller
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
 	./tools // github.com/pluralsh/console/go/tools
+	./demo/flaky-service // github.com/pluralsh/console/go/test/failing-service
 )

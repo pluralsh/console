@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaky-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaky-service
+  template:
+    metadata:
+      name: flaky-service
+      labels:
+        app: flaky-service
+    spec:
+      containers:
+        - name: flaky-service
+          image: ghcr.io/pluralsh/flaky-service:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080  # API Server
+            - containerPort: 8081  # Metrics Server
+          volumeMounts:
+            - name: flaky-service-volume
+              mountPath: /app/service
+          resources:
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            requests:
+              cpu: "20m"
+              memory: "100Mi"
+        
+        - name: flaky-service-sidecar
+          image: ghcr.io/pluralsh/flaky-service-sidecar:v1.0.0
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: flaky-service-volume
+              mountPath: /app/service
+          resources:
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            requests:
+              cpu: "20m"
+              memory: "50Mi"
+
+      volumes:
+        - name: flaky-service-volume
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaky-service
+  labels:
+    app: flaky-service
+spec:
+  selector:
+    app: flaky-service
+  ports:
+    - name: api
+      port: 8080
+      targetPort: 8080
+    - name: metrics
+      port: 8081
+      targetPort: 8081
+  type: ClusterIP

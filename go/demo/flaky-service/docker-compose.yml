@@ -1,0 +1,36 @@
+services:
+  flaky-service:
+    container_name: flaky-service
+    image: flaky-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - flaky-service:/app/service
+    networks:
+      - flaky-service-network
+
+  flaky-service-sidecar:
+    container_name: flaky-service-sidecar
+    image: flaky-service-sidecar
+    build:
+      context: .
+      dockerfile: Dockerfile.sidecar
+    depends_on:
+      - flaky-service
+    volumes:
+      - flaky-service:/app/service
+    networks:
+      - flaky-service-network    
+
+volumes:
+  flaky-service:
+    driver: local
+
+networks:
+  flaky-service-network:
+    driver: bridge
+  

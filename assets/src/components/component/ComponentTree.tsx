@@ -1,41 +1,45 @@
-import { EmptyState } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import { EmptyState, Flex } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 import { ReactFlowProvider } from 'reactflow'
 
 import { useComponentTreeQuery } from 'generated/graphql'
 
-import { GqlError } from 'components/utils/Alert'
 import { ComponentTreeGraph } from 'components/component/tree/ComponentTreeGraph'
+import { GqlError } from 'components/utils/Alert'
 
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ComponentDetailsContext } from './ComponentDetails'
-import { getTreeNodesAndEdges } from './tree/getTreeNodesAndEdges'
 
 export default function ComponentTree() {
   const ctx = useOutletContext<ComponentDetailsContext>()
   const component = ctx?.component
   const componentId = ctx?.component.id
 
-  const queryRes = useComponentTreeQuery({ variables: { id: componentId } })
-  const tree = queryRes.data?.componentTree
+  const { data, loading, error } = useComponentTreeQuery({
+    variables: { id: componentId },
+  })
+  const tree = data?.componentTree
 
-  const flowData = useMemo(
-    () => getTreeNodesAndEdges(tree, component.kind.toLowerCase()),
-    [component, tree]
-  )
+  if (error) return <GqlError error={error} />
 
-  if (queryRes.error) {
-    return <GqlError error={queryRes.error} />
-  }
-  if (!queryRes.data?.componentTree) {
-    return <EmptyState message="No data available." />
-  }
+  if (!tree)
+    return loading ? (
+      <LoadingIndicator />
+    ) : (
+      <EmptyState message="No data available." />
+    )
 
   return (
-    <div css={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Flex
+      height="100%"
+      direction="column"
+    >
       <ReactFlowProvider>
-        <ComponentTreeGraph {...flowData} />
+        <ComponentTreeGraph
+          tree={tree}
+          component={component}
+        />
       </ReactFlowProvider>
-    </div>
+    </Flex>
   )
 }

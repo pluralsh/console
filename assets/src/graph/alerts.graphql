@@ -1,6 +1,6 @@
 fragment Alert on Alert {
   id
-  provider
+  type
   severity
   state
   title

@@ -1,64 +1,14 @@
-import { memo, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import {
-  CheckIcon,
-  CloseIcon,
-  EmptyState,
-  IconFrame,
-  Table,
-} from '@pluralsh/design-system'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { useOutletContext } from 'react-router-dom'
-
-import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
-
-const Compatibility = memo(
-  ({
-    isCompatible,
-    isCurrentVersion,
-  }: {
-    isCompatible: boolean
-    isCurrentVersion: boolean
-  }) => {
-    const theme = useTheme()
-    const label = isCurrentVersion
-      ? 'Current'
-      : isCompatible
-        ? 'Compatible'
-        : 'Not compatible'
-
-    return (
-      <IconFrame
-        type={isCurrentVersion ? 'floating' : 'tertiary'}
-        tooltip={label}
-        textValue={label}
-        icon={
-          isCompatible ? (
-            <CheckIcon
-              color={theme.colors['icon-success']}
-              size={16}
-            />
-          ) : (
-            <CloseIcon
-              color={theme.colors['icon-disabled']}
-              size={16}
-            />
-          )
-        }
-        css={{
-          alignSelf: 'center',
-          borderRadius: '50%',
-          height: 43,
-          width: 43,
-        }}
-      />
-    )
-  }
-)
+import { ClusterAddOnOutletContextT } from '../ClusterAddon.tsx'
+import { Compatibility } from './Compatibility.tsx'
 
 const columnHelper = createColumnHelper<AddonVersion>()
 

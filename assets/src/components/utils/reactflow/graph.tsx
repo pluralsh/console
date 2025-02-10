@@ -1,30 +1,47 @@
-import styled, { useTheme } from 'styled-components'
-import ReactFlow, {
-  Background,
-  BackgroundVariant,
-  ReactFlowProps,
-} from 'reactflow'
 import {
   CloseIcon,
   IconFrame,
   LinkoutIcon,
   ReloadIcon,
-  WrapWithIf,
 } from '@pluralsh/design-system'
-import chroma from 'chroma-js'
-import { useState } from 'react'
 import { useKeyDown } from '@react-hooks-library/core'
+import { createContext, useCallback, useEffect, useState } from 'react'
+import FocusLock from 'react-focus-lock'
+import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  Edge,
+  ReactFlowProps,
+  useReactFlow,
+  type Node as FlowNode,
+} from 'reactflow'
+import styled, { useTheme } from 'styled-components'
 
-import { MarkerDefs } from './markers'
+import {
+  DagreGraphOptions,
+  runAfterLayout,
+  useLayoutNodes,
+} from 'components/cd/pipelines/utils/nodeLayouter'
 import { edgeTypes } from './edges'
+import { MarkerDefs } from './markers'
 
-const ReactFlowFullScreenWrapperSC = styled.div(({ theme }) => ({
-  position: 'fixed',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: theme.zIndexes.modal,
+export const GraphLayoutCtx = createContext<DagreGraphOptions | undefined>(
+  undefined
+)
+
+const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
+  $fullscreen?: boolean
+}>(({ theme, $fullscreen }) => ({
+  ...($fullscreen
+    ? {
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: theme.zIndexes.modal,
+      }
+    : { display: 'contents' }),
 }))
 
 const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
@@ -71,68 +88,100 @@ const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
 }))
 
 export function ReactFlowGraph({
+  baseNodes,
+  baseEdges,
+  dagreOptions,
   resetView,
   allowFullscreen = false,
   ...props
 }: {
+  baseNodes: FlowNode[]
+  baseEdges: Edge[]
+  dagreOptions?: DagreGraphOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
   resetView?: () => void
   allowFullscreen?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
+  const { fitView } = useReactFlow()
+  const { nodes, edges, layoutNodes } = useLayoutNodes({
+    baseNodes,
+    baseEdges,
+    options: dagreOptions,
+  })
 
-  useKeyDown('Escape', () => setFullscreen(false))
+  const defaultResetView = useCallback(() => {
+    layoutNodes()
+    fitView({ duration: 500 })
+  }, [fitView, layoutNodes])
+
+  // initial layout
+  useEffect(() => {
+    layoutNodes()
+    runAfterLayout(fitView)
+  }, [layoutNodes, fitView])
+
+  const toggleFullscreen = useCallback(() => {
+    setFullscreen(!fullscreen)
+    runAfterLayout(() => fitView({ duration: 500 }))
+  }, [fitView, fullscreen])
+
+  useKeyDown('Escape', () => fullscreen && toggleFullscreen())
 
   return (
-    <WrapWithIf
-      condition={fullscreen}
-      wrapper={<ReactFlowFullScreenWrapperSC />}
-    >
-      <ReactFlowAreaSC $fullscreen={fullscreen}>
-        <ReactFlowWrapperSC>
-          <ReactFlow
-            edgeTypes={edgeTypes}
-            draggable
-            edgesFocusable={false}
-            edgesUpdatable={false}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            {...props}
-          >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={theme.spacing.large}
-              size={1}
-              color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
-            />
-            <MarkerDefs />
-          </ReactFlow>
-          <ReactFlowActionWrapperSC>
-            {allowFullscreen && (
-              <IconFrame
-                clickable
-                type="floating"
-                icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
-                tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                onClick={() => setFullscreen(!fullscreen)}
-              >
-                Fullscreen
-              </IconFrame>
-            )}
-            {resetView && (
+    <GraphLayoutCtx value={dagreOptions}>
+      <ReactFlowFullScreenWrapperSC
+        disabled={!fullscreen} // controls focus lock
+        $fullscreen={fullscreen}
+      >
+        <ReactFlowAreaSC $fullscreen={fullscreen}>
+          <ReactFlowWrapperSC>
+            <ReactFlow
+              fitView
+              draggable
+              minZoom={0.08}
+              edgeTypes={edgeTypes}
+              edgesFocusable={false}
+              edgesUpdatable={false}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              {...props}
+              nodes={nodes}
+              edges={edges}
+            >
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={theme.spacing.large}
+                size={1}
+                color={theme.colors['border-fill-three']}
+              />
+              <MarkerDefs />
+            </ReactFlow>
+            <ReactFlowActionWrapperSC>
+              {allowFullscreen && (
+                <IconFrame
+                  clickable
+                  type="floating"
+                  icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
+                  tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                  onClick={toggleFullscreen}
+                >
+                  Fullscreen
+                </IconFrame>
+              )}
               <IconFrame
                 clickable
                 type="floating"
                 icon={<ReloadIcon />}
                 tooltip="Reset view"
-                onClick={resetView}
+                onClick={resetView || defaultResetView}
               >
                 Reset view
               </IconFrame>
-            )}
-          </ReactFlowActionWrapperSC>
-        </ReactFlowWrapperSC>
-      </ReactFlowAreaSC>
-    </WrapWithIf>
+            </ReactFlowActionWrapperSC>
+          </ReactFlowWrapperSC>
+        </ReactFlowAreaSC>
+      </ReactFlowFullScreenWrapperSC>
+    </GraphLayoutCtx>
   )
 }

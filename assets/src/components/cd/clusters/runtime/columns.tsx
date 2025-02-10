@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { RuntimeServicesQuery } from 'generated/graphql'
+import { CloudAddonFragment, RuntimeServicesQuery } from 'generated/graphql'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
@@ -21,6 +21,7 @@ type AddOnVersion = NonNullable<
 >[0]
 
 const columnHelperRuntime = createColumnHelper<RuntimeService>()
+const columnHelperCloud = createColumnHelper<CloudAddonFragment>()
 const columnHelperExpanded = createColumnHelper<AddOnVersion>()
 
 function AddOnName({ addon, row }) {
@@ -56,24 +57,6 @@ export const expandedColumns = [
   }),
 ]
 
-function ChartVersion({ runtimeService }: { runtimeService: RuntimeService }) {
-  const theme = useTheme()
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.xsmall,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-      }}
-    >
-      <TableText>{runtimeService?.version}</TableText>
-    </div>
-  )
-}
-
 export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.addon, {
     id: 'name',
@@ -94,8 +77,8 @@ export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.version, {
     id: 'version',
     header: 'Version',
-    cell({ row: { original } }) {
-      return <ChartVersion runtimeService={original} />
+    cell({ getValue }) {
+      return <TableText>{getValue()}</TableText>
     },
   }),
   columnHelperRuntime.accessor((row) => row?.addonVersion?.chartVersion, {
@@ -138,6 +121,64 @@ export const runtimeColumns = [
     },
   }),
   columnHelperRuntime.accessor((_) => null, {
+    id: 'icon',
+    header: '',
+    meta: { gridTemplate: 'minmax(auto, 65px)' },
+    cell: () => (
+      <IconFrame
+        tooltip="Go to addon details"
+        size="medium"
+        icon={<CaretRightIcon />}
+      />
+    ),
+  }),
+]
+
+export const cloudColumns = [
+  columnHelperCloud.accessor((row) => row?.name, {
+    id: 'name',
+    header: 'Name',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelperCloud.accessor((row) => row?.version, {
+    id: 'version',
+    header: 'Version',
+    cell({ getValue }) {
+      return <TableText>{getValue()}</TableText>
+    },
+  }),
+  columnHelperCloud.accessor((row) => row?.versionInfo?.compatibilities, {
+    id: 'kube-version',
+    header: 'Compatible k8s versions',
+    meta: { truncate: true },
+    cell: ({ getValue }) => (
+      <TableText>{(getValue() || []).join(', ')}</TableText>
+    ),
+  }),
+  columnHelperCloud.accessor((row) => row?.versionInfo?.blocking, {
+    id: 'blocking',
+    header: 'Blocks upgrade',
+    cell: function Cell({ getValue }) {
+      const theme = useTheme()
+
+      if (!getValue()) return null
+
+      return (
+        <Chip severity="danger">
+          <BlockedIcon
+            color="icon-danger"
+            size={theme.spacing.small}
+          />
+          <span
+            css={{ alignSelf: 'center', marginLeft: theme.spacing.xxsmall }}
+          >
+            Blocking
+          </span>
+        </Chip>
+      )
+    },
+  }),
+  columnHelperCloud.accessor((_) => null, {
     id: 'icon',
     header: '',
     meta: { gridTemplate: 'minmax(auto, 65px)' },
