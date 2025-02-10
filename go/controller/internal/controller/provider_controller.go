@@ -193,7 +193,6 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 		// Remove Provider from Console API if it exists
 		if exists && !provider.Status.IsReadonly() {
-			logger.Info("Deleting provider")
 			if err = r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -215,7 +214,6 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 }
 
 func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
-	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 	if err != nil {
 		return nil, err
@@ -228,7 +226,6 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 			return nil, err
 		}
 
-		logger.Info("Updating provider")
 		return r.ConsoleClient.UpdateProvider(ctx, provider.Status.GetID(), attributes)
 	}
 
@@ -243,7 +240,6 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 		return nil, err
 	}
 
-	logger.Info("Creating provider")
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
 }
 

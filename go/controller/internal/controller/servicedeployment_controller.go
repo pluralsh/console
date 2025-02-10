@@ -93,7 +93,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	if cluster.Status.ID == nil {
-		logger.Info("Cluster is not ready")
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
 		return waitForResources, nil
 	}
@@ -114,12 +113,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 
 		if repository.Status.ID == nil {
-			logger.Info("Repository is not ready")
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
 			return waitForResources, nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
-			logger.Info("Repository is not healthy")
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 			return waitForResources, nil
 		}

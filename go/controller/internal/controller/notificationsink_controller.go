@@ -238,9 +238,7 @@ func (r *NotificationSinkReconciler) isAlreadyExists(ctx context.Context, notifi
 }
 
 func (r *NotificationSinkReconciler) handleDelete(ctx context.Context, notificationSink *v1alpha1.NotificationSink) error {
-	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(notificationSink, NotificationSinkFinalizer) {
-		logger.Info("try to delete notification sink")
 		if notificationSink.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetNotificationSink(ctx, notificationSink.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {

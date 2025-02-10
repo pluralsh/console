@@ -178,8 +178,6 @@ func (r *ScmConnectionReconciler) isAlreadyExists(ctx context.Context, scm *v1al
 }
 
 func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm *v1alpha1.ScmConnection) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if scm.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(scm, ScmConnectionProtectionFinalizerName) {
@@ -195,7 +193,6 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 		}
 
 		if exists && !scm.Status.IsReadonly() {
-			logger.Info("Deleting ScmConnection")
 			if err = r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -217,7 +214,6 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 }
 
 func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
-	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
 	if err != nil {
 		return nil, err
@@ -230,7 +226,6 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 
 	// Update only if ScmConnection has changed
 	if changed && exists {
-		logger.Info("Updating ScmConnection")
 		attr, err := scm.Attributes(ctx, r.Client, token)
 		if err != nil {
 			return nil, err
@@ -244,7 +239,6 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 	}
 
 	// Create the ScmConnection in Console API if it doesn't exist
-	logger.Info("Creating ScmConnection")
 	attr, err := scm.Attributes(ctx, r.Client, token)
 	if err != nil {
 		return nil, err

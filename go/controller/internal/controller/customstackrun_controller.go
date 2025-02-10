@@ -186,7 +186,6 @@ func (r *CustomStackRunReconciler) handleDelete(ctx context.Context, stack *v1al
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, CustomStackRunFinalizer)
-		logger.Info("custom stack run deleted successfully")
 	}
 	return nil
 }

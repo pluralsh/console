@@ -277,9 +277,7 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 }
 
 func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) error {
-	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
-		logger.Info("try to delete global service")
 		if service.Status.GetID() != "" {
 			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {

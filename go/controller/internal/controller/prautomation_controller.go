@@ -104,8 +104,6 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 }
 
 func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if prAutomation.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(prAutomation, PrAutomationProtectionFinalizerName) {
@@ -121,7 +119,6 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 		// Remove PrAutomation from Console API if it exists
 		if exists {
-			logger.Info("Deleting PR automation")
 			if err = in.ConsoleClient.DeletePrAutomation(ctx, prAutomation.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -172,7 +169,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 
 	// Update only if PrAutomation has changed
 	if prAutomation.Status.SHA != nil && *prAutomation.Status.SHA != sha && exists {
-		logger.Info("Updating PR automation")
 		pra, err = in.ConsoleClient.UpdatePrAutomation(ctx, prAutomation.Status.GetID(), *attributes)
 		return pra, sha, err
 	}
@@ -183,7 +179,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 		return pra, sha, err
 	}
 
-	logger.Info("Creating PR automation")
 	pra, err = in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
 	return pra, sha, err
 }

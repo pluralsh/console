@@ -142,7 +142,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
-		logger.Info("delete git repository")
 		existingRepo, err := r.getRepository(repo.Spec.Url)
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

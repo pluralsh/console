@@ -125,8 +125,6 @@ func (r *ObserverReconciler) sync(
 	observer *v1alpha1.Observer,
 	changed bool,
 ) (*console.ObserverFragment, error) {
-	logger := log.FromContext(ctx)
-
 	exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
 	if err != nil {
 		return nil, err
@@ -142,7 +140,6 @@ func (r *ObserverReconciler) sync(
 		return nil, err
 	}
 
-	logger.Info("upsert Observer")
 	return r.ConsoleClient.UpsertObserver(ctx, observer.Attributes(target, actions, projectID))
 }
 
@@ -282,8 +279,6 @@ func (r *ObserverReconciler) handleExisting(ctx context.Context, observer *v1alp
 }
 
 func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer *v1alpha1.Observer) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if observer.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(observer, ObserverFinalizer) {
@@ -300,7 +295,6 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 		}
 
 		if exists && !observer.Status.IsReadonly() {
-			logger.Info("deleting Observer")
 			if err := r.ConsoleClient.DeleteObserver(ctx, observer.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.

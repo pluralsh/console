@@ -99,7 +99,6 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if !settings.GetDeletionTimestamp().IsZero() {
-		logger.Info("deployment settings CRD deleted successfully")
 		return ctrl.Result{}, nil
 	}
 

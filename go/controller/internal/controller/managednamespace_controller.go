@@ -161,9 +161,7 @@ func (r *ManagedNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace *deploymentsv1alpha1.ManagedNamespace) error {
-	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(namespace, ManagedNamespaceFinalizer) {
-		logger.Info("try to delete namespace")
 		if namespace.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetNamespace(ctx, namespace.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
@@ -178,7 +176,6 @@ func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace
 			}
 		}
 		controllerutil.RemoveFinalizer(namespace, ManagedNamespaceFinalizer)
-		logger.Info("namespace deleted successfully")
 	}
 	return nil
 }

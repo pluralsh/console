@@ -246,7 +246,6 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
-		logger.Info("try to delete stack")
 		if stack.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
@@ -448,7 +447,6 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 // ready before allowing main reconcile loop to continue. In case cluster reference is misconfigured,
 // it will return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
 	cluster := &v1alpha1.Cluster{}
 
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.ClusterRef.Name, Namespace: stack.Spec.ClusterRef.Namespace}, cluster); err != nil {
@@ -457,7 +455,6 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if cluster.Status.ID == nil {
-		logger.Info("Cluster is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
 		return "", lo.ToPtr(waitForResources), nil
 	}
