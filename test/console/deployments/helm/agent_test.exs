@@ -74,6 +74,15 @@ defmodule Console.Deployments.Helm.AgentTest do
       Process.exit(pid, :kill)
     end
 
+    test "it can properly error on invalid charts" do
+      repo = "oci://registry-1.docker.io/bitnamicharts"
+      {:ok, pid} = Agent.start(repo)
+
+      {:error, "error fetching" <> _} = Agent.fetch(pid, "externaldns", "x.x.x")
+
+      Process.exit(pid, :kill)
+    end
+
     test "it can fetch a chart by floating version" do
       repo = "https://pluralsh.github.io/console"
       {:ok, pid} = Agent.start(repo)

@@ -58,7 +58,7 @@ defmodule Console.OCI.Client do
   def download_blob(client, digest, to), do: authed_get(client, "/v2/:repo/blobs/#{digest}", into: to)
 
   defp dkr_client(h, repo) do
-    Req.new(base_url: "https://#{h}")
+    Req.new(base_url: "https://#{h}", retry: false)
     |> Req.Request.register_options([:dkr_repo])
     |> Req.Request.merge_options(dkr_repo: repo)
     |> Req.Request.append_request_steps(dkr_repo: fn %{options: %{dkr_repo: repo}} = req ->
@@ -101,8 +101,8 @@ defmodule Console.OCI.Client do
     end
   end
 
-  defp auth_client(:empty), do: Req.new()
-  defp auth_client({u, p}), do: Req.new(auth: {:basic, "#{u}:#{p}"})
+  defp auth_client(:empty), do: Req.new(retry: false)
+  defp auth_client({u, p}), do: Req.new(auth: {:basic, "#{u}:#{p}"}, retry: false)
 
   defp parse_uri(uri) do
     case URI.parse(uri) do
