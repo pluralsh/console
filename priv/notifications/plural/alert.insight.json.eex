@@ -1,0 +1,7 @@
+✨ We have a new insight into issues from the alert <%= @alert.title %>
+
+Here's a brief summary of what we've found:
+
+<%= @text %>
+
+View full details: <%= Console.url("/cd/clusters/#{@alert.service.cluster_id}/services/#{@alert.service_id}") %>

@@ -9,9 +9,6 @@ defmodule Console.AI.CronTest do
 
   setup :set_mimic_global
 
-  @host Application.compile_env(:elasticsearch, :host)
-  @index Application.compile_env(:elasticsearch, :index)
-
   describe "#trim_threads/0" do
     test "it will trim threads for users with more than 50" do
       user = insert(:user)
@@ -46,6 +43,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
@@ -67,10 +65,7 @@ defmodule Console.AI.CronTest do
         logging: %{
           enabled: true,
           driver: :elastic,
-          elastic: %{
-            host: @host,
-            index: @index
-          }
+          elastic: es_settings(),
         },
         ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
       )
@@ -86,6 +81,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
@@ -129,6 +125,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(ExAws, :request, 4, fn
         %ExAws.Operation.JSON{
@@ -168,6 +165,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
@@ -194,6 +192,7 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
@@ -233,6 +232,34 @@ defmodule Console.AI.CronTest do
       assert run.insight.text
 
       assert_receive {:event, %PubSub.StackInsight{item: {%{id: ^id}, _}}}
+    end
+  end
+
+  describe "#alerts/0" do
+    test "it will gather info from alerts and generate" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+      )
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      svc = insert(:service)
+      alert = insert(:alert, state: :firing, service: svc)
+
+      log_document(svc, "error what is happening") |> index_doc()
+      log_document(svc, "another valid log message") |> index_doc()
+      refresh()
+
+      Cron.alerts()
+
+      %{id: id} = alert = refetch(alert) |> Console.Repo.preload([insight: :evidence])
+
+      assert alert.insight.text
+
+      %{evidence: [evidence]} = alert.insight
+      assert evidence.type == :log
+      assert hd(evidence.logs.lines).log == "error what is happening"
+
+      assert_receive {:event, %PubSub.AlertInsight{item: {%{id: ^id}, _}}}
     end
   end
 end

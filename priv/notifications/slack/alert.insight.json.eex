@@ -1,0 +1,40 @@
+{
+	"text": "✨ *New insights found for issues against one of your alerts",
+	"blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "✨ *New insights generated for alert <%= @alert.title %>:*"
+            }
+        },
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": "Here's a brief summary of what we've found:\n"
+            }
+		},
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": <%= Jason.encode!(Console.truncate(@text, 2800)) %>
+            }
+		},
+        {
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View The Full Insight Here",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/cd/clusters/#{@alert.service.cluster_id}/services/#{@alert.service_id}") %>"
+				}
+			]
+		}
+	]
+}

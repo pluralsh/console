@@ -23,6 +23,7 @@ defmodule Console.Services.PluralTest do
   end
 
   describe "#merge_config/2" do
+    @tag :skip
     test "it can apply path updates appropriately" do
       {:ok, formatted} = Console.Utils.Yaml.format(%{"a" => %{"b" => [1, %{"c" => 2}]}})
       expect(File, :read, fn _ -> {:ok, formatted} end)

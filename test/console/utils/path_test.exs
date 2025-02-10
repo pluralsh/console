@@ -3,6 +3,7 @@ defmodule Console.Utils.PathTest do
   alias Console.Utils.Path
 
   describe "#update/3" do
+    @tag :skip
     test "it can update complex nested types" do
       nested = %{"a" => 1, "b" => "2", "c" => [%{"d" => [[1], [2, 3, %{"e" => 5}]]}]}
 

@@ -1,0 +1,20 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "✨ New insights generated for your alert <%= @alert.title %>",
+    "sections": [{
+        "activityTitle": "✨ *New insights generated for your alert <%= @alert.title %>*",
+        "activitySubtitle": "Here's a brief summary of what we've found",
+        "activityText": <%= Jason.encode!(Console.truncate(@text, 2800)) %>,
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "View the full insight in Plural",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/cd/clusters/#{@alert.service.cluster_id}/services/#{@alert.service_id}") %>"
+        }]
+    }]
+}

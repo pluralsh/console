@@ -1,6 +1,7 @@
 defmodule Console.Schema.AiInsight do
   use Piazza.Ecto.Schema
   alias Console.Schema.{
+    Alert,
     Service,
     Stack,
     Cluster,
@@ -24,6 +25,7 @@ defmodule Console.Schema.AiInsight do
       field :message, :string
     end
 
+    has_one :alert,       Alert,      foreign_key: :insight_id
     has_one :service,     Service,    foreign_key: :insight_id
     has_one :stack,       Stack,      foreign_key: :insight_id
     has_one :cluster,     Cluster,    foreign_key: :insight_id

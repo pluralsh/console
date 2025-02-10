@@ -3,10 +3,15 @@ defmodule Console.TestHelpers do
   alias Console.Schema.{Cluster, Service}
   alias Console.Deployments.Services
 
+  @es_host Application.compile_env(:elasticsearch, :host)
+  @es_index Application.compile_env(:elasticsearch, :index)
+
   def deployment_settings(args \\ []) do
     Console.Cache.flush()
     insert(:deployment_settings, args)
   end
+
+  def es_settings(), do: %{host: @es_host, index: @es_index}
 
   def create_service(attrs, %Cluster{} = cluster, user), do: create_service(cluster, user, attrs)
   def create_service(%Cluster{id: id}, user, attrs), do: Services.create_service(Map.new(attrs), id, user)

@@ -10,6 +10,7 @@ defmodule Kube.Client do
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscaler.List
   list_request :list_wireguard_peers, Kube.WireguardPeer.List
   list_request :list_certificate, Kube.Certificate.List
+  list_request :list_certificate_requests, Kube.CertificateRequest.List
   list_request :list_clusters, Kube.Cluster.List
   list_request :list_canaries, Kube.Canary.List
   list_request :list_rollouts, Kube.Rollout.List
@@ -18,6 +19,7 @@ defmodule Kube.Client do
   get_request :get_slashcommand, Kube.SlashCommand
   get_request :get_application, Kube.Application
   get_request :get_certificate, Kube.Certificate
+  get_request :get_certificate_request, Kube.CertificateRequest
   get_request :get_runbook, Kube.Runbook
   get_request :get_postgresql, Kube.Postgresql
   get_request :get_statefulset_resize, Kube.StatefulSetResize

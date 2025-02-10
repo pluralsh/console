@@ -1592,6 +1592,9 @@ type Alert {
   "key\/value tags to filter clusters"
   tags: [Tag]
 
+  "an insight explaining the state of this alert"
+  insight: AiInsight
+
   "the cluster this alert was associated with"
   cluster: Cluster
 
@@ -6843,10 +6846,12 @@ type AiInsight {
   "a shortish summary of this insight"
   summary: String
 
-  freshness: InsightFreshness
-
   "any errors generated when compiling this insight"
   error: [ServiceError]
+
+  freshness: InsightFreshness
+
+  alert: Alert
 
   service: ServiceDeployment
 
