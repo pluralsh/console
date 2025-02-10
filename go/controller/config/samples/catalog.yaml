@@ -1,0 +1,52 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Project
+metadata:
+  name: default
+spec:
+  name: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: base-catalog
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: base-catalog
+spec:
+  author: Plural
+  category: Data
+  description: The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.
+  projectRef:
+    name: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: data-catalog
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: data-catalog
+spec:
+  author: Plural
+  category: Data
+  description: The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: uncategorized-catalog
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: uncategorized-catalog
+spec:
+  author: Plural
+  description: The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.
