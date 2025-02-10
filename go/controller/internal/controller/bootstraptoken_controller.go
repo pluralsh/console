@@ -8,10 +8,8 @@ import (
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -51,8 +49,6 @@ type BootstrapTokenReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
-	logger := log.FromContext(ctx)
-
 	bootstrapToken := new(v1alpha1.BootstrapToken)
 	if err := in.Get(ctx, req.NamespacedName, bootstrapToken); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -63,7 +59,6 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	scope, err := NewDefaultScope(ctx, in.Client, bootstrapToken)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -76,8 +71,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}()
 
 	// Handle proper resource deletion via finalizer
-	result := in.addOrRemoveFinalizer(ctx, bootstrapToken)
-	if result != nil {
+	if result := in.addOrRemoveFinalizer(ctx, bootstrapToken); result != nil {
 		return *result, nil
 	}
 
@@ -88,8 +82,13 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
+	project, result, err := in.getProject(ctx, bootstrapToken)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, bootstrapToken.SetCondition)
+	}
+
 	// Create token and generate secret
-	apiBootstrapToken, err := in.sync(ctx, bootstrapToken)
+	apiBootstrapToken, err := in.sync(ctx, bootstrapToken, *project)
 	if err != nil {
 		if goerrors.Is(err, operrors.ErrRetriable) {
 			utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -105,6 +104,27 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*v1alpha1.Project, *ctrl.Result, error) {
+	project := &v1alpha1.Project{}
+	if err := in.Get(ctx, client.ObjectKey{Name: bootstrapToken.Spec.ProjectRef.Name}, project); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, &waitForResources, err
+		}
+
+		return nil, nil, err
+	}
+
+	if project.Status.ID == nil {
+		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+	}
+
+	if err := controllerutil.SetOwnerReference(project, bootstrapToken, in.Scheme); err != nil {
+		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
+	}
+
+	return project, nil, nil
 }
 
 func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) *ctrl.Result {
@@ -140,29 +160,9 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bo
 	return &ctrl.Result{}
 }
 
-func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*v1alpha1.Project, error) {
-	logger := log.FromContext(ctx)
-	project := &v1alpha1.Project{}
-	if err := in.Get(ctx, client.ObjectKey{Name: bootstrapToken.Spec.ProjectRef.Name}, project); err != nil {
-		return project, err
-	}
+func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken, project v1alpha1.Project) (*consoleapi.BootstrapTokenBase, error) {
+	attributes := consoleapi.BootstrapTokenAttributes{ProjectID: lo.FromPtr(project.ConsoleID())}
 
-	if project.Status.ID == nil {
-		logger.Info("Project is not ready")
-		return project, apierrors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, bootstrapToken.Spec.ProjectRef.Name)
-	}
-
-	if err := controllerutil.SetOwnerReference(project, bootstrapToken, in.Scheme); err != nil {
-		return project, fmt.Errorf("could not set bootstrapToken owner reference, got error: %+v", err)
-	}
-
-	return project, nil
-}
-
-func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*consoleapi.BootstrapTokenBase, error) {
-	attributes := consoleapi.BootstrapTokenAttributes{}
-
-	// Configure optional user binding
 	if !lo.IsEmpty(bootstrapToken.Spec.User) {
 		userID, err := in.UserGroupCache.GetUserID(*bootstrapToken.Spec.User)
 		if errors.IsNotFound(err) {
@@ -176,19 +176,6 @@ func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1
 		attributes.UserID = lo.ToPtr(userID)
 	}
 
-	// Configure required project binding
-	project, err := in.getProject(ctx, bootstrapToken)
-	if errors.IsNotFound(err) {
-		return nil, operrors.ErrRetriable
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	attributes.ProjectID = lo.FromPtr(project.ConsoleID())
-
-	// Create the token
 	apiBootstrapToken, err := in.ConsoleClient.CreateBootstrapToken(ctx, attributes)
 	if err != nil {
 		return nil, err

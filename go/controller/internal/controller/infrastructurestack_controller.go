@@ -200,7 +200,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return RequeueAfter(requeueAfterInfrastructureStack), nil
+	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
 }
 
 func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists bool) error {
@@ -246,7 +246,6 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
-		logger.Info("try to delete stack")
 		if stack.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
@@ -448,7 +447,6 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 // ready before allowing main reconcile loop to continue. In case cluster reference is misconfigured,
 // it will return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
 	cluster := &v1alpha1.Cluster{}
 
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.ClusterRef.Name, Namespace: stack.Spec.ClusterRef.Namespace}, cluster); err != nil {
@@ -457,9 +455,8 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if cluster.Status.ID == nil {
-		logger.Info("Cluster is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return "", lo.ToPtr(waitForResources), nil
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -469,7 +466,6 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 // ready before allowing main reconcile loop to continue. In case project ref is misconfigured, it will
 // return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
 	repository := &v1alpha1.GitRepository{}
 
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.RepositoryRef.Name, Namespace: stack.Spec.RepositoryRef.Namespace}, repository); err != nil {
@@ -478,15 +474,13 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	if repository.Status.ID == nil {
-		logger.Info("Repository is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return "", lo.ToPtr(waitForResources), nil
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		logger.Info("Repository is not healthy")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return "", lo.ToPtr(waitForResources), nil
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -511,7 +505,7 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 	if project.Status.ID == nil {
 		logger.Info("Project is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-		return nil, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return nil, lo.ToPtr(waitForResources), nil
 	}
 
 	if err := controllerutil.SetOwnerReference(project, stack, r.Scheme); err != nil {
@@ -544,7 +538,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	if stackDefinition.Status.ID == nil {
 		logger.Info("StackDefinition is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-		return nil, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return nil, lo.ToPtr(waitForResources), nil
 	}
 
 	return stackDefinition.Status.ID, nil, nil

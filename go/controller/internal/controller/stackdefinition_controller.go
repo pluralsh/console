@@ -116,8 +116,6 @@ func (in *StackDefinitionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, stack *v1alpha1.StackDefinition) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if stack.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(stack, StackDefinitionFinalizer) {
@@ -134,7 +132,6 @@ func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, s
 		}
 
 		if exists && !stack.Status.IsReadonly() {
-			logger.Info("deleting StackDefinition")
 			if err := in.ConsoleClient.DeleteStackDefinition(ctx, stack.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -164,8 +161,6 @@ func (in *StackDefinitionReconciler) isAlreadyExists(ctx context.Context, stack 
 }
 
 func (in *StackDefinitionReconciler) sync(ctx context.Context, stack *v1alpha1.StackDefinition, changed bool) (*console.StackDefinitionFragment, error) {
-	logger := log.FromContext(ctx)
-
 	exists, err := in.isAlreadyExists(ctx, stack)
 	if err != nil {
 		return nil, err
@@ -173,7 +168,6 @@ func (in *StackDefinitionReconciler) sync(ctx context.Context, stack *v1alpha1.S
 
 	// Update only if StackDefinition has changed
 	if changed && exists {
-		logger.Info("updating StackDefinition")
 		return in.ConsoleClient.UpdateStackDefinition(ctx, stack.Status.GetID(), stack.Attributes())
 	}
 
@@ -183,6 +177,5 @@ func (in *StackDefinitionReconciler) sync(ctx context.Context, stack *v1alpha1.S
 	}
 
 	// Create the StackDefinition in Console API if it doesn't exist
-	logger.Info("creating StackDefinition")
 	return in.ConsoleClient.CreateStackDefinition(ctx, stack.Attributes())
 }

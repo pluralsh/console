@@ -20,9 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +71,6 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, globalService)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -95,37 +91,26 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 
 	if !globalService.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, globalService)
+		return ctrl.Result{}, r.handleDelete(globalService)
 	}
 
 	if globalService.Spec.ServiceRef == nil && globalService.Spec.Template == nil {
 		return ctrl.Result{}, fmt.Errorf("the spec.serviceRef and spec.template can't be null")
 	}
 
-	service, res, err := r.getService(ctx, globalService)
-	if res != nil {
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, "service is not ready"))
-		return *res, err
+	service, result, err := r.getService(ctx, globalService)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
-	provider, err := r.getProvider(ctx, globalService)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return RequeueAfter(requeueWaitForResources), nil
-		}
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	provider, result, err := r.getProvider(ctx, globalService)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
-	project, err := r.getProject(ctx, globalService)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return RequeueAfter(requeueWaitForResources), nil
-		}
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
+	project, result, err := r.getProject(ctx, globalService)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
 	attr := globalService.Attributes(provider.Status.ID, project.Status.ID)
@@ -204,61 +189,68 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
-		return service, &ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			return nil, &waitForResources, err
+		}
+
+		return nil, nil, err
 	}
 
 	logger := log.FromContext(ctx)
 	if !service.DeletionTimestamp.IsZero() {
 		logger.Info("deleting global service after service deployment deletion")
 		if err := r.Delete(ctx, globalService); err != nil {
-			return nil, &ctrl.Result{}, err
+			return nil, nil, err
 		}
-		return service, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return nil, &waitForResources, nil
 	}
 
 	if service.Status.ID == nil {
-		logger.Info("service is not ready")
-		return service, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
+		return nil, &waitForResources, fmt.Errorf("service is not ready yet")
 	}
 
 	return service, nil, nil
 }
 
-func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, error) {
-	logger := log.FromContext(ctx)
+func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, *ctrl.Result, error) {
 	provider := &v1alpha1.Provider{}
 	if globalService.Spec.ProviderRef != nil {
 		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
-			return provider, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 		if provider.Status.ID == nil {
-			logger.Info("Provider is not ready")
-			return provider, apierrors.NewNotFound(schema.GroupResource{Resource: "Provider", Group: "deployments.plural.sh"}, globalService.Spec.ProviderRef.Name)
+			return nil, &waitForResources, fmt.Errorf("provider is not ready yet")
 		}
 	}
 
-	return provider, nil
+	return provider, nil, nil
 }
 
-func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Project, error) {
-	logger := log.FromContext(ctx)
+func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Project, *ctrl.Result, error) {
 	project := &v1alpha1.Project{}
 	if globalService.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
-			return project, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 
 		if project.Status.ID == nil {
-			logger.Info("Project is not ready")
-			return project, apierrors.NewNotFound(schema.GroupResource{Resource: "Project", Group: "deployments.plural.sh"}, globalService.Spec.ProjectRef.Name)
+			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
-			return project, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
+			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
 		}
 	}
 
-	return project, nil
+	return project, nil, nil
 }
 
 func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.GlobalService, svc *v1alpha1.ServiceDeployment, attrs console.GlobalServiceAttributes) error {
@@ -280,10 +272,8 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	return nil
 }
 
-func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) error {
-	logger := log.FromContext(ctx)
+func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) error {
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
-		logger.Info("try to delete global service")
 		if service.Status.GetID() != "" {
 			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {

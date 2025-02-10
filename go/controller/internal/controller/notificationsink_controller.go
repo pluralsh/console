@@ -75,7 +75,6 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	scope, err := NewDefaultScope(ctx, r.Client, notificationSink)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -115,7 +114,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	err = r.ensureNotificationSink(notificationSink)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return RequeueAfter(requeueWaitForResources), nil
+		return waitForResources, nil
 	}
 	if err != nil {
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -239,9 +238,7 @@ func (r *NotificationSinkReconciler) isAlreadyExists(ctx context.Context, notifi
 }
 
 func (r *NotificationSinkReconciler) handleDelete(ctx context.Context, notificationSink *v1alpha1.NotificationSink) error {
-	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(notificationSink, NotificationSinkFinalizer) {
-		logger.Info("try to delete notification sink")
 		if notificationSink.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetNotificationSink(ctx, notificationSink.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {

@@ -122,8 +122,6 @@ func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.R
 }
 
 func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidcProvider *v1alpha1.OIDCProvider) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if oidcProvider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(oidcProvider, OIDCProviderFinalizer) {
@@ -137,7 +135,6 @@ func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidc
 		exists := in.isAlreadyExists(oidcProvider)
 
 		if exists {
-			logger.Info("deleting OIDCProvider")
 			if err := in.ConsoleClient.DeleteOIDCProvider(ctx, oidcProvider.Status.GetID(), console.OidcProviderTypePlural); errors.IgnoreNotFound(err) != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -155,7 +152,6 @@ func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidc
 }
 
 func (in *OIDCProviderReconciler) sync(ctx context.Context, oidcProvider *v1alpha1.OIDCProvider, changed bool) (*console.OIDCProviderFragment, error) {
-	logger := log.FromContext(ctx)
 	// Currently only Plural type is supported
 	// TODO: parametrize once more types will be supported
 	providerType := console.OidcProviderTypePlural
@@ -163,14 +159,12 @@ func (in *OIDCProviderReconciler) sync(ctx context.Context, oidcProvider *v1alph
 
 	// Update only if OIDCProvider has changed
 	if changed && exists {
-		logger.Info("updating OIDCProvider")
 		response, err := in.ConsoleClient.UpdateOIDCProvider(ctx, oidcProvider.Status.GetID(), providerType, oidcProvider.Attributes())
 		return in.backfillCredentialsRefSecret(ctx, oidcProvider, response, err)
 	}
 
 	// Create the OIDCProvider in Console API if it doesn't exist
 	if !exists {
-		logger.Info("creating OIDCProvider")
 		response, err := in.ConsoleClient.CreateOIDCProvider(ctx, providerType, oidcProvider.Attributes())
 		return in.backfillCredentialsRefSecret(ctx, oidcProvider, response, err)
 	}

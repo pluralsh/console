@@ -130,8 +130,6 @@ func (in *ObservabilityProviderReconciler) SetupWithManager(mgr ctrl.Manager) er
 }
 
 func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if provider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(provider, ObservabilityProviderFinalizer) {
@@ -148,7 +146,6 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 		}
 
 		if exists && !provider.Status.IsReadonly() {
-			logger.Info("deleting ObservabilityProvider")
 			if err := in.ConsoleClient.DeleteObservabilityProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -191,8 +188,6 @@ func (in *ObservabilityProviderReconciler) sync(
 	provider *v1alpha1.ObservabilityProvider,
 	changed bool,
 ) (*console.ObservabilityProviderFragment, error) {
-	logger := log.FromContext(ctx)
-
 	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 	if err != nil {
 		return nil, err
@@ -209,7 +204,6 @@ func (in *ObservabilityProviderReconciler) sync(
 		return nil, err
 	}
 
-	logger.Info("upsert ObservabilityProvider")
 	return in.ConsoleClient.UpsertObservabilityProvider(ctx, provider.Attributes(c))
 }
 

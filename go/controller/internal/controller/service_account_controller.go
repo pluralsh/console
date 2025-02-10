@@ -52,7 +52,6 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, sa)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -177,7 +176,6 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 }
 
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
-	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
 		return nil, err
@@ -185,7 +183,6 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 
 	// Update only if ServiceAccount has changed
 	if changed && exists {
-		logger.Info("Updating ServiceAccount")
 		attr := sa.Attributes()
 		return r.ConsoleClient.UpdateServiceAccount(ctx, sa.Status.GetID(), attr)
 	}
@@ -196,10 +193,7 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 	}
 
 	// Create the ServiceAccount in Console API if it doesn't exist
-	logger.Info("Creating ServiceAccount")
-	attr := sa.Attributes()
-
-	return r.ConsoleClient.CreateServiceAccount(ctx, attr)
+	return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes())
 }
 
 func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {

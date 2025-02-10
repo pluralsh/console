@@ -57,7 +57,6 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, provider)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -194,7 +193,6 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 		// Remove Provider from Console API if it exists
 		if exists && !provider.Status.IsReadonly() {
-			logger.Info("Deleting provider")
 			if err = r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -216,7 +214,6 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 }
 
 func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
-	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 	if err != nil {
 		return nil, err
@@ -229,7 +226,6 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 			return nil, err
 		}
 
-		logger.Info("Updating provider")
 		return r.ConsoleClient.UpdateProvider(ctx, provider.Status.GetID(), attributes)
 	}
 
@@ -244,7 +240,6 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 		return nil, err
 	}
 
-	logger.Info("Creating provider")
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
 }
 

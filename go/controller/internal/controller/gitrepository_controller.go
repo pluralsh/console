@@ -2,10 +2,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,7 +61,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, repo)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -85,21 +83,17 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	if exists {
-		logger.Info("repository already exists in the API, running in read-only mode")
-		return r.handleExistingRepo(ctx, repo)
+		logger.V(9).Info("repository already exists, running in read-only mode", "name", repo.Name, "namespace", repo.Namespace)
+		return r.handleExistingRepo(repo)
 	}
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	attrs, err := r.getRepositoryAttributes(ctx, repo)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return RequeueAfter(requeueWaitForResources), nil
-		}
-		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+	attrs, result, err := r.getRepositoryAttributes(ctx, repo)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, repo.SetCondition)
 	}
+
 	sha, err := utils.HashObject(attrs)
 	if err != nil {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -117,17 +111,16 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		logger.Info("repository created")
 		apiRepo = resp.CreateGitRepository
+		logger.V(9).Info("created repository", "id", apiRepo.ID, "name", repo.Name, "namespace", repo.Namespace)
 	}
 
 	if repo.Status.HasSHA() && !repo.Status.IsSHAEqual(sha) {
-		_, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, *attrs)
-		if err != nil {
+		if _, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, *attrs); err != nil {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		logger.Info("repository updated")
+		logger.V(9).Info("updated repository", "id", apiRepo.ID, "name", repo.Name, "namespace", repo.Namespace)
 	}
 
 	repo.Status.Message = apiRepo.Error
@@ -149,7 +142,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
-		logger.Info("delete git repository")
 		existingRepo, err := r.getRepository(repo.Spec.Url)
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -171,58 +163,50 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 	return ctrl.Result{}, nil
 }
 
-func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, repo *v1alpha1.GitRepository) (*console.GitAttributes, error) {
+func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, repo *v1alpha1.GitRepository) (*console.GitAttributes, *ctrl.Result, error) {
 	attrs := console.GitAttributes{URL: repo.Spec.Url}
 	if repo.Spec.ConnectionRef != nil {
 		connection := &v1alpha1.ScmConnection{}
-		if err := r.Get(ctx, types.NamespacedName{Name: repo.Spec.ConnectionRef.Name, Namespace: repo.Spec.ConnectionRef.Namespace}, connection); err != nil {
-			return nil, err
+		ref := repo.Spec.ConnectionRef
+		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 		if connection.Status.ID == nil {
-			return nil, apierrors.NewNotFound(schema.GroupResource{Resource: "ScmConnection", Group: "deployments.plural.sh"}, repo.Spec.ConnectionRef.Name)
+			return nil, &waitForResources, fmt.Errorf("SCM connection is not ready yet")
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		attrs.ConnectionID = connection.Status.ID
 	}
 
 	if repo.Spec.CredentialsRef != nil {
 		secret := &corev1.Secret{}
-		name := types.NamespacedName{Name: repo.Spec.CredentialsRef.Name, Namespace: repo.Spec.CredentialsRef.Namespace}
-		err := r.Get(ctx, name, secret)
-		if err != nil {
-			return nil, err
+		ref := repo.Spec.CredentialsRef
+		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, secret); err != nil {
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
 
-		err = utils.TryAddOwnerRef(ctx, r.Client, repo, secret, r.Scheme)
-		if err != nil {
-			return nil, err
+		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, secret, r.Scheme); err != nil {
+			return nil, nil, err
 		}
 
-		privateKey := string(secret.Data[privateKey])
-		passphrase := string(secret.Data[passphrase])
-		username := string(secret.Data[username])
-		password := string(secret.Data[password])
-		if privateKey != "" {
-			attrs.PrivateKey = &privateKey
-		}
-
-		if passphrase != "" {
-			attrs.Passphrase = &passphrase
-		}
-
-		if username != "" {
-			attrs.Username = &username
-		}
-
-		if password != "" {
-			attrs.Password = &password
-		}
+		attrs.PrivateKey = lo.EmptyableToPtr(string(secret.Data[privateKey]))
+		attrs.Passphrase = lo.EmptyableToPtr(string(secret.Data[passphrase]))
+		attrs.Username = lo.EmptyableToPtr(string(secret.Data[username]))
+		attrs.Password = lo.EmptyableToPtr(string(secret.Data[password]))
 	}
 
-	return &attrs, nil
+	return &attrs, nil, nil
 }
 
 func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitRepositoryFragment, error) {
@@ -254,16 +238,14 @@ func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitReposi
 	return !repository.Status.HasID(), nil
 }
 
-func (r *GitRepositoryReconciler) handleExistingRepo(ctx context.Context, repo *v1alpha1.GitRepository) (reconcile.Result, error) {
-	logger := log.FromContext(ctx)
+func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepository) (reconcile.Result, error) {
 	existingRepo, err := r.getRepository(repo.Spec.Url)
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if existingRepo == nil {
-		msg := "Could not find Git repository in Console API"
-		logger.Info(msg)
+		msg := "could not find the repository"
 		repo.Status.Message = &msg
 		repo.Status.Health = v1alpha1.GitHealthFailed
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, msg)

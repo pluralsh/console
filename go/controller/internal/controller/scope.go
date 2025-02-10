@@ -2,10 +2,8 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/samber/lo"
 	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -26,13 +24,9 @@ func (in *DefaultScope[T]) PatchObject() error {
 }
 
 func NewDefaultScope[T client.Object](ctx context.Context, client client.Client, object T) (Scope[T], error) {
-	if lo.IsNil(object) {
-		return nil, errors.New("object cannot be nil")
-	}
-
 	helper, err := patch.NewHelper(object, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create new helper, go error: %s", err)
+		return nil, fmt.Errorf("failed to create scope: %s", err)
 	}
 
 	return &DefaultScope[T]{

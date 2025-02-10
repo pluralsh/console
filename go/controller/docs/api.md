@@ -205,7 +205,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `user` _string_ | User is an optional email to the user identity for this bootstrap token in audit logs |  | Optional: {} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef is the optional project that all clusters spawned by generated bootstrap token will belong to |  | Required: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef is the project that all clusters spawned by generated bootstrap token will belong to |  | Required: {} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef points to an output secret where bootstrap token will be stored.<br />It will be created automatically in the same namespace as BootstrapToken and cannot exist. |  | Required: {} <br /> |
 
 
