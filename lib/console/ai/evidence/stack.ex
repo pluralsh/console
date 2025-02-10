@@ -21,7 +21,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
 
   def insight(%Stack{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:insight, :cluster, :repository])
+  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :repository, insight: :evidence])
 
   defp stack_description(%Stack{} = stack) do
     {:user, """

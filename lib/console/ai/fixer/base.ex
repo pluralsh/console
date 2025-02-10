@@ -45,7 +45,12 @@ defmodule Console.AI.Fixer.Base do
     end
   end
 
-  def prompt_size(prompt), do: Enum.reduce(prompt, 0, fn {_, txt}, acc -> acc + byte_size(txt) end)
+  def prompt_size(prompt) do
+    Enum.reduce(prompt, 0, fn
+      {_, %{} = m}, acc -> acc + byte_size(Jason.encode!(m))
+      {_, txt}, acc when is_binary(txt) -> acc + byte_size(txt)
+    end)
+  end
 
   defp values_files(contents, %Service{helm: %Service.Helm{values_files: fs} = helm} = svc) do
     subfolder  = folder(svc)

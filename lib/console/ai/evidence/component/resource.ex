@@ -44,9 +44,23 @@ defmodule Console.AI.Evidence.Component.Resource do
     |> Kube.Client.raw()
   end
 
+  def events(resource) do
+    case details(resource) do
+      {uid, ns} when is_binary(ns) ->
+        CoreV1.list_namespaced_event!(ns, field_selector: "involvedObject.uid=#{uid}")
+        |> Kube.Utils.run()
+      _ -> {:ok, []}
+    end
+  end
+
+  def hydrate(resource) do
+    do_hydrate(resource)
+    |> as_history()
+  end
+
   def generate(resource) do
     with {:ok, events} <- events(resource),
-         {:ok, hydration} <- hydrate(resource) do
+         {:ok, hydration, claims} <- hydrate(resource) do
       {:ok, [{:user, """
           The kubernetes component #{description(resource)} could also be related.
 
@@ -58,8 +72,7 @@ defmodule Console.AI.Evidence.Component.Resource do
           """
         }]
         ++ tpl_events(events)
-        ++ tpl_hydration(hydration)
-      }
+        ++ tpl_hydration(hydration), claims}
     end
   end
 
@@ -76,25 +89,15 @@ defmodule Console.AI.Evidence.Component.Resource do
     "#{g}/#{v} #{k}#{ns(namespace)} with name #{name}"
   end
 
-  def hydrate(%AppsV1.Deployment{} = dep), do: Deployment.hydrate(dep)
-  def hydrate(%AppsV1.StatefulSet{} = ss), do: StatefulSet.hydrate(ss)
-  def hydrate(%AppsV1.DaemonSet{} = ds), do: DaemonSet.hydrate(ds)
-  def hydrate(%NetworkingV1.Ingress{} = ing), do: Ingress.hydrate(ing)
-  def hydrate(%BatchV1.CronJob{} = cj), do: CronJob.hydrate(cj)
-  def hydrate(%BatchV1.Job{} = cj), do: Job.hydrate(cj)
-  def hydrate(%Kube.Certificate{} = cert), do: Certificate.hydrate(cert)
-  def hydrate(%{"metadata" => _} = raw), do: Raw.hydrate(raw)
-  def hydrate(_), do: {:ok, []}
-
-  def events(resource) do
-    {uid, ns} = details(resource)
-    case ns do
-      ns when is_binary(ns) ->
-        CoreV1.list_namespaced_event!(ns, field_selector: "involvedObject.uid=#{uid}")
-        |> Kube.Utils.run()
-      _ -> {:ok, []}
-    end
-  end
+  defp do_hydrate(%AppsV1.Deployment{} = dep), do: Deployment.hydrate(dep)
+  defp do_hydrate(%AppsV1.StatefulSet{} = ss), do: StatefulSet.hydrate(ss)
+  defp do_hydrate(%AppsV1.DaemonSet{} = ds), do: DaemonSet.hydrate(ds)
+  defp do_hydrate(%NetworkingV1.Ingress{} = ing), do: Ingress.hydrate(ing)
+  defp do_hydrate(%BatchV1.CronJob{} = cj), do: CronJob.hydrate(cj)
+  defp do_hydrate(%BatchV1.Job{} = cj), do: Job.hydrate(cj)
+  defp do_hydrate(%Kube.Certificate{} = cert), do: Certificate.hydrate(cert)
+  defp do_hydrate(%{"metadata" => _} = raw), do: Raw.hydrate(raw)
+  defp do_hydrate(_), do: {:ok, []}
 
   defp details(%{metadata: %{uid: uid} = meta}), do: {uid, Map.get(meta, :namespace)}
   defp details(%{"metadata" => %{"uid" => uid} = meta}), do: {uid, meta["namespace"]}

@@ -25,7 +25,8 @@ defmodule Console.Schema.Alert do
     field :annotations, :map
     field :url,         :string
 
-    belongs_to :insight, AiInsight
+    belongs_to :insight, AiInsight, on_replace: :update
+
     belongs_to :project, Project
     belongs_to :cluster, Cluster
     belongs_to :service, Service

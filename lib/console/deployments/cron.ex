@@ -63,7 +63,7 @@ defmodule Console.Deployments.Cron do
     |> Repo.delete_all()
   end
 
-  @concurrency [
+  @opts [
     ordered: false,
     timeout: :timer.seconds(120),
     on_timeout: :kill_task
@@ -74,7 +74,7 @@ defmodule Console.Deployments.Cron do
     Cluster.stream()
     |> Repo.stream(method: :keyset)
     |> Task.async_stream(fn cluster ->
-      Logger.info "warming node caches for cluster"
+      Logger.info "warming node caches for cluster #{cluster.handle}"
       try do
         Clusters.warm(:cluster_metrics, cluster)
         Clusters.warm(:nodes, cluster)
@@ -85,7 +85,7 @@ defmodule Console.Deployments.Cron do
           Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
           Logger.error(Exception.format(:error, e, __STACKTRACE__))
       end
-    end, [max_concurrency: clamp(Clusters.count())] ++ @concurrency)
+    end, [max_concurrency: clamp(Clusters.count())] ++ @opts)
     |> Stream.run()
   end
 

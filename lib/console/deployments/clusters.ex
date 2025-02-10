@@ -178,7 +178,7 @@ defmodule Console.Deployments.Clusters do
   """
   @spec cached_nodes(Cluster.t) :: {:ok, term} | Console.error
   def cached_nodes(%Cluster{id: id}) do
-    case @local_adapter.get({:nodes, id}) do
+    case @cache_adapter.get({:nodes, id}) do
       {:ok, nodes} when is_list(nodes) -> {:ok, nodes}
       _ -> {:ok, []}
     end
@@ -205,7 +205,7 @@ defmodule Console.Deployments.Clusters do
 
 
   def cached_node_metrics(%Cluster{id: id}) do
-    case @local_adapter.get({:node_metrics, id}) do
+    case @cache_adapter.get({:node_metrics, id}) do
       {:ok, nodes} when is_list(nodes) -> {:ok, nodes}
       _ -> {:ok, []}
     end
@@ -1077,7 +1077,7 @@ defmodule Console.Deployments.Clusters do
   @doc """
   Saves upgrade insights for a cluster
   """
-  @spec save_upgrade_insights([map], Cluster.t) :: {:ok, [UpgradeInsight.t]} | Console.error
+  @spec save_upgrade_insights(%{insights: [map]}, Cluster.t) :: {:ok, [UpgradeInsight.t]} | Console.error
   def save_upgrade_insights(%{insights: insights} = attrs, %Cluster{id: id}) do
     start_transaction()
     |> add_operation(:insights, fn _ ->

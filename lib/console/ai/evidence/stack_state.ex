@@ -12,7 +12,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackState do
 
   def insight(%StackState{insight: insight}), do: insight
 
-  def preload(state), do: Repo.preload(state, [:insight, run: [:stack, :cluster, :errors, :repository]])
+  def preload(state), do: Repo.preload(state, [insight: :evidence, run: [:stack, :cluster, :errors, :repository]])
 
   defp state_description(%StackState{run: %StackRun{} = run} = state) do
     {:user, """

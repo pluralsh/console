@@ -5,6 +5,8 @@ defmodule Console.AI.Evidence.Base do
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
+  @cluster_key {__MODULE__, :cluster}
+
   defmacro __using__(_) do
     quote do
       import Console.AI.Evidence.Base
@@ -17,7 +19,14 @@ defmodule Console.AI.Evidence.Base do
     end
   end
 
+  def save_cluster(cluster), do: Process.put(@cluster_key, cluster)
+  def get_cluster(), do: Process.get(@cluster_key)
+
   def history(msgs, claims \\ %{}), do: {:ok, msgs, claims}
+
+  def as_history({:ok, res}) when is_list(res), do: {:ok, res, %{}}
+  def as_history({:ok, res, %{} = claims}) when is_list(res), do: {:ok, res, claims}
+  def as_history({:error, err}), do: {:error, err}
 
   def default_empty({:ok, res}, fun), do: {:ok, fun.(res)}
   def default_empty(_, _), do: {:ok, []}
@@ -102,6 +111,7 @@ defmodule Console.AI.Evidence.Base do
   def meaning(:pending), do: meaning(:stale)
 
   def save_kubeconfig(cluster) do
+    save_cluster(cluster)
     with %Kazan.Server{} = server <- Clusters.control_plane(cluster),
       do: Kube.Utils.save_kubeconfig(server)
   end
