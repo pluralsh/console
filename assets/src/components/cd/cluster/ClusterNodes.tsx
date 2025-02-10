@@ -1,4 +1,6 @@
+import { EmptyState, Table, Tooltip } from '@pluralsh/design-system'
 import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table'
+import { filesize } from 'filesize'
 import {
   ClusterFragment,
   ClusterNodeFragment,
@@ -11,9 +13,18 @@ import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
-import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 
+import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
+import { cpuParser, memoryParser } from '../../../utils/kubernetes.ts'
+import { rounded } from '../../../utils/number.ts'
+import {
+  nodeStatusToReadiness,
+  ReadinessT,
+  readinessToLabel,
+} from '../../../utils/status.ts'
+import { POLL_INTERVAL } from '../../cluster/constants.ts'
+import { mapify } from '../../cluster/LabelsAnnotations.tsx'
+import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 import {
   numishSort,
   StatusChip,
@@ -22,20 +33,8 @@ import {
   UsageText,
 } from '../../cluster/TableElements'
 import { useMetricsEnabled } from '../../contexts/DeploymentSettingsContext'
-import { cpuParser, memoryParser } from '../../../utils/kubernetes.ts'
-import { mapify } from '../../cluster/LabelsAnnotations.tsx'
-import {
-  nodeStatusToReadiness,
-  ReadinessT,
-  readinessToLabel,
-} from '../../../utils/status.ts'
-import { EmptyState, Table, Tooltip } from '@pluralsh/design-system'
-
-import { rounded } from '../../../utils/number.ts'
-import { UsageBar } from '../../utils/UsageBar.tsx'
-import { filesize } from 'filesize'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
-import { POLL_INTERVAL } from '../../cluster/constants.ts'
+import { UsageBar } from '../../utils/UsageBar.tsx'
 
 export default function ClusterNodes() {
   const theme = useTheme()
@@ -71,6 +70,8 @@ export default function ClusterNodes() {
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.medium,
+        overflow: 'hidden',
+        height: '100%',
       }}
     >
       {!isEmpty(data?.cluster?.nodes) && metricsEnabled && (
@@ -310,6 +311,7 @@ function NodesList({
   return (
     <Table
       loose
+      fullHeightWrap
       data={tableData}
       columns={columns}
       onRowClick={(_e, { original }: Row<TableData>) =>
