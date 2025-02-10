@@ -65,8 +65,8 @@ const columns = [
     cell: ({ getValue }) => getValue()?.name,
   }),
   columnHelper.accessor((edge) => edge?.node?.insertedAt, {
-    id: 'timestamp',
-    header: 'Timestamp',
+    id: 'created',
+    header: 'Created',
     meta: { truncate: true, gridTemplate: 'minmax(100px, .5fr)' },
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
