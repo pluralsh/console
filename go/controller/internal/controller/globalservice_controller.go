@@ -91,7 +91,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 
 	if !globalService.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, globalService)
+		return ctrl.Result{}, r.handleDelete(globalService)
 	}
 
 	if globalService.Spec.ServiceRef == nil && globalService.Spec.Template == nil {
@@ -270,7 +270,7 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	return nil
 }
 
-func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) error {
+func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) error {
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
 		if service.Status.GetID() != "" {
 			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
