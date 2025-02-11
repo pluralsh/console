@@ -3,6 +3,8 @@ package controller_test
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
@@ -30,7 +32,7 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 		)
 
 		ctx := context.Background()
-
+		ns := &v1alpha1.NotificationRouter{}
 		typeNamespacedName := types.NamespacedName{
 			Name:      routerName,
 			Namespace: namespace,
@@ -38,7 +40,7 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("creating the custom resource for the Kind NotificationRouter")
-			ns := &v1alpha1.NotificationRouter{}
+
 			err := k8sClient.Get(ctx, typeNamespacedName, ns)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &v1alpha1.NotificationRouter{
@@ -118,6 +120,81 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 			})
 
 			Expect(err).NotTo(HaveOccurred())
+
+			mns := &v1alpha1.NotificationRouter{}
+			err = k8sClient.Get(ctx, typeNamespacedName, mns)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should successfully reconcile the resource", func() {
+			By("Wait for resource")
+			test := struct {
+				notificationRouterFragment *gqlclient.NotificationRouterFragment
+				expectedStatus             v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "clusters.deployments.plural.sh \"test\" not found",
+						},
+					},
+				},
+				notificationRouterFragment: &gqlclient.NotificationRouterFragment{
+					ID: "123",
+				},
+			}
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ns)).To(Succeed())
+			ns.Spec.Filters = []v1alpha1.RouterFilters{
+				{
+					ClusterRef: &corev1.ObjectReference{
+						Name:      "test",
+						Namespace: namespace,
+					},
+				},
+			}
+			Expect(k8sClient.Update(ctx, ns)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetNotificationRouter", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			nr := &controller.NotificationRouterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			result, err := nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).To(Not(BeZero()))
 
 			mns := &v1alpha1.NotificationRouter{}
 			err = k8sClient.Get(ctx, typeNamespacedName, mns)
