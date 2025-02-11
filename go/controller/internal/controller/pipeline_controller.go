@@ -102,7 +102,6 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		}
 
 		if project.Status.ID == nil {
-			logger.Info("Project is not ready")
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
 			return waitForResources, nil
 		}

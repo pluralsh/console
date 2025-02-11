@@ -490,7 +490,6 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 // main reconcile loop to continue. In case project reference is not configured, it will return early and allow the
 // reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
 	project := &v1alpha1.Project{}
 
 	if !stack.HasProjectRef() {
@@ -503,7 +502,6 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 	}
 
 	if project.Status.ID == nil {
-		logger.Info("Project is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
 		return nil, lo.ToPtr(waitForResources), nil
 	}
