@@ -9,6 +9,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -45,8 +46,15 @@ func notFoundOrReadyErrorMessage(err error) string {
 // If the result is set, then any potential error will be saved in a condition
 // and ignored in the return to avoid rate limiting.
 //
+// If not found error is detected, then the result is automatically changed to
+// wait for resources.
+//
 // It is important that at least one from a result or an error have to be non-nil.
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
+	if err != nil && apierrors.IsNotFound(err) {
+		result = &waitForResources
+	}
+
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
 		v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
 	return lo.FromPtr(result), lo.Ternary(result != nil, nil, err)
