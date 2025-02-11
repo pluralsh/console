@@ -34,6 +34,11 @@ var (
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
 
+// TODO: Remove.
+func notFoundOrReadyErrorMessage(err error) string {
+	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
+}
+
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
 //
@@ -319,10 +324,6 @@ func mergeHelmValues(ctx context.Context, c runtimeclient.Client, secretRef *cor
 		return nil, err
 	}
 	return lo.ToPtr(string(out)), nil
-}
-
-func notFoundOrReadyErrorMessage(err error) string {
-	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
 }
 
 func getGitRepoID(ctx context.Context, c runtimeclient.Client, namespacedName v1alpha1.NamespacedName) (*string, error) {

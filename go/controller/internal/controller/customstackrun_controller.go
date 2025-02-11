@@ -20,8 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,14 +104,9 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	if !exists {
 		logger.Info("create custom stack run", "name", stack.CustomStackRunName())
-		attr, err := r.genCustomStackRunAttr(ctx, stack)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return waitForResources, nil
-			}
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
+		if result != nil || err != nil {
+			return handleRequeue(result, err, stack.SetCondition)
 		}
 
 		st, err := r.ConsoleClient.CreateCustomStackRun(ctx, *attr)
@@ -127,15 +120,11 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	if exists && !stack.Status.IsSHAEqual(sha) {
 		logger.Info("upsert custom stack run", "name", stack.CustomStackRunName())
-		attr, err := r.genCustomStackRunAttr(ctx, stack)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return waitForResources, nil
-			}
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
+		if result != nil || err != nil {
+			return handleRequeue(result, err, stack.SetCondition)
 		}
+
 		_, err = r.ConsoleClient.UpdateCustomStackRun(ctx, stack.Status.GetID(), *attr)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -190,29 +179,38 @@ func (r *CustomStackRunReconciler) handleDelete(ctx context.Context, stack *v1al
 	return nil
 }
 
-func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, stackRun *v1alpha1.CustomStackRun) (*console.CustomStackRunAttributes, error) {
+func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, stackRun *v1alpha1.CustomStackRun) (*console.CustomStackRunAttributes, *ctrl.Result, error) {
 	attr := &console.CustomStackRunAttributes{
 		Name:          stackRun.CustomStackRunName(),
 		Documentation: stackRun.Spec.Documentation,
 		Commands:      nil,
 		Configuration: nil,
 	}
+
 	if stackRun.Spec.StackRef != nil {
 		stack := &v1alpha1.InfrastructureStack{}
 		if err := r.Get(ctx, client.ObjectKey{Name: stackRun.Spec.StackRef.Name, Namespace: stackRun.Namespace}, stack); err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+
+			return nil, nil, err
 		}
+
 		if stack.Status.ID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{Resource: "InfrastructureStack", Group: "deployments.plural.sh"}, stackRun.Spec.StackRef.Name)
+			return nil, &waitForResources, fmt.Errorf("stack is not ready yet")
 		}
+
 		attr.StackID = stack.Status.ID
 	}
+
 	if stackRun.Spec.Commands != nil {
 		attr.Commands = make([]*console.CommandAttributes, 0)
 		attr.Commands = algorithms.Map(stackRun.Spec.Commands, func(b v1alpha1.CommandAttributes) *console.CommandAttributes {
 			return b.Attributes()
 		})
 	}
+
 	if stackRun.Spec.Configuration != nil {
 		attr.Configuration = make([]*console.PrConfigurationAttributes, 0)
 		attr.Configuration = algorithms.Map(stackRun.Spec.Configuration, func(b v1alpha1.PrAutomationConfiguration) *console.PrConfigurationAttributes {
@@ -220,5 +218,5 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		})
 	}
 
-	return attr, nil
+	return attr, nil, nil
 }
