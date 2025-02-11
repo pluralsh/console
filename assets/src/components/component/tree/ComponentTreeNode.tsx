@@ -138,7 +138,7 @@ export function ComponentTreeNode({
       </div>
       <IconFrame
         clickable
-        forwardedAs={Link}
+        as={Link}
         replace
         to={dashboardUrl}
         icon={<ArrowTopRightIcon />}

@@ -1,12 +1,9 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
-import {
-  InfoOutlineIcon,
-  Tooltip,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
 import { filesize } from 'filesize'
+import { useMemo } from 'react'
 
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   Maybe,
   Pod_PodList as PodListT,
@@ -15,22 +12,21 @@ import {
   PodsQueryVariables,
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   PODS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useCluster } from '../Cluster'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
-import { Kind } from '../common/types'
-import ResourceLink from '../common/ResourceLink'
 import { UsageText } from '../../cluster/TableElements'
+import { useCluster } from '../Cluster'
+import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
+import { Kind } from '../common/types'
+import { useDefaultColumns } from '../common/utils'
 
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
-import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -91,6 +87,15 @@ const colContainers = columnHelper.accessor(
 
 const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
   id: 'cpu',
+  header: 'CPU',
+  meta: {
+    tooltip: (
+      <div style={{ width: 370 }}>
+        {`Allocated CPU displayed in "requests / limits" format. Values are added
+        up from all containers that have them specified by the user.`}
+      </div>
+    ),
+  },
   cell: ({ getValue }) => {
     const allocatedResources = getValue()
 
@@ -106,22 +111,19 @@ const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
       </UsageText>
     )
   },
-  // @ts-ignore
-  header: (
-    <div>
-      CPU{' '}
-      <Tooltip
-        label='Allocated CPU displayed in "requests / limits" format. Values are added up from all containers that have them specified by the user. '
-        width={370}
-      >
-        <InfoOutlineIcon size={14} />
-      </Tooltip>
-    </div>
-  ),
 })
 
 const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
   id: 'memory',
+  header: 'Memory',
+  meta: {
+    tooltip: (
+      <div style={{ width: 370 }}>
+        {`Allocated memory displayed in "requests / limits" format. Values are added
+        up from all containers that have them specified by the user.`}
+      </div>
+    ),
+  },
   cell: ({ getValue }) => {
     const allocatedResources = getValue()
 
@@ -137,18 +139,6 @@ const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
       </UsageText>
     )
   },
-  // @ts-ignore
-  header: (
-    <div>
-      Memory{' '}
-      <Tooltip
-        label='Allocated memory displayed in "requests / limits" format. Values are added up from all containers that have them specified by the user. '
-        width={370}
-      >
-        <InfoOutlineIcon size={14} />
-      </Tooltip>
-    </div>
-  ),
 })
 
 export function usePodsColumns(): Array<object> {

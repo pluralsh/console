@@ -303,7 +303,7 @@ export function AccessTokens() {
         <Flex gap="small">
           Access tokens
           <Tooltip
-            width={315}
+            css={{ width: 315 }}
             label={TOOLTIP}
           >
             <InfoIcon />
