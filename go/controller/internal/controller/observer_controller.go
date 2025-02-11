@@ -126,10 +126,6 @@ func (r *ObserverReconciler) sync(
 	if exists && !changed {
 		apiObserver, err := r.ConsoleClient.GetObserver(ctx, nil, lo.ToPtr(observer.ObserverName()))
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
@@ -157,10 +153,6 @@ func (in *ObserverReconciler) getProject(ctx context.Context, observer *v1alpha1
 
 	project := &v1alpha1.Project{}
 	if err := in.Get(ctx, client.ObjectKey{Name: observer.Spec.ProjectRef.Name, Namespace: observer.Spec.ProjectRef.Namespace}, project); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 

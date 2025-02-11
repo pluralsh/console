@@ -286,10 +286,6 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 	repository := &v1alpha1.GitRepository{}
 	if ns.Spec.Service.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Service.RepositoryRef.Name, Namespace: ns.Spec.Service.RepositoryRef.Namespace}, repository); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
@@ -308,10 +304,6 @@ func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha
 	project := &v1alpha1.Project{}
 	if ns.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 

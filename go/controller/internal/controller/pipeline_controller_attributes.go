@@ -92,10 +92,6 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context, stageService v1alpha1.PipelineStageService) (*console.StageServiceAttributes, *ctrl.Result, error) {
 	service, err := utils.GetServiceDeployment(ctx, r.Client, stageService.ServiceRef)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 
@@ -132,10 +128,6 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 	if criteria.PrAutomationRef != nil {
 		prAutomation, err := utils.GetPrAutomation(ctx, r.Client, criteria.PrAutomationRef)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
@@ -148,10 +140,6 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 	if criteria.ServiceRef != nil {
 		service, err := utils.GetServiceDeployment(ctx, r.Client, criteria.ServiceRef)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 		sourceID = service.Status.ID
@@ -191,10 +179,6 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 
 	cluster, err := utils.GetCluster(ctx, r.Client, clusterRef)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 

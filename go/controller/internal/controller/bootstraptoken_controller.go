@@ -109,10 +109,6 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*v1alpha1.Project, *ctrl.Result, error) {
 	project := &v1alpha1.Project{}
 	if err := in.Get(ctx, client.ObjectKey{Name: bootstrapToken.Spec.ProjectRef.Name}, project); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 

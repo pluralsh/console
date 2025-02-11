@@ -169,10 +169,6 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		connection := &v1alpha1.ScmConnection{}
 		ref := repo.Spec.ConnectionRef
 		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 		if connection.Status.ID == nil {
@@ -189,10 +185,6 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		secret := &corev1.Secret{}
 		ref := repo.Spec.CredentialsRef
 		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, secret); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 

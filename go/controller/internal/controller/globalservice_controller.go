@@ -189,10 +189,6 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 
@@ -216,10 +212,6 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 	provider := &v1alpha1.Provider{}
 	if globalService.Spec.ProviderRef != nil {
 		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 		if provider.Status.ID == nil {
@@ -234,10 +226,6 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 	project := &v1alpha1.Project{}
 	if globalService.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 

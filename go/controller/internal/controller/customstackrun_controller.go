@@ -190,10 +190,6 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 	if stackRun.Spec.StackRef != nil {
 		stack := &v1alpha1.InfrastructureStack{}
 		if err := r.Get(ctx, client.ObjectKey{Name: stackRun.Spec.StackRef.Name, Namespace: stackRun.Namespace}, stack); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 

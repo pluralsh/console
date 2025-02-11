@@ -310,10 +310,6 @@ func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, clus
 
 	project := &v1alpha1.Project{}
 	if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProjectRef.Name}, project); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 

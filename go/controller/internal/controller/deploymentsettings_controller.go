@@ -160,9 +160,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.PrometheusConnection != nil {
 		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.PrometheusConnection = pc
@@ -170,9 +167,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.LokiConnection != nil {
 		lc, err := settings.Spec.LokiConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.LokiConnection = lc
@@ -180,9 +174,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.AI != nil {
 		ai, err := settings.Spec.AI.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.Ai = ai
@@ -190,9 +181,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.Logging != nil {
 		logging, err := settings.Spec.Logging.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.Logging = logging
@@ -210,9 +198,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		if settings.Spec.Stacks.ConnectionRef != nil {
 			connection := &v1alpha1.ScmConnection{}
 			if err := r.Get(ctx, types.NamespacedName{Name: settings.Spec.Stacks.ConnectionRef.Name, Namespace: settings.Spec.Stacks.ConnectionRef.Namespace}, connection); err != nil {
-				if errors.IsNotFound(err) {
-					return nil, &waitForResources, err
-				}
 				return nil, nil, err
 			}
 			connectionID = connection.Status.ID
@@ -224,9 +209,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 	if settings.Spec.Bindings != nil {
 		if err := r.ensure(settings); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
@@ -238,9 +220,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.DeploymentRepositoryRef != nil {
 		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.DeploymentRepositoryRef)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.DeployerRepositoryID = id
@@ -249,9 +228,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.ScaffoldsRepositoryRef != nil {
 		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.ScaffoldsRepositoryRef)
 		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
 			return nil, nil, err
 		}
 		attr.ArtifactRepositoryID = id
