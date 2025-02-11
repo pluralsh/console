@@ -4,13 +4,13 @@ defmodule ElasticsearchUtils do
   In all cases, base_url is the url for the cluster (ex. if running locally, something like "http://localhost:9200"),
   and index_name is the name of the index to use.
   """
-
+  alias Console.Schema.{Service, Cluster}
   require Tesla
 
   @host Application.compile_env(:elasticsearch, :host)
   @index Application.compile_env(:elasticsearch, :index)
 
-  def log_document(service, message) do
+  def log_document(%Service{} = service, message) do
     %{
       "@timestamp" => Timex.now(),
       "message" => message,
@@ -19,6 +19,19 @@ defmodule ElasticsearchUtils do
       },
       "cluster" => %{
         "handle" => service.cluster.handle
+      }
+    }
+  end
+
+  def log_document(%Cluster{} = cluster, namespace, message) do
+    %{
+      "@timestamp" => Timex.now(),
+      "message" => message,
+      "kubernetes" => %{
+        "namespace" => namespace
+      },
+      "cluster" => %{
+        "handle" => cluster.handle
       }
     }
   end

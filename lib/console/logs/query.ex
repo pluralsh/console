@@ -19,7 +19,8 @@ defmodule Console.Logs.Query do
       query: args[:query],
       limit: args[:limit],
       time: Time.new(args[:time]),
-      facets: args[:facets]
+      facets: args[:facets],
+      namespaces: args[:namespaces]
     }
   end
 
