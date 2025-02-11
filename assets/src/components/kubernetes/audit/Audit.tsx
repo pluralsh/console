@@ -45,7 +45,7 @@ const userColumn = columnHelper.accessor((log) => log?.actor, {
   cell: ({ getValue }) => <UserInfo user={getValue() ?? {}} />,
 })
 
-const columns = [userColumn, pathColumn, methodColumn, insertedAtColumn]
+const columns = [methodColumn, pathColumn, userColumn, insertedAtColumn]
 
 export default function Audit() {
   const cluster = useCluster()
