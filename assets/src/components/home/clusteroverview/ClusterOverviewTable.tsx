@@ -1,4 +1,4 @@
-import { Table } from '@pluralsh/design-system'
+import { Flex, Table } from '@pluralsh/design-system'
 import {
   ColCluster,
   ColProvider,
@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 
 export function ClusterOverViewTable({
   refetch,
@@ -46,20 +47,30 @@ export function ClusterOverViewTable({
   )
 }
 
-export const ColActions = columnHelper.display({
+export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
-  meta: {
-    gridTemplate: 'minmax(auto, 80px)',
+  header: '',
+  meta: { gridTemplate: 'max(92px)' },
+  cell: function Cell({ getValue }) {
+    const cluster = getValue()
+    return (
+      <Flex gap="xxsmall">
+        <AiInsightSummaryIcon
+          preserveSpace
+          navPath={`${getClusterDetailsPath({
+            clusterId: cluster?.id,
+          })}/insights`}
+          insight={getValue()?.insight}
+        />
+        <TableCaretLink
+          to={getClusterDetailsPath({
+            clusterId: cluster?.id,
+          })}
+          textValue={`View ${cluster?.name} details`}
+        />
+      </Flex>
+    )
   },
-  cell: ({ row: { original } }) => (
-    <TableCaretLink
-      css={{ alignSelf: 'end' }}
-      to={getClusterDetailsPath({
-        clusterId: original?.node?.id,
-      })}
-      textValue={`View ${original?.node?.name} details`}
-    />
-  ),
 })
 
 const clusterOverviewColumns = [
