@@ -75,10 +75,10 @@ defmodule Console.Deployments.Helm.AgentTest do
     end
 
     test "it can properly error on invalid charts" do
-      repo = "oci://registry-1.docker.io/bitnamicharts"
+      repo = "oci://ghcr.io/stefanprodan/charts"
       {:ok, pid} = Agent.start(repo)
 
-      {:error, "error fetching" <> _} = Agent.fetch(pid, "externaldns", "x.x.x")
+      {:error, "error fetching" <> _} = Agent.fetch(pid, "incorrect", "x.x.x")
 
       Process.exit(pid, :kill)
     end

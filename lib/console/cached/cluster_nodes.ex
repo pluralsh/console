@@ -13,7 +13,6 @@ defmodule Console.Cached.ClusterNodes do
   def init(_) do
     if Console.conf(:initialize) do
       :timer.send_interval(@warm, :warm)
-      send self(), :warm
     end
     {:ok, %{}}
   end

@@ -12,7 +12,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
     save_kubeconfig(cluster)
     with {:ok, resource} <- Resource.resource(comp, cluster),
          {:ok, events} <- Resource.events(resource),
-         {:ok, hydration} <- Resource.hydrate(resource) do
+         {:ok, hydration, claims} <- Resource.hydrate(resource) do
       history(
         [{:user, """
           The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.  It is deployed
@@ -26,14 +26,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
           """
         }]
         ++ tpl_events(events)
-        ++ tpl_hydration(hydration)
+        ++ tpl_hydration(hydration),
+        claims
       )
     end
   end
 
   def insight(%{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:insight, service: :cluster])
+  def preload(comp), do: Console.Repo.preload(comp, [insight: :evidence, service: :cluster])
 
   defp tpl_hydration([_ | _] = hydration) do
     [

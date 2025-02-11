@@ -26,7 +26,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Cluster do
 
   def insight(%Cluster{insight: insight}), do: insight
 
-  def preload(comp), do: Repo.preload(comp, [:insight, insight_components: [:cluster, insight: :evidence]])
+  def preload(comp), do: Repo.preload(comp, [insight: :evidence, insight_components: [:cluster, insight: :evidence]])
 
   defp description(%Cluster{distro: d, name: n, version: v}) do
     [

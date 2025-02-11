@@ -13,7 +13,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
     save_kubeconfig(cluster)
     with {:ok, resource} <- Resource.resource(to_svc_component(comp), cluster),
          {:ok, events} <- Resource.events(resource),
-         {:ok, hydration} <- Resource.hydrate(resource) do
+         {:ok, hydration, claims} <- Resource.hydrate(resource) do
       (
         [{:user, """
           The kubernetes resource #{component(comp)}.  It is deployed on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} with version #{cluster.version}
@@ -29,6 +29,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
         ++ tpl_hydration(hydration)
       )
       |> Logs.with_logging(comp)
+      |> Context.evidence(claims)
       |> Context.result()
     end
   end

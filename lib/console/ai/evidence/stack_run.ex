@@ -22,7 +22,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
 
   def insight(%StackRun{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:stack, :state, :insight, :steps, :cluster, :errors, :repository])
+  def preload(comp), do: Console.Repo.preload(comp, [:stack, :state, :steps, :cluster, :errors, :repository, insight: :evidence])
 
   defp step_description(%StackRun{} = run) do
     {:user, """
