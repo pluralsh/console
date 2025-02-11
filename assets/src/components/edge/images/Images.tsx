@@ -2,121 +2,101 @@ import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactNode } from 'react'
 import {
-  Types_CustomResourceObject,
-  useCustomResourcesQuery,
-} from '../../../generated/graphql-kubernetes.ts'
-import { KubernetesClient } from '../../../helpers/kubernetes.client.ts'
+  ClusterIsoImageEdge,
+  useClusterIsoImagesQuery,
+} from '../../../generated/graphql.ts'
+import { ObscuredToken } from '../../profile/ObscuredToken.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData.tsx'
+import CopyButton from '../../utils/CopyButton.tsx'
+import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import {
-  OSArtifact,
-  useDescribeOSArtifact,
-  useGetManagementCluster,
-} from './hooks.ts'
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData.tsx'
 
-const OS_ARTIFACT_CRD_NAME = 'osartifacts.build.kairos.io'
-const ALL_NAMESPACES = ' '
-
-const columnHelper = createColumnHelper<OSArtifact>()
+const columnHelper = createColumnHelper<ClusterIsoImageEdge>()
 
 const columns = [
-  columnHelper.accessor((artifact) => artifact, {
+  columnHelper.accessor((edge) => edge?.node, {
     id: 'image',
     header: 'Image',
-    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
-    cell: ({ getValue }) => {
-      const artifact = getValue()
-
-      return (
-        <>
-          {artifact.spec.outputImage.repository}:{artifact.spec.outputImage.tag}
-        </>
-      )
-    },
+    meta: { truncate: true, gridTemplate: 'minmax(150px, 1fr)' },
+    cell: ({ getValue }) => getValue()?.image,
   }),
-  columnHelper.accessor((artifact) => artifact.spec.outputImage.registry, {
+  columnHelper.accessor((edge) => edge?.node, {
     id: 'registry',
     header: 'Registry',
-    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
-    cell: ({ getValue }) => getValue(),
+    meta: { truncate: true, gridTemplate: 'minmax(150px, 1fr)' },
+    cell: ({ getValue }) => getValue()?.registry,
   }),
-  columnHelper.accessor((artifact) => artifact.spec.outputImage.username, {
+  columnHelper.accessor((edge) => edge?.node, {
     id: 'user',
     header: 'SSH User',
-    meta: { truncate: true, gridTemplate: 'minmax(100px,.5fr)' },
-    cell: ({ getValue }) => getValue(),
+    meta: { truncate: true, gridTemplate: 'minmax(125px, .75fr)' },
+    cell: ({ getValue }) => getValue()?.user,
   }),
-  // columnHelper.accessor((artifact) => artifact, {
-  //   id: 'credentials',
-  //   header: 'Credentials',
-  //   meta: { truncate: true, gridTemplate: 'minmax(150px, .25fr)' },
-  //   cell: ({ getValue, table }) => {
-  //     const artifact = getValue()
-  //     const { cluster } = table.options.meta as {
-  //       cluster: Cluster
-  //     }
-  //
-  //     return (
-  //       <Button
-  //         small
-  //         secondary
-  //         as={Link}
-  //         to={
-  //           getKubernetesResourcePath({
-  //             clusterId: cluster?.id ?? '',
-  //             name: artifact.spec.outputImage.passwordSecretKeyRef.name,
-  //             namespace: 'osbuilder',
-  //             kind: 'secret',
-  //             group: '',
-  //             version: 'v1',
-  //           }) ?? ''
-  //         }
-  //       >
-  //         View secret
-  //       </Button>
-  //     )
-  //   },
-  // }),
-  columnHelper.accessor((artifact) => artifact, {
-    id: 'status',
-    header: 'Status',
-    meta: { truncate: true, gridTemplate: '100px' },
-    cell: ({ getValue }) => {
-      const artifact = getValue()
-
-      return <>{artifact.status.phase}</>
-    },
+  columnHelper.accessor((edge) => edge?.node, {
+    id: 'password',
+    header: 'SSH Password',
+    meta: { gridTemplate: 'minmax(125px, .75fr)' },
+    cell: ({ getValue }) => (
+      <div
+        css={{
+          display: 'inline-flex',
+          alignItems: 'center',
+        }}
+      >
+        <ObscuredToken
+          token={getValue()?.password}
+          length={12}
+        />
+        <CopyButton
+          text={getValue()?.password ?? ''}
+          tooltip="Copy value"
+          type="tertiary"
+        />
+      </div>
+    ),
+  }),
+  columnHelper.accessor((edge) => edge?.node?.project, {
+    id: 'project',
+    header: 'Project',
+    meta: { truncate: true, gridTemplate: 'minmax(100px, .5fr)' },
+    cell: ({ getValue }) => getValue()?.name,
+  }),
+  columnHelper.accessor((edge) => edge?.node?.insertedAt, {
+    id: 'created',
+    header: 'Created',
+    meta: { truncate: true, gridTemplate: 'minmax(100px, .5fr)' },
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
 ]
 
 export default function Images(): ReactNode {
-  const { cluster } = useGetManagementCluster()
-  const { data: artifacts, error: artifactsListError } =
-    useCustomResourcesQuery({
-      client: KubernetesClient(cluster?.id ?? ''),
-      skip: !cluster?.id,
-      variables: { name: OS_ARTIFACT_CRD_NAME, namespace: ALL_NAMESPACES },
+  const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
       pollInterval: 30_000,
+      queryHook: useClusterIsoImagesQuery,
+      keyPath: ['clusterIsoImages'],
     })
 
-  const { items, error: describeError } = useDescribeOSArtifact({
-    clusterId: cluster?.id,
-    artifacts: (artifacts?.handleGetCustomResourceObjectList?.items ??
-      []) as Array<Types_CustomResourceObject>,
-  })
-
-  if (artifactsListError) return <GqlError error={artifactsListError} />
-  if (describeError) return <GqlError error={describeError} />
-  if (!artifacts || !items) return <LoopingLogo />
+  if (error) return <GqlError error={error} />
+  if (!data) return <LoopingLogo />
 
   return (
     <Table
       fullHeightWrap
+      data={(data?.clusterIsoImages?.edges as Array<ClusterIsoImageEdge>) ?? []}
       columns={columns}
-      reactTableOptions={{ meta: { cluster } }}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-      data={items}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
       virtualizeRows
+      emptyStateProps={{
+        message: 'No images found',
+      }}
     />
   )
 }

@@ -22,6 +22,18 @@ fragment Tag on Tag {
   value
 }
 
+fragment IsoImage on ClusterIsoImage {
+  id
+  user
+  password
+  registry
+  image
+  insertedAt
+  project {
+    name
+  }
+}
+
 query ClusterRegistration($id: ID, $machineId: String) {
   clusterRegistration(id: $id, machineId: $machineId) {
     ...ClusterRegistration
@@ -71,5 +83,23 @@ mutation UpdateClusterRegistration(
 mutation DeleteClusterRegistration($id: ID!) {
   deleteClusterRegistration(id: $id) {
     ...ClusterRegistration
+  }
+}
+
+query ClusterISOImages(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  clusterIsoImages(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...IsoImage
+      }
+    }
   }
 }

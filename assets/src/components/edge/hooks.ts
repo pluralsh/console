@@ -19,7 +19,7 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
       {
         path: EDGE_IMAGES_REL_PATH,
         label: 'Images',
-        enabled: false,
+        enabled: true,
       },
     ]
 
