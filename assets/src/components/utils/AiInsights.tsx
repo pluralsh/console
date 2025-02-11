@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { CaptionP } from './typography/Text'
 import dayjs from 'dayjs'
+import { MouseEventHandler } from 'react'
 
 export function AiInsightSummaryIcon({
   insight,
@@ -43,7 +44,7 @@ export function AiInsightSummaryIcon({
       />
     ) : null
 
-  const handleClick = (e: MouseEvent) => {
+  const handleClick: MouseEventHandler = (e) => {
     e.stopPropagation()
     e.preventDefault()
     navigate(navPath ?? '')
@@ -81,11 +82,13 @@ export function AiInsightSummaryIcon({
           {insight.summary}
         </Flex>
       }
-      border={'1px solid transparent'}
-      borderRadius={theme.borderRadiuses.medium}
-      backgroundImage={`linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`}
-      backgroundOrigin={'border-box'}
-      backgroundClip={'padding-box, border-box'}
+      css={{
+        border: '1px solid transparent',
+        borderRadius: theme.borderRadiuses.medium,
+        backgroundImage: `linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'padding-box, border-box',
+      }}
     >
       {asIconFrame ? (
         <IconFrame

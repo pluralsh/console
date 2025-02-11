@@ -63,7 +63,6 @@ export function SinkInfo({
       {icon && (
         <IconFrame
           type="secondary"
-          secondary
           icon={icon}
         />
       )}
