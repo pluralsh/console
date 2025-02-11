@@ -18,10 +18,7 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
-
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -29,7 +26,6 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -117,18 +113,9 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	// Prepare attributes object that is used to calculate SHA and save changes.
-	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
-	if err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
-		}
-		if apierrors.IsNotFound(err) {
-			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return waitForResources, nil
-		}
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	attrs, res, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
+	if res != nil || err != nil {
+		return handleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
