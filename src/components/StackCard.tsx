@@ -6,13 +6,13 @@ import Tooltip from './Tooltip'
 import Chip from './Chip'
 import StackIcon from './icons/StackIcon'
 
-const HUES = ['neutral', 'red', 'green', 'blue', 'yellow'] as const
+type StackHue = 'neutral' | 'red' | 'green' | 'blue' | 'yellow'
 
 type StackCardProps = DivProps & {
   title?: string
   description?: string
   apps?: App[]
-  hue?: (typeof HUES)[number]
+  hue?: StackHue
 }
 
 type App = {

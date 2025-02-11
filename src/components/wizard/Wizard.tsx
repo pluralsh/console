@@ -78,7 +78,7 @@ const Wizard = styled(WizardUnstyled)(({ theme }) => ({
 type WizardProps = {
   dependencySteps?: Array<StepConfig>
   loading?: boolean
-  onClose?: MouseEventHandler<void>
+  onClose?: MouseEventHandler<HTMLDivElement>
   onComplete?: (completed: boolean) => void
   onSelect?: (selected: Array<StepConfig>) => void
   onResetRef?: RefObject<{ onReset: Dispatch<void> }>

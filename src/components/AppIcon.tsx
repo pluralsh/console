@@ -9,20 +9,15 @@ import { type styledTheme as theme } from '../theme'
 
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
-const HUES = ['default', 'lighter', 'lightest'] as const
-const SIZES = [
-  'xxsmall',
-  'xsmall',
-  'small',
-  'medium',
-  'large',
-  'xlarge',
-] as const
-const SPACINGS = ['none', 'padding'] as const
-
-type AppIconHue = (typeof HUES)[number]
-type AppIconSize = (typeof SIZES)[number]
-type AppIconSpacing = (typeof SPACINGS)[number]
+type AppIconHue = 'default' | 'lighter' | 'lightest'
+type AppIconSize =
+  | 'xxsmall'
+  | 'xsmall'
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'xlarge'
+type AppIconSpacing = 'none' | 'padding'
 
 type AppIconProps = {
   size?: AppIconSize

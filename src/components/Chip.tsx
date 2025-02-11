@@ -18,9 +18,7 @@ import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
-const SIZES = ['small', 'medium', 'large'] as const
-
-export type ChipSize = (typeof SIZES)[number]
+export type ChipSize = 'small' | 'medium' | 'large'
 export type ChipSeverity = (typeof SEVERITIES)[number]
 
 export type ChipProps = Omit<FlexProps, 'size'> &

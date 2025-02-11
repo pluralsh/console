@@ -1,4 +1,4 @@
-import React, {
+import {
   type PropsWithChildren,
   type ReactNode,
   createContext,
@@ -54,7 +54,6 @@ export function BreadcrumbsProvider({
   )
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <BreadcrumbsContext.Provider value={contextVal}>
       {children}
     </BreadcrumbsContext.Provider>

@@ -10,7 +10,7 @@ import styled, { useTheme } from 'styled-components'
 import { Flex } from 'honorable'
 import AnimateHeight from 'react-animate-height'
 
-import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
+import { type SeverityExt, sanitizeSeverity } from '../types'
 
 import { CaretDownIcon, CloseIcon, InfoOutlineIcon } from '../icons'
 
@@ -29,6 +29,7 @@ import InfoIcon from './icons/InfoIcon'
 import StatusOkIcon from './icons/StatusOkIcon'
 import WarningIcon from './icons/WarningIcon'
 import IconFrame from './IconFrame'
+import { SemanticColorKey } from '../theme/colors'
 
 const CALLOUT_SEVERITIES = [
   'info',
@@ -46,7 +47,7 @@ const DEFAULT_SEVERITY: CalloutSeverity = 'info'
 
 export type CalloutSize = 'compact' | 'full'
 
-const severityToIconColorKey: Record<CalloutSeverity, ColorKey> = {
+const severityToIconColorKey: Record<CalloutSeverity, SemanticColorKey> = {
   info: 'icon-info',
   neutral: 'icon-light',
   success: 'icon-success',
@@ -54,7 +55,7 @@ const severityToIconColorKey: Record<CalloutSeverity, ColorKey> = {
   danger: 'icon-danger',
 }
 
-const severityToBorderColorKey: Record<CalloutSeverity, ColorKey> = {
+const severityToBorderColorKey: Record<CalloutSeverity, SemanticColorKey> = {
   info: 'border-info',
   neutral: 'border-selected',
   success: 'border-success',
@@ -231,7 +232,6 @@ function Callout({
           >
             <IconFrame
               textValue=""
-              display="flex"
               size="small"
               clickable
               {...(closeable && onClose

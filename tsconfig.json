@@ -10,12 +10,9 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDirs": [
-      "src",
-      ".storybook"
-    ],
+    "rootDirs": ["src", ".storybook"],
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "eslint.config.mjs"]
 }

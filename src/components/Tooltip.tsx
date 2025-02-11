@@ -1,14 +1,7 @@
 // Tooltip Library docs: https://floating-ui.com/docs/react-dom
 import {
-  type JSX,
-  type ReactNode,
-  cloneElement,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import {
   FloatingPortal,
+  type OffsetOptions,
   type Placement,
   arrow,
   autoUpdate,
@@ -23,10 +16,19 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react-dom-interactions'
+import {
+  type JSX,
+  type ReactNode,
+  cloneElement,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { mergeRefs } from 'react-merge-refs'
-import { Div, type DivProps } from 'honorable'
 import { CSSTransition } from 'react-transition-group'
 import styled, { useTheme } from 'styled-components'
+
+import { type ComponentPropsWithRef } from '@react-spring/web'
 
 import createIcon from './icons/createIcon'
 import WrapWithIf from './WrapWithIf'
@@ -36,7 +38,8 @@ type TooltipProps = {
   placement?: Placement
   children?: JSX.Element
   displayOn?: 'hover' | 'click' | 'focus' | 'manual' | 'none'
-  arrowProps?: DivProps
+  arrowProps?: ComponentPropsWithRef<'div'>
+  offset?: OffsetOptions
   manualOpen?: boolean
   strategy?: 'absolute' | 'fixed'
   arrow?: boolean
@@ -44,39 +47,7 @@ type TooltipProps = {
   portal?: boolean
   portalProps?: any
   onOpenChange?: (open: boolean) => unknown
-} & DivProps
-
-const Tip = styled(Div)`
-  &.enter {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  &.enter-active,
-  &.enter-done {
-    opacity: 1;
-    transform: scale(1);
-    visibility: visible;
-  }
-  &.enter-active {
-    transition:
-      transform 0.15s cubic-bezier(0.37, 1.4, 0.62, 1),
-      opacity 0.1s linear;
-  }
-  &.exit {
-    opacity: 1;
-    transform: scale(1);
-  }
-  &.exit-active,
-  &.exit-done {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  &.exit-active {
-    transition:
-      transform 0.05s ease-in,
-      opacity 0.05s linear;
-  }
-`
+} & ComponentPropsWithRef<'div'>
 
 const TooltipArrow = createIcon(({ size, color }) => (
   <svg
@@ -110,11 +81,12 @@ function Tooltip({
   portal = true,
   portalProps = {},
   onOpenChange,
+  style,
   ...props
 }: TooltipProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const arrowRef = useRef(undefined)
+  const arrowRef = useRef<HTMLDivElement>(null)
   const isOpen =
     displayOn === 'none' ? false : displayOn === 'manual' ? manualOpen : open
 
@@ -193,7 +165,7 @@ function Tooltip({
     <>
       {cloneElement(
         children,
-        getReferenceProps({ ref: childrenRef, ...children.props })
+        getReferenceProps({ ...children.props, ref: childrenRef })
       )}
       <WrapWithIf
         condition={portal}
@@ -212,40 +184,33 @@ function Tooltip({
           mountOnEnter
           unmountOnExit
         >
-          <Tip
-            ref={floating as any}
-            caption
-            color="text-light"
-            borderRadius="medium"
-            paddingVertical="xsmall"
-            paddingHorizontal="small"
-            backgroundColor="fill-two"
-            boxShadow={theme.boxShadows.moderate}
-            userSelect="none"
+          <TipSC
+            {...props}
+            ref={floating}
             style={{
               position: finalStrategy,
               left: x ?? 0,
               top: y ?? 0,
+              transformOrigin,
+              ...style,
             }}
-            transformOrigin={transformOrigin}
-            zIndex={theme.zIndexes.tooltip}
-            pointerEvents="none"
-            {...props}
             {...getFloatingProps()}
           >
             {label}
             {showArrow && (
-              <Div
-                ref={arrowRef as any}
+              <div
+                ref={arrowRef}
                 style={{
                   position: 'absolute',
                   top: middlewareData?.arrow?.y || '',
                   left: middlewareData?.arrow?.x || '',
                   [staticSide]: `-${ARROW_WIDTH}px`,
                 }}
-                width={ARROW_WIDTH}
-                height={ARROW_WIDTH}
-                transform={`rotate(${arrowRotation}deg)`}
+                css={{
+                  width: ARROW_WIDTH,
+                  height: ARROW_WIDTH,
+                  transform: `rotate(${arrowRotation}deg)`,
+                }}
                 {...arrowProps}
               >
                 <TooltipArrow
@@ -255,14 +220,49 @@ function Tooltip({
                   size={ARROW_WIDTH}
                   color="fill-two"
                 />
-              </Div>
+              </div>
             )}
-          </Tip>
+          </TipSC>
         </CSSTransition>
       </WrapWithIf>
     </>
   )
 }
+
+const TipSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  borderRadius: theme.borderRadiuses.medium,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  backgroundColor: theme.colors['fill-two'],
+  boxShadow: theme.boxShadows.moderate,
+  userSelect: 'none',
+  zIndex: theme.zIndexes.tooltip,
+  pointerEvents: 'none',
+  '&.enter': {
+    opacity: 0,
+    transform: 'scale(0.5)',
+  },
+  '&.enter-active, &.enter-done': {
+    opacity: 1,
+    transform: 'scale(1)',
+    visibility: 'visible',
+  },
+  '&.enter-active': {
+    transition:
+      'transform 0.15s cubic-bezier(0.37, 1.4, 0.62, 1), opacity 0.1s linear',
+  },
+  '&.exit': {
+    opacity: 1,
+    transform: 'scale(1)',
+  },
+  '&.exit-active, &.exit-done': {
+    opacity: 0,
+    transform: 'scale(0.3)',
+  },
+  '&.exit-active': {
+    transition: 'transform 0.05s ease-in, opacity 0.05s linear',
+  },
+}))
 
 export default Tooltip
 export type { TooltipProps }

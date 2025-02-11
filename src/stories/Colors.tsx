@@ -16,7 +16,6 @@ const ColorBox = styled(FilledBox)<{ $colorKey: string | number }>(
   })
 )
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ColorBoxWrap = styled.div((_) => ({
   display: 'flex',
   flexDirection: 'column',

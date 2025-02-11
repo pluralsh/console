@@ -4,7 +4,7 @@ import { type ComponentPropsWithRef, type ReactNode, useCallback } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { type ColorKey, type Nullable, type SeverityExt } from '../types'
+import { type Nullable, type SeverityExt } from '../types'
 
 import Card from './Card'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -13,6 +13,7 @@ import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import WarningIcon from './icons/WarningIcon'
 import { ModalWrapper, type ModalWrapperProps } from './ModalWrapper'
+import { SemanticColorKey } from '../theme/colors'
 
 export const SEVERITIES = [
   'info',
@@ -20,11 +21,10 @@ export const SEVERITIES = [
   'success',
   'danger',
 ] as const satisfies Readonly<SeverityExt[]>
-const SIZES = ['medium', 'large', 'custom', 'auto'] as const
+
+type ModalSize = 'medium' | 'large' | 'custom' | 'auto'
 
 type ModalSeverity = Extract<SeverityExt, (typeof SEVERITIES)[number]>
-
-type ModalSize = (typeof SIZES)[number]
 
 type ModalPropsType = ModalWrapperProps & {
   onClose?: Nullable<() => void>
@@ -44,7 +44,9 @@ const severityToIconColorKey = {
   danger: 'icon-danger',
   warning: 'icon-warning',
   success: 'icon-success',
-} as const satisfies Readonly<Record<ModalSeverity | 'default', ColorKey>>
+} as const satisfies Readonly<
+  Record<ModalSeverity | 'default', SemanticColorKey>
+>
 
 const severityToIcon = {
   default: null as null,

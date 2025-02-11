@@ -1,4 +1,5 @@
-import { type DefaultTheme } from 'styled-components'
+import { type ComponentPropsWithRef } from '@react-spring/web'
+import { type ElementType } from 'react'
 
 export type UserType = {
   name?: string
@@ -54,8 +55,11 @@ export function sanitizeSeverity<T extends SeverityExt>(
 export type Severity = (typeof SEVERITIES)[number]
 export type SeverityExt = (typeof SEVERITIES)[number]
 
-export type ColorKey = keyof DefaultTheme['colors']
-
 export { type CSSObject } from 'styled-components'
 
 export type Nullable<T> = T | null | undefined
+
+export type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithRef<E>, keyof P> & {
+    as?: E
+  }

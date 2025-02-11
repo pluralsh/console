@@ -57,7 +57,7 @@ function WithTooltip({
       arrow
       placement="right"
       label={tooltip}
-      whiteSpace="nowrap"
+      css={{ whiteSpace: 'nowrap' }}
     >
       <Item
         clickable={clickable}

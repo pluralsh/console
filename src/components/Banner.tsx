@@ -2,8 +2,9 @@ import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
 import { type ReactNode } from 'react'
 import styled from 'styled-components'
 
-import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
+import { type SeverityExt, sanitizeSeverity } from '../types'
 
+import { SemanticColorKey } from '../theme/colors'
 import { FillLevelProvider } from './contexts/FillLevelContext'
 import IconFrame from './IconFrame'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -32,14 +33,16 @@ export type BannerProps = FlexProps & {
   onClose?: () => void
 }
 
-const severityToIconColorKey: Readonly<Record<BannerSeverity, ColorKey>> = {
+const severityToIconColorKey: Readonly<
+  Record<BannerSeverity, SemanticColorKey>
+> = {
   info: 'icon-info',
   danger: 'icon-danger',
   warning: 'icon-warning',
   success: 'icon-success',
 }
 
-const severityToBorderColorKey: Record<BannerSeverity, ColorKey> = {
+const severityToBorderColorKey: Record<BannerSeverity, SemanticColorKey> = {
   info: 'border-info',
   danger: 'border-danger',
   warning: 'border-warning',
@@ -54,7 +57,7 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
 }
 
 const BannerOuter: any = styled.div<{
-  $borderColorKey: ColorKey
+  $borderColorKey: SemanticColorKey
   $fullWidth?: boolean
 }>(({ $borderColorKey, $fullWidth, theme }) => ({
   display: 'inline-flex',

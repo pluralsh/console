@@ -11,7 +11,7 @@ function WrapWithIf({ condition, wrapper, children }: WrapWithIfProps) {
   }
 
   // Typescript won't allow unwrapped children as return value
-  // eslint-disable-next-line react/jsx-no-useless-fragment
+
   return <>{children}</>
 }
 

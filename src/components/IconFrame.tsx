@@ -1,17 +1,21 @@
-import { ButtonBase, Flex, type FlexProps } from 'honorable'
-import { type ReactElement, type ReactNode, cloneElement } from 'react'
-import styled from 'styled-components'
-
-import { type styledTheme } from '../theme'
+import {
+  type ElementType,
+  type ReactElement,
+  type ReactNode,
+  cloneElement,
+} from 'react'
+import styled, { DefaultTheme } from 'styled-components'
 
 import { type SemanticColorKey } from '../theme/colors'
+
+import { type PolymorphicComponentProps } from '../types'
 
 import Tooltip, { type TooltipProps } from './Tooltip'
 
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'
 
-function typeToBG(theme: typeof styledTheme): Record<Type, string> {
+function typeToBG(theme: DefaultTheme): Record<Type, string> {
   return {
     secondary: 'transparent',
     tertiary: 'transparent',
@@ -22,7 +26,7 @@ function typeToBG(theme: typeof styledTheme): Record<Type, string> {
   }
 }
 
-function typeToHoverBG(theme: typeof styledTheme): Record<Type, string> {
+function typeToHoverBG(theme: DefaultTheme): Record<Type, string> {
   return {
     secondary: theme.colors['action-input-hover'],
     tertiary: theme.colors['action-input-hover'],
@@ -33,7 +37,7 @@ function typeToHoverBG(theme: typeof styledTheme): Record<Type, string> {
   }
 }
 
-function typeToSelectedBG(theme: typeof styledTheme): Record<Type, string> {
+function typeToSelectedBG(theme: DefaultTheme): Record<Type, string> {
   return {
     secondary: undefined,
     tertiary: undefined,
@@ -44,7 +48,7 @@ function typeToSelectedBG(theme: typeof styledTheme): Record<Type, string> {
   }
 }
 
-function typeToFocusBG(theme: typeof styledTheme): Record<Type, string> {
+function typeToFocusBG(theme: DefaultTheme): Record<Type, string> {
   return {
     secondary: undefined,
     tertiary: undefined,
@@ -55,7 +59,7 @@ function typeToFocusBG(theme: typeof styledTheme): Record<Type, string> {
   }
 }
 
-function typeToBorder(theme: typeof styledTheme): Record<Type, string> {
+function typeToBorder(theme: DefaultTheme): Record<Type, string> {
   return {
     secondary:
       theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
@@ -81,7 +85,7 @@ const sizeToFrameSize: Record<Size, number> = {
   xlarge: 48,
 }
 
-type IconFrameProps = {
+type IconFrameBaseProps = {
   clickable?: boolean
   disabled?: boolean
   textValue?: string
@@ -92,11 +96,14 @@ type IconFrameProps = {
   type?: Type
   selected?: boolean
   background?: SemanticColorKey
-} & FlexProps & {
-    as?: any
-  }
+}
 
-const IconFrameSC = styled(Flex)<{
+type IconFrameProps<E extends ElementType = 'div'> = PolymorphicComponentProps<
+  E,
+  IconFrameBaseProps
+>
+
+const IconFrameSC = styled.div<{
   $type: Type
   $clickable: boolean
   $selected: boolean
@@ -144,8 +151,7 @@ const IconFrameSC = styled(Flex)<{
   ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
 }))
 
-function IconFrame({
-  ref,
+function IconFrame<E extends ElementType = 'div'>({
   icon,
   size = 'medium',
   textValue = '',
@@ -158,13 +164,11 @@ function IconFrame({
   background,
   as,
   ...props
-}: IconFrameProps) {
+}: IconFrameProps<E>) {
   icon = cloneElement(icon, { size: sizeToIconSize[size] })
   if (tooltip && typeof tooltip === 'boolean') {
     tooltip = textValue
   }
-  const forwardedAs = as || (clickable ? ButtonBase : undefined)
-
   let content = (
     <IconFrameSC
       $clickable={clickable}
@@ -172,10 +176,9 @@ function IconFrame({
       $type={type}
       $size={size}
       $background={background}
-      ref={ref}
       aria-label={textValue}
       disabled={(clickable && disabled) || undefined}
-      {...(forwardedAs ? { forwardedAs } : {})}
+      as={as || (clickable ? 'button' : undefined)}
       {...(clickable && {
         tabIndex: 0,
         role: 'button',

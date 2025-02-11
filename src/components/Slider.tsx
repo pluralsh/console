@@ -198,7 +198,6 @@ function Slider({
       >
         {props.label && (
           <div className="label-container">
-            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label {...labelProps}>{props.label}</label>
             <output {...outputProps}>{state.getThumbValueLabel(0)}</output>
           </div>

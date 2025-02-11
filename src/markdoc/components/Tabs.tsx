@@ -77,6 +77,5 @@ export function Tabs({ tabs }: { tabs: TabProps[] }) {
 }
 
 export function Tab({ children }: PropsWithChildren) {
-  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{children}</>
 }

@@ -1,6 +1,6 @@
-import styled from 'styled-components'
+import styled, { DefaultTheme } from 'styled-components'
 
-import { type styledTheme, useFillLevel } from '../../index'
+import { useFillLevel } from '../../index'
 import { type MarkdocContextValue, useMarkdocContext } from '../MarkdocContext'
 
 export function bodyText({
@@ -8,7 +8,7 @@ export function bodyText({
   fillLevel,
   variant,
 }: {
-  theme: typeof styledTheme
+  theme: DefaultTheme
   fillLevel: ReturnType<typeof useFillLevel>
   variant: MarkdocContextValue['variant']
 }) {
