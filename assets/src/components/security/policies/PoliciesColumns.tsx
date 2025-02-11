@@ -3,7 +3,12 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { PolicyConstraint } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
-import { Chip, ErrorIcon } from '@pluralsh/design-system'
+import {
+  CaretRightIcon,
+  Chip,
+  ErrorIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 
 const columnHelper = createColumnHelper<Edge<PolicyConstraint>>()
@@ -58,4 +63,16 @@ export const ColDescription = columnHelper.accessor(({ node }) => node, {
 
     return <div>{policy ? policy.description : ''}</div>
   },
+})
+
+export const ColActions = columnHelper.display({
+  id: 'actions',
+  cell: ({ row: { original } }) => (
+    <IconFrame
+      clickable
+      tooltip={`View ${original?.node?.name} details`}
+      textValue={`View ${original?.node?.name} details`}
+      icon={<CaretRightIcon />}
+    />
+  ),
 })

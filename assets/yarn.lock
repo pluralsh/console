@@ -5963,7 +5963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:~9.7.1, @react-spring/core@npm:~9.7.3, @react-spring/core@npm:~9.7.5":
+"@react-spring/core@npm:~9.7.3, @react-spring/core@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/core@npm:9.7.5"
   dependencies:
@@ -5976,7 +5976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/konva@npm:~9.7.1":
+"@react-spring/konva@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/konva@npm:9.7.5"
   dependencies:
@@ -5992,7 +5992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/native@npm:~9.7.1":
+"@react-spring/native@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/native@npm:9.7.5"
   dependencies:
@@ -6026,7 +6026,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/three@npm:~9.7.1":
+"@react-spring/three@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/three@npm:9.7.5"
   dependencies:
@@ -6049,7 +6049,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/web@npm:9.4.5 || ^9.7.2, @react-spring/web@npm:~9.7.1":
+"@react-spring/web@npm:9.4.5 || ^9.7.2, @react-spring/web@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/web@npm:9.7.5"
   dependencies:
@@ -6079,7 +6079,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/zdog@npm:~9.7.1":
+"@react-spring/zdog@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/zdog@npm:9.7.5"
   dependencies:
@@ -10461,7 +10461,7 @@ __metadata:
     react-merge-refs: 2.1.1
     react-resize-detector: 9.1.0
     react-router-dom: 6.28.1
-    react-spring: 9.7.1
+    react-spring: 9.7.5
     react-virtualized-auto-sizer: 1.0.20
     react-window: 1.8.10
     react-window-infinite-loader: 1.0.9
@@ -10469,7 +10469,7 @@ __metadata:
     reactflow: 11.10.1
     regenerator-runtime: 0.13.11
     semver: 7.5.4
-    styled-components: 6.1.13
+    styled-components: 6.1.15
     stylelint: 15.11.0
     type-fest: 4.8.3
     typescript: 5.7.3
@@ -17424,9 +17424,9 @@ __metadata:
   linkType: hard
 
 "pathe@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "pathe@npm:2.0.2"
-  checksum: f99e40ac6e5a9d31c7192a8262cb66f286c2619684d2ff6ae1b30f276c6cf3373c319dc8994ba25ced133b51edff13152b20c7554d63ac3be142d6c70220ef32
+  version: 2.0.3
+  resolution: "pathe@npm:2.0.3"
+  checksum: 0602bdd4acb54d91044e0c56f1fb63467ae7d44ab3afea1f797947b0eb2b4d1d91cf0d58d065fdb0a8ab0c4acbbd8d3a5b424983eaf10dd5285d37a16f6e3ee9
   languageName: node
   linkType: hard
 
@@ -17595,14 +17595,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:8.4.38":
-  version: 8.4.38
-  resolution: "postcss@npm:8.4.38"
+"postcss@npm:8.4.49":
+  version: 8.4.49
+  resolution: "postcss@npm:8.4.49"
   dependencies:
     nanoid: ^3.3.7
-    picocolors: ^1.0.0
-    source-map-js: ^1.2.0
-  checksum: 649f9e60a763ca4b5a7bbec446a069edf07f057f6d780a5a0070576b841538d1ecf7dd888f2fbfd1f76200e26c969e405aeeae66332e6927dbdc8bdcb90b9451
+    picocolors: ^1.1.1
+    source-map-js: ^1.2.1
+  checksum: eb5d6cbdca24f50399aafa5d2bea489e4caee4c563ea1edd5a2485bc5f84e9ceef3febf170272bc83a99c31d23a316ad179213e853f34c2a7a8ffa534559d63a
   languageName: node
   linkType: hard
 
@@ -18277,20 +18277,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-spring@npm:9.7.1":
-  version: 9.7.1
-  resolution: "react-spring@npm:9.7.1"
+"react-spring@npm:9.7.5":
+  version: 9.7.5
+  resolution: "react-spring@npm:9.7.5"
   dependencies:
-    "@react-spring/core": ~9.7.1
-    "@react-spring/konva": ~9.7.1
-    "@react-spring/native": ~9.7.1
-    "@react-spring/three": ~9.7.1
-    "@react-spring/web": ~9.7.1
-    "@react-spring/zdog": ~9.7.1
+    "@react-spring/core": ~9.7.5
+    "@react-spring/konva": ~9.7.5
+    "@react-spring/native": ~9.7.5
+    "@react-spring/three": ~9.7.5
+    "@react-spring/web": ~9.7.5
+    "@react-spring/zdog": ~9.7.5
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 75f31601d9a8e94e93e66ccfed2ced8cc71399835cf4d509eae6b373315f182f3b5ca0d96da7cd132f01faa6b1cf89dcf087ca43bf40e51c3202c6713f730c28
+  checksum: 51495a1952a5b9f01d05647d7378900767494545524fd774fea75184573b24fd66f07a6ac3e0489ee450c09ab9af1ed86d1d2fb953d85eb4b5fd086501a357e1
   languageName: node
   linkType: hard
 
@@ -20152,23 +20152,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.1.13":
-  version: 6.1.13
-  resolution: "styled-components@npm:6.1.13"
+"styled-components@npm:6.1.15":
+  version: 6.1.15
+  resolution: "styled-components@npm:6.1.15"
   dependencies:
     "@emotion/is-prop-valid": 1.2.2
     "@emotion/unitless": 0.8.1
     "@types/stylis": 4.2.5
     css-to-react-native: 3.2.0
     csstype: 3.1.3
-    postcss: 8.4.38
+    postcss: 8.4.49
     shallowequal: 1.1.0
     stylis: 4.3.2
     tslib: 2.6.2
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: cb836c5d4cc8d183f4b70a4a1b1aa13551c57389e9c8fe3286619eef9fc81466fee09c39a1c8b5aa03deb0e466e4d5ee04921f7d9f3b7afe4744e539e6047550
+  checksum: f340a52fec3eddebe98a6171a30362d88bb92f3884befb7220ca06df1841e7541f70cf3e8c132decd9e46f45c1a640cc9c9a39df3dbe6ef781356bd3c1145c57
   languageName: node
   linkType: hard
 
