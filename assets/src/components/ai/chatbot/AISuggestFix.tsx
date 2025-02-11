@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import {
+  ComponentPropsWithRef,
   Dispatch,
   ReactNode,
   SetStateAction,
@@ -29,8 +30,10 @@ import { AIPanel } from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 
-interface AISuggestFixProps {
+type AISuggestFixProps = {
   insight: Nullable<AiInsightFragment>
+  buttonProps?: ComponentPropsWithRef<typeof AISuggestFixButton>
+  iconOnly?: boolean
 }
 
 function fixMessage(fix: string): ChatMessage {
@@ -50,7 +53,7 @@ export function Loading({
   scopeId?: string
   scrollToBottom: () => void
   setStreaming: Dispatch<SetStateAction<boolean>>
-}): ReactNode {
+}) {
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
   useAiChatStreamSubscription({
     variables: { insightId, scopeId },
@@ -129,7 +132,7 @@ function FixPr({
   )
 }
 
-function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
+function AISuggestFix({ insight, buttonProps }: AISuggestFixProps) {
   const settings = useDeploymentSettings()
   const ref = useRef<HTMLDivElement>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -169,12 +172,11 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
   )
 
   return (
-    <div
-      css={{
-        position: 'relative',
-      }}
-    >
-      <AISuggestFixButton onClick={showPanel} />
+    <div css={{ position: 'relative' }}>
+      <AISuggestFixButton
+        {...buttonProps}
+        onClick={showPanel}
+      />
       <AIPanel
         ref={ref}
         open={open}
