@@ -18,8 +18,8 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -37,7 +37,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -114,14 +113,11 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 	if !settings.Status.IsSHAEqual(sha) {
 		logger.Info("upsert deployment settings", "name", settings.Name)
-		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
-		if err != nil {
-			utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) || goerrors.Is(err, operrors.ErrReferenceNotFound) {
-				return requeue, nil
-			}
-			return ctrl.Result{}, err
+		attr, res, err := r.genDeploymentSettingsAttr(ctx, settings)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, settings.SetCondition)
 		}
+
 		_, err = r.ConsoleClient.UpdateDeploymentSettings(ctx, *attr)
 		if err != nil {
 			utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -144,7 +140,7 @@ func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		Complete(r)
 }
 
-func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Context, settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
+func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Context, settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, *ctrl.Result, error) {
 	attr := &console.DeploymentSettingsAttributes{
 		MgmtRepo: settings.Spec.ManagementRepo,
 		Cost:     settings.Spec.Cost.Attributes(),
@@ -153,47 +149,51 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.AgentHelmValues != nil {
 		var obj runtime.Object
 		if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(settings.Spec.AgentHelmValues, &obj, nil); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		rawHelmValues, err := yaml.Marshal(obj)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
 	}
 	if settings.Spec.PrometheusConnection != nil {
 		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+			return nil, nil, err
 		}
 		attr.PrometheusConnection = pc
 	}
 	if settings.Spec.LokiConnection != nil {
 		lc, err := settings.Spec.LokiConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+			return nil, nil, err
 		}
 		attr.LokiConnection = lc
 	}
 	if settings.Spec.AI != nil {
 		ai, err := settings.Spec.AI.Attributes(ctx, r.Client, settings.Namespace)
-		if errors.IsNotFound(err) {
-			return nil, operrors.ErrReferenceNotFound
-		}
-
 		if err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+			return nil, nil, err
 		}
 		attr.Ai = ai
 	}
 	if settings.Spec.Logging != nil {
 		logging, err := settings.Spec.Logging.Attributes(ctx, r.Client, settings.Namespace)
-		if errors.IsNotFound(err) {
-			return nil, operrors.ErrReferenceNotFound
-		}
-
 		if err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+			return nil, nil, err
 		}
 		attr.Logging = logging
 	}
@@ -204,16 +204,16 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		if settings.Spec.Stacks.JobSpec != nil {
 			jobSpec, err = gateJobAttributes(settings.Spec.Stacks.JobSpec)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 		if settings.Spec.Stacks.ConnectionRef != nil {
 			connection := &v1alpha1.ScmConnection{}
 			if err := r.Get(ctx, types.NamespacedName{Name: settings.Spec.Stacks.ConnectionRef.Name, Namespace: settings.Spec.Stacks.ConnectionRef.Namespace}, connection); err != nil {
 				if errors.IsNotFound(err) {
-					return nil, operrors.ErrReferenceNotFound
+					return nil, &waitForResources, err
 				}
-				return nil, err
+				return nil, nil, err
 			}
 			connectionID = connection.Status.ID
 		}
@@ -224,7 +224,10 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 	if settings.Spec.Bindings != nil {
 		if err := r.ensure(settings); err != nil {
-			return nil, err
+			if errors.IsNotFound(err) {
+				return nil, &waitForResources, err
+			}
+			return nil, nil, err
 		}
 		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
 		attr.WriteBindings = policyBindings(settings.Spec.Bindings.Write)
@@ -236,9 +239,9 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.DeploymentRepositoryRef)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return nil, operrors.ErrReferenceNotFound
+				return nil, &waitForResources, err
 			}
-			return nil, err
+			return nil, nil, err
 		}
 		attr.DeployerRepositoryID = id
 	}
@@ -247,14 +250,14 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.ScaffoldsRepositoryRef)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return nil, operrors.ErrReferenceNotFound
+				return nil, &waitForResources, err
 			}
-			return nil, err
+			return nil, nil, err
 		}
 		attr.ArtifactRepositoryID = id
 	}
 
-	return attr, nil
+	return attr, nil, nil
 }
 
 // ensure makes sure that user-friendly input such as userEmail/groupName in
@@ -289,7 +292,7 @@ func (r *DeploymentSettingsReconciler) ensure(settings *v1alpha1.DeploymentSetti
 	settings.Spec.Bindings.Git = bindings
 
 	if req || req2 || req3 || req4 {
-		return operrors.ErrRetriable
+		return errors.NewNotFound(schema.GroupResource{}, "bindings")
 	}
 
 	return nil
