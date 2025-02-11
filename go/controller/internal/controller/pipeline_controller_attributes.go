@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	v1 "k8s.io/api/core/v1"
