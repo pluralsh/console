@@ -57,7 +57,7 @@ defmodule Console.AI.Memoizer do
     |> Repo.update()
     |> case do
       {:ok, %{insight: insight}} -> {:ok, insight}
-      {:error, _} -> {:error, "failed to persist insight to db"}
+      {:error, err} -> {:error, "failed to persist insight to db: #{inspect(err)}"}
     end
   end
 
