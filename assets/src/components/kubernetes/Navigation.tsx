@@ -18,6 +18,7 @@ import {
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
+  AUDIT_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
@@ -44,6 +45,7 @@ const directory: Directory = [
   { path: RBAC_REL_PATH, label: 'RBAC' },
   { path: CLUSTER_REL_PATH, label: 'Cluster' },
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
+  { path: AUDIT_REL_PATH, label: 'Audit logs' },
 ] as const
 
 export default function Navigation() {
@@ -64,6 +66,8 @@ export default function Navigation() {
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   useLayoutEffect(() => {
+    dataSelect.setEnabled(true)
+
     if (clusterId) sessionStorage.setItem(LAST_SELECTED_CLUSTER_KEY, clusterId)
 
     const newParams = new URLSearchParams()
@@ -125,7 +129,7 @@ export default function Navigation() {
           }}
         >
           <div css={{ flex: 1, overflow: 'hidden' }}>{headerContent}</div>
-          <DataSelectInputs dataSelect={dataSelect} />
+          {dataSelect.enabled && <DataSelectInputs dataSelect={dataSelect} />}
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
           <DataSelect.Provider value={dataSelect}>

@@ -11120,6 +11120,17 @@ export type KubernetesClustersQueryVariables = Exact<{
 
 export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null } | null };
 
+export type KubernetesClusterAuditLogsQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type KubernetesClusterAuditLogsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', auditLogs?: { __typename?: 'ClusterAuditLogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterAuditLogEdge', node?: { __typename?: 'ClusterAuditLog', id: string, insertedAt?: string | null, method: string, path: string, actor?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+
 export type PinCustomResourceMutationVariables = Exact<{
   attributes: PinnedCustomResourceAttributes;
 }>;
@@ -22260,6 +22271,66 @@ export type KubernetesClustersQueryHookResult = ReturnType<typeof useKubernetesC
 export type KubernetesClustersLazyQueryHookResult = ReturnType<typeof useKubernetesClustersLazyQuery>;
 export type KubernetesClustersSuspenseQueryHookResult = ReturnType<typeof useKubernetesClustersSuspenseQuery>;
 export type KubernetesClustersQueryResult = Apollo.QueryResult<KubernetesClustersQuery, KubernetesClustersQueryVariables>;
+export const KubernetesClusterAuditLogsDocument = gql`
+    query KubernetesClusterAuditLogs($clusterId: ID, $first: Int, $after: String, $before: String, $last: Int) {
+  cluster(id: $clusterId) {
+    auditLogs(first: $first, last: $last, after: $after, before: $before) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          insertedAt
+          method
+          path
+          actor {
+            name
+            email
+          }
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useKubernetesClusterAuditLogsQuery__
+ *
+ * To run a query within a React component, call `useKubernetesClusterAuditLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useKubernetesClusterAuditLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useKubernetesClusterAuditLogsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useKubernetesClusterAuditLogsQuery(baseOptions?: Apollo.QueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+      }
+export function useKubernetesClusterAuditLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+        }
+export function useKubernetesClusterAuditLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+        }
+export type KubernetesClusterAuditLogsQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsQuery>;
+export type KubernetesClusterAuditLogsLazyQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsLazyQuery>;
+export type KubernetesClusterAuditLogsSuspenseQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsSuspenseQuery>;
+export type KubernetesClusterAuditLogsQueryResult = Apollo.QueryResult<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>;
 export const PinCustomResourceDocument = gql`
     mutation PinCustomResource($attributes: PinnedCustomResourceAttributes!) {
   createPinnedCustomResource(attributes: $attributes) {
@@ -26146,6 +26217,7 @@ export const namedOperations = {
     GroupMembers: 'GroupMembers',
     UpgradeStatistics: 'UpgradeStatistics',
     KubernetesClusters: 'KubernetesClusters',
+    KubernetesClusterAuditLogs: 'KubernetesClusterAuditLogs',
     ArgoRollout: 'ArgoRollout',
     Canary: 'Canary',
     Certificate: 'Certificate',
