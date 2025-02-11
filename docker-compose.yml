@@ -9,7 +9,7 @@ services:
     volumes:
     - database_data:/var/lib/postgresql/data
   es:
-    image: elasticsearch:8.8.0
+    image: elasticsearch:8.8.2
     restart: always
     ports:
     - 9200:9200
