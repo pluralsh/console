@@ -47,6 +47,11 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			Name:      readonlyScmName,
 		}
 
+		secretNamespacedName := types.NamespacedName{
+			Name:      secretName,
+			Namespace: namespace,
+		}
+
 		BeforeAll(func() {
 			By("creating the secret")
 			secret := &corev1.Secret{
@@ -100,6 +105,10 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 		})
 
 		AfterAll(func() {
+			secret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, secretNamespacedName, secret)).To(Succeed())
+			Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
+
 			scm := &v1alpha1.ScmConnection{}
 			if err := k8sClient.Get(ctx, types.NamespacedName{Name: scmName, Namespace: namespace}, scm); err == nil {
 				By("Cleanup the specific resource instance ScmConnection")
@@ -379,5 +388,110 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
+	})
+})
+
+var _ = Describe("Waiting for Secret", Ordered, func() {
+	Context("When reconciling a resource", func() {
+		const (
+			scmName   = "scm-connection-wait"
+			scmType   = gqlclient.ScmTypeGithub
+			namespace = "default"
+			id        = "123"
+		)
+
+		ctx := context.Background()
+
+		typeNamespacedName := types.NamespacedName{
+			Name:      scmName,
+			Namespace: namespace,
+		}
+
+		BeforeAll(func() {
+			By("creating the custom resource for the Kind ScmConnection")
+			scm := &v1alpha1.ScmConnection{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, scm); err == nil {
+				Expect(k8sClient.Delete(ctx, scm)).To(Succeed())
+			}
+			resource := &v1alpha1.ScmConnection{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      scmName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ScmConnectionSpec{
+					Name: scmName,
+					Type: scmType,
+					TokenSecretRef: &corev1.SecretReference{
+						Name:      "test-secret",
+						Namespace: namespace,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			scm := &v1alpha1.ScmConnection{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: scmName, Namespace: namespace}, scm); err == nil {
+				By("Cleanup the specific resource instance ScmConnection")
+				Expect(k8sClient.Delete(ctx, scm)).To(Succeed())
+			}
+		})
+
+		It("should wait for secret on create", func() {
+			By("Create resource")
+			test := struct {
+				returnGetScmConnection *gqlclient.ScmConnectionFragment
+				expectedStatus         v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionType.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "secrets \"test-secret\" not found",
+						},
+					},
+				},
+				returnGetScmConnection: &gqlclient.ScmConnectionFragment{
+					ID: id,
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetScmConnectionByName", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, scmName)).Once()
+			fakeConsoleClient.On("IsScmConnectionExists", mock.Anything, mock.Anything).Return(false, nil).Once()
+			scmReconciler := &controller.ScmConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			resp, err := scmReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.RequeueAfter).ToNot(BeZero())
+			scm := &v1alpha1.ScmConnection{}
+			err = k8sClient.Get(ctx, typeNamespacedName, scm)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
 	})
 })
