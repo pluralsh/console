@@ -69,7 +69,7 @@ build: ## Build the Docker image
 helm-dependencies-rapid:
 	cd charts/console-rapid && helm dependency update
 
-helm-dependencies:
+helm-dependencies: helm-dependencies-rapid ## updates helm deps for all key charts
 	cd charts/console && helm dependency update && \
 	cd ../../plural/helm/console && helm dependency update
 

@@ -10,7 +10,7 @@ defmodule Console.AI.Evidence.Logs do
 
   @type parent :: Service.t | ClusterInsightComponent.t | Cluster.t
 
-  @base [query: "error fatal exception", limit: 10]
+  @base [query: "error fatal exception fail failed failure", limit: 10]
   @format ~s({"timestamp": datetime, "log": string})
 
   @preface """

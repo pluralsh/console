@@ -29,7 +29,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
         ++ tpl_hydration(hydration)
       )
       |> Logs.with_logging(comp)
-      |> Context.evidence(claims)
+      |> Context.claims(claims)
       |> Context.result()
     end
   end

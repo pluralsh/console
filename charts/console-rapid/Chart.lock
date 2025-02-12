@@ -1,7 +1,7 @@
 dependencies:
 - name: kas
   repository: file://../../plural/helm/kas
-  version: 0.1.1
+  version: 0.1.3
 - name: controller
   repository: file://../controller
   version: 0.0.105
@@ -11,5 +11,5 @@ dependencies:
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.1
-digest: sha256:bf0c60daa44c997a9a74627c1cb2ebe579b37b92d5bee1fdf4269e2c4343730b
-generated: "2025-01-31T23:30:39.53867461Z"
+digest: sha256:51da61d3ab8a2a857bebfd1486639c5df8563113f2f81b6712896beff115823f
+generated: "2025-02-11T15:15:45.954367-05:00"
