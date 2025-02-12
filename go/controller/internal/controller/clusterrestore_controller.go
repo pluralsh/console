@@ -20,9 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -95,14 +92,9 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 
 	// Sync resource with Console API.
-	apiRestore, err := r.sync(ctx, restore)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return waitForResources, nil
-		}
-		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
+	apiRestore, result, err := r.sync(ctx, restore)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, restore.SetCondition)
 	}
 
 	// Update resource status.
@@ -118,16 +110,15 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	return ctrl.Result{}, nil
 }
 
-func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, error) {
-	logger := log.FromContext(ctx)
+func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, *ctrl.Result, error) {
 	exists, err := r.ConsoleClient.IsClusterRestoreExisting(ctx, restore.Status.GetID())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if exists {
-		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", restore.Name))
-		return r.ConsoleClient.GetClusterRestore(ctx, restore.Status.GetID())
+		apiRestore, err := r.ConsoleClient.GetClusterRestore(ctx, restore.Status.GetID())
+		return apiRestore, nil, err
 	}
 
 	var backupID string
@@ -137,21 +128,22 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 		helper := utils.NewConsoleHelper(ctx, r.ConsoleClient, r.Client)
 		clusterID, err := helper.IDFromRef(restore.Spec.BackupClusterRef, &v1alpha1.Cluster{})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
+
 		if clusterID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{Resource: "Cluster", Group: "deployments.plural.sh"}, restore.Spec.BackupClusterRef.Name)
+			return nil, &waitForResources, fmt.Errorf("cluster is not ready")
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		backupID = backup.ID
 	}
 
-	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", restore.Name))
-	return r.ConsoleClient.CreateClusterRestore(ctx, backupID)
+	apiRestore, err := r.ConsoleClient.CreateClusterRestore(ctx, backupID)
+	return apiRestore, nil, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
