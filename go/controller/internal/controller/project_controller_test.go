@@ -2,6 +2,9 @@ package controller_test
 
 import (
 	"context"
+	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -37,20 +40,16 @@ var _ = Describe("NotificationSink Project Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("creating the custom resource for the Kind Project")
-			project := &v1alpha1.Project{}
-			err := k8sClient.Get(ctx, typeNamespacedName, project)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.Project{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      projectName,
-						Namespace: namespace,
-					},
-					Spec: v1alpha1.ProjectSpec{
-						Name: projectName,
-					},
-				}
-				Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
+			resource := &v1alpha1.Project{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      projectName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ProjectSpec{
+					Name: projectName,
+				},
 			}
+			Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
 		})
 
 		AfterAll(func() {
@@ -117,6 +116,78 @@ var _ = Describe("NotificationSink Project Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should wait for bindings", func() {
+			By("Create resource")
+			test := struct {
+				projectFragment *gqlclient.ProjectFragment
+				expectedStatus  v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: " \"bindings\" not found",
+						},
+					},
+				},
+				projectFragment: &gqlclient.ProjectFragment{
+					ID: id,
+				},
+			}
+			project := &v1alpha1.Project{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, project)).To(Succeed())
+			project.Spec.Bindings = &v1alpha1.Bindings{
+				Read: []v1alpha1.Binding{
+					{
+						UserEmail: lo.ToPtr("test@plural.sh"),
+					},
+				},
+			}
+			Expect(k8sClient.Update(ctx, project)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
+				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
+			})
+			userGroupCache := cache.NewUserGroupCache(fakeConsoleClient)
+
+			nsReconciler := &controller.ProjectReconciler{
+				Client:         k8sClient,
+				Scheme:         k8sClient.Scheme(),
+				ConsoleClient:  fakeConsoleClient,
+				UserGroupCache: userGroupCache,
+			}
+
+			result, err := nsReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
+
+			service := &v1alpha1.Project{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, service)).To(Succeed())
+			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+
 		})
 
 		It("should successfully reconcile the resource", func() {
