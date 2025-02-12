@@ -55,10 +55,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id: string) {
-          if (id.includes('moment')) {
-            return 'moment'
-          }
-
           if (id.includes('lodash')) {
             return 'lodash'
           }

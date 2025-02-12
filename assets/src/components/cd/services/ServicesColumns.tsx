@@ -15,7 +15,7 @@ import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
-import { toDateOrUndef } from 'utils/date'
+import { toDateOrUndef } from 'utils/datetime'
 import { Edge } from 'utils/graphql'
 import { shortenSha1 } from 'utils/sha'
 

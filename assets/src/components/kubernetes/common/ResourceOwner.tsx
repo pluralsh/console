@@ -1,14 +1,14 @@
-import { ReactElement } from 'react'
-import moment from 'moment'
 import { ChipList } from '@pluralsh/design-system'
+import { ReactElement } from 'react'
+import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { Controller_ResourceOwner as ResourceOwnerT } from '../../../generated/graphql-kubernetes'
 
+import Annotations from './Annotations'
 import ResourceInfoCard, {
   ResourceInfoCardEntry,
   ResourceInfoCardSection,
 } from './ResourceInfoCard'
-import Annotations from './Annotations'
 import ResourceLink from './ResourceLink'
 import { toKind } from './types'
 
@@ -36,7 +36,7 @@ export default function ResourceOwner({
           {owner?.pods?.running} / {owner?.pods?.desired}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {moment(owner?.objectMeta?.creationTimestamp).format('lll')}
+          {formatLocalizedDateTime(owner?.objectMeta?.creationTimestamp)}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Labels">
           <ChipList

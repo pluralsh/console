@@ -1,5 +1,5 @@
 import { Button, Markdown } from '@pluralsh/design-system'
-import moment from 'moment/moment'
+import { formatDateTime } from 'utils/datetime'
 import { useEffect, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -54,7 +54,7 @@ export default function Notification({
           justifyContent: 'space-between',
         }}
       >
-        {moment(notification.insertedAt).format('MMM D, YYYY h:mm a')}
+        {formatDateTime(notification.insertedAt)}
         <NotificationPriorityChip priority={notification.priority} />
       </div>
       <div

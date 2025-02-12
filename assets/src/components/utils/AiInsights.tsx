@@ -4,16 +4,16 @@ import {
   Flex,
   IconFrame,
   IconFrameProps,
-  Tooltip,
   IconProps,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
+import { MouseEventHandler } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { fromNow } from 'utils/datetime'
 import { CaptionP } from './typography/Text'
-import dayjs from 'dayjs'
-import { MouseEventHandler } from 'react'
 
 export function AiInsightSummaryIcon({
   insight,
@@ -76,7 +76,7 @@ export function AiInsightSummaryIcon({
           >
             <Overline>insights summary</Overline>
             <CaptionP $color="text-xlight">
-              {dayjs(insight.updatedAt).fromNow()}
+              {fromNow(insight.updatedAt)}
             </CaptionP>
           </Flex>
           {insight.summary}

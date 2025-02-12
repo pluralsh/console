@@ -7,7 +7,7 @@ import {
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
 import { Body2P } from 'components/utils/typography/Text'
 import { GetManagedNamespaceQuery } from 'generated/graphql'
-import moment from 'moment'
+import { formatDateTime } from 'utils/datetime'
 import { useTheme } from 'styled-components'
 
 function NamespaceSidecar({
@@ -23,7 +23,8 @@ function NamespaceSidecar({
       minWidth={200}
     >
       <SidecarItem heading="Last Updated">
-        {moment(namespace?.updatedAt || namespace?.insertedAt).format(
+        {formatDateTime(
+          namespace?.updatedAt || namespace?.insertedAt,
           'M/D/YYYY'
         )}
       </SidecarItem>

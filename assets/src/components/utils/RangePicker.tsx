@@ -1,7 +1,7 @@
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { Key, useEffect, useRef, useState } from 'react'
 
-import { DURATIONS } from 'utils/time'
+import { DURATIONS } from 'utils/datetime'
 
 export default function RangePicker({ duration, setDuration }: any) {
   const tabStateRef = useRef<any>(undefined)

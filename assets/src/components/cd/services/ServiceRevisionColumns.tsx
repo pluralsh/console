@@ -11,7 +11,7 @@ import {
   useRollbackServiceMutation,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { toDateOrUndef } from 'utils/date'
+import { toDateOrUndef } from 'utils/datetime'
 
 import { useState } from 'react'
 
