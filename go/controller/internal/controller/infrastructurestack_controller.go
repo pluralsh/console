@@ -105,22 +105,22 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	clusterID, result, err := r.handleClusterRef(ctx, stack)
 	if result != nil || err != nil {
-		return lo.FromPtr(result), err
+		return handleRequeue(result, err, stack.SetCondition)
 	}
 
 	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
 	if result != nil || err != nil {
-		return lo.FromPtr(result), err
+		return handleRequeue(result, err, stack.SetCondition)
 	}
 
 	projectID, result, err := r.handleProjectRef(ctx, stack)
 	if result != nil || err != nil {
-		return lo.FromPtr(result), err
+		return handleRequeue(result, err, stack.SetCondition)
 	}
 
 	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
 	if result != nil || err != nil {
-		return lo.FromPtr(result), err
+		return handleRequeue(result, err, stack.SetCondition)
 	}
 
 	metrics, result, err := r.handleObservableMetrics(ctx, stack)
@@ -448,15 +448,12 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 // it will return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
 	cluster := &v1alpha1.Cluster{}
-
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.ClusterRef.Name, Namespace: stack.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return "", &ctrl.Result{}, err
+		return "", nil, err
 	}
 
-	if cluster.Status.ID == nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return "", lo.ToPtr(waitForResources), nil
+	if !cluster.Status.HasID() {
+		return "", &waitForResources, fmt.Errorf("cluster is not ready")
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -467,20 +464,16 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 // return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
 	repository := &v1alpha1.GitRepository{}
-
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.RepositoryRef.Name, Namespace: stack.Spec.RepositoryRef.Namespace}, repository); err != nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return "", &ctrl.Result{}, err
+		return "", nil, err
 	}
 
-	if repository.Status.ID == nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-		return "", lo.ToPtr(waitForResources), nil
+	if !repository.Status.HasID() {
+		return "", &waitForResources, fmt.Errorf("repository is not ready")
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-		return "", lo.ToPtr(waitForResources), nil
+		return "", &waitForResources, fmt.Errorf("repository is not healthy")
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -490,24 +483,21 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 // main reconcile loop to continue. In case project reference is not configured, it will return early and allow the
 // reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
-	project := &v1alpha1.Project{}
-
 	if !stack.HasProjectRef() {
 		return nil, nil, nil
 	}
 
+	project := &v1alpha1.Project{}
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.ProjectName()}, project); err != nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return nil, &requeue, err
+		return nil, nil, err
 	}
 
-	if project.Status.ID == nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-		return nil, lo.ToPtr(waitForResources), nil
+	if !project.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, stack, r.Scheme); err != nil {
-		return nil, &requeue, fmt.Errorf("could not set stack owner reference, got error: %+v", err)
+		return nil, nil, fmt.Errorf("could not set stack owner reference, got error: %+v", err)
 	}
 
 	return project.Status.ID, nil, nil
@@ -517,26 +507,21 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 // to be ready before allowing main reconcile loop to continue. In case stack definition reference is not
 // configured, it will return early and allow the reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-	stackDefinition := &v1alpha1.StackDefinition{}
-
 	if !stack.HasStackDefinitionRef() {
 		return nil, nil, nil
 	}
 
-	if stack.HasStackDefinitionRef() && stack.Spec.Type != console.StackTypeCustom {
+	if stack.Spec.Type != console.StackTypeCustom {
 		return nil, nil, fmt.Errorf("stack definition reference can only be used when stack type is set to custom, type: %s", stack.Spec.Type)
 	}
 
+	stackDefinition := &v1alpha1.StackDefinition{}
 	if err := r.Get(ctx, stack.StackDefinitionObjectKey(), stackDefinition); err != nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return nil, nil, err
 	}
 
-	if stackDefinition.Status.ID == nil {
-		logger.Info("StackDefinition is not ready")
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-		return nil, lo.ToPtr(waitForResources), nil
+	if !stackDefinition.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("stack definition is not ready")
 	}
 
 	return stackDefinition.Status.ID, nil, nil
