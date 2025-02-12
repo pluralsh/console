@@ -32,6 +32,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			id           = "123"
 			repoUrl      = "https://test"
 			providerName = "test"
+			notExisting  = "not-existing"
 		)
 
 		ctx := context.Background()
@@ -132,6 +133,10 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			By("Cleanup the specific resource instance Repository")
 			Expect(k8sClient.Delete(ctx, repo)).To(Succeed())
+			notExistingSD := &v1alpha1.ServiceDeployment{}
+			if k8sClient.Get(ctx, types.NamespacedName{Name: notExisting, Namespace: namespace}, notExistingSD) == nil {
+				Expect(k8sClient.Delete(ctx, notExistingSD)).To(Succeed())
+			}
 		})
 
 		It("should successfully reconcile the resource", func() {
@@ -189,6 +194,147 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
+
+		It("should wait for service deployment", func() {
+			By("Service deployment not found")
+			test := struct {
+				returnCreateService *gqlclient.GlobalServiceFragment
+				expectedStatus      v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("XFWZ7AP5GMT74YUUGI4RKZ3VM6BHLQOX6IEDHD4PBGQCPDQ3NL5A===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "servicedeployments.deployments.plural.sh \"not-existing\" not found",
+						},
+					},
+				},
+				returnCreateService: &gqlclient.GlobalServiceFragment{
+					ID: "123",
+				},
+			}
+
+			gs := &v1alpha1.GlobalService{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, gs)).To(Succeed())
+			gs.Spec.ServiceRef = &corev1.ObjectReference{
+				Name:      "not-existing",
+				Namespace: namespace,
+			}
+			Expect(k8sClient.Update(ctx, gs)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			serviceReconciler := &controller.GlobalServiceReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.RequeueAfter).ToNot(BeZero())
+
+			service := &v1alpha1.GlobalService{}
+			err = k8sClient.Get(ctx, typeNamespacedName, service)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should wait for service deployment", func() {
+			By("Service deployment not ready yet")
+			test := struct {
+				returnCreateService *gqlclient.GlobalServiceFragment
+				expectedStatus      v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("XFWZ7AP5GMT74YUUGI4RKZ3VM6BHLQOX6IEDHD4PBGQCPDQ3NL5A===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "service is not ready",
+						},
+					},
+				},
+				returnCreateService: &gqlclient.GlobalServiceFragment{
+					ID: "123",
+				},
+			}
+
+			gs := &v1alpha1.GlobalService{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, gs)).To(Succeed())
+			gs.Spec.ServiceRef = &corev1.ObjectReference{
+				Name:      "not-existing",
+				Namespace: namespace,
+			}
+			Expect(k8sClient.Update(ctx, gs)).To(Succeed())
+			resource := &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "not-existing",
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ServiceSpec{
+					Version:       lo.ToPtr("1.24"),
+					ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			serviceReconciler := &controller.GlobalServiceReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.RequeueAfter).ToNot(BeZero())
+
+			service := &v1alpha1.GlobalService{}
+			err = k8sClient.Get(ctx, typeNamespacedName, service)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
 		It("should successfully reconcile the resource", func() {
 			By("Delete resource")
 			test := struct {
