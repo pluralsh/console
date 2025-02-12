@@ -118,6 +118,10 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err != nil {
 		logger.Error(err, "unable to create or update scm")
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		if errors.IsNotFound(err) {
+			return waitForResources, nil
+		}
+
 		return ctrl.Result{}, err
 	}
 
