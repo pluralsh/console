@@ -183,7 +183,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 			return nil, nil, err
 		}
 
-		if notifSink.Status.ID == nil {
+		if !notifSink.Status.HasID() {
 			return nil, &waitForResources, nil
 		}
 

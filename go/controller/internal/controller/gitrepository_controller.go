@@ -171,7 +171,7 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
 			return nil, nil, err
 		}
-		if connection.Status.ID == nil {
+		if !connection.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
 		}
 

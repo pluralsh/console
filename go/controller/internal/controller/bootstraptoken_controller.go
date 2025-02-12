@@ -112,7 +112,7 @@ func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapTok
 		return nil, nil, err
 	}
 
-	if project.Status.ID == nil {
+	if !project.Status.HasID() {
 		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 

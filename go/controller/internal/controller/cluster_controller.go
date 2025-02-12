@@ -223,7 +223,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
-		if cluster.Status.ID == nil {
+		if !cluster.Status.HasID() {
 			controllerutil.RemoveFinalizer(cluster, ClusterFinalizer)
 			return &ctrl.Result{}
 		}

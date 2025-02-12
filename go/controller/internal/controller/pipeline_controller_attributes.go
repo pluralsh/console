@@ -94,7 +94,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 		return nil, nil, err
 	}
 
-	if service.Status.ID == nil {
+	if !service.Status.HasID() {
 		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
@@ -130,7 +130,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 			return nil, nil, err
 		}
 
-		if prAutomation.Status.ID == nil {
+		if !prAutomation.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("pr automation is not ready")
 		}
 

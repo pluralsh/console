@@ -289,7 +289,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 			return nil, nil, err
 		}
 
-		if repository.Status.ID == nil {
+		if !repository.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("repository is not ready")
 		}
 
@@ -307,7 +307,7 @@ func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
+		if !project.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 

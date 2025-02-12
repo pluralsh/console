@@ -201,7 +201,7 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		return nil, &waitForResources, nil
 	}
 
-	if service.Status.ID == nil {
+	if !service.Status.HasID() {
 		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
@@ -214,7 +214,7 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
 			return nil, nil, err
 		}
-		if provider.Status.ID == nil {
+		if !provider.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("provider is not ready")
 		}
 	}
@@ -229,7 +229,7 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
+		if !project.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
@@ -296,7 +296,7 @@ func (r *GlobalServiceReconciler) getRepository(ctx context.Context, ns *v1alpha
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Template.RepositoryRef.Name, Namespace: ns.Spec.Template.RepositoryRef.Namespace}, repository); err != nil {
 			return nil, err
 		}
-		if repository.Status.ID == nil {
+		if !repository.Status.HasID() {
 			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

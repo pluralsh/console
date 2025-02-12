@@ -91,7 +91,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return handleRequeue(nil, err, service.SetCondition)
 	}
 
-	if cluster.Status.ID == nil {
+	if !cluster.Status.HasID() {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
 		return waitForResources, nil
 	}
@@ -110,7 +110,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			return waitForResources, nil
 		}
 
-		if repository.Status.ID == nil {
+		if !repository.Status.HasID() {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
 			return waitForResources, nil
 		}
@@ -317,8 +317,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 				return nil, &requeue, fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
-			if repo.Status.ID == nil {
-				return nil, &requeue, fmt.Errorf("repository is not ready")
+			if !repo.Status.HasID() {
+				return nil, &waitForResources, fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -451,7 +451,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 				return ctrl.Result{}, err
 			}
 		}
-		if cluster.Status.ID == nil {
+		if !cluster.Status.HasID() {
 			err := r.deleteService(service)
 			if errors.IsNotFound(err) || err == nil {
 				controllerutil.RemoveFinalizer(service, ServiceFinalizer)
