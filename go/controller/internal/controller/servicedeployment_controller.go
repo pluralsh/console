@@ -88,11 +88,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		if apierrors.IsNotFound(err) {
-			return waitForResources, nil
-		}
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, service.SetCondition)
 	}
 
 	if cluster.Status.ID == nil {
@@ -103,11 +99,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	repository := &v1alpha1.GitRepository{}
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if apierrors.IsNotFound(err) {
-				return waitForResources, nil
-			}
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, service.SetCondition)
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -129,11 +121,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	if err = r.ensureService(service); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		if apierrors.IsNotFound(err) {
-			return waitForResources, nil
-		}
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, service.SetCondition)
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)

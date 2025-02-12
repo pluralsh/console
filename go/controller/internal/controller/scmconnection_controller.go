@@ -116,13 +116,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync ScmConnection CRD with the Console API
 	apiScmConnection, err := r.sync(ctx, scm, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update scm")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		if errors.IsNotFound(err) {
-			return waitForResources, nil
-		}
-
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, scm.SetCondition)
 	}
 
 	scm.Status.ID = &apiScmConnection.ID
