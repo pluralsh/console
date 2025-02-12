@@ -2,9 +2,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	console "github.com/pluralsh/console/go/client"
 
@@ -12,43 +12,43 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.PrAutomation) (*console.PrAutomationAttributes, error) {
+func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.PrAutomation) (*console.PrAutomationAttributes, *ctrl.Result, error) {
 	helper := utils.NewConsoleHelper(ctx, in.ConsoleClient, in.Client)
 
 	clusterID, err := helper.IDFromRef(pra.Spec.ClusterRef, &v1alpha1.Cluster{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	serviceID, err := helper.IDFromRef(pra.Spec.ServiceRef, &v1alpha1.ServiceDeployment{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	repositoryID, err := helper.IDFromRef(pra.Spec.RepositoryRef, &v1alpha1.GitRepository{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if connectionID == nil {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "ScmConnection", Group: "deployments.plural.sh"}, pra.Spec.ScmConnectionRef.Name)
+		return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	catalogID, err := helper.IDFromRef(pra.Spec.CatalogRef, &v1alpha1.Catalog{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	attrs := pra.Attributes(clusterID, serviceID, connectionID, repositoryID, projectID)
 	attrs.CatalogID = catalogID
-	return attrs, nil
+	return attrs, nil, nil
 }

@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/pluralsh/polly/algorithms"
@@ -34,11 +33,6 @@ var (
 	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
-
-// TODO: Remove.
-func notFoundOrReadyErrorMessage(err error) string {
-	return fmt.Sprintf("Referenced object is either not found or not ready, found error: %s", err.Error())
-}
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
