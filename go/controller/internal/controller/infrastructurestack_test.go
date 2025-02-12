@@ -469,7 +469,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should detect invalid repo ref and update conditions accordingly", func() {
+		It("should detect invalid repo ref and set conditions accordingly", func() {
 			By("create stack")
 			test := struct {
 				returnCreateStack *gqlclient.InfrastructureStackFragment
