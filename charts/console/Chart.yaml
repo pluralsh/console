@@ -3,7 +3,7 @@ name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
 appVersion: 0.11.0
-version: 0.3.77
+version: 0.3.78
 dependencies:
   - name: kas
     version: 0.1.2
@@ -18,7 +18,7 @@ dependencies:
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
   - name: flux2
-    version: 2.14.0
+    version: 2.14.1
     repository: https://fluxcd-community.github.io/helm-charts
     condition: flux2.enabled
 type: application
