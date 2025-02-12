@@ -157,7 +157,7 @@ func (r *ObserverReconciler) getProjectID(ctx context.Context, observer *v1alpha
 	}
 
 	if project.ConsoleID() == nil {
-		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 
 	return project.ConsoleID(), nil, nil
@@ -197,7 +197,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			return target, actions, nil, err
 		}
 		if !gitRepo.Status.HasID() {
-			return target, actions, &waitForResources, fmt.Errorf("repository is not ready yet")
+			return target, actions, &waitForResources, fmt.Errorf("repository is not ready")
 		}
 		target.Git = &console.ObserverGitAttributes{
 			RepositoryID: gitRepo.Status.GetID(),
@@ -239,7 +239,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, nil, err
 				}
 				if !prAutomation.Status.HasID() {
-					return target, actions, &waitForResources, fmt.Errorf("pr automation is not ready yet")
+					return target, actions, &waitForResources, fmt.Errorf("pr automation is not ready")
 				}
 
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
@@ -262,7 +262,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, nil, err
 				}
 				if !pipeline.Status.HasID() {
-					return target, actions, &waitForResources, fmt.Errorf("pipeline is not ready yet")
+					return target, actions, &waitForResources, fmt.Errorf("pipeline is not ready")
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),

@@ -318,7 +318,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 
 			if repo.Status.ID == nil {
-				return nil, &requeue, fmt.Errorf("repository is not ready yet")
+				return nil, &requeue, fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -350,7 +350,7 @@ func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectRef
 		return nil, err
 	}
 	if !stack.Status.HasID() {
-		return nil, fmt.Errorf("stack is not ready yet")
+		return nil, fmt.Errorf("stack is not ready")
 	}
 	return stack.Status.ID, nil
 }

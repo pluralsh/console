@@ -72,7 +72,7 @@ func (r *ClusterRestoreTriggerReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	if !restore.Status.HasID() {
-		logger.Info("cluster restore is not ready yet", "name", restore.Name, "namespace", restore.Namespace)
+		logger.Info("cluster restore is not ready", "name", restore.Name, "namespace", restore.Namespace)
 		return ctrl.Result{}, nil
 	}
 

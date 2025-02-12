@@ -113,7 +113,7 @@ func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapTok
 	}
 
 	if project.Status.ID == nil {
-		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, bootstrapToken, in.Scheme); err != nil {

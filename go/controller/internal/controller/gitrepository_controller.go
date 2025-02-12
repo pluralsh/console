@@ -172,7 +172,7 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, nil, err
 		}
 		if connection.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("SCM connection is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {

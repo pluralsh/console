@@ -95,7 +95,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if service.Status.ID == nil {
-		return nil, &waitForResources, fmt.Errorf("service is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
@@ -131,7 +131,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		}
 
 		if prAutomation.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("pr automation is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("pr automation is not ready")
 		}
 
 		prAutomationID = prAutomation.Status.ID
@@ -181,8 +181,8 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 		return nil, nil, err
 	}
 
-	if cluster.Status.ID == nil {
-		return nil, &waitForResources, fmt.Errorf("cluster is not ready yet")
+	if !cluster.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("cluster is not ready")
 	}
 
 	return cluster.Status.ID, nil, nil

@@ -290,7 +290,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 
 		if repository.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("repository is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
@@ -308,7 +308,7 @@ func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha
 		}
 
 		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {

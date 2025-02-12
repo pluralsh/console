@@ -130,8 +130,8 @@ func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Ca
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		if !project.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {

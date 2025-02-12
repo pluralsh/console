@@ -72,7 +72,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if !prAutomation.Status.HasID() {
-		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "pr automation is not ready yet")
+		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "pr automation is not ready")
 		return waitForResources, nil
 	}
 

@@ -313,7 +313,7 @@ func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, clus
 	}
 
 	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, cluster, r.Scheme); err != nil {

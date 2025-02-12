@@ -202,7 +202,7 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 	}
 
 	if service.Status.ID == nil {
-		return nil, &waitForResources, fmt.Errorf("service is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
 	return service, nil, nil
@@ -215,7 +215,7 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 			return nil, nil, err
 		}
 		if provider.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("provider is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("provider is not ready")
 		}
 	}
 
@@ -230,7 +230,7 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 		}
 
 		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
