@@ -2,7 +2,7 @@ apiVersion: v2
 name: console
 description: A chart for plural console
 appVersion: 0.10.40
-version: 0.10.67
+version: 0.10.68
 dependencies:
   - name: test-base
     version: 0.1.10
@@ -12,7 +12,7 @@ dependencies:
     version: 0.0.106
     repository: file://../../../charts/controller
   - name: kubernetes-dashboard
-    version: 7.10.3
+    version: 7.10.4
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
