@@ -185,14 +185,14 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 	}
 
 	if exists && pipeline.Status.IsSHAEqual(sha) {
-		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))
+		logger.V(9).Info("no changes detected for pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
 		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
 	}
 
 	if exists {
-		logger.Info(fmt.Sprintf("Detected changes, saving %s pipeline", pipeline.Name))
+		logger.V(9).Info("detected changes, saving pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
 	} else {
-		logger.Info(fmt.Sprintf("%s pipeline does not exist, saving it", pipeline.Name))
+		logger.V(9).Info("pipeline does not exist, saving it", "name", pipeline.Name)
 	}
 	return r.ConsoleClient.SavePipeline(pipeline.Name, attrs)
 }

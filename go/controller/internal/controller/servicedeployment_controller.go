@@ -179,8 +179,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	if service.Status.HasSHA() && !service.Status.IsSHAEqual(sha) {
-		logger.Info("updating ServiceDeployment")
-		// update service
 		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
