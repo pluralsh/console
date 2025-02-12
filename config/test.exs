@@ -157,4 +157,5 @@ config :bamboo, :refute_timeout, 10
 
 config :elasticsearch,
   host: "http://localhost:9200",
-  index: "testindex"
+  index: "testindex",
+  vector_index: "plrl-vector-testindex"

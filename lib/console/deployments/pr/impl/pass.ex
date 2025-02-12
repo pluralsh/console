@@ -8,4 +8,6 @@ defmodule Console.Deployments.Pr.Impl.Pass do
   def pr(_), do: :ignore
 
   def review(_, _, _), do: {:ok, ""}
+
+  def files(_, _), do: {:ok, []}
 end

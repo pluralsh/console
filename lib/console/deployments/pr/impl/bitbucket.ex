@@ -63,6 +63,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
+  def files(_, _), do: {:ok, []}
+
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()

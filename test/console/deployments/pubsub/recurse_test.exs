@@ -1,6 +1,7 @@
 defmodule Console.Deployments.PubSub.RecurseTest do
   use Console.DataCase, async: true
   use Mimic
+  import ElasticsearchUtils
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services, Global, Stacks}
   alias Console.Deployments.Git.Discovery
@@ -453,6 +454,48 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert deleted.id == stack.id
       refute refetch(stack)
+    end
+  end
+
+  describe "ScmWebhook" do
+    test "it can vector index pr files" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+
+      hook = insert(:scm_webhook, type: :github)
+      insert(:scm_connection, default: true, type: :github)
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
+      expect(Tentacat.Pulls.Files, :list, fn _, _, _, _ ->
+        {:ok, [%{
+          "filename" => "terraform/main.tf",
+          "sha" => "sha",
+          "raw_url" => "https://test.url",
+          "patch" => "example diff",
+        }], %HTTPoison.Response{status_code: 200}}
+      end)
+      expect(HTTPoison, :get, fn "https://test.url", _ -> {:ok, %HTTPoison.Response{status_code: 200, body: "terraform"}} end)
+
+      event = %PubSub.ScmWebhook{
+        item: %{
+          "action" => "pull_request",
+          "pull_request" => %{"merged" => true, "html_url" => "https://github.com/owner/repo/pull/1"},
+        },
+        actor: hook
+      }
+      Recurse.handle_event(event)
+      refresh(vector_index())
+
+      {:ok, c} = count_index(vector_index())
+      assert c > 0
     end
   end
 end

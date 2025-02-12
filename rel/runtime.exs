@@ -204,6 +204,31 @@ if is_set("CONSOLE_ADMIN_EMAILS") do
     admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
 end
 
+if is_set("CONSOLE_DEPLOY_OPERATOR_URL") do
+  config :console,
+    deploy_url: get_env("CONSOLE_DEPLOY_OPERATOR_URL")
+end
+
+if is_set("CONSOLE_ARTIFACTS_URL") do
+  config :console,
+    artifacts_url: get_env("CONSOLE_ARTIFACTS_URL")
+end
+
+if is_set("CONSOLE_DEFAULT_GIT_PASSWORD") do
+  config :console,
+    git_auth_attrs: %{
+      password: get_env("CONSOLE_DEFAULT_GIT_PASSWORD"),
+      username: get_env("CONSOLE_DEFAULT_GIT_USERNAME") || "apikey"
+    }
+end
+
+if is_set("CONSOLE_DEFAULT_GIT_PRIVATE_KEY") do
+  config :console,
+    git_auth_attrs: %{
+      private_key: get_env("CONSOLE_DEFAULT_GIT_PRIVATE_KEY"),
+      passphrase: get_env("CONSOLE_DEFAULT_GIT_PASSPHRASE")
+    }
+end
 
 if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
   config :console, :backup_keys,

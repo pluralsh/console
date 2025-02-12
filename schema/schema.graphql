@@ -456,6 +456,8 @@ type RootMutationType {
 
   updateUser(id: ID, attributes: UserAttributes!): User
 
+  upsertUser(attributes: UserAttributes!): User
+
   deleteUser(id: ID!): User
 
   impersonateServiceAccount(email: String!): User
@@ -1021,6 +1023,10 @@ enum LogDriver {
   ELASTIC
 }
 
+enum VectorStore {
+  ELASTIC
+}
+
 input ProjectAttributes {
   name: String!
   description: String
@@ -1117,6 +1123,9 @@ input AiSettingsAttributes {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "ai provider to use with embeddings (for vector indexing)"
+  embeddingProvider: AiProvider
+
   openai: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
@@ -1128,6 +1137,8 @@ input AiSettingsAttributes {
   bedrock: BedrockAiAttributes
 
   vertex: VertexAiAttributes
+
+  vectorStore: VectorStoreAttributes
 }
 
 input ToolConfigAttributes {
@@ -1148,6 +1159,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 input AnthropicSettingsAttributes {
@@ -1157,6 +1171,9 @@ input AnthropicSettingsAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 input OllamaAttributes {
@@ -1164,6 +1181,9 @@ input OllamaAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   url: String!
 
@@ -1183,6 +1203,9 @@ input AzureOpenaiAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   "the azure openai access token to use"
   accessToken: String!
@@ -1209,6 +1232,9 @@ input VertexAiAttributes {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
+  "the model to use for vector embeddings"
+  embeddingModel: String
+
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
 
@@ -1220,6 +1246,12 @@ input VertexAiAttributes {
 
   "the gcp region the model is hosted in"
   location: String!
+}
+
+input VectorStoreAttributes {
+  enabled: Boolean
+  store: VectorStore
+  elastic: ElasticsearchConnectionAttributes
 }
 
 input SmtpSettingsAttributes {

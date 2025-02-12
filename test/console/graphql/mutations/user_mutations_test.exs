@@ -111,6 +111,53 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "upsertUser" do
+    test "admins can update other existing users" do
+      {:ok, user} = Users.create_user(%{
+        name: "some user",
+        email: "email@example.com",
+        password: "bogus password"
+      })
+
+      {:ok, %{data: %{"upsertUser" => updated}}} = run_query("""
+        mutation upsertUser($attributes: UserAttributes!) {
+          upsertUser(attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"attributes" => %{"email" => user.email, "name" => "new name"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == user.id
+      assert updated["name"] == "new name"
+    end
+
+    test "it can create a fresh user" do
+      {:ok, %{data: %{"upsertUser" => updated}}} = run_query("""
+        mutation upsertUser($attributes: UserAttributes!) {
+          upsertUser(attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"attributes" => %{"email" => "me@example.com"}}, %{current_user: admin_user()})
+
+      assert updated["id"]
+      assert updated["name"] == "me@example.com"
+    end
+
+    test "non admins cannot upsert" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation upsertUser($attributes: UserAttributes!) {
+          upsertUser(attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"attributes" => %{"email" => "me@example.com"}}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "updateUser" do
     test "It can update a user's attributes" do
       {:ok, user} = Users.create_user(%{

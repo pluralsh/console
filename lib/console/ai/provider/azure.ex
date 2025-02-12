@@ -7,7 +7,7 @@ defmodule Console.AI.Azure do
 
   require Logger
 
-  defstruct [:access_token, :api_version, :base_url, :model, :tool_model]
+  defstruct [:access_token, :api_version, :base_url, :model, :tool_model, :embedding_model]
 
   @api_vsn "2024-10-01-preview"
 
@@ -19,6 +19,7 @@ defmodule Console.AI.Azure do
       api_version: opts.api_version,
       model: opts.model,
       tool_model: opts.tool_model,
+      embedding_model: opts.embedding_model,
       base_url: "#{opts.endpoint}/openai"
     }
   end
@@ -43,6 +44,17 @@ defmodule Console.AI.Azure do
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:model, model || OpenAI.default_model())
     |> OpenAI.tool_call(messages, tools)
+  end
+
+  @doc """
+  Generate a openai completion from the azure openai credentials chain
+  """
+  @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
+  def embeddings(%__MODULE__{api_version: vsn, embedding_model: model} = azure, text) do
+    OpenAI.new(azure)
+    |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
+    |> Map.put(:embedding_model, model || OpenAI.default_embedding_model())
+    |> OpenAI.embeddings(text)
   end
 
   def tools?(), do: true

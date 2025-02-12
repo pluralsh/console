@@ -79,6 +79,9 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> response(200)
 
       assert refetch(pr).status == :merged
+
+      assert_receive {:event, %Console.PubSub.ScmWebhook{item: %{"pull_request" => %{}}, actor: sender}}
+      assert sender.id == hook.id
     end
 
     test "it can detect and create stack prs", %{conn: conn} do

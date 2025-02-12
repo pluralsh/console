@@ -127,6 +127,14 @@ defmodule Console.Services.Users do
     |> when_ok(:update)
   end
 
+  def upsert_user(%{email: email} = attrs, %User{} = user) when is_binary(email) do
+    case get_user_by_email(email) do
+      %User{id: id} -> update_user(attrs, id, user)
+      nil -> create_user(attrs)
+    end
+  end
+  def upsert_user(_, _), do: {:error, "email is required to upsert"}
+
   @spec create_user(map) :: user_resp
   def create_user(attrs) do
     start_transaction()

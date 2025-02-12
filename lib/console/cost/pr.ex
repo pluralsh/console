@@ -29,6 +29,7 @@ defmodule Console.Cost.Pr do
       |> Fixer.handle_tool_call(%{service_id: svc.id})
     end
   end
+
   def create(id, %User{} = user) when is_binary(id) do
     Repo.get!(ClusterScalingRecommendation, id)
     |> create(user)

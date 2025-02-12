@@ -25,6 +25,8 @@ defmodule Console.AI.Provider do
 
   @callback tool_call(struct, history, [atom]) :: {:ok, binary | [tool_result]} | {:error, binary}
 
+  @callback embeddings(struct, binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
+
   @callback tools?() :: boolean
 
   def tools?() do
@@ -47,6 +49,12 @@ defmodule Console.AI.Provider do
     with {:ok, %mod{} = client} <- tool_client(settings),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
       do: handle_tool_calls(result, tools)
+  end
+
+  def embeddings(text) do
+    settings = Console.Deployments.Settings.cached()
+    with {:ok, %mod{} = client} <- client(settings),
+      do: mod.embeddings(client, text)
   end
 
   def summary(text), do: completion([{:user, text}], preface: @summary)

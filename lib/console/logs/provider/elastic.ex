@@ -3,7 +3,7 @@ defmodule Console.Logs.Provider.Elastic do
   Log driver implementation for victoria metrics
   """
   @behaviour Console.Logs.Provider
-  alias Console.Schema.{Cluster, Service, DeploymentSettings.Logging}
+  alias Console.Schema.{Cluster, Service, DeploymentSettings.Elastic}
   alias Console.Logs.{Query, Line, Time}
 
   @headers [{"Content-Type", "application/json"}]
@@ -24,18 +24,17 @@ defmodule Console.Logs.Provider.Elastic do
     end
   end
 
-  defp search(%Logging.Elastic{index: index, host: host} = conn, query) do
-    with {:ok, %HTTPoison.Response{
-           body: body,
-           status_code: 200
-         }} <- HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn)),
-         {:ok, resp} <- Jason.decode(body) do
-      {:ok, Snap.SearchResponse.new(resp)}
-    else
-      {:ok, %HTTPoison.Response{body: body}} -> {:error, body}
-      err -> err
-    end
+  def search(%Elastic{index: index, host: host} = conn, query) do
+    HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn))
+    |> search_response()
   end
+
+  defp search_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
+    with {:ok, resp} <- Jason.decode(body),
+      do: {:ok, Snap.SearchResponse.new(resp)}
+  end
+  defp search_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "es failure: #{body}"}
+  defp search_response(_), do: {:error, "network failure"}
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
     Enum.map(hits, fn %Snap.Hit{source: source} ->
@@ -126,7 +125,7 @@ defmodule Console.Logs.Provider.Elastic do
   defp sort(%Query{time: %Time{reverse: true}}), do: [%{"@timestamp": %{order: "asc"}}]
   defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]
 
-  defp headers(%Logging.Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
+  defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
   defp headers(_), do: @headers
 end

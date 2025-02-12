@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   ecto_enum :ai_provider, DeploymentSettings.AIProvider
   ecto_enum :log_driver, DeploymentSettings.LogDriver
+  ecto_enum :vector_store, DeploymentSettings.VectorStore
 
   input_object :project_attributes do
     field :name,          non_null(:string)
@@ -68,16 +69,18 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :ai_settings_attributes do
-    field :enabled,       :boolean
-    field :tools,         :tool_config_attributes
-    field :provider,      :ai_provider
-    field :tool_provider, :ai_provider, description: "ai provider to use with tool calls"
-    field :openai,        :openai_settings_attributes
-    field :anthropic,     :anthropic_settings_attributes
-    field :ollama,        :ollama_attributes
-    field :azure,         :azure_openai_attributes
-    field :bedrock,       :bedrock_ai_attributes
-    field :vertex,        :vertex_ai_attributes
+    field :enabled,            :boolean
+    field :tools,              :tool_config_attributes
+    field :provider,           :ai_provider
+    field :tool_provider,      :ai_provider, description: "ai provider to use with tool calls"
+    field :embedding_provider, :ai_provider, description: "ai provider to use with embeddings (for vector indexing)"
+    field :openai,             :openai_settings_attributes
+    field :anthropic,          :anthropic_settings_attributes
+    field :ollama,             :ollama_attributes
+    field :azure,              :azure_openai_attributes
+    field :bedrock,            :bedrock_ai_attributes
+    field :vertex,             :vertex_ai_attributes
+    field :vector_store,       :vector_store_attributes
   end
 
   input_object :tool_config_attributes do
@@ -89,31 +92,35 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :openai_settings_attributes do
-    field :base_url,     :string
-    field :access_token, :string
-    field :model,        :string
-    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :base_url,        :string
+    field :access_token,    :string
+    field :model,           :string
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
   end
 
   input_object :anthropic_settings_attributes do
-    field :access_token, :string
-    field :model,        :string
-    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :access_token,    :string
+    field :model,           :string
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
   end
 
   input_object :ollama_attributes do
-    field :model,         non_null(:string)
-    field :tool_model,    :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :url,           non_null(:string)
-    field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
+    field :model,           non_null(:string)
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :url,             non_null(:string)
+    field :authorization,   :string, description: "An http authorization header to use on calls to the Ollama api"
   end
 
   input_object :azure_openai_attributes do
-    field :endpoint,     non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
-    field :api_version,  :string, description: "the api version you want to use"
-    field :model,        :string, description: "the exact model you wish to use"
-    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :access_token, non_null(:string), description: "the azure openai access token to use"
+    field :endpoint,        non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :api_version,     :string, description: "the api version you want to use"
+    field :model,           :string, description: "the exact model you wish to use"
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :access_token,    non_null(:string), description: "the azure openai access token to use"
   end
 
   input_object :bedrock_ai_attributes do
@@ -126,10 +133,17 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :vertex_ai_attributes do
     field :model,                :string, description: "the vertex model id to use"
     field :tool_model,           :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model,      :string, description: "the model to use for vector embeddings"
     field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
     field :endpoint,             :string, description: "custom vertexai endpoint if for dedicated customer deployments"
     field :project,              non_null(:string), description: "the gcp project id to use"
     field :location,             non_null(:string), description: "the gcp region the model is hosted in"
+  end
+
+  input_object :vector_store_attributes do
+    field :enabled, :boolean
+    field :store,   :vector_store
+    field :elastic, :elasticsearch_connection_attributes
   end
 
   input_object :smtp_settings_attributes do

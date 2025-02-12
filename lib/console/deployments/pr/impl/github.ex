@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Github do
   import Console.Deployments.Pr.Utils
+  alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   alias Console.Jwt.Github
   @behaviour Console.Deployments.Pr.Dispatcher
@@ -67,7 +68,42 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def files(conn, %{"html_url" => url} = pr) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, client} <- client(conn) do
+      case Tentacat.Pulls.Files.list(client, owner, repo, number) do
+        {_, [_ | _] = files, _} -> {:ok, to_files(client, url, pr["title"], files)}
+        {_, body, _} ->
+          {:error, "failed to list pr files: #{Jason.encode!(body)}"}
+      end
+    end
+  end
+
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
+
+  defp to_files(client, url, title, files) do
+    Enum.map(files, fn f ->
+      %File{
+        url: url,
+        title: title,
+        contents: get_content(client, f["raw_url"]),
+        filename: f["filename"],
+        sha: f["sha"],
+        patch: f["patch"],
+      }
+    end)
+    |> Enum.filter(& &1.contents)
+    |> Enum.filter(&File.valid?/1)
+  end
+
+  defp get_content(client, url) when is_binary(url) do
+    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}]) do
+      {:ok, %HTTPoison.Response{status_code: code, body: content}}
+        when code >= 200 and code < 300 -> content
+      _ -> nil
+    end
+  end
+  defp get_content(_, _), do: nil
 
   defp identifier(%PrAutomation{identifier: id}) when is_binary(id) do
     case String.split(id, "/") do
