@@ -4,6 +4,6 @@ dependencies:
   version: 5.2.2
 - name: s3-proxy
   repository: https://radar-base.github.io/radar-helm-charts
-  version: 0.3.1
-digest: sha256:129f21ba68693973b9dfd73c266a21a41275e8b7a50794aa649684c897c0f638
-generated: "2024-01-24T10:49:52.567595+01:00"
+  version: 0.3.2
+digest: sha256:b68037757e817ba49acd46a8e4d8a6bf271521282a43c69f60e056545d19f5fa
+generated: "2025-02-12T23:30:39.941241865Z"
