@@ -288,8 +288,7 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 		}
 
 		if !provider.Status.HasID() {
-			logger.Info("Provider does not have ID set yet")
-			return nil, &requeue, nil
+			return nil, &waitForResources, fmt.Errorf("provider does not have ID set yet")
 		}
 
 		err := controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
