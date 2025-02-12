@@ -55,7 +55,6 @@ type ClusterRestoreTriggerReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ClusterRestoreTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Reconcile ClusterRestoreTrigger", "namespace", req.Namespace, "name", req.Name)
 
 	trigger := new(v1alpha1.ClusterRestoreTrigger)
 	if err := r.Get(ctx, req.NamespacedName, trigger); err != nil {
