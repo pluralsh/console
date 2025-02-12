@@ -2,9 +2,10 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 	"sort"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -29,7 +30,6 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/errors"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -89,6 +89,9 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		if errors.IsNotFound(err) {
+			return waitForResources, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -101,7 +104,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return waitForResources, err
+			if errors.IsNotFound(err) {
+				return waitForResources, nil
+			}
+			return ctrl.Result{}, err
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -122,14 +128,11 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 	}
 
-	err = r.ensureService(service)
-	if goerrors.Is(err, operrors.ErrRetriable) {
+	if err = r.ensureService(service); err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return waitForResources, nil
-	}
-
-	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		if errors.IsNotFound(err) {
+			return waitForResources, nil
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -524,7 +527,7 @@ func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) e
 	service.Spec.Bindings.Write = bindings
 
 	if req || req2 {
-		return operrors.ErrRetriable
+		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
 	}
 
 	return nil
