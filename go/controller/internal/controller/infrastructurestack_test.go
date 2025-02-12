@@ -24,21 +24,20 @@ import (
 var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			secretName  = "stack-secret"
-			stackName   = "stack-test"
-			clusterName = "cluster-test"
-			repoName    = "repo-test"
-			namespace   = "default"
-			id          = "123"
-			repoUrl     = "https://test"
+			secretName                 = "stack-secret"
+			stackName                  = "stack-test"
+			invalidClusterRefStackName = "invalid-cluster-ref-stack"
+			clusterName                = "cluster-test"
+			repoName                   = "repo-test"
+			namespace                  = "default"
+			id                         = "123"
+			repoUrl                    = "https://test"
 		)
 
 		ctx := context.Background()
 
-		typeNamespacedName := types.NamespacedName{
-			Name:      stackName,
-			Namespace: namespace,
-		}
+		typeNamespacedName := types.NamespacedName{Name: stackName, Namespace: namespace}
+		invalidClusterRefTypeNamespacedName := types.NamespacedName{Name: invalidClusterRefStackName, Namespace: namespace}
 
 		BeforeAll(func() {
 			By("creating the configuration secret")
@@ -48,6 +47,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 					"secret": []byte("secret"),
 				},
 			}, nil)).To(Succeed())
+
 			By("creating the custom resource for the Kind Cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
@@ -57,6 +57,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}, func(p *v1alpha1.Cluster) {
 				p.Status.ID = lo.ToPtr(id)
 			})).To(Succeed())
+
 			By("creating the custom resource for the Kind Repository")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
@@ -130,6 +131,30 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				},
 			}, nil)).To(Succeed())
 
+			By("creating stack")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: invalidClusterRefStackName, Namespace: namespace},
+				Spec: v1alpha1.InfrastructureStackSpec{
+					Name: lo.ToPtr(invalidClusterRefStackName),
+					Type: gqlclient.StackTypeTerraform,
+					RepositoryRef: corev1.ObjectReference{
+						Name:      repoName,
+						Namespace: namespace,
+					},
+					ClusterRef: corev1.ObjectReference{
+						Name:      "invalid-cluster-ref",
+						Namespace: namespace,
+					},
+					Git: v1alpha1.GitRef{
+						Ref:    "main",
+						Folder: "terraform",
+					},
+					Configuration: &v1alpha1.StackConfiguration{
+						Version: lo.ToPtr("v0.0.1"),
+					},
+				},
+			}, nil)).To(Succeed())
+
 		})
 
 		AfterAll(func() {
@@ -155,6 +180,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, stack)
 			if err == nil {
 				By("Cleanup the specific resource instance InfrastructureStack")
+				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
+			}
+
+			err = k8sClient.Get(ctx, invalidClusterRefTypeNamespacedName, stack)
+			if err == nil {
+				By("cleanup stack")
 				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
 			}
 		})
@@ -342,6 +373,60 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			service := &v1alpha1.InfrastructureStack{}
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should detect invalid cluster ref and update conditions accordingly", func() {
+			By("create stack")
+			test := struct {
+				returnCreateStack *gqlclient.InfrastructureStackFragment
+				expectedStatus    v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "clusters.deployments.plural.sh \"invalid-cluster-ref\" not found",
+						},
+					},
+				},
+				returnCreateStack: &gqlclient.InfrastructureStackFragment{
+					ID: lo.ToPtr(id),
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: invalidClusterRefTypeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			resource := &v1alpha1.InfrastructureStack{}
+			err = k8sClient.Get(ctx, invalidClusterRefTypeNamespacedName, resource)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 	})
