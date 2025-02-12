@@ -4,10 +4,10 @@ import {
   IconFrame,
   Tooltip,
 } from '@pluralsh/design-system'
-import moment from 'moment'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 import { CSSObject, useTheme } from 'styled-components'
+import { fromNow } from 'utils/datetime'
 
 import { StackRunFragment } from '../../../generated/graphql'
 import {
@@ -127,7 +127,7 @@ export default function StackRunsEntry({
           whiteSpace: 'nowrap',
         }}
       >
-        {moment(insertedAt).fromNow()}
+        {fromNow(insertedAt)}
       </div>
       {ai?.enabled && (
         <AiInsightSummaryIcon

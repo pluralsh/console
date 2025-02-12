@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
-import moment from 'moment'
 import { Chip, Tooltip } from '@pluralsh/design-system'
-import { ClustersRowFragment } from 'generated/graphql'
 import { TooltipTime } from 'components/utils/TooltipTime'
+import { ClustersRowFragment } from 'generated/graphql'
+import { useEffect, useState } from 'react'
+import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
 export function ClusterHealth({
   cluster,
@@ -42,24 +42,23 @@ function ClusterHealthChip({
   pingedAt?: string | null
   size?: 'small' | 'medium' | 'large'
 }) {
-  const [now, setNow] = useState(moment())
+  const [now, setNow] = useState(dayjs())
 
   useEffect(() => {
-    const int = setInterval(() => setNow(moment()), 1000)
-
+    const int = setInterval(() => setNow(dayjs()), 1000)
     return () => clearInterval(int)
   }, [])
 
   const pinged = pingedAt !== null
   const healthy =
     cluster?.healthy ||
-    (pingedAt && now.clone().subtract(10, 'minutes').isBefore(pingedAt))
+    (pingedAt && now.subtract(10, 'minutes').isBefore(dayjs(pingedAt)))
 
   return (
     <TooltipTime
       startContent={
         pinged
-          ? `Pinged: ${moment(pingedAt).format('MMM D, h:mm')}`
+          ? `Pinged: ${formatDateTime(pingedAt, 'MMM D, h:mm')}`
           : `This cluster was not pinged yet`
       }
       date={pingedAt}

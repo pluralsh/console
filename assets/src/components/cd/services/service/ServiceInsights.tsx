@@ -1,6 +1,5 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import moment from 'moment/moment'
+import { fromNow } from 'utils/datetime'
 import { useMemo } from 'react'
 
 import { useParams } from 'react-router-dom'
@@ -60,7 +59,7 @@ export function ServiceInsights() {
           firstPartialType="body1Bold"
           second={
             service.insight?.updatedAt &&
-            `Last updated ${moment(service.insight?.updatedAt).fromNow()}`
+            `Last updated ${fromNow(service.insight.updatedAt)}`
           }
         />
         <Flex

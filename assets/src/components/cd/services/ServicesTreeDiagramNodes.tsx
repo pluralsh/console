@@ -1,5 +1,3 @@
-import { NodeProps } from 'reactflow'
-import { useTheme } from 'styled-components'
 import {
   ArrowTopRightIcon,
   Button,
@@ -17,7 +15,9 @@ import {
 } from '@pluralsh/design-system'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import moment from 'moment'
+import { NodeProps } from 'reactflow'
+import { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
@@ -32,19 +32,19 @@ import {
   useKickServiceMutation,
   useSyncGlobalServiceMutation,
 } from '../../../generated/graphql'
-import { NodeBase } from '../../utils/reactflow/nodes'
 import {
   getClusterDetailsPath,
   getGlobalServiceDetailsPath,
   getServiceComponentPath,
   getServiceDetailsPath,
 } from '../../../routes/cdRoutesConsts'
-import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
-import ProviderIcon from '../../utils/Provider'
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
+import ProviderIcon from '../../utils/Provider'
+import { NodeBase } from '../../utils/reactflow/nodes'
+import { ColWithIcon } from '../../utils/table/ColWithIcon'
+import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { OverlineH1 } from '../../utils/typography/Text'
-import { ColWithIcon } from '../../utils/table/ColWithIcon'
 
 import KickButton from '../../utils/KickButton'
 
@@ -347,7 +347,7 @@ function ServicesTreeDiagramServiceNodeModal({
           </ModalProp>
           <ModalProp title="namespace">{service.namespace}</ModalProp>
           <ModalProp title="last activity">
-            {moment(service.updatedAt).format('MMM D, YYYY h:mm a')}
+            {formatDateTime(service.updatedAt)}
           </ModalProp>
         </div>
         <Divider

@@ -9,7 +9,7 @@ import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { OverlineH1 } from '../../utils/typography/Text'
 import { isNonNullable } from '../../../utils/isNonNullable'
 import isEmpty from 'lodash/isEmpty'
-import moment from 'moment/moment'
+import { formatDateTime } from 'utils/datetime'
 
 const statusToSeverity = {
   [UpgradeInsightStatus.Passing]: 'success',
@@ -210,10 +210,7 @@ export function UpgradeInsightExpansionPanel({
                         <div>
                           {client?.userAgent} made {client?.count ?? 0}
                           {pluralize(' request', client?.count ?? 0)}, last
-                          request at{' '}
-                          {moment(client?.lastRequestAt).format(
-                            'MMM D, YYYY h:mm a'
-                          )}
+                          request at {formatDateTime(client?.lastRequestAt)}
                         </div>
                       ))}
                     </div>

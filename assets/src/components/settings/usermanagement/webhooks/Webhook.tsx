@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import { useMutation } from '@apollo/client'
+import { useState } from 'react'
 
-import moment from 'moment'
+import { formatDateTime } from 'utils/datetime'
 
 import { Div, Flex, P } from 'honorable'
 
@@ -59,7 +59,7 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
             caption
             color="text-xlight"
           >
-            Created on {moment(insertedAt).format('DD/MM/YY')}
+            Created on {formatDateTime(insertedAt, 'DD/MM/YY')}
           </P>
         </Div>
         <Flex

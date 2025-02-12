@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem } from '@pluralsh/design-system'
 import { Flex, P } from 'honorable'
-import moment from 'moment'
 import { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
 import NotificationSeverity from './NotificationSeverity'
 
@@ -35,7 +35,7 @@ export default function Notification({ notification }: any) {
                 color="text-xlight"
                 whiteSpace="nowrap"
               >
-                {moment(seenAt).format('MMM D, h:mm')}
+                {formatDateTime(seenAt, 'MMM D, h:mm')}
               </P>
             </div>
             <Flex grow={1} />

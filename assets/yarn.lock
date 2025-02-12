@@ -402,16 +402,14 @@ __metadata:
   linkType: hard
 
 "@ardatan/relay-compiler@npm:^12.0.1":
-  version: 12.0.1
-  resolution: "@ardatan/relay-compiler@npm:12.0.1"
+  version: 12.0.2
+  resolution: "@ardatan/relay-compiler@npm:12.0.2"
   dependencies:
     "@babel/generator": ^7.14.0
     "@babel/parser": ^7.14.0
     "@babel/runtime": ^7.0.0
-    babel-preset-fbjs: ^3.4.0
     chalk: ^4.0.0
     fb-watchman: ^2.0.0
-    fbjs: ^3.0.0
     immutable: ~3.7.6
     invariant: ^2.2.4
     nullthrows: ^1.1.1
@@ -421,7 +419,7 @@ __metadata:
     graphql: "*"
   bin:
     relay-compiler: bin/relay-compiler
-  checksum: 9ac40be43d3963c25d9a2011b3f4ca6f11d475fb27dc670d88768c4d34703b66dc9508f97a023966f592674860ef94b6aa2fce389087f930557d2d7d0283747f
+  checksum: 30e3759cd725221daf0d10ad2bce5e5ee8e45374281ab17e7ed973d55e0a8f344dbbfc1ce984ffaa66bf37301ad0e13c0eab3f16cb84e3a605f9e025dd4443b3
   languageName: node
   linkType: hard
 
@@ -10439,8 +10437,6 @@ __metadata:
     kubernetes-resource-parser: 0.1.0
     lint-staged: 15.0.2
     lodash: 4.17.21
-    moment: 2.29.4
-    moment-timezone: 0.5.43
     npm-run-all: 4.1.5
     phoenix: 1.7.14
     pluralize: 8.0.0
@@ -11881,11 +11877,11 @@ __metadata:
   linkType: hard
 
 "es-shim-unscopables@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "es-shim-unscopables@npm:1.0.2"
+  version: 1.1.0
+  resolution: "es-shim-unscopables@npm:1.1.0"
   dependencies:
-    hasown: ^2.0.0
-  checksum: 432bd527c62065da09ed1d37a3f8e623c423683285e6188108286f4a1e8e164a5bcbfbc0051557c7d14633cd2a41ce24c7048e6bbb66a985413fd32f1be72626
+    hasown: ^2.0.2
+  checksum: 33cfb1ebcb2f869f0bf528be1a8660b4fe8b6cec8fc641f330e508db2284b58ee2980fad6d0828882d22858c759c0806076427a3673b6daa60f753e3b558ee15
   languageName: node
   linkType: hard
 
@@ -16611,29 +16607,6 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 972deb188e8fb55547f1e58d66bd6b4a3623bf0c7137802582602d73e6480c1c2268dcbafbfb1be466e00cc7e56ac514d7fd9334b7cf33e3e2ab547c16f83a8d
-  languageName: node
-  linkType: hard
-
-"moment-timezone@npm:0.5.43":
-  version: 0.5.43
-  resolution: "moment-timezone@npm:0.5.43"
-  dependencies:
-    moment: ^2.29.4
-  checksum: 8075c897ed8a044f992ef26fe8cdbcad80caf974251db424cae157473cca03be2830de8c74d99341b76edae59f148c9d9d19c1c1d9363259085688ec1cf508d0
-  languageName: node
-  linkType: hard
-
-"moment@npm:2.29.4":
-  version: 2.29.4
-  resolution: "moment@npm:2.29.4"
-  checksum: 0ec3f9c2bcba38dc2451b1daed5daded747f17610b92427bebe1d08d48d8b7bdd8d9197500b072d14e326dd0ccf3e326b9e3d07c5895d3d49e39b6803b76e80e
-  languageName: node
-  linkType: hard
-
-"moment@npm:^2.29.4":
-  version: 2.30.1
-  resolution: "moment@npm:2.30.1"
-  checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
   languageName: node
   linkType: hard
 

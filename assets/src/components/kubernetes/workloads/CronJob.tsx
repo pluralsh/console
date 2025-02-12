@@ -1,5 +1,3 @@
-import { ReactElement, useMemo, useState } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   Button,
   ChipList,
@@ -8,8 +6,10 @@ import {
   Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import moment from 'moment/moment'
 import { ApolloError } from 'apollo-boost'
+import { ReactElement, useMemo, useState } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
+import { formatLocalizedDateTime } from 'utils/datetime'
 
 import {
   CronJobEventsQuery,
@@ -29,19 +29,19 @@ import {
   useCronJobTriggerMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   CRON_JOBS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { Kind } from '../common/types'
 
@@ -137,7 +137,7 @@ export default function CronJob(): ReactElement<any> {
             </SidecarItem>
             <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
             <SidecarItem heading="Last schedule">
-              {moment(cronJob?.lastSchedule).format('lll')}
+              {formatLocalizedDateTime(cronJob?.lastSchedule)}
             </SidecarItem>
             <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
             <SidecarItem heading="Suspended">

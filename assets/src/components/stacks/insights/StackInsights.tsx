@@ -1,7 +1,7 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { fromNow } from 'utils/datetime'
 import { AiInsight } from '../../../generated/graphql.ts'
 import AIPinButton from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
@@ -9,10 +9,10 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
-import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
 
 export function StackInsights() {
   const { stack, refetch, loading } = useOutletContext() as StackOutletContextT
@@ -39,7 +39,7 @@ export function StackInsights() {
           firstPartialType="body1Bold"
           second={
             stack.insight?.updatedAt &&
-            `Last updated ${moment(stack.insight?.updatedAt).fromNow()}`
+            `Last updated ${fromNow(stack.insight?.updatedAt)}`
           }
         />
         <Flex

@@ -21,10 +21,10 @@ import {
 } from 'generated/graphql'
 import { Button, Modal } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
-import moment from 'moment'
 import { Suspense, useMemo, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
 import { useLocation } from 'react-router-dom'
 
@@ -84,7 +84,7 @@ const auditColumns = [
       row: {
         original: { node },
       },
-    }) => node?.timestamp && moment(getValue()).format('lll'),
+    }) => node?.timestamp && formatDateTime(getValue(), 'lll'),
     meta: { truncate: true },
     enableSorting: true,
     sortingFn: 'datetime',

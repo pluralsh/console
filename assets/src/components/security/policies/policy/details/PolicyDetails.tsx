@@ -8,22 +8,22 @@ import {
 } from '@pluralsh/design-system'
 import { Body1P, Title2H1 } from 'components/utils/typography/Text'
 import { A } from 'honorable'
-import moment from 'moment'
 import { Link, useOutletContext } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
+import { formatDateTime } from 'utils/datetime'
 
 import { useTheme } from 'styled-components'
 
-import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
-import { PolicyContextType } from '../Policy'
 import { useMemo } from 'react'
 import {
-  POLICIES_REL_PATH,
   POLICIES_ABS_PATH,
   POLICIES_DETAILS_PATH,
+  POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
+import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
+import { PolicyContextType } from '../Policy'
 
 function PolicyDetails() {
   const theme = useTheme()
@@ -83,7 +83,7 @@ function PolicyDetails() {
       >
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
         <SidecarItem heading="Last Updated">
-          {moment(updatedAt || insertedAt).format('M/D/YYYY')}
+          {formatDateTime(updatedAt || insertedAt, 'M/D/YYYY')}
         </SidecarItem>
         <SidecarItem heading="Violations">
           <Chip

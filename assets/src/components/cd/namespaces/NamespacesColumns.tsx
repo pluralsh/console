@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { ManagedNamespace } from 'generated/graphql'
-import { toDateOrUndef } from 'utils/date'
+import { toDateOrUndef } from 'utils/datetime'
 
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { Edge } from 'utils/graphql'

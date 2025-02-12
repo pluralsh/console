@@ -3,7 +3,7 @@ import { useTheme } from 'styled-components'
 
 import { GlobalService } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
-import { toDateOrUndef } from 'utils/date'
+import { toDateOrUndef } from 'utils/datetime'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'

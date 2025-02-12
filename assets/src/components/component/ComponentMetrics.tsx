@@ -11,12 +11,11 @@ import {
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
-import moment from 'moment/moment'
+import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { DURATIONS } from 'utils/time'
 import { Prometheus } from '../../utils/prometheus.ts'
 
 import { ComponentDetailsContext } from './ComponentDetails'
@@ -173,7 +172,7 @@ function Metric({
 }) {
   const theme = useTheme()
   const start = useMemo(
-    () => moment().subtract({ second: offset }).toISOString(),
+    () => dayjs().subtract(offset, 'second').toISOString(),
     [offset]
   )
   const { data, loading } = useServiceDeploymentComponentMetricsQuery({

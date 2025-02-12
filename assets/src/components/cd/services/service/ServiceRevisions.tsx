@@ -28,7 +28,7 @@ import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 
 import { useTheme } from 'styled-components'
 
-import moment from 'moment'
+import { formatDateTime } from 'utils/datetime'
 
 import { CaptionText } from 'components/cluster/TableElements'
 
@@ -129,7 +129,7 @@ function CurrentRevision({
       >
         <h3 css={theme.partials.text.subtitle2}>Current revision</h3>
         <CaptionText>
-          {moment(revision.insertedAt).format('ll h:mma')}
+          {formatDateTime(revision.insertedAt, 'll h:mma')}
         </CaptionText>
       </Flex>
       <Card
