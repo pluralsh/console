@@ -416,10 +416,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: invalidClusterRefTypeNamespacedName,
 			})
 
+			Expect(result).NotTo(BeNil())
+			Expect(result.RequeueAfter).NotTo(BeZero())
 			Expect(err).NotTo(HaveOccurred())
 
 			resource := &v1alpha1.InfrastructureStack{}
