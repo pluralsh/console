@@ -104,7 +104,10 @@ export default function Node() {
   })
 
   return (
-    <TabPanel stateRef={tabStateRef}>
+    <TabPanel
+      stateRef={tabStateRef}
+      css={{ height: '100%' }}
+    >
       <ResponsivePageFullWidth
         scrollable={
           (currentTab?.label ?? 'Info') === 'Info' ||

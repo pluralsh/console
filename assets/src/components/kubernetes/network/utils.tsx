@@ -44,12 +44,20 @@ export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
 
   return (
     <div css={{ display: 'flex', gap: theme.spacing.xsmall, flexWrap: 'wrap' }}>
-      {endpoints.map((endpoint) =>
+      {endpoints.map((endpoint, i) =>
         isEmpty(endpoint?.ports) ? (
-          <Chip size="small">{endpoint?.host}</Chip>
+          <Chip
+            key={i}
+            size="small"
+          >
+            {endpoint?.host}
+          </Chip>
         ) : (
           endpoint?.ports.map((port) => (
-            <Chip size="small">
+            <Chip
+              key={i}
+              size="small"
+            >
               {endpoint?.host}:{port?.port ?? port?.nodePort} {port?.protocol}
             </Chip>
           ))
