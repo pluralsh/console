@@ -107,13 +107,13 @@ type AddonVersion struct {
 
 // a representation of a bulk operation to be performed on all agent services
 type AgentMigration struct {
-	ID            string                 `json:"id"`
-	Name          *string                `json:"name,omitempty"`
-	Ref           *string                `json:"ref,omitempty"`
-	Configuration map[string]interface{} `json:"configuration,omitempty"`
-	Completed     *bool                  `json:"completed,omitempty"`
-	InsertedAt    *string                `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                `json:"updatedAt,omitempty"`
+	ID            string         `json:"id"`
+	Name          *string        `json:"name,omitempty"`
+	Ref           *string        `json:"ref,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
+	Completed     *bool          `json:"completed,omitempty"`
+	InsertedAt    *string        `json:"insertedAt,omitempty"`
+	UpdatedAt     *string        `json:"updatedAt,omitempty"`
 }
 
 type AgentMigrationAttributes struct {
@@ -224,7 +224,7 @@ type Alert struct {
 	Title       *string                  `json:"title,omitempty"`
 	Message     *string                  `json:"message,omitempty"`
 	Fingerprint *string                  `json:"fingerprint,omitempty"`
-	Annotations map[string]interface{}   `json:"annotations,omitempty"`
+	Annotations map[string]any           `json:"annotations,omitempty"`
 	URL         *string                  `json:"url,omitempty"`
 	// key/value tags to filter clusters
 	Tags []*Tag `json:"tags,omitempty"`
@@ -813,7 +813,7 @@ type Cluster struct {
 	// the distribution of kubernetes this cluster is running
 	Distro *ClusterDistro `json:"distro,omitempty"`
 	// arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
 	// current k8s version as told to us by the deployment operator
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 	// The lowest discovered kubelet version for all nodes in the cluster
@@ -1256,8 +1256,8 @@ type ClusterRegistration struct {
 	// the tags to apply to the given cluster
 	Tags []*Tag `json:"tags,omitempty"`
 	// additional metadata to apply to the cluster
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
-	Creator  *User                  `json:"creator,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
+	Creator  *User          `json:"creator,omitempty"`
 	// the project the cluster will live in
 	Project    *Project `json:"project,omitempty"`
 	InsertedAt *string  `json:"insertedAt,omitempty"`
@@ -1388,7 +1388,7 @@ type ClusterStatusInfo struct {
 // A spec for targeting clusters
 type ClusterTarget struct {
 	// the cluster tags to target
-	Tags map[string]interface{} `json:"tags,omitempty"`
+	Tags map[string]any `json:"tags,omitempty"`
 	// kubernetes distribution to target
 	Distro *ClusterDistro `json:"distro,omitempty"`
 }
@@ -1564,9 +1564,9 @@ type ConfigAttributes struct {
 }
 
 type ConfigMap struct {
-	Metadata Metadata               `json:"metadata"`
-	Data     map[string]interface{} `json:"data"`
-	Raw      string                 `json:"raw"`
+	Metadata Metadata       `json:"metadata"`
+	Data     map[string]any `json:"data"`
+	Raw      string         `json:"raw"`
 }
 
 // Validations to apply to this configuration entry prior to PR creation
@@ -2539,7 +2539,7 @@ type InfrastructureStack struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables    map[string]interface{} `json:"variables,omitempty"`
+	Variables    map[string]any         `json:"variables,omitempty"`
 	Runs         *StackRunConnection    `json:"runs,omitempty"`
 	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
 	// files bound to a run of this stack
@@ -2669,9 +2669,9 @@ type JobGateSpec struct {
 	// list of containers to run in this job
 	Containers []*ContainerSpec `json:"containers,omitempty"`
 	// any pod labels to apply
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// any pod annotations to apply
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
 	// equivalent to resources, present for backwards compatibility
@@ -2704,12 +2704,12 @@ type KubeconfigAttributes struct {
 }
 
 type KubernetesUnstructured struct {
-	Group    *string                `json:"group,omitempty"`
-	Version  string                 `json:"version"`
-	Kind     string                 `json:"kind"`
-	Raw      map[string]interface{} `json:"raw,omitempty"`
-	Metadata Metadata               `json:"metadata"`
-	Events   []*Event               `json:"events,omitempty"`
+	Group    *string        `json:"group,omitempty"`
+	Version  string         `json:"version"`
+	Kind     string         `json:"kind"`
+	Raw      map[string]any `json:"raw,omitempty"`
+	Metadata Metadata       `json:"metadata"`
+	Events   []*Event       `json:"events,omitempty"`
 }
 
 // metadata needed for configuring kustomize
@@ -2758,8 +2758,8 @@ type LogLine struct {
 }
 
 type LogStream struct {
-	Stream map[string]interface{} `json:"stream,omitempty"`
-	Values []*MetricResult        `json:"values,omitempty"`
+	Stream map[string]any  `json:"stream,omitempty"`
+	Values []*MetricResult `json:"values,omitempty"`
 }
 
 type LogTimeRange struct {
@@ -2828,9 +2828,9 @@ type ManagedNamespace struct {
 	// A short description of the purpose of this namespace
 	Description *string `json:"description,omitempty"`
 	// labels for this namespace
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// annotations for this namespace
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// a list of pull secrets to attach to this namespace
 	PullSecrets []*string `json:"pullSecrets,omitempty"`
 	// The targeting criteria to select clusters this namespace is bound to
@@ -2904,8 +2904,8 @@ type MetadataAttributes struct {
 }
 
 type MetricResponse struct {
-	Metric map[string]interface{} `json:"metric,omitempty"`
-	Values []*MetricResult        `json:"values,omitempty"`
+	Metric map[string]any  `json:"metric,omitempty"`
+	Values []*MetricResult `json:"values,omitempty"`
 }
 
 type MetricResult struct {
@@ -2923,8 +2923,8 @@ type Namespace struct {
 
 // metadata fields for created namespaces
 type NamespaceMetadata struct {
-	Labels      map[string]interface{} `json:"labels,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Labels      map[string]any `json:"labels,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 type NamespaceSpec struct {
@@ -2995,7 +2995,7 @@ type NodePool struct {
 	// whether this is a spot pool or not
 	Spot *bool `json:"spot,omitempty"`
 	// kubernetes labels to apply to the nodes in this pool, useful for node selectors
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// any taints you'd want to apply to a node, for eg preventing scheduling on spot instances
 	Taints []*Taint `json:"taints,omitempty"`
 	// cloud specific settings for the node groups
@@ -3025,10 +3025,10 @@ type NodeSpec struct {
 }
 
 type NodeStatus struct {
-	Allocatable map[string]interface{} `json:"allocatable,omitempty"`
-	Capacity    map[string]interface{} `json:"capacity,omitempty"`
-	Phase       *string                `json:"phase,omitempty"`
-	Conditions  []*NodeCondition       `json:"conditions,omitempty"`
+	Allocatable map[string]any   `json:"allocatable,omitempty"`
+	Capacity    map[string]any   `json:"capacity,omitempty"`
+	Phase       *string          `json:"phase,omitempty"`
+	Conditions  []*NodeCondition `json:"conditions,omitempty"`
 }
 
 type NodeUsage struct {
@@ -3037,18 +3037,18 @@ type NodeUsage struct {
 }
 
 type Notification struct {
-	ID          string                 `json:"id"`
-	Title       string                 `json:"title"`
-	Description *string                `json:"description,omitempty"`
-	Fingerprint string                 `json:"fingerprint"`
-	Status      *NotificationStatus    `json:"status,omitempty"`
-	Labels      map[string]interface{} `json:"labels,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
-	Repository  string                 `json:"repository"`
-	SeenAt      *string                `json:"seenAt,omitempty"`
-	Severity    *Severity              `json:"severity,omitempty"`
-	InsertedAt  *string                `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                `json:"updatedAt,omitempty"`
+	ID          string              `json:"id"`
+	Title       string              `json:"title"`
+	Description *string             `json:"description,omitempty"`
+	Fingerprint string              `json:"fingerprint"`
+	Status      *NotificationStatus `json:"status,omitempty"`
+	Labels      map[string]any      `json:"labels,omitempty"`
+	Annotations map[string]any      `json:"annotations,omitempty"`
+	Repository  string              `json:"repository"`
+	SeenAt      *string             `json:"seenAt,omitempty"`
+	Severity    *Severity           `json:"severity,omitempty"`
+	InsertedAt  *string             `json:"insertedAt,omitempty"`
+	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
 
 type NotificationConnection struct {
@@ -3349,7 +3349,7 @@ type ObserverOciRepo struct {
 type ObserverPipelineAction struct {
 	PipelineID string `json:"pipelineId"`
 	// the context to apply, use $value to interject the observed value
-	Context map[string]interface{} `json:"context"`
+	Context map[string]any `json:"context"`
 }
 
 // Configuration for setting a pipeline context in an observer
@@ -3649,8 +3649,8 @@ type PipelineConnection struct {
 type PipelineContext struct {
 	ID string `json:"id"`
 	// the context map that will be passed to the pipeline
-	Context  map[string]interface{} `json:"context"`
-	Pipeline *Pipeline              `json:"pipeline,omitempty"`
+	Context  map[string]any `json:"context"`
+	Pipeline *Pipeline      `json:"pipeline,omitempty"`
 	// a history of pull requests created by this context thus far
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	// a list of pipeline-specific PRs for this context
@@ -4220,11 +4220,11 @@ type PrDeleteSpec struct {
 
 // the details of where to find and place a templated file
 type PrTemplateSpec struct {
-	Source      string                 `json:"source"`
-	Destination string                 `json:"destination"`
-	Context     map[string]interface{} `json:"context,omitempty"`
-	External    bool                   `json:"external"`
-	Condition   *string                `json:"condition,omitempty"`
+	Source      string         `json:"source"`
+	Destination string         `json:"destination"`
+	Context     map[string]any `json:"context,omitempty"`
+	External    bool           `json:"external"`
+	Condition   *string        `json:"condition,omitempty"`
 }
 
 // existing file updates that can be performed in a PR
@@ -4752,9 +4752,9 @@ type ScopeAttributes struct {
 }
 
 type Secret struct {
-	Metadata Metadata               `json:"metadata"`
-	Type     *string                `json:"type,omitempty"`
-	Data     map[string]interface{} `json:"data"`
+	Metadata Metadata       `json:"metadata"`
+	Type     *string        `json:"type,omitempty"`
+	Data     map[string]any `json:"data"`
 }
 
 type Service struct {
@@ -4824,7 +4824,7 @@ type ServiceConfiguration struct {
 type ServiceContext struct {
 	ID            string                  `json:"id"`
 	Name          string                  `json:"name"`
-	Configuration map[string]interface{}  `json:"configuration,omitempty"`
+	Configuration map[string]any          `json:"configuration,omitempty"`
 	Secrets       []*ServiceConfiguration `json:"secrets,omitempty"`
 	InsertedAt    *string                 `json:"insertedAt,omitempty"`
 	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
@@ -5007,10 +5007,10 @@ type ServicePort struct {
 }
 
 type ServiceSpec struct {
-	Type      *string                `json:"type,omitempty"`
-	ClusterIP *string                `json:"clusterIp,omitempty"`
-	Selector  map[string]interface{} `json:"selector,omitempty"`
-	Ports     []*ServicePort         `json:"ports,omitempty"`
+	Type      *string        `json:"type,omitempty"`
+	ClusterIP *string        `json:"clusterIp,omitempty"`
+	Selector  map[string]any `json:"selector,omitempty"`
+	Ports     []*ServicePort `json:"ports,omitempty"`
 }
 
 type ServiceStatus struct {
@@ -5340,7 +5340,7 @@ type StackRun struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables map[string]interface{} `json:"variables,omitempty"`
+	Variables map[string]any `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
 	CancellationReason *string    `json:"cancellationReason,omitempty"`
 	StateUrls          *StateUrls `json:"stateUrls,omitempty"`
@@ -5438,7 +5438,7 @@ type StackStateResource struct {
 	// the name of the resource within that type
 	Name string `json:"name"`
 	// arbitrary configuration used to create the resource
-	Configuration map[string]interface{} `json:"configuration,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
 	// identifiers this resource is linked to for graphing in the UI
 	Links []*string `json:"links,omitempty"`
 }
