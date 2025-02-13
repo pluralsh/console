@@ -2,12 +2,12 @@ apiVersion: v2
 name: velero-s3-proxy
 description: Chart for Velero
 appVersion: 1.12.3
-version: 0.1.0
+version: 0.1.1
 type: application
 dependencies:
   - name: velero
     version: 5.2.2
     repository: https://vmware-tanzu.github.io/helm-charts
   - name: s3-proxy
-    version: 0.3.1
+    version: 0.3.2
     repository: https://radar-base.github.io/radar-helm-charts
