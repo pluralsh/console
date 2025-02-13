@@ -56,7 +56,7 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 				}
 			}
 		}
-	case console.HelmAuthProviderAws:
+	case console.HelmAuthProviderAWS:
 		if helmRepository.Spec.Auth.Aws != nil {
 			if helmRepository.Spec.Auth.Aws.SecretAccessKeySecretRef != nil {
 				return helmRepository.Spec.Auth.Aws.SecretAccessKeySecretRef
@@ -80,7 +80,7 @@ func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepo
 				}
 			}
 		}
-	case console.HelmAuthProviderGcp:
+	case console.HelmAuthProviderGCP:
 		if helmRepository.Spec.Auth.Gcp != nil {
 			if helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef != nil {
 				return helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef
@@ -115,11 +115,11 @@ func (in *HelmRepositoryAuth) HelmAuthAttributes(ctx context.Context, namespace 
 		return in.basicAuthAttributes(ctx, namespace, auth.Basic)
 	case console.HelmAuthProviderBearer:
 		return in.bearerAuthAttributes(ctx, namespace, auth.Bearer)
-	case console.HelmAuthProviderAws:
+	case console.HelmAuthProviderAWS:
 		return in.awsAuthAttributes(ctx, namespace, auth.Aws)
 	case console.HelmAuthProviderAzure:
 		return in.azureAuthAttributes(ctx, namespace, auth.Azure)
-	case console.HelmAuthProviderGcp:
+	case console.HelmAuthProviderGCP:
 		return in.gcpAuthAttributes(ctx, namespace, auth.Gcp)
 	}
 
@@ -207,7 +207,7 @@ func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, namespace s
 	}
 
 	attrs := &console.HelmAuthAttributes{
-		Aws: &console.HelmAwsAuthAttributes{
+		AWS: &console.HelmAWSAuthAttributes{
 			AccessKey:     auth.AccessKey,
 			AssumeRoleArn: auth.AssumeRoleArn,
 		},
@@ -222,7 +222,7 @@ func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, namespace s
 		if !exists {
 			return nil, in.missingCredentialKeyError(auth.SecretAccessKeySecretKeyRef.Key)
 		}
-		attrs.Aws.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
+		attrs.AWS.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
 
 	} else if auth.SecretAccessKeySecretRef != nil {
 		secret, err := utils.GetSecret(ctx, in.Client, auth.SecretAccessKeySecretRef)
@@ -235,7 +235,7 @@ func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, namespace s
 			return nil, in.missingCredentialKeyError(secretAccessKeyKeyName)
 		}
 
-		attrs.Aws.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
+		attrs.AWS.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
 	}
 
 	return attrs, nil
@@ -312,7 +312,7 @@ func (in *HelmRepositoryAuth) gcpAuthAttributes(ctx context.Context, namespace s
 	}
 
 	return &console.HelmAuthAttributes{
-		Gcp: &console.HelmGcpAuthAttributes{
+		GCP: &console.HelmGCPAuthAttributes{
 			ApplicationCredentials: lo.ToPtr(string(appCredentials)),
 		},
 	}, nil
