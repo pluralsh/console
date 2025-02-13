@@ -4,7 +4,7 @@ go 1.22.5
 
 toolchain go1.23.5
 
-require github.com/Yamashou/gqlgenc v0.30.3
+require github.com/Yamashou/gqlgenc v0.30.2
 
 require (
 	github.com/99designs/gqlgen v0.17.64 // indirect
