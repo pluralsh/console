@@ -12,8 +12,8 @@ github.com/Masterminds/semver/v3 v3.3.1 h1:QtNSWtVZ3nBfk8mAOu/B6v7FMJ+NHTIgUPi7r
 github.com/Masterminds/semver/v3 v3.3.1/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/Masterminds/sprig/v3 v3.3.0 h1:mQh0Yrg1XPo6vjYXgtf5OtijNAKJRNcTdOOGZe3tPhs=
 github.com/Masterminds/sprig/v3 v3.3.0/go.mod h1:Zy1iXRYNqNLUolqCpL4uhk6SHUMAOSCzdgBfDb35Lz0=
-github.com/Yamashou/gqlgenc v0.30.3 h1:a5RyDxLVQDgyQB1KqbvqkVdEmF0jUGybHNkLdDBRTBk=
-github.com/Yamashou/gqlgenc v0.30.3/go.mod h1:0VNZtzXhyDofkNNZXXPw8LSLvi3vyG6LXo7XvcWv2X4=
+github.com/Yamashou/gqlgenc v0.30.2 h1:hkoWStLZI2JgrgZuHlJXVnDFt0/B2X6YLv6hFPYpEAg=
+github.com/Yamashou/gqlgenc v0.30.2/go.mod h1:0VNZtzXhyDofkNNZXXPw8LSLvi3vyG6LXo7XvcWv2X4=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
