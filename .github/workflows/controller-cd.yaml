@@ -67,6 +67,9 @@ jobs:
           gcr.io/pluralsh/deployment-controller
           docker.io/pluralsh/deployment-controller
         tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=tag
           type=ref,event=pr
           type=sha
     - name: Login to GHCR
