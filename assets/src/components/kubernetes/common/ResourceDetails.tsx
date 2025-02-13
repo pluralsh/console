@@ -75,7 +75,9 @@ export default function ResourceDetails({
   useExplainWithAI(prompt)
 
   return (
-    <ResponsiveLayoutPage>
+    <ResponsiveLayoutPage
+      css={{ maxWidth: theme.breakpoints.desktopLarge, margin: 'auto' }}
+    >
       <ResponsiveLayoutPage
         css={{
           display: 'flex',
@@ -127,10 +129,7 @@ export default function ResourceDetails({
           {headerContent}
           {additionalHeaderContent}
         </header>
-        <ResponsivePageFullWidth
-          noPadding
-          maxContentWidth={theme.breakpoints.desktopLarge}
-        >
+        <ResponsivePageFullWidth noPadding>
           <PageHeaderContext.Provider value={pageHeaderContext}>
             <div
               css={{
@@ -152,6 +151,7 @@ export default function ResourceDetails({
           height: '100%',
           overflow: 'hidden',
           paddingBottom: theme.spacing.large,
+          marginLeft: 0,
         }}
       >
         <div css={{ height: '100%', overflowY: 'auto' }}>{sidecar}</div>
