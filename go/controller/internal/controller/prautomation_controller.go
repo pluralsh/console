@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/samber/lo"
+	"github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -185,16 +185,20 @@ func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) (*
 	}
 
 	bindings, req, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
-	if req || err != nil {
-		return lo.Ternary(req, &waitForResources, nil), err
+	if err != nil {
+		return nil, err
 	}
 	prAutomation.Spec.Bindings.Create = bindings
 
-	bindings, req, err = ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
-	if req || err != nil {
-		return lo.Ternary(req, &waitForResources, nil), err
+	bindings, req2, err := ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
+	if err != nil {
+		return nil, err
 	}
 	prAutomation.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return &waitForResources, errors.ErrRetriable
+	}
 
 	return nil, nil
 }

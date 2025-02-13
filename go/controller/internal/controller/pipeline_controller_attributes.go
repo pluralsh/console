@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/samber/lo"
+	"github.com/pluralsh/console/go/controller/internal/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	v1 "k8s.io/api/core/v1"
@@ -211,16 +211,20 @@ func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) (*ctrl.Result, error) 
 	}
 
 	bindings, req, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
-	if req || err != nil {
-		return lo.Ternary(req, &waitForResources, nil), err
+	if err != nil {
+		return nil, err
 	}
 	p.Spec.Bindings.Read = bindings
 
-	bindings, req, err = ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
-	if req || err != nil {
-		return lo.Ternary(req, &waitForResources, nil), err
+	bindings, req2, err := ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
+	if err != nil {
+		return nil, err
 	}
 	p.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return &waitForResources, errors.ErrRetriable
+	}
 
 	return nil, nil
 }
