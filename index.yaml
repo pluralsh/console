@@ -5437,6 +5437,23 @@ entries:
   velero-s3-proxy:
   - apiVersion: v2
     appVersion: 1.12.3
+    created: "2025-02-13T02:22:38.128700901Z"
+    dependencies:
+    - name: velero
+      repository: https://vmware-tanzu.github.io/helm-charts
+      version: 5.2.2
+    - name: s3-proxy
+      repository: https://radar-base.github.io/radar-helm-charts
+      version: 0.3.2
+    description: Chart for Velero
+    digest: f780e60b8c035a82f0a2c96316af2f78b7e89c7fcb0855a11826d688869eac20
+    name: velero-s3-proxy
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.1/velero-s3-proxy-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.12.3
     created: "2024-02-06T15:43:41.057877011Z"
     dependencies:
     - name: velero
@@ -5463,4 +5480,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-12T19:01:30.521257134Z"
+generated: "2025-02-13T02:22:38.129119745Z"
