@@ -1,4 +1,10 @@
-import { Card, Flyover } from '@pluralsh/design-system'
+import {
+  Card,
+  Flex,
+  Flyover,
+  IconFrame,
+  InfoOutlineIcon,
+} from '@pluralsh/design-system'
 import LogsScrollIndicator from 'components/cd/logs/LogsScrollIndicator'
 import { GqlError } from 'components/utils/Alert'
 import {
@@ -7,11 +13,12 @@ import {
   LogTimeRange,
   useLogAggregationQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { LogContextPanel } from './LogContextPanel'
 import { secondsToDuration } from './Logs'
+import LogsLegend from './LogsLegend'
 import { LogsTable } from './LogsTable'
-import { isEmpty } from 'lodash'
 
 const LIMIT = 250
 const POLL_INTERVAL = 10 * 1000
@@ -24,6 +31,7 @@ export const LogsCard = memo(function LogsCard({
   time,
   labels,
   addLabel,
+  showLegendTooltip = true,
 }: {
   serviceId?: string
   clusterId?: string
@@ -32,6 +40,7 @@ export const LogsCard = memo(function LogsCard({
   time?: LogTimeRange
   labels?: LogFacetInput[]
   addLabel?: (key: string, value: string) => void
+  showLegendTooltip?: boolean
 }) {
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
@@ -109,10 +118,22 @@ export const LogsCard = memo(function LogsCard({
       header={{
         size: 'large',
         content: (
-          <LogsScrollIndicator
-            live={live}
-            toggleLive={toggleLive}
-          />
+          <Flex
+            width="100%"
+            justify="space-between"
+          >
+            <LogsScrollIndicator
+              live={live}
+              toggleLive={toggleLive}
+            />
+            {showLegendTooltip && (
+              <IconFrame
+                icon={<InfoOutlineIcon color="icon-default" />}
+                tooltip={<LogsLegend />}
+                tooltipProps={{ placement: 'right' }}
+              />
+            )}
+          </Flex>
         ),
       }}
     >
