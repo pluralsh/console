@@ -185,8 +185,16 @@ func TryAddFinalizer(ctx context.Context, client ctrlruntimeclient.Client, obj c
 }
 
 func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.SecretReference) (*corev1.Secret, error) {
+	namespace := "default"
+	if ref == nil {
+		return nil, fmt.Errorf("secret reference is nil")
+	}
+	if ref.Namespace != "" {
+		namespace = ref.Namespace
+	}
+
 	secret := &corev1.Secret{}
-	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, secret); err != nil {
+	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: namespace}, secret); err != nil {
 		return nil, err
 	}
 
