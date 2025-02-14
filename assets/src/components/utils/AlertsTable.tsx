@@ -1,10 +1,9 @@
 import { ApolloError } from '@apollo/client'
 import {
-  ArrowTopRightIcon,
   Chip,
   ChipSeverity,
+  ErrorIcon,
   Flex,
-  IconFrame,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -12,9 +11,10 @@ import { AlertFragment, AlertSeverity, AlertState } from 'generated/graphql'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
-import dayjs from 'dayjs'
 import { isEmpty, truncate, upperFirst } from 'lodash'
 import { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
+import { AiInsightSummaryIcon } from './AiInsights'
 import { GqlError } from './Alert'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { StackedText } from './table/StackedText'
@@ -83,24 +83,17 @@ const cols = [
   columnHelper.accessor((alert) => alert.title, {
     id: 'title',
     header: 'Title',
-    meta: { gridTemplate: 'minmax(240px, 1fr)' },
+    meta: { gridTemplate: 'minmax(220px, 1fr)', truncate: true },
     cell: function Cell({ getValue, row }) {
       return (
         <StackedText
           first={getValue()}
-          second={dayjs(row.original.updatedAt).format('MM/DD/YYYY hh:mma')}
+          second={formatDateTime(row.original.updatedAt, 'M/D/YYYY h:ma')}
         />
       )
     },
   }),
-  columnHelper.accessor((alert) => alert.message, {
-    id: 'message',
-    header: 'Message',
-    meta: { gridTemplate: 'minmax(320px, 1fr)' },
-    cell: function Cell({ getValue }) {
-      return truncate(getValue() ?? '', { length: 120 })
-    },
-  }),
+
   columnHelper.accessor((alert) => alert.state, {
     id: 'state',
     header: 'State',
@@ -113,7 +106,13 @@ const cols = [
           severity={state === AlertState.Firing ? 'danger' : 'neutral'}
           inactive={state !== AlertState.Firing}
         >
-          {state === AlertState.Firing ? 'Firing' : 'Non-firing'}
+          <Flex
+            gap="xsmall"
+            align="center"
+          >
+            {state === AlertState.Firing && <ErrorIcon size={12} />}
+            {state === AlertState.Firing ? 'Firing' : 'Non-firing'}
+          </Flex>
         </Chip>
       )
     },
@@ -132,32 +131,30 @@ const cols = [
       )
     },
   }),
-  columnHelper.accessor((alert) => alert.url, {
+  columnHelper.accessor((alert) => alert, {
     id: 'url',
     header: 'URL',
     cell: function Cell({ getValue }) {
+      const { url, insight } = getValue()
       return (
-        <Tooltip
-          placement="top"
-          label={getValue()}
+        <Flex
+          gap="small"
+          align="center"
+          maxWidth="250px"
         >
-          <div>
-            <Flex
-              gap="small"
-              align="center"
-              maxWidth="250px"
-            >
-              <StandardUrl href={getValue()}>
-                {truncate(getValue() ?? '', { length: 25 })}
-              </StandardUrl>
-              <IconFrame
-                clickable
-                icon={<ArrowTopRightIcon />}
-                onClick={() => window.open(getValue() || '', '_blank')}
-              />
-            </Flex>
-          </div>
-        </Tooltip>
+          <Tooltip
+            placement="top"
+            label={url}
+          >
+            <StandardUrl href={url}>
+              {truncate(url ?? '', { length: 25 })}
+            </StandardUrl>
+          </Tooltip>
+          <AiInsightSummaryIcon
+            insight={insight}
+            navPath={`insight/${insight?.id}`}
+          />
+        </Flex>
       )
     },
   }),

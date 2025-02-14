@@ -67,6 +67,11 @@ fragment AiInsightContext on AiInsight {
       name
     }
   }
+  alert {
+    id
+    title
+    message
+  }
 }
 
 fragment ClusterInsightComponent on ClusterInsightComponent {

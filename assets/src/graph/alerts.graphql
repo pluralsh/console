@@ -1,10 +1,10 @@
 fragment Alert on Alert {
   id
+  title
+  message
   type
   severity
   state
-  title
-  message
   fingerprint
   url
   annotations
@@ -12,6 +12,9 @@ fragment Alert on Alert {
     id
     name
     value
+  }
+  insight {
+    ...AiInsightSummary
   }
   updatedAt
 }

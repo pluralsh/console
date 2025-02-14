@@ -1,9 +1,15 @@
-import { Chip, Flex } from '@pluralsh/design-system'
+import {
+  AiSparkleFilledIcon,
+  Button,
+  Chip,
+  Flex,
+  Markdown,
+} from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { AlertFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { StackedText } from './table/StackedText'
 import { Body2BoldP } from './typography/Text'
 
 export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
@@ -17,13 +23,24 @@ export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
 
   return (
     <WrapperSC>
-      <StackedText
-        first={alert.title}
-        second={alert.message}
-        firstPartialType="body2LooseLineHeightBold"
-        firstColor="text"
-        secondPartialType="body2"
-      />
+      {alert.insight && (
+        <Button
+          as={Link}
+          to={`insight/${alert.insight.id}`}
+          startIcon={<AiSparkleFilledIcon />}
+          style={{ width: 'fit-content' }}
+        >
+          Go to insight
+        </Button>
+      )}
+
+      <Body2BoldP $color="text">{alert.title}</Body2BoldP>
+      <Flex
+        direction="column"
+        wordBreak="break-word"
+      >
+        <Markdown text={alert.message ?? ''} />
+      </Flex>
       <Flex gap="small">
         <ChipGroupLabelWrapperSC>
           <Body2BoldP $color="text">Annotations</Body2BoldP>
@@ -62,14 +79,14 @@ export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing['xlarge'],
+  gap: theme.spacing.medium,
   maxWidth: 920,
 }))
 
 const ChipGroupLabelWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing['medium'],
+  gap: theme.spacing.medium,
   flex: 1,
 }))
 
