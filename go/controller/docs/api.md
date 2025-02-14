@@ -821,6 +821,8 @@ _Appears in:_
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: {} <br /> |
 | `logging` _[LoggingSettings](#loggingsettings)_ | Settings for connections to log aggregation datastores |  | Optional: {} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Settings for managing Plural's cost management features |  | Optional: {} <br /> |
+| `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | pointer to the deployment GIT repository to use |  | Optional: {} <br /> |
+| `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | pointer to the Scaffolds GIT repository to use |  | Optional: {} <br /> |
 
 
 #### ElasticsearchConnection
@@ -1390,6 +1392,7 @@ with the addition of kubebuilder/json annotations for better schema support.
 
 
 _Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [ServiceHelm](#servicehelm)
 
 | Field | Description | Default | Validation |
@@ -2397,6 +2400,7 @@ _Appears in:_
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
 | `github` _[ScmGithubConnection](#scmgithubconnection)_ |  |  | Optional: {} <br /> |
+| `default` _boolean_ |  |  | Optional: {} <br /> |
 
 
 #### ScmGithubConnection
