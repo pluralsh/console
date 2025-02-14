@@ -1,0 +1,5 @@
+image:
+  repository: quay.io/netobserv/network-observability-operator
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
