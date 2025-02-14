@@ -2532,7 +2532,8 @@ type InfrastructureStack struct {
 	// The status of the last run of the stack
 	Status StackStatus `json:"status"`
 	// optional k8s job configuration for the job that will apply this stack
-	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
+	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
+	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -4009,6 +4010,17 @@ type PolicyConstraintEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+// Configuration for applying policy enforcement to a stack
+type PolicyEngine struct {
+	// the policy engine to use with this stack
+	Type PolicyEngineType `json:"type"`
+}
+
+type PolicyEngineAttributes struct {
+	// the policy engine to use with this stack
+	Type PolicyEngineType `json:"type"`
+}
+
 // Aggregate statistics for policies across your fleet
 type PolicyStatistic struct {
 	// the field you're computing this statistic on
@@ -5196,6 +5208,7 @@ type StackAttributes struct {
 	Cron *StackCronAttributes `json:"cron,omitempty"`
 	// arbitrary variables to pass into the stack
 	Variables         *string                       `json:"variables,omitempty"`
+	PolicyEngine      *PolicyEngineAttributes       `json:"policyEngine,omitempty"`
 	ReadBindings      []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
 	WriteBindings     []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 	Tags              []*TagAttributes              `json:"tags,omitempty"`
@@ -5328,6 +5341,32 @@ type StackOutputAttributes struct {
 	Secret *bool  `json:"secret,omitempty"`
 }
 
+type StackPolicyViolation struct {
+	ID           string       `json:"id"`
+	Severity     VulnSeverity `json:"severity"`
+	PolicyID     string       `json:"policyId"`
+	PolicyURL    *string      `json:"policyUrl,omitempty"`
+	PolicyModule *string      `json:"policyModule,omitempty"`
+	Title        string       `json:"title"`
+	Description  *string      `json:"description,omitempty"`
+	Resolution   *string      `json:"resolution,omitempty"`
+	// the causes of this violation line-by-line in code
+	Causes     []*StackViolationCause `json:"causes,omitempty"`
+	InsertedAt *string                `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                `json:"updatedAt,omitempty"`
+}
+
+type StackPolicyViolationAttributes struct {
+	Severity     VulnSeverity                     `json:"severity"`
+	PolicyID     string                           `json:"policyId"`
+	PolicyURL    *string                          `json:"policyUrl,omitempty"`
+	PolicyModule *string                          `json:"policyModule,omitempty"`
+	Title        string                           `json:"title"`
+	Description  *string                          `json:"description,omitempty"`
+	Resolution   *string                          `json:"resolution,omitempty"`
+	Causes       []*StackViolationCauseAttributes `json:"causes,omitempty"`
+}
+
 type StackRun struct {
 	ID string `json:"id"`
 	// The status of this run
@@ -5337,7 +5376,8 @@ type StackRun struct {
 	// reference w/in the repository where the IaC lives
 	Git GitRef `json:"git"`
 	// optional k8s job configuration for the job that will apply this stack
-	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
+	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
+	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -5387,8 +5427,10 @@ type StackRun struct {
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the git repository you're sourcing IaC from
 	Repository *GitRepository `json:"repository,omitempty"`
-	InsertedAt *string        `json:"insertedAt,omitempty"`
-	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+	// policy violations for this stack
+	Violations []*StackPolicyViolation `json:"violations,omitempty"`
+	InsertedAt *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
 }
 
 type StackRunAttributes struct {
@@ -5404,6 +5446,8 @@ type StackRunAttributes struct {
 	Errors []*ServiceErrorAttributes `json:"errors,omitempty"`
 	// Why you decided to cancel this run
 	CancellationReason *string `json:"cancellationReason,omitempty"`
+	// the violations detected by the policy engine
+	Violations []*StackPolicyViolationAttributes `json:"violations,omitempty"`
 }
 
 type StackRunConnection struct {
@@ -5465,6 +5509,34 @@ type StackStateResourceAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 	// identifiers this resource is linked to for graphing in the UI
 	Links []*string `json:"links,omitempty"`
+}
+
+type StackViolationCause struct {
+	Resource string                     `json:"resource"`
+	Start    int64                      `json:"start"`
+	End      int64                      `json:"end"`
+	Lines    []*StackViolationCauseLine `json:"lines,omitempty"`
+}
+
+type StackViolationCauseAttributes struct {
+	Resource string                               `json:"resource"`
+	Start    int64                                `json:"start"`
+	End      int64                                `json:"end"`
+	Lines    []*StackViolationCauseLineAttributes `json:"lines,omitempty"`
+}
+
+type StackViolationCauseLine struct {
+	Content string `json:"content"`
+	Line    int64  `json:"line"`
+	First   *bool  `json:"first,omitempty"`
+	Last    *bool  `json:"last,omitempty"`
+}
+
+type StackViolationCauseLineAttributes struct {
+	Content string `json:"content"`
+	Line    int64  `json:"line"`
+	First   *bool  `json:"first,omitempty"`
+	Last    *bool  `json:"last,omitempty"`
 }
 
 // the configuration of a service within a pipeline stage, including optional promotion criteria
@@ -7786,6 +7858,45 @@ func (e *PolicyAggregate) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PolicyAggregate) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PolicyEngineType string
+
+const (
+	PolicyEngineTypeTrivy PolicyEngineType = "TRIVY"
+)
+
+var AllPolicyEngineType = []PolicyEngineType{
+	PolicyEngineTypeTrivy,
+}
+
+func (e PolicyEngineType) IsValid() bool {
+	switch e {
+	case PolicyEngineTypeTrivy:
+		return true
+	}
+	return false
+}
+
+func (e PolicyEngineType) String() string {
+	return string(e)
+}
+
+func (e *PolicyEngineType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PolicyEngineType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PolicyEngineType", str)
+	}
+	return nil
+}
+
+func (e PolicyEngineType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
