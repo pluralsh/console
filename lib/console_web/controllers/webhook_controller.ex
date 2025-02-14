@@ -21,6 +21,7 @@ defmodule ConsoleWeb.WebhookController do
   def scm(conn, %{"id" => id}) do
     with %ScmWebhook{} = hook <- Git.get_scm_webhook_by_ext_id(id),
          :ok <- verify(conn, hook),
+         _ <- Console.Services.Base.handle_notify(Console.PubSub.ScmWebhook, conn.body_params, actor: hook),
          {:ok, resp} <- Git.Webhooks.webhook(hook, conn.body_params) do
       json(conn, resp)
     else

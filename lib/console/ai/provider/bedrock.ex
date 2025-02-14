@@ -39,6 +39,8 @@ defmodule Console.AI.Bedrock do
 
   def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
 
+  def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
+
   def tools?(), do: false
 
   defp build_req([{:system, system} | rest]) do

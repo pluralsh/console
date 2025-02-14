@@ -71,6 +71,8 @@ defmodule Console.AI.Anthropic do
     end
   end
 
+  def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
+
   def tools?(), do: true
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history) do

@@ -10,7 +10,7 @@ defmodule Console.AI.Vertex do
 
   require Logger
 
-  defstruct [:service_account_json, :model, :tool_model, :project, :location, :endpoint]
+  defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint]
 
   @type t :: %__MODULE__{}
 
@@ -57,12 +57,29 @@ defmodule Console.AI.Vertex do
     end
   end
 
+  @doc """
+  Generate a openai completion from the azure openai credentials chain
+  """
+  @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def embeddings(%__MODULE__{} = vertex, text) do
+    with {:ok, %{token: token}} <- client(vertex) do
+      OpenAI.new(%{
+        base_url: openai_url(vertex),
+        access_token: token,
+        model: openai_model(vertex),
+        embedding_model: openai_model(vertex.embedding_model)
+      })
+      |> OpenAI.embeddings(text)
+    end
+  end
+
   def tools?(), do: true
 
   defp openai_url(%__MODULE__{project: p, location: l} = c),
     do: "https://#{l}-aiplatform.googleapis.com/v1beta1/projects/#{p}/locations/#{l}/endpoints/#{ep(c)}"
 
-  defp openai_model(%__MODULE__{model: m}) when is_binary(m) do
+  defp openai_model(%__MODULE__{model: m}) when is_binary(m), do: openai_model(m)
+  defp openai_model(m) when is_binary(m) do
     case String.contains?(m, "/") do
       true -> m
       false -> "google/#{m}"

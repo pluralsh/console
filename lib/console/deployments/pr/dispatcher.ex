@@ -2,7 +2,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   import Console.Deployments.Pr.Git
   import Console.Deployments.Pr.Utils
   alias Console.Repo
-  alias Console.Deployments.{Pr.Config, Git.Discovery, Tar, Settings}
+  alias Console.Deployments.{Pr.Config, Pr.File, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
   alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
@@ -29,6 +29,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
   """
   @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
+
+  @callback files(conn :: ScmConnection.t, msg :: map) :: {:ok, [File.t]} | Console.error
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -62,6 +64,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def review(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.review(conn, pr, body)
+  end
+
+  def files(%ScmConnection{} = conn, map) do
+    impl = dispatcher(conn)
+    impl.files(conn, map)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do

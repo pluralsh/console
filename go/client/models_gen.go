@@ -207,13 +207,16 @@ type AiSettingsAttributes struct {
 	Tools    *ToolConfigAttributes `json:"tools,omitempty"`
 	Provider *AiProvider           `json:"provider,omitempty"`
 	// ai provider to use with tool calls
-	ToolProvider *AiProvider                  `json:"toolProvider,omitempty"`
-	Openai       *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic    *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama       *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure        *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock      *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex       *VertexAiAttributes          `json:"vertex,omitempty"`
+	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// ai provider to use with embeddings (for vector indexing)
+	EmbeddingProvider *AiProvider                  `json:"embeddingProvider,omitempty"`
+	Openai            *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	Anthropic         *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama            *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure             *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
+	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
 }
 
 type Alert struct {
@@ -263,6 +266,8 @@ type AnthropicSettingsAttributes struct {
 	Model       *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 // a representation of a kubernetes api deprecation
@@ -447,6 +452,8 @@ type AzureOpenaiAttributes struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
 }
@@ -3433,7 +3440,9 @@ type OllamaAttributes struct {
 	Model string `json:"model"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
-	URL       string  `json:"url"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	URL            string  `json:"url"`
 	// An http authorization header to use on calls to the Ollama api
 	Authorization *string `json:"authorization,omitempty"`
 }
@@ -3463,6 +3472,8 @@ type OpenaiSettingsAttributes struct {
 	Model       *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type OperationalLayoutAttributes struct {
@@ -5762,6 +5773,12 @@ type UserRoles struct {
 	Admin *bool `json:"admin,omitempty"`
 }
 
+type VectorStoreAttributes struct {
+	Enabled *bool                              `json:"enabled,omitempty"`
+	Store   *VectorStore                       `json:"store,omitempty"`
+	Elastic *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+}
+
 // a shortform reference to an addon by version
 type VersionReference struct {
 	Name    string `json:"name"`
@@ -5773,6 +5790,8 @@ type VertexAiAttributes struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
 	// custom vertexai endpoint if for dedicated customer deployments
@@ -8524,6 +8543,45 @@ func (e *ValidationUniqScope) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VectorStore string
+
+const (
+	VectorStoreElastic VectorStore = "ELASTIC"
+)
+
+var AllVectorStore = []VectorStore{
+	VectorStoreElastic,
+}
+
+func (e VectorStore) IsValid() bool {
+	switch e {
+	case VectorStoreElastic:
+		return true
+	}
+	return false
+}
+
+func (e VectorStore) String() string {
+	return string(e)
+}
+
+func (e *VectorStore) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VectorStore(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VectorStore", str)
+	}
+	return nil
+}
+
+func (e VectorStore) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

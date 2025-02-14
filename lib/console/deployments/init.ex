@@ -14,10 +14,14 @@ defmodule Console.Deployments.Init do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     start_transaction()
     |> add_operation(:deploy_repo, fn _ ->
-      Git.create_repository(%{url: Git.deploy_url()}, bot)
+      Git.git_auth_attrs()
+      |> Map.put(:url, Git.deploy_url())
+      |> Git.create_repository(bot)
     end)
     |> add_operation(:artifacts_repo, fn _ ->
-      Git.create_repository(%{url: Git.artifacts_url()}, bot)
+      Git.git_auth_attrs()
+      |> Map.put(:url, Git.artifacts_url())
+      |> Git.create_repository(bot)
     end)
     |> add_operation(:cluster, fn _ ->
       Clusters.create_cluster(%{

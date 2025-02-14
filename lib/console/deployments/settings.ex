@@ -209,6 +209,13 @@ defmodule Console.Deployments.Settings do
     |> notify(:update, user)
   end
 
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
+  def update(attrs) do
+    fetch_consistent()
+    |> DeploymentSettings.changeset(attrs)
+    |> Repo.update()
+  end
+
   @spec enable(User.t) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def enable(%User{} = user) do

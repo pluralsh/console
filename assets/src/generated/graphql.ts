@@ -282,6 +282,8 @@ export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
   bedrock?: InputMaybe<BedrockAiAttributes>;
+  /** ai provider to use with embeddings (for vector indexing) */
+  embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
@@ -289,6 +291,7 @@ export type AiSettingsAttributes = {
   /** ai provider to use with tool calls */
   toolProvider?: InputMaybe<AiProvider>;
   tools?: InputMaybe<ToolConfigAttributes>;
+  vectorStore?: InputMaybe<VectorStoreAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
 };
 
@@ -353,6 +356,8 @@ export type AnthropicSettings = {
 
 export type AnthropicSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -599,6 +604,8 @@ export type AzureOpenaiAttributes = {
   accessToken: Scalars['String']['input'];
   /** the api version you want to use */
   apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['input'];
   /** the exact model you wish to use */
@@ -4166,6 +4173,8 @@ export enum OidcProviderType {
 export type OllamaAttributes = {
   /** An http authorization header to use on calls to the Ollama api */
   authorization?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model: Scalars['String']['input'];
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -4196,6 +4205,8 @@ export type OpenaiSettings = {
 export type OpenaiSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -5669,6 +5680,7 @@ export type RootMutationType = {
   upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
 };
@@ -6610,6 +6622,11 @@ export type RootMutationTypeUpsertObserverArgs = {
 
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
+
+export type RootMutationTypeUpsertUserArgs = {
+  attributes: UserAttributes;
 };
 
 
@@ -9251,6 +9268,16 @@ export enum ValidationUniqScope {
   Project = 'PROJECT'
 }
 
+export enum VectorStore {
+  Elastic = 'ELASTIC'
+}
+
+export type VectorStoreAttributes = {
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  store?: InputMaybe<VectorStore>;
+};
+
 /** a shortform reference to an addon by version */
 export type VersionReference = {
   __typename?: 'VersionReference';
@@ -9259,6 +9286,8 @@ export type VersionReference = {
 };
 
 export type VertexAiAttributes = {
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** custom vertexai endpoint if for dedicated customer deployments */
   endpoint?: InputMaybe<Scalars['String']['input']>;
   /** the gcp region the model is hosted in */

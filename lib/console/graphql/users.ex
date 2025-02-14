@@ -541,6 +541,14 @@ defmodule Console.GraphQl.Users do
       safe_resolve &User.update_user/2
     end
 
+    field :upsert_user, :user do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :attributes, non_null(:user_attributes)
+
+      safe_resolve &User.upsert_user/2
+    end
+
     field :delete_user, :user do
       middleware Authenticated
       middleware AdminRequired
