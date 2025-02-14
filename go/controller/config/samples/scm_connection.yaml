@@ -18,4 +18,25 @@ spec:
     name: github-token
     namespace: default
   username: "johndoe"
-
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: plural
+spec:
+  name: plural
+  type: GITHUB
+  default: true
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github-2
+spec:
+  name: scm-test-github-2
+  type: GITHUB
+  tokenSecretRef:
+    name: github-token
+    namespace: default
+  username: "johndoe"
+  default: false
