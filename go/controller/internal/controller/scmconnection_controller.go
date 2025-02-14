@@ -145,6 +145,17 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 		return ctrl.Result{}, err
 	}
 
+	// Default field should also be editable even if the resource is in the read-only mode.
+	if scm.Spec.Default != nil {
+		if apiScmConnection, err = r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), console.ScmConnectionAttributes{
+			Name:    apiScmConnection.Name,
+			Type:    apiScmConnection.Type,
+			Default: scm.Spec.Default,
+		}); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
 	scm.Status.ID = &apiScmConnection.ID
 
 	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
