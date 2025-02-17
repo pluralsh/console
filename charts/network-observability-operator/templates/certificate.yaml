@@ -22,5 +22,4 @@ metadata:
   name: self-signed
 spec:
   selfSigned: {}
----
 {{ end }}
