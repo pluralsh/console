@@ -79,6 +79,8 @@ spec:
             name: console-env
         env:
         {{ include "console.env" . | nindent 8 }}
+        - name: REPLICAS
+          value: {{ .Values.replicaCount | quote }}
         {{- if  .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
         {{- end }}
