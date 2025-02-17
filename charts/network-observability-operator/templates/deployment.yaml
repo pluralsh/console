@@ -7,7 +7,7 @@ metadata:
     app: netobserv-operator
     control-plane: controller-manager
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: netobserv-operator
@@ -78,7 +78,7 @@ spec:
               readOnly: true
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: netobserv-controller-manager
+      serviceAccountName: {{ include "network-observability-operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       volumes:
         - name: cert
