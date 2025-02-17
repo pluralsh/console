@@ -456,6 +456,44 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       refute refetch(stack)
     end
   end
+end
+
+
+defmodule Console.Deployments.PubSub.RecurseSyncTest do
+  use Console.DataCase, async: false
+  use Mimic
+  import ElasticsearchUtils
+  alias Console.PubSub
+  alias Console.PubSub.Consumers.Recurse
+
+  setup :set_mimic_global
+
+  describe "PipelineStageUpdated" do
+    test "it will attempt to apply pr automations" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx)
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      expect(Console.Deployments.Pipelines.Discovery, :context, fn stage -> {:ok, stage} end)
+      event = %PubSub.PipelineStageUpdated{item: dev}
+      {:ok, stage} = Recurse.handle_event(event)
+
+      assert stage.id == dev.id
+    end
+  end
 
   describe "ScmWebhook" do
     test "it can vector index pr files" do
@@ -496,43 +534,6 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       {:ok, c} = count_index(vector_index())
       assert c > 0
-    end
-  end
-end
-
-
-defmodule Console.Deployments.PubSub.RecurseSyncTest do
-  use Console.DataCase, async: false
-  use Mimic
-  alias Console.PubSub
-  alias Console.PubSub.Consumers.Recurse
-
-  setup :set_mimic_global
-
-  describe "PipelineStageUpdated" do
-    test "it will attempt to apply pr automations" do
-      insert(:user, bot_name: "console", roles: %{admin: true})
-
-      conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
-
-      svc = insert(:service)
-      pipe = insert(:pipeline, name: "my-pipeline")
-      ctx = insert(:pipeline_context, context: %{some: "context"})
-      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx)
-      ss = insert(:stage_service, service: svc, stage: dev)
-      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
-
-      expect(Console.Deployments.Pipelines.Discovery, :context, fn stage -> {:ok, stage} end)
-      event = %PubSub.PipelineStageUpdated{item: dev}
-      {:ok, stage} = Recurse.handle_event(event)
-
-      assert stage.id == dev.id
     end
   end
 end

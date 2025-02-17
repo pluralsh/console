@@ -204,7 +204,7 @@ defmodule Console.AI.OpenAI do
   defp tool_role(:system, "o1-" <> _), do: :user
   defp tool_role(r, _), do: r
 
-  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o"
+  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o-mini"
 
   defp tool_args(tool) do
     %{

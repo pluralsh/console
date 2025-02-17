@@ -65,6 +65,22 @@ defmodule Console.Schema.Stack do
     end
   end
 
+  defmodule PolicyEngine do
+    use Piazza.Ecto.Schema
+
+    defenum Type, trivy: 0
+
+    embedded_schema do
+      field :type, Type
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(type)a)
+      |> validate_required(~w(type)a)
+    end
+  end
+
   schema "stacks" do
     field :name,            :string
     field :type,            Type
@@ -86,6 +102,7 @@ defmodule Console.Schema.Stack do
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
 
+    embeds_one :policy_engine, PolicyEngine, on_replace: :update
     embeds_one :git,           Service.Git, on_replace: :update
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Configuration, on_replace: :update
@@ -191,6 +208,7 @@ defmodule Console.Schema.Stack do
     |> cast_embed(:git)
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
+    |> cast_embed(:policy_engine)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)

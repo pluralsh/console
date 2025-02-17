@@ -3094,6 +3094,7 @@ export type InfrastructureStack = {
   parent?: Maybe<ServiceDeployment>;
   /** whether the stack is actively tracking changes in git */
   paused?: Maybe<Scalars['Boolean']['output']>;
+  policyEngine?: Maybe<PolicyEngine>;
   /** The project this stack belongs to */
   project?: Maybe<Project>;
   pullRequests?: Maybe<PullRequestConnection>;
@@ -4839,6 +4840,22 @@ export type PolicyConstraintEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PolicyConstraint>;
 };
+
+/** Configuration for applying policy enforcement to a stack */
+export type PolicyEngine = {
+  __typename?: 'PolicyEngine';
+  /** the policy engine to use with this stack */
+  type: PolicyEngineType;
+};
+
+export type PolicyEngineAttributes = {
+  /** the policy engine to use with this stack */
+  type: PolicyEngineType;
+};
+
+export enum PolicyEngineType {
+  Trivy = 'TRIVY'
+}
 
 /** Aggregate statistics for policies across your fleet */
 export type PolicyStatistic = {
@@ -8595,6 +8612,7 @@ export type StackAttributes = {
   observableMetrics?: InputMaybe<Array<InputMaybe<ObservableMetricAttributes>>>;
   /** the parent service this stack was created w/in */
   parentId?: InputMaybe<Scalars['ID']['input']>;
+  policyEngine?: InputMaybe<PolicyEngineAttributes>;
   /** the project id this stack will belong to */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -8744,6 +8762,33 @@ export type StackOutputAttributes = {
   value: Scalars['String']['input'];
 };
 
+export type StackPolicyViolation = {
+  __typename?: 'StackPolicyViolation';
+  /** the causes of this violation line-by-line in code */
+  causes?: Maybe<Array<Maybe<StackViolationCause>>>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  policyId: Scalars['String']['output'];
+  policyModule?: Maybe<Scalars['String']['output']>;
+  policyUrl?: Maybe<Scalars['String']['output']>;
+  resolution?: Maybe<Scalars['String']['output']>;
+  severity: VulnSeverity;
+  title: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackPolicyViolationAttributes = {
+  causes?: InputMaybe<Array<InputMaybe<StackViolationCauseAttributes>>>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  policyId: Scalars['String']['input'];
+  policyModule?: InputMaybe<Scalars['String']['input']>;
+  policyUrl?: InputMaybe<Scalars['String']['input']>;
+  resolution?: InputMaybe<Scalars['String']['input']>;
+  severity: VulnSeverity;
+  title: Scalars['String']['input'];
+};
+
 export type StackRun = {
   __typename?: 'StackRun';
   /** the actor of this run (defaults to root console user) */
@@ -8784,6 +8829,7 @@ export type StackRun = {
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** temporary plural creds usable for terraform authentication */
   pluralCreds?: Maybe<PluralCreds>;
+  policyEngine?: Maybe<PolicyEngine>;
   /** the pull request this stack belongs to */
   pullRequest?: Maybe<PullRequest>;
   /** the git repository you're sourcing IaC from */
@@ -8804,6 +8850,8 @@ export type StackRun = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Arbitrary variables to add to a stack run */
   variables?: Maybe<Scalars['Map']['output']>;
+  /** policy violations for this stack */
+  violations?: Maybe<Array<Maybe<StackPolicyViolation>>>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
 };
@@ -8821,6 +8869,8 @@ export type StackRunAttributes = {
   state?: InputMaybe<StackStateAttributes>;
   /** The status of this run */
   status: StackStatus;
+  /** the violations detected by the policy engine */
+  violations?: InputMaybe<Array<InputMaybe<StackPolicyViolationAttributes>>>;
 };
 
 export type StackRunConnection = {
@@ -8904,6 +8954,36 @@ export enum StackType {
   Custom = 'CUSTOM',
   Terraform = 'TERRAFORM'
 }
+
+export type StackViolationCause = {
+  __typename?: 'StackViolationCause';
+  end: Scalars['Int']['output'];
+  lines?: Maybe<Array<Maybe<StackViolationCauseLine>>>;
+  resource: Scalars['String']['output'];
+  start: Scalars['Int']['output'];
+};
+
+export type StackViolationCauseAttributes = {
+  end: Scalars['Int']['input'];
+  lines?: InputMaybe<Array<InputMaybe<StackViolationCauseLineAttributes>>>;
+  resource: Scalars['String']['input'];
+  start: Scalars['Int']['input'];
+};
+
+export type StackViolationCauseLine = {
+  __typename?: 'StackViolationCauseLine';
+  content: Scalars['String']['output'];
+  first?: Maybe<Scalars['Boolean']['output']>;
+  last?: Maybe<Scalars['Boolean']['output']>;
+  line: Scalars['Int']['output'];
+};
+
+export type StackViolationCauseLineAttributes = {
+  content: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Boolean']['input']>;
+  last?: InputMaybe<Scalars['Boolean']['input']>;
+  line: Scalars['Int']['input'];
+};
 
 /** the configuration of a service within a pipeline stage, including optional promotion criteria */
 export type StageService = {

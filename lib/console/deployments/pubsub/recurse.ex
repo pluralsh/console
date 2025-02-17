@@ -102,11 +102,14 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Schema.{PullRequest, Stack}
   alias Console.Deployments.{Stacks, Git.Discovery}
+  alias Console.Deployments.Notifications.Utils
 
   def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
-    with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
+    Utils.deduplicate({:stack_pr, pr.id}, fn ->
+      with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
          _ <- Discovery.kick(stack.repository),
       do: Stacks.poll(pr)
+    end, ttl: :timer.minutes(2))
   end
   def process(_), do: :ok
 end

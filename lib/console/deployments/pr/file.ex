@@ -3,11 +3,12 @@ defmodule Console.Deployments.Pr.File do
 
   @type t :: %__MODULE__{sha: binary, contents: binary, filename: binary, patch: binary}
 
-  defstruct [:url, :title, :sha, :contents, :filename, :patch]
+  defstruct [:url, :repo, :title, :sha, :contents, :filename, :patch]
 
   def new(args) do
     %__MODULE__{
       url: args["url"],
+      repo: args["repo"],
       title: args["title"],
       sha: args["sha"],
       contents: args["contents"],
@@ -25,6 +26,7 @@ defmodule Console.Deployments.Pr.File do
       """
       url: #{file.url}
       title: #{file.title}
+      repo: #{file.repo}
       filename: #{file.filename}
       #{Utils.stopword()}
       #{file.contents}

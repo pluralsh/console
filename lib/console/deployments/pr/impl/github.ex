@@ -85,6 +85,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     Enum.map(files, fn f ->
       %File{
         url: url,
+        repo: to_repo_url(url),
         title: title,
         contents: get_content(client, f["raw_url"]),
         filename: f["filename"],
@@ -134,6 +135,13 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp state(%{"state" => "closed", "merged_at" => merged}) when not is_nil(merged), do: :merged
   defp state(%{"state" => "closed"}), do: :closed
   defp state(_), do: :open
+
+  defp to_repo_url(url) do
+    case String.split(url, "/pull") do
+      [repo | _] -> "#{repo}.git"
+      _ -> url
+    end
+  end
 
   defp get_pull_id(url) do
     with %URI{path: "/" <> path} <- URI.parse(url),
