@@ -3615,19 +3615,31 @@ func (t *InfrastructureStackStatusFragment) GetStatus() *StackStatus {
 	return &t.Status
 }
 
+type PolicyEngineFragment struct {
+	Type PolicyEngineType "json:\"type\" graphql:\"type\""
+}
+
+func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
+	if t == nil {
+		t = &PolicyEngineFragment{}
+	}
+	return &t.Type
+}
+
 type InfrastructureStackFragment struct {
 	ID            *string                     "json:\"id,omitempty\" graphql:\"id\""
 	Name          string                      "json:\"name\" graphql:\"name\""
 	Type          StackType                   "json:\"type\" graphql:\"type\""
+	Variables     map[string]interface{}      "json:\"variables,omitempty\" graphql:\"variables\""
+	Approval      *bool                       "json:\"approval,omitempty\" graphql:\"approval\""
+	Workdir       *string                     "json:\"workdir,omitempty\" graphql:\"workdir\""
+	ManageState   *bool                       "json:\"manageState,omitempty\" graphql:\"manageState\""
+	DeletedAt     *string                     "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Git           GitRefFragment              "json:\"git\" graphql:\"git\""
 	JobSpec       *JobSpecFragment            "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Configuration StackConfigurationFragment  "json:\"configuration\" graphql:\"configuration\""
 	Cluster       *TinyClusterFragment        "json:\"cluster,omitempty\" graphql:\"cluster\""
 	Project       *TinyProjectFragment        "json:\"project,omitempty\" graphql:\"project\""
-	Approval      *bool                       "json:\"approval,omitempty\" graphql:\"approval\""
-	Workdir       *string                     "json:\"workdir,omitempty\" graphql:\"workdir\""
-	ManageState   *bool                       "json:\"manageState,omitempty\" graphql:\"manageState\""
-	DeletedAt     *string                     "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Files         []*StackFileFragment        "json:\"files,omitempty\" graphql:\"files\""
 	Environment   []*StackEnvironmentFragment "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment      "json:\"output,omitempty\" graphql:\"output\""
@@ -3635,7 +3647,7 @@ type InfrastructureStackFragment struct {
 	Repository    *GitRepositoryFragment      "json:\"repository,omitempty\" graphql:\"repository\""
 	WriteBindings []*PolicyBindingFragment    "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 	ReadBindings  []*PolicyBindingFragment    "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	Variables     map[string]interface{}      "json:\"variables,omitempty\" graphql:\"variables\""
+	PolicyEngine  *PolicyEngineFragment       "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
 }
 
 func (t *InfrastructureStackFragment) GetID() *string {
@@ -3655,6 +3667,36 @@ func (t *InfrastructureStackFragment) GetType() *StackType {
 		t = &InfrastructureStackFragment{}
 	}
 	return &t.Type
+}
+func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.Variables
+}
+func (t *InfrastructureStackFragment) GetApproval() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.Approval
+}
+func (t *InfrastructureStackFragment) GetWorkdir() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.Workdir
+}
+func (t *InfrastructureStackFragment) GetManageState() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.ManageState
+}
+func (t *InfrastructureStackFragment) GetDeletedAt() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.DeletedAt
 }
 func (t *InfrastructureStackFragment) GetGit() *GitRefFragment {
 	if t == nil {
@@ -3685,30 +3727,6 @@ func (t *InfrastructureStackFragment) GetProject() *TinyProjectFragment {
 		t = &InfrastructureStackFragment{}
 	}
 	return t.Project
-}
-func (t *InfrastructureStackFragment) GetApproval() *bool {
-	if t == nil {
-		t = &InfrastructureStackFragment{}
-	}
-	return t.Approval
-}
-func (t *InfrastructureStackFragment) GetWorkdir() *string {
-	if t == nil {
-		t = &InfrastructureStackFragment{}
-	}
-	return t.Workdir
-}
-func (t *InfrastructureStackFragment) GetManageState() *bool {
-	if t == nil {
-		t = &InfrastructureStackFragment{}
-	}
-	return t.ManageState
-}
-func (t *InfrastructureStackFragment) GetDeletedAt() *string {
-	if t == nil {
-		t = &InfrastructureStackFragment{}
-	}
-	return t.DeletedAt
 }
 func (t *InfrastructureStackFragment) GetFiles() []*StackFileFragment {
 	if t == nil {
@@ -3752,11 +3770,11 @@ func (t *InfrastructureStackFragment) GetReadBindings() []*PolicyBindingFragment
 	}
 	return t.ReadBindings
 }
-func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
+func (t *InfrastructureStackFragment) GetPolicyEngine() *PolicyEngineFragment {
 	if t == nil {
 		t = &InfrastructureStackFragment{}
 	}
-	return t.Variables
+	return t.PolicyEngine
 }
 
 type StackRunIDFragment struct {
@@ -3779,6 +3797,7 @@ type StackRunFragment struct {
 	Tarball       string                                             "json:\"tarball\" graphql:\"tarball\""
 	Workdir       *string                                            "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                                              "json:\"manageState,omitempty\" graphql:\"manageState\""
+	Variables     map[string]interface{}                             "json:\"variables,omitempty\" graphql:\"variables\""
 	StateUrls     *StackRunFragment_StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunFragment_StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                                      "json:\"actor,omitempty\" graphql:\"actor\""
@@ -3793,7 +3812,8 @@ type StackRunFragment struct {
 	Environment   []*StackEnvironmentFragment                        "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment                             "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment                            "json:\"errors,omitempty\" graphql:\"errors\""
-	Variables     map[string]interface{}                             "json:\"variables,omitempty\" graphql:\"variables\""
+	Violations    []*StackPolicyViolationFragment                    "json:\"violations,omitempty\" graphql:\"violations\""
+	PolicyEngine  *PolicyEngineFragment                              "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
 	Approver      *UserFragment                                      "json:\"approver,omitempty\" graphql:\"approver\""
 }
 
@@ -3844,6 +3864,12 @@ func (t *StackRunFragment) GetManageState() *bool {
 		t = &StackRunFragment{}
 	}
 	return t.ManageState
+}
+func (t *StackRunFragment) GetVariables() map[string]interface{} {
+	if t == nil {
+		t = &StackRunFragment{}
+	}
+	return t.Variables
 }
 func (t *StackRunFragment) GetStateUrls() *StackRunFragment_StackRunBaseFragment_StateUrls {
 	if t == nil {
@@ -3929,11 +3955,17 @@ func (t *StackRunFragment) GetErrors() []*ServiceErrorFragment {
 	}
 	return t.Errors
 }
-func (t *StackRunFragment) GetVariables() map[string]interface{} {
+func (t *StackRunFragment) GetViolations() []*StackPolicyViolationFragment {
 	if t == nil {
 		t = &StackRunFragment{}
 	}
-	return t.Variables
+	return t.Violations
+}
+func (t *StackRunFragment) GetPolicyEngine() *PolicyEngineFragment {
+	if t == nil {
+		t = &StackRunFragment{}
+	}
+	return t.PolicyEngine
 }
 func (t *StackRunFragment) GetApprover() *UserFragment {
 	if t == nil {
@@ -4025,6 +4057,7 @@ type StackRunBaseFragment struct {
 	Tarball       string                            "json:\"tarball\" graphql:\"tarball\""
 	Workdir       *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
+	Variables     map[string]interface{}            "json:\"variables,omitempty\" graphql:\"variables\""
 	StateUrls     *StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
@@ -4039,7 +4072,8 @@ type StackRunBaseFragment struct {
 	Environment   []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
-	Variables     map[string]interface{}            "json:\"variables,omitempty\" graphql:\"variables\""
+	Violations    []*StackPolicyViolationFragment   "json:\"violations,omitempty\" graphql:\"violations\""
+	PolicyEngine  *PolicyEngineFragment             "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
 }
 
 func (t *StackRunBaseFragment) GetID() string {
@@ -4089,6 +4123,12 @@ func (t *StackRunBaseFragment) GetManageState() *bool {
 		t = &StackRunBaseFragment{}
 	}
 	return t.ManageState
+}
+func (t *StackRunBaseFragment) GetVariables() map[string]interface{} {
+	if t == nil {
+		t = &StackRunBaseFragment{}
+	}
+	return t.Variables
 }
 func (t *StackRunBaseFragment) GetStateUrls() *StackRunBaseFragment_StateUrls {
 	if t == nil {
@@ -4174,11 +4214,148 @@ func (t *StackRunBaseFragment) GetErrors() []*ServiceErrorFragment {
 	}
 	return t.Errors
 }
-func (t *StackRunBaseFragment) GetVariables() map[string]interface{} {
+func (t *StackRunBaseFragment) GetViolations() []*StackPolicyViolationFragment {
 	if t == nil {
 		t = &StackRunBaseFragment{}
 	}
-	return t.Variables
+	return t.Violations
+}
+func (t *StackRunBaseFragment) GetPolicyEngine() *PolicyEngineFragment {
+	if t == nil {
+		t = &StackRunBaseFragment{}
+	}
+	return t.PolicyEngine
+}
+
+type StackPolicyViolationFragment struct {
+	ID           string                         "json:\"id\" graphql:\"id\""
+	Title        string                         "json:\"title\" graphql:\"title\""
+	Description  *string                        "json:\"description,omitempty\" graphql:\"description\""
+	PolicyID     string                         "json:\"policyId\" graphql:\"policyId\""
+	PolicyModule *string                        "json:\"policyModule,omitempty\" graphql:\"policyModule\""
+	PolicyURL    *string                        "json:\"policyUrl,omitempty\" graphql:\"policyUrl\""
+	Severity     VulnSeverity                   "json:\"severity\" graphql:\"severity\""
+	Resolution   *string                        "json:\"resolution,omitempty\" graphql:\"resolution\""
+	Causes       []*StackViolationCauseFragment "json:\"causes,omitempty\" graphql:\"causes\""
+}
+
+func (t *StackPolicyViolationFragment) GetID() string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.ID
+}
+func (t *StackPolicyViolationFragment) GetTitle() string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.Title
+}
+func (t *StackPolicyViolationFragment) GetDescription() *string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.Description
+}
+func (t *StackPolicyViolationFragment) GetPolicyID() string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.PolicyID
+}
+func (t *StackPolicyViolationFragment) GetPolicyModule() *string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.PolicyModule
+}
+func (t *StackPolicyViolationFragment) GetPolicyURL() *string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.PolicyURL
+}
+func (t *StackPolicyViolationFragment) GetSeverity() *VulnSeverity {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return &t.Severity
+}
+func (t *StackPolicyViolationFragment) GetResolution() *string {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.Resolution
+}
+func (t *StackPolicyViolationFragment) GetCauses() []*StackViolationCauseFragment {
+	if t == nil {
+		t = &StackPolicyViolationFragment{}
+	}
+	return t.Causes
+}
+
+type StackViolationCauseFragment struct {
+	Start    int64                              "json:\"start\" graphql:\"start\""
+	End      int64                              "json:\"end\" graphql:\"end\""
+	Resource string                             "json:\"resource\" graphql:\"resource\""
+	Lines    []*StackViolationCauseLineFragment "json:\"lines,omitempty\" graphql:\"lines\""
+}
+
+func (t *StackViolationCauseFragment) GetStart() int64 {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.Start
+}
+func (t *StackViolationCauseFragment) GetEnd() int64 {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.End
+}
+func (t *StackViolationCauseFragment) GetResource() string {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.Resource
+}
+func (t *StackViolationCauseFragment) GetLines() []*StackViolationCauseLineFragment {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.Lines
+}
+
+type StackViolationCauseLineFragment struct {
+	First   *bool  "json:\"first,omitempty\" graphql:\"first\""
+	Last    *bool  "json:\"last,omitempty\" graphql:\"last\""
+	Content string "json:\"content\" graphql:\"content\""
+	Line    int64  "json:\"line\" graphql:\"line\""
+}
+
+func (t *StackViolationCauseLineFragment) GetFirst() *bool {
+	if t == nil {
+		t = &StackViolationCauseLineFragment{}
+	}
+	return t.First
+}
+func (t *StackViolationCauseLineFragment) GetLast() *bool {
+	if t == nil {
+		t = &StackViolationCauseLineFragment{}
+	}
+	return t.Last
+}
+func (t *StackViolationCauseLineFragment) GetContent() string {
+	if t == nil {
+		t = &StackViolationCauseLineFragment{}
+	}
+	return t.Content
+}
+func (t *StackViolationCauseLineFragment) GetLine() int64 {
+	if t == nil {
+		t = &StackViolationCauseLineFragment{}
+	}
+	return t.Line
 }
 
 type ServiceErrorFragment struct {
@@ -26084,6 +26261,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -26131,7 +26309,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -26142,6 +26325,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -26157,10 +26345,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -26182,7 +26366,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -26303,6 +26489,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -26316,6 +26505,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
@@ -26513,6 +26729,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -26528,10 +26749,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -26553,7 +26770,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -26678,6 +26897,9 @@ fragment UserFragment on User {
 	name
 	id
 	email
+}
+fragment PolicyEngineFragment on PolicyEngine {
+	type
 }
 `
 
@@ -26811,6 +27033,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -26858,7 +27081,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -26869,6 +27097,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -26884,10 +27117,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -26909,7 +27138,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27030,6 +27261,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -27043,6 +27277,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
@@ -27077,6 +27338,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -27124,7 +27386,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -27135,6 +27402,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -27150,10 +27422,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -27175,7 +27443,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27296,6 +27566,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -27309,6 +27582,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
@@ -27343,6 +27643,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -27390,7 +27691,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -27401,6 +27707,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -27416,10 +27727,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -27441,7 +27748,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27562,6 +27871,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -27575,6 +27887,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
@@ -27632,6 +27971,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -27647,10 +27991,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -27672,7 +28012,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27797,6 +28139,9 @@ fragment UserFragment on User {
 	name
 	id
 	email
+}
+fragment PolicyEngineFragment on PolicyEngine {
+	type
 }
 `
 
@@ -27826,6 +28171,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -27841,10 +28191,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -27866,7 +28212,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27991,6 +28339,9 @@ fragment UserFragment on User {
 	name
 	id
 	email
+}
+fragment PolicyEngineFragment on PolicyEngine {
+	type
 }
 `
 
@@ -28075,6 +28426,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -28090,10 +28446,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -28115,7 +28467,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -28240,6 +28594,9 @@ fragment UserFragment on User {
 	name
 	id
 	email
+}
+fragment PolicyEngineFragment on PolicyEngine {
+	type
 }
 `
 
@@ -28679,6 +29036,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -28726,7 +29084,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -28737,6 +29100,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -28752,10 +29120,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -28777,7 +29141,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -28898,6 +29264,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -28911,6 +29280,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
@@ -28949,6 +29345,7 @@ fragment StackRunBaseFragment on StackRun {
 	tarball
 	workdir
 	manageState
+	variables
 	stateUrls {
 		terraform {
 			address
@@ -28996,7 +29393,12 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
-	variables
+	violations {
+		... StackPolicyViolationFragment
+	}
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -29007,6 +29409,11 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	id
 	name
 	type
+	variables
+	approval
+	workdir
+	manageState
+	deletedAt
 	git {
 		... GitRefFragment
 	}
@@ -29022,10 +29429,6 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	project {
 		... TinyProjectFragment
 	}
-	approval
-	workdir
-	manageState
-	deletedAt
 	files {
 		... StackFileFragment
 	}
@@ -29047,7 +29450,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
-	variables
+	policyEngine {
+		... PolicyEngineFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -29168,6 +29573,9 @@ fragment GroupFragment on Group {
 	name
 	description
 }
+fragment PolicyEngineFragment on PolicyEngine {
+	type
+}
 fragment RunStepFragment on RunStep {
 	id
 	status
@@ -29181,6 +29589,33 @@ fragment RunStepFragment on RunStep {
 fragment ServiceErrorFragment on ServiceError {
 	source
 	message
+}
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+	id
+	title
+	description
+	policyId
+	policyModule
+	policyUrl
+	severity
+	resolution
+	causes {
+		... StackViolationCauseFragment
+	}
+}
+fragment StackViolationCauseFragment on StackViolationCause {
+	start
+	end
+	resource
+	lines {
+		... StackViolationCauseLineFragment
+	}
+}
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+	first
+	last
+	content
+	line
 }
 `
 
