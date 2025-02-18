@@ -22,13 +22,15 @@ spec:
       containers:
         - args:
             - --health-probe-bind-address=:8081
-            - --metrics-bind-address=127.0.0.1:8080
+            - --metrics-bind-address=:8443
             - --leader-elect
             - --ebpf-agent-image=$(RELATED_IMAGE_EBPF_AGENT)
             - --flowlogs-pipeline-image=$(RELATED_IMAGE_FLOWLOGS_PIPELINE)
             - --console-plugin-image=$(RELATED_IMAGE_CONSOLE_PLUGIN)
             - --downstream-deployment=$(DOWNSTREAM_DEPLOYMENT)
             - --profiling-bind-address=$(PROFILING_BIND_ADDRESS)
+            - --metrics-cert-file=/etc/tls/private/tls.crt
+            - --metrics-cert-key-file=/etc/tls/private/tls.key
           command:
             - /manager
           env:
@@ -76,6 +78,9 @@ spec:
             - mountPath: /tmp/k8s-webhook-server/serving-certs
               name: cert
               readOnly: true
+            - mountPath: /etc/tls/private
+              name: manager-metric-tls
+              readOnly: true
       securityContext:
         runAsNonRoot: true
       serviceAccountName: {{ include "network-observability-operator.serviceAccountName" . }}
@@ -85,3 +90,7 @@ spec:
           secret:
             defaultMode: 420
             secretName: webhook-server-cert
+        - name: manager-metric-tls
+          secret:
+            defaultMode: 420
+            secretName: manager-metrics-tls
