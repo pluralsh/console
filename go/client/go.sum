@@ -1,7 +1,7 @@
 github.com/99designs/gqlgen v0.17.64 h1:BzpqO5ofQXyy2XOa93Q6fP1BHLRjTOeU35ovTEsbYlw=
 github.com/99designs/gqlgen v0.17.64/go.mod h1:kaxLetFxPGeBBwiuKk75NxuI1fe9HRvob17In74v/Zc=
-github.com/Yamashou/gqlgenc v0.30.2 h1:hkoWStLZI2JgrgZuHlJXVnDFt0/B2X6YLv6hFPYpEAg=
-github.com/Yamashou/gqlgenc v0.30.2/go.mod h1:0VNZtzXhyDofkNNZXXPw8LSLvi3vyG6LXo7XvcWv2X4=
+github.com/Yamashou/gqlgenc v0.29.0 h1:SgZKlp3+l5QeJ1ylwkyLS9iQ+K/MYFo990rUTAvnhbo=
+github.com/Yamashou/gqlgenc v0.29.0/go.mod h1:LmaUl5DU5pckbbg8RxYFDod7HZ3Mfz4sZOL5rXEa6Ug=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=

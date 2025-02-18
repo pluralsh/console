@@ -6,7 +6,7 @@ toolchain go1.23.5
 
 require (
 	github.com/99designs/gqlgen v0.17.61
-	github.com/Yamashou/gqlgenc v0.30.2
+	github.com/Yamashou/gqlgenc v0.29.0
 	github.com/a8m/envsubst v1.4.2
 	github.com/arttor/helmify v0.4.13
 	github.com/elastic/crd-ref-docs v0.0.12

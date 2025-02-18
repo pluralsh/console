@@ -44,8 +44,8 @@ github.com/Masterminds/squirrel v1.5.3 h1:YPpoceAcxuzIljlr5iWpNKaql7hLeG1KLSrhvd
 github.com/Masterminds/squirrel v1.5.3/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA400rg+riTZj10=
 github.com/OpenPeeDeeP/depguard/v2 v2.2.0 h1:vDfG60vDtIuf0MEOhmLlLLSzqaRM8EMcgJPdp74zmpA=
 github.com/OpenPeeDeeP/depguard/v2 v2.2.0/go.mod h1:CIzddKRvLBC4Au5aYP/i3nyaWQ+ClszLIuVocRiCYFQ=
-github.com/Yamashou/gqlgenc v0.30.2 h1:hkoWStLZI2JgrgZuHlJXVnDFt0/B2X6YLv6hFPYpEAg=
-github.com/Yamashou/gqlgenc v0.30.2/go.mod h1:0VNZtzXhyDofkNNZXXPw8LSLvi3vyG6LXo7XvcWv2X4=
+github.com/Yamashou/gqlgenc v0.29.0 h1:SgZKlp3+l5QeJ1ylwkyLS9iQ+K/MYFo990rUTAvnhbo=
+github.com/Yamashou/gqlgenc v0.29.0/go.mod h1:LmaUl5DU5pckbbg8RxYFDod7HZ3Mfz4sZOL5rXEa6Ug=
 github.com/a8m/envsubst v1.4.2 h1:4yWIHXOLEJHQEFd4UjrWDrYeYlV7ncFWJOCBRLOZHQg=
 github.com/a8m/envsubst v1.4.2/go.mod h1:MVUTQNGQ3tsjOOtKCNd+fl8RzhsXcDvvAEzkhGtlsbY=
 github.com/agnivade/levenshtein v1.2.0 h1:U9L4IOT0Y3i0TIlUIDJ7rVUziKi/zPbrJGaFrtYH3SY=

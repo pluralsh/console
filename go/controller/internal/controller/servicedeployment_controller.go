@@ -179,7 +179,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	if service.Status.HasSHA() && !service.Status.IsSHAEqual(sha) {
-		if err := r.ConsoleClient.UpdateService(existingService.ServiceDeploymentFragment.ServiceDeploymentBaseFragment.ID, updater); err != nil {
+		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -197,7 +197,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
-	r.Status.ID = &existingService.ServiceDeploymentFragment.ServiceDeploymentBaseFragment.ID
+	r.Status.ID = &existingService.ID
 	r.Status.SHA = &sha
 	if existingService.Errors != nil {
 		r.Status.Errors = algorithms.Map(existingService.Errors,
@@ -209,7 +209,7 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 			})
 	}
 	r.Status.Components = make([]v1alpha1.ServiceComponent, 0)
-	for _, c := range existingService.ServiceDeploymentFragment.Components {
+	for _, c := range existingService.Components {
 		sc := v1alpha1.ServiceComponent{
 			ID:        c.ID,
 			Name:      c.Name,
@@ -466,7 +466,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		if existingService != nil && existingService.ServiceDeploymentFragment.DeletedAt != nil {
+		if existingService != nil && existingService.DeletedAt != nil {
 			log.Info("waiting for the console")
 			updateStatus(service, existingService, "")
 			return requeue, nil
