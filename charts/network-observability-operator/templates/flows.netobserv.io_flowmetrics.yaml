@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.16.2
   name: flowmetrics.flows.netobserv.io
 spec:
   conversion:
@@ -11,7 +11,7 @@ spec:
       clientConfig:
         service:
           name: netobserv-webhook-service
-          namespace: {{ .Release.Namespace }}
+          namespace: '{{ .Release.Namespace }}'
           path: /convert
       conversionReviewVersions:
         - v1
@@ -36,8 +36,7 @@ spec:
       name: v1alpha1
       schema:
         openAPIV3Schema:
-          description: FlowMetric is the API allowing to create custom metrics from
-            the collected flow logs.
+          description: FlowMetric is the API allowing to create custom metrics from the collected flow logs.
           properties:
             apiVersion:
               description: |-
@@ -65,24 +64,18 @@ spec:
                 To check the cardinality of all NetObserv metrics, run as `promql`: `count({__name__=~"netobserv.*"}) by (__name__)`.
               properties:
                 buckets:
-                  description: A list of buckets to use when `type` is "Histogram".
-                    The list must be parsable as floats. When not set, Prometheus default
-                    buckets are used.
+                  description: A list of buckets to use when `type` is "Histogram". The list must be parsable as floats. When not set, Prometheus default buckets are used.
                   items:
                     type: string
                   type: array
                 charts:
-                  description: Charts configuration, for the OpenShift Console in the
-                    administrator view, Dashboards menu.
+                  description: Charts configuration, for the OpenShift Console in the administrator view, Dashboards menu.
                   items:
-                    description: Configures charts / dashboard generation associated
-                      to a metric
+                    description: Configures charts / dashboard generation associated to a metric
                     properties:
                       dashboardName:
                         default: Main
-                        description: Name of the containing dashboard. If this name
-                          does not refer to an existing dashboard, a new dashboard is
-                          created.
+                        description: Name of the containing dashboard. If this name does not refer to an existing dashboard, a new dashboard is created.
                         type: string
                       queries:
                         description: |-
@@ -96,7 +89,6 @@ spec:
                                 The query legend that applies to each timeseries represented in this chart. When multiple timeseries are displayed, you should set a legend
                                 that distinguishes each of them. It can be done with the following format: {{`{{ Label }}`}}. For example, if the `promQL` groups timeseries per
                                 label such as: `sum(rate($METRIC[2m])) by (Label1, Label2)`, you may write as the legend: {{`Label1={{ Label1 }}, Label2={{ Label2 }}`}}.
-
                               type: string
                             promQL:
                               description: |-
@@ -107,8 +99,7 @@ spec:
                               type: string
                             top:
                               default: 7
-                              description: Top N series to display per timestamp. Does
-                                not apply to `SingleStat` chart type.
+                              description: Top N series to display per timestamp. Does not apply to `SingleStat` chart type.
                               minimum: 1
                               type: integer
                           required:
@@ -133,8 +124,7 @@ spec:
                           - StackArea
                         type: string
                       unit:
-                        description: Unit of this chart. Only a few units are currently
-                          supported. Leave empty to use generic number.
+                        description: Unit of this chart. Only a few units are currently supported. Leave empty to use generic number.
                         enum:
                           - bytes
                           - seconds
@@ -162,8 +152,7 @@ spec:
                     - Ingress
                   type: string
                 divider:
-                  description: When nonzero, scale factor (divider) of the value. Metric
-                    value = Flow value / Divider.
+                  description: When nonzero, scale factor (divider) of the value. Metric value = Flow value / Divider.
                   type: string
                 filters:
                   description: |-
@@ -187,14 +176,19 @@ spec:
                           - NotMatchRegex
                         type: string
                       value:
-                        description: Value to filter on. When `matchType` is `Equal`
-                          or `NotEqual`, you can use field injection with `$(SomeField)`
-                          to refer to any other field of the flow.
+                        description: Value to filter on. When `matchType` is `Equal` or `NotEqual`, you can use field injection with `$(SomeField)` to refer to any other field of the flow.
                         type: string
                     required:
                       - field
                       - matchType
                     type: object
+                  type: array
+                flatten:
+                  description: |-
+                    `flatten` is a list of array-type fields that must be flattened, such as Interfaces or NetworkEvents. Flattened fields generate one metric per item in that field.
+                    For instance, when flattening `Interfaces` on a bytes counter, a flow having Interfaces [br-ex, ens5] increases one counter for `br-ex` and another for `ens5`.
+                  items:
+                    type: string
                   type: array
                 labels:
                   description: |-
@@ -208,9 +202,13 @@ spec:
                     type: string
                   type: array
                 metricName:
-                  description: Name of the metric. In Prometheus, it is automatically
-                    prefixed with "netobserv_".
+                  description: Name of the metric. In Prometheus, it is automatically prefixed with "netobserv_".
                   type: string
+                remap:
+                  additionalProperties:
+                    type: string
+                  description: Set the `remap` property to use different names for the generated metric labels than the flow fields. Use the origin flow fields as keys, and the desired label names as values.
+                  type: object
                 type:
                   description: |-
                     Metric type: "Counter" or "Histogram".
@@ -234,19 +232,9 @@ spec:
               description: FlowMetricStatus defines the observed state of FlowMetric
               properties:
                 conditions:
-                  description: '`conditions` represent the latest available observations
-                  of an object''s state'
+                  description: '`conditions` represent the latest available observations of an object''s state'
                   items:
-                    description: "Condition contains details for one aspect of the current
-                    state of this API Resource.\n---\nThis struct is intended for
-                    direct use as an array at the field path .status.conditions.  For
-                    example,\n\n\n\ttype FooStatus struct{\n\t    // Represents the
-                    observations of a foo's current state.\n\t    // Known .status.conditions.type
-                    are: \"Available\", \"Progressing\", and \"Degraded\"\n\t    //
-                    +patchMergeKey=type\n\t    // +patchStrategy=merge\n\t    // +listType=map\n\t
-                    \   // +listMapKey=type\n\t    Conditions []metav1.Condition `json:\"conditions,omitempty\"
-                    patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"`\n\n\n\t
-                    \   // other fields\n\t}"
+                    description: Condition contains details for one aspect of the current state of this API Resource.
                     properties:
                       lastTransitionTime:
                         description: |-
@@ -287,12 +275,7 @@ spec:
                           - Unknown
                         type: string
                       type:
-                        description: |-
-                          type of condition in CamelCase or in foo.example.com/CamelCase.
-                          ---
-                          Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be
-                          useful (see .node.status.conditions), the ability to deconflict is important.
-                          The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                        description: type of condition in CamelCase or in foo.example.com/CamelCase.
                         maxLength: 316
                         pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                         type: string

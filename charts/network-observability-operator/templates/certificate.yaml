@@ -1,25 +1,34 @@
 apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: serving-cert
-spec:
-  secretName: webhook-server-cert
-  dnsNames:
-    - netobserv-webhook-service.{{ .Release.Namespace }}.svc
-    - netobserv-webhook-service.{{ .Release.Namespace }}.svc.cluster.local
-{{ if .Values.certManager.existingIssuer.name }}
-  issuerRef:
-    kind: {{ .Values.certManager.existingIssuer.kind }}
-    name: {{ .Values.certManager.existingIssuer.name }}
-{{ else }}
-  issuerRef:
-    kind: Issuer
-    name: self-signed
----
-apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: self-signed
 spec:
   selfSigned: {}
-{{ end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "network-observability-operator.fullname" . }}-ca
+spec:
+  secretName: webhook-server-cert
+  dnsNames:
+    - netobserv-webhook-service.{{ .Release.Namespace }}.svc
+    - netobserv-webhook-service.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: self-signed
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: metrics-serving-cert
+spec:
+  secretName: manager-metrics-tls
+  dnsNames:
+    - netobserv-metrics-service.{{ .Release.Namespace }}.svc
+    - netobserv-metrics-service.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    name: self-signed
+    kind: Issuer
+    group: cert-manager.io
