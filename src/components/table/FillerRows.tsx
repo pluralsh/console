@@ -1,7 +1,7 @@
 import type { Row } from '@tanstack/react-table'
 import type { VirtualItem } from '@tanstack/react-virtual'
 
-import { type TableFillLevel } from './Table'
+import { type TableFillLevel } from './tableUtils'
 import { Td } from './Td'
 import { Tr } from './Tr'
 

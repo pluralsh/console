@@ -1,4 +1,4 @@
-import { type TableFillLevel } from './Table'
+import { TableFillLevel } from './tableUtils'
 
 export const tableFillLevelToBorder = {
   0: 'fill-two',

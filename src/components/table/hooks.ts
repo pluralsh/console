@@ -3,7 +3,7 @@ import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import usePrevious from '../../hooks/usePrevious'
 
-import { type VirtualSlice } from './Table'
+import { type VirtualSlice } from './tableUtils'
 
 export function useIsScrolling(
   ref: RefObject<HTMLElement>,

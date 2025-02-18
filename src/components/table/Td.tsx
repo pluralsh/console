@@ -4,7 +4,7 @@ import {
   tableFillLevelToBorder,
   tableFillLevelToHighlightedCellBg,
 } from './colors'
-import { type TableFillLevel } from './Table'
+import { type TableFillLevel } from './tableUtils'
 
 export const Td = styled.td<{
   $fillLevel: TableFillLevel
@@ -88,3 +88,7 @@ export const TdLoading = styled(Td)(({ theme }) => ({
   color: theme.colors['text-xlight'],
   minHeight: theme.spacing.large * 2 + theme.spacing.xlarge,
 }))
+
+export const TdBasic = styled.td({
+  gridColumn: '1 / -1',
+})

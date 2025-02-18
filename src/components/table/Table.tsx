@@ -1,10 +1,4 @@
-import { rankItem } from '@tanstack/match-sorter-utils'
-import type {
-  ColumnDef,
-  FilterFn,
-  Row,
-  TableOptions,
-} from '@tanstack/react-table'
+import type { Row } from '@tanstack/react-table'
 import {
   flexRender,
   getCoreRowModel,
@@ -13,15 +7,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { isEmpty, isNil } from 'lodash-es'
 import {
-  type CSSProperties,
   Fragment,
-  type MouseEvent,
-  type RefObject,
-  type UIEventHandler,
   useCallback,
   useEffect,
   useMemo,
@@ -30,111 +19,36 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import {
-  type FillLevel,
-  InfoOutlineIcon,
-  Tooltip,
-  WrapWithIf,
-} from '../../index'
+import { InfoOutlineIcon, Tooltip, WrapWithIf } from '../../index'
 import Button from '../Button'
-import EmptyState, { type EmptyStateProps } from '../EmptyState'
+import EmptyState from '../EmptyState'
 import CaretUpIcon from '../icons/CaretUpIcon'
 import { Spinner } from '../Spinner'
 
-import { tableFillLevelToBg, tableFillLevelToBorderColor } from './colors'
+import { toTableFillLevel } from '../contexts/FillLevelContext'
+import {
+  tableFillLevelToBg,
+  tableFillLevelToBorderColor,
+  tableFillLevelToHighlightedCellBg,
+} from './colors'
 import { FillerRows } from './FillerRows'
-import { useIsScrolling, useOnVirtualSliceChange } from './hooks'
+import { useOnVirtualSliceChange } from './hooks'
 import { Skeleton } from './Skeleton'
 import { SortIndicator } from './SortIndicator'
 import { T } from './T'
+import {
+  defaultGlobalFilterFn,
+  getGridTemplateCols,
+  isRow,
+  isValidId,
+  measureElementHeight,
+  TableProps,
+} from './tableUtils'
 import { Tbody } from './Tbody'
-import { Td, TdExpand, TdLoading } from './Td'
+import { Td, TdBasic, TdExpand, TdLoading } from './Td'
 import { Th } from './Th'
 import { Thead } from './Thead'
 import { Tr } from './Tr'
-
-export type TableProps = Omit<CSSProperties, keyof TableBaseProps> &
-  TableBaseProps
-
-type TableBaseProps = {
-  ref?: RefObject<HTMLDivElement>
-  data: any[]
-  columns: any[]
-  loading?: boolean
-  loadingSkeletonRows?: number
-  hideHeader?: boolean
-  padCells?: boolean
-  fullHeightWrap?: boolean
-  fillLevel?: TableFillLevel
-  rowBg?: 'base' | 'raised' | 'stripes'
-  highlightedRowId?: string
-  getRowCanExpand?: any
-  renderExpanded?: any
-  loose?: boolean
-  stickyColumn?: boolean
-  scrollTopMargin?: number
-  flush?: boolean
-  virtualizeRows?: boolean
-  lockColumnsOnScroll?: boolean
-  reactVirtualOptions?: Partial<
-    Omit<Parameters<typeof useVirtualizer>[0], 'count' | 'getScrollElement'>
-  >
-  reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
-  onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
-  emptyStateProps?: EmptyStateProps
-  hasNextPage?: boolean
-  fetchNextPage?: () => void
-  isFetchingNextPage?: boolean
-  onVirtualSliceChange?: (slice: VirtualSlice) => void
-  onScrollCapture?: UIEventHandler<HTMLDivElement>
-}
-
-export type TableFillLevel = Exclude<FillLevel, 3>
-
-export type VirtualSlice = {
-  start: VirtualItem | undefined
-  end: VirtualItem | undefined
-}
-
-function getGridTemplateCols(columnDefs: ColumnDef<unknown>[] = []): string {
-  return columnDefs
-    .reduce(
-      (val: string[], columnDef): string[] => [
-        ...val,
-        columnDef.meta?.gridTemplate
-          ? columnDef.meta?.gridTemplate
-          : columnDef.meta?.truncate
-          ? 'minmax(100px, 1fr)'
-          : 'auto',
-      ],
-      [] as string[]
-    )
-    .join(' ')
-}
-
-function isRow<T>(row: Row<T> | VirtualItem): row is Row<T> {
-  return typeof (row as Row<T>).getVisibleCells === 'function'
-}
-
-function isValidId(id: unknown) {
-  return typeof id === 'number' || (typeof id === 'string' && id.length > 0)
-}
-
-const defaultGlobalFilterFn: FilterFn<any> = (
-  row,
-  columnId,
-  value,
-  addMeta
-) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value)
-
-  // Store the ranking info
-  addMeta(itemRank)
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed
-}
 
 function Table({
   ref: forwardedRef,
@@ -147,6 +61,7 @@ function Table({
   renderExpanded,
   loose = false,
   padCells = true,
+  expandedRowType = 'default',
   fullHeightWrap = false, // TODO: default this to true after regression testing
   fillLevel = 0,
   rowBg = 'stripes',
@@ -172,6 +87,8 @@ function Table({
   const tableContainerRef = useRef<HTMLDivElement>(undefined)
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
+  const [expanded, setExpanded] = useState({})
+
   const table = useReactTable({
     data,
     columns,
@@ -195,8 +112,14 @@ function Table({
       sortingFn: 'alphanumeric',
     },
     enableRowSelection: false,
+    onExpandedChange: setExpanded,
     ...reactTableOptions,
+    state: {
+      expanded,
+      ...reactTableOptions?.state,
+    },
   })
+
   const [fixedGridTemplateColumns, setFixedGridTemplateColumns] = useState<
     string | null
   >(null)
@@ -207,23 +130,18 @@ function Table({
   >((i) => tableRows[i]?.id || i, [tableRows])
   const rowVirtualizer = useVirtualizer({
     count: hasNextPage ? tableRows.length + 1 : tableRows.length,
-    overscan: 6,
+    overscan: 0,
     getItemKey,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 52,
     measureElement: (el) => {
-      // Since <td>s are rendered with `display: contents`, we need to calculate
-      // row height from contents using Range
-      if (el?.getBoundingClientRect().height <= 0 && el?.hasChildNodes()) {
-        const range = document.createRange()
+      let totalHeight = measureElementHeight(el)
+      // add height of expanded row if present
+      const sibling = el.nextElementSibling
+      if (sibling?.getAttribute('data-expander-row'))
+        totalHeight += measureElementHeight(sibling)
 
-        range.setStart(el, 0)
-        range.setEnd(el, el.childNodes.length)
-
-        return range.getBoundingClientRect().height
-      }
-
-      return el.getBoundingClientRect().height
+      return totalHeight
     },
     ...reactVirtualOptions,
   })
@@ -232,32 +150,21 @@ function Table({
 
   useOnVirtualSliceChange({ virtualRows, virtualizeRows, onVirtualSliceChange })
 
-  lockColumnsOnScroll = lockColumnsOnScroll ?? virtualizeRows
-  useIsScrolling(tableContainerRef, {
-    onIsScrollingChange: useCallback(
-      (isScrolling) => {
-        if (lockColumnsOnScroll) {
-          const thCells = tableContainerRef.current?.querySelectorAll('th')
-
-          const columns = Array.from(thCells)
-            .map((th) => {
-              const { width } = th.getBoundingClientRect()
-
-              return `${width}px`
-            })
-            .join(' ')
-
-          setFixedGridTemplateColumns(isScrolling ? columns : null)
-        }
-      },
-      [lockColumnsOnScroll]
-    ),
-  })
+  // lock column widths when scrolling
   useEffect(() => {
-    if (!lockColumnsOnScroll) {
+    if ((lockColumnsOnScroll ?? virtualizeRows) && rowVirtualizer.isScrolling) {
+      const thCells = tableContainerRef.current?.querySelectorAll('th')
+      const columns = Array.from(thCells)
+        .map((th) => {
+          const { width } = th.getBoundingClientRect()
+          return `${width}px`
+        })
+        .join(' ')
+      setFixedGridTemplateColumns(columns)
+    } else {
       setFixedGridTemplateColumns(null)
     }
-  }, [lockColumnsOnScroll])
+  }, [lockColumnsOnScroll, rowVirtualizer.isScrolling, virtualizeRows])
 
   const { paddingTop, paddingBottom } = useMemo(
     () => ({
@@ -291,6 +198,11 @@ function Table({
     (i: number) => rowBg === 'raised' || (rowBg === 'stripes' && i % 2 === 1),
     [rowBg]
   )
+
+  const expanderBorder =
+    theme.borders[
+      tableFillLevelToHighlightedCellBg[toTableFillLevel(fillLevel)]
+    ]
 
   useEffect(() => {
     const lastItem = virtualRows[virtualRows.length - 1]
@@ -424,31 +336,34 @@ function Table({
                   {rows.map((maybeRow) => {
                     const i = maybeRow.index
                     const isLoaderRow = i > tableRows.length - 1
-                    const row: Row<unknown> | null = isRow(maybeRow)
+                    const tableRow: Row<unknown> | null = isRow(maybeRow)
                       ? maybeRow
                       : isLoaderRow
                       ? null
                       : tableRows[maybeRow.index]
-                    const key = row?.id ?? maybeRow.index
+                    const virtualRow = !isRow(maybeRow) ? maybeRow : null
+                    const key =
+                      virtualRow?.key ?? tableRow?.id ?? maybeRow.index
 
                     return (
                       <Fragment key={key}>
                         <Tr
-                          key={key}
-                          onClick={(e) => onRowClick?.(e, row)}
+                          key={`${key}-${tableRow?.getIsExpanded()}`} // forces row to be rerendered (and remeasured) when expanded state changes
+                          data-index={virtualRow?.index} // required for virtual scrolling to work
+                          ref={
+                            virtualizeRows
+                              ? rowVirtualizer.measureElement
+                              : undefined
+                          }
+                          onClick={(e) => onRowClick?.(e, tableRow)}
                           $fillLevel={fillLevel}
                           $raised={isRaised(i)}
-                          $highlighted={row?.id === highlightedRowId}
-                          $selectable={row?.getCanSelect() ?? false}
-                          $selected={row?.getIsSelected() ?? false}
+                          $highlighted={tableRow?.id === highlightedRowId}
+                          $selectable={tableRow?.getCanSelect() ?? false}
+                          $selected={tableRow?.getIsSelected() ?? false}
                           $clickable={!!onRowClick}
-                          // data-index is required for virtual scrolling to work
-                          data-index={row?.index}
-                          {...(virtualizeRows
-                            ? { ref: rowVirtualizer.measureElement }
-                            : {})}
                         >
-                          {isNil(row) && isLoaderRow ? (
+                          {isNil(tableRow) && isLoaderRow ? (
                             <TdLoading
                               key={i}
                               $fillLevel={fillLevel}
@@ -464,7 +379,7 @@ function Table({
                               <Spinner color={theme.colors['text-xlight']} />
                             </TdLoading>
                           ) : (
-                            row?.getVisibleCells().map((cell) => (
+                            tableRow?.getVisibleCells().map((cell) => (
                               <Td
                                 key={cell.id}
                                 $fillLevel={fillLevel}
@@ -488,17 +403,30 @@ function Table({
                             ))
                           )}
                         </Tr>
-                        {row?.getIsExpanded() && (
+                        {tableRow?.getIsExpanded() && (
                           <Tr
+                            data-expander-row
                             $fillLevel={fillLevel}
-                            $raised={i % 2 === 1}
+                            $raised={isRaised(i)}
+                            $type="expander"
                           >
-                            <TdExpand />
-                            <TdExpand
-                              colSpan={row.getVisibleCells().length - 1}
-                            >
-                              {renderExpanded({ row })}
-                            </TdExpand>
+                            {expandedRowType === 'default' ? (
+                              <>
+                                <TdExpand css={{ borderTop: expanderBorder }} />
+                                <TdExpand
+                                  colSpan={
+                                    tableRow.getVisibleCells().length - 1
+                                  }
+                                  css={{ borderTop: expanderBorder }}
+                                >
+                                  {renderExpanded({ row: tableRow })}
+                                </TdExpand>
+                              </>
+                            ) : (
+                              <TdBasic>
+                                {renderExpanded({ row: tableRow })}
+                              </TdBasic>
+                            )}
                           </Tr>
                         )}
                       </Fragment>

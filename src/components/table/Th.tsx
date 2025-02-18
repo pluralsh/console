@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import styled from 'styled-components'
 
 import { tableFillLevelToBorder, tableHeaderColor } from './colors'
-import { type TableFillLevel } from './Table'
+import { type TableFillLevel } from './tableUtils'
 
 export const Th = styled.th<{
   $fillLevel: TableFillLevel
