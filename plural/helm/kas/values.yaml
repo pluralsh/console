@@ -41,8 +41,8 @@ tolerations: []
 
 resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 1Gi
   requests:
     cpu: 100m
     memory: 128Mi
@@ -72,6 +72,8 @@ metrics:
     enabled: false
     additionalLabels: {}
     endpointConfig: {}
+
+replicCount: 1
 
 autoscaling:
   enabled: false
