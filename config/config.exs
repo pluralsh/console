@@ -56,6 +56,7 @@ config :console,
   sidecar_token_path: "./secrets",
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
+  multilevel_cache: Console.MultilevelCache,
   version: Mix.Project.config[:version],
   kas_dns: "https://kas.example.com",
   qps: 1_000,
@@ -105,10 +106,31 @@ config :http_stream, adapter: HTTPStream.Adapter.HTTPoison
 
 config :console, Console.PartitionedCache,
   primary: [
-    gc_interval: :timer.seconds(3600),
+    gc_interval: :timer.hours(2),
     backend: :shards,
     partitions: 2,
     allocated_memory: 1000 * 1000 * 500
+  ]
+
+config :my_app, Console.MultilevelCache,
+  model: :inclusive,
+  levels: [
+    {
+      Console.MultilevelCache.L1,
+      gc_interval: :timer.hours(12),
+      backend: :shards,
+      partitions: 2,
+      allocated_memory: 1000 * 1000 * 10
+    },
+    {
+      Console.MultilevelCache.L2,
+      primary: [
+        gc_interval: :timer.hours(12),
+        backend: :shards,
+        partitions: 2,
+        allocated_memory: 1000 * 1000 * 200
+      ]
+    }
   ]
 
 config :console, Console.Cron.Scheduler,

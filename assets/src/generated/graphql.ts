@@ -6664,6 +6664,7 @@ export type RootQueryType = {
   account?: Maybe<Account>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
+  aiInsight?: Maybe<AiInsight>;
   aiPin?: Maybe<AiPin>;
   aiPins?: Maybe<AiPinConnection>;
   /** Use the content of an insight and additional context from its associated object to suggest a fix */
@@ -6857,6 +6858,11 @@ export type RootQueryTypeAiCompletionArgs = {
   input?: InputMaybe<Scalars['String']['input']>;
   scopeId?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAiInsightArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

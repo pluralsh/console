@@ -37,6 +37,24 @@ defmodule Console.LocalCache do
     adapter: Nebulex.Adapters.Local
 end
 
+defmodule Console.MultilevelCache do
+  use Nebulex.Cache,
+    otp_app: :console,
+    adapter: Nebulex.Adapters.Multilevel
+
+  defmodule L1 do
+    use Nebulex.Cache,
+      otp_app: :console,
+      adapter: Nebulex.Adapters.Local
+  end
+
+  defmodule L2 do
+    use Nebulex.Cache,
+      otp_app: :console,
+      adapter: Nebulex.Adapters.Partitioned
+  end
+end
+
 defmodule Console.TestCache do
   use Nebulex.Cache,
     otp_app: :console,

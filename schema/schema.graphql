@@ -397,6 +397,8 @@ type RootQueryType {
 
   project(id: ID, name: String): Project
 
+  aiInsight(id: ID!): AiInsight
+
   "General api to query the configured LLM for your console"
   aiCompletion(
     "the initial system prompt to use for this completion"

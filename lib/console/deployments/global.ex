@@ -336,7 +336,8 @@ defmodule Console.Deployments.Global do
 
     Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
     |> Cluster.target(global)
-    |> Repo.all()
+    |> Cluster.stream()
+    |> Repo.stream(method: :keyset)
     |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
     |> Stream.map(fn
       {:ok, res} -> res

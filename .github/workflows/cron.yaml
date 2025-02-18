@@ -59,3 +59,46 @@ jobs:
         branch: compatibility-matrix-update-${{ steps.date.outputs.DATE }}
         labels: enhancement
         base: master
+
+  eks-addons:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip' # caching pip dependencies
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+      with:
+        role-to-assume: arn:aws:iam::312272277431:role/github-actions/console-actions
+        role-session-name: eks-addons
+        aws-region: us-east-2
+
+    - name: Run eks addons updater
+      working-directory: utils/addons
+      run: |
+        pip install -r requirements.txt
+        python main.py
+
+    - name: Get current date
+      id: date
+      run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: Compatibility Matrix Update ${{ steps.date.outputs.DATE }}
+        body: Automated Pull Request to update eks addons matrix
+        commit-message: Updated eks addons matrix ${{ steps.date.outputs.DATE }}
+        branch: eks-addons-matrix-update-${{ steps.date.outputs.DATE }}
+        labels: enhancement
+        base: master
