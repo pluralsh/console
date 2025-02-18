@@ -5,6 +5,7 @@ defmodule Console.Deployments.Git do
   alias Console.PubSub
   alias Console.Deployments.{Settings, Services, Clusters}
   alias Console.Services.Users
+  alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
   alias Console.Schema.{
     GitRepository,
@@ -24,7 +25,7 @@ defmodule Console.Deployments.Git do
 
   @cache Console.conf(:cache_adapter)
   @local_cache Console.conf(:local_cache)
-  @ttl :timer.minutes(30)
+  @ttl Console.conf(:ttls)[:helm]
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
   @type helm_resp :: {:ok, HelmRepository.t} | Console.error
@@ -395,7 +396,10 @@ defmodule Console.Deployments.Git do
 
   def cached_helm_repositories(), do: @local_cache.get(:helm_repositories)
 
-  def warm_helm_cache(), do: @local_cache.put(:helm_repositories, list_helm_repositories(), ttl: @ttl)
+  def warm_helm_cache() do
+    list_helm_repositories()
+    |> ClusterNodes.helm_repos()
+  end
 
   @spec upsert_helm_repository(binary) :: helm_resp
   def upsert_helm_repository(url) do

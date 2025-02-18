@@ -316,6 +316,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:backups, e}, q -> Cluster.with_backups(q, !!e)
       {:project_id, id}, q -> Cluster.for_project(q, id)
       {:parent_id, id}, q -> Cluster.for_parent(q, id)
+      {:upgradeable, true}, q -> Cluster.upgradeable(q)
+      {:upgradeable, false}, q -> Cluster.not_upgradeable(q)
       _, q -> q
     end)
   end

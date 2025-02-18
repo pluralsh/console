@@ -72,11 +72,12 @@ defmodule Console.Schema.Stack do
 
     embedded_schema do
       field :type, Type
+      field :max_severity, Console.Schema.Vulnerability.Severity
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(type)a)
+      |> cast(attrs, ~w(type max_severity)a)
       |> validate_required(~w(type)a)
     end
   end

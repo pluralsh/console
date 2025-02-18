@@ -52,6 +52,7 @@ config :console,
   audit_expiry: 30,
   admin_emails: [],
   cloud: false,
+  chunk_size: 1024 * 10,
   sidecar_token: "example",
   sidecar_token_path: "./secrets",
   cache_adapter: Console.Cache,
@@ -112,7 +113,7 @@ config :console, Console.PartitionedCache,
     allocated_memory: 1000 * 1000 * 500
   ]
 
-config :my_app, Console.MultilevelCache,
+config :console, Console.MultilevelCache,
   model: :inclusive,
   levels: [
     {
@@ -160,5 +161,9 @@ config :console, Console.PromEx,
   grafana: :disabled,
   metrics_server: :disabled,
   version: "0.11.0"
+
+config :console, :ttls,
+  helm: :timer.minutes(30),
+  cluster_metrics: :timer.hours(6)
 
 import_config "#{Mix.env()}.exs"

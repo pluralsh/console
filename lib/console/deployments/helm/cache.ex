@@ -54,7 +54,7 @@ defmodule Console.Deployments.Helm.Cache do
 
   def download_to(url, path, chart) do
     with {:ok, tmp} <- Tar.from_url(url),
-         :ok <- File.open!(tmp) |> Utils.clean_chart(path, chart),
+         :ok <- File.open!(tmp, [:raw]) |> Utils.clean_chart(path, chart),
          :ok <- File.rm(tmp),
       do: {:ok, path}
   end

@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  import Console, only: [clamp: 1]
+  import Console, only: [clamp: 1, clamp: 3]
   alias Console.Deployments.{Services, Clusters, Global, Stacks, Git}
   alias Console.Services.Users
   alias Console.Schema.{
@@ -71,9 +71,11 @@ defmodule Console.Deployments.Cron do
 
   def cache_warm() do
     Task.async(fn -> Git.warm_helm_cache() end)
-    Cluster.healthy()
-    |> Cluster.stream()
-    |> Repo.stream(method: :keyset)
+
+    Cluster.ordered()
+    |> Cluster.healthy()
+    |> Cluster.with_limit(150)
+    |> Repo.all()
     |> Task.async_stream(fn cluster ->
       Logger.info "warming node caches for cluster #{cluster.handle}"
       try do
@@ -86,7 +88,7 @@ defmodule Console.Deployments.Cron do
           Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
           Logger.error(Exception.format(:error, e, __STACKTRACE__))
       end
-    end, [max_concurrency: clamp(Clusters.count())] ++ @opts)
+    end, [max_concurrency: clamp(Clusters.count(), 5, 25)] ++ @opts)
     |> Stream.run()
   end
 
