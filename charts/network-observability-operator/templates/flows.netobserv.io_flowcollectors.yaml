@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.2
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "network-observability-operator.fullname" . }}-ca
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/webhook-server-cert
   name: flowcollectors.flows.netobserv.io
 spec:
   conversion:
