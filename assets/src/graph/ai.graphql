@@ -156,6 +156,12 @@ fragment ChatThread on ChatThread {
   }
 }
 
+query AiInsight($id: ID!) {
+  aiInsight(id: $id) {
+    ...AiInsight
+  }
+}
+
 query AICompletion(
   $system: String!
   $input: String

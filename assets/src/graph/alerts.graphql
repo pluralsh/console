@@ -14,7 +14,7 @@ fragment Alert on Alert {
     value
   }
   insight {
-    ...AiInsightSummary
+    ...AiInsight
   }
   updatedAt
 }
