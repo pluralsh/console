@@ -307,6 +307,8 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.pinged_at <= ^expired)
   end
 
+  def healthy(query \\ __MODULE__), do: health(query, true)
+
   defp health_threshold(), do: Timex.now() |> Timex.shift(minutes: -5)
 
   def with_tag(query \\ __MODULE__, name, value) do
@@ -345,7 +347,7 @@ defmodule Console.Schema.Cluster do
   end
 
   def uninstalled(query \\ __MODULE__) do
-    from(c in query, where: not c.installed and is_nil(c.pinged_at) and (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
+    from(c in query, where: not c.installed and is_nil(c.pinged_at) and c.self and is_nil(c.deleted_at))
   end
 
   def installed(query \\ __MODULE__) do

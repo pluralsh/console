@@ -33,6 +33,7 @@ defmodule Console.Deployments.Clusters do
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
+  @multilevel_adapter Console.conf(:multilevel_cache)
   @node_ttl :timer.hours(6)
   @readme_ttl :timer.hours(2)
 
@@ -113,7 +114,7 @@ defmodule Console.Deployments.Clusters do
   Downloads the api discovery data for a cluster to be used in dynamic queries
   """
   @spec api_discovery(Cluster.t) :: %{{binary, binary, binary} => binary}
-  @decorate cacheable(cache: @local_adapter, key: {:discovery, cluster.id}, opts: [ttl: @node_ttl])
+  @decorate cacheable(cache: @multilevel_adapter, key: {:discovery, cluster.id}, opts: [ttl: :timer.minutes(5)])
   def api_discovery(%Cluster{} = cluster) do
     control_plane(cluster)
     |> Console.Deployments.Discovery.discovery()
@@ -188,7 +189,7 @@ defmodule Console.Deployments.Clusters do
   Fetches the nodes for a cluster, this query is heavily cached for performance
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:nodes, cluster.id}, opts: [ttl: @node_ttl])
+  @decorate cacheable(cache: @cache_adapter, key: {:nodes, cluster.id}, opts: [ttl: @node_ttl])
   def nodes(%Cluster{} = cluster), do: fetch_nodes(cluster)
 
   defp fetch_nodes(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
@@ -215,7 +216,7 @@ defmodule Console.Deployments.Clusters do
   Fetches the node metrics for a cluster, this query is heavily cached for performance
   """
   @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, cluster.id}, opts: [ttl: @node_ttl])
+  @decorate cacheable(cache: @cache_adapter, key: {:node_metrics, cluster.id}, opts: [ttl: @node_ttl])
   def node_metrics(%Cluster{} = cluster), do: fetch_node_metrics(cluster)
 
   defp fetch_node_metrics(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}

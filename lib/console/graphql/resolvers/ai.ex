@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.AiInsight
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
-  alias Console.AI.{Provider, Fixer}
+  alias Console.AI.{Service, Provider, Fixer}
   alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
@@ -12,6 +12,9 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(AiPin, _), do: AiPin
   def query(AiInsightEvidence, _), do: AiInsightEvidence
   def query(_, _), do: AiInsight
+
+  def resolve_insight(%{id: id}, %{context: %{current_user: user}}),
+    do: Service.authorized(id, user)
 
   def resolve_pin(args, %{context: %{current_user: user}}) do
     args = Enum.filter([user_id: user.id] ++ Map.to_list(args), fn {_, v} -> not is_nil(v) end)

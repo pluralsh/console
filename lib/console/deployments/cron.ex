@@ -71,15 +71,16 @@ defmodule Console.Deployments.Cron do
 
   def cache_warm() do
     Task.async(fn -> Git.warm_helm_cache() end)
-    Cluster.stream()
+    Cluster.healthy()
+    |> Cluster.stream()
     |> Repo.stream(method: :keyset)
     |> Task.async_stream(fn cluster ->
       Logger.info "warming node caches for cluster #{cluster.handle}"
       try do
         Clusters.warm(:cluster_metrics, cluster)
-        Clusters.warm(:nodes, cluster)
-        Clusters.warm(:node_metrics, cluster)
-        Clusters.warm(:api_discovery, cluster)
+        # Clusters.warm(:nodes, cluster)
+        # Clusters.warm(:node_metrics, cluster)
+        # Clusters.warm(:api_discovery, cluster)
       rescue
         e ->
           Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"

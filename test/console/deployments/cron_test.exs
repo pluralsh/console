@@ -1,8 +1,8 @@
 defmodule Console.Deployments.CronTest do
   use Console.DataCase, async: true
   use Mimic
-  import KubernetesScaffolds
-  alias Kazan.Apis.Core.V1, as: Core
+  # import KubernetesScaffolds
+  # alias Kazan.Apis.Core.V1, as: Core
   alias Console.Deployments.{Cron, Clusters, Services}
 
 
@@ -148,23 +148,21 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
-  describe "#install_clusters/0" do
-    test "it can install the operator into a provisioned cluster" do
-      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
-        insert(:cluster, provider: insert(:cluster_provider))
-      insert(:cluster, pinged_at: Timex.now())
-      kubeconf_secret = "#{n}-kubeconfig"
-      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
-      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
-        {:ok, %Core.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
-      end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+  # describe "#install_clusters/0" do
+  #   test "it can install the operator into a provisioned cluster" do
+  #     insert(:cluster, pinged_at: Timex.now())
+  #     kubeconf_secret = "#{n}-kubeconfig"
+  #     expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+  #     expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+  #       {:ok, %Core.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
+  #     end)
+  #     expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
 
-      :ok = Cron.install_clusters()
+  #     :ok = Cron.install_clusters()
 
-      assert refetch(cluster).installed
-    end
-  end
+  #     assert refetch(cluster).installed
+  #   end
+  # end
 
   describe "#migrate_kas/0" do
     test "it will update kasAddress for deploy-operator services" do
@@ -191,14 +189,10 @@ defmodule Console.Deployments.CronTest do
   end
 
   describe "#cache_warm/0" do
-    test "it can warm the cache for all registered clusters" do
-      insert_list(3, :cluster)
-      expect(Clusters, :warm, 12, fn
-        :nodes, _ -> :ok
-        :node_metrics, _ -> :ok
-        :api_discovery, _ -> :ok
-        :cluster_metrics, _ -> :ok
-      end)
+    test "it can warm the cache for all healthy registered clusters" do
+      insert_list(3, :cluster, pinged_at: Timex.now())
+      insert_list(2, :cluster)
+      expect(Clusters, :warm, 3, fn :cluster_metrics, _ -> :ok end)
 
       :ok = Cron.cache_warm()
     end

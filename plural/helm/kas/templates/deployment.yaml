@@ -5,6 +5,9 @@ metadata:
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:
+  {{ if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{ end }}
   selector:
     matchLabels:
       {{- include "kas.selectorLabels" . | nindent 6 }}

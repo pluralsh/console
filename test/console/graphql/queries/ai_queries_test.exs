@@ -2,6 +2,32 @@ defmodule Console.GraphQl.AiQueriesTest do
   use Console.DataCase, async: false
   use Mimic
 
+  describe "aiInsight" do
+    test "it can authorize access to an insight" do
+      user = insert(:user)
+      svc  = insert(:service, read_bindings: [%{user_id: user.id}])
+      insight = insert(:ai_insight, service: svc)
+
+      {:ok, %{data: %{"aiInsight" => found}}} = run_query("""
+        query Insight($id: ID!) {
+          aiInsight(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => insight.id}, %{current_user: user})
+
+      assert found["id"] == insight.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Insight($id: ID!) {
+          aiInsight(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => insight.id}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "chatThread" do
     test "you can view your own threads" do
       user = insert(:user)

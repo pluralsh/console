@@ -170,6 +170,13 @@ defmodule Console.GraphQl.AI do
   connection node_type: :ai_pin
 
   object :ai_queries do
+    field :ai_insight, :ai_insight do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.resolve_insight/2
+    end
+
     @desc "General api to query the configured LLM for your console"
     field :ai_completion, :string do
       middleware Authenticated
