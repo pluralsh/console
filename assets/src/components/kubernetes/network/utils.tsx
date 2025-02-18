@@ -53,9 +53,9 @@ export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
             {endpoint?.host}
           </Chip>
         ) : (
-          endpoint?.ports.map((port) => (
+          endpoint?.ports.map((port, idx) => (
             <Chip
-              key={i}
+              key={idx}
               size="small"
             >
               {endpoint?.host}:{port?.port ?? port?.nodePort} {port?.protocol}

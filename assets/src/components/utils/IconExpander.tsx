@@ -20,7 +20,7 @@ import {
 import { useTransition } from 'react-spring'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 
-const ARBITRARY_VALUE_NAME = 'expander'
+export const ARBITRARY_VALUE_NAME = 'expander'
 
 export function IconExpander({
   icon,

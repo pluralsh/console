@@ -1,11 +1,6 @@
 import { Button, EmptyState, Flex, ReturnIcon } from '@pluralsh/design-system'
-import {
-  AiInsightFragment,
-  AlertFragment,
-  useAiInsightQuery,
-} from 'generated/graphql'
+import { useAiInsightQuery } from 'generated/graphql'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 
 import AIPinButton from 'components/ai/AIPinButton'
@@ -14,63 +9,35 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from 'components/ai/chatbot/ChatbotButton'
-import { InsightDisplay } from 'components/ai/InsightDisplay'
+import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
 import { GqlError } from 'components/utils/Alert'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame'
 import { StackedText } from 'components/utils/table/StackedText'
-import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
-import { POLL_INTERVAL } from '../ContinuousDeployment'
+import {
+  getClusterDetailsPath,
+  getServiceDetailsPath,
+} from 'routes/cdRoutesConsts'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import styled from 'styled-components'
+import { ComponentPropsWithoutRef } from 'react'
 
-export function ClusterAlertInsight() {
-  const theme = useTheme()
-  const { clusterId, insightId } = useParams()
+export function AlertInsight({ type }: { type: 'cluster' | 'service' }) {
+  const navigate = useNavigate()
+  const { clusterId, serviceId, insightId } = useParams()
 
   const { data, loading, error, refetch } = useAiInsightQuery({
     variables: { id: insightId ?? '' },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  console.log('data', data)
+
   const insight = data?.aiInsight
   const alert = insight?.alert
 
   if (!data && loading) return <LoadingIndicator />
   if (error) return <GqlError error={error} />
   if (!insight) return <EmptyState message="Insight not found" />
-
-  return (
-    <ScrollablePage scrollable={false}>
-      <AlertInsight
-        backPath={`${getClusterDetailsPath({ clusterId })}/alerts`}
-        insight={insight}
-        alert={alert}
-        loading={loading}
-        refetch={refetch}
-      />
-    </ScrollablePage>
-  )
-}
-
-export function AlertInsight({
-  backPath,
-  backLabel = 'Back to alerts',
-  alert,
-  insight,
-  loading,
-  refetch,
-}: {
-  backPath: string
-  backLabel?: string
-  alert?: Nullable<Pick<AlertFragment, 'id' | 'title' | 'message'>>
-  insight: AiInsightFragment
-  loading: boolean
-  refetch: () => void
-}) {
-  const theme = useTheme()
-  const navigate = useNavigate()
-  if (!insight) return null
 
   return (
     <Flex
@@ -84,16 +51,22 @@ export function AlertInsight({
         alignItems="center"
       >
         <Button
-          onClick={() => navigate(backPath)}
+          onClick={() =>
+            navigate(
+              type === 'cluster'
+                ? `${getClusterDetailsPath({ clusterId })}/alerts`
+                : `${getServiceDetailsPath({ clusterId, serviceId })}/alerts`
+            )
+          }
           floating
           startIcon={<ReturnIcon />}
         >
-          {backLabel}
+          Back to alerts
         </Button>
         {alert && (
           <StackedText
-            css={{ maxWidth: 550 }}
             truncate
+            css={{ maxWidth: '50%' }}
             first={alert.title}
             firstPartialType="body1Bold"
             firstColor="text"
@@ -128,9 +101,24 @@ export function AlertInsight({
         </Flex>
       </Flex>
       <InsightDisplay
-        text={insight.text}
+        insight={insight}
         kind="alert"
       />
     </Flex>
   )
 }
+
+export function FullPageAlertInsight(
+  props: ComponentPropsWithoutRef<typeof AlertInsight>
+) {
+  return (
+    <FullPageAlertInsightSC>
+      <AlertInsight {...props} />
+    </FullPageAlertInsightSC>
+  )
+}
+
+const FullPageAlertInsightSC = styled.div(({ theme }) => ({
+  height: '100%',
+  padding: theme.spacing.large,
+}))

@@ -14,15 +14,16 @@ import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { isEmpty, truncate, upperFirst } from 'lodash'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
-import { AiInsightSummaryIcon } from './AiInsights'
-import { GqlError } from './Alert'
-import { AlertsTableExpander } from './AlertsTableExpander'
-import { StackedText } from './table/StackedText'
+import { AiInsightSummaryIcon } from '../AiInsights'
+import { GqlError } from '../Alert'
+
+import { StackedText } from '../table/StackedText'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   VirtualSlice,
-} from './table/useFetchPaginatedData'
-import { StandardUrl } from './typography/Text'
+} from '../table/useFetchPaginatedData'
+import { StandardUrl } from '../typography/Text'
+import { AlertsTableExpander } from './AlertsTableExpander'
 
 const columnHelper = createColumnHelper<AlertFragment>()
 

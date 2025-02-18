@@ -1,4 +1,4 @@
-import { AlertsTable } from 'components/utils/AlertsTable'
+import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useClusterAlertsQuery } from 'generated/graphql'
 import { useMemo } from 'react'

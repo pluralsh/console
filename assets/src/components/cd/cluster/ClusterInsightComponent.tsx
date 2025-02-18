@@ -28,7 +28,7 @@ import {
 import { ComponentEntry } from './ClusterInsightsComponents.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
-import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
+import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 
 export default function ClusterInsightComponent(): ReactNode {
   const theme = useTheme()
@@ -141,7 +141,7 @@ export default function ClusterInsightComponent(): ReactNode {
         }}
       >
         <InsightDisplay
-          text={component?.insight?.text}
+          insight={component?.insight}
           kind={component?.kind}
         />
         {showRaw && (

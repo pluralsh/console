@@ -9,7 +9,7 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../ai/InsightDisplay.tsx'
+import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
@@ -61,7 +61,7 @@ export function StackInsights() {
         </Flex>
       </Flex>
       <InsightDisplay
-        text={stack.insight?.text}
+        insight={stack.insight}
         kind="stack"
       />
     </Flex>

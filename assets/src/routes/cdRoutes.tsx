@@ -89,6 +89,20 @@ import ServicesTree from '../components/cd/services/ServicesTree'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
+import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
+
+import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
+import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
+import {
+  AlertInsight,
+  FullPageAlertInsight,
+} from 'components/utils/alerts/AlertInsight.tsx'
+import styled from 'styled-components'
+import ClusterCloudAddOnCompatibility from '../components/cd/cluster/addon/ClusterCloudAddOnCompatibility.tsx'
+import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
+import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
+import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
+import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 import {
   ALERT_INSIGHT_REL_PATH,
   CD_REL_PATH,
@@ -130,17 +144,6 @@ import {
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
-import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
-import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
-import styled from 'styled-components'
-import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
-import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
-import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
-import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
-import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
-import ClusterCloudAddOnCompatibility from '../components/cd/cluster/addon/ClusterCloudAddOnCompatibility.tsx'
-import { ClusterAlertInsight } from 'components/cd/cluster/ClusterAlertInsight.tsx'
-import { ServiceAlertInsight } from 'components/cd/services/service/ServiceAlertInsight.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -432,8 +435,9 @@ const clusterDetailsRoutes = [
     </Route>
   </Route>,
   <Route
+    key="cluster-alert-insight"
     path={`${CLUSTER_REL_PATH}/${CLUSTER_ALERTS_REL_PATH}/insight/:insightId`}
-    element={<ClusterAlertInsight />}
+    element={<FullPageAlertInsight type="cluster" />}
   />,
 ]
 
@@ -573,7 +577,7 @@ const serviceDetailsRoutes = (
     />
     <Route
       path={ALERT_INSIGHT_REL_PATH}
-      element={<ServiceAlertInsight />}
+      element={<AlertInsight type="service" />}
     />
     <Route
       element={<ServiceScalingRecs />}

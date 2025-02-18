@@ -10,7 +10,7 @@ import { AlertFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Body2BoldP } from './typography/Text'
+import { Body2BoldP } from '../typography/Text'
 
 export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
   const alert = row.original
