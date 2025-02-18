@@ -9672,6 +9672,13 @@ export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, de
 
 export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, type: ChatType, insertedAt?: string | null, updatedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
+export type AiInsightQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AiInsightQuery = { __typename?: 'RootQueryType', aiInsight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
+
 export type AiCompletionQueryVariables = Exact<{
   system: Scalars['String']['input'];
   input?: InputMaybe<Scalars['String']['input']>;
@@ -9830,7 +9837,7 @@ export type AiChatStreamSubscriptionVariables = Exact<{
 
 export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, content: string } | null };
 
-export type AlertFragment = { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
+export type AlertFragment = { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type ClusterAlertsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -9841,7 +9848,7 @@ export type ClusterAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type ServiceAlertsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -9852,7 +9859,7 @@ export type ServiceAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type AuditFragment = { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
@@ -11219,7 +11226,10 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type UpgradeStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+export type UpgradeStatisticsQueryVariables = Exact<{
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  tag?: InputMaybe<TagInput>;
+}>;
 
 
 export type UpgradeStatisticsQuery = { __typename?: 'RootQueryType', upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null, latest?: number | null, compliant?: number | null } | null };
@@ -12387,11 +12397,11 @@ export const AlertFragmentDoc = gql`
     value
   }
   insight {
-    ...AiInsightSummary
+    ...AiInsight
   }
   updatedAt
 }
-    ${AiInsightSummaryFragmentDoc}`;
+    ${AiInsightFragmentDoc}`;
 export const PolicyBindingFragmentDoc = gql`
     fragment PolicyBinding on PolicyBinding {
   id
@@ -15492,6 +15502,46 @@ export const ClusterVulnAggregateFragmentDoc = gql`
   count
 }
     `;
+export const AiInsightDocument = gql`
+    query AiInsight($id: ID!) {
+  aiInsight(id: $id) {
+    ...AiInsight
+  }
+}
+    ${AiInsightFragmentDoc}`;
+
+/**
+ * __useAiInsightQuery__
+ *
+ * To run a query within a React component, call `useAiInsightQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiInsightQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiInsightQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAiInsightQuery(baseOptions: Apollo.QueryHookOptions<AiInsightQuery, AiInsightQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiInsightQuery, AiInsightQueryVariables>(AiInsightDocument, options);
+      }
+export function useAiInsightLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiInsightQuery, AiInsightQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiInsightQuery, AiInsightQueryVariables>(AiInsightDocument, options);
+        }
+export function useAiInsightSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiInsightQuery, AiInsightQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiInsightQuery, AiInsightQueryVariables>(AiInsightDocument, options);
+        }
+export type AiInsightQueryHookResult = ReturnType<typeof useAiInsightQuery>;
+export type AiInsightLazyQueryHookResult = ReturnType<typeof useAiInsightLazyQuery>;
+export type AiInsightSuspenseQueryHookResult = ReturnType<typeof useAiInsightSuspenseQuery>;
+export type AiInsightQueryResult = Apollo.QueryResult<AiInsightQuery, AiInsightQueryVariables>;
 export const AiCompletionDocument = gql`
     query AICompletion($system: String!, $input: String, $chat: [ChatMessage], $scopeId: String) {
   aiCompletion(system: $system, input: $input, chat: $chat, scopeId: $scopeId)
@@ -22309,8 +22359,8 @@ export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMuta
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
 export const UpgradeStatisticsDocument = gql`
-    query UpgradeStatistics {
-  upgradeStatistics {
+    query UpgradeStatistics($projectId: ID, $tag: TagInput) {
+  upgradeStatistics(projectId: $projectId, tag: $tag) {
     upgradeable
     count
     latest
@@ -22331,6 +22381,8 @@ export const UpgradeStatisticsDocument = gql`
  * @example
  * const { data, loading, error } = useUpgradeStatisticsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
+ *      tag: // value for 'tag'
  *   },
  * });
  */
@@ -26252,6 +26304,7 @@ export type ClusterVulnerabilityAggregateSuspenseQueryHookResult = ReturnType<ty
 export type ClusterVulnerabilityAggregateQueryResult = Apollo.QueryResult<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>;
 export const namedOperations = {
   Query: {
+    AiInsight: 'AiInsight',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
     AIPins: 'AIPins',

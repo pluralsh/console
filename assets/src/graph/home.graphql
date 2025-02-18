@@ -1,5 +1,5 @@
-query UpgradeStatistics {
-  upgradeStatistics {
+query UpgradeStatistics($projectId: ID, $tag: TagInput) {
+  upgradeStatistics(projectId: $projectId, tag: $tag) {
     upgradeable
     count
     latest

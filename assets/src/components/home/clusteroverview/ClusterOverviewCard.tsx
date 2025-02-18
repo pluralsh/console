@@ -36,6 +36,7 @@ export function ClusterOverviewCard() {
     loading: chartLoading,
     error: chartError,
   } = useUpgradeStatisticsQuery({
+    variables: { projectId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
