@@ -5360,6 +5360,17 @@ entries:
   network-observability-operator:
   - apiVersion: v2
     appVersion: 1.8.0-community
+    created: "2025-02-18T14:37:10.150291204Z"
+    description: A Helm chart for Kubernetes that installs Network Observability Operator
+    digest: 441f1620f4764636af97c6d6e6578178822b6822e8375d51d852cdb0122c65d6
+    home: https://github.com/netobserv/network-observability-operator
+    name: network-observability-operator
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/network-observability-operator-chart-v0.2.1/network-observability-operator-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: 1.8.0-community
     created: "2025-02-18T14:10:56.140556285Z"
     description: A Helm chart for Kubernetes that installs Network Observability Operator
     digest: 38c8e5c728487391dac9014807e9c24c49df0da4754b5eaf5d5ae706030a1d21
@@ -5514,4 +5525,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-18T14:10:56.140941114Z"
+generated: "2025-02-18T14:37:10.15070292Z"
