@@ -5,21 +5,21 @@ import {
   IconFrame,
   SidecarItem,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
-import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
 import { Link } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
+import { fromNow } from 'utils/datetime'
 
 import { ClusterFragment } from 'generated/graphql'
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { TooltipTime } from 'components/utils/TooltipTime'
 
-import { SubTitle } from '../../utils/SubTitle'
-import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterProviderIcon } from '../../utils/Provider'
+import { SubTitle } from '../../utils/SubTitle'
+import { InlineLink } from '../../utils/typography/InlineLink'
+import ClusterUpgrade from '../clusters/ClusterUpgrade'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
@@ -105,7 +105,7 @@ function MetadataCard({
                 placement="top"
                 date={cluster?.pingedAt}
               >
-                <span>{moment(cluster?.pingedAt).fromNow()}</span>
+                <span>{fromNow(cluster?.pingedAt)}</span>
               </TooltipTime>
             ) : (
               '-'

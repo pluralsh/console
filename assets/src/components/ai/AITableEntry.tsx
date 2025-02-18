@@ -29,7 +29,7 @@ import {
 } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { dayjsExtended as dayjs } from 'utils/datetime.ts'
+import { dayjsExtended as dayjs, fromNow, isAfter } from 'utils/datetime.ts'
 import {
   getClusterDetailsPath,
   getServiceComponentPath,
@@ -88,7 +88,7 @@ export function AITableEntry({
 
   const timestamp = getThreadOrPinTimestamp(item)
 
-  const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
+  const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
   const onClick = useCallback(() => {
     if (isInsight && insight) goToInsight(insight)
@@ -121,7 +121,7 @@ export function AITableEntry({
         </Chip>
       )}
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
-        {`${dayjs(timestamp).fromNow()}`}
+        {fromNow(timestamp)}
       </CaptionP>
       {!modal && (
         <>
@@ -387,7 +387,7 @@ function TableEntryResourceLink({
 export const getThreadOrPinTimestamp = (
   item: Nullable<ChatThreadTinyFragment | AiPinFragment>
 ) => {
-  if (!item) return dayjs()
+  if (!item) return new Date()
 
   const isPin = item.__typename === 'AiPin'
   const isInsight = isPin && !item.thread
@@ -396,8 +396,8 @@ export const getThreadOrPinTimestamp = (
   const insight = item.insight
 
   return isInsight
-    ? (insight?.updatedAt ?? insight?.insertedAt ?? dayjs())
-    : (thread?.lastMessageAt ?? thread?.insertedAt ?? dayjs())
+    ? (insight?.updatedAt ?? insight?.insertedAt ?? new Date())
+    : (thread?.lastMessageAt ?? thread?.insertedAt ?? new Date())
 }
 
 export const sortThreadsOrPins = (

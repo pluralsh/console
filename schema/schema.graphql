@@ -456,6 +456,8 @@ type RootMutationType {
 
   updateUser(id: ID, attributes: UserAttributes!): User
 
+  upsertUser(attributes: UserAttributes!): User
+
   deleteUser(id: ID!): User
 
   impersonateServiceAccount(email: String!): User
@@ -1021,6 +1023,10 @@ enum LogDriver {
   ELASTIC
 }
 
+enum VectorStore {
+  ELASTIC
+}
+
 input ProjectAttributes {
   name: String!
   description: String
@@ -1117,6 +1123,9 @@ input AiSettingsAttributes {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "ai provider to use with embeddings (for vector indexing)"
+  embeddingProvider: AiProvider
+
   openai: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
@@ -1128,6 +1137,8 @@ input AiSettingsAttributes {
   bedrock: BedrockAiAttributes
 
   vertex: VertexAiAttributes
+
+  vectorStore: VectorStoreAttributes
 }
 
 input ToolConfigAttributes {
@@ -1148,6 +1159,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 input AnthropicSettingsAttributes {
@@ -1157,6 +1171,9 @@ input AnthropicSettingsAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 input OllamaAttributes {
@@ -1164,6 +1181,9 @@ input OllamaAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   url: String!
 
@@ -1183,6 +1203,9 @@ input AzureOpenaiAttributes {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   "the azure openai access token to use"
   accessToken: String!
@@ -1209,6 +1232,9 @@ input VertexAiAttributes {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
+  "the model to use for vector embeddings"
+  embeddingModel: String
+
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
 
@@ -1220,6 +1246,12 @@ input VertexAiAttributes {
 
   "the gcp region the model is hosted in"
   location: String!
+}
+
+input VectorStoreAttributes {
+  enabled: Boolean
+  store: VectorStore
+  elastic: ElasticsearchConnectionAttributes
 }
 
 input SmtpSettingsAttributes {
@@ -1655,6 +1687,10 @@ enum StepStage {
   DESTROY
 }
 
+enum PolicyEngineType {
+  TRIVY
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -1707,6 +1743,8 @@ input StackAttributes {
   "arbitrary variables to pass into the stack"
   variables: Json
 
+  policyEngine: PolicyEngineAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1753,6 +1791,11 @@ input StackCronAttributes {
   autoApprove: Boolean
 }
 
+input PolicyEngineAttributes {
+  "the policy engine to use with this stack"
+  type: PolicyEngineType!
+}
+
 input StackRunAttributes {
   "The status of this run"
   status: StackStatus!
@@ -1771,6 +1814,9 @@ input StackRunAttributes {
 
   "Why you decided to cancel this run"
   cancellationReason: String
+
+  "the violations detected by the policy engine"
+  violations: [StackPolicyViolationAttributes]
 }
 
 input RunStepAttributes {
@@ -1857,6 +1903,31 @@ input CustomStepAttributes {
   requireApproval: Boolean
 }
 
+input StackPolicyViolationAttributes {
+  severity: VulnSeverity!
+  policyId: String!
+  policyUrl: String
+  policyModule: String
+  title: String!
+  description: String
+  resolution: String
+  causes: [StackViolationCauseAttributes]
+}
+
+input StackViolationCauseAttributes {
+  resource: String!
+  start: Int!
+  end: Int!
+  lines: [StackViolationCauseLineAttributes]
+}
+
+input StackViolationCauseLineAttributes {
+  content: String!
+  line: Int!
+  first: Boolean
+  last: Boolean
+}
+
 type InfrastructureStack {
   id: ID
 
@@ -1877,6 +1948,8 @@ type InfrastructureStack {
 
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
+
+  policyEngine: PolicyEngine
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -2007,6 +2080,12 @@ type StackConfiguration {
   hooks: [StackHook]
 }
 
+"Configuration for applying policy enforcement to a stack"
+type PolicyEngine {
+  "the policy engine to use with this stack"
+  type: PolicyEngineType!
+}
+
 type StackHook {
   "a script hook to run at a stage"
   cmd: String!
@@ -2032,6 +2111,8 @@ type StackRun {
 
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
+
+  policyEngine: PolicyEngine
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -2106,6 +2187,9 @@ type StackRun {
 
   "the git repository you're sourcing IaC from"
   repository: GitRepository
+
+  "policy violations for this stack"
+  violations: [StackPolicyViolation]
 
   insertedAt: DateTime
 
@@ -2230,6 +2314,45 @@ type StackCommand {
 
   "working directory for this command (not required)"
   dir: String
+}
+
+type StackPolicyViolation {
+  id: ID!
+
+  severity: VulnSeverity!
+
+  policyId: String!
+
+  policyUrl: String
+
+  policyModule: String
+
+  title: String!
+
+  description: String
+
+  resolution: String
+
+  "the causes of this violation line-by-line in code"
+  causes: [StackViolationCause]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type StackViolationCause {
+  resource: String!
+  start: Int!
+  end: Int!
+  lines: [StackViolationCauseLine]
+}
+
+type StackViolationCauseLine {
+  content: String!
+  line: Int!
+  first: Boolean
+  last: Boolean
 }
 
 type InfrastructureStackConnection {

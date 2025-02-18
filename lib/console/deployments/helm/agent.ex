@@ -13,9 +13,9 @@ defmodule Console.Deployments.Helm.Agent do
 
   def registry(), do: __MODULE__
 
-  def fetch(pid, chart, vsn), do: GenServer.call(pid, {:fetch, chart, vsn}, 30_000)
+  def fetch(pid, chart, vsn), do: GenServer.call(pid, {:fetch, chart, vsn}, 60_000)
 
-  def digest(pid, chart, vsn), do: GenServer.call(pid, {:digest, chart, vsn}, 30_000)
+  def digest(pid, chart, vsn), do: GenServer.call(pid, {:digest, chart, vsn}, 60_000)
 
   def start(url) do
     GenServer.start(__MODULE__, url, name: via(url))

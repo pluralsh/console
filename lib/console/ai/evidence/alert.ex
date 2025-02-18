@@ -13,7 +13,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Alert do
   def generate(%Alert{state: :resolved}), do: {:error, "alert is already resolved"}
   def generate(_), do: {:error, "insights only supported for service bound alerts"}
 
-  def preload(%Alert{} = alert), do: Repo.preload(alert, [:insight, service: :cluster])
+  def preload(%Alert{} = alert), do: Repo.preload(alert, [insight: :evidence, service: :cluster])
 
   def insight(%Alert{insight: insight}), do: insight
 

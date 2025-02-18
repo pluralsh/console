@@ -1,4 +1,8 @@
-import { Navigate, Route } from 'react-router-dom'
+import Secret, { SecretData } from 'components/kubernetes/configuration/Secret'
+import CustomResourceDefinition, {
+  CustomResourceDefinitionConditions,
+  CustomResourceDefinitionObjects,
+} from 'components/kubernetes/customresources/CustomResourceDefinition'
 
 import Service, {
   ServiceEvents,
@@ -6,22 +10,104 @@ import Service, {
   ServiceIngresses,
   ServicePods,
 } from 'components/kubernetes/network/Service'
-import PersistentVolume, {
-  PersistentVolumeInfo,
-} from 'components/kubernetes/storage/PersistentVolume'
-import Secret, { SecretData } from 'components/kubernetes/configuration/Secret'
-import RoleBinding, {
-  RoleBindingSubjects,
-} from 'components/kubernetes/rbac/RoleBinding'
-import Role, { RolePolicyRules } from 'components/kubernetes/rbac/Role'
 import ClusterRole from 'components/kubernetes/rbac/ClusterRole'
 import ClusterRoleBinding, {
   ClusterRoleBindingSubjects,
 } from 'components/kubernetes/rbac/ClusterRoleBinding'
-import CustomResourceDefinition, {
-  CustomResourceDefinitionObjects,
-  CustomResourceDefinitionConditions,
-} from 'components/kubernetes/customresources/CustomResourceDefinition'
+import Role, { RolePolicyRules } from 'components/kubernetes/rbac/Role'
+import RoleBinding, {
+  RoleBindingSubjects,
+} from 'components/kubernetes/rbac/RoleBinding'
+import PersistentVolume, {
+  PersistentVolumeInfo,
+} from 'components/kubernetes/storage/PersistentVolume'
+import { Navigate, Route } from 'react-router-dom'
+import Audit from '../components/kubernetes/audit/Audit.tsx'
+
+import Root from '../components/kubernetes/Cluster'
+import Cluster from '../components/kubernetes/cluster/Cluster'
+import Events from '../components/kubernetes/cluster/Events'
+
+import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
+import Namespace, {
+  NamespaceEvents,
+} from '../components/kubernetes/cluster/Namespace'
+import Namespaces from '../components/kubernetes/cluster/Namespaces'
+import Node, {
+  NodeConditions,
+  NodeContainerImages,
+  NodeEvents,
+  NodeInfo,
+  NodePods,
+} from '../components/kubernetes/cluster/Node'
+import Nodes from '../components/kubernetes/cluster/Nodes'
+
+import Raw from '../components/kubernetes/common/Raw'
+import ConfigMap, {
+  ConfigMapData,
+} from '../components/kubernetes/configuration/ConfigMap'
+import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
+import Configuration from '../components/kubernetes/configuration/Configuration'
+import Secrets from '../components/kubernetes/configuration/Secrets'
+
+import CustomResource, {
+  CustomResourceEvents,
+} from '../components/kubernetes/customresources/CustomResource'
+import CustomResourceDefinitions from '../components/kubernetes/customresources/CustomResourceDefinitions'
+import Navigation from '../components/kubernetes/Navigation'
+import Ingress, {
+  IngressEvents,
+  IngressInfo,
+} from '../components/kubernetes/network/Ingress'
+import IngressClass from '../components/kubernetes/network/IngressClass'
+import IngressClasses from '../components/kubernetes/network/IngressClasses'
+import Ingresses from '../components/kubernetes/network/Ingresses'
+import Network from '../components/kubernetes/network/Network'
+import NetworkPolicies from '../components/kubernetes/network/NetworkPolicies'
+import NetworkPolicy, {
+  NetworkPolicyInfo,
+} from '../components/kubernetes/network/NetworkPolicy'
+import Services from '../components/kubernetes/network/Services'
+import ClusterRoleBindings from '../components/kubernetes/rbac/ClusterRoleBindings'
+import ClusterRoles from '../components/kubernetes/rbac/ClusterRoles'
+import Rbac from '../components/kubernetes/rbac/Rbac'
+import RoleBindings from '../components/kubernetes/rbac/RoleBindings'
+import Roles from '../components/kubernetes/rbac/Roles'
+
+import ServiceAccount from '../components/kubernetes/rbac/ServiceAccount'
+
+import ServiceAccounts from '../components/kubernetes/rbac/ServiceAccounts'
+import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
+import PersistentVolumeClaims from '../components/kubernetes/storage/PersistentVolumeClaims'
+import PersistentVolumes from '../components/kubernetes/storage/PersistentVolumes'
+import Storage from '../components/kubernetes/storage/Storage'
+import StorageClass, {
+  StorageClassPersistentVolumes,
+} from '../components/kubernetes/storage/StorageClass'
+import StorageClasses from '../components/kubernetes/storage/StorageClasses'
+import CronJob, {
+  CronJobEvents,
+  CronJobJobs,
+} from '../components/kubernetes/workloads/CronJob'
+import CronJobs from '../components/kubernetes/workloads/CronJobs'
+import DaemonSet, {
+  DaemonSetEvents,
+  DaemonSetPods,
+  DaemonSetServices,
+} from '../components/kubernetes/workloads/DaemonSet'
+import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
+import Deployment, {
+  DeploymentEvents,
+  DeploymentHorizontalPodAutoscalers,
+  DeploymentReplicaSets,
+} from '../components/kubernetes/workloads/Deployment'
+import Deployments from '../components/kubernetes/workloads/Deployments'
+import Job, {
+  JobConditions,
+  JobEvents,
+  JobPods,
+} from '../components/kubernetes/workloads/Job'
+import Jobs from '../components/kubernetes/workloads/Jobs'
 
 import {
   Pod,
@@ -31,126 +117,42 @@ import {
   PodInfo,
   PodLogs,
 } from '../components/kubernetes/workloads/Pod'
-import Navigation from '../components/kubernetes/Navigation'
-import Workloads from '../components/kubernetes/workloads/Workloads'
-import Network from '../components/kubernetes/network/Network'
-import Services from '../components/kubernetes/network/Services'
-import Ingresses from '../components/kubernetes/network/Ingresses'
-import IngressClasses from '../components/kubernetes/network/IngressClasses'
-import Storage from '../components/kubernetes/storage/Storage'
-import Configuration from '../components/kubernetes/configuration/Configuration'
-import Deployments from '../components/kubernetes/workloads/Deployments'
 import Pods from '../components/kubernetes/workloads/Pods'
-import ReplicaSets from '../components/kubernetes/workloads/ReplicaSets'
-import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
-import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
-import Jobs from '../components/kubernetes/workloads/Jobs'
-import CronJobs from '../components/kubernetes/workloads/CronJobs'
-import ReplicationControllers from '../components/kubernetes/workloads/ReplicationControllers'
-import PersistentVolumeClaims from '../components/kubernetes/storage/PersistentVolumeClaims'
-import PersistentVolumes from '../components/kubernetes/storage/PersistentVolumes'
-import StorageClasses from '../components/kubernetes/storage/StorageClasses'
-import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
-import Secrets from '../components/kubernetes/configuration/Secrets'
-import Cluster from '../components/kubernetes/cluster/Cluster'
-import Nodes from '../components/kubernetes/cluster/Nodes'
-import Node, {
-  NodeConditions,
-  NodeContainerImages,
-  NodeEvents,
-  NodeInfo,
-  NodePods,
-} from '../components/kubernetes/cluster/Node'
-import Events from '../components/kubernetes/cluster/Events'
-import Namespaces from '../components/kubernetes/cluster/Namespaces'
-import CustomResourceDefinitions from '../components/kubernetes/customresources/CustomResourceDefinitions'
-import NetworkPolicies from '../components/kubernetes/network/NetworkPolicies'
-import ClusterRoleBindings from '../components/kubernetes/rbac/ClusterRoleBindings'
-import ClusterRoles from '../components/kubernetes/rbac/ClusterRoles'
-import RoleBindings from '../components/kubernetes/rbac/RoleBindings'
-import Roles from '../components/kubernetes/rbac/Roles'
-import Rbac from '../components/kubernetes/rbac/Rbac'
-import Deployment, {
-  DeploymentEvents,
-  DeploymentHorizontalPodAutoscalers,
-  DeploymentReplicaSets,
-} from '../components/kubernetes/workloads/Deployment'
 import ReplicaSet, {
   ReplicaSetEvents,
   ReplicaSetInfo,
   ReplicaSetPods,
   ReplicaSetServices,
 } from '../components/kubernetes/workloads/ReplicaSet'
-import StatefulSet, {
-  StatefulSetEvents,
-  StatefulSetPods,
-} from '../components/kubernetes/workloads/StatefulSet'
-import DaemonSet, {
-  DaemonSetEvents,
-  DaemonSetPods,
-  DaemonSetServices,
-} from '../components/kubernetes/workloads/DaemonSet'
-import Job, {
-  JobConditions,
-  JobEvents,
-  JobPods,
-} from '../components/kubernetes/workloads/Job'
+import ReplicaSets from '../components/kubernetes/workloads/ReplicaSets'
 import ReplicationController, {
   ReplicationControllerEvents,
   ReplicationControllerPods,
   ReplicationControllerServices,
 } from '../components/kubernetes/workloads/ReplicationController'
-import Ingress, {
-  IngressEvents,
-  IngressInfo,
-} from '../components/kubernetes/network/Ingress'
-import CronJob, {
-  CronJobEvents,
-  CronJobJobs,
-} from '../components/kubernetes/workloads/CronJob'
-import IngressClass from '../components/kubernetes/network/IngressClass'
-import NetworkPolicy, {
-  NetworkPolicyInfo,
-} from '../components/kubernetes/network/NetworkPolicy'
-import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
-import StorageClass, {
-  StorageClassPersistentVolumes,
-} from '../components/kubernetes/storage/StorageClass'
-import ConfigMap, {
-  ConfigMapData,
-} from '../components/kubernetes/configuration/ConfigMap'
-import Namespace, {
-  NamespaceEvents,
-} from '../components/kubernetes/cluster/Namespace'
-
-import Raw from '../components/kubernetes/common/Raw'
-
-import ServiceAccounts from '../components/kubernetes/rbac/ServiceAccounts'
-
-import ServiceAccount from '../components/kubernetes/rbac/ServiceAccount'
-
-import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
-
-import CustomResource, {
-  CustomResourceEvents,
-} from '../components/kubernetes/customresources/CustomResource'
-
-import Root from '../components/kubernetes/Cluster'
+import ReplicationControllers from '../components/kubernetes/workloads/ReplicationControllers'
+import StatefulSet, {
+  StatefulSetEvents,
+  StatefulSetPods,
+} from '../components/kubernetes/workloads/StatefulSet'
+import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
+import Workloads from '../components/kubernetes/workloads/Workloads'
 
 import {
+  AUDIT_REL_PATH,
   CLUSTER_REL_PATH,
-  CLUSTER_ROLES_REL_PATH,
   CLUSTER_ROLE_BINDINGS_REL_PATH,
-  CONFIGURATION_REL_PATH,
+  CLUSTER_ROLES_REL_PATH,
   CONFIG_MAPS_REL_PATH,
+  CONFIGURATION_REL_PATH,
   CRON_JOBS_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
   DAEMON_SETS_REL_PATH,
   DEPLOYMENTS_REL_PATH,
   EVENTS_REL_PATH,
   HPAS_REL_PATH,
-  INGRESSES_REL_PATH,
   INGRESS_CLASSES_REL_PATH,
+  INGRESSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
   NAMESPACED_RESOURCE_DETAILS_REL_PATH,
@@ -158,18 +160,18 @@ import {
   NETWORK_POLICIES_REL_PATH,
   NETWORK_REL_PATH,
   NODES_REL_PATH,
-  PERSISTENT_VOLUMES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
+  PERSISTENT_VOLUMES_REL_PATH,
   PODS_REL_PATH,
   RBAC_REL_PATH,
-  REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
+  REPLICATION_CONTROLLERS_REL_PATH,
   RESOURCE_DETAILS_REL_PATH,
-  ROLES_REL_PATH,
   ROLE_BINDINGS_REL_PATH,
+  ROLES_REL_PATH,
   SECRETS_REL_PATH,
-  SERVICES_REL_PATH,
   SERVICE_ACCOUNTS_REL_PATH,
+  SERVICES_REL_PATH,
   STATEFUL_SETS_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
   STORAGE_REL_PATH,
@@ -385,6 +387,10 @@ export const kubernetesRoutes = (
       <Route
         path={CUSTOM_RESOURCES_REL_PATH}
         element={<CustomResourceDefinitions />}
+      />
+      <Route
+        path={AUDIT_REL_PATH}
+        element={<Audit />}
       />
     </Route>
     <Route

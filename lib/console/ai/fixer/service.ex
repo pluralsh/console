@@ -52,9 +52,9 @@ defmodule Console.AI.Fixer.Service do
       (if is_list(h.values_files) && !Enum.empty?(h.values_files), do: "values files: #{Enum.join(h.values_files, ",")}", else: nil)
     ])}
 
-    Changes to helm charts should be focused on values files or values overrides, if there is no value file present,
-    simply add the customized values as the `spec.helm.values` field, which supports any unstructured map type,
-    of the associated ServiceDeployment kubernetes custom resource for this service.
+    Changes to helm charts should be focused on dedicated values files or values overrides. You should *always* prefer
+    to make changes in the custom values file already configured, but if none is relevant, simply add the customized values
+    as the `spec.helm.values` field, which supports any unstructured map type, of the associated ServiceDeployment kubernetes custom resource for this service.
     """
   end
   def helm_details(_), do: nil

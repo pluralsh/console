@@ -1,7 +1,7 @@
-import { useContext } from 'react'
-import moment from 'moment'
-import styled from 'styled-components'
 import { ErrorIcon, IconFrame } from '@pluralsh/design-system'
+import { useContext } from 'react'
+import styled from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
 import SubscriptionContext from '../contexts/SubscriptionContext'
 
@@ -24,7 +24,8 @@ export default function BillingLegacyUserMessage() {
 
   const message = isGrandfatheringExpired
     ? 'Legacy user access expired. '
-    : `Legacy user access until ${moment(account?.grandfatheredUntil).format(
+    : `Legacy user access until ${formatDateTime(
+        account?.grandfatheredUntil,
         'MMM DD, YYYY'
       )}. `
 

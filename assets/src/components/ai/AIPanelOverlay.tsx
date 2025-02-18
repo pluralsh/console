@@ -17,12 +17,10 @@ const getTransitionProps = (open: boolean) => ({
 export function AIPanelOverlay({
   open,
   onClose,
-  alwaysGrow = false,
   children,
 }: {
   open: boolean
   onClose: () => void
-  alwaysGrow?: boolean
   children: ReactNode
 }) {
   const theme = useTheme()
@@ -36,25 +34,31 @@ export function AIPanelOverlay({
 
   return transitions((styles) => (
     <AnimatedDiv
-      ref={ref}
       css={{
-        display: 'flex',
-        transition: 'max-height 0.2s ease-in-out, height 0.2s ease-in-out',
-        pointerEvents: 'none',
+        zIndex: theme.zIndexes.modal,
         position: 'absolute',
         right: 0,
         top: 32 + theme.spacing.small,
-        width: 600,
-        zIndex: theme.zIndexes.modal,
-        '& > *': { pointerEvents: 'auto' },
-      }}
-      style={{
-        ...(alwaysGrow ? { height: maxHeight } : { maxHeight }),
         transformOrigin: 'top right',
-        ...styles,
       }}
+      style={styles}
     >
-      {children}
+      {/* react-spring incorrectly injects refs into the outermost component, which was causing an error with react 19 */}
+      {/* can probably remove this wrapper once this issue is closed: https://github.com/pmndrs/react-spring/issues/2341  */}
+      {/* perfectly fine for now though */}
+      <div
+        ref={ref}
+        css={{
+          display: 'flex',
+          transition: 'max-height 0.2s ease-in-out, height 0.2s ease-in-out',
+          pointerEvents: 'none',
+          width: 600,
+          '& > *': { pointerEvents: 'auto' },
+        }}
+        style={{ maxHeight }}
+      >
+        {children}
+      </div>
     </AnimatedDiv>
   ))
 }

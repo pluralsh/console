@@ -234,7 +234,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state])
+      |> Repo.preload([:state, violations: :causes])
       |> StackRun.update_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -329,7 +329,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, :output, :errors])
+      |> Repo.preload([:state, :output, :errors, violations: :causes])
       |> StackRun.complete_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -606,7 +606,7 @@ defmodule Console.Deployments.Stacks do
     |> notify(:create)
   end
 
-  @run_attrs ~w(approval variables actor_id workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a
+  @run_attrs ~w(approval variables actor_id workdir manage_state dry_run configuration type environment files job_spec policy_engine repository_id cluster_id)a
 
   defp stack_attrs(%Stack{} = stack, sha) do
     Repo.preload(stack, [:environment, :files])

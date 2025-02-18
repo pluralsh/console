@@ -71,7 +71,9 @@ defmodule Console.Deployments.Helm.AgentCache do
       cache = %{cache | client: client}
       {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
     else
-      {:cache, {line, true}} -> {:ok, line, cache}
+      {:cache, {line, true}} ->
+        File.rm(tmp)
+        {:ok, line, cache}
       err ->
         File.rm(tmp)
         err

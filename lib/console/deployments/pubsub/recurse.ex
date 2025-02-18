@@ -102,11 +102,14 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Schema.{PullRequest, Stack}
   alias Console.Deployments.{Stacks, Git.Discovery}
+  alias Console.Deployments.Notifications.Utils
 
   def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
-    with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
+    Utils.deduplicate({:stack_pr, pr.id}, fn ->
+      with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
          _ <- Discovery.kick(stack.repository),
       do: Stacks.poll(pr)
+    end, ttl: :timer.minutes(2))
   end
   def process(_), do: :ok
 end
@@ -182,6 +185,31 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
         Stacks.post_comment(run)
         Stacks.dequeue(pr)
       {stack, _} -> Stacks.dequeue(stack)
+    end
+  end
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ScmWebhook do
+  alias Console.AI.{Tool, VectorStore}
+  alias Console.Deployments.{Pr.Dispatcher, Settings}
+  alias Console.Schema.{ScmWebhook, ScmConnection, DeploymentSettings}
+
+  def process(%@for{
+    item: %{"action" => "pull_request", "pull_request" => %{"merged" => true} = pr},
+    actor: %ScmWebhook{type: :github}
+  }) do
+    with true <- enabled?(),
+         %ScmConnection{} = conn <- Tool.scm_connection(),
+         {:ok, [_ | _] = files} <- Dispatcher.files(conn, pr) do
+      Enum.each(files, &VectorStore.insert/1)
+    end
+  end
+  def process(_), do: :ok
+
+  defp enabled?() do
+    case Settings.cached() do
+      %DeploymentSettings{ai: %{vector_store: %{enabled: enabled}}} -> enabled
+      _ -> false
     end
   end
 end

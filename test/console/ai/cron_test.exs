@@ -208,6 +208,55 @@ defmodule Console.AI.CronTest do
 
       assert_receive {:event, %PubSub.ClusterInsight{item: {%{id: ^id}, _}}}
     end
+
+    test "it can query cert manager logs when needed" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+      )
+      cluster = insert(:cluster,
+        operational_layout: build(:operational_layout,
+          namespaces: %{cert_manager: "cert-manager"}
+        )
+      )
+      insert(:cluster_insight_component,
+        cluster: cluster,
+        group: "cert-manager.io",
+        version: "v1",
+        kind: "Certificate",
+        namespace: "ns",
+        name: "name"
+      )
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+        {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
+      end)
+
+      log_document(cluster, "cert-manager", "failed no such host") |> index_doc()
+      refresh()
+
+      Cron.clusters()
+
+      %{id: id} = cluster =
+        refetch(cluster)
+        |> Console.Repo.preload([:insight, insight_components: [insight: :evidence]])
+
+      assert cluster.insight.text
+
+      %{insight_components: [component]} = cluster
+
+      assert component.insight.text
+
+      [evidence] = component.insight.evidence
+
+      assert evidence.type == :log
+
+      assert_receive {:event, %PubSub.ClusterInsight{item: {%{id: ^id}, _}}}
+    end
   end
 
   describe "#stacks/0" do

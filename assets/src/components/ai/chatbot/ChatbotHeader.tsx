@@ -15,6 +15,7 @@ import AIPinButton from '../AIPinButton'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../AITableEntry'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton'
 import { Body1BoldP } from 'components/utils/typography/Text'
+import { AISuggestFix } from './AISuggestFix'
 
 export function ChatbotHeader({
   fullscreen,
@@ -31,6 +32,7 @@ export function ChatbotHeader({
   const isStale =
     !!timestamp && dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
   const isShowingList = !currentThread && !currentInsight
+  const type = currentThread ? 'thread' : 'insight'
 
   return (
     <WrapperSC $fullscreen={fullscreen}>
@@ -59,7 +61,7 @@ export function ChatbotHeader({
         <AIEntryLabel
           insight={insight}
           thread={currentThread}
-          isInsight={!currentThread}
+          isInsight={type === 'insight'}
           isStale={isStale}
         />
       )}
@@ -76,12 +78,20 @@ export function ChatbotHeader({
         insight={insight}
         thread={currentThread}
       />
-      {!currentThread && insight && fullscreen && (
-        <ChatWithAIButton
-          insightId={insight.id}
-          messages={[insightMessage(insight)]}
-          bodyText="Chat about it"
-        />
+      {type === 'insight' && insight && (
+        <>
+          <ChatWithAIButton
+            floating
+            iconOnly={!fullscreen}
+            insightId={insight.id}
+            messages={[insightMessage(insight)]}
+            bodyText="Chat about it"
+          />
+          <AISuggestFix
+            buttonProps={{ iconOnly: !fullscreen }}
+            insight={insight}
+          />
+        </>
       )}
       <IconFrame
         size={fullscreen ? 'large' : 'medium'}

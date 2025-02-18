@@ -48,6 +48,8 @@ export const HPAS_REL_PATH = 'horizontalpodautoscalers'
 
 export const CUSTOM_RESOURCES_REL_PATH = 'customresourcedefinitions'
 
+export const AUDIT_REL_PATH = 'audit'
+
 export const NAMESPACED_RESOURCE_DETAILS_REL_PATH = ':namespace/:name'
 export const RESOURCE_DETAILS_REL_PATH = ':name'
 

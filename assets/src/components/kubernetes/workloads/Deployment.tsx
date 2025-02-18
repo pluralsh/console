@@ -1,11 +1,11 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import moment from 'moment/moment'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
+import { formatLocalizedDateTime } from 'utils/datetime'
 
 import {
   DeploymentEventsQuery,
@@ -27,29 +27,29 @@ import {
   useDeploymentQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   DEPLOYMENTS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { PodInfo } from '../common/PodInfo'
 import { SubTitle } from '../../utils/SubTitle'
+import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
-import { ResourceList } from '../common/ResourceList'
+import Annotations from '../common/Annotations'
+import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 import { LabelSelector } from '../common/LabelSelector'
+import { PodInfo } from '../common/PodInfo'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import ResourceInfoCard, {
   ResourceInfoCardEntry,
   ResourceInfoCardSection,
 } from '../common/ResourceInfoCard'
-import Annotations from '../common/Annotations'
-import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
-import { useCluster } from '../Cluster'
 import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
 import { Kind, Resource, fromResource } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
@@ -206,7 +206,7 @@ function NewReplicaSet(): ReactElement<any> {
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {moment(replicaSet?.objectMeta?.creationTimestamp).format('lll')}{' '}
+          {formatLocalizedDateTime(replicaSet?.objectMeta?.creationTimestamp)}{' '}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Pods">
           <PodInfo info={replicaSet?.podInfo as PodInfoT} />

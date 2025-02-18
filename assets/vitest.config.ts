@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, Plugin } from 'vitest/config'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitest.dev/config/
@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    globalSetup: 'utils/test-globals.ts',
     setupFiles: ['setupTests.ts'],
     root: 'src',
     coverage: {
@@ -21,7 +22,7 @@ export default defineConfig({
   },
   cacheDir: '../node_modules/',
   esbuild: { jsx: 'automatic' },
-  plugins: [tsconfigPaths()],
+  plugins: [tsconfigPaths() as Plugin],
   resolve: {
     mainFields: ['module'],
   },

@@ -107,9 +107,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
-  def list_nodes(cluster, _, _), do: Clusters.cached_nodes(cluster)
+  def list_nodes(cluster, _, _), do: Clusters.nodes(cluster)
 
-  def list_node_metrics(cluster, _, _), do: Clusters.cached_node_metrics(cluster)
+  def list_node_metrics(cluster, _, _), do: Clusters.node_metrics(cluster)
 
   def list_pinned_custom_resources(cluster, _, _) do
     PinnedCustomResource.for_cluster(cluster.id)

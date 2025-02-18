@@ -8,8 +8,6 @@ import { Edge } from 'utils/graphql'
 
 import { getPolicyPath } from 'routes/securityRoutesConsts'
 
-import { ColActions } from 'components/home/clusteroverview/ClusterOverviewTable'
-
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 import {
@@ -17,6 +15,7 @@ import {
   ColDescription,
   ColPolicyName,
   ColViolations,
+  ColActions,
 } from './PoliciesColumns'
 
 const columns = [ColPolicyName, ColCluster, ColViolations, ColDescription]

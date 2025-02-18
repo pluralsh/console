@@ -5,6 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
   defenum LogDriver, victoria: 0, elastic: 1
+  defenum VectorStore, elastic: 0
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -19,6 +20,23 @@ defmodule Console.Schema.DeploymentSettings do
       model
       |> cast(attrs, ~w(host user password)a)
       |> validate_required([:host])
+    end
+  end
+
+  defmodule Elastic do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :host,     :string
+      field :index,    :string
+      field :user,     :string
+      field :password, EncryptedString
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host index user password)a)
+      |> validate_required([:host, :index])
     end
   end
 
@@ -61,12 +79,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :driver,   LogDriver
 
       embeds_one :victoria, Connection, on_replace: :update
-      embeds_one :elastic,  Elastic, on_replace: :update do
-        field :host,     :string
-        field :index,    :string
-        field :user,     :string
-        field :password, EncryptedString
-      end
+      embeds_one :elastic,  Elastic, on_replace: :update
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -76,9 +89,18 @@ defmodule Console.Schema.DeploymentSettings do
     end
 
     embeds_one :ai, AI, on_replace: :update do
-      field :enabled,       :boolean, default: false
-      field :provider,      AIProvider, default: :openai
-      field :tool_provider, AIProvider
+      field :enabled,            :boolean, default: false
+      field :provider,           AIProvider, default: :openai
+      field :tool_provider,      AIProvider
+      field :embedding_provider, AIProvider
+
+      embeds_one :vector_store, VectorStore, on_replace: :update do
+        field :enabled,    :boolean, default: false
+        field :initalized, :boolean, default: false
+        field :store,      VectorStore, default: :elastic
+
+        embeds_one :elastic, Elastic, on_replace: :update
+      end
 
       embeds_one :tools, ToolsConfig, on_replace: :update do
         embeds_one :create_pr, PrToolConfig, on_replace: :update do
@@ -87,32 +109,35 @@ defmodule Console.Schema.DeploymentSettings do
       end
 
       embeds_one :openai, OpenAi, on_replace: :update do
-        field :base_url,     :string
-        field :access_token, EncryptedString
-        field :model,        :string
-        field :tool_model,   :string
+        field :base_url,        :string
+        field :access_token,    EncryptedString
+        field :model,           :string
+        field :tool_model,      :string
+        field :embedding_model, :string
       end
 
       embeds_one :anthropic, Anthropic, on_replace: :update do
-        field :base_url,     :string
-        field :access_token, EncryptedString
-        field :model,        :string
-        field :tool_model,   :string
+        field :base_url,        :string
+        field :access_token,    EncryptedString
+        field :model,           :string
+        field :tool_model,      :string
+        field :embedding_model, :string
       end
 
       embeds_one :ollama, Ollama, on_replace: :update do
-        field :model,         :string
-        field :tool_model,    :string
-        field :url,           :string
-        field :authorization, EncryptedString
+        field :model,           :string
+        field :tool_model,      :string
+        field :url,             :string
+        field :authorization,   EncryptedString
+        field :embedding_model, :string
       end
 
       embeds_one :azure, Azure, on_replace: :update do
-        field :api_version, :string
-        field :endpoint,    :string
-        field :model,       :string
-        field :tool_model,  :string
-        field :access_key,  EncryptedString
+        field :api_version,     :string
+        field :endpoint,        :string
+        field :model,           :string
+        field :tool_model,      :string
+        field :access_key,      EncryptedString
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do
@@ -120,6 +145,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :tool_model_id,     :string
         field :access_key_id,     :string
         field :secret_access_key, EncryptedString
+        field :embedding_model,   :string
       end
 
       embeds_one :vertex, Vertex, on_replace: :update do
@@ -129,6 +155,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :project,              :string
         field :endpoint,             :string
         field :location,             :string
+        field :embedding_model,      :string
       end
     end
 
@@ -196,8 +223,9 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider tool_provider)a)
+    |> cast(attrs, ~w(enabled provider tool_provider embedding_provider)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
+    |> cast_embed(:vector_store, with: &vector_store_changeset/2)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
@@ -208,18 +236,18 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_api_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(access_token model tool_model base_url)a)
+    |> cast(attrs, ~w(access_token model tool_model embedding_model base_url)a)
   end
 
   defp ollama_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url model tool_model authorization)a)
+    |> cast(attrs, ~w(url model tool_model embedding_model authorization)a)
     |> validate_required(~w(url model)a)
   end
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token tool_model model)a)
+    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model)a)
     |> validate_required(~w(access_token endpoint)a)
   end
 
@@ -231,7 +259,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model tool_model service_account_json project location endpoint)a)
+    |> cast(attrs, ~w(model tool_model embedding_model service_account_json project location endpoint)a)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do
@@ -258,16 +286,25 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(enabled recommendation_threshold recommendation_cushion)a)
   end
 
+  defp vector_store_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled store)a)
+    |> cast_embed(:elastic)
+    |> set_initialized()
+  end
+
   defp logging_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(enabled driver)a)
     |> cast_embed(:victoria)
-    |> cast_embed(:elastic, with: &elastic_changeset/2)
+    |> cast_embed(:elastic)
   end
 
-  defp elastic_changeset(model, attrs) do
-    model
-    |> cast(attrs, ~w(host index user password)a)
-    |> validate_required([:host, :index])
+  defp set_initialized(changeset) do
+    case {get_change(changeset, :store), get_change(changeset, :elastic)} do
+      {:elastic, e} when not is_nil(e) ->
+        put_change(changeset, :initialized, false)
+      _ -> changeset
+    end
   end
 end

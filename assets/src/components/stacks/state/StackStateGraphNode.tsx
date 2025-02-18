@@ -37,7 +37,7 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
           <IconFrame
             clickable
             icon={<InfoOutlineIcon />}
-            onClick={(e: Event) => {
+            onClick={(e) => {
               e.stopPropagation()
               setOpen(true)
             }}

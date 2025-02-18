@@ -80,15 +80,19 @@ export function AccessTokensCreateScope({
       <IconFrame
         size="small"
         clickable
-        color={canRemove ? 'icon-xlight' : 'icon-disabled'}
-        disabled={!canRemove}
         tooltip
+        disabled={!canRemove}
         onClick={remove}
         icon={<CloseIcon />}
         textValue="Delete"
-        position="absolute"
-        right={16}
-        top={16}
+        css={{
+          color: canRemove
+            ? theme.colors['icon-xlight']
+            : theme.colors['icon-disabled'],
+          position: 'absolute',
+          right: theme.spacing.medium,
+          top: theme.spacing.medium,
+        }}
       />
       <FormField
         label="API"

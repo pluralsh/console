@@ -1,10 +1,9 @@
 import { Flex } from '@pluralsh/design-system'
 
 import { CaptionP } from 'components/utils/typography/Text'
-import moment from 'moment'
+import { formatDateTime, fromNow } from 'utils/datetime'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { dateTimeFormat } from 'utils/date'
 import { AiInsight } from '../../../../generated/graphql.ts'
 import AIPinButton from '../../../ai/AIPinButton.tsx'
 import {
@@ -37,7 +36,7 @@ export function StackRunInsights() {
           firstPartialType="body1Bold"
           second={
             stackRun.insight?.updatedAt &&
-            `Last updated ${moment(stackRun.insight?.updatedAt).fromNow()}`
+            `Last updated ${fromNow(stackRun.insight?.updatedAt)}`
           }
         />
         <Flex
@@ -51,7 +50,7 @@ export function StackRunInsights() {
             $color="text-xlight"
           >
             {stackRun.insight?.updatedAt &&
-              `Last updated ${dateTimeFormat(stackRun?.insight?.updatedAt)}`}
+              `Last updated ${formatDateTime(stackRun?.insight?.updatedAt)}`}
           </CaptionP>
           <IconFrameRefreshButton
             loading={loading}

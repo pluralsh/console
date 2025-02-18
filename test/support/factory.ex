@@ -848,6 +848,12 @@ defmodule Console.Factory do
     }
   end
 
+  def operational_layout_factory do
+    %Schema.OperationalLayout{
+      namespaces: %{cert_manager: "cert-manager", external_dns: "external-dns"}
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

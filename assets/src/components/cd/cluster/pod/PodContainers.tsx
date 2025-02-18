@@ -26,7 +26,7 @@ import {
 } from 'utils/status'
 
 import { Overline } from 'components/cd/utils/PermissionsModal.tsx'
-import moment from 'moment/moment'
+import { formatDateTime } from 'utils/datetime'
 import { TableText, Usage } from '../../../cluster/TableElements.tsx'
 
 export const TABLE_HEIGHT = {
@@ -404,7 +404,8 @@ export function ContainerExpansionPanel({
               title="Started"
               margin={0}
             >
-              {moment(status?.state?.terminated.startedAt).format(
+              {formatDateTime(
+                status?.state?.terminated.startedAt,
                 'MMM D, YYYY h:mm'
               )}
             </Prop>
@@ -412,7 +413,8 @@ export function ContainerExpansionPanel({
               title="Finished"
               margin={0}
             >
-              {moment(status?.state?.terminated.finishedAt).format(
+              {formatDateTime(
+                status?.state?.terminated.finishedAt,
                 'MMM D, YYYY h:mm'
               )}
             </Prop>

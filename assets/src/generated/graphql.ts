@@ -282,6 +282,8 @@ export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
   bedrock?: InputMaybe<BedrockAiAttributes>;
+  /** ai provider to use with embeddings (for vector indexing) */
+  embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
@@ -289,6 +291,7 @@ export type AiSettingsAttributes = {
   /** ai provider to use with tool calls */
   toolProvider?: InputMaybe<AiProvider>;
   tools?: InputMaybe<ToolConfigAttributes>;
+  vectorStore?: InputMaybe<VectorStoreAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
 };
 
@@ -353,6 +356,8 @@ export type AnthropicSettings = {
 
 export type AnthropicSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -599,6 +604,8 @@ export type AzureOpenaiAttributes = {
   accessToken: Scalars['String']['input'];
   /** the api version you want to use */
   apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['input'];
   /** the exact model you wish to use */
@@ -3087,6 +3094,7 @@ export type InfrastructureStack = {
   parent?: Maybe<ServiceDeployment>;
   /** whether the stack is actively tracking changes in git */
   paused?: Maybe<Scalars['Boolean']['output']>;
+  policyEngine?: Maybe<PolicyEngine>;
   /** The project this stack belongs to */
   project?: Maybe<Project>;
   pullRequests?: Maybe<PullRequestConnection>;
@@ -4166,6 +4174,8 @@ export enum OidcProviderType {
 export type OllamaAttributes = {
   /** An http authorization header to use on calls to the Ollama api */
   authorization?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model: Scalars['String']['input'];
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -4196,6 +4206,8 @@ export type OpenaiSettings = {
 export type OpenaiSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
@@ -4828,6 +4840,22 @@ export type PolicyConstraintEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PolicyConstraint>;
 };
+
+/** Configuration for applying policy enforcement to a stack */
+export type PolicyEngine = {
+  __typename?: 'PolicyEngine';
+  /** the policy engine to use with this stack */
+  type: PolicyEngineType;
+};
+
+export type PolicyEngineAttributes = {
+  /** the policy engine to use with this stack */
+  type: PolicyEngineType;
+};
+
+export enum PolicyEngineType {
+  Trivy = 'TRIVY'
+}
 
 /** Aggregate statistics for policies across your fleet */
 export type PolicyStatistic = {
@@ -5669,6 +5697,7 @@ export type RootMutationType = {
   upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
 };
@@ -6610,6 +6639,11 @@ export type RootMutationTypeUpsertObserverArgs = {
 
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
+
+export type RootMutationTypeUpsertUserArgs = {
+  attributes: UserAttributes;
 };
 
 
@@ -8578,6 +8612,7 @@ export type StackAttributes = {
   observableMetrics?: InputMaybe<Array<InputMaybe<ObservableMetricAttributes>>>;
   /** the parent service this stack was created w/in */
   parentId?: InputMaybe<Scalars['ID']['input']>;
+  policyEngine?: InputMaybe<PolicyEngineAttributes>;
   /** the project id this stack will belong to */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -8727,6 +8762,33 @@ export type StackOutputAttributes = {
   value: Scalars['String']['input'];
 };
 
+export type StackPolicyViolation = {
+  __typename?: 'StackPolicyViolation';
+  /** the causes of this violation line-by-line in code */
+  causes?: Maybe<Array<Maybe<StackViolationCause>>>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  policyId: Scalars['String']['output'];
+  policyModule?: Maybe<Scalars['String']['output']>;
+  policyUrl?: Maybe<Scalars['String']['output']>;
+  resolution?: Maybe<Scalars['String']['output']>;
+  severity: VulnSeverity;
+  title: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackPolicyViolationAttributes = {
+  causes?: InputMaybe<Array<InputMaybe<StackViolationCauseAttributes>>>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  policyId: Scalars['String']['input'];
+  policyModule?: InputMaybe<Scalars['String']['input']>;
+  policyUrl?: InputMaybe<Scalars['String']['input']>;
+  resolution?: InputMaybe<Scalars['String']['input']>;
+  severity: VulnSeverity;
+  title: Scalars['String']['input'];
+};
+
 export type StackRun = {
   __typename?: 'StackRun';
   /** the actor of this run (defaults to root console user) */
@@ -8767,6 +8829,7 @@ export type StackRun = {
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** temporary plural creds usable for terraform authentication */
   pluralCreds?: Maybe<PluralCreds>;
+  policyEngine?: Maybe<PolicyEngine>;
   /** the pull request this stack belongs to */
   pullRequest?: Maybe<PullRequest>;
   /** the git repository you're sourcing IaC from */
@@ -8787,6 +8850,8 @@ export type StackRun = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Arbitrary variables to add to a stack run */
   variables?: Maybe<Scalars['Map']['output']>;
+  /** policy violations for this stack */
+  violations?: Maybe<Array<Maybe<StackPolicyViolation>>>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
 };
@@ -8804,6 +8869,8 @@ export type StackRunAttributes = {
   state?: InputMaybe<StackStateAttributes>;
   /** The status of this run */
   status: StackStatus;
+  /** the violations detected by the policy engine */
+  violations?: InputMaybe<Array<InputMaybe<StackPolicyViolationAttributes>>>;
 };
 
 export type StackRunConnection = {
@@ -8887,6 +8954,36 @@ export enum StackType {
   Custom = 'CUSTOM',
   Terraform = 'TERRAFORM'
 }
+
+export type StackViolationCause = {
+  __typename?: 'StackViolationCause';
+  end: Scalars['Int']['output'];
+  lines?: Maybe<Array<Maybe<StackViolationCauseLine>>>;
+  resource: Scalars['String']['output'];
+  start: Scalars['Int']['output'];
+};
+
+export type StackViolationCauseAttributes = {
+  end: Scalars['Int']['input'];
+  lines?: InputMaybe<Array<InputMaybe<StackViolationCauseLineAttributes>>>;
+  resource: Scalars['String']['input'];
+  start: Scalars['Int']['input'];
+};
+
+export type StackViolationCauseLine = {
+  __typename?: 'StackViolationCauseLine';
+  content: Scalars['String']['output'];
+  first?: Maybe<Scalars['Boolean']['output']>;
+  last?: Maybe<Scalars['Boolean']['output']>;
+  line: Scalars['Int']['output'];
+};
+
+export type StackViolationCauseLineAttributes = {
+  content: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Boolean']['input']>;
+  last?: InputMaybe<Scalars['Boolean']['input']>;
+  line: Scalars['Int']['input'];
+};
 
 /** the configuration of a service within a pipeline stage, including optional promotion criteria */
 export type StageService = {
@@ -9251,6 +9348,16 @@ export enum ValidationUniqScope {
   Project = 'PROJECT'
 }
 
+export enum VectorStore {
+  Elastic = 'ELASTIC'
+}
+
+export type VectorStoreAttributes = {
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  store?: InputMaybe<VectorStore>;
+};
+
 /** a shortform reference to an addon by version */
 export type VersionReference = {
   __typename?: 'VersionReference';
@@ -9259,6 +9366,8 @@ export type VersionReference = {
 };
 
 export type VertexAiAttributes = {
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** custom vertexai endpoint if for dedicated customer deployments */
   endpoint?: InputMaybe<Scalars['String']['input']>;
   /** the gcp region the model is hosted in */
@@ -10985,6 +11094,8 @@ export type ClusterRegistrationFragment = { __typename?: 'ClusterRegistration', 
 
 export type TagFragment = { __typename?: 'Tag', name: string, value: string };
 
+export type IsoImageFragment = { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null };
+
 export type ClusterRegistrationQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
   machineId?: InputMaybe<Scalars['String']['input']>;
@@ -11024,6 +11135,16 @@ export type DeleteClusterRegistrationMutationVariables = Exact<{
 
 
 export type DeleteClusterRegistrationMutation = { __typename?: 'RootMutationType', deleteClusterRegistration?: { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type ClusterIsoImagesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterIsoImagesQuery = { __typename?: 'RootQueryType', clusterIsoImages?: { __typename?: 'ClusterIsoImageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterIsoImageEdge', node?: { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -11107,6 +11228,17 @@ export type KubernetesClustersQueryVariables = Exact<{
 
 
 export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null } | null };
+
+export type KubernetesClusterAuditLogsQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type KubernetesClusterAuditLogsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', auditLogs?: { __typename?: 'ClusterAuditLogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterAuditLogEdge', node?: { __typename?: 'ClusterAuditLog', id: string, insertedAt?: string | null, method: string, path: string, actor?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type PinCustomResourceMutationVariables = Exact<{
   attributes: PinnedCustomResourceAttributes;
@@ -13873,6 +14005,19 @@ export const ClusterRegistrationFragmentDoc = gql`
     ${TagFragmentDoc}
 ${UserTinyFragmentDoc}
 ${ProjectTinyFragmentDoc}`;
+export const IsoImageFragmentDoc = gql`
+    fragment IsoImage on ClusterIsoImage {
+  id
+  user
+  password
+  registry
+  image
+  insertedAt
+  project {
+    name
+  }
+}
+    `;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -21782,6 +21927,57 @@ export function useDeleteClusterRegistrationMutation(baseOptions?: Apollo.Mutati
 export type DeleteClusterRegistrationMutationHookResult = ReturnType<typeof useDeleteClusterRegistrationMutation>;
 export type DeleteClusterRegistrationMutationResult = Apollo.MutationResult<DeleteClusterRegistrationMutation>;
 export type DeleteClusterRegistrationMutationOptions = Apollo.BaseMutationOptions<DeleteClusterRegistrationMutation, DeleteClusterRegistrationMutationVariables>;
+export const ClusterIsoImagesDocument = gql`
+    query ClusterISOImages($after: String, $first: Int, $before: String, $last: Int) {
+  clusterIsoImages(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...IsoImage
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${IsoImageFragmentDoc}`;
+
+/**
+ * __useClusterIsoImagesQuery__
+ *
+ * To run a query within a React component, call `useClusterIsoImagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterIsoImagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterIsoImagesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterIsoImagesQuery(baseOptions?: Apollo.QueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+      }
+export function useClusterIsoImagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+        }
+export function useClusterIsoImagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>(ClusterIsoImagesDocument, options);
+        }
+export type ClusterIsoImagesQueryHookResult = ReturnType<typeof useClusterIsoImagesQuery>;
+export type ClusterIsoImagesLazyQueryHookResult = ReturnType<typeof useClusterIsoImagesLazyQuery>;
+export type ClusterIsoImagesSuspenseQueryHookResult = ReturnType<typeof useClusterIsoImagesSuspenseQuery>;
+export type ClusterIsoImagesQueryResult = Apollo.QueryResult<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -22184,6 +22380,66 @@ export type KubernetesClustersQueryHookResult = ReturnType<typeof useKubernetesC
 export type KubernetesClustersLazyQueryHookResult = ReturnType<typeof useKubernetesClustersLazyQuery>;
 export type KubernetesClustersSuspenseQueryHookResult = ReturnType<typeof useKubernetesClustersSuspenseQuery>;
 export type KubernetesClustersQueryResult = Apollo.QueryResult<KubernetesClustersQuery, KubernetesClustersQueryVariables>;
+export const KubernetesClusterAuditLogsDocument = gql`
+    query KubernetesClusterAuditLogs($clusterId: ID, $first: Int, $after: String, $before: String, $last: Int) {
+  cluster(id: $clusterId) {
+    auditLogs(first: $first, last: $last, after: $after, before: $before) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          insertedAt
+          method
+          path
+          actor {
+            name
+            email
+          }
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useKubernetesClusterAuditLogsQuery__
+ *
+ * To run a query within a React component, call `useKubernetesClusterAuditLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useKubernetesClusterAuditLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useKubernetesClusterAuditLogsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useKubernetesClusterAuditLogsQuery(baseOptions?: Apollo.QueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+      }
+export function useKubernetesClusterAuditLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+        }
+export function useKubernetesClusterAuditLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>(KubernetesClusterAuditLogsDocument, options);
+        }
+export type KubernetesClusterAuditLogsQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsQuery>;
+export type KubernetesClusterAuditLogsLazyQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsLazyQuery>;
+export type KubernetesClusterAuditLogsSuspenseQueryHookResult = ReturnType<typeof useKubernetesClusterAuditLogsSuspenseQuery>;
+export type KubernetesClusterAuditLogsQueryResult = Apollo.QueryResult<KubernetesClusterAuditLogsQuery, KubernetesClusterAuditLogsQueryVariables>;
 export const PinCustomResourceDocument = gql`
     mutation PinCustomResource($attributes: PinnedCustomResourceAttributes!) {
   createPinnedCustomResource(attributes: $attributes) {
@@ -26064,11 +26320,13 @@ export const namedOperations = {
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
     ClusterRegistration: 'ClusterRegistration',
     ClusterRegistrations: 'ClusterRegistrations',
+    ClusterISOImages: 'ClusterISOImages',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
     UpgradeStatistics: 'UpgradeStatistics',
     KubernetesClusters: 'KubernetesClusters',
+    KubernetesClusterAuditLogs: 'KubernetesClusterAuditLogs',
     ArgoRollout: 'ArgoRollout',
     Canary: 'Canary',
     Certificate: 'Certificate',
@@ -26348,6 +26606,7 @@ export const namedOperations = {
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     ClusterRegistration: 'ClusterRegistration',
     Tag: 'Tag',
+    IsoImage: 'IsoImage',
     GroupMember: 'GroupMember',
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',

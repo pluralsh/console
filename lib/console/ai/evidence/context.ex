@@ -7,7 +7,12 @@ defmodule Console.AI.Evidence.Context do
 
   def new(history), do: %__MODULE__{history: history}
 
-  def evidence(%__MODULE__{} = ctx, evidence), do: %{ctx | evidence: [evidence | ctx.evidence]}
+  def evidence(%__MODULE__{} = ctx, %{} = e) when map_size(e) > 0, do: %{ctx | evidence: [e | ctx.evidence]}
+  def evidence(%__MODULE__{} = ctx, [_ | _] = es), do: %{ctx | evidence: ctx.evidence ++ es}
+  def evidence(%__MODULE__{} = ctx, _), do: ctx
+
+  def claims(%__MODULE__{} = ctx, %{evidence: [_ | _] = evidence}), do: evidence(ctx, evidence)
+  def claims(%__MODULE__{} = ctx, _), do: ctx
 
   def prompt(%__MODULE__{history: hist} = ctx, msg), do: %{ctx | history: append(hist, msg)}
 

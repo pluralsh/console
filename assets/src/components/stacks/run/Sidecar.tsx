@@ -8,7 +8,7 @@ import {
   SidecarItem,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import moment from 'moment'
+import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { Link } from 'react-router-dom'
 
@@ -85,7 +85,7 @@ export default function StackRunSidecar({
         </SidecarItem>
         {stackRun.approvedAt && (
           <SidecarItem heading="Approved at">
-            {moment(stackRun.approvedAt).format('lll')}
+            {formatLocalizedDateTime(stackRun.approvedAt)}
           </SidecarItem>
         )}
         {stackRun.approver && (
@@ -116,10 +116,10 @@ export default function StackRunSidecar({
           </div>
         </SidecarItem>
         <SidecarItem heading="Created at">
-          {moment(stackRun.insertedAt).format('lll')}
+          {formatLocalizedDateTime(stackRun.insertedAt)}
         </SidecarItem>
         <SidecarItem heading="Updated at">
-          {moment(stackRun.updatedAt).format('lll')}
+          {formatLocalizedDateTime(stackRun.updatedAt)}
         </SidecarItem>
       </Sidecar>
     </ResponsiveLayoutSidecarContainer>

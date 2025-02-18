@@ -4,11 +4,13 @@ defmodule Console.AI.Evidence.Logs do
   alias Console.Deployments.Settings
   alias Console.Logs.Provider, as: LogEngine
   alias Console.AI.{Provider, Tools.Logging, Evidence.Context}
-  alias Console.Schema.{Service, ClusterInsightComponent, DeploymentSettings}
+  alias Console.Schema.{Service, ClusterInsightComponent, Cluster, DeploymentSettings}
 
   require Logger
 
-  @base [query: "error fatal exception", limit: 10]
+  @type parent :: Service.t | ClusterInsightComponent.t | Cluster.t
+
+  @base [query: "error fatal exception fail failed failure warning warn", limit: 10]
   @format ~s({"timestamp": datetime, "log": string})
 
   @preface """
@@ -18,10 +20,10 @@ defmodule Console.AI.Evidence.Logs do
   container.
   """
 
-  @spec with_logging(Provider.history, Service.t | ClusterInsightComponent.t) :: Context.t
+  @spec with_logging(Provider.history, parent) :: Context.t
   def with_logging(history, parent, opts \\ []) do
     force = Keyword.get(opts, :force, false)
-    args  = Keyword.take(opts, ~w(lines q)a)
+    args  = Keyword.take(opts, ~w(lines q namespaces)a)
     with %DeploymentSettings{logging: %{enabled: true}} <- Settings.cached(),
          true <- use_logs?(history, force),
          {:ok, query} <- query(parent, args),
@@ -43,6 +45,7 @@ defmodule Console.AI.Evidence.Logs do
     %{cluster: cluster} = Repo.preload(comp, [:cluster])
     build_query(cluster, args ++ @base ++ [cluster_id: cluster.id, namespaces: [comp.namespace]])
   end
+  defp query(%Cluster{} = cluster, args), do: build_query(cluster, args ++ @base ++ [cluster_id: cluster.id])
   defp query(_, _), do: {:error, :invalid_parent}
 
   defp build_query(resource, args), do: {:ok, %{Query.new(args) | resource: resource}}

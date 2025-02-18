@@ -13,7 +13,7 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
-import { toDateOrUndef } from 'utils/date'
+import { toDateOrUndef } from 'utils/datetime'
 
 import CopyButton from 'components/utils/CopyButton'
 import { TRUNCATE } from 'components/utils/truncate'

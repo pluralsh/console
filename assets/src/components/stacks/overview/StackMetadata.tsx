@@ -1,18 +1,18 @@
 import { Card, Prop } from '@pluralsh/design-system'
 
+import capitalize from 'lodash/capitalize'
 import { Link, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import capitalize from 'lodash/capitalize'
-import moment from 'moment/moment'
+import { fromNow } from 'utils/datetime'
 
-import { ClusterProviderIcon } from '../../utils/Provider'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
+import { ClusterProviderIcon } from '../../utils/Provider'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { StackOutletContextT } from '../Stacks'
-import StackStatusChip from '../common/StackStatusChip'
-import StackApprovalChip from '../common/StackApprovalChip'
 import { OverlineH1 } from '../../utils/typography/Text'
+import { StackOutletContextT } from '../Stacks'
+import StackApprovalChip from '../common/StackApprovalChip'
+import StackStatusChip from '../common/StackStatusChip'
 
 export default function StackMetadata() {
   const theme = useTheme()
@@ -111,14 +111,14 @@ export default function StackMetadata() {
           title="Created"
           margin={0}
         >
-          {moment(stack.insertedAt).fromNow()}
+          {fromNow(stack.insertedAt)}
         </Prop>
         {stack.deletedAt && (
           <Prop
             title="Deleted"
             margin={0}
           >
-            {moment(stack.deletedAt).fromNow()}
+            {fromNow(stack.deletedAt)}
           </Prop>
         )}
         <Prop

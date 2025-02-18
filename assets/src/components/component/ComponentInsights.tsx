@@ -1,7 +1,7 @@
 import { Flex } from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
-import { dateTimeFormat } from 'utils/date'
+import { formatDateTime } from 'utils/datetime'
 import { AiInsight } from '../../generated/graphql.ts'
 import AIPinButton from '../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../ai/chatbot/AISuggestFix.tsx'
@@ -9,9 +9,9 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../ai/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
-import { InsightDisplay } from '../ai/InsightDisplay.tsx'
 
 export function ComponentInsights() {
   const { component, refetch, loading } =
@@ -35,7 +35,7 @@ export function ComponentInsights() {
           $color="text-xlight"
         >
           {component.insight?.updatedAt &&
-            `Last updated at ${dateTimeFormat(component.insight?.updatedAt)}`}
+            `Last updated at ${formatDateTime(component.insight?.updatedAt)}`}
         </CaptionP>
         <IconFrameRefreshButton
           loading={loading}

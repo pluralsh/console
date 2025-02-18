@@ -82,9 +82,11 @@ defmodule Console.Deployments.Git do
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
 
-  def deploy_url(), do: "https://github.com/pluralsh/deployment-operator.git"
+  def deploy_url(), do: Console.conf(:deploy_url) || "https://github.com/pluralsh/deployment-operator.git"
 
-  def artifacts_url(), do: "https://github.com/pluralsh/scaffolds.git"
+  def artifacts_url(), do: Console.conf(:artifacts_url) || "https://github.com/pluralsh/scaffolds.git"
+
+  def git_auth_attrs(), do: Console.conf(:git_auth_attrs) || %{}
 
   def deploy_repo!() do
     case Settings.fetch_consistent() do

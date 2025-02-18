@@ -1,9 +1,14 @@
-import { Button, ChatOutlineIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  ChatOutlineIcon,
+  IconFrame,
+  Spinner,
+} from '@pluralsh/design-system'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
+import { ButtonProps } from 'honorable'
 import { Dispatch, ReactNode } from 'react'
 import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../explain/ExplainWithAIButton.tsx'
-import { ButtonProps } from 'honorable'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
@@ -43,12 +48,14 @@ export function insightMessage(
 export function ChatWithAIButton({
   messages,
   insightId,
-  bodyText,
+  bodyText = 'Chat with AI',
+  iconOnly = false,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
   insightId?: Nullable<string>
   bodyText?: string
+  iconOnly?: boolean
 } & ButtonProps) {
   const { createNewThread, loading } = useChatbot()
 
@@ -61,14 +68,24 @@ export function ChatWithAIButton({
       messages: messages || [],
     })
   }
-  return (
+  return iconOnly ? (
+    <IconFrame
+      clickable
+      onClick={handleClick}
+      tooltip
+      textValue={bodyText}
+      icon={loading ? <Spinner /> : <ChatOutlineIcon />}
+      type="secondary"
+      {...props}
+    />
+  ) : (
     <Button
       loading={loading}
       onClick={handleClick}
       startIcon={<ChatOutlineIcon />}
       {...props}
     >
-      {bodyText ?? 'Chat with AI'}
+      {bodyText}
     </Button>
   )
 }

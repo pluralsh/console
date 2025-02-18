@@ -1,16 +1,16 @@
 import {
   Chip,
   ChipList,
+  ChipProps,
   Sidecar,
   SidecarItem,
-  ChipProps,
 } from '@pluralsh/design-system'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { dump } from 'js-yaml'
 import { capitalize } from 'lodash'
 import uniqWith from 'lodash/uniqWith'
-import moment from 'moment/moment'
 import { ReactNode, useMemo, useState } from 'react'
+import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
@@ -259,7 +259,7 @@ export function MetadataSidecar({
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
-            {moment(objectMeta.creationTimestamp).format('lll')}
+            {formatLocalizedDateTime(objectMeta.creationTimestamp)}
           </SidecarItem>
           <SidecarItem heading="Labels">
             <ChipList

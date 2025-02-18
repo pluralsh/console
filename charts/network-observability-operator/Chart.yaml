@@ -1,0 +1,7 @@
+apiVersion: v2
+name: network-observability-operator
+description: A Helm chart for Kubernetes that installs Network Observability Operator
+type: application
+version: 0.2.1
+appVersion: "1.8.0-community"
+home: https://github.com/netobserv/network-observability-operator

@@ -4,15 +4,18 @@ defmodule Console.AI.OpenAI do
   """
   @behaviour Console.AI.Provider
 
+  alias Console.AI.Utils
   alias Console.AI.Stream
 
   require Logger
 
   @model "gpt-4o-mini"
+  @embedding_model "text-embedding-3-large"
 
   def default_model(), do: @model
+  def default_embedding_model(), do: @embedding_model
 
-  defstruct [:access_key, :model, :tool_model, :base_url, :params, :stream]
+  defstruct [:access_key, :model, :tool_model, :embedding_model, :base_url, :params, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -53,12 +56,31 @@ defmodule Console.AI.OpenAI do
     def spec(), do: %__MODULE__{choices: [OpenAI.Choice.spec()]}
   end
 
+  defmodule Embedding do
+    @type t :: %__MODULE__{embedding: [float], index: integer}
+
+    defstruct [:embedding, :index]
+
+    def spec(), do: %__MODULE__{}
+  end
+
+  defmodule EmbeddingResponse do
+    alias Console.AI.OpenAI
+
+    @type t :: %__MODULE__{data: [OpenAI.Embedding.t], model: binary}
+
+    defstruct [:data, :model]
+
+    def spec(), do: %__MODULE__{data: [OpenAI.Embedding.spec()]}
+  end
+
   def new(opts) do
     %__MODULE__{
       access_key: opts.access_token,
       model: opts.model,
       tool_model: opts.tool_model,
       base_url: opts.base_url,
+      embedding_model: opts.embedding_model,
       stream: Stream.stream()
     }
   end
@@ -96,6 +118,18 @@ defmodule Console.AI.OpenAI do
     end
   end
 
+  def embeddings(%__MODULE__{} = openai, text) do
+    Utils.chunk(text, 8000)
+    |> Enum.reduce_while([], fn chunk, acc ->
+      case embed(openai, chunk) do
+        {:ok, %EmbeddingResponse{data: [%Embedding{embedding: embedding} | _]}} ->
+          {:cont, [{chunk, embedding} | acc]}
+        error -> {:halt, error}
+      end
+    end)
+    |> Utils.maybe_ok()
+  end
+
   def tools?(), do: true
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history) do
@@ -116,11 +150,27 @@ defmodule Console.AI.OpenAI do
       model: model || "gpt-4o-mini",
       messages: history,
       tools: tools && Enum.map(tools, &tool_args(&1)),
-    }) |> Jason.encode!()
+    })
+    |> Map.merge((if tools, do: %{tool_choice: "required"}, else: %{}))
+    |> Jason.encode!()
 
     url(openai, "/chat/completions")
     |> HTTPoison.post(body, json_headers(token), @options)
     |> handle_response(CompletionResponse.spec())
+  end
+
+  defp embed(%__MODULE__{access_key: token, embedding_model: model} = openai, text) do
+    body = Console.drop_nils(%{
+      model: model || @embedding_model,
+      input: String.slice(text, 0, 8100),
+      encoding_format: "float",
+      dimensions: Utils.embedding_dims()
+    })
+    |> Jason.encode!()
+
+    url(openai, "/embeddings")
+    |> HTTPoison.post(body, json_headers(token), @options)
+    |> handle_response(EmbeddingResponse.spec())
   end
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}}, type) when code in 200..299,
@@ -154,7 +204,7 @@ defmodule Console.AI.OpenAI do
   defp tool_role(:system, "o1-" <> _), do: :user
   defp tool_role(r, _), do: r
 
-  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o"
+  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o-mini"
 
   defp tool_args(tool) do
     %{

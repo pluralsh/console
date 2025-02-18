@@ -22,19 +22,24 @@ fragment InfrastructureStackStatusFragment on InfrastructureStack {
     status
 }
 
+fragment PolicyEngineFragment on PolicyEngine {
+    type
+}
+
 fragment InfrastructureStackFragment on InfrastructureStack {
     id
     name
     type
+    variables
+    approval
+    workdir
+    manageState
+    deletedAt
     git { ...GitRefFragment }
     jobSpec { ...JobSpecFragment}
     configuration { ...StackConfigurationFragment}
     cluster { ...TinyClusterFragment }
     project {...TinyProjectFragment }
-    approval
-    workdir
-    manageState
-    deletedAt
     files { ...StackFileFragment}
     environment { ...StackEnvironmentFragment}
     output { ...StackOutputFragment}
@@ -42,7 +47,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
     repository { ...GitRepositoryFragment}
     writeBindings { ...PolicyBindingFragment }
     readBindings { ...PolicyBindingFragment }
-    variables
+    policyEngine { ...PolicyEngineFragment }
 }
 
 fragment StackRunIdFragment on StackRun {
@@ -76,6 +81,7 @@ fragment StackRunBaseFragment on StackRun {
     tarball
     workdir
     manageState
+    variables
     stateUrls {
         terraform {
             address
@@ -99,7 +105,34 @@ fragment StackRunBaseFragment on StackRun {
     environment { ...StackEnvironmentFragment}
     output { ...StackOutputFragment}
     errors { ...ServiceErrorFragment}
-    variables
+    violations { ...StackPolicyViolationFragment }
+    policyEngine { ...PolicyEngineFragment }
+}
+
+fragment StackPolicyViolationFragment on StackPolicyViolation {
+    id
+    title
+    description
+    policyId
+    policyModule
+    policyUrl
+    severity
+    resolution
+    causes {...StackViolationCauseFragment }
+}
+
+fragment StackViolationCauseFragment on StackViolationCause {
+    start
+    end
+    resource
+    lines { ...StackViolationCauseLineFragment }
+}
+
+fragment StackViolationCauseLineFragment on StackViolationCauseLine {
+    first
+    last
+    content
+    line
 }
 
 fragment ServiceErrorFragment on ServiceError {

@@ -280,7 +280,7 @@ const SecretValueSC = styled.div(({ theme }) => ({
   },
 }))
 
-function SecretValue({ children }: { children: string }) {
+export function SecretValue({ children }: { children: string }) {
   const [reveal, setReveal] = useState(false)
 
   return (

@@ -14,7 +14,8 @@ defmodule Console.Schema.StackRun do
     User,
     ServiceError,
     PullRequest,
-    AiInsight
+    AiInsight,
+    StackPolicyViolation
   }
 
   schema "stack_runs" do
@@ -30,6 +31,7 @@ defmodule Console.Schema.StackRun do
 
     field :cancellation_reason, :string
 
+    embeds_one :policy_engine, Stack.PolicyEngine, on_replace: :update
     embeds_one :git,           Service.Git, on_replace: :update
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Stack.Configuration, on_replace: :update
@@ -56,6 +58,10 @@ defmodule Console.Schema.StackRun do
       foreign_key: :run_id
 
     has_many :output, StackOutput,
+      on_replace: :delete,
+      foreign_key: :run_id
+
+    has_many :violations, StackPolicyViolation,
       on_replace: :delete,
       foreign_key: :run_id
 
@@ -124,6 +130,7 @@ defmodule Console.Schema.StackRun do
     |> cast_embed(:git)
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
+    |> cast_embed(:policy_engine)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> cast_assoc(:state)
     |> cast_assoc(:environment)
@@ -144,6 +151,7 @@ defmodule Console.Schema.StackRun do
     |> cast(attrs, ~w(status)a)
     |> cast_assoc(:state)
     |> cast_assoc(:errors)
+    |> cast_assoc(:violations)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> validate_required(~w(status)a)
   end
@@ -154,6 +162,7 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:state)
     |> cast_assoc(:output)
     |> cast_assoc(:errors)
+    |> cast_assoc(:violations)
     |> validate_required(~w(status)a)
   end
 

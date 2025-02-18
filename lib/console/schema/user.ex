@@ -116,6 +116,7 @@ defmodule Console.Schema.User do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> infer_name()
     |> cast_assoc(:assume_bindings)
     |> cast_embed(:roles, with: &role_changeset/2)
     |> cast_embed(:email_settings, with: &settings_changeset/2)
@@ -144,4 +145,11 @@ defmodule Console.Schema.User do
     put_change(changeset, :password_hash, Argon2.hash_pwd_salt(password))
   end
   defp hash_password(changeset), do: changeset
+
+  defp infer_name(changeset) do
+    case {get_field(changeset, :name), get_field(changeset, :email)} do
+      {nil, email} -> put_change(changeset, :name, email)
+      _ -> changeset
+    end
+  end
 end
