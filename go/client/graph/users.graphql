@@ -16,6 +16,14 @@ mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
     }
 }
 
+
+mutation UpsertUser($attributes: UserAttributes!) {
+    upsertUser(attributes: $attributes) {
+        ...UserFragment
+    }
+}
+
+
 mutation DeleteUser($id: ID!) {
     deleteUser(id: $id) {
         ...UserFragment
