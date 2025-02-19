@@ -205,6 +205,7 @@ type ConsoleClient interface {
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
+	UpsertUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUser, error)
 	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 	AddGroupMember(ctx context.Context, groupID string, userID string, interceptors ...clientv2.RequestInterceptor) (*AddGroupMember, error)
 	DeleteGroupMember(ctx context.Context, userID string, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroupMember, error)
@@ -15730,6 +15731,17 @@ func (t *UpdateUser) GetUpdateUser() *UserFragment {
 	return t.UpdateUser
 }
 
+type UpsertUser struct {
+	UpsertUser *UserFragment "json:\"upsertUser,omitempty\" graphql:\"upsertUser\""
+}
+
+func (t *UpsertUser) GetUpsertUser() *UserFragment {
+	if t == nil {
+		t = &UpsertUser{}
+	}
+	return t.UpsertUser
+}
+
 type DeleteUser struct {
 	DeleteUser *UserFragment "json:\"deleteUser,omitempty\" graphql:\"deleteUser\""
 }
@@ -30154,6 +30166,35 @@ func (c *Client) UpdateUser(ctx context.Context, id *string, attributes UserAttr
 	return &res, nil
 }
 
+const UpsertUserDocument = `mutation UpsertUser ($attributes: UserAttributes!) {
+	upsertUser(attributes: $attributes) {
+		... UserFragment
+	}
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUser, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertUser
+	if err := c.Client.Post(ctx, "UpsertUser", UpsertUserDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const DeleteUserDocument = `mutation DeleteUser ($id: ID!) {
 	deleteUser(id: $id) {
 		... UserFragment
@@ -30469,6 +30510,7 @@ var DocumentOperationNames = map[string]string{
 	GetUserDocument:                                   "GetUser",
 	CreateUserDocument:                                "CreateUser",
 	UpdateUserDocument:                                "UpdateUser",
+	UpsertUserDocument:                                "UpsertUser",
 	DeleteUserDocument:                                "DeleteUser",
 	AddGroupMemberDocument:                            "AddGroupMember",
 	DeleteGroupMemberDocument:                         "DeleteGroupMember",
