@@ -9,7 +9,7 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../ai/InsightDisplay.tsx'
+import { InsightDisplay } from '../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
 
@@ -50,7 +50,7 @@ export function ComponentInsights() {
         <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay
-        text={component.insight?.text}
+        insight={component.insight}
         kind={component.kind}
       />
     </Flex>

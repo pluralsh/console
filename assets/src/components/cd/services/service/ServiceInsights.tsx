@@ -19,7 +19,7 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
-import { InsightDisplay } from '../../../ai/InsightDisplay.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 
 export function ServiceInsights() {
   const theme = useTheme()
@@ -80,7 +80,7 @@ export function ServiceInsights() {
         </Flex>
       </Flex>
       <InsightDisplay
-        text={service.insight?.text}
+        insight={service.insight}
         kind="service"
       />
     </Flex>

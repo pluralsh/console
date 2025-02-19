@@ -1,7 +1,7 @@
 import { useServiceAlertsQuery } from 'generated/graphql'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { AlertsTable } from 'components/utils/AlertsTable'
+import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'

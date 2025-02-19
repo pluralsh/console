@@ -138,8 +138,8 @@ const columns = [
     id: 'ports',
     header: 'Ports',
     cell: ({ getValue }) =>
-      getValue()?.map((port) => (
-        <div>
+      getValue()?.map((port, i) => (
+        <div key={i}>
           {port?.name} {port?.port} {port?.protocol} {port?.appProtocol}
         </div>
       )),
@@ -194,10 +194,8 @@ export function ServiceInfo(): ReactElement<any> {
         <Table
           data={service.endpointList.endpoints}
           columns={columns}
-          css={{
-            maxHeight: '500px',
-            height: '100%',
-          }}
+          maxHeight={500}
+          height="100%"
         />
       </section>
     </>

@@ -24,9 +24,11 @@ const MAX_QUERY_LENGTH = 250
 export function Logs({
   serviceId,
   clusterId,
+  showLegendTooltip,
 }: {
   serviceId?: string
   clusterId?: string
+  showLegendTooltip?: boolean
 }) {
   const theme = useTheme()
   const [showErrorToast, setShowErrorToast] = useState(false)
@@ -122,6 +124,7 @@ export function Logs({
           time={time}
           labels={labels}
           addLabel={addLabel}
+          showLegendTooltip={showLegendTooltip}
         />
       </MainContentWrapperSC>
       <Toast

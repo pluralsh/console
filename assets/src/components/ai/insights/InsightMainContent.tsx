@@ -1,28 +1,22 @@
-import { AiSparkleFilledIcon, Card, Markdown } from '@pluralsh/design-system'
+import { AiSparkleFilledIcon, Markdown } from '@pluralsh/design-system'
 import styled from 'styled-components'
-import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
-import { AIDisabledState, AIEmptyState } from './AI.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import { useAIEnabled } from '../../contexts/DeploymentSettingsContext'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { AIDisabledState, AIEmptyState } from '../AI'
 
-const cssProps = {
-  background: 'transparent',
-  border: 'none',
-  justifyContent: 'start',
-}
-
-export const InsightDisplay = ({
+export function InsightMainContent({
   text,
-  kind = 'resource',
+  kind,
 }: {
   text: Nullable<string>
   kind: Nullable<string>
-}) => {
+}) {
   const aiEnabled = useAIEnabled()
 
   if (aiEnabled === undefined) return <LoadingIndicator />
 
   return (
-    <InsightWrapperCardSC>
+    <WrapperSC>
       {text ? (
         <Markdown text={text} />
       ) : aiEnabled ? (
@@ -40,12 +34,17 @@ export const InsightDisplay = ({
       ) : (
         <AIDisabledState cssProps={cssProps} />
       )}
-    </InsightWrapperCardSC>
+    </WrapperSC>
   )
 }
 
-const InsightWrapperCardSC = styled(Card)(({ theme }) => ({
-  flexGrow: 1,
+const cssProps = {
+  background: 'transparent',
+  border: 'none',
+  justifyContent: 'start',
+}
+
+const WrapperSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   overflow: 'auto',
 }))

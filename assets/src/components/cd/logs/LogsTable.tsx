@@ -41,11 +41,12 @@ export function LogsTable({
       loading={!!initialLoading}
       padCells={!!initialLoading}
       onScrollCapture={onScrollCapture}
-      css={{
-        '& td *': { maxWidth: 'unset' }, // stretches the skeleton loaders out to the end
-        background: data.length
-          ? theme.colors['fill-zero-selected']
-          : 'transparent',
+      background={
+        data.length ? theme.colors['fill-zero-selected'] : 'transparent'
+      }
+      {...{
+        // stretches the skeleton loaders out to the end
+        '& td *': { maxWidth: 'unset' },
       }}
     />
   )
