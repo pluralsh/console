@@ -63,7 +63,7 @@ export default function GlobalServiceSidecar({
                 )
               }
             >
-              Go to root service
+              Root service
             </Button>
           ) : (
             <Button
