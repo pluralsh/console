@@ -78,15 +78,17 @@ export const ColFixedVersion = columnHelper.accessor(
   }
 )
 
-const vulnSeverityToChipSeverity: Record<VulnSeverity, ChipProps['severity']> =
-  {
-    [VulnSeverity.Critical]: 'critical',
-    [VulnSeverity.High]: 'danger',
-    [VulnSeverity.Medium]: 'warning',
-    [VulnSeverity.Low]: 'success',
-    [VulnSeverity.Unknown]: 'neutral',
-    [VulnSeverity.None]: 'neutral',
-  }
+export const vulnSeverityToChipSeverity: Record<
+  VulnSeverity,
+  ChipProps['severity']
+> = {
+  [VulnSeverity.Critical]: 'critical',
+  [VulnSeverity.High]: 'danger',
+  [VulnSeverity.Medium]: 'warning',
+  [VulnSeverity.Low]: 'success',
+  [VulnSeverity.Unknown]: 'neutral',
+  [VulnSeverity.None]: 'neutral',
+}
 
 export const ColSeverity = columnHelper.accessor((report) => report?.severity, {
   id: 'severity',
