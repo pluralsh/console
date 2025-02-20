@@ -30,7 +30,8 @@ export const columns = [
   ColLastActivity,
   ColActions,
 ]
-const crumbs = [
+
+export const crumbs = [
   ...CD_BASE_CRUMBS,
   {
     label: 'global services',

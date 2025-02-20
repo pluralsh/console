@@ -38,6 +38,7 @@ export default function GlobalServiceSidecar({
     <Flex
       direction={'column'}
       gap={'medium'}
+      width={220}
     >
       <Sidecar heading="Source">
         <SidecarItem heading="Type">
@@ -63,7 +64,7 @@ export default function GlobalServiceSidecar({
                 )
               }
             >
-              Go to root service
+              Root service
             </Button>
           ) : (
             <Button
