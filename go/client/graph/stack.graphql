@@ -125,6 +125,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
     start
     end
     resource
+    filename
     lines { ...StackViolationCauseLineFragment }
 }
 

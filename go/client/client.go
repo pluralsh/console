@@ -4299,6 +4299,7 @@ type StackViolationCauseFragment struct {
 	Start    int64                              "json:\"start\" graphql:\"start\""
 	End      int64                              "json:\"end\" graphql:\"end\""
 	Resource string                             "json:\"resource\" graphql:\"resource\""
+	Filename *string                            "json:\"filename,omitempty\" graphql:\"filename\""
 	Lines    []*StackViolationCauseLineFragment "json:\"lines,omitempty\" graphql:\"lines\""
 }
 
@@ -4319,6 +4320,12 @@ func (t *StackViolationCauseFragment) GetResource() string {
 		t = &StackViolationCauseFragment{}
 	}
 	return t.Resource
+}
+func (t *StackViolationCauseFragment) GetFilename() *string {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.Filename
 }
 func (t *StackViolationCauseFragment) GetLines() []*StackViolationCauseLineFragment {
 	if t == nil {
@@ -26535,6 +26542,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -27307,6 +27315,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -27612,6 +27621,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -27917,6 +27927,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -29310,6 +29321,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -29619,6 +29631,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}

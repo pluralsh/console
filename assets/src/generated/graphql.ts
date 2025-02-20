@@ -4846,6 +4846,8 @@ export type PolicyConstraintEdge = {
 /** Configuration for applying policy enforcement to a stack */
 export type PolicyEngine = {
   __typename?: 'PolicyEngine';
+  /** the maximum allowed severity without failing the stack run */
+  maxSeverity?: Maybe<VulnSeverity>;
   /** the policy engine to use with this stack */
   type: PolicyEngineType;
 };

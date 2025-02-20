@@ -4016,6 +4016,8 @@ type PolicyConstraintEdge struct {
 type PolicyEngine struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// the maximum allowed severity without failing the stack run
+	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
 
 type PolicyEngineAttributes struct {
