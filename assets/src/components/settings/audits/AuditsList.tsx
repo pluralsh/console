@@ -1,11 +1,15 @@
-import { AppIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  Flex,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useAuditsQuery } from 'generated/graphql'
-import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'

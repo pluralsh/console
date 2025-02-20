@@ -1,10 +1,28 @@
 import {
   Button,
+  Flex,
   FormField,
   Input2,
   Modal,
   ValidatedInput,
 } from '@pluralsh/design-system'
+import { RequiredDeep } from 'type-fest'
+
+import {
+  PersonaConfigurationAttributes,
+  PersonaFragment,
+  useUpdatePersonaMutation,
+} from 'generated/graphql'
+
+import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { Body2P } from 'components/utils/typography/Text'
+
+import { useUpdateState } from 'components/hooks/useUpdateState'
+import { PersonaConfiguration } from './PersonaConfiguration'
+
+import { mergeWith } from 'lodash'
 import {
   ComponentProps,
   FormEventHandler,
@@ -14,25 +32,8 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { Flex } from 'honorable'
-import { RequiredDeep } from 'type-fest'
-import mergeWith from 'lodash/mergeWith'
 import { useTheme } from 'styled-components'
-
-import {
-  PersonaConfigurationAttributes,
-  PersonaFragment,
-  useUpdatePersonaMutation,
-} from 'generated/graphql'
-
 import { deepOmitKey } from 'utils/deepOmitKey'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { GqlError } from 'components/utils/Alert'
-import { useUpdateState } from 'components/hooks/useUpdateState'
-
-import { Body2P } from 'components/utils/typography/Text'
-
-import { PersonaConfiguration } from './PersonaConfiguration'
 
 const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
   all: false,

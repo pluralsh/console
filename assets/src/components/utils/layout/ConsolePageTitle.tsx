@@ -1,34 +1,39 @@
-import { DivProps, Flex, FlexProps, H1 } from 'honorable'
-import { ReactNode, forwardRef } from 'react'
+import { DivProps, H1 } from 'honorable'
+import { ComponentPropsWithRef, ReactNode } from 'react'
+import styled from 'styled-components'
 
 export type PageTitleProps = {
   heading?: ReactNode
   headingProps?: DivProps
-} & FlexProps
+} & ComponentPropsWithRef<typeof WrapperSC>
 
-const ConsolePageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
-  ({ heading, headingProps = {}, children, ...props }, ref) => (
-    <Flex
-      ref={ref}
-      gap="large"
-      alignItems="center"
-      justifyContent="space-between"
-      position="relative"
-      minHeight={40}
-      {...props}
-    >
+export default function ConsolePageTitle({
+  heading,
+  headingProps = {},
+  children,
+  ...props
+}: PageTitleProps) {
+  return (
+    <WrapperSC {...props}>
       {heading && (
         <H1
           title2
-          marginBottom="-0.1em" // optically center title
+          paddingTop="0.2em" // optically center title
           {...headingProps}
         >
           {heading}
         </H1>
       )}
       {children}
-    </Flex>
+    </WrapperSC>
   )
-)
+}
 
-export default ConsolePageTitle
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  position: 'relative',
+  minHeight: 40,
+}))

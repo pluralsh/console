@@ -1,14 +1,13 @@
-import { Flex } from 'honorable'
+import { Card, Flex } from '@pluralsh/design-system'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import {
   ClusterFragment,
   ClusterNodeFragment,
   Maybe,
   useClusterMetricsQuery,
 } from 'generated/graphql'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { Card } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 import { isNull } from 'lodash'
+import { useTheme } from 'styled-components'
 
 import { Prometheus } from '../../../utils/prometheus'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -51,62 +50,47 @@ export function ClusterMetrics({
   return (
     <Card css={{ padding: theme.spacing.xlarge }}>
       <Flex
-        flex={false}
-        direction="column"
-        gap="xlarge"
-        align="center"
+        width="100%"
+        gap="xsmall"
       >
-        <Flex
-          flex={false}
-          flexDirection="row"
-          alignItems="stretch"
-          justifyContent="center"
-          width="100%"
-          gap="xsmall"
-          overflow="visible"
-          wrap="wrap"
-        >
-          <ClusterGauges
-            cpu={{
-              usage: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.cpuUsage
-              ),
-              requests: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.cpuRequests
-              ),
-              limits: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.cpuLimits
-              ),
-              total: cpuTotal!,
-            }}
-            memory={{
-              usage: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.memoryUsage
-              ),
-              requests: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.memoryRequests
-              ),
-              limits: Prometheus.toValues(
-                data?.cluster?.clusterMetrics?.memoryLimits
-              ),
-              total: memTotal!,
-            }}
-            pods={{
-              used: Prometheus.toValues(data?.cluster?.clusterMetrics?.pods),
-              total: podsTotal!,
-            }}
-          />
-          <SaturationGraphs
-            cpuUsage={Prometheus.toValues(
-              data?.cluster?.clusterMetrics?.cpuUsage
-            )}
-            cpuTotal={cpuTotal!}
-            memUsage={Prometheus.toValues(
+        <ClusterGauges
+          cpu={{
+            usage: Prometheus.toValues(data?.cluster?.clusterMetrics?.cpuUsage),
+            requests: Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.cpuRequests
+            ),
+            limits: Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.cpuLimits
+            ),
+            total: cpuTotal!,
+          }}
+          memory={{
+            usage: Prometheus.toValues(
               data?.cluster?.clusterMetrics?.memoryUsage
-            )}
-            memTotal={memTotal!}
-          />
-        </Flex>
+            ),
+            requests: Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.memoryRequests
+            ),
+            limits: Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.memoryLimits
+            ),
+            total: memTotal!,
+          }}
+          pods={{
+            used: Prometheus.toValues(data?.cluster?.clusterMetrics?.pods),
+            total: podsTotal!,
+          }}
+        />
+        <SaturationGraphs
+          cpuUsage={Prometheus.toValues(
+            data?.cluster?.clusterMetrics?.cpuUsage
+          )}
+          cpuTotal={cpuTotal!}
+          memUsage={Prometheus.toValues(
+            data?.cluster?.clusterMetrics?.memoryUsage
+          )}
+          memTotal={memTotal!}
+        />
       </Flex>
     </Card>
   )

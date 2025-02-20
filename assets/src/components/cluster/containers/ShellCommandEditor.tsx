@@ -5,8 +5,8 @@ import {
   Input,
   PencilIcon,
 } from '@pluralsh/design-system'
+import { Form } from 'honorable'
 import { useEffect, useRef, useState } from 'react'
-import { Flex, Form } from 'honorable'
 import styled from 'styled-components'
 
 export const CODELINE_HEIGHT = 42
@@ -102,7 +102,7 @@ export function ShellCommandEditor({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(command)
-  const inputWrapRef = useRef<HTMLDivElement>(undefined)
+  const inputWrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!isEditing) {
@@ -136,13 +136,7 @@ export function ShellCommandEditor({
       flex="1 1"
       overflow="hidden"
     >
-      <Flex
-        ref={inputWrapRef as any}
-        minWidth={50}
-        // width="50px"
-        flex="1 1"
-        overflow="hidden"
-      >
+      <WrapperSC ref={inputWrapRef}>
         <CodeWrap
           $isEditing={isEditing}
           className="codeWrap"
@@ -169,7 +163,7 @@ export function ShellCommandEditor({
             }}
           />
         )}
-      </Flex>
+      </WrapperSC>
       {!isEditing && (
         <Button
           floating
@@ -208,3 +202,10 @@ export function ShellCommandEditor({
     </Form>
   )
 }
+
+const WrapperSC = styled.div(() => ({
+  display: 'flex',
+  minWidth: 50,
+  flex: '1 1',
+  overflow: 'hidden',
+}))

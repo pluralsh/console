@@ -2,15 +2,15 @@ import {
   AppIcon,
   CaretRightIcon,
   Chip,
-  IconFrame,
   ChipProps,
+  Flex,
+  IconFrame,
 } from '@pluralsh/design-system'
 import { SortingFn } from '@tanstack/table-core'
 import { UnstyledLink } from 'components/utils/Link'
 import { Maybe } from 'generated/graphql'
-import { Flex } from 'honorable'
 import { ComponentProps, ReactNode } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import {
   PhaseT,
   phaseToSeverity,
@@ -151,11 +151,9 @@ export function LabelWithIcon({
   label?: Maybe<string>
   icon?: Maybe<string>
 }) {
-  const theme = useTheme()
-
   return (
     <Flex
-      gap={theme.spacing.xsmall}
+      gap="xsmall"
       alignItems="center"
     >
       {icon && (

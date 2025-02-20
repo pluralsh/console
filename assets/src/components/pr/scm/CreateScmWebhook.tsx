@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
 import {
   Button,
   Codeline,
+  Flex,
   FormField,
   Input2,
   Modal,
 } from '@pluralsh/design-system'
+import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import {
@@ -16,8 +17,6 @@ import {
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { Flex } from 'honorable'
 
 import { GqlError } from 'components/utils/Alert'
 

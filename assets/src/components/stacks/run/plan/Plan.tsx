@@ -13,7 +13,6 @@ export default function StackRunPlan(): ReactNode {
   return (
     <Card
       flexGrow={1}
-      fontFamily="Monument Mono"
       overflowY="auto"
       maxHeight="100%"
     >

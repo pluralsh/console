@@ -1,6 +1,6 @@
-import { useOutletContext } from 'react-router-dom'
-import { Flex } from 'honorable'
+import { Flex } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useOutletContext } from 'react-router-dom'
 
 import { Node } from 'generated/graphql'
 

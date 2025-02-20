@@ -1,5 +1,5 @@
-import { CloseIcon, Modal } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
+import { CloseIcon, Flex, Modal } from '@pluralsh/design-system'
+import { Div, Span } from 'honorable'
 
 export function LogsInfoPanel({
   title,

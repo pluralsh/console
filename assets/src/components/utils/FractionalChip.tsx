@@ -1,5 +1,4 @@
-import { Flex } from 'honorable'
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Flex } from '@pluralsh/design-system'
 
 interface FractionalChipProps {
   label?: string

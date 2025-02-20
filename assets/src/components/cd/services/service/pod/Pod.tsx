@@ -130,7 +130,7 @@ export default function Pod() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <TabPanel
-        as={<ResponsiveLayoutContentContainer overflow="visible" />}
+        as={<ResponsiveLayoutContentContainer css={{ overflow: 'visible' }} />}
         stateRef={tabStateRef}
       >
         <Outlet context={{ pod }} />
