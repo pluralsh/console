@@ -8376,6 +8376,20 @@ spec:
                   - observabilityProviderRef
                   type: object
                 type: array
+              policyEngine:
+                description: PolicyEngine is a configuration for applying policy enforcement
+                  to a stack.
+                properties:
+                  maxSeverity:
+                    description: MaxSeverity is the maximum allowed severity without
+                      failing the stack run
+                    type: string
+                  type:
+                    description: Type is the policy engine to use with this stack
+                    type: string
+                required:
+                - type
+                type: object
               projectRef:
                 description: |-
                   ProjectRef references project this stack belongs to.

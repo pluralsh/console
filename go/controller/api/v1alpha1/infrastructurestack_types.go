@@ -138,6 +138,10 @@ type InfrastructureStackSpec struct {
 	// stack Type (except [console.StackTypeCustom]).
 	// +kubebuilder:validation:Optional
 	Variables *runtime.RawExtension `json:"variables,omitempty"`
+
+	// PolicyEngine is a configuration for applying policy enforcement to a stack.
+	// +kubebuilder:validation:Optional
+	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 }
 
 type StackFile struct {
@@ -243,4 +247,25 @@ type ObservableMetric struct {
 
 	// +kubebuilder:validation:Required
 	ObservabilityProviderRef corev1.ObjectReference `json:"observabilityProviderRef"`
+}
+
+type PolicyEngine struct {
+	// Type is the policy engine to use with this stack
+	// +kubebuilder:validation:Required
+	Type console.PolicyEngineType `json:"type"`
+
+	// MaxSeverity is the maximum allowed severity without failing the stack run
+	// +kubebuilder:validation:Optional
+	MaxSeverity *console.VulnSeverity `json:"maxSeverity,omitempty"`
+}
+
+func (in *PolicyEngine) Attributes() *console.PolicyEngineAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PolicyEngineAttributes{
+		Type:        in.Type,
+		MaxSeverity: in.MaxSeverity,
+	}
 }
