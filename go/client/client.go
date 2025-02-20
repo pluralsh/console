@@ -3617,7 +3617,8 @@ func (t *InfrastructureStackStatusFragment) GetStatus() *StackStatus {
 }
 
 type PolicyEngineFragment struct {
-	Type PolicyEngineType "json:\"type\" graphql:\"type\""
+	Type        PolicyEngineType "json:\"type\" graphql:\"type\""
+	MaxSeverity *VulnSeverity    "json:\"maxSeverity,omitempty\" graphql:\"maxSeverity\""
 }
 
 func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
@@ -3625,6 +3626,12 @@ func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
 		t = &PolicyEngineFragment{}
 	}
 	return &t.Type
+}
+func (t *PolicyEngineFragment) GetMaxSeverity() *VulnSeverity {
+	if t == nil {
+		t = &PolicyEngineFragment{}
+	}
+	return t.MaxSeverity
 }
 
 type InfrastructureStackFragment struct {
@@ -26510,6 +26517,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -26920,6 +26928,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -27283,6 +27292,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -27589,6 +27599,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -27895,6 +27906,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -28165,6 +28177,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -28365,6 +28378,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -28620,6 +28634,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -29289,6 +29304,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -29599,6 +29615,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id

@@ -24,6 +24,7 @@ fragment InfrastructureStackStatusFragment on InfrastructureStack {
 
 fragment PolicyEngineFragment on PolicyEngine {
     type
+    maxSeverity
 }
 
 fragment InfrastructureStackFragment on InfrastructureStack {
