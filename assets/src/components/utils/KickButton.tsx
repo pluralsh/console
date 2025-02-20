@@ -7,8 +7,7 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
-import { useCallback, useState } from 'react'
-import { ButtonProps } from 'honorable'
+import { ComponentPropsWithRef, useCallback, useState } from 'react'
 
 export default function KickButton({
   pulledAt,
@@ -25,7 +24,7 @@ export default function KickButton({
   icon?: boolean
   tooltipMessage: string
   variables: any
-} & ButtonProps) {
+} & ComponentPropsWithRef<typeof Button>) {
   const [mutation, { loading, error }] = kickMutationHook({ variables })
   const [lastSync, setLastSync] = useState<Date | undefined>(undefined)
   const { disabled, secondsRemaining } = useSyncCooldown(lastSync, 15 * 1000)
