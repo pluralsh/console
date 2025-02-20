@@ -8383,9 +8383,18 @@ spec:
                   maxSeverity:
                     description: MaxSeverity is the maximum allowed severity without
                       failing the stack run
+                    enum:
+                    - UNKNOWN
+                    - LOW
+                    - MEDIUM
+                    - HIGH
+                    - CRITICAL
+                    - NONE
                     type: string
                   type:
                     description: Type is the policy engine to use with this stack
+                    enum:
+                    - TRIVY
                     type: string
                 required:
                 - type

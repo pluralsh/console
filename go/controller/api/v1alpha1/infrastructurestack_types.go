@@ -251,10 +251,12 @@ type ObservableMetric struct {
 
 type PolicyEngine struct {
 	// Type is the policy engine to use with this stack
+	// +kubebuilder:validation:Enum=TRIVY
 	// +kubebuilder:validation:Required
 	Type console.PolicyEngineType `json:"type"`
 
 	// MaxSeverity is the maximum allowed severity without failing the stack run
+	// +kubebuilder:validation:Enum=UNKNOWN;LOW;MEDIUM;HIGH;CRITICAL;NONE
 	// +kubebuilder:validation:Optional
 	MaxSeverity *console.VulnSeverity `json:"maxSeverity,omitempty"`
 }

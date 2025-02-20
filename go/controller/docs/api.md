@@ -1989,8 +1989,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[PolicyEngineType](#policyenginetype)_ | Type is the policy engine to use with this stack |  | Required: {} <br /> |
-| `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run |  | Optional: {} <br /> |
+| `type` _[PolicyEngineType](#policyenginetype)_ | Type is the policy engine to use with this stack |  | Enum: [TRIVY] <br />Required: {} <br /> |
+| `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: {} <br /> |
 
 
 #### PrAutomation
