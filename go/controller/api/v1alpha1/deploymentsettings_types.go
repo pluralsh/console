@@ -706,7 +706,6 @@ type VectorStore struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
-	// +kubebuilder:default=ELASTIC
 	// +kubebuilder:validation:Enum=ELASTIC
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
@@ -718,6 +717,10 @@ type VectorStore struct {
 func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.VectorStoreAttributes, error) {
 	if in == nil {
 		return nil, nil
+	}
+
+	if lo.FromPtr(in.Enabled) && in.VectorStore == nil {
+		return nil, fmt.Errorf("vector store type has to be set if it is enabled")
 	}
 
 	attr := &console.VectorStoreAttributes{
