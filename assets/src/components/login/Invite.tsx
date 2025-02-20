@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { Form } from 'honorable'
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -11,6 +10,8 @@ import { setRefreshToken, setToken } from '../../helpers/auth'
 import { INVITE_Q, SIGNUP } from '../graphql/users'
 import { LabelledInput } from '../utils/LabelledInput'
 
+import { Body1P, CaptionP } from 'components/utils/typography/Text'
+import { useTheme } from 'styled-components'
 import { LoginPortal } from './LoginPortal'
 import {
   PasswordError,
@@ -18,8 +19,6 @@ import {
   PasswordErrorMessage,
   validatePassword,
 } from './PasswordValidation'
-import { useTheme } from 'styled-components'
-import { Body1P, CaptionP } from 'components/utils/typography/Text'
 
 function InvalidInvite() {
   return (
@@ -137,7 +136,7 @@ export default function Invite() {
           to join.
         </Body1P>
       </div>
-      <Form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit}>
         {signupError && (
           <div css={{ marginBottom: spacing.large }}>
             <GqlError
@@ -184,7 +183,7 @@ export default function Invite() {
         >
           Sign up
         </Button>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }

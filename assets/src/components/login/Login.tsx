@@ -3,7 +3,6 @@ import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
-import { Form } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
@@ -27,6 +26,7 @@ import ShowAfterDelay from '../utils/ShowAfterDelay'
 
 import { Body1P } from 'components/utils/typography/Text'
 import { LoginPortal } from './LoginPortal'
+
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
 const LOGIN_INFO = gql`
@@ -232,7 +232,7 @@ export default function Login() {
   return (
     <LoginPortal>
       <WelcomeHeader marginBottom="xlarge" />
-      <Form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit}>
         <div
           css={{
             display: 'flex',
@@ -282,7 +282,7 @@ export default function Login() {
             Log in
           </Button>
         </div>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }
