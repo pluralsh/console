@@ -9,7 +9,6 @@ import {
   SlackLogoIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { P } from 'honorable'
 
 import { Confirm } from 'components/utils/Confirm'
 
@@ -21,6 +20,7 @@ import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../../graphql/webhooks'
 
 import WebhookHealth from './WebhookHealth'
 import { useTheme } from 'styled-components'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 
 export default function Webhook({ hook: { id, url, health, insertedAt } }) {
   const { borders } = useTheme()
@@ -51,19 +51,10 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
           type="floating"
         />
         <div css={{ flexGrow: 1, ...TRUNCATE }}>
-          <P
-            body2
-            fontWeight={600}
-            {...TRUNCATE}
-          >
-            {url}
-          </P>
-          <P
-            caption
-            color="text-xlight"
-          >
+          <Body2P css={{ fontWeight: 600, ...TRUNCATE }}>{url}</Body2P>
+          <CaptionP $color="text-xlight">
             Created on {formatDateTime(insertedAt, 'DD/MM/YY')}
-          </P>
+          </CaptionP>
         </div>
         <Flex
           direction="column"

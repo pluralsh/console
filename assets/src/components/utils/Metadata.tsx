@@ -1,8 +1,9 @@
 import { Card, Flex, FlexProps, SidecarProps } from '@pluralsh/design-system'
-import { CardProps, H2 } from 'honorable'
+import { CardProps } from 'honorable'
 import { Children } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
+import { Body1BoldP } from './typography/Text'
 
 const MAX_COLS = 4
 
@@ -69,14 +70,13 @@ export function MetadataItem({
       {...props}
     >
       {heading && (
-        <H2
-          body1
-          bold
-          color="text-default"
+        <Body1BoldP
+          as="h2"
+          $color="text"
           {...headingProps}
         >
           {heading}
-        </H2>
+        </Body1BoldP>
       )}
       {children && (
         <div

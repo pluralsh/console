@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { Form, P } from 'honorable'
+import { Form } from 'honorable'
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -19,6 +19,7 @@ import {
   validatePassword,
 } from './PasswordValidation'
 import { useTheme } from 'styled-components'
+import { Body1P, CaptionP } from 'components/utils/typography/Text'
 
 function InvalidInvite() {
   return (
@@ -35,12 +36,7 @@ function InvalidInvite() {
 
 function PasswordErrorMsg({ errorCode }: { errorCode: PasswordErrorCode }) {
   return (
-    <P
-      caption
-      color="text-error"
-    >
-      {PasswordErrorMessage[errorCode]}
-    </P>
+    <CaptionP $color="text-danger">{PasswordErrorMessage[errorCode]}</CaptionP>
   )
 }
 
@@ -136,13 +132,10 @@ export default function Invite() {
           textAlign="left"
           marginBottom="xxsmall"
         />
-        <P
-          body1
-          color="text-xlight"
-        >
+        <Body1P $color="text-xlight">
           You have been invited to join this Plural account. Create an account
           to join.
-        </P>
+        </Body1P>
       </div>
       <Form onSubmit={onSubmit}>
         {signupError && (

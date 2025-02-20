@@ -1,13 +1,13 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useIsManager } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { useTheme } from 'styled-components'
-import { useIsManager } from 'components/contexts'
+import { AiThreads } from './AiThreads.tsx'
 import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
 import { DeploymentsCard } from './deployments/DeploymentsCard'
-import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 import { PrCard } from './pullrequests/PrCard'
-import { AiThreads } from './AiThreads.tsx'
 import { ServiceCatalogs } from './ServiceCatalog.tsx'
+import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 

@@ -10,10 +10,11 @@ import {
 } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { H3 } from 'honorable'
 import { useContext, useMemo, useState } from 'react'
 import { stringify } from 'yaml'
 
+import { Body1P } from 'components/utils/typography/Text'
+import { useTheme } from 'styled-components'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 function sanitize({ name, repositories, permissions, roleBindings }) {
@@ -33,6 +34,7 @@ function sanitizeBinding({ user, group }) {
 const breadcrumbs = [...PROFILE_BREADCRUMBS, { label: 'permissions' }]
 
 export function Permissions() {
+  const { spacing } = useTheme()
   useSetBreadcrumbs(breadcrumbs)
   const { me } = useContext<any>(LoginContext)
   const [role, setRole] = useState<any>(undefined)
@@ -42,16 +44,18 @@ export function Permissions() {
     <>
       <ScrollablePage heading="Permissions">
         <ContentCard>
-          <H3
-            body1
-            fontWeight="600"
-            marginBottom="small"
+          <Body1P
+            as="h3"
+            css={{ marginBottom: spacing.small, fontWeight: 600 }}
           >
             Roles
-          </H3>
+          </Body1P>
           <Flex>
-            {me.boundRoles?.map((role) => (
-              <Tooltip label={role.description}>
+            {me.boundRoles?.map((role, i) => (
+              <Tooltip
+                key={i}
+                label={role.description}
+              >
                 <Chip
                   clickable
                   onClick={() => setRole(role)}

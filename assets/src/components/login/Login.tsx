@@ -3,7 +3,7 @@ import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
-import { Form, P } from 'honorable'
+import { Form } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
@@ -25,8 +25,8 @@ import { LabelledInput } from '../utils/LabelledInput'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import ShowAfterDelay from '../utils/ShowAfterDelay'
 
+import { Body1P } from 'components/utils/typography/Text'
 import { LoginPortal } from './LoginPortal'
-
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
 const LOGIN_INFO = gql`
@@ -84,12 +84,9 @@ export function GrantAccess() {
           textAlign="left"
           marginBottom="xxsmall"
         />
-        <P
-          body1
-          color="text-xlight"
-        >
+        <Body1P $color="text-xlight">
           Enter the login token given to you to gain access
-        </P>
+        </Body1P>
       </div>
       <LabelledInput
         value={jwt}
@@ -151,13 +148,12 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
           gap="xsmall"
         >
           <WelcomeHeader />
-          <P
-            body1
-            color="text-light"
-            textAlign="center"
+          <Body1P
+            $color="text-light"
+            css={{ textAlign: 'center' }}
           >
             Connect to your Plural account for access to this Console.
-          </P>
+          </Body1P>
         </Flex>
         <Button
           id="plrl-login"

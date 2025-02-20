@@ -4,7 +4,6 @@ import { Suspense } from 'react'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-import { A, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -28,6 +27,7 @@ import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { useTheme } from 'styled-components'
 
 export default function Console() {
   return (
@@ -59,6 +59,7 @@ export default function Console() {
 
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
+  const theme = useTheme()
   const { configuration } = useLogin()
 
   return (
@@ -79,14 +80,19 @@ function ConsoleContent() {
               marginBottom="medium"
               marginRight="xxxxlarge"
             >
-              <Span marginRight="small">Time for a new update!</Span>
-              <A
+              <span css={{ marginRight: theme.spacing.small }}>
+                Time for a new update!
+              </span>
+              <a
                 onClick={() => reloadApplication()}
-                style={{ textDecoration: 'none' }}
-                color="action-link-inline"
+                style={{
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  color: theme.colors['action-link-inline'],
+                }}
               >
                 Update now
-              </A>
+              </a>
             </Toast>
           )}
         </WithApplicationUpdate>
