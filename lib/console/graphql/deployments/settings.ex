@@ -128,6 +128,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model_id,     :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_key_id,     :string, description: "aws access key id to use, you can also use IRSA for self-hosted consoles"
     field :secret_access_key, :string, description: "aws secret access key to use, you can also use IRSA for self-hosted consoles"
+    field :embedding_model,   :string, description: "the model to use for vector embeddings"
   end
 
   input_object :vertex_ai_attributes do

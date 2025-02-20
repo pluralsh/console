@@ -160,7 +160,7 @@ type RootQueryType {
 
   "a relay connection of all clusters visible to the current user"
   clusters(
-    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID, parentId: ID
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID, parentId: ID, upgradeable: Boolean
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
@@ -1225,6 +1225,9 @@ input BedrockAiAttributes {
 
   "aws secret access key to use, you can also use IRSA for self-hosted consoles"
   secretAccessKey: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 input VertexAiAttributes {
@@ -1796,6 +1799,9 @@ input StackCronAttributes {
 input PolicyEngineAttributes {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
+
+  "the maximum allowed severity without failing the stack run"
+  maxSeverity: VulnSeverity
 }
 
 input StackRunAttributes {
@@ -1920,6 +1926,7 @@ input StackViolationCauseAttributes {
   resource: String!
   start: Int!
   end: Int!
+  filename: String
   lines: [StackViolationCauseLineAttributes]
 }
 
@@ -2347,6 +2354,7 @@ type StackViolationCause {
   resource: String!
   start: Int!
   end: Int!
+  filename: String
   lines: [StackViolationCauseLine]
 }
 

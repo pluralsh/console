@@ -9,6 +9,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.Deployments.Compatibilities.{Table, AddOn, Version, CloudAddOns}
   alias Console.Deployments.Ecto.Validations
   alias Console.Services.Users
+  alias Console.Cached.ClusterNodes
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{
     Cluster,
@@ -169,7 +170,7 @@ defmodule Console.Deployments.Clusters do
 
   def warm(:cluster_metrics, %Cluster{id: id} = cluster) do
     with {:ok, metrics} <- fetch_cluster_metrics(cluster),
-      do: @local_adapter.put({:cluster_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
+      do: ClusterNodes.cluster_metrics(id, metrics)
   end
 
   def warm(:api_discovery, %Cluster{} = cluster), do: api_discovery(cluster)

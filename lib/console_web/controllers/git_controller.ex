@@ -2,6 +2,7 @@ defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
   alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{Cluster, Service}
+  alias Console.Deployments.Local.Server, as: FileServer
   require Logger
 
   def proceed(conn, params) do
@@ -25,8 +26,10 @@ defmodule ConsoleWeb.GitController do
   def stack_tarball(conn, %{"id" => run_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, run} <- Stacks.authorized(run_id, cluster),
-         {{:ok, f}, _} <- {Stacks.tarstream(run), run} do
-      chunk_send_tar(conn, f)
+         run <- Console.Repo.preload(run, [:repository]),
+         {{:ok, sha}, _} <- {Stacks.digest(run), run},
+         {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Stacks.tarstream(run) end), run} do
+      chunk_send_tar(conn, File.open!(path, [:raw]))
     else
       {{:error, err}, run} ->
         Stacks.add_errors(run, [%{source: "git", message: err}])
@@ -54,13 +57,14 @@ defmodule ConsoleWeb.GitController do
     end
   end
 
-  def tarball(conn, %{"id" => service_id}) do
+  def tarball(conn, %{"id" => service_id} = params) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision]),
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
-         {{:ok, f}, _} <- {Services.tarstream(svc), svc} do
-      chunk_send_tar(conn, f)
+         {{:ok, sha}, _} <- {get_digest(params, svc), svc},
+         {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Services.tarstream(svc) end), svc} do
+      chunk_send_tar(conn, File.open!(path, [:raw]))
     else
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: err}])
@@ -71,6 +75,9 @@ defmodule ConsoleWeb.GitController do
     end
   end
 
+  defp get_digest(%{"digest" => digest}, _), do: {:ok, digest}
+  defp get_digest(_, %Service{} = svc), do: Services.digest(svc)
+
   defp chunk_send_tar(conn, f) do
     try do
       conn =
@@ -78,7 +85,7 @@ defmodule ConsoleWeb.GitController do
         |> put_resp_content_type("application/gzip")
         |> send_chunked(200)
 
-      IO.binstream(f, 1024)
+      IO.binstream(f, Console.conf(:chunk_size))
       |> Enum.reduce_while(conn, fn line, conn ->
         case chunk(conn, line) do
           {:ok, conn} -> {:cont, conn}

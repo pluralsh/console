@@ -41,6 +41,11 @@ func (in *AIProviderSettings) DeepCopyInto(out *AIProviderSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EmbeddingModel != nil {
+		in, out := &in.EmbeddingModel, &out.EmbeddingModel
+		*out = new(string)
+		**out = **in
+	}
 	if in.BaseUrl != nil {
 		in, out := &in.BaseUrl, &out.BaseUrl
 		*out = new(string)
@@ -79,6 +84,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 	}
 	if in.ToolProvider != nil {
 		in, out := &in.ToolProvider, &out.ToolProvider
+		*out = new(client.AiProvider)
+		**out = **in
+	}
+	if in.EmbeddingProvider != nil {
+		in, out := &in.EmbeddingProvider, &out.EmbeddingProvider
 		*out = new(client.AiProvider)
 		**out = **in
 	}
@@ -139,6 +149,11 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 	}
 	if in.ToolModel != nil {
 		in, out := &in.ToolModel, &out.ToolModel
+		*out = new(string)
+		**out = **in
+	}
+	if in.EmbeddingModel != nil {
+		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)
 		**out = **in
 	}
