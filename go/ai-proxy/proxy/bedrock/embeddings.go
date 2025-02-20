@@ -89,6 +89,10 @@ func (b *BedrockEmbeddingsProxy) handleEmbeddingBedrock(
 		ModelId: aws.String(req.Model),
 		Body:    payloadBytes,
 	})
+	if err != nil {
+		klog.ErrorS(err, "request to bedrock failed")
+		return
+	}
 
 	response, err := convertBedrockEmbeddingToOpenAI(output, req.Model)
 	if err != nil {
