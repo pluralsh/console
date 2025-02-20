@@ -1,8 +1,8 @@
-import { ReactNode, useMemo } from 'react'
 import { filesize } from 'filesize'
+import { ReactNode, useMemo } from 'react'
 import styled from 'styled-components'
 
-import { Flex, FlexProps } from 'honorable'
+import { Flex, FlexProps } from '@pluralsh/design-system'
 
 import RadialBarChart from 'components/utils/RadialBarChart'
 

@@ -1,10 +1,13 @@
-import { Flex } from 'honorable'
-import { LightDarkSwitch, setThemeColorMode } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import {
+  Flex,
+  LightDarkSwitch,
+  setThemeColorMode,
+} from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
 
-import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
+import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher'
 
 import NotificationsLauncher from '../notifications/NotificationsLauncher'

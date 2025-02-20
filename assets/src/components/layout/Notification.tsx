@@ -1,5 +1,5 @@
-import { Accordion, AccordionItem } from '@pluralsh/design-system'
-import { Flex, P } from 'honorable'
+import { Accordion, AccordionItem, Flex } from '@pluralsh/design-system'
+import { P } from 'honorable'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 

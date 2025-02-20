@@ -1,6 +1,7 @@
 import {
   Chip,
   CollapseIcon,
+  Flex,
   IconFrame,
   Prop,
   Table,
@@ -11,18 +12,18 @@ import { createColumnHelper, Row } from '@tanstack/react-table'
 import { UnstyledLink } from 'components/utils/Link'
 import { filesize } from 'filesize'
 import { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
-import { Flex, Span } from 'honorable'
+import { Span } from 'honorable'
 import { ComponentProps, CSSProperties, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 import {
+  containerStatusToReadiness,
   Readiness,
   ReadinessT,
-  containerStatusToReadiness,
+  readinessToContainerLabel,
   readinessToLabel,
   readinessToSeverity,
-  readinessToContainerLabel,
 } from 'utils/status'
 
 import { Overline } from 'components/cd/utils/PermissionsModal.tsx'

@@ -1,9 +1,14 @@
+import {
+  AnimatedDiv,
+  CloseIcon,
+  Flex,
+  IconFrame,
+} from '@pluralsh/design-system'
+import { Checkbox, P, useOutsideClick } from 'honorable'
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from 'react'
-import { Checkbox, Flex, P, useOutsideClick } from 'honorable'
-import { AnimatedDiv, CloseIcon, IconFrame } from '@pluralsh/design-system'
 import { useTransition } from 'react-spring'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { NotificationsPanel } from './NotificationsPanel'
 
@@ -56,6 +61,7 @@ export function NotificationsPanelOverlay({
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
 }) {
+  const theme = useTheme()
   const notificationsPanelRef = useRef<any>(undefined)
   const [all, setAll] = useState<boolean>(false)
 
@@ -76,7 +82,7 @@ export function NotificationsPanelOverlay({
           align="center"
           justify="space-between"
           padding="medium"
-          borderBottom="1px solid border"
+          borderBottom={theme.borders.default}
         >
           <P subtitle2>Notifications</P>
           <Flex

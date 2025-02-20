@@ -1,19 +1,19 @@
-import { useContext, useState } from 'react'
-import { Flex } from 'honorable'
-import Fuse from 'fuse.js'
-
 import {
+  Flex,
+  FlexProps,
   Input,
   ListBoxItem,
   MagnifyingGlassIcon,
   Select,
   SprayIcon,
 } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
+import { useContext, useState } from 'react'
 
 import { HeaderIconButton } from 'components/cluster/containers/ContainerShell'
 
-import { normalizedThemes, themeNames } from './themes'
 import TerminalThemeContext from './TerminalThemeContext'
+import { normalizedThemes, themeNames } from './themes'
 
 const fuse = new Fuse(themeNames, { threshold: 0.25 })
 
@@ -61,19 +61,17 @@ function TerminalThemeSelector() {
           key={t}
           label={t}
           textValue={t}
-          leftContent={
-            <TerminalThemePreview
-              theme={normalizedThemes[t]}
-              marginRight="small"
-            />
-          }
+          leftContent={<TerminalThemePreview theme={normalizedThemes[t]} />}
         />
       ))}
     </Select>
   )
 }
 
-function TerminalThemePreview({ theme, ...props }: any) {
+function TerminalThemePreview({
+  theme,
+  ...props
+}: { theme: object } & FlexProps) {
   return (
     <Flex {...props}>
       {Object.entries(theme).map(([key, hex]) => (
