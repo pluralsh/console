@@ -4,6 +4,7 @@ import {
   ListBoxItem,
   ReloadIcon,
   Select,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
@@ -29,6 +30,7 @@ import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import { GlobalServiceServices } from './GlobalServiceServices.tsx'
 import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
 import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
+import { crumbs } from '../GlobalService.tsx'
 
 export default function GlobalService() {
   const theme = useTheme()
@@ -40,6 +42,13 @@ export default function GlobalService() {
   })
 
   const globalService = data?.globalService
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...crumbs, { label: globalService?.name ?? globalServiceId }],
+      [globalService?.name, globalServiceId]
+    )
+  )
 
   const { data: globalServicesData, error: globalServicesError } =
     useFetchPaginatedData(
