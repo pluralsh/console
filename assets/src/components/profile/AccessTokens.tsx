@@ -1,4 +1,5 @@
 import {
+  Button,
   CopyIcon,
   EmptyState,
   Flex,
@@ -19,7 +20,7 @@ import {
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
 } from 'generated/graphql'
-import { Button, Modal } from 'honorable'
+import { Modal } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { Suspense, useMemo, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
@@ -53,6 +54,11 @@ import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
 import { ObscuredToken } from './ObscuredToken'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
+import { GqlError } from 'components/utils/Alert'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -207,21 +213,19 @@ function CopyButton({ token }: { token: AccessTokenFragment }) {
 
   return (
     <>
-      {displayCopyBanner && (
-        <Toast
-          severity="success"
-          marginBottom="medium"
-          marginRight="xxxxlarge"
-        >
-          Access token copied successfully.
-        </Toast>
-      )}
+      <Toast
+        show={displayCopyBanner}
+        onClose={() => setDisplayCopyBanner(false)}
+        closeTimeout={1000}
+        severity="success"
+        marginBottom="medium"
+        marginRight="xxxxlarge"
+      >
+        Access token copied successfully.
+      </Toast>
       <CopyToClipboard
         text={token.token}
-        onCopy={() => {
-          setDisplayCopyBanner(true)
-          setTimeout(() => setDisplayCopyBanner(false), 1000)
-        }}
+        onCopy={() => setDisplayCopyBanner(true)}
       >
         <Button
           small
@@ -257,8 +261,7 @@ const tokenColumns = [
   tokenColumnHelper.accessor((row) => row.id, {
     id: 'actions',
     header: '',
-    cell: ({ row: { original } }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    cell: function Cell({ row: { original } }) {
       const theme = useTheme()
 
       return (
@@ -288,7 +291,11 @@ export function AccessTokens() {
   const isInSettings = useLocation().pathname.includes('settings')
   const [open, setOpen] = useState(false)
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
-  const { data, loading } = useAccessTokensQuery()
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useAccessTokensQuery,
+      keyPath: ['accessTokens'],
+    })
 
   useSetBreadcrumbs(isInSettings ? settingsBreadcrumbs : profileBreadcrumbs)
 
@@ -325,7 +332,8 @@ export function AccessTokens() {
   // this will throw a warning from the profile route but that's fine
   useSetPageHeaderContent(headingContent)
 
-  if (loading) return <LoadingIndicator />
+  if (!data && loading) return <LoadingIndicator />
+  if (error) return <GqlError error={error} />
 
   return (
     <div
@@ -342,6 +350,11 @@ export function AccessTokens() {
           virtualizeRows
           data={tokensList}
           columns={tokenColumns}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         />
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
@@ -362,16 +375,15 @@ export function AccessTokens() {
           />
         </ModalMountTransition>
       </Suspense>
-      {displayNewBanner && (
-        <Toast
-          severity="success"
-          marginBottom="medium"
-          marginRight="xxxxlarge"
-          onClose={() => setDisplayNewBanner(false)}
-        >
-          New access token created.
-        </Toast>
-      )}
+      <Toast
+        show={displayNewBanner}
+        severity="success"
+        marginBottom="medium"
+        marginRight="xxxxlarge"
+        onClose={() => setDisplayNewBanner(false)}
+      >
+        New access token created.
+      </Toast>
     </div>
   )
 }

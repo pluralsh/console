@@ -1,9 +1,9 @@
 import { useLazyQuery } from '@apollo/client'
-import { Code, ContentCard, Flex } from '@pluralsh/design-system'
+import { Button, Code, ContentCard, Flex } from '@pluralsh/design-system'
 import { TEMP_TOKEN_Q } from 'components/graphql/users'
 import { GqlError } from 'components/utils/Alert'
 import { localized } from 'helpers/hostname'
-import { Button } from 'honorable'
+
 import { useTheme } from 'styled-components'
 import { InlineA } from 'components/utils/typography/Text'
 

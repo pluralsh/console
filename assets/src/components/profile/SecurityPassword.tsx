@@ -1,10 +1,15 @@
-import { Button } from 'honorable'
-import { ContentCard, Flex, ValidatedInput } from '@pluralsh/design-system'
+import {
+  Button,
+  ContentCard,
+  Flex,
+  ValidatedInput,
+} from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { LoginContext } from 'components/contexts'
 import { useTheme } from 'styled-components'
+
 const validPassword = (pass) =>
   pass.length < 8
     ? { error: true, message: 'password is too short' }
