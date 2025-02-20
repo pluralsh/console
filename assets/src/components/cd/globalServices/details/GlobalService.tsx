@@ -31,6 +31,7 @@ import { GlobalServiceServices } from './GlobalServiceServices.tsx'
 import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
 import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
 import { crumbs } from '../GlobalService.tsx'
+import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
 
 export default function GlobalService() {
   const theme = useTheme()
@@ -88,7 +89,9 @@ export default function GlobalService() {
             <Flex
               direction={'column'}
               gap={'large'}
-              width={'100%'}
+              flexGrow={1}
+              flexShrink={1}
+              width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
             >
               <GlobalServiceSelect
                 selectedGlobalService={globalService}
