@@ -3617,7 +3617,8 @@ func (t *InfrastructureStackStatusFragment) GetStatus() *StackStatus {
 }
 
 type PolicyEngineFragment struct {
-	Type PolicyEngineType "json:\"type\" graphql:\"type\""
+	Type        PolicyEngineType "json:\"type\" graphql:\"type\""
+	MaxSeverity *VulnSeverity    "json:\"maxSeverity,omitempty\" graphql:\"maxSeverity\""
 }
 
 func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
@@ -3625,6 +3626,12 @@ func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
 		t = &PolicyEngineFragment{}
 	}
 	return &t.Type
+}
+func (t *PolicyEngineFragment) GetMaxSeverity() *VulnSeverity {
+	if t == nil {
+		t = &PolicyEngineFragment{}
+	}
+	return t.MaxSeverity
 }
 
 type InfrastructureStackFragment struct {
@@ -4299,6 +4306,7 @@ type StackViolationCauseFragment struct {
 	Start    int64                              "json:\"start\" graphql:\"start\""
 	End      int64                              "json:\"end\" graphql:\"end\""
 	Resource string                             "json:\"resource\" graphql:\"resource\""
+	Filename *string                            "json:\"filename,omitempty\" graphql:\"filename\""
 	Lines    []*StackViolationCauseLineFragment "json:\"lines,omitempty\" graphql:\"lines\""
 }
 
@@ -4319,6 +4327,12 @@ func (t *StackViolationCauseFragment) GetResource() string {
 		t = &StackViolationCauseFragment{}
 	}
 	return t.Resource
+}
+func (t *StackViolationCauseFragment) GetFilename() *string {
+	if t == nil {
+		t = &StackViolationCauseFragment{}
+	}
+	return t.Filename
 }
 func (t *StackViolationCauseFragment) GetLines() []*StackViolationCauseLineFragment {
 	if t == nil {
@@ -26503,6 +26517,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -26535,6 +26550,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -26912,6 +26928,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -27275,6 +27292,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -27307,6 +27325,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -27580,6 +27599,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -27612,6 +27632,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -27885,6 +27906,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -27917,6 +27939,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -28154,6 +28177,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -28354,6 +28378,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -28609,6 +28634,7 @@ fragment UserFragment on User {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 `
 
@@ -29278,6 +29304,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -29310,6 +29337,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}
@@ -29587,6 +29615,7 @@ fragment GroupFragment on Group {
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
+	maxSeverity
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -29619,6 +29648,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
 	start
 	end
 	resource
+	filename
 	lines {
 		... StackViolationCauseLineFragment
 	}

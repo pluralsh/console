@@ -2093,6 +2093,9 @@ type StackConfiguration {
 type PolicyEngine {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
+
+  "the maximum allowed severity without failing the stack run"
+  maxSeverity: VulnSeverity
 }
 
 type StackHook {

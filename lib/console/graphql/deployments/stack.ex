@@ -263,7 +263,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   @desc "Configuration for applying policy enforcement to a stack"
   object :policy_engine do
-    field :type, non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :type,         non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :max_severity, :vuln_severity, description: "the maximum allowed severity without failing the stack run"
   end
 
   object :stack_hook do
