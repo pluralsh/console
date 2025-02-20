@@ -1,4 +1,4 @@
-// drop-in replacement for anywhere 'honorable' Flex is used
+// almost drop-in replacement for anywhere 'honorable' Flex is used
 
 import { type CSSProperties, type ReactNode, type RefObject, memo } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
@@ -42,6 +42,7 @@ type FlexBaseProps = {
   gap?: keyof DefaultTheme['spacing']
   padding?: keyof DefaultTheme['spacing']
   ref?: RefObject<HTMLDivElement>
+  className?: string
   children?: ReactNode
 }
 
@@ -49,6 +50,7 @@ export type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
 
 function BaseFlex({
   ref,
+  className,
   direction,
   wrap,
   basis,
@@ -64,6 +66,7 @@ function BaseFlex({
   return (
     <FlexSC
       ref={ref}
+      className={className}
       {...{
         $direction: direction,
         $wrap: wrap,

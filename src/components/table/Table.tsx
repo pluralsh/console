@@ -130,7 +130,7 @@ function Table({
   >((i) => tableRows[i]?.id || i, [tableRows])
   const rowVirtualizer = useVirtualizer({
     count: hasNextPage ? tableRows.length + 1 : tableRows.length,
-    overscan: 0,
+    overscan: 10,
     getItemKey,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 52,
