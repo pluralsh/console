@@ -170,6 +170,10 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def with_limit(query \\ __MODULE__, limit) do
+    from(c in query, limit: ^limit)
+  end
+
   def with_backups(query \\ __MODULE__, enabled)
   def with_backups(query, true) do
     from(c in query, left_join: o in assoc(c, :object_store), where: not is_nil(o.id))
@@ -267,6 +271,20 @@ defmodule Console.Schema.Cluster do
         on: n.id == c.id,
       group_by: n.healthy,
       select: %{healthy: n.healthy, count: count(c.id, :distinct)}
+    )
+  end
+
+  def upgradeable(query \\ __MODULE__) do
+    from(c in query,
+      where: not is_nil(c.upgrade_plan) and c.upgrade_plan["compatibilities"]
+        and c.upgrade_plan["incompatibilities"] and c.upgrade_plan["deprecations"]
+    )
+  end
+
+  def not_upgradeable(query \\ __MODULE__) do
+    from(c in query,
+      where: is_nil(c.upgrade_plan) or not c.upgrade_plan["compatibilities"]
+        or not c.upgrade_plan["incompatibilities"] or not c.upgrade_plan["deprecations"]
     )
   end
 

@@ -1,11 +1,9 @@
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Flex } from 'honorable'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
+import { PROFILE_BREADCRUMBS } from './MyProfile'
 import SecurityAccess from './SecurityAccess'
 import SecurityPassword from './SecurityPassword'
-import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 const breadcrumbs = [...PROFILE_BREADCRUMBS, { label: 'security' }]
 

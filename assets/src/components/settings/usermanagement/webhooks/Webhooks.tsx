@@ -1,13 +1,11 @@
-import { Flex } from 'honorable'
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
-import WebhooksList from './WebhooksList'
 import WebhooksHeader from './WebhooksHeader'
+import WebhooksList from './WebhooksList'
 
 const breadcrumbs = getUserManagementBreadcrumbs('webhooks')
 

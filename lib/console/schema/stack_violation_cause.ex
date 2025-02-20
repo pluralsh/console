@@ -6,6 +6,7 @@ defmodule Console.Schema.StackViolationCause do
     field :resource, :string
     field :start,    :integer
     field :end,      :integer
+    field :filename, :string
 
     embeds_many :lines, Lines, on_replace: :delete do
       field :content, :string
@@ -19,8 +20,8 @@ defmodule Console.Schema.StackViolationCause do
     timestamps()
   end
 
-  @valid ~w(resource start end violation_id)a
-  @required @valid -- [:violation_id]
+  @valid ~w(resource start end violation_id filename)a
+  @required @valid -- [:violation_id, :filename]
 
   def changeset(model, attrs \\ %{}) do
     model

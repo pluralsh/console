@@ -640,6 +640,17 @@ defmodule Console.Deployments.Stacks do
   @doc """
   Fetches a file handle to the tarball for a stack run
   """
+  @spec digest(StackRun.t) :: {:ok, binary} | error
+  def digest(%StackRun{} = run) do
+    case Repo.preload(run, [:repository]) do
+      %{repository: %GitRepository{} = repo, git: git} -> Discovery.digest(repo, git)
+      _ -> {:error, "could not resolve repository for run"}
+    end
+  end
+
+  @doc """
+  Fetches a file handle to the tarball for a stack run
+  """
   @spec tarstream(StackRun.t) :: {:ok, File.t} | error
   def tarstream(%StackRun{} = run) do
     case Repo.preload(run, [:repository]) do

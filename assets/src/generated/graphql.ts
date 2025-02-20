@@ -665,6 +665,8 @@ export type BackupAttributes = {
 export type BedrockAiAttributes = {
   /** aws access key id to use, you can also use IRSA for self-hosted consoles */
   accessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
   modelId: Scalars['String']['input'];
   /** aws secret access key to use, you can also use IRSA for self-hosted consoles */
@@ -4844,11 +4846,15 @@ export type PolicyConstraintEdge = {
 /** Configuration for applying policy enforcement to a stack */
 export type PolicyEngine = {
   __typename?: 'PolicyEngine';
+  /** the maximum allowed severity without failing the stack run */
+  maxSeverity?: Maybe<VulnSeverity>;
   /** the policy engine to use with this stack */
   type: PolicyEngineType;
 };
 
 export type PolicyEngineAttributes = {
+  /** the maximum allowed severity without failing the stack run */
+  maxSeverity?: InputMaybe<VulnSeverity>;
   /** the policy engine to use with this stack */
   type: PolicyEngineType;
 };
@@ -7111,6 +7117,7 @@ export type RootQueryTypeClustersArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
+  upgradeable?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -8964,6 +8971,7 @@ export enum StackType {
 export type StackViolationCause = {
   __typename?: 'StackViolationCause';
   end: Scalars['Int']['output'];
+  filename?: Maybe<Scalars['String']['output']>;
   lines?: Maybe<Array<Maybe<StackViolationCauseLine>>>;
   resource: Scalars['String']['output'];
   start: Scalars['Int']['output'];
@@ -8971,6 +8979,7 @@ export type StackViolationCause = {
 
 export type StackViolationCauseAttributes = {
   end: Scalars['Int']['input'];
+  filename?: InputMaybe<Scalars['String']['input']>;
   lines?: InputMaybe<Array<InputMaybe<StackViolationCauseLineAttributes>>>;
   resource: Scalars['String']['input'];
   start: Scalars['Int']['input'];

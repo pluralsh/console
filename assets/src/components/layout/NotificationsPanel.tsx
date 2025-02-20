@@ -1,10 +1,11 @@
-import { Flex, P } from 'honorable'
+import { Flex } from '@pluralsh/design-system'
+import { P } from 'honorable'
 
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
 import { ME_Q, NOTIFICATIONS_Q } from 'components/graphql/users'
 import InfiniteScroller from 'components/utils/InfiniteScroller'
-import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
-import { extendConnection, updateCache } from 'utils/graphql'
 import { Dispatch, useEffect } from 'react'
+import { extendConnection, updateCache } from 'utils/graphql'
 
 import Notification from './Notification'
 import { NOTIFS_SUB } from './queries'

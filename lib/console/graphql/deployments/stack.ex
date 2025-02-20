@@ -59,7 +59,8 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :policy_engine_attributes do
-    field :type, non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :type,         non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :max_severity, :vuln_severity, description: "the maximum allowed severity without failing the stack run"
   end
 
   input_object :stack_run_attributes do
@@ -153,6 +154,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :resource, non_null(:string)
     field :start,    non_null(:integer)
     field :end,      non_null(:integer)
+    field :filename, :string
 
     field :lines, list_of(:stack_violation_cause_line_attributes)
   end
@@ -261,7 +263,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   @desc "Configuration for applying policy enforcement to a stack"
   object :policy_engine do
-    field :type, non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :type,         non_null(:policy_engine_type), description: "the policy engine to use with this stack"
+    field :max_severity, :vuln_severity, description: "the maximum allowed severity without failing the stack run"
   end
 
   object :stack_hook do
@@ -450,6 +453,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :resource, non_null(:string)
     field :start,    non_null(:integer)
     field :end,      non_null(:integer)
+    field :filename, :string
 
     field :lines, list_of(:stack_violation_cause_line)
   end

@@ -1,7 +1,7 @@
+import { Flex } from '@pluralsh/design-system'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useOutletContext } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { Flex } from 'honorable'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { Node } from '../../../../generated/graphql'
 import { RawPageCode } from '../../../utils/RawPageCode.tsx'

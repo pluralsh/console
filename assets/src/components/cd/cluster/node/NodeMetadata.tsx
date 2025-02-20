@@ -1,12 +1,12 @@
-import { useOutletContext } from 'react-router-dom'
-import { Flex } from 'honorable'
-import { Node } from 'generated/graphql'
-import { nodeStatusToReadiness } from 'utils/status'
-import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
+import { Flex } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
+import { Node } from 'generated/graphql'
+import { useOutletContext } from 'react-router-dom'
+import { nodeStatusToReadiness } from 'utils/status'
 
-import { StatusChip } from '../../../cluster/TableElements'
 import { LabelsAnnotations } from '../../../cluster/LabelsAnnotations'
+import { StatusChip } from '../../../cluster/TableElements'
 
 export default function NodeMetadata() {
   const { node } = useOutletContext() as { node: Node }

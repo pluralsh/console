@@ -53,11 +53,15 @@ defmodule Console.AI.Provider do
 
   def embeddings(text) do
     settings = Console.Deployments.Settings.cached()
-    with {:ok, %mod{} = client} <- client(settings),
+    with {:ok, %mod{} = client} <- embedding_client(settings),
       do: mod.embeddings(client, text)
   end
 
   def summary(text), do: completion([{:user, text}], preface: @summary)
+
+  defp embedding_client(%DeploymentSettings{ai: %AI{embedding_provider: p}} = settings) when not is_nil(p),
+    do: client(put_in(settings.ai.provider, p))
+  defp embedding_client(settings), do: client(settings)
 
   defp tool_client(%DeploymentSettings{ai: %AI{tool_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))

@@ -1,8 +1,8 @@
-import { CardProps, ChipList } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
-import { ReactNode } from 'react'
-import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
+import { CardProps, ChipList, Flex } from '@pluralsh/design-system'
 import { CARD_CONTENT_MAX_WIDTH, MetadataCard } from 'components/utils/Metadata'
+import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
+import { Div } from 'honorable'
+import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
 export const mapify = (tags) =>

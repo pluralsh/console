@@ -24,6 +24,7 @@ fragment InfrastructureStackStatusFragment on InfrastructureStack {
 
 fragment PolicyEngineFragment on PolicyEngine {
     type
+    maxSeverity
 }
 
 fragment InfrastructureStackFragment on InfrastructureStack {
@@ -125,6 +126,7 @@ fragment StackViolationCauseFragment on StackViolationCause {
     start
     end
     resource
+    filename
     lines { ...StackViolationCauseLineFragment }
 }
 

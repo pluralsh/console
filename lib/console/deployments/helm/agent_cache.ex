@@ -89,7 +89,7 @@ defmodule Console.Deployments.Helm.AgentCache do
 
   defp sweep(%__MODULE__{cache: lines} = cache) do
     {keep, expire} = Enum.split_with(lines, fn {_, l} -> !Line.expired?(l) end)
-    Enum.each(expire, &Line.expire/1)
+    Enum.each(expire, fn {_, l} -> Line.expire(l) end)
     Enum.each(keep, fn {_, l} -> send(self(), {:refresh, l.chart, l.vsn}) end)
     %{cache | cache: Map.new(keep)}
   end

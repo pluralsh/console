@@ -1,9 +1,9 @@
-import { Tooltip } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
+import { Flex, Tooltip } from '@pluralsh/design-system'
+import { Div, Span } from 'honorable'
 import styled from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
-import { ReactElement, type JSX } from 'react'
+import { type JSX, ReactElement } from 'react'
 import { ContainerStatusT } from '../cd/cluster/pod/PodsList.tsx'
 
 const iconBaseProps = {

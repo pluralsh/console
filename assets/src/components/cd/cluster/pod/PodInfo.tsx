@@ -1,27 +1,27 @@
-import { Link, useOutletContext, useParams } from 'react-router-dom'
-import { Flex } from 'honorable'
+import { Button, Flex, LogsIcon } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
-import { Button, LogsIcon } from '@pluralsh/design-system'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 
 import { SubTitle } from '../../../utils/SubTitle'
 
-import { Readiness } from '../../../../utils/status'
 import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
+import { Readiness } from '../../../../utils/status'
 import { PodConditions } from './PodConditions.tsx'
-import { PodMetadata } from './PodMetadata.tsx'
 import {
   ColCpuReservation,
+  ColExpander,
   ColImage,
   ColMemoryReservation,
   ColName,
   ColPorts,
   ColStatus,
-  ShellLink,
   columnHelper,
-  ColExpander,
   PodContainers,
+  ShellLink,
 } from './PodContainers.tsx'
+import { PodMetadata } from './PodMetadata.tsx'
+import { useTheme } from 'styled-components'
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
   (statuses || []).reduce(
@@ -94,6 +94,7 @@ const columns = [
 
 // It's used by multiple routes.
 export default function PodInfo() {
+  const { spacing } = useTheme()
   const { clusterId, serviceId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
   const containers = pod.spec.containers || []
@@ -112,7 +113,7 @@ export default function PodInfo() {
       <Flex
         direction="column"
         gap="xlarge"
-        paddingBottom="large"
+        paddingBottom={spacing.large}
       >
         <section>
           <SubTitle>Containers</SubTitle>

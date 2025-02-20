@@ -40,7 +40,6 @@ export default function StackRunProgress(): ReactNode {
     >
       <Card
         flexGrow={1}
-        fontFamily="Monument Mono"
         overflowY="auto"
         maxHeight="100%"
       >

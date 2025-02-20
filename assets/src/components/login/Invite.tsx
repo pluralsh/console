@@ -1,15 +1,15 @@
-import { ComponentProps, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import { Div, Flex, Form, P } from 'honorable'
-import { Button } from '@pluralsh/design-system'
+import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
+import { Div, Form, P } from 'honorable'
+import { ComponentProps, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 
-import { LabelledInput } from '../utils/LabelledInput'
 import { INVITE_Q, SIGNUP } from '../graphql/users'
+import { LabelledInput } from '../utils/LabelledInput'
 
 import { LoginPortal } from './LoginPortal'
 import {
@@ -18,6 +18,7 @@ import {
   PasswordErrorMessage,
   validatePassword,
 } from './PasswordValidation'
+import { useTheme } from 'styled-components'
 
 function InvalidInvite() {
   return (
@@ -91,6 +92,7 @@ export function ConfirmPasswordField({
 }
 
 export default function Invite() {
+  const { spacing } = useTheme()
   const navigate = useNavigate()
   const { inviteId } = useParams()
   const [attributes, setAttributes] = useState({ name: '', password: '' })
@@ -154,7 +156,7 @@ export default function Invite() {
         <Flex
           flexDirection="column"
           gap="small"
-          marginBottom="small"
+          marginBottom={spacing.small}
         >
           <LabelledInput
             label="Email"
