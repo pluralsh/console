@@ -73,43 +73,6 @@ function LoginError({
   )
 }
 
-export function GrantAccess() {
-  const theme = useTheme()
-  const [jwt, setJwt] = useState('')
-
-  return (
-    <LoginPortal>
-      <div css={{ marginBottom: theme.spacing.large }}>
-        <WelcomeHeader
-          textAlign="left"
-          marginBottom="xxsmall"
-        />
-        <Body1P $color="text-xlight">
-          Enter the login token given to you to gain access
-        </Body1P>
-      </div>
-      <LabelledInput
-        value={jwt}
-        width="100%"
-        label="Login Token"
-        onChange={setJwt}
-      />
-      <Button
-        fill="horizontal"
-        pad={{ vertical: '8px' }}
-        margin={{ top: 'xsmall' }}
-        onClick={() => {
-          setToken(jwt)
-          window.location = '/' as any as Location
-        }}
-        disabled={jwt === ''}
-      >
-        Get access
-      </Button>
-    </LoginPortal>
-  )
-}
-
 export function EnsureLogin({ children }) {
   const { data, error, loading } = useMeQuery({
     pollInterval: POLL_INTERVAL,

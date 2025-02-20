@@ -1,5 +1,10 @@
-import { Card, Flex, FlexProps, SidecarProps } from '@pluralsh/design-system'
-import { CardProps } from 'honorable'
+import {
+  Card,
+  CardProps,
+  Flex,
+  FlexProps,
+  SidecarProps,
+} from '@pluralsh/design-system'
 import { Children } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'

@@ -6,6 +6,7 @@ import {
   IconFrame,
   InfoIcon,
   ListIcon,
+  Modal,
   Table,
   Toast,
   Tooltip,
@@ -20,7 +21,7 @@ import {
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
 } from 'generated/graphql'
-import { Modal } from 'honorable'
+
 import isEmpty from 'lodash/isEmpty'
 import { Suspense, useMemo, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
@@ -50,15 +51,12 @@ import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 import { ModalMountTransition } from '../utils/ModalMountTransition'
 
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
 import { ObscuredToken } from './ObscuredToken'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
-import { GqlError } from 'components/utils/Alert'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -354,7 +352,6 @@ export function AccessTokens() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         />
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">

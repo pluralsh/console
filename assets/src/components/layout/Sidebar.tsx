@@ -3,6 +3,7 @@ import { GITHUB_LINK } from 'utils/constants'
 import {
   AiSparkleOutlineIcon,
   ArrowTopRightIcon,
+  Avatar,
   CatalogIcon,
   CostManagementIcon,
   Sidebar as DSSidebar,
@@ -14,6 +15,8 @@ import {
   HomeIcon,
   KubernetesAltIcon,
   LogoutIcon,
+  Menu,
+  MenuItem,
   PersonIcon,
   PrOpenIcon,
   ScrollIcon,
@@ -26,7 +29,7 @@ import {
   useSidebar,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
-import { Avatar, Menu, MenuItem } from 'honorable'
+
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
