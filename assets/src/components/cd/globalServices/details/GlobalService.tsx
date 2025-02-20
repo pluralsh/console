@@ -88,6 +88,7 @@ export default function GlobalService() {
             <Flex
               direction={'column'}
               gap={'large'}
+              width={'100%'}
             >
               <GlobalServiceSelect
                 selectedGlobalService={globalService}
