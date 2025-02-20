@@ -56,6 +56,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: {} <br /> |
 | `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
+| `embeddingModel` _string_ | Model to use for generating embeddings |  | Optional: {} <br /> |
 | `baseUrl` _string_ | A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
 
@@ -77,12 +78,14 @@ _Appears in:_
 | `tools` _[Tools](#tools)_ |  |  | Optional: {} <br /> |
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
+| `embeddingProvider` _[AiProvider](#aiprovider)_ | Provider to use for generating embeddings. Oftentimes foundational model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: {} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: {} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment, more details available at https://github.com/ollama/ollama |  | Optional: {} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: {} <br /> |
 | `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: {} <br /> |
 | `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Optional: {} <br /> |
 
 
 
@@ -104,6 +107,7 @@ _Appears in:_
 | `apiVersion` _string_ | The azure openai Data plane - inference api version to use, defaults to 2024-10-01-preview or the latest available |  | Optional: {} <br /> |
 | `model` _string_ | The OpenAi Model you wish to use.  If not specified, Plural will provide a default |  | Optional: {} <br /> |
 | `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
+| `embeddingModel` _string_ | Model to use for generating embeddings |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
 
 
@@ -821,6 +825,8 @@ _Appears in:_
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: {} <br /> |
 | `logging` _[LoggingSettings](#loggingsettings)_ | Settings for connections to log aggregation datastores |  | Optional: {} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Settings for managing Plural's cost management features |  | Optional: {} <br /> |
+| `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | pointer to the deployment GIT repository to use |  | Optional: {} <br /> |
+| `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | pointer to the Scaffolds GIT repository to use |  | Optional: {} <br /> |
 
 
 #### ElasticsearchConnection
@@ -840,6 +846,25 @@ _Appears in:_
 | `index` _string_ | Index to query in elasticsearch |  | Optional: {} <br /> |
 | `user` _string_ | User to connect with basic auth |  | Optional: {} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
+
+
+#### ElasticsearchConnectionSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [VectorStore](#vectorstore)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ |  |  | Required: {} <br /> |
+| `index` _string_ |  |  | Required: {} <br /> |
+| `user` _string_ |  |  | Optional: {} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 
@@ -1390,6 +1415,7 @@ with the addition of kubebuilder/json annotations for better schema support.
 
 
 _Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [ServiceHelm](#servicehelm)
 
 | Field | Description | Default | Validation |
@@ -2916,6 +2942,24 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `createPr` _[CreatePr](#createpr)_ |  |  |  |
+
+
+#### VectorStore
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ |  | false | Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  | ELASTIC | Enum: [ELASTIC] <br />Optional: {} <br /> |
+| `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ |  |  | Optional: {} <br /> |
 
 
 #### VertexSettings

@@ -161,6 +161,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
 	}
+
 	if settings.Spec.PrometheusConnection != nil {
 		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
@@ -168,6 +169,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.PrometheusConnection = pc
 	}
+
 	if settings.Spec.LokiConnection != nil {
 		lc, err := settings.Spec.LokiConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
@@ -175,6 +177,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.LokiConnection = lc
 	}
+
 	if settings.Spec.AI != nil {
 		ai, err := settings.Spec.AI.Attributes(ctx, r.Client, settings.Namespace)
 		if errors.IsNotFound(err) {
@@ -186,6 +189,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.Ai = ai
 	}
+
 	if settings.Spec.Logging != nil {
 		logging, err := settings.Spec.Logging.Attributes(ctx, r.Client, settings.Namespace)
 		if errors.IsNotFound(err) {
@@ -197,6 +201,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.Logging = logging
 	}
+
 	if settings.Spec.Stacks != nil {
 		var jobSpec *console.GateJobAttributes
 		var err error
@@ -222,6 +227,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 			ConnectionID: connectionID,
 		}
 	}
+
 	if settings.Spec.Bindings != nil {
 		if err := r.ensure(settings); err != nil {
 			return nil, err
