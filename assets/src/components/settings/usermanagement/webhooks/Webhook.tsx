@@ -9,7 +9,7 @@ import {
   SlackLogoIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { Div, P } from 'honorable'
+import { P } from 'honorable'
 
 import { Confirm } from 'components/utils/Confirm'
 
@@ -50,10 +50,7 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
           textValue="Slack"
           type="floating"
         />
-        <Div
-          flexGrow={1}
-          {...TRUNCATE}
-        >
+        <div css={{ flexGrow: 1, ...TRUNCATE }}>
           <P
             body2
             fontWeight={600}
@@ -67,7 +64,7 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
           >
             Created on {formatDateTime(insertedAt, 'DD/MM/YY')}
           </P>
-        </Div>
+        </div>
         <Flex
           direction="column"
           justify="center"

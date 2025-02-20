@@ -3,7 +3,7 @@ import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
-import { Div, Form, P } from 'honorable'
+import { Form, P } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
@@ -74,11 +74,12 @@ function LoginError({
 }
 
 export function GrantAccess() {
+  const theme = useTheme()
   const [jwt, setJwt] = useState('')
 
   return (
     <LoginPortal>
-      <Div marginBottom="large">
+      <div css={{ marginBottom: theme.spacing.large }}>
         <WelcomeHeader
           textAlign="left"
           marginBottom="xxsmall"
@@ -89,7 +90,7 @@ export function GrantAccess() {
         >
           Enter the login token given to you to gain access
         </P>
-      </Div>
+      </div>
       <LabelledInput
         value={jwt}
         width="100%"
@@ -245,12 +246,12 @@ export default function Login() {
           }}
         >
           {loginMError && (
-            <Div marginBottom="large">
+            <div css={{ marginBottom: theme.spacing.large }}>
               <GqlError
                 header="Login failed"
                 error={loginError}
               />
-            </Div>
+            </div>
           )}
           <Flex
             flexDirection="column"

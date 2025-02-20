@@ -1,18 +1,26 @@
-import { Div, H1 } from 'honorable'
+import { CSSProperties } from 'react'
+import { DefaultTheme, useTheme } from 'styled-components'
 
 export function WelcomeHeader({
   heading = 'Welcome to Plural Console',
+  marginBottom,
   textAlign = 'center',
   ...props
-}: any) {
+}: {
+  heading?: string
+  marginBottom?: keyof DefaultTheme['spacing']
+} & CSSProperties) {
+  const theme = useTheme()
   return (
-    <Div {...props}>
-      <H1
-        title1
-        textAlign={textAlign}
-      >
+    <div
+      css={{
+        ...props,
+        marginBottom: marginBottom ? theme.spacing[marginBottom] : undefined,
+      }}
+    >
+      <h1 css={{ ...theme.partials.text.title1, margin: 0, textAlign }}>
         {heading}
-      </H1>
-    </Div>
+      </h1>
+    </div>
   )
 }

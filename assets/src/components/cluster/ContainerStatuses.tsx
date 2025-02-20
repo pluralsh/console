@@ -1,9 +1,8 @@
 import { Flex, Tooltip } from '@pluralsh/design-system'
-import { Div, Span } from 'honorable'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
-import { type JSX, ReactElement } from 'react'
+import { type JSX } from 'react'
 import { ContainerStatusT } from '../cd/cluster/pod/PodsList.tsx'
 
 const iconBaseProps = {
@@ -69,34 +68,34 @@ export function ContainerStatuses({
   )
 }
 
-export function ContainerStatus({
-  status,
-}: {
-  status: ContainerStatusT
-}): ReactElement<any> {
+export function ContainerStatus({ status }: { status: ContainerStatusT }) {
+  const { colors } = useTheme()
   const { name, readiness } = status
-
   return (
     <Tooltip
       label={
-        <>
-          {name && <span>{name}:&nbsp;</span>}
-          <Span
-            color={readinessToTooltipColor[readiness]}
-            fontWeight={600}
+        <span>
+          {name && `${name}: `}
+          <span
+            css={{
+              color: colors[readinessToTooltipColor[readiness]],
+              fontWeight: 600,
+            }}
           >
             {readinessToContainerLabel[readiness]}
-          </Span>
-        </>
+          </span>
+        </span>
       }
     >
-      <Div
-        borderRadius={3}
-        padding={2}
-        _hover={{ backgroundColor: 'fill-two-hover' }}
+      <div
+        css={{
+          borderRadius: 3,
+          padding: 2,
+          '&:hover': { backgroundColor: colors['fill-two-hover'] },
+        }}
       >
         {readinessToIcon[readiness]}
-      </Div>
+      </div>
     </Tooltip>
   )
 }

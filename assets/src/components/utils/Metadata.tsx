@@ -1,7 +1,7 @@
 import { Card, Flex, FlexProps, SidecarProps } from '@pluralsh/design-system'
-import { CardProps, Div, H2 } from 'honorable'
+import { CardProps, H2 } from 'honorable'
 import { Children } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
 
 const MAX_COLS = 4
@@ -19,6 +19,7 @@ const MetadataGridGrid = styled.div<{ $maxCols: number }>(
 )
 
 export function MetadataCard({ children, ...props }: CardProps) {
+  const { spacing } = useTheme()
   return (
     <Card
       display="flex"
@@ -26,13 +27,15 @@ export function MetadataCard({ children, ...props }: CardProps) {
       {...props}
     >
       {/* 1526 is magic number which is the card's width when screen is 1940px wide */}
-      <Div
-        maxWidth={CARD_CONTENT_MAX_WIDTH}
-        width="100%"
-        padding="xlarge"
+      <div
+        css={{
+          maxWidth: CARD_CONTENT_MAX_WIDTH,
+          width: '100%',
+          padding: spacing.xlarge,
+        }}
       >
         {children}
-      </Div>
+      </div>
     </Card>
   )
 }
@@ -58,6 +61,7 @@ export function MetadataItem({
   children,
   ...props
 }: SidecarProps & FlexProps) {
+  const theme = useTheme()
   return (
     <Flex
       direction="column"
@@ -75,14 +79,16 @@ export function MetadataItem({
         </H2>
       )}
       {children && (
-        <Div
-          body1
-          color="text-xlight"
-          overflowWrap="anywhere"
+        <div
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-xlight'],
+            overflowWrap: 'anywhere',
+          }}
           {...contentProps}
         >
           {children}
-        </Div>
+        </div>
       )}
     </Flex>
   )

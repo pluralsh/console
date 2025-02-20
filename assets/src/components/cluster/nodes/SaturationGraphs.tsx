@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Div } from 'honorable'
 
 import { Graph } from 'components/utils/Graph'
 
@@ -61,15 +60,11 @@ export function SaturationGraphs({
   }
 
   return (
-    <Div
-      height="240px"
-      width="300px"
-      flexGrow={1}
-    >
+    <div css={{ height: 240, width: 300, flexGrow: 1 }}>
       <Graph
         data={result}
         yFormat={(v) => format(v, 'percent')}
       />
-    </Div>
+    </div>
   )
 }

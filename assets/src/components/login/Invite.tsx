@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { Div, Form, P } from 'honorable'
+import { Form, P } from 'honorable'
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -131,7 +131,7 @@ export default function Invite() {
 
   return (
     <LoginPortal>
-      <Div marginBottom="xlarge">
+      <div css={{ marginBottom: spacing.xlarge }}>
         <WelcomeHeader
           textAlign="left"
           marginBottom="xxsmall"
@@ -143,15 +143,15 @@ export default function Invite() {
           You have been invited to join this Plural account. Create an account
           to join.
         </P>
-      </Div>
+      </div>
       <Form onSubmit={onSubmit}>
         {signupError && (
-          <Div marginBottom="large">
+          <div css={{ marginBottom: spacing.large }}>
             <GqlError
               header="Signup failed"
               error={signupError}
             />
-          </Div>
+          </div>
         )}
         <Flex
           flexDirection="column"

@@ -1,10 +1,10 @@
-import { Button, Div } from 'honorable'
+import { Button } from 'honorable'
 import { ContentCard, Flex, ValidatedInput } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { LoginContext } from 'components/contexts'
-
+import { useTheme } from 'styled-components'
 const validPassword = (pass) =>
   pass.length < 8
     ? { error: true, message: 'password is too short' }
@@ -81,6 +81,7 @@ function UpdatePassword({ cancel }: any) {
 }
 
 export default function SecurityPassword() {
+  const theme = useTheme()
   const { configuration } = useContext<any>(LoginContext)
   const [pass, setPass] = useState(false)
 
@@ -92,12 +93,14 @@ export default function SecurityPassword() {
         flexDirection="column"
         gap="large"
       >
-        <Div
-          body1
-          fontWeight="600"
+        <div
+          css={{
+            ...theme.partials.text.body1,
+            fontWeight: 600,
+          }}
         >
           Password
-        </Div>
+        </div>
         <div>
           {!pass && (
             <Button

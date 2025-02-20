@@ -1,5 +1,5 @@
-import { Div } from 'honorable'
 import { InfoOutlineIcon, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import styled from 'styled-components'
 
 export default function GraphHeader({
   title,
@@ -9,12 +9,7 @@ export default function GraphHeader({
   tooltip?: string
 }) {
   return (
-    <Div
-      color="text-light"
-      justifyContent="center"
-      overline
-      textAlign="center"
-    >
+    <WrapperSC>
       <WrapWithIf
         condition={!!tooltip}
         wrapper={<Tooltip label={tooltip} />}
@@ -32,6 +27,12 @@ export default function GraphHeader({
           )}
         </span>
       </WrapWithIf>
-    </Div>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.overline,
+  color: theme.colors['text-light'],
+  textAlign: 'center',
+}))
