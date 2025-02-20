@@ -32,7 +32,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	eop, err := proxy.NewOpenAIEmbeddingsProxy(api.ProviderOpenAI, args.ProviderHost(), args.ProviderCredentials())
+	if err != nil {
+		klog.ErrorS(err, "Could not create proxy")
+		os.Exit(1)
+	}
+
 	bp, err := proxy.NewBedrockProxy(api.ProviderBedrock, args.ProviderCredentials())
+	if err != nil {
+		klog.ErrorS(err, "Could not create proxy")
+		os.Exit(1)
+	}
+
+	ebp, err := proxy.NewBedrockEmbeddingsProxy(api.ProviderBedrock, args.ProviderCredentials())
 	if err != nil {
 		klog.ErrorS(err, "Could not create proxy")
 		os.Exit(1)
@@ -41,7 +53,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	router.HandleFunc(openai.EndpointChat, op.Proxy())
+	router.HandleFunc(openai.EndpointEmbeddings, eop.Proxy())
 	router.HandleFunc(bedrock.EndpointChat, bp.Proxy())
+	router.HandleFunc(bedrock.EndpointEmbeddings, ebp.Proxy())
 
 	klog.V(log.LogLevelMinimal).InfoS("Listening and serving HTTP", "address", args.Address())
 	if err := http.ListenAndServe(args.Address(), router); err != nil {

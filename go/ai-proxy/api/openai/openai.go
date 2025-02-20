@@ -15,6 +15,7 @@ type Endpoint string
 const (
 	EndpointChat            = "/openai/v1/chat/completions"
 	EndpointChatCompletions = "/v1/chat/completions"
+	EndpointEmbeddings      = "/v1/embeddings"
 )
 
 type ChatCompletionRequest struct {
