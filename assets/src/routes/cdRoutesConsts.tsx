@@ -119,6 +119,9 @@ export const NAMESPACES_PARAM_ID = 'namespaceId' as const
 export const NAMESPACE_INFO_PATH = 'info' as const
 export const NAMESPACE_SERVICES_PATH = 'services' as const
 
+export const ALERT_INSIGHT_REL_PATH =
+  `${CLUSTER_ALERTS_REL_PATH}/insight/:insightId` as const
+
 export function getClusterDetailsPath({
   clusterId,
   isRelative = false,

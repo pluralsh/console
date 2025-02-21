@@ -307,6 +307,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		Configuration: r.stackConfigurationAttributes(stack.Spec.Configuration),
 		Approval:      stack.Spec.Approval,
 		Files:         make([]*console.StackFileAttributes, 0),
+		PolicyEngine:  stack.Spec.PolicyEngine.Attributes(),
 	}
 
 	if stack.Spec.ScmConnectionRef != nil {

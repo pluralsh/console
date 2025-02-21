@@ -297,6 +297,12 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
+	// Provider to use for generating embeddings. Oftentimes foundational model providers do not have embeddings models, and it's better to simply use OpenAI.
+	//
+	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Optional
+	EmbeddingProvider *console.AiProvider `json:"embeddingProvider,omitempty"`
+
 	// OpenAI holds the OpenAI provider configuration.
 	//
 	// +kubebuilder:validation:Optional
@@ -364,9 +370,10 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
 	attr := &console.AiSettingsAttributes{
-		Enabled:      in.Enabled,
-		Provider:     in.Provider,
-		ToolProvider: in.ToolProvider,
+		Enabled:           in.Enabled,
+		Provider:          in.Provider,
+		ToolProvider:      in.ToolProvider,
+		EmbeddingProvider: in.EmbeddingProvider,
 	}
 
 	if in.Tools != nil && in.Tools.CreatePr != nil {
@@ -397,10 +404,11 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Openai = &console.OpenaiSettingsAttributes{
-			AccessToken: &token,
-			Model:       in.OpenAI.Model,
-			BaseURL:     in.OpenAI.BaseUrl,
-			ToolModel:   in.OpenAI.ToolModel,
+			AccessToken:    &token,
+			Model:          in.OpenAI.Model,
+			BaseURL:        in.OpenAI.BaseUrl,
+			ToolModel:      in.OpenAI.ToolModel,
+			EmbeddingModel: in.OpenAI.EmbeddingModel,
 		}
 	case console.AiProviderAnthropic:
 		if in.Anthropic == nil {
@@ -413,9 +421,10 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
-			AccessToken: lo.ToPtr(token),
-			Model:       in.Anthropic.Model,
-			ToolModel:   in.Anthropic.ToolModel,
+			AccessToken:    lo.ToPtr(token),
+			Model:          in.Anthropic.Model,
+			ToolModel:      in.Anthropic.ToolModel,
+			EmbeddingModel: in.Anthropic.EmbeddingModel,
 		}
 	case console.AiProviderAzure:
 		if in.Azure == nil {
@@ -428,11 +437,12 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Azure = &console.AzureOpenaiAttributes{
-			Endpoint:    in.Azure.Endpoint,
-			APIVersion:  in.Azure.ApiVersion,
-			Model:       in.Azure.Model,
-			ToolModel:   in.Azure.ToolModel,
-			AccessToken: token,
+			Endpoint:       in.Azure.Endpoint,
+			APIVersion:     in.Azure.ApiVersion,
+			Model:          in.Azure.Model,
+			ToolModel:      in.Azure.ToolModel,
+			EmbeddingModel: in.Azure.EmbeddingModel,
+			AccessToken:    token,
 		}
 	case console.AiProviderVertex:
 		if in.Vertex == nil {
@@ -499,6 +509,11 @@ type AIProviderSettings struct {
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
+	// Model to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
 	// A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec)
 	//
 	// +kubebuilder:validation:Optional
@@ -555,6 +570,11 @@ type AzureOpenAISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
+
+	// Model to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.

@@ -1,11 +1,14 @@
+import {
+  Flex,
+  Input,
+  SearchIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Flex } from 'honorable'
 import { useContext, useState } from 'react'
-
-import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { List } from '../../../utils/List'
 

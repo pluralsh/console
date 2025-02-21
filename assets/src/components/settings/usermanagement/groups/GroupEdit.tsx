@@ -2,12 +2,12 @@ import { useApolloClient } from '@apollo/client'
 import {
   Button,
   ComboBox,
+  Flex,
   FormField,
   Modal,
   Switch,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import { Flex } from 'honorable'
 import { ComponentProps, ReactNode, useEffect, useState } from 'react'
 
 import { fetchUsers } from 'components/utils/BindingInput'

@@ -3,13 +3,14 @@ import {
   Chip,
   Code,
   ContentCard,
+  Flex,
   Modal,
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Flex, H3 } from 'honorable'
+import { H3 } from 'honorable'
 import { useContext, useMemo, useState } from 'react'
 import { stringify } from 'yaml'
 

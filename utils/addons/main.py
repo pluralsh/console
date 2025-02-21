@@ -1,5 +1,9 @@
 import boto3
 import yaml
+from semver import Version
+
+def parse_version(vsn):
+    return Version.parse(vsn.lstrip('v'))
 
 def addon_version(boto_vsn):
     return {
@@ -10,7 +14,7 @@ def addon_version(boto_vsn):
 def to_addon(boto_addon):
     return {
         'name': boto_addon['addonName'],
-        'versions': [addon_version(v) for v in boto_addon['addonVersions']],
+        'versions': sorted([addon_version(v) for v in boto_addon['addonVersions']], key=lambda v: parse_version(v['version']), reverse=True),
         'publisher': boto_addon['publisher']
     }
 
@@ -32,6 +36,7 @@ def fetch_addons():
         
         next_token = resp['nextToken']
     
+    addons.sort(key=lambda a: a['name'])
     return addons
 
 def write_yaml(file_path, data):

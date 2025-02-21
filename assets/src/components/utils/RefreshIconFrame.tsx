@@ -1,15 +1,14 @@
 import { IconFrame, ReloadIcon, Spinner } from '@pluralsh/design-system'
-import { Dispatch, ReactNode } from 'react'
 
 interface RefreshIconFrameButtonProps {
-  refetch: Dispatch<void>
+  refetch: () => void
   loading?: boolean
 }
 
 export default function IconFrameRefreshButton({
   refetch,
   loading,
-}: RefreshIconFrameButtonProps): ReactNode {
+}: RefreshIconFrameButtonProps) {
   return (
     <IconFrame
       clickable

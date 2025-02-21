@@ -13,7 +13,7 @@ import {
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
-import { InsightDisplay } from '../../../ai/InsightDisplay.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
@@ -67,7 +67,7 @@ export function StackRunInsights() {
         </Flex>
       </Flex>
       <InsightDisplay
-        text={stackRun.insight?.text}
+        insight={stackRun?.insight}
         kind="stack run"
       />
     </Flex>

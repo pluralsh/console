@@ -1,7 +1,7 @@
 import 'xterm/css/xterm.css'
 
 import {
-  MutableRefObject,
+  RefObject,
   createContext,
   useCallback,
   useContext,
@@ -187,6 +187,6 @@ export function TerminalScreen({
 }
 
 export type TerminalActions = { handleResetSize: () => void }
-export const ShellContext = createContext<MutableRefObject<TerminalActions>>({
+export const ShellContext = createContext<RefObject<TerminalActions>>({
   current: { handleResetSize: () => {} },
 })

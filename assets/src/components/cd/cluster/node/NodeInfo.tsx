@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Node, NodeMetric } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { isEmpty } from 'lodash'
 
-import { SubTitle } from '../../../utils/SubTitle'
 import { NodeGraphs } from '../../../cluster/nodes/NodeGraphs'
 import {
   ColContainers,
@@ -32,6 +31,8 @@ const columns = [
   ColContainers,
   ColActions,
 ]
+
+const PODS_TABLE_MAX_HEIGHT = 300
 
 export default function NodeInfo() {
   const theme = useTheme()
@@ -63,18 +64,26 @@ export default function NodeInfo() {
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.xlarge,
+        height: '100%',
       }}
     >
-      <section>
+      <SectionSC>
+        <SubTitleSC>Overview</SubTitleSC>
         <NodeGraphs
           node={node}
           name={nodeName}
           clusterId={clusterId}
         />
-      </section>
-      <section>
-        <SubTitle>Pods</SubTitle>
+      </SectionSC>
+      <SectionSC
+        css={{
+          maxHeight: PODS_TABLE_MAX_HEIGHT,
+          paddingBottom: theme.spacing.xlarge,
+        }}
+      >
+        <SubTitleSC>Pods</SubTitleSC>
         <PodsList
+          fullHeightWrap
           columns={columns}
           pods={pods}
           refetch={refetch}
@@ -83,7 +92,19 @@ export default function NodeInfo() {
             isRelative: false,
           })}
         />
-      </section>
+      </SectionSC>
     </div>
   )
 }
+
+const SubTitleSC = styled.h2(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+  margin: 0,
+}))
+
+const SectionSC = styled.section(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  flex: 1,
+}))

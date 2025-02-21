@@ -3,9 +3,13 @@ import { useState } from 'react'
 
 import { formatDateTime } from 'utils/datetime'
 
-import { Div, Flex, P } from 'honorable'
-
-import { IconFrame, SlackLogoIcon, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  Flex,
+  IconFrame,
+  SlackLogoIcon,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
+import { Div, P } from 'honorable'
 
 import { Confirm } from 'components/utils/Confirm'
 
@@ -16,8 +20,10 @@ import { removeConnection, updateCache } from '../../../../utils/graphql'
 import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../../graphql/webhooks'
 
 import WebhookHealth from './WebhookHealth'
+import { useTheme } from 'styled-components'
 
 export default function Webhook({ hook: { id, url, health, insertedAt } }) {
+  const { borders } = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_WEBHOOK, {
     variables: { id },
@@ -33,7 +39,7 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
   return (
     <>
       <Flex
-        borderBottom="1px solid border"
+        borderBottom={borders.default}
         gap="small"
         justify="center"
         padding="small"

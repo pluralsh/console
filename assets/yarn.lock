@@ -4395,9 +4395,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.5.0":
-  version: 5.5.0
-  resolution: "@pluralsh/design-system@npm:5.5.0"
+"@pluralsh/design-system@npm:5.7.1":
+  version: 5.7.1
+  resolution: "@pluralsh/design-system@npm:5.7.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4408,7 +4408,7 @@ __metadata:
     "@radix-ui/react-focus-scope": 1.1.0
     "@react-aria/utils": 3.23.0
     "@react-hooks-library/core": 0.6.0
-    "@react-spring/web": 9.7.3
+    "@react-spring/web": 9.7.5
     "@react-stately/utils": 3.9.0
     "@tanstack/match-sorter-utils": 8.8.4
     "@tanstack/react-table": 8.20.5
@@ -4441,8 +4441,8 @@ __metadata:
     react: ">=19.0.0"
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
-    styled-components: ">=6.1.13"
-  checksum: 58e67d5ef7fde1da852bffaa5981a506d9f1efb2f6c9fd6690722b8856fa38a8abb76d1c295a839e02ae76f95081189c99c00215c9e3e5411e5861a673da7dc1
+    styled-components: ">=6.1.15"
+  checksum: fb53af6c0aed2c2ac5da1010e188abda6304f54be8635418c83942a04dffd979e5ab42b2c95c8c54dd6c8cfc523d25641c8697bc9419119de7d5d21eb440d9aa
   languageName: node
   linkType: hard
 
@@ -5949,7 +5949,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/animated@npm:~9.7.3, @react-spring/animated@npm:~9.7.5":
+"@react-spring/animated@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/animated@npm:9.7.5"
   dependencies:
@@ -5961,7 +5961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:~9.7.3, @react-spring/core@npm:~9.7.5":
+"@react-spring/core@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/core@npm:9.7.5"
   dependencies:
@@ -6012,7 +6012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/shared@npm:~9.7.3, @react-spring/shared@npm:~9.7.5":
+"@react-spring/shared@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/shared@npm:9.7.5"
   dependencies:
@@ -6040,14 +6040,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/types@npm:~9.7.3, @react-spring/types@npm:~9.7.5":
+"@react-spring/types@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/types@npm:9.7.5"
   checksum: f9d2dea0ea6afb6d81dc0275cf2554b20d7eef8bafac99fc0de5b728f1ad5a5c02438932dc70a360686b34166124b13900788ece09af3cee96ce585ba168480e
   languageName: node
   linkType: hard
 
-"@react-spring/web@npm:9.4.5 || ^9.7.2, @react-spring/web@npm:~9.7.5":
+"@react-spring/web@npm:9.4.5 || ^9.7.2, @react-spring/web@npm:9.7.5, @react-spring/web@npm:~9.7.5":
   version: 9.7.5
   resolution: "@react-spring/web@npm:9.7.5"
   dependencies:
@@ -6059,21 +6059,6 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 4da57c7d2bf4cf76cedd1c57986ba85e839aaec45e247f75b7d12d777f6054fe77446e95a18080db5e714b0a5386a07e617c36592506554abfd2c301c50e66cc
-  languageName: node
-  linkType: hard
-
-"@react-spring/web@npm:9.7.3":
-  version: 9.7.3
-  resolution: "@react-spring/web@npm:9.7.3"
-  dependencies:
-    "@react-spring/animated": ~9.7.3
-    "@react-spring/core": ~9.7.3
-    "@react-spring/shared": ~9.7.3
-    "@react-spring/types": ~9.7.3
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 7f5cd05b2314b7f2f715e1926abcf9aa0a539399b222ab34e989144f48350adfcd2edab65d41425570f72c57f602fc6994d6730fbeed902171ac527b630a8a9b
   languageName: node
   linkType: hard
 
@@ -10370,7 +10355,7 @@ __metadata:
     "@nivo/radial-bar": 0.88.0
     "@nivo/tooltip": 0.88.0
     "@nivo/treemap": 0.88.0
-    "@pluralsh/design-system": 5.5.0
+    "@pluralsh/design-system": 5.7.1
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0

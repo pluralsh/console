@@ -2,6 +2,7 @@ import {
   AppIcon,
   Button,
   ChipList,
+  Flex,
   LoopingLogo,
   Table,
 } from '@pluralsh/design-system'
@@ -15,7 +16,6 @@ import {
   ClusterRegistrationFragment,
   useClusterRegistrationsQuery,
 } from 'generated/graphql'
-import { Flex } from 'honorable'
 import { ReactNode, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'

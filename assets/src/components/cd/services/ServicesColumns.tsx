@@ -224,7 +224,7 @@ export const ColErrors = columnHelper.accessor(
         original: { node },
       },
     }) => (
-      <div css={{ minWidth: 160 }}>
+      <div>
         <ServicesTableErrors service={node} />
         <ServiceDeprecations service={node} />
       </div>

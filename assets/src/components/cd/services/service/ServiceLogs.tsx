@@ -32,7 +32,10 @@ export default function ServiceLogs() {
 
   return (
     <WrapperSC>
-      <Logs serviceId={serviceId} />
+      <Logs
+        serviceId={serviceId}
+        showLegendTooltip={false}
+      />
     </WrapperSC>
   )
 }

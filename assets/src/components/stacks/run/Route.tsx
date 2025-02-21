@@ -90,7 +90,7 @@ export default function StackRunDetail(): ReactNode {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutContentContainer maxWidth-desktopLarge-up="100%">
+      <ResponsiveLayoutContentContainer css={{ maxWidth: '100%' }}>
         <StackRunHeader
           stackRun={stackRun}
           refetch={refetch}

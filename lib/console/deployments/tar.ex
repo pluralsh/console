@@ -1,6 +1,8 @@
 defmodule Console.Deployments.Tar do
   @type err :: Console.error
 
+  @chunk Console.conf(:chunk_size)
+
   @doc """
   Streams a tar from a url to a local file and returns a handle
   """
@@ -18,7 +20,7 @@ defmodule Console.Deployments.Tar do
   def tarball(contents) do
     with {:ok, tmp} <- Briefly.create(),
          :ok <- tarball(tmp, contents),
-      do: File.open(tmp)
+      do: File.open(tmp, [:raw])
   end
 
   @spec tarball(binary, [{binary, binary}]) :: :ok | err
@@ -48,7 +50,7 @@ defmodule Console.Deployments.Tar do
   def tar_stream(tar_file) do
     try do
       with {:ok, tmp} <- Briefly.create(),
-            _ <- IO.binstream(tar_file, 1024) |> Enum.into(File.stream!(tmp)),
+            _ <- IO.binstream(tar_file, @chunk) |> Enum.into(File.stream!(tmp)),
            {:ok, res} <- :erl_tar.extract(tmp, [:compressed, :memory]),
            _ <- File.rm(tmp),
         do: {:ok, Enum.map(res, fn {name, content} -> {to_string(name), to_string(content)} end)}

@@ -1,6 +1,6 @@
-import { Button, ToolIcon, Tooltip } from '@pluralsh/design-system'
+import { Button, Flex, ToolIcon, Tooltip } from '@pluralsh/design-system'
+import { Div } from 'honorable'
 import { useContext, useState } from 'react'
-import { Div, Flex } from 'honorable'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
 

@@ -513,6 +513,8 @@ type BedrockAiAttributes struct {
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// aws secret access key to use, you can also use IRSA for self-hosted consoles
 	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -4014,11 +4016,15 @@ type PolicyConstraintEdge struct {
 type PolicyEngine struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// the maximum allowed severity without failing the stack run
+	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
 
 type PolicyEngineAttributes struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// the maximum allowed severity without failing the stack run
+	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -5515,6 +5521,7 @@ type StackViolationCause struct {
 	Resource string                     `json:"resource"`
 	Start    int64                      `json:"start"`
 	End      int64                      `json:"end"`
+	Filename *string                    `json:"filename,omitempty"`
 	Lines    []*StackViolationCauseLine `json:"lines,omitempty"`
 }
 
@@ -5522,6 +5529,7 @@ type StackViolationCauseAttributes struct {
 	Resource string                               `json:"resource"`
 	Start    int64                                `json:"start"`
 	End      int64                                `json:"end"`
+	Filename *string                              `json:"filename,omitempty"`
 	Lines    []*StackViolationCauseLineAttributes `json:"lines,omitempty"`
 }
 

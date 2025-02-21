@@ -1,9 +1,9 @@
 import { ApolloError, useMutation, useQuery } from '@apollo/client'
-import { Button, LoopingLogo } from '@pluralsh/design-system'
+import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { User, useMeQuery } from 'generated/graphql'
+import { useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
-import { Div, Flex, Form, P } from 'honorable'
+import { Div, Form, P } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
@@ -255,7 +255,7 @@ export default function Login() {
           <Flex
             flexDirection="column"
             gap="small"
-            marginBottom="small"
+            marginBottom={theme.spacing.small}
           >
             <LabelledInput
               ref={emailRef}

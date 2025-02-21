@@ -1,9 +1,7 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, Flex } from '@pluralsh/design-system'
 
-import { Flex } from 'honorable'
-
-import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
+import { Pod } from 'generated/graphql'
 
 import { useTheme } from 'styled-components'
 

@@ -3,9 +3,11 @@ import {
   CaretRightIcon,
   CheckIcon,
   ErrorIcon,
+  Flex,
   Spinner,
 } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
+import { Div } from 'honorable'
+import sortBy from 'lodash/sortBy'
 import {
   ReactNode,
   useCallback,
@@ -14,7 +16,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import sortBy from 'lodash/sortBy'
 
 import {
   RunLogs,
@@ -23,6 +24,7 @@ import {
   useLogsDeltaSubscription,
 } from '../../../../generated/graphql'
 import CommandLog from '../../../utils/CommandLog.tsx'
+import styled from 'styled-components'
 
 interface StepProps {
   step: RunStep
@@ -70,20 +72,8 @@ export default function Step({ step, open }: StepProps): ReactNode {
 
   return (
     <Div ref={ref}>
-      <Flex
-        gap="small"
-        paddingHorizontal="large"
-        paddingVertical="xsmall"
-        justify="space-between"
-        backgroundColor="fill-two"
-        _hover={{
-          backgroundColor: logs.length > 0 ? 'fill-two-hover' : 'none',
-        }}
-        css={{
-          position: 'sticky',
-          top: 0,
-          cursor: logs.length > 0 ? 'pointer' : 'cursor',
-        }}
+      <TriggerSC
+        $hasLogs={logs.length > 0}
         onClick={() => logs.length > 0 && setFolded(!(folded ?? !open))}
       >
         <Flex
@@ -105,7 +95,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
           <span>{command}</span>
         </Flex>
         <Status status={step.status} />
-      </Flex>
+      </TriggerSC>
       {show && (
         <CommandLog
           text={toLogsString(logs)}
@@ -147,3 +137,18 @@ function Status({ status }: StepStatusProps): ReactNode {
       )
   }
 }
+
+const TriggerSC = styled.div<{ $hasLogs: boolean }>(({ theme, $hasLogs }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: theme.spacing.small,
+  fontFamily: 'Monument Mono',
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+  backgroundColor: theme.colors['fill-two'],
+  '&:hover': {
+    backgroundColor: $hasLogs ? theme.colors['fill-two-hover'] : 'none',
+  },
+  position: 'sticky',
+  top: 0,
+  cursor: $hasLogs ? 'pointer' : 'cursor',
+}))

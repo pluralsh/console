@@ -1,8 +1,10 @@
+import { Flex } from '@pluralsh/design-system'
 import { ansiToJson } from 'anser'
 import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
-import { Flex, Span } from 'honorable'
+import { Span } from 'honorable'
 import { useEffect, useMemo, useRef } from 'react'
+import styled, { useTheme } from 'styled-components'
 
 function CommandLogLine({ line, number, follow }) {
   const mounted = useRef<any>(undefined)
@@ -24,14 +26,7 @@ function CommandLogLine({ line, number, follow }) {
   }, [follow, lineRef, line])
 
   return (
-    <Flex
-      align="center"
-      color="text-light"
-      gap="medium"
-      paddingLeft="medium"
-      ref={lineRef}
-      _hover={{ backgroundColor: 'fill-one-hover' }}
-    >
+    <LineWrapperSC ref={lineRef}>
       <Span
         color="text-xlight"
         width={35}
@@ -47,11 +42,12 @@ function CommandLogLine({ line, number, follow }) {
           {json.content}
         </Span>
       ))}
-    </Flex>
+    </LineWrapperSC>
   )
 }
 
 export default function CommandLog({ text, follow }) {
+  const { spacing } = useTheme()
   if (!text) return null
 
   const lines = text.match(/[^\r\n]+/g)
@@ -59,7 +55,9 @@ export default function CommandLog({ text, follow }) {
   return (
     <Flex
       direction="column"
-      paddingVertical="small"
+      fontFamily="Monument Mono"
+      paddingTop={spacing.small}
+      paddingBottom={spacing.small}
       overflowY="auto"
     >
       {lines.map((line, i) => (
@@ -73,3 +71,14 @@ export default function CommandLog({ text, follow }) {
     </Flex>
   )
 }
+
+const LineWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: theme.colors['text-light'],
+  gap: theme.spacing.medium,
+  paddingLeft: theme.spacing.medium,
+  '&:hover': {
+    backgroundColor: theme.colors['fill-one-hover'],
+  },
+}))

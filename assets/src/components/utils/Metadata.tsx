@@ -1,6 +1,6 @@
-import { Card, type Sidecar } from '@pluralsh/design-system'
-import { CardProps, Div, Flex, H2 } from 'honorable'
-import { Children, ComponentProps, forwardRef } from 'react'
+import { Card, Flex, FlexProps, SidecarProps } from '@pluralsh/design-system'
+import { CardProps, Div, H2 } from 'honorable'
+import { Children } from 'react'
 import styled from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
 
@@ -51,35 +51,39 @@ export function MetadataGrid(props) {
   )
 }
 
-export const MetadataItem = forwardRef<
-  HTMLDivElement,
-  ComponentProps<typeof Sidecar>
->(({ heading, headingProps, contentProps, children, ...props }, ref) => (
-  <Flex
-    ref={ref}
-    direction="column"
-    gap="xsmall"
-    {...props}
-  >
-    {heading && (
-      <H2
-        body1
-        bold
-        color="text-default"
-        {...headingProps}
-      >
-        {heading}
-      </H2>
-    )}
-    {children && (
-      <Div
-        body1
-        color="text-xlight"
-        overflowWrap="anywhere"
-        {...contentProps}
-      >
-        {children}
-      </Div>
-    )}
-  </Flex>
-))
+export function MetadataItem({
+  heading,
+  headingProps,
+  contentProps,
+  children,
+  ...props
+}: SidecarProps & FlexProps) {
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      {...props}
+    >
+      {heading && (
+        <H2
+          body1
+          bold
+          color="text-default"
+          {...headingProps}
+        >
+          {heading}
+        </H2>
+      )}
+      {children && (
+        <Div
+          body1
+          color="text-xlight"
+          overflowWrap="anywhere"
+          {...contentProps}
+        >
+          {children}
+        </Div>
+      )}
+    </Flex>
+  )
+}

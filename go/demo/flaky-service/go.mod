@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/prometheus/client_golang v1.20.5
-	k8s.io/klog/v2 v2.130.1
+	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 )
 
 require (

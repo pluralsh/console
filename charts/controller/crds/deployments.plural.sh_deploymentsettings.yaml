@@ -56,6 +56,9 @@ spec:
                           of the same API scheme (for instance Together.ai uses the
                           OpenAI API spec)
                         type: string
+                      embeddingModel:
+                        description: Model to use for generating embeddings
+                        type: string
                       model:
                         description: Model is the LLM model name to use.
                         type: string
@@ -95,6 +98,9 @@ spec:
                       apiVersion:
                         description: The azure openai Data plane - inference api version
                           to use, defaults to 2024-10-01-preview or the latest available
+                        type: string
+                      embeddingModel:
+                        description: Model to use for generating embeddings
                         type: string
                       endpoint:
                         description: 'Your Azure OpenAI endpoint, should be formatted
@@ -173,6 +179,18 @@ spec:
                     required:
                     - modelId
                     type: object
+                  embeddingProvider:
+                    description: Provider to use for generating embeddings. Oftentimes
+                      foundational model providers do not have embeddings models,
+                      and it's better to simply use OpenAI.
+                    enum:
+                    - OPENAI
+                    - ANTHROPIC
+                    - OLLAMA
+                    - AZURE
+                    - BEDROCK
+                    - VERTEX
+                    type: string
                   enabled:
                     default: false
                     description: Enabled defines whether to enable the AI integration
@@ -226,6 +244,9 @@ spec:
                         description: A custom base url to use, for reimplementations
                           of the same API scheme (for instance Together.ai uses the
                           OpenAI API spec)
+                        type: string
+                      embeddingModel:
+                        description: Model to use for generating embeddings
                         type: string
                       model:
                         description: Model is the LLM model name to use.

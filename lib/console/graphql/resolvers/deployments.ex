@@ -73,7 +73,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     CloudAddon,
     ClusterScalingRecommendation,
     StackPolicyViolation,
-    StackViolationCause
+    StackViolationCause,
+    Alert
   }
 
   def query(Project, _), do: Project
@@ -145,6 +146,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterScalingRecommendation, _), do: ClusterScalingRecommendation
   def query(StackPolicyViolation, _), do: StackPolicyViolation
   def query(StackViolationCause, _), do: StackViolationCause
+  def query(Alert, _), do: Alert
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

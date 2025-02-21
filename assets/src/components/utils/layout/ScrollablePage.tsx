@@ -1,8 +1,8 @@
-import { Div, FlexProps } from 'honorable'
+import { Div } from 'honorable'
 import { ReactNode, RefObject } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
-import ConsolePageTitle from './ConsolePageTitle'
+import ConsolePageTitle, { PageTitleProps } from './ConsolePageTitle'
 
 const ScrollablePageContent = styled.div<{
   $scrollable?: boolean
@@ -81,7 +81,7 @@ export function ScrollablePage({
   fullWidth?: boolean
   scrollRef?: RefObject<HTMLDivElement>
   noPadding?: boolean
-} & FlexProps) {
+} & PageTitleProps) {
   return (
     <>
       {(heading || headingContent) && (

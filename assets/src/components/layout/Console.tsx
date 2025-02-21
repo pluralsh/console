@@ -1,10 +1,10 @@
+import { Flex, MarkdocContextProvider, Toast } from '@pluralsh/design-system'
 import { Suspense } from 'react'
-import { MarkdocContextProvider, Toast } from '@pluralsh/design-system'
 
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-import { A, Flex, Span } from 'honorable'
+import { A, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -21,13 +21,13 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
+import { AIContextProvider } from 'components/ai/AIContext'
+import { CloudConsoleWelcomeModal } from './CloudConsoleWelcomeModal'
 import Header from './Header'
 import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
-import { CloudConsoleWelcomeModal } from './CloudConsoleWelcomeModal'
-import { AIContextProvider } from 'components/ai/AIContext'
 
 export default function Console() {
   return (
