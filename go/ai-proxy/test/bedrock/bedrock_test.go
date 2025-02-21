@@ -147,3 +147,51 @@ func TestBedrockProxy_Streaming(t *testing.T) {
 		}
 	})
 }
+
+func TestBedrockEmbeddingsProxy(t *testing.T) {
+	cases := []helpers.TestStruct[any, any]{
+		{
+			Name:     "embeddings request should return correct openai response",
+			Method:   "POST",
+			Endpoint: bedrock.EndpointEmbeddings,
+			Request: openai.EmbedRequest{
+				Model: "amazon.titan-embed-text-v2:0",
+				Input: "Hello from Titan embeddings test.",
+			},
+			WantData: openai.EmbeddingList{
+				Model: "amazon.titan-embed-text-v2:0",
+				Data: []openai.Embedding{
+					{
+						Embedding: make([]float32, 5)},
+				},
+			},
+			WantErr:    nil,
+			WantStatus: http.StatusOK,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			wantDataBytes, err := json.Marshal(tc.WantData)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			mockResponseFunc := helpers.MockResponse(tc.Endpoint, wantDataBytes, tc.WantErr, tc.WantStatus)
+			err = mockResponseFunc(handlers)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			requestFunc := helpers.CreateRequest(tc.Method, tc.Endpoint, tc.Request)
+			res, err := requestFunc(server, providerServer)
+			if !errors.Is(err, tc.WantErr) {
+				t.Fatalf("\nwant:\n%v\ngot:\n%v", tc.WantErr, err)
+			}
+
+			if !bytes.Equal(wantDataBytes, res) {
+				t.Errorf("\nwant:\n%s\ngot:\n%s", tc.WantData, res)
+			}
+		})
+	}
+}

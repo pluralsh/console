@@ -8,9 +8,11 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/bedrock"
@@ -32,15 +34,29 @@ func SetupServer() (*httptest.Server, error) {
 		return nil, err
 	}
 
+	eop, err := proxy.NewOpenAIEmbeddingsProxy(api.ProviderOpenAI, args.ProviderHost(), args.ProviderCredentials())
+	if err != nil {
+		klog.ErrorS(err, "Could not create proxy")
+		os.Exit(1)
+	}
+
 	bp, err := proxy.NewBedrockProxy(api.ProviderBedrock, args.ProviderCredentials())
 	if err != nil {
 		return nil, err
 	}
 
+	ebp, err := proxy.NewBedrockEmbeddingsProxy(api.ProviderBedrock, args.ProviderCredentials())
+	if err != nil {
+		klog.ErrorS(err, "Could not create proxy")
+		os.Exit(1)
+	}
+
 	router := mux.NewRouter()
 	router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	router.HandleFunc(openai.EndpointChat, op.Proxy())
+	router.HandleFunc(openai.EndpointEmbeddings, eop.Proxy())
 	router.HandleFunc(bedrock.EndpointChat, bp.Proxy())
+	router.HandleFunc(bedrock.EndpointEmbeddings, ebp.Proxy())
 
 	return httptest.NewServer(router), nil
 }

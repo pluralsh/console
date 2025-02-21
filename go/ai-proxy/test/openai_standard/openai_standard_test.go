@@ -29,7 +29,10 @@ var (
 	handlers = make(map[string]http.HandlerFunc)
 )
 
-const endpoint = "/openai/chat/completions"
+const (
+	endpointChat       = "/openai/chat/completions"
+	endpointEmbeddings = "/embeddings/bedrock"
+)
 
 func TestMain(m *testing.M) {
 	var err error
@@ -51,7 +54,7 @@ func TestOpenAIStandardProxy(t *testing.T) {
 		{
 			Name:     "chat request should return correct openai response",
 			Method:   "POST",
-			Endpoint: endpoint,
+			Endpoint: endpointChat,
 			Request: openai.ChatCompletionRequest{
 				Model: "testmodel",
 				Messages: []openai.Message{{
@@ -102,7 +105,7 @@ func TestOpenAIStandardProxy_Streaming(t *testing.T) {
 	streamTest := helpers.TestStruct[openai.ChatCompletionRequest, any]{
 		Name:     "chat request with streaming should return SSE headers",
 		Method:   "POST",
-		Endpoint: endpoint,
+		Endpoint: endpointChat,
 		Request: openai.ChatCompletionRequest{
 			Model:  "testmodel",
 			Stream: true,
@@ -146,4 +149,52 @@ func TestOpenAIStandardProxy_Streaming(t *testing.T) {
 			t.Errorf("expected SSE body %q, got %q", wantSSE, string(resBody))
 		}
 	})
+}
+
+func TestOpenAIEmbeddingsProxy(t *testing.T) {
+	cases := []helpers.TestStruct[any, any]{
+		{
+			Name:     "chat request should return correct openai response",
+			Method:   "POST",
+			Endpoint: endpointEmbeddings,
+			Request: openai.EmbedRequest{
+				Model: "openai-embedding-model",
+				Input: "Hello from embeddings test.",
+			},
+			WantData: openai.EmbeddingList{
+				Model: "openai-embedding-model",
+				Data: []openai.Embedding{
+					{
+						Embedding: make([]float32, 5)},
+				},
+			},
+			WantErr:    nil,
+			WantStatus: http.StatusOK,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			wantDataBytes, err := json.Marshal(tc.WantData)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			mockResponseFunc := helpers.MockResponse(tc.Endpoint, wantDataBytes, tc.WantErr, tc.WantStatus)
+			err = mockResponseFunc(handlers)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			requestFunc := helpers.CreateRequest(tc.Method, tc.Endpoint, tc.Request)
+			res, err := requestFunc(server, providerServer)
+			if !errors.Is(err, tc.WantErr) {
+				t.Fatalf("\nwant:\n%v\ngot:\n%v", tc.WantErr, err)
+			}
+
+			if !bytes.Equal(wantDataBytes, res) {
+				t.Errorf("\nwant:\n%s\ngot:\n%s", tc.WantData, res)
+			}
+		})
+	}
 }
