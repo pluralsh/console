@@ -332,6 +332,9 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Vertex *VertexSettings `json:"vertex,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	VectorStore *VectorStore `json:"vectorStore,omitempty"`
 }
 
 type Tools struct {
@@ -369,11 +372,17 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 }
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
+	vectorStoreAttributes, err := in.VectorStore.Attributes(ctx, c, namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	attr := &console.AiSettingsAttributes{
 		Enabled:           in.Enabled,
 		Provider:          in.Provider,
 		ToolProvider:      in.ToolProvider,
 		EmbeddingProvider: in.EmbeddingProvider,
+		VectorStore:       vectorStoreAttributes,
 	}
 
 	if in.Tools != nil && in.Tools.CreatePr != nil {
@@ -689,5 +698,81 @@ func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Clien
 	}
 
 	res, err := utils.GetSecretKey(ctx, c, in.ServiceAccountJsonSecretRef, namespace)
+	return lo.ToPtr(res), err
+}
+
+type VectorStore struct {
+	// +kubebuilder:default=false
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Enum=ELASTIC
+	// +kubebuilder:validation:Optional
+	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Elastic *ElasticsearchConnectionSettings `json:"elastic,omitempty"`
+}
+
+func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.VectorStoreAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	if lo.FromPtr(in.Enabled) && in.VectorStore == nil {
+		return nil, fmt.Errorf("vector store type has to be set if it is enabled")
+	}
+
+	attr := &console.VectorStoreAttributes{
+		Enabled: in.Enabled,
+		Store:   in.VectorStore,
+	}
+
+	switch *in.VectorStore {
+	case console.VectorStoreElastic:
+		if in.Elastic == nil {
+			return nil, fmt.Errorf("must provide elastic configuration to set the provider to ELASTIC")
+		}
+
+		password, err := in.Elastic.Password(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Elastic = &console.ElasticsearchConnectionAttributes{
+			Host:     in.Elastic.Host,
+			Index:    in.Elastic.Index,
+			User:     in.Elastic.User,
+			Password: password,
+		}
+	}
+
+	return attr, nil
+}
+
+type ElasticsearchConnectionSettings struct {
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// +kubebuilder:validation:Required
+	Index string `json:"index"`
+
+	// +kubebuilder:validation:Optional
+	User *string `json:"user,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+}
+
+func (in *ElasticsearchConnectionSettings) Password(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured elastic settings cannot be nil")
+	}
+
+	if in.PasswordSecretRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.PasswordSecretRef, namespace)
 	return lo.ToPtr(res), err
 }

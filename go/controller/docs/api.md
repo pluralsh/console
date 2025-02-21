@@ -85,6 +85,7 @@ _Appears in:_
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: {} <br /> |
 | `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: {} <br /> |
 | `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Optional: {} <br /> |
 
 
 
@@ -845,6 +846,25 @@ _Appears in:_
 | `index` _string_ | Index to query in elasticsearch |  | Optional: {} <br /> |
 | `user` _string_ | User to connect with basic auth |  | Optional: {} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
+
+
+#### ElasticsearchConnectionSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [VectorStore](#vectorstore)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ |  |  | Required: {} <br /> |
+| `index` _string_ |  |  | Required: {} <br /> |
+| `user` _string_ |  |  | Optional: {} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 
@@ -2941,6 +2961,24 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `createPr` _[CreatePr](#createpr)_ |  |  |  |
+
+
+#### VectorStore
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ |  | false | Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Enum: [ELASTIC] <br />Optional: {} <br /> |
+| `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ |  |  | Optional: {} <br /> |
 
 
 #### VertexSettings
