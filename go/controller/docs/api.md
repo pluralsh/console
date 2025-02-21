@@ -2421,6 +2421,7 @@ _Appears in:_
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
 | `github` _[ScmGithubConnection](#scmgithubconnection)_ |  |  | Optional: {} <br /> |
+| `default` _boolean_ |  |  | Optional: {} <br /> |
 
 
 #### ScmGithubConnection

@@ -96,11 +96,10 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	ro, err := r.isReadOnly(ctx, notificationRouter)
 	if err != nil {
-		if err != nil {
-			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, fmt.Errorf("could not check if notification router is existing resource, got error: %+v", err)
-		}
+		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, fmt.Errorf("could not check if notification router is existing resource, got error: %+v", err)
 	}
+
 	if ro {
 		logger.V(9).Info("Notification Router already exists in the API, running in read-only mode")
 		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
@@ -122,14 +121,9 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 	if !exists || !notificationRouter.Status.IsSHAEqual(sha) {
 		logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
-		attr, err := r.genNotificationRouterAttr(ctx, notificationRouter)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-				return waitForResources, nil
-			}
-			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+		attr, res, err := r.genNotificationRouterAttr(ctx, notificationRouter)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, notificationRouter.SetCondition)
 		}
 		ns, err := r.ConsoleClient.UpsertNotificationRouter(ctx, *attr)
 		if err != nil {
@@ -147,7 +141,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	return ctrl.Result{}, nil
 }
 
-func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Context, router *v1alpha1.NotificationRouter) (*console.NotificationRouterAttributes, error) {
+func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Context, router *v1alpha1.NotificationRouter) (*console.NotificationRouterAttributes, *ctrl.Result, error) {
 	attr := &console.NotificationRouterAttributes{
 		Name: router.NotificationName(),
 	}
@@ -166,15 +160,15 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 	for _, filter := range router.Spec.Filters {
 		clusterID, err := r.getClusterID(ctx, filter.ClusterRef)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		serviceID, err := r.getServiceID(ctx, filter.ServiceRef)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		pipelineID, err := r.getPipelineID(ctx, filter.PipelineRef)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		attr.Filters = append(attr.Filters, &console.RouterFilterAttributes{
 			Regex:      filter.Regex,
@@ -186,17 +180,17 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 	for _, sink := range router.Spec.Sinks {
 		notifSink, err := utils.GetNotificationSink(ctx, r.Client, &sink)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		if notifSink.Status.ID == nil {
-			return nil, errors.NewNotFound(schema.GroupResource{Resource: "NotificationSink", Group: "deployments.plural.sh"}, sink.Name)
+		if !notifSink.Status.HasID() {
+			return nil, &waitForResources, nil
 		}
 
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})
 	}
 
-	return attr, nil
+	return attr, nil, nil
 }
 
 func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *corev1.ObjectReference) (*string, error) {

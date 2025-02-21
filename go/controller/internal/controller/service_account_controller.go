@@ -197,45 +197,36 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 }
 
 func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
-	logger := log.FromContext(ctx)
-
 	if sa.Status.IsStatusConditionTrue(v1alpha1.ReadyTokenConditionType) {
 		return nil
 	}
 
 	if sa.Spec.TokenSecretRef == nil {
-		logger.Info("no token secret ref found in service account, skipping token creation")
 		return nil
 	}
 
 	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, []*console.ScopeAttributes{})
 	if err != nil {
-		logger.Info("failed to create service account token")
-		return err
+		return fmt.Errorf("failed to create service account token: %s", err.Error())
 	}
 	if token.Token == nil {
-		logger.Info("service account token is empty")
 		return fmt.Errorf("service account token is empty")
 	}
 
 	secret := &corev1.Secret{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)}, secret)
 	if err != nil && !errors.IsNotFound(err) {
-		logger.Info("failed to get token secret")
 		return err
 	}
 
 	if err == nil {
-		logger.Info("updating existing token secret")
 		secret.StringData = map[string]string{credentials.CredentialsSecretTokenKey: *token.Token}
 		if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 			return err
 		}
-		err = r.Client.Update(ctx, secret)
-		return err
+		return r.Client.Update(ctx, secret)
 	}
 
-	logger.Info("creating new token secret")
 	secret = &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
 		StringData: map[string]string{credentials.CredentialsSecretTokenKey: *token.Token},

@@ -286,15 +286,11 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 	repository := &v1alpha1.GitRepository{}
 	if ns.Spec.Service.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Service.RepositoryRef.Name, Namespace: ns.Spec.Service.RepositoryRef.Namespace}, repository); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
-		if repository.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("repository is not ready yet")
+		if !repository.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
@@ -308,15 +304,11 @@ func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha
 	project := &v1alpha1.Project{}
 	if ns.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		if !project.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {

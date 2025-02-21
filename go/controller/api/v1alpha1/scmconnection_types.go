@@ -58,6 +58,7 @@ func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client
 		BaseURL:  s.Spec.BaseUrl,
 		APIURL:   s.Spec.APIUrl,
 		Token:    token,
+		Default:  s.Spec.Default,
 	}
 	if s.Spec.Github != nil {
 		attr.Github = &console.GithubAppAttributes{
@@ -118,6 +119,8 @@ type ScmConnectionSpec struct {
 	APIUrl *string `json:"apiUrl,omitempty"`
 	// +kubebuilder:validation:Optional
 	Github *ScmGithubConnection `json:"github,omitempty"`
+	// +kubebuilder:validation:Optional
+	Default *bool `json:"default,omitempty"`
 }
 
 type ScmGithubConnection struct {
