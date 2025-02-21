@@ -19,7 +19,7 @@ import {
   useObserversQuery,
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
-import { Div } from 'honorable'
+
 import styled, { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
@@ -242,7 +242,7 @@ const columns = [
       })
 
       return (
-        <Div onClick={(e) => e.stopPropagation()}>
+        <div onClick={(e) => e.stopPropagation()}>
           <IconFrame
             clickable
             icon={<TrashCanIcon color="icon-danger" />}
@@ -262,7 +262,7 @@ const columns = [
               text={`Are you sure you want to delete ${node?.name}?`}
             />
           )}
-        </Div>
+        </div>
       )
     },
   }),

@@ -1,10 +1,9 @@
 import { GITHUB_LINK } from 'utils/constants'
 
-import { useMutation } from '@apollo/client'
 import {
   AiSparkleOutlineIcon,
   ArrowTopRightIcon,
-  BellIcon,
+  Avatar,
   CatalogIcon,
   CostManagementIcon,
   Sidebar as DSSidebar,
@@ -16,6 +15,8 @@ import {
   HomeIcon,
   KubernetesAltIcon,
   LogoutIcon,
+  Menu,
+  MenuItem,
   PersonIcon,
   PrOpenIcon,
   ScrollIcon,
@@ -28,12 +29,10 @@ import {
   useSidebar,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
-import { ME_Q } from 'components/graphql/users'
-import { Avatar, Menu, MenuItem } from 'honorable'
+
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { updateCache } from 'utils/graphql'
 
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -52,12 +51,10 @@ import { useLogin } from '../contexts'
 import HelpLauncher from '../help/HelpLauncher'
 
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
-import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
-import { MARK_READ } from './queries'
-import { TRUNCATE } from 'components/utils/truncate.ts'
 
 type MenuItem = {
   text: string
@@ -207,29 +204,10 @@ const SidebarSC = styled(DSSidebar).attrs(({ variant }) => ({
   overflow: 'visible',
 }))
 
-const NotificationsCountSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: theme.colors['text-always-white'],
-  backgroundColor: theme.colors['icon-danger-critical'],
-  borderRadius: '50%',
-  fontSize: 10,
-  height: 15,
-  width: 15,
-  position: 'absolute',
-  left: 16,
-  top: 2,
-  userSelect: 'none',
-}))
-
 export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
-  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
-    useState(false)
   const { me, configuration, personaConfiguration } = useLogin()
   const { pathname } = useLocation()
   const isActive = useCallback(
@@ -251,25 +229,6 @@ export default function Sidebar() {
     [personaConfiguration, configuration?.isSandbox, isCDEnabled, defaultCDPath]
   )
 
-  const [mutation] = useMutation(MARK_READ, {
-    update: (cache) =>
-      updateCache(cache, {
-        query: ME_Q,
-        update: ({ me, ...rest }) => ({
-          ...rest,
-          me: { ...me, unreadNotifications: 0 },
-        }),
-      }),
-  })
-
-  const toggleNotificationPanel = useCallback(
-    (open) => {
-      if (!open) mutation()
-      setIsNotificationsPanelOpen(open)
-    },
-    [mutation, setIsNotificationsPanelOpen]
-  )
-
   const { logout } = useLogin()
   const handleLogout = useCallback(() => {
     setIsMenuOpen(false)
@@ -282,12 +241,9 @@ export default function Sidebar() {
     }
   })
 
-  useOutsideClick(notificationsPanelRef, () => toggleNotificationPanel(false))
-
   const theme = useTheme()
 
   if (!me) return null
-  const unreadNotifications = me.unreadNotifications || 0
 
   return (
     <SidebarSC variant="console">
@@ -335,31 +291,6 @@ export default function Sidebar() {
           >
             <GitHubLogoIcon />
           </SidebarItem>
-          {!configuration?.byok && (
-            <SidebarItem
-              clickable
-              label="Notifications"
-              tooltip="Notifications"
-              className="sidebar-notifications"
-              css={{
-                position: 'relative',
-              }}
-              onClick={(event) => {
-                event.stopPropagation()
-                toggleNotificationPanel(!isNotificationsPanelOpen)
-              }}
-              badge={unreadNotifications}
-              active={isNotificationsPanelOpen}
-              expandedLabel="Notifications"
-            >
-              <BellIcon />
-              {unreadNotifications > 0 && (
-                <NotificationsCountSC>
-                  {unreadNotifications > 99 ? '!' : unreadNotifications}
-                </NotificationsCountSC>
-              )}
-            </SidebarItem>
-          )}
           <HelpLauncher />
           <SidebarItem
             ref={menuItemRef}
@@ -385,13 +316,6 @@ export default function Sidebar() {
             <ConsoleVersion version={configuration.consoleVersion} />
           )}
         </SidebarSection>
-        {/* ---
-        NOTIFICATIONS PANEL
-      --- */}
-        <NotificationsPanelOverlay
-          isOpen={isNotificationsPanelOpen}
-          setIsOpen={setIsNotificationsPanelOpen}
-        />
         {isMenuOpen && (
           <Menu
             ref={menuRef}

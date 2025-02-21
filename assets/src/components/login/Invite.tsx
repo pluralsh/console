@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { Div, Form, P } from 'honorable'
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -11,6 +10,8 @@ import { setRefreshToken, setToken } from '../../helpers/auth'
 import { INVITE_Q, SIGNUP } from '../graphql/users'
 import { LabelledInput } from '../utils/LabelledInput'
 
+import { Body1P, CaptionP } from 'components/utils/typography/Text'
+import { useTheme } from 'styled-components'
 import { LoginPortal } from './LoginPortal'
 import {
   PasswordError,
@@ -18,7 +19,6 @@ import {
   PasswordErrorMessage,
   validatePassword,
 } from './PasswordValidation'
-import { useTheme } from 'styled-components'
 
 function InvalidInvite() {
   return (
@@ -35,12 +35,7 @@ function InvalidInvite() {
 
 function PasswordErrorMsg({ errorCode }: { errorCode: PasswordErrorCode }) {
   return (
-    <P
-      caption
-      color="text-error"
-    >
-      {PasswordErrorMessage[errorCode]}
-    </P>
+    <CaptionP $color="text-danger">{PasswordErrorMessage[errorCode]}</CaptionP>
   )
 }
 
@@ -131,27 +126,24 @@ export default function Invite() {
 
   return (
     <LoginPortal>
-      <Div marginBottom="xlarge">
+      <div css={{ marginBottom: spacing.xlarge }}>
         <WelcomeHeader
           textAlign="left"
           marginBottom="xxsmall"
         />
-        <P
-          body1
-          color="text-xlight"
-        >
+        <Body1P $color="text-xlight">
           You have been invited to join this Plural account. Create an account
           to join.
-        </P>
-      </Div>
-      <Form onSubmit={onSubmit}>
+        </Body1P>
+      </div>
+      <form onSubmit={onSubmit}>
         {signupError && (
-          <Div marginBottom="large">
+          <div css={{ marginBottom: spacing.large }}>
             <GqlError
               header="Signup failed"
               error={signupError}
             />
-          </Div>
+          </div>
         )}
         <Flex
           flexDirection="column"
@@ -191,7 +183,7 @@ export default function Invite() {
         >
           Sign up
         </Button>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }

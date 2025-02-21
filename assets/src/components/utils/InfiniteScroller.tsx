@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react'
-import { Div } from 'honorable'
+import { CSSProperties, ReactNode, useEffect, useRef } from 'react'
 
 function InfiniteScroller({
   loading = false,
@@ -8,7 +7,13 @@ function InfiniteScroller({
   loadMoreArgs,
   children,
   ...props
-}: any) {
+}: {
+  loading?: boolean
+  hasMore?: boolean
+  loadMore: (args: any) => void
+  loadMoreArgs: any
+  children: ReactNode
+} & CSSProperties) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const isScrollbarVisible = (el) => el.scrollHeight > el.clientHeight
 
@@ -43,13 +48,15 @@ function InfiniteScroller({
   }, [loading, hasMore, loadMore, loadMoreArgs])
 
   return (
-    <Div
+    <div
       ref={scrollRef}
-      overflowY="auto"
-      {...props}
+      css={{
+        overflowY: 'auto',
+        ...props,
+      }}
     >
       {children}
-    </Div>
+    </div>
   )
 }
 

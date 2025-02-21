@@ -12,7 +12,7 @@ import { createColumnHelper, Row } from '@tanstack/react-table'
 import { UnstyledLink } from 'components/utils/Link'
 import { filesize } from 'filesize'
 import { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
-import { Span } from 'honorable'
+
 import { ComponentProps, CSSProperties, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -110,24 +110,18 @@ export const ColName = columnHelper.accessor((row) => row.name, {
 
 export const ColImage = columnHelper.accessor((row) => row.image, {
   id: 'image',
+  header: 'Image',
+  meta: { truncate: true },
   cell: (props) => (
     <Tooltip
       label={props.getValue()}
       placement="top-start"
     >
-      <Span
-        color="text-light"
-        direction="rtl"
-        textAlign="left"
-      >
+      <span css={{ direction: 'rtl', textAlign: 'left' }}>
         {props.getValue()}
-      </Span>
+      </span>
     </Tooltip>
   ),
-  header: 'Image',
-  meta: {
-    truncate: true,
-  },
 })
 
 export const ColPorts = columnHelper.accessor((row) => row.ports, {

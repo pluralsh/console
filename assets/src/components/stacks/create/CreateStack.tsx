@@ -1,6 +1,5 @@
 import { Button, Tooltip } from '@pluralsh/design-system'
-import { ReactNode, useState } from 'react'
-import { ButtonProps } from 'honorable'
+import { ComponentPropsWithRef, ReactNode, useState } from 'react'
 
 import CreateStackModal from './CreateStackModal'
 
@@ -10,7 +9,7 @@ export default function CreateStack({
   buttonProps,
 }: {
   refetch?: Nullable<() => void>
-  buttonProps?: ButtonProps
+  buttonProps?: ComponentPropsWithRef<typeof Button>
   buttonContent?: string | ReactNode
 }) {
   const [open, setOpen] = useState(false)

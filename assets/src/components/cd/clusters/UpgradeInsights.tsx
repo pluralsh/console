@@ -110,7 +110,9 @@ export function UpgradeInsightExpansionPanel({
 
   return (
     <div>
-      <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
+      <OverlineH1
+        css={{ color: theme.colors['text-xlight'], margin: '0.67em 0' }}
+      >
         Description
       </OverlineH1>
       <p>{description}</p>

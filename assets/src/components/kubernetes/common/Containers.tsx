@@ -1,6 +1,5 @@
 import { Chip, ChipList, CloseIcon, Code } from '@pluralsh/design-system'
 import { dump } from 'js-yaml'
-import { ReactElement } from 'react'
 
 import {
   Pod_Container as ContainerT,
@@ -19,9 +18,7 @@ interface ContainersProps {
   containers: Array<Maybe<ContainerT>>
 }
 
-export default function Containers({
-  containers,
-}: ContainersProps): ReactElement<any> {
+export default function Containers({ containers }: ContainersProps) {
   return (
     <div
       css={{
@@ -45,7 +42,7 @@ interface ContainerProps {
   container: ContainerT
 }
 
-function Container({ container }: ContainerProps): ReactElement<any> {
+function Container({ container }: ContainerProps) {
   return (
     <ResourceInfoCard
       title={
@@ -247,13 +244,7 @@ function Container({ container }: ContainerProps): ReactElement<any> {
   )
 }
 
-function Probe({
-  heading,
-  probe,
-}: {
-  heading: string
-  probe: ProbeT
-}): ReactElement<any> {
+function Probe({ heading, probe }: { heading: string; probe: ProbeT }) {
   return (
     <ResourceInfoCardSection heading={heading}>
       <ResourceInfoCardEntry heading="Failure threshold">

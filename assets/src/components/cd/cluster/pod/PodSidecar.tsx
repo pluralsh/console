@@ -1,6 +1,5 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Pod } from 'generated/graphql'
-import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { PhaseT, podStatusToReadiness } from 'utils/status'
 
@@ -8,6 +7,7 @@ import { getNodeDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import { PhaseChip, StatusChip } from '../../../cluster/TableElements.tsx'
 import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
+import { useTheme } from 'styled-components'
 
 export default function PodSidecar({
   pod,
@@ -16,6 +16,7 @@ export default function PodSidecar({
   pod: Pod
   clusterId?: string
 }) {
+  const theme = useTheme()
   const readiness = podStatusToReadiness(pod.status)
   const containerStats = getPodContainersStats(pod.status)
 
@@ -28,21 +29,19 @@ export default function PodSidecar({
       <SidecarItem heading="IP">{pod.status?.podIp}</SidecarItem>
       <SidecarItem heading="Parent node">
         {clusterId ? (
-          <A
-            as={Link}
+          <Link
+            css={theme.partials.text.inlineLink}
             to={getNodeDetailsPath({ clusterId, name: pod.spec.nodeName })}
-            inline
           >
             {pod.spec.nodeName}
-          </A>
+          </Link>
         ) : (
-          <A
-            as={Link}
+          <Link
+            css={theme.partials.text.inlineLink}
             to={`/nodes/${pod.spec.nodeName}`}
-            inline
           >
             {pod.spec.nodeName}
-          </A>
+          </Link>
         )}
       </SidecarItem>
       <SidecarItem heading="Service account">

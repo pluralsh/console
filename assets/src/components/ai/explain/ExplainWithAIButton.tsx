@@ -1,12 +1,11 @@
-import { DefaultTheme, useTheme } from 'styled-components'
 import {
   AiSparkleOutlineIcon,
   AnimatedDiv,
   Button,
 } from '@pluralsh/design-system'
-import { ReactNode } from 'react'
-import { ButtonProps } from 'honorable'
+import { ComponentPropsWithRef, ReactNode } from 'react'
 import { useTransition } from 'react-spring'
+import { DefaultTheme, useTheme } from 'styled-components'
 
 export default function ExplainWithAIButton({
   active,
@@ -19,7 +18,7 @@ export default function ExplainWithAIButton({
   startIcon?: ReactNode
   visible: boolean
   children: ReactNode
-} & ButtonProps) {
+} & ComponentPropsWithRef<typeof Button>) {
   const theme = useTheme()
   const transitions = useTransition(visible ? [true] : [], {
     from: { opacity: 0, scale: `85%`, marginRight: -100 },

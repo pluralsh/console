@@ -1,7 +1,5 @@
 import { useState } from 'react'
 
-import { Div } from 'honorable'
-
 import { Confirm } from '../../utils/Confirm'
 import {
   ClusterProviderFragment,
@@ -26,7 +24,7 @@ export function DeleteProvider({
   })
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
+    <div onClick={(e) => e.stopPropagation()}>
       <DeleteIconButton
         onClick={() => setConfirm(true)}
         disabled={!!provider.service}
@@ -43,6 +41,6 @@ export function DeleteProvider({
         title="Delete cluster provider"
         text={`Are you sure you want to delete ${provider.name}?  You need to make sure all attached clusters are deleted first`}
       />
-    </Div>
+    </div>
   )
 }

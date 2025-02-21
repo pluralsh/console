@@ -118,6 +118,7 @@ const ContentHeaderSC = styled.div(({ theme }) => ({
 const LeftSideSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
+  width: '100%',
 })
 
 const RightSideSC = styled.div(({ theme }) => ({
