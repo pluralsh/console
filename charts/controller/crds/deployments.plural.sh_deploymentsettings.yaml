@@ -391,7 +391,6 @@ spec:
                         default: false
                         type: boolean
                       vectorStore:
-                        default: ELASTIC
                         enum:
                         - ELASTIC
                         type: string

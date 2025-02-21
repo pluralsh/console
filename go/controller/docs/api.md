@@ -2958,7 +2958,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ |  | false | Optional: {} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ |  | ELASTIC | Enum: [ELASTIC] <br />Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Enum: [ELASTIC] <br />Optional: {} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ |  |  | Optional: {} <br /> |
 
 
