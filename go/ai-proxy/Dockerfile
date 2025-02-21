@@ -1,5 +1,5 @@
 # Build the binary
-FROM golang:1.22.8 as builder
+FROM golang:1.22.12 as builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG VERSION
