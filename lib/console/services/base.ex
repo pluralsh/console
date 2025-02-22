@@ -24,6 +24,9 @@ defmodule Console.Services.Base do
 
   def ok(val), do: {:ok, val}
 
+  def bang!({:ok, val}), do: val
+  def bang!({:error, reason}), do: raise(ArgumentError, message: inspect(reason))
+
   def should_cache?({:error, _}), do: false
   def should_cache?(nil), do: false
   def should_cache?(_), do: true

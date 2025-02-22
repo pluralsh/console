@@ -26,6 +26,7 @@ if get_env("PLURAL_CLIENT_ID") do
       client_secret: get_env("PLURAL_CLIENT_SECRET"),
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
+      pkce_enabled: get_env("OIDC_PKCE_ENABLED") == "true",
       scope: "openid"
     ]
 end
@@ -44,6 +45,7 @@ if get_env("OIDC_CLIENT_ID") do
       client_secret: get_env("OIDC_CLIENT_SECRET"),
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
+      pkce_enabled: get_env("OIDC_PKCE_ENABLED") == "true",
       scope: get_env("OIDC_SCOPES") || "openid email"
     ]
 end

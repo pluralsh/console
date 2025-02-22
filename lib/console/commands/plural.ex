@@ -21,12 +21,14 @@ defmodule Console.Commands.Plural do
     with conf when is_binary(conf) <- kubeconfig,
          {:ok, f} <- Briefly.create(),
          :ok <- File.write(f, conf) do
-      plural_home("deployments", ["install", "--url", url, "--token", token, "--force"], [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"]), [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
     else
-      nil -> plural_home("deployments", ["install", "--url", url, "--token", token, "--force"], [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      nil -> plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"]), [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
       err -> err
     end
   end
+
+  defp add_chart(args), do: args ++ ["--chart-loc", Console.Deployments.Settings.agent_chart()]
 
   def unlock_repo(repo), do: plural("repos", ["unlock", repo])
 

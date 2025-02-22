@@ -57,14 +57,15 @@ defmodule Console.Deployments.Init do
         deployer_repository_id: drepo.id,
       }))
     end)
-    |> add_operation(:secret, fn _ -> ensure_secret() end)
+    |> add_operation(:secret, fn _ -> ensure_secret(Console.cloud?()) end)
     |> execute()
   end
 
-  def ensure_secret(ignore \\ true) do
-    case {ignore && Console.cloud?(), Utils.get_secret(namespace(), @secret_name)} do
-      {true, _} -> {:ok, %{}}
-      {_, {:ok, _} = res} -> res
+  def ensure_secret(ignore \\ false)
+  def ensure_secret(true), do: {:ok, %{}}
+  def ensure_secret(_) do
+    case Utils.get_secret(namespace(), @secret_name) do
+      {:ok, _} = res -> res
       _ -> create_auth_secret()
     end
   end

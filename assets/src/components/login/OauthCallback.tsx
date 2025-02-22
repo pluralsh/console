@@ -1,32 +1,21 @@
 import { useEffect, useRef } from 'react'
-import gql from 'graphql-tag'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
-import { useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 import { Button, Callout } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { RefreshTokenFragment } from 'components/graphql/users'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 
 import { LoginPortal } from './LoginPortal'
-
-const CALLBACK = gql`
-  mutation Callback($code: String!, $redirect: String) {
-    oauthCallback(code: $code, redirect: $redirect) {
-      jwt
-      refreshToken {
-        ...RefreshTokenFragment
-      }
-    }
-  }
-  ${RefreshTokenFragment}
-`
+import {
+  OauthCallbackMutationVariables,
+  useOauthCallbackMutation,
+} from 'generated/graphql'
 
 function OAuthError({ error: { error, error_description: description } }: any) {
   return (
@@ -46,10 +35,14 @@ export function OAuthCallback() {
   const location = useLocation()
   const navigate = useNavigate()
   const theme = useTheme()
-  const { code, ...oauthError } = qs.parse(location.search)
+  const { code, state, ...oauthError } = qs.parse(location.search)
   const prevCode = useRef<any>(undefined)
-  const [mutation, { error, loading }] = useMutation(CALLBACK, {
-    variables: { code, redirect: localized('/oauth/callback') },
+  const [mutation, { error, loading }] = useOauthCallbackMutation({
+    variables: {
+      code,
+      state,
+      redirect: localized('/oauth/callback'),
+    } as OauthCallbackMutationVariables,
     onCompleted: (result) => {
       const { jwt, refreshToken } = result?.oauthCallback || {}
 
