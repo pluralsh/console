@@ -1,6 +1,14 @@
 defmodule ConsoleWeb.GitControllerTest do
   use ConsoleWeb.ConnCase, async: false
 
+  describe "agent_chart/2" do
+    test "it can download the current valid agent chart", %{conn: conn} do
+      conn
+      |> get("/ext/v1/agent/chart")
+      |> response(200)
+    end
+  end
+
   describe "#tarball/2" do
     test "it will download git content for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")

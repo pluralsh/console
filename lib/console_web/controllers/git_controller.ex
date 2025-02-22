@@ -23,6 +23,11 @@ defmodule ConsoleWeb.GitController do
     end
   end
 
+  def agent_chart(conn, _) do
+    path = Console.Deployments.Settings.agent_chart()
+    chunk_send_tar(conn, File.open!(path, [:raw]))
+  end
+
   def stack_tarball(conn, %{"id" => run_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, run} <- Stacks.authorized(run_id, cluster),
