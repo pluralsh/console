@@ -181,3 +181,12 @@ query Refresh($token: String!) {
     jwt
   }
 }
+
+mutation OauthCallback($code: String!, $redirect: String, $state: String) {
+  oauthCallback(code: $code, redirect: $redirect, state: $state) {
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}

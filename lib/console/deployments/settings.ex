@@ -10,6 +10,7 @@ defmodule Console.Deployments.Settings do
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
+  @agent_chart Path.join(:code.priv_dir(:console), "agent-chart.tgz")
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 
@@ -63,6 +64,12 @@ defmodule Console.Deployments.Settings do
 
   @spec agent_vsn() :: binary
   def agent_vsn(), do: @agent_vsn
+
+  @doc """
+  Local file containing the valid, working agent chart tarball
+  """
+  @spec agent_chart() :: binary
+  def agent_chart(), do: @agent_chart
 
   @doc "same as fetch/0 but always reads from db"
   def fetch_consistent() do

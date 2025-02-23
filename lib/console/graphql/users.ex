@@ -495,6 +495,7 @@ defmodule Console.GraphQl.Users do
       middleware AllowJwt
       arg :code,     non_null(:string)
       arg :redirect, :string
+      arg :state,    :string
 
       safe_resolve &User.oauth_callback/2
     end

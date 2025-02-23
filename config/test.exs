@@ -16,13 +16,12 @@ config :console, ConsoleWeb.Endpoint,
   http: [port: 4002],
   server: false
 
-config :logger, level: :warning
+config :logger, level: :error
 
 config :goth,
   disabled: true
 
 config :piazza_core, aes_key: "1HdFP1DuK7xkkcEBne41yAwUY8NSfJnYfGVylYYCS2U="
-
 
 secrets_path = __ENV__.file |> Path.dirname() |> Path.join("secrets")
 binfile = fn p ->

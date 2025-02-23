@@ -1,5 +1,6 @@
 defmodule Console.Application do
   use Application
+  alias Console.Services.OAuth
 
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
@@ -47,8 +48,9 @@ defmodule Console.Application do
       Console.Watchers.Supervisor,
       Console.AI.GothManager,
       Console.PromEx,
-      {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
-    ] ++ consumers() ++ [
+    ] ++ consumers()
+      ++ oidc_providers()
+      ++ [
       Piazza.GracefulShutdown
     ]
 
@@ -63,12 +65,21 @@ defmodule Console.Application do
 
   defp consumers(), do: Console.conf(:consumers) || []
 
-  # defp deployer() do
-  #   case {Console.conf(:build_id), Console.byok?()} do
-  #     {build_id, _} when is_binary(build_id) ->
-  #       [{Console.Runner.Harakiri, [Console.storage(), build_id]}]
-  #     {_, false} -> [Console.Deployer]
-  #     _ -> []
-  #   end
-  # end
+  defp oidc_providers() do
+    case OAuth.issuer() do
+      iss when is_binary(iss) ->
+        [
+          {
+            Oidcc.ProviderConfiguration.Worker,
+            %{
+              issuer: iss,
+              name: OAuth.name(),
+              provider_configuration_opts: %{quirks: %{allow_issuer_mismatch: true}},
+              backoff_type: :exponential
+            }
+          }
+        ]
+      _ -> []
+    end
+  end
 end

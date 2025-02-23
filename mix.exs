@@ -167,6 +167,7 @@ defmodule Console.MixProject do
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.13"},
+      {:oidcc, "~> 3.3"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},
@@ -184,7 +185,7 @@ defmodule Console.MixProject do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "elasticsearch.down", "elasticsearch.up", "test"]
+      test: ["ecto.create --quiet", "agent.chart", "ecto.migrate", "elasticsearch.down", "elasticsearch.up", "test"]
     ]
   end
 end
