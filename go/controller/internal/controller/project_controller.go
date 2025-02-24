@@ -2,8 +2,9 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -22,7 +23,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -104,15 +104,8 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	// Sync Project CRD with the Console API
 	apiProject, err := in.sync(ctx, project, changed)
-	if goerrors.Is(err, operrors.ErrRetriable) {
-		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
-	}
-
 	if err != nil {
-		logger.Error(err, "unable to create or update project")
-		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID
@@ -252,7 +245,7 @@ func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
 	project.Spec.Bindings.Write = bindings
 
 	if req || req2 {
-		return operrors.ErrRetriable
+		return errors.NewNotFound(schema.GroupResource{}, "bindings")
 	}
 
 	return nil

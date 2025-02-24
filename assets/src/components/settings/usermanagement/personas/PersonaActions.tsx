@@ -1,4 +1,5 @@
 import {
+  Button,
   Flex,
   GearTrainIcon,
   IconFrame,
@@ -12,7 +13,7 @@ import {
   PersonasDocument,
   useDeletePersonaMutation,
 } from 'generated/graphql'
-import { Button } from 'honorable'
+
 import { useContext, useState } from 'react'
 
 import { removeConnection, updateCache } from '../../../../utils/graphql'

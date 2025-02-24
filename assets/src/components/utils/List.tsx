@@ -1,5 +1,5 @@
 import { Card, FillLevel, useFillLevel } from '@pluralsh/design-system'
-import { Ul } from 'honorable'
+
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -47,21 +47,21 @@ type ListProps = any & {
 
 function List({ children, ...props }: ListProps) {
   return (
-    <Card
-      display="flex"
-      alignItems="top"
-      flexDirection="column"
-      cornerSize="large"
-      margin={0}
-      flexGrow={1}
-      maxHeight="min-content"
-      {...props}
-      overflow="hidden"
-      as={Ul}
-    >
-      {children}
-    </Card>
+    <ul css={{ display: 'contents' }}>
+      <Card
+        display="flex"
+        alignItems="top"
+        flexDirection="column"
+        cornerSize="large"
+        margin={0}
+        flexGrow={1}
+        {...props}
+        overflow="hidden"
+      >
+        {children}
+      </Card>
+    </ul>
   )
 }
 
-export { List, ListItem, fillLevelToBorderColor }
+export { fillLevelToBorderColor, List, ListItem }

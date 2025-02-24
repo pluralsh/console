@@ -1,5 +1,5 @@
 import { Button, Flex, ToolIcon, Tooltip } from '@pluralsh/design-system'
-import { Div } from 'honorable'
+
 import { useContext, useState } from 'react'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
@@ -14,14 +14,14 @@ export function HeaderIconButton({ tooltipProps, ...props }) {
   // Button needs div wrapper for tooltip to work
   return (
     <Tooltip {...tooltipProps}>
-      <Div height="100%">
+      <div css={{ height: '100%' }}>
         <Button
           floating
           width={CODELINE_HEIGHT}
           height="100%"
           {...props}
         />
-      </Div>
+      </div>
     </Tooltip>
   )
 }

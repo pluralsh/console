@@ -127,15 +127,11 @@ func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Ca
 	project := &v1alpha1.Project{}
 	if catalog.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: catalog.Spec.ProjectRef.Name}, project); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		if !project.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {

@@ -7,7 +7,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Body1P, Title2H1 } from 'components/utils/typography/Text'
-import { A } from 'honorable'
+
 import { Link, useOutletContext } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 import { formatDateTime } from 'utils/datetime'
@@ -64,12 +64,12 @@ function PolicyDetails() {
           scrollable
           fullWidth
         >
-          <Title2H1 css={{ marginTop: 0 }}>Description</Title2H1>
+          <Title2H1 css={{ marginBottom: '0.67em' }}>Description</Title2H1>
           <Body1P css={{ color: theme.colors['text-long-form'] }}>
             {policy.description ||
               'No description found for this policy, this must be set in an annotation'}
           </Body1P>
-          <Title2H1>Recommended action</Title2H1>
+          <Title2H1 css={{ margin: '0.67em 0' }}>Recommended action</Title2H1>
           <Body1P css={{ color: theme.colors['text-long-form'] }}>
             {policy.recommendation ||
               'No recommendation found for this policy, this must be set in an annotation'}
@@ -104,13 +104,12 @@ function PolicyDetails() {
         )}
         {cluster && (
           <SidecarItem heading="Cluster name">
-            <A
-              as={Link}
+            <Link
+              css={theme.partials.text.inlineLink}
               to={getClusterDetailsPath({ clusterId: cluster.id })}
-              inline
             >
               {cluster.name}
-            </A>
+            </Link>
           </SidecarItem>
         )}
       </Sidecar>

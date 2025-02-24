@@ -169,14 +169,10 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		connection := &v1alpha1.ScmConnection{}
 		ref := repo.Spec.ConnectionRef
 		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
-		if connection.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("SCM connection is not ready yet")
+		if !connection.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
@@ -189,10 +185,6 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		secret := &corev1.Secret{}
 		ref := repo.Spec.CredentialsRef
 		if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, secret); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 

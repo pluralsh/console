@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -100,15 +98,9 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	// Sync ObservabilityProvider CRD with the Console API
-	apiProvider, err := r.sync(ctx, observer, changed)
-	if err != nil {
-		logger.Error(err, "unable to create or update observer")
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return waitForResources, nil
-		}
-		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	apiProvider, res, err := r.sync(ctx, observer, changed)
+	if res != nil || err != nil {
+		return handleRequeue(res, err, observer.SetCondition)
 	}
 
 	observer.Status.ID = &apiProvider.ID
@@ -124,37 +116,55 @@ func (r *ObserverReconciler) sync(
 	ctx context.Context,
 	observer *v1alpha1.Observer,
 	changed bool,
-) (*console.ObserverFragment, error) {
+) (*console.ObserverFragment, *ctrl.Result, error) {
 	exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Read the Observer from Console API if it already exists and has not changed
 	if exists && !changed {
-		return r.ConsoleClient.GetObserver(ctx, nil, lo.ToPtr(observer.ObserverName()))
+		apiObserver, err := r.ConsoleClient.GetObserver(ctx, nil, lo.ToPtr(observer.ObserverName()))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return apiObserver, nil, nil
 	}
 
-	target, actions, projectID, err := r.getAttributes(ctx, observer)
-	if err != nil {
-		return nil, err
+	projectID, result, err := r.getProjectID(ctx, observer)
+	if result != nil || err != nil {
+		return nil, result, err
 	}
 
-	return r.ConsoleClient.UpsertObserver(ctx, observer.Attributes(target, actions, projectID))
+	target, actions, result, err := r.getAttributes(ctx, observer)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	apiObserver, err := r.ConsoleClient.UpsertObserver(ctx, observer.Attributes(target, actions, projectID))
+	return apiObserver, nil, err
 }
 
-func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alpha1.Observer) (target console.ObserverTargetAttributes, actions []*console.ObserverActionAttributes, projectID *string, err error) {
-	if observer.Spec.ProjectRef != nil {
-		project := &v1alpha1.Project{}
-		if err = r.Get(ctx, client.ObjectKey{Name: observer.Spec.ProjectRef.Name, Namespace: observer.Spec.ProjectRef.Namespace}, project); err != nil {
-			return target, actions, projectID, err
-		}
-		if !project.Status.HasID() {
-			err = fmt.Errorf("project ID is nil")
-			return target, actions, projectID, err
-		}
-		projectID = project.Status.ID
+func (r *ObserverReconciler) getProjectID(ctx context.Context, observer *v1alpha1.Observer) (*string, *ctrl.Result, error) {
+	if observer.Spec.ProjectRef == nil {
+		return nil, nil, nil
 	}
+
+	project := &v1alpha1.Project{}
+	if err := r.Get(ctx, client.ObjectKey{Name: observer.Spec.ProjectRef.Name, Namespace: observer.Spec.ProjectRef.Namespace}, project); err != nil {
+		return nil, nil, err
+	}
+
+	if project.ConsoleID() == nil {
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
+	}
+
+	return project.ConsoleID(), nil, nil
+}
+
+func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alpha1.Observer) (target console.ObserverTargetAttributes, actions []*console.ObserverActionAttributes, result *ctrl.Result, err error) {
+
 	target = console.ObserverTargetAttributes{
 		Type:   lo.ToPtr(observer.Spec.Target.Type),
 		Format: observer.Spec.Target.Format,
@@ -164,7 +174,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		var helmAuthAttr *console.HelmAuthAttributes
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, helm.Provider, helm.Auth)
 		if err != nil {
-			return target, actions, projectID, err
+			if errors.IsNotFound(err) {
+				return target, actions, &waitForResources, err
+			}
+
+			return target, actions, nil, err
 		}
 		target.Helm = &console.ObserverHelmAttributes{
 			URL:      helm.URL,
@@ -176,11 +190,14 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 	if git := observer.Spec.Target.Git; git != nil {
 		gitRepo := &v1alpha1.GitRepository{}
 		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
-			return target, actions, projectID, err
+			if errors.IsNotFound(err) {
+				return target, actions, &waitForResources, err
+			}
+
+			return target, actions, nil, err
 		}
 		if !gitRepo.Status.HasID() {
-			err = errors.NewNotFound(schema.GroupResource{Resource: "GitRepository", Group: "deployments.plural.sh"}, gitRepo.Name)
-			return target, actions, projectID, err
+			return target, actions, &waitForResources, fmt.Errorf("repository is not ready")
 		}
 		target.Git = &console.ObserverGitAttributes{
 			RepositoryID: gitRepo.Status.GetID(),
@@ -192,7 +209,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		var helmAuthAttr *console.HelmAuthAttributes
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, oci.Provider, oci.Auth)
 		if err != nil {
-			return target, actions, projectID, err
+			if errors.IsNotFound(err) {
+				return target, actions, &waitForResources, err
+			}
+
+			return target, actions, nil, err
 		}
 		target.Oci = &console.ObserverOciAttributes{
 			URL:      oci.URL,
@@ -211,11 +232,14 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			if pr := action.Configuration.Pr; pr != nil {
 				prAutomation := &v1alpha1.PrAutomation{}
 				if err = r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
-					return target, actions, projectID, err
+					if errors.IsNotFound(err) {
+						return target, actions, &waitForResources, err
+					}
+
+					return target, actions, nil, err
 				}
 				if !prAutomation.Status.HasID() {
-					err = errors.NewNotFound(schema.GroupResource{Resource: "PrAutomation", Group: "deployments.plural.sh"}, prAutomation.Name)
-					return target, actions, projectID, err
+					return target, actions, &waitForResources, fmt.Errorf("pr automation is not ready")
 				}
 
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
@@ -231,11 +255,14 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			if p := action.Configuration.Pipeline; p != nil {
 				pipeline := &v1alpha1.Pipeline{}
 				if err = r.Get(ctx, client.ObjectKey{Name: p.PipelineRef.Name, Namespace: p.PipelineRef.Namespace}, pipeline); err != nil {
-					return target, actions, projectID, err
+					if errors.IsNotFound(err) {
+						return target, actions, &waitForResources, err
+					}
+
+					return target, actions, nil, err
 				}
 				if !pipeline.Status.HasID() {
-					err = errors.NewNotFound(schema.GroupResource{Resource: "Pipeline", Group: "deployments.plural.sh"}, pipeline.Name)
-					return target, actions, projectID, err
+					return target, actions, &waitForResources, fmt.Errorf("pipeline is not ready")
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),
@@ -249,7 +276,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 
 	}
-	return target, actions, projectID, err
+	return target, actions, nil, err
 }
 
 func (r *ObserverReconciler) handleExisting(ctx context.Context, observer *v1alpha1.Observer) (ctrl.Result, error) {

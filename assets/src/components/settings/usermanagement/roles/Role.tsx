@@ -62,6 +62,7 @@ export default function Role({ role, q }: any) {
     <div
       css={{
         display: 'flex',
+        justifyContent: 'space-between',
         width: '100%',
         alignItems: 'center',
       }}

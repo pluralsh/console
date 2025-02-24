@@ -1,25 +1,36 @@
-import { forwardRef } from 'react'
-import { FormField } from '@pluralsh/design-system'
-import { Input } from 'honorable'
+import { FormField, Input } from '@pluralsh/design-system'
 
-export const LabelledInput = forwardRef(
-  (
-    {
-      label,
-      value,
-      onChange,
-      placeholder,
-      type,
-      caption,
-      hint,
-      error = undefined,
-      required = false,
-      disabled = false,
-      inputProps,
-      ...props
-    }: any,
-    ref
-  ) => (
+import { ComponentPropsWithoutRef, ReactNode, RefObject } from 'react'
+
+export function LabelledInput({
+  ref,
+  label,
+  value,
+  onChange,
+  placeholder,
+  type,
+  caption,
+  hint,
+  error = undefined,
+  required = false,
+  disabled = false,
+  inputProps,
+  ...props
+}: {
+  ref?: RefObject<HTMLInputElement>
+  label?: string
+  value?: string
+  onChange?: (value: string) => void
+  placeholder?: string
+  type?: string
+  caption?: ReactNode
+  hint?: string
+  error?: boolean
+  required?: boolean
+  disabled?: boolean
+  inputProps?: ComponentPropsWithoutRef<typeof Input>
+} & ComponentPropsWithoutRef<typeof FormField>) {
+  return (
     <FormField
       label={label}
       caption={caption}
@@ -43,4 +54,4 @@ export const LabelledInput = forwardRef(
       />
     </FormField>
   )
-)
+}

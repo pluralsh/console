@@ -54,7 +54,6 @@ type PrAutomationTriggerReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Reconcile ClusterRestoreTrigger", "namespace", req.Namespace, "name", req.Name)
 
 	trigger := new(v1alpha1.PrAutomationTrigger)
 	if err := r.Get(ctx, req.NamespacedName, trigger); err != nil {
@@ -73,8 +72,8 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if !prAutomation.Status.HasID() {
-		logger.Info("cluster restore is not ready yet", "name", prAutomation.Name, "namespace", prAutomation.Namespace)
-		return ctrl.Result{}, nil
+		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "pr automation is not ready")
+		return waitForResources, nil
 	}
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, prAutomation, trigger, r.Scheme); err != nil {

@@ -6,7 +6,6 @@ import {
   Flex,
   Spinner,
 } from '@pluralsh/design-system'
-import { Div } from 'honorable'
 import sortBy from 'lodash/sortBy'
 import {
   ReactNode,
@@ -17,6 +16,7 @@ import {
   useState,
 } from 'react'
 
+import styled from 'styled-components'
 import {
   RunLogs,
   RunStep,
@@ -24,7 +24,6 @@ import {
   useLogsDeltaSubscription,
 } from '../../../../generated/graphql'
 import CommandLog from '../../../utils/CommandLog.tsx'
-import styled from 'styled-components'
 
 interface StepProps {
   step: RunStep
@@ -32,7 +31,7 @@ interface StepProps {
 }
 
 export default function Step({ step, open }: StepProps): ReactNode {
-  const ref = useRef<HTMLDivElement>(undefined)
+  const ref = useRef<HTMLDivElement>(null)
 
   const [folded, setFolded] = useState<boolean | undefined>(undefined)
   const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)
@@ -71,7 +70,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
   }, [open, ref])
 
   return (
-    <Div ref={ref}>
+    <div ref={ref}>
       <TriggerSC
         $hasLogs={logs.length > 0}
         onClick={() => logs.length > 0 && setFolded(!(folded ?? !open))}
@@ -102,7 +101,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
           follow={step.status === StepStatus.Running}
         />
       )}
-    </Div>
+    </div>
   )
 }
 

@@ -18,8 +18,6 @@ import { FitAddon } from 'xterm-addon-fit'
 
 import { socket } from 'helpers/client'
 
-import { Div } from 'honorable'
-
 import TerminalThemeContext from './TerminalThemeContext'
 import { normalizedThemes } from './themes'
 
@@ -80,7 +78,7 @@ export function TerminalScreen({
   const shellContext = useContext(ShellContext)
   const isFirstConnect = useRef(true)
 
-  const terminalRef = useRef<HTMLElement>(undefined)
+  const terminalRef = useRef<HTMLDivElement>(null)
   const [terminalTheme] = useContext(TerminalThemeContext)
 
   const [channel, setChannel] = useState()
@@ -177,7 +175,7 @@ export function TerminalScreen({
       ref={terminalContainerRef}
       $backgroundColor={normalizedThemes[terminalTheme].background}
     >
-      <Div
+      <div
         id="terminal"
         className="terminal"
         ref={terminalRef}

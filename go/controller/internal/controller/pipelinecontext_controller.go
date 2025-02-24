@@ -74,7 +74,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if !pipeline.Status.HasID() {
-		logger.Info("pipeline is not ready yet", "name", pipeline.Name, "namespace", pipeline.Namespace)
+		logger.Info("pipeline is not ready", "name", pipeline.Name, "namespace", pipeline.Namespace)
 		return requeue, nil
 	}
 

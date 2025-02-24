@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Div } from 'honorable'
 import { isEmpty } from 'lodash'
-import { useGroupMembersQuery } from 'generated/graphql'
+import { GroupFragment, useGroupMembersQuery } from 'generated/graphql'
 
 import { extendConnection } from '../../../../utils/graphql'
 import { StandardScroller } from '../../../utils/SmoothScroller'
@@ -13,7 +12,11 @@ export default function GroupMembers({
   group,
   edit = false,
   skip = false,
-}: any) {
+}: {
+  group: GroupFragment
+  edit?: boolean
+  skip?: boolean
+}) {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useGroupMembersQuery({
     variables: { id: group.id },
@@ -31,19 +34,13 @@ export default function GroupMembers({
       minHeight="230px"
       position="relative"
     >
-      <Div flexGrow="1">
+      <div css={{ flexGrow: 1 }}>
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
           loading={loading}
-          placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
-            />
-          )}
+          placeholder={() => <div css={{ height: '50px', padding: 'small' }} />}
           hasNextPage={pageInfo.hasNextPage}
           mapper={({ node }, { next }) => (
             <GroupMember
@@ -66,7 +63,7 @@ export default function GroupMembers({
           refreshKey={undefined}
           setLoader={undefined}
         />
-      </Div>
+      </div>
     </List>
   )
 }

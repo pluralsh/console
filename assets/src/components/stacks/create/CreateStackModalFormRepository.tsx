@@ -3,7 +3,6 @@ import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import useOnUnMount from 'components/hooks/useOnUnMount'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useGitRepositoryQuery } from 'generated/graphql'
-import { trimStart } from 'lodash'
 
 import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
 
@@ -106,5 +105,6 @@ export function CreateStackModalFormRepository({
   )
 }
 
-export const cleanRefs = (refs: string[] | null) =>
-  (refs || []).map((ref) => trimStart(trimStart(ref, '/'), 'refs/heads/'))
+export const cleanRefs = (refs: string[] | null) => {
+  return refs?.map((ref) => ref.replace(/^(?:\/)?(?:refs\/heads\/)?/, '')) ?? []
+}

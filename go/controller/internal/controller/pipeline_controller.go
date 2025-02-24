@@ -18,10 +18,7 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
-
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -29,7 +26,6 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -105,8 +101,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 			return requeue, err
 		}
 
-		if project.Status.ID == nil {
-			logger.Info("Project is not ready")
+		if !project.Status.HasID() {
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
 			return waitForResources, nil
 		}
@@ -117,18 +112,9 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	// Prepare attributes object that is used to calculate SHA and save changes.
-	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
-	if err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
-		}
-		if apierrors.IsNotFound(err) {
-			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return waitForResources, nil
-		}
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	attrs, res, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
+	if res != nil || err != nil {
+		return handleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
@@ -199,14 +185,14 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 	}
 
 	if exists && pipeline.Status.IsSHAEqual(sha) {
-		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))
+		logger.V(9).Info("no changes detected for pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
 		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
 	}
 
 	if exists {
-		logger.Info(fmt.Sprintf("Detected changes, saving %s pipeline", pipeline.Name))
+		logger.V(9).Info("detected changes, saving pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
 	} else {
-		logger.Info(fmt.Sprintf("%s pipeline does not exist, saving it", pipeline.Name))
+		logger.V(9).Info("pipeline does not exist, saving it", "name", pipeline.Name)
 	}
 	return r.ConsoleClient.SavePipeline(pipeline.Name, attrs)
 }

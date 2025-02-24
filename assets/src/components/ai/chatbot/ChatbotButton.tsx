@@ -5,8 +5,7 @@ import {
   Spinner,
 } from '@pluralsh/design-system'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
-import { ButtonProps } from 'honorable'
-import { Dispatch, ReactNode } from 'react'
+import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
 import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../explain/ExplainWithAIButton.tsx'
 
@@ -22,7 +21,7 @@ export function ChatbotIconButton({
   onClick,
   active,
   ...props
-}: ChatbotButtonProps & ButtonProps): ReactNode {
+}: ChatbotButtonProps & ComponentPropsWithRef<typeof Button>): ReactNode {
   return (
     <AIButton
       onClick={onClick}
@@ -56,7 +55,7 @@ export function ChatWithAIButton({
   insightId?: Nullable<string>
   bodyText?: string
   iconOnly?: boolean
-} & ButtonProps) {
+} & ComponentPropsWithRef<typeof Button>) {
   const { createNewThread, loading } = useChatbot()
 
   const handleClick = () => {

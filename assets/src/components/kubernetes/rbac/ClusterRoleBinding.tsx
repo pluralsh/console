@@ -1,10 +1,7 @@
+import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { A } from 'honorable'
 
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { MetadataSidecar } from '../common/utils'
 import {
   ClusterRoleBindingQueryVariables,
   Clusterrolebinding_ClusterRoleBindingDetail as ClusterRoleBindingT,
@@ -13,10 +10,13 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import Subjects from '../common/Subjects'
 import { useCluster } from '../Cluster'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import Subjects from '../common/Subjects'
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
 
+import { useTheme } from 'styled-components'
 import { getBreadcrumbs } from './ClusterRoleBindings'
 
 const directory: Array<TabEntry> = [
@@ -24,7 +24,8 @@ const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
 ] as const
 
-export default function ClusterRoleBinding(): ReactElement<any> {
+export default function ClusterRoleBinding() {
+  const theme = useTheme()
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleBindingQuery({
@@ -63,17 +64,16 @@ export default function ClusterRoleBinding(): ReactElement<any> {
       sidecar={
         <MetadataSidecar resource={crb}>
           <SidecarItem heading="Role">
-            <A
-              as={Link}
+            <Link
+              css={theme.partials.text.inlineLink}
               to={getResourceDetailsAbsPath(
                 clusterId,
                 Kind.ClusterRole,
                 crb?.roleRef.name ?? ''
               )}
-              inline
             >
               {crb?.roleRef.name}
-            </A>
+            </Link>
           </SidecarItem>
         </MetadataSidecar>
       }

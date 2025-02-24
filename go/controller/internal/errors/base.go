@@ -19,9 +19,7 @@ func (k KnownError) Error() string {
 const (
 	ErrorNotFound             KnownError = "could not find resource"
 	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
-	ErrExpected               KnownError = "this is a transient, expected error"
-	ErrRetriable              KnownError = "Still waiting on read/write bindings, requeueing until they're available"
-	ErrReferenceNotFound      KnownError = "Waiting for configured resource reference, requeueing until it's available"
+	ErrRetriable              KnownError = "still waiting on read/write bindings, requeueing until they're available"
 	ErrDeleteRepository                  = "could not delete repository"
 )
 

@@ -189,10 +189,6 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 
@@ -205,8 +201,8 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		return nil, &waitForResources, nil
 	}
 
-	if service.Status.ID == nil {
-		return nil, &waitForResources, fmt.Errorf("service is not ready yet")
+	if !service.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
 	return service, nil, nil
@@ -216,14 +212,10 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 	provider := &v1alpha1.Provider{}
 	if globalService.Spec.ProviderRef != nil {
 		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
-		if provider.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("provider is not ready yet")
+		if !provider.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("provider is not ready")
 		}
 	}
 
@@ -234,15 +226,11 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 	project := &v1alpha1.Project{}
 	if globalService.Spec.ProjectRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
-			if errors.IsNotFound(err) {
-				return nil, &waitForResources, err
-			}
-
 			return nil, nil, err
 		}
 
-		if project.Status.ID == nil {
-			return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		if !project.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("project is not ready")
 		}
 
 		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
@@ -308,7 +296,7 @@ func (r *GlobalServiceReconciler) getRepository(ctx context.Context, ns *v1alpha
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Template.RepositoryRef.Name, Namespace: ns.Spec.Template.RepositoryRef.Namespace}, repository); err != nil {
 			return nil, err
 		}
-		if repository.Status.ID == nil {
+		if !repository.Status.HasID() {
 			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

@@ -67,7 +67,7 @@ func (r *ProviderReconciler) toCloudProviderAWSSettingsAttributes(ctx context.Co
 	}
 
 	return &console.CloudProviderSettingsAttributes{
-		Aws: &console.AwsSettingsAttributes{
+		AWS: &console.AWSSettingsAttributes{
 			AccessKeyID:     string(accessKeyID),
 			SecretAccessKey: string(secretAccessKey),
 		},
@@ -129,7 +129,7 @@ func (r *ProviderReconciler) toCloudProviderGCPSettingsAttributes(ctx context.Co
 	}
 
 	return &console.CloudProviderSettingsAttributes{
-		Gcp: &console.GcpSettingsAttributes{
+		GCP: &console.GCPSettingsAttributes{
 			ApplicationCredentials: string(applicationCredentials),
 		},
 	}, nil
