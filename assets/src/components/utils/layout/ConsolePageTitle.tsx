@@ -1,10 +1,9 @@
-import { DivProps, H1 } from 'honorable'
-import { ComponentPropsWithRef, ReactNode } from 'react'
+import { ComponentPropsWithRef, CSSProperties, ReactNode } from 'react'
 import styled from 'styled-components'
 
 export type PageTitleProps = {
   heading?: ReactNode
-  headingProps?: DivProps
+  headingProps?: CSSProperties
 } & ComponentPropsWithRef<typeof WrapperSC>
 
 export default function ConsolePageTitle({
@@ -15,15 +14,7 @@ export default function ConsolePageTitle({
 }: PageTitleProps) {
   return (
     <WrapperSC {...props}>
-      {heading && (
-        <H1
-          title2
-          paddingTop="0.2em" // optically center title
-          {...headingProps}
-        >
-          {heading}
-        </H1>
-      )}
+      {heading && <HeadingSC css={{ ...headingProps }}>{heading}</HeadingSC>}
       {children}
     </WrapperSC>
   )
@@ -36,4 +27,10 @@ const WrapperSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   position: 'relative',
   minHeight: 40,
+}))
+
+const HeadingSC = styled.h1(({ theme }) => ({
+  ...theme.partials.text.title2,
+  margin: 0,
+  paddingTop: '0.1em', // optically center title
 }))

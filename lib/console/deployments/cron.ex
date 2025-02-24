@@ -74,7 +74,7 @@ defmodule Console.Deployments.Cron do
 
     Cluster.ordered()
     |> Cluster.healthy()
-    |> Cluster.with_limit(150)
+    |> Cluster.with_limit(100)
     |> Repo.all()
     |> Task.async_stream(fn cluster ->
       Logger.info "warming node caches for cluster #{cluster.handle}"

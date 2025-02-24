@@ -69,7 +69,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewDefaultScope(ctx, r.Client, cluster)
 	if err != nil {
-		logger.Error(err, "Failed to create cluster scope")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -100,7 +99,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if exists {
-		logger.V(9).Info("Cluster is in BYOK mode, running in read-only mode")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExisting(cluster)
 	}
@@ -111,8 +109,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil || err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "")
-		return *result, err
+		return handleRequeue(result, err, cluster.SetCondition)
 	}
 
 	// Get Project ID from the reference if it is set and ensure that controller reference is set properly.
@@ -226,7 +223,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
-		if cluster.Status.ID == nil {
+		if !cluster.Status.HasID() {
 			controllerutil.RemoveFinalizer(cluster, ClusterFinalizer)
 			return &ctrl.Result{}
 		}
@@ -270,12 +267,12 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 
 	if cluster.Spec.IsProviderRefRequired() {
 		if !cluster.Spec.HasProviderRef() {
-			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, reference is not set but required")
+			return nil, nil, fmt.Errorf("could not get provider, reference is not set but required")
 		}
 
 		provider := &v1alpha1.Provider{}
 		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name}, provider); err != nil {
-			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
+			return nil, nil, fmt.Errorf("could not get provider, got error: %+v", err)
 		}
 
 		// Once provider is marked with deletion timestamp we should delete cluster as well.
@@ -284,20 +281,19 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 			logger.Info(fmt.Sprintf("Provider is being deleted, deleting %s cluster as well", cluster.Name))
 			err := r.Delete(ctx, cluster)
 			if err != nil {
-				return nil, &ctrl.Result{}, fmt.Errorf("could not delete %s cluster, got error: %+v", cluster.Name, err)
+				return nil, nil, fmt.Errorf("could not delete %s cluster, got error: %+v", cluster.Name, err)
 			}
 
 			return nil, &requeue, nil
 		}
 
 		if !provider.Status.HasID() {
-			logger.Info("Provider does not have ID set yet")
-			return nil, &requeue, nil
+			return nil, &waitForResources, fmt.Errorf("provider does not have ID set yet")
 		}
 
 		err := controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
 		if err != nil {
-			return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
+			return nil, nil, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
 		}
 
 		return provider.Status.ID, nil, nil
@@ -313,15 +309,11 @@ func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, clus
 
 	project := &v1alpha1.Project{}
 	if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProjectRef.Name}, project); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, &waitForResources, err
-		}
-
 		return nil, nil, err
 	}
 
 	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready yet")
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, cluster, r.Scheme); err != nil {

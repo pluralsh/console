@@ -22,7 +22,7 @@ import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   VirtualSlice,
 } from '../table/useFetchPaginatedData'
-import { StandardUrl } from '../typography/Text'
+import { InlineA } from '../typography/Text'
 import { AlertsTableExpander } from './AlertsTableExpander'
 
 const columnHelper = createColumnHelper<AlertFragment>()
@@ -147,9 +147,7 @@ const cols = [
             placement="top"
             label={url}
           >
-            <StandardUrl href={url}>
-              {truncate(url ?? '', { length: 25 })}
-            </StandardUrl>
+            <InlineA href={url}>{truncate(url ?? '', { length: 25 })}</InlineA>
           </Tooltip>
           <AiInsightSummaryIcon
             insight={insight}

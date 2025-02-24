@@ -101,8 +101,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	err = r.tryAddControllerRef(ctx, scm)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, scm.SetCondition)
 	}
 
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
@@ -116,9 +115,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync ScmConnection CRD with the Console API
 	apiScmConnection, err := r.sync(ctx, scm, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update scm")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, scm.SetCondition)
 	}
 
 	scm.Status.ID = &apiScmConnection.ID
@@ -146,6 +143,17 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 	if err != nil {
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
+	}
+
+	// Default field should also be editable even if the resource is in the read-only mode.
+	if scm.Spec.Default != nil {
+		if apiScmConnection, err = r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), console.ScmConnectionAttributes{
+			Name:    scm.ConsoleName(),
+			Type:    scm.Spec.Type,
+			Default: scm.Spec.Default,
+		}); err != nil {
+			return reconcile.Result{}, err
+		}
 	}
 
 	scm.Status.ID = &apiScmConnection.ID

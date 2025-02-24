@@ -3,7 +3,6 @@ import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
-import { Div, Form, P } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
@@ -25,6 +24,7 @@ import { LabelledInput } from '../utils/LabelledInput'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import ShowAfterDelay from '../utils/ShowAfterDelay'
 
+import { Body1P } from 'components/utils/typography/Text'
 import { LoginPortal } from './LoginPortal'
 
 // 30 seconds
@@ -73,45 +73,6 @@ function LoginError({
   )
 }
 
-export function GrantAccess() {
-  const [jwt, setJwt] = useState('')
-
-  return (
-    <LoginPortal>
-      <Div marginBottom="large">
-        <WelcomeHeader
-          textAlign="left"
-          marginBottom="xxsmall"
-        />
-        <P
-          body1
-          color="text-xlight"
-        >
-          Enter the login token given to you to gain access
-        </P>
-      </Div>
-      <LabelledInput
-        value={jwt}
-        width="100%"
-        label="Login Token"
-        onChange={setJwt}
-      />
-      <Button
-        fill="horizontal"
-        pad={{ vertical: '8px' }}
-        margin={{ top: 'xsmall' }}
-        onClick={() => {
-          setToken(jwt)
-          window.location = '/' as any as Location
-        }}
-        disabled={jwt === ''}
-      >
-        Get access
-      </Button>
-    </LoginPortal>
-  )
-}
-
 export function EnsureLogin({ children }) {
   const { data, error, loading } = useMeQuery({
     pollInterval: POLL_INTERVAL,
@@ -150,13 +111,12 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
           gap="xsmall"
         >
           <WelcomeHeader />
-          <P
-            body1
-            color="text-light"
-            textAlign="center"
+          <Body1P
+            $color="text-light"
+            css={{ textAlign: 'center' }}
           >
             Connect to your Plural account for access to this Console.
-          </P>
+          </Body1P>
         </Flex>
         <Button
           id="plrl-login"
@@ -235,7 +195,7 @@ export default function Login() {
   return (
     <LoginPortal>
       <WelcomeHeader marginBottom="xlarge" />
-      <Form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit}>
         <div
           css={{
             display: 'flex',
@@ -245,12 +205,12 @@ export default function Login() {
           }}
         >
           {loginMError && (
-            <Div marginBottom="large">
+            <div css={{ marginBottom: theme.spacing.large }}>
               <GqlError
                 header="Login failed"
                 error={loginError}
               />
-            </Div>
+            </div>
           )}
           <Flex
             flexDirection="column"
@@ -285,7 +245,7 @@ export default function Login() {
             Log in
           </Button>
         </div>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }

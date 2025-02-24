@@ -6,7 +6,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import Invite from 'components/login/Invite'
 import { LinkLogin } from 'components/login/LinkLogin'
-import Login, { GrantAccess } from 'components/login/Login'
+import Login from 'components/login/Login'
 import { OAuthCallback } from 'components/login/OauthCallback'
 import { consoleRoutes } from './consoleRoutes'
 
@@ -35,10 +35,6 @@ export const rootRoutes = [
       {
         path: 'quick-login/:key',
         element: <LinkLogin />,
-      },
-      {
-        path: 'access',
-        element: <GrantAccess />,
       },
       {
         path: 'oauth/callback',

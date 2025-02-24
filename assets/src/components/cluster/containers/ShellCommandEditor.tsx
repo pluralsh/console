@@ -5,7 +5,6 @@ import {
   Input,
   PencilIcon,
 } from '@pluralsh/design-system'
-import { Form } from 'honorable'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -124,17 +123,12 @@ export function ShellCommandEditor({
   const commandLeft2 = commandSplit.slice(-4, -1).join(' ')
 
   return (
-    <Form
-      display="flex"
-      gap="medium"
+    <OuterFormSC
       onSubmit={(e) => {
         e.preventDefault()
         setCommand(inputVal)
         setIsEditing(false)
       }}
-      width="100%"
-      flex="1 1"
-      overflow="hidden"
     >
       <WrapperSC ref={inputWrapRef}>
         <CodeWrap
@@ -199,13 +193,21 @@ export function ShellCommandEditor({
           Reset
         </Button>
       )}
-    </Form>
+    </OuterFormSC>
   )
 }
 
 const WrapperSC = styled.div(() => ({
   display: 'flex',
   minWidth: 50,
+  flex: '1 1',
+  overflow: 'hidden',
+}))
+
+const OuterFormSC = styled.form(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  width: '100%',
   flex: '1 1',
   overflow: 'hidden',
 }))

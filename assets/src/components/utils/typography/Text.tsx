@@ -48,10 +48,9 @@ export const Title2H1 = styled.h1<TextProps>(({ theme, $color }) => ({
 }))
 
 const StandardUrlSC = styled.a(({ theme }) => ({
-  ...theme.partials.text.body2LooseLineHeight,
-  color: theme.colors['text-primary-accent'],
+  ...theme.partials.text.inlineLink,
 }))
-export function StandardUrl({
+export function InlineA({
   href,
   children,
   ...props
@@ -64,6 +63,7 @@ export function StandardUrl({
       href={href || ''}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
       {...props}
     >
       {children}

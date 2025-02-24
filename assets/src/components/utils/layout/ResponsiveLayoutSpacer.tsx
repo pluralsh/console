@@ -1,10 +1,8 @@
-import { Div } from 'honorable'
+import styled from 'styled-components'
 
-export function ResponsiveLayoutSpacer() {
-  return (
-    <Div
-      flexGrow={1}
-      display-desktopLarge-down="none"
-    />
-  )
-}
+export const ResponsiveLayoutSpacer = styled.div(({ theme }) => ({
+  flexGrow: 1,
+  [`@media (max-width: ${theme.breakpoints.desktopLarge - 1}px)`]: {
+    display: 'none',
+  },
+}))

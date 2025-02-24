@@ -163,7 +163,10 @@ defmodule Console.Services.Users do
   def bootstrap_user(%{"email" => email} = attrs) do
     email = sanitize_email(email)
 
-    attrs = token_attrs(attrs) |> Map.put("email", email)
+    attrs = token_attrs(attrs)
+            |> Map.put("email", email)
+    groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
+             |> group_attrs()
     start_transaction()
     |> add_operation(:user, fn _ ->
       case get_user_by_email(email) do
@@ -173,7 +176,7 @@ defmodule Console.Services.Users do
         _ -> create_user(attrs)
       end
     end)
-    |> hydrate_groups(attrs)
+    |> hydrate_groups(groups)
     |> add_refresh_token()
     |> execute(extract: :hydrated)
   end
@@ -277,6 +280,12 @@ defmodule Console.Services.Users do
     end
   end
 
+  defp group_attrs(%{"groups" => [_ | _] = groups}), do: groups
+  defp group_attrs(%{"adgroups" => [_ | _] = groups}), do: groups
+  defp group_attrs(%{"groups" => group}) when is_binary(group), do: [group]
+  defp group_attrs(%{"adgroups" => group}) when is_binary(group), do: [group]
+  defp group_attrs(_), do: []
+
   defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})
   # defp token_attrs(%{"admin" => false} = attrs), do: Map.put(attrs, "roles", %{"admin" => false})
   defp token_attrs(attrs), do: maybe_admin(attrs)
@@ -313,7 +322,7 @@ defmodule Console.Services.Users do
     end
   end
 
-  defp hydrate_groups(transaction, %{"groups" => [_ | _] = groups}) do
+  defp hydrate_groups(transaction, [_ | _] = groups) do
     Enum.uniq(groups)
     |> Enum.reduce(transaction, fn group, xaction ->
       xaction

@@ -12,9 +12,6 @@ help: ## show help
 generate: ## generate Go client from GraphQL schema
 	@$(GQLGENC)
 
-generate-in-container: ## generate Go client from GraphQL schema (dockerized)
-	hack/gen-api-client.sh
-
 release: ## create and push a tag with new client version
 	@LATEST_TAG=$$(git describe --tags `git rev-list --tags --max-count=1` --match="go/client/*" 2>/dev/null) ;\
 	if [ $$? -ne 0 ]; then \

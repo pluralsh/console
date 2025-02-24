@@ -20,9 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"github.com/pluralsh/console/go/controller/internal/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	v1 "k8s.io/api/core/v1"
 
@@ -32,14 +31,14 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline, projectID *string) (*console.PipelineAttributes, error) {
+func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline, projectID *string) (*console.PipelineAttributes, *ctrl.Result, error) {
 	stages := make([]*console.PipelineStageAttributes, 0)
 	for _, stage := range p.Spec.Stages {
 		services := make([]*console.StageServiceAttributes, 0)
 		for _, service := range stage.Services {
-			s, err := r.pipelineStageServiceAttributes(ctx, service)
-			if err != nil {
-				return nil, err
+			s, result, err := r.pipelineStageServiceAttributes(ctx, service)
+			if result != nil || err != nil {
+				return nil, result, err
 			}
 			services = append(services, s)
 		}
@@ -54,9 +53,9 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	for _, edge := range p.Spec.Edges {
 		gates := make([]*console.PipelineGateAttributes, 0)
 		for _, gate := range edge.Gates {
-			g, err := r.pipelineEdgeGateAttributes(ctx, gate)
-			if err != nil {
-				return nil, err
+			g, result, err := r.pipelineEdgeGateAttributes(ctx, gate)
+			if result != nil || err != nil {
+				return nil, result, err
 			}
 			gates = append(gates, g)
 		}
@@ -77,24 +76,26 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	if p.Spec.Bindings != nil {
-		if err := r.ensure(p); err != nil {
-			return nil, err
+		result, err := r.ensure(p)
+		if result != nil || err != nil {
+			return nil, result, err
 		}
+
 		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
 		attr.WriteBindings = policyBindings(p.Spec.Bindings.Write)
 	}
 
-	return attr, nil
+	return attr, nil, nil
 }
 
-func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context, stageService v1alpha1.PipelineStageService) (*console.StageServiceAttributes, error) {
+func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context, stageService v1alpha1.PipelineStageService) (*console.StageServiceAttributes, *ctrl.Result, error) {
 	service, err := utils.GetServiceDeployment(ctx, r.Client, stageService.ServiceRef)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	if service.Status.ID == nil {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "ServiceDeployment", Group: "deployments.plural.sh"}, service.Name)
+	if !service.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
@@ -103,9 +104,9 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	// 	return nil, err
 	// }
 
-	criteria, err := r.pipelineStageServiceCriteriaAttributes(ctx, stageService.Criteria)
-	if err != nil {
-		return nil, err
+	criteria, result, err := r.pipelineStageServiceCriteriaAttributes(ctx, stageService.Criteria)
+	if result != nil || err != nil {
+		return nil, result, err
 	}
 
 	return &console.StageServiceAttributes{
@@ -113,15 +114,12 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 		Name:      nil, // Using ServiceID instead.
 		ServiceID: service.Status.ID,
 		Criteria:  criteria,
-	}, nil
+	}, nil, nil
 }
 
-func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.Context, criteria *v1alpha1.PipelineStageServicePromotionCriteria) (*console.PromotionCriteriaAttributes, error) {
-	if criteria == nil {
-		return nil, nil
-	}
-	if criteria.ServiceRef == nil && criteria.PrAutomationRef == nil {
-		return nil, nil
+func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.Context, criteria *v1alpha1.PipelineStageServicePromotionCriteria) (*console.PromotionCriteriaAttributes, *ctrl.Result, error) {
+	if criteria == nil || (criteria.ServiceRef == nil && criteria.PrAutomationRef == nil) {
+		return nil, nil, nil
 	}
 
 	var sourceID *string
@@ -129,11 +127,11 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 	if criteria.PrAutomationRef != nil {
 		prAutomation, err := utils.GetPrAutomation(ctx, r.Client, criteria.PrAutomationRef)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		if prAutomation.Status.ID == nil {
-			return nil, fmt.Errorf("pr automation %s is not yet ready", prAutomation.Name)
+		if !prAutomation.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("pr automation is not ready")
 		}
 
 		prAutomationID = prAutomation.Status.ID
@@ -141,7 +139,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 	if criteria.ServiceRef != nil {
 		service, err := utils.GetServiceDeployment(ctx, r.Client, criteria.ServiceRef)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		sourceID = service.Status.ID
 	}
@@ -151,40 +149,43 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		PrAutomationID: prAutomationID,
 		Secrets:        criteria.Secrets,
 		Repository:     criteria.Repository,
-	}, nil
+	}, nil, nil
 }
 
-func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gate v1alpha1.PipelineGate) (*console.PipelineGateAttributes, error) {
-	clusterRef, err := r.pipelineEdgeGateClusterIDAttribute(ctx, gate.ClusterRef)
-	if err != nil {
-		return nil, err
+func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gate v1alpha1.PipelineGate) (*console.PipelineGateAttributes, *ctrl.Result, error) {
+	clusterId, result, err := r.pipelineEdgeGateClusterIDAttribute(ctx, gate.ClusterRef)
+	if result != nil || err != nil {
+		return nil, result, err
 	}
 
 	spec, err := r.pipelineEdgeGateSpecAttributes(gate.Spec)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	return &console.PipelineGateAttributes{
 		Name:      gate.Name,
 		Type:      gate.Type,
-		Cluster:   nil, // Using ClusterID instead.
-		ClusterID: clusterRef,
+		ClusterID: clusterId,
 		Spec:      spec,
-	}, nil
+	}, nil, nil
 }
 
-func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Context, clusterRef *v1.ObjectReference) (*string, error) {
+func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Context, clusterRef *v1.ObjectReference) (*string, *ctrl.Result, error) {
 	if clusterRef == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	cluster, err := utils.GetCluster(ctx, r.Client, clusterRef)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return cluster.Status.ID, nil
+	if !cluster.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("cluster is not ready")
+	}
+
+	return cluster.Status.ID, nil, nil
 }
 
 func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateSpec) (*console.GateSpecAttributes, error) {
@@ -204,28 +205,26 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 
 // ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
+func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) (*ctrl.Result, error) {
 	if p.Spec.Bindings == nil {
-		return nil
+		return nil, nil
 	}
 
 	bindings, req, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	p.Spec.Bindings.Read = bindings
 
 	bindings, req2, err := ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	p.Spec.Bindings.Write = bindings
 
 	if req || req2 {
-		return operrors.ErrRetriable
+		return &waitForResources, errors.ErrRetriable
 	}
 
-	return nil
+	return nil, nil
 }

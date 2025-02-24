@@ -2,10 +2,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -19,7 +18,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -78,16 +76,11 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	}
 
 	// Sync PrAutomation CRD with the Console API
-	apiPrAutomation, sha, err := in.sync(ctx, prAutomation)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			utils.MarkCondition(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyErrorMessage(err))
-			return requeue, nil
-		}
-		logger.Error(err, "unable to create or update prAutomation")
-		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	apiPrAutomation, sha, result, err := in.sync(ctx, prAutomation)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, prAutomation.SetCondition)
 	}
+
 	if apiPrAutomation == nil {
 		logger.Info("PR automation already exists in the Console API. Won't reconcile again.")
 		return ctrl.Result{}, err
@@ -139,48 +132,45 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 	return nil, nil
 }
 
-func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (pra *console.PrAutomationFragment, sha string, err error) {
-	logger := log.FromContext(ctx)
+func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (pra *console.PrAutomationFragment, sha string, result *ctrl.Result, err error) {
 	exists, err := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
 	if err != nil {
-		return pra, sha, err
+		return pra, sha, nil, err
 	}
 
 	if exists && !prAutomation.Status.HasID() {
-		return pra, sha, err
+		return pra, sha, nil, err
 	}
 
-	if err = in.ensure(prAutomation); err != nil {
-		return pra, sha, err
+	if result, err = in.ensure(prAutomation); result != nil || err != nil {
+		return pra, sha, result, err
 	}
 
-	attributes, err := in.Attributes(ctx, prAutomation)
-	if err != nil {
-		return pra, sha, err
+	attributes, result, err := in.Attributes(ctx, prAutomation)
+	if result != nil || err != nil {
+		return pra, sha, result, err
 	}
 
 	// Get PrAutomation SHA that can be saved back in the status to check for changes
 	sha, err = utils.HashObject(attributes)
 	if err != nil {
-		logger.Error(err, "unable to calculate prAutomation SHA")
-		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return pra, sha, err
+		return pra, sha, nil, fmt.Errorf("unable to calculate pr automation sha: %s", err.Error())
 	}
 
 	// Update only if PrAutomation has changed
 	if prAutomation.Status.SHA != nil && *prAutomation.Status.SHA != sha && exists {
 		pra, err = in.ConsoleClient.UpdatePrAutomation(ctx, prAutomation.Status.GetID(), *attributes)
-		return pra, sha, err
+		return pra, sha, nil, err
 	}
 
 	// Read the PrAutomation from Console API if it already exists
 	if exists {
 		pra, err = in.ConsoleClient.GetPrAutomation(ctx, prAutomation.Status.GetID())
-		return pra, sha, err
+		return pra, sha, nil, err
 	}
 
 	pra, err = in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
-	return pra, sha, err
+	return pra, sha, nil, err
 }
 
 func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.PrAutomation) {
@@ -189,28 +179,28 @@ func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.Pr
 
 // ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
+func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {
 	if prAutomation.Spec.Bindings == nil {
-		return nil
+		return nil, nil
 	}
 
 	bindings, req, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	prAutomation.Spec.Bindings.Create = bindings
 
 	bindings, req2, err := ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	prAutomation.Spec.Bindings.Write = bindings
 
 	if req || req2 {
-		return operrors.ErrRetriable
+		return &waitForResources, errors.ErrRetriable
 	}
 
-	return nil
+	return nil, nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

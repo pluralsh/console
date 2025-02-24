@@ -4,7 +4,6 @@ package client
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
@@ -216,7 +215,7 @@ type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
+func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
@@ -381,7 +380,7 @@ type ClusterFragment struct {
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]interface{}   "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -455,7 +454,7 @@ func (t *ClusterFragment) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *ClusterFragment) GetMetadata() map[string]interface{} {
+func (t *ClusterFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ClusterFragment{}
 	}
@@ -629,7 +628,7 @@ type NodePoolFragment struct {
 	MinSize      int64                    "json:\"minSize\" graphql:\"minSize\""
 	MaxSize      int64                    "json:\"maxSize\" graphql:\"maxSize\""
 	InstanceType string                   "json:\"instanceType\" graphql:\"instanceType\""
-	Labels       map[string]interface{}   "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels       map[string]any           "json:\"labels,omitempty\" graphql:\"labels\""
 	Taints       []*NodePoolTaintFragment "json:\"taints,omitempty\" graphql:\"taints\""
 }
 
@@ -663,7 +662,7 @@ func (t *NodePoolFragment) GetInstanceType() string {
 	}
 	return t.InstanceType
 }
-func (t *NodePoolFragment) GetLabels() map[string]interface{} {
+func (t *NodePoolFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &NodePoolFragment{}
 	}
@@ -868,16 +867,16 @@ func (t *ServiceDeploymentForAgent) GetImports() []*ServiceDeploymentForAgent_Im
 }
 
 type ClusterRegistrationFragment struct {
-	ID         string                 "json:\"id\" graphql:\"id\""
-	InsertedAt *string                "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	UpdatedAt  *string                "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
-	MachineID  string                 "json:\"machineId\" graphql:\"machineId\""
-	Name       *string                "json:\"name,omitempty\" graphql:\"name\""
-	Handle     *string                "json:\"handle,omitempty\" graphql:\"handle\""
-	Metadata   map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
-	Tags       []*ClusterTags         "json:\"tags,omitempty\" graphql:\"tags\""
-	Creator    *UserFragment          "json:\"creator,omitempty\" graphql:\"creator\""
-	Project    *TinyProjectFragment   "json:\"project,omitempty\" graphql:\"project\""
+	ID         string               "json:\"id\" graphql:\"id\""
+	InsertedAt *string              "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string              "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	MachineID  string               "json:\"machineId\" graphql:\"machineId\""
+	Name       *string              "json:\"name,omitempty\" graphql:\"name\""
+	Handle     *string              "json:\"handle,omitempty\" graphql:\"handle\""
+	Metadata   map[string]any       "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Tags       []*ClusterTags       "json:\"tags,omitempty\" graphql:\"tags\""
+	Creator    *UserFragment        "json:\"creator,omitempty\" graphql:\"creator\""
+	Project    *TinyProjectFragment "json:\"project,omitempty\" graphql:\"project\""
 }
 
 func (t *ClusterRegistrationFragment) GetID() string {
@@ -916,7 +915,7 @@ func (t *ClusterRegistrationFragment) GetHandle() *string {
 	}
 	return t.Handle
 }
-func (t *ClusterRegistrationFragment) GetMetadata() map[string]interface{} {
+func (t *ClusterRegistrationFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ClusterRegistrationFragment{}
 	}
@@ -1081,8 +1080,8 @@ type JobSpecFragment struct {
 	Namespace      string                      "json:\"namespace\" graphql:\"namespace\""
 	Raw            *string                     "json:\"raw,omitempty\" graphql:\"raw\""
 	Containers     []*ContainerSpecFragment    "json:\"containers,omitempty\" graphql:\"containers\""
-	Labels         map[string]interface{}      "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations    map[string]interface{}      "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels         map[string]any              "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations    map[string]any              "json:\"annotations,omitempty\" graphql:\"annotations\""
 	ServiceAccount *string                     "json:\"serviceAccount,omitempty\" graphql:\"serviceAccount\""
 	Requests       *ContainerResourcesFragment "json:\"requests,omitempty\" graphql:\"requests\""
 }
@@ -1105,13 +1104,13 @@ func (t *JobSpecFragment) GetContainers() []*ContainerSpecFragment {
 	}
 	return t.Containers
 }
-func (t *JobSpecFragment) GetLabels() map[string]interface{} {
+func (t *JobSpecFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &JobSpecFragment{}
 	}
 	return t.Labels
 }
-func (t *JobSpecFragment) GetAnnotations() map[string]interface{} {
+func (t *JobSpecFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &JobSpecFragment{}
 	}
@@ -1398,9 +1397,9 @@ func (t *ServiceDeploymentIDFragment) GetID() string {
 }
 
 type ServiceContextFragment struct {
-	ID            string                 "json:\"id\" graphql:\"id\""
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+	ID            string         "json:\"id\" graphql:\"id\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
 func (t *ServiceContextFragment) GetID() string {
@@ -1415,7 +1414,7 @@ func (t *ServiceContextFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceContextFragment) GetConfiguration() map[string]interface{} {
+func (t *ServiceContextFragment) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceContextFragment{}
 	}
@@ -1902,7 +1901,7 @@ type BaseClusterFragment struct {
 	PingedAt       *string                      "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	CurrentVersion *string                      "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                      "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Metadata       map[string]interface{}       "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Metadata       map[string]any               "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Credential     *ProviderCredentialFragment  "json:\"credential,omitempty\" graphql:\"credential\""
 	Provider       *BaseClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment          "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -1957,7 +1956,7 @@ func (t *BaseClusterFragment) GetKasURL() *string {
 	}
 	return t.KasURL
 }
-func (t *BaseClusterFragment) GetMetadata() map[string]interface{} {
+func (t *BaseClusterFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &BaseClusterFragment{}
 	}
@@ -2362,8 +2361,8 @@ func (t *PageInfoFragment) GetEndCursor() *string {
 }
 
 type PipelineContextFragment struct {
-	ID      string                 "json:\"id\" graphql:\"id\""
-	Context map[string]interface{} "json:\"context\" graphql:\"context\""
+	ID      string         "json:\"id\" graphql:\"id\""
+	Context map[string]any "json:\"context\" graphql:\"context\""
 }
 
 func (t *PipelineContextFragment) GetID() string {
@@ -2372,7 +2371,7 @@ func (t *PipelineContextFragment) GetID() string {
 	}
 	return t.ID
 }
-func (t *PipelineContextFragment) GetContext() map[string]interface{} {
+func (t *PipelineContextFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &PipelineContextFragment{}
 	}
@@ -2437,17 +2436,17 @@ func (t *SyncConfigFragment) GetNamespaceMetadata() *NamespaceMetadataFragment {
 }
 
 type NamespaceMetadataFragment struct {
-	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *NamespaceMetadataFragment) GetLabels() map[string]interface{} {
+func (t *NamespaceMetadataFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &NamespaceMetadataFragment{}
 	}
 	return t.Labels
 }
-func (t *NamespaceMetadataFragment) GetAnnotations() map[string]interface{} {
+func (t *NamespaceMetadataFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &NamespaceMetadataFragment{}
 	}
@@ -2455,11 +2454,11 @@ func (t *NamespaceMetadataFragment) GetAnnotations() map[string]interface{} {
 }
 
 type ClusterTargetFragment struct {
-	Tags   map[string]interface{} "json:\"tags,omitempty\" graphql:\"tags\""
-	Distro *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+	Tags   map[string]any "json:\"tags,omitempty\" graphql:\"tags\""
+	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
-func (t *ClusterTargetFragment) GetTags() map[string]interface{} {
+func (t *ClusterTargetFragment) GetTags() map[string]any {
 	if t == nil {
 		t = &ClusterTargetFragment{}
 	}
@@ -2551,8 +2550,8 @@ type ManagedNamespaceFragment struct {
 	ID          string                   "json:\"id\" graphql:\"id\""
 	Name        string                   "json:\"name\" graphql:\"name\""
 	Description *string                  "json:\"description,omitempty\" graphql:\"description\""
-	Labels      map[string]interface{}   "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{}   "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any           "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any           "json:\"annotations,omitempty\" graphql:\"annotations\""
 	PullSecrets []*string                "json:\"pullSecrets,omitempty\" graphql:\"pullSecrets\""
 	Service     *ServiceTemplateFragment "json:\"service,omitempty\" graphql:\"service\""
 	Target      *ClusterTargetFragment   "json:\"target,omitempty\" graphql:\"target\""
@@ -2577,13 +2576,13 @@ func (t *ManagedNamespaceFragment) GetDescription() *string {
 	}
 	return t.Description
 }
-func (t *ManagedNamespaceFragment) GetLabels() map[string]interface{} {
+func (t *ManagedNamespaceFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &ManagedNamespaceFragment{}
 	}
 	return t.Labels
 }
-func (t *ManagedNamespaceFragment) GetAnnotations() map[string]interface{} {
+func (t *ManagedNamespaceFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ManagedNamespaceFragment{}
 	}
@@ -3009,8 +3008,8 @@ func (t *ObserverActionConfigurationFragment) GetPipeline() *ObserverPipelineAct
 }
 
 type ObserverPipelineActionFragment struct {
-	PipelineID string                 "json:\"pipelineId\" graphql:\"pipelineId\""
-	Context    map[string]interface{} "json:\"context\" graphql:\"context\""
+	PipelineID string         "json:\"pipelineId\" graphql:\"pipelineId\""
+	Context    map[string]any "json:\"context\" graphql:\"context\""
 }
 
 func (t *ObserverPipelineActionFragment) GetPipelineID() string {
@@ -3019,7 +3018,7 @@ func (t *ObserverPipelineActionFragment) GetPipelineID() string {
 	}
 	return t.PipelineID
 }
-func (t *ObserverPipelineActionFragment) GetContext() map[string]interface{} {
+func (t *ObserverPipelineActionFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &ObserverPipelineActionFragment{}
 	}
@@ -3638,7 +3637,7 @@ type InfrastructureStackFragment struct {
 	ID            *string                     "json:\"id,omitempty\" graphql:\"id\""
 	Name          string                      "json:\"name\" graphql:\"name\""
 	Type          StackType                   "json:\"type\" graphql:\"type\""
-	Variables     map[string]interface{}      "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]any              "json:\"variables,omitempty\" graphql:\"variables\""
 	Approval      *bool                       "json:\"approval,omitempty\" graphql:\"approval\""
 	Workdir       *string                     "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                       "json:\"manageState,omitempty\" graphql:\"manageState\""
@@ -3676,7 +3675,7 @@ func (t *InfrastructureStackFragment) GetType() *StackType {
 	}
 	return &t.Type
 }
-func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
+func (t *InfrastructureStackFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &InfrastructureStackFragment{}
 	}
@@ -3805,7 +3804,7 @@ type StackRunFragment struct {
 	Tarball       string                                             "json:\"tarball\" graphql:\"tarball\""
 	Workdir       *string                                            "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                                              "json:\"manageState,omitempty\" graphql:\"manageState\""
-	Variables     map[string]interface{}                             "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]any                                     "json:\"variables,omitempty\" graphql:\"variables\""
 	StateUrls     *StackRunFragment_StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunFragment_StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                                      "json:\"actor,omitempty\" graphql:\"actor\""
@@ -3873,7 +3872,7 @@ func (t *StackRunFragment) GetManageState() *bool {
 	}
 	return t.ManageState
 }
-func (t *StackRunFragment) GetVariables() map[string]interface{} {
+func (t *StackRunFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &StackRunFragment{}
 	}
@@ -4065,7 +4064,7 @@ type StackRunBaseFragment struct {
 	Tarball       string                            "json:\"tarball\" graphql:\"tarball\""
 	Workdir       *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
-	Variables     map[string]interface{}            "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
 	StateUrls     *StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
@@ -4132,7 +4131,7 @@ func (t *StackRunBaseFragment) GetManageState() *bool {
 	}
 	return t.ManageState
 }
-func (t *StackRunBaseFragment) GetVariables() map[string]interface{} {
+func (t *StackRunBaseFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &StackRunBaseFragment{}
 	}
@@ -4442,11 +4441,11 @@ func (t *StackStateFragment) GetState() []*StackStateResourceFragment {
 }
 
 type StackStateResourceFragment struct {
-	Identifier    string                 "json:\"identifier\" graphql:\"identifier\""
-	Resource      string                 "json:\"resource\" graphql:\"resource\""
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
-	Links         []*string              "json:\"links,omitempty\" graphql:\"links\""
+	Identifier    string         "json:\"identifier\" graphql:\"identifier\""
+	Resource      string         "json:\"resource\" graphql:\"resource\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Links         []*string      "json:\"links,omitempty\" graphql:\"links\""
 }
 
 func (t *StackStateResourceFragment) GetIdentifier() string {
@@ -4467,7 +4466,7 @@ func (t *StackStateResourceFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *StackStateResourceFragment) GetConfiguration() map[string]interface{} {
+func (t *StackStateResourceFragment) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &StackStateResourceFragment{}
 	}
@@ -5060,16 +5059,16 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration
 }
 
 type ServiceDeploymentForAgent_Cluster struct {
-	ID             string                 "json:\"id\" graphql:\"id\""
-	Name           string                 "json:\"name\" graphql:\"name\""
-	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
 func (t *ServiceDeploymentForAgent_Cluster) GetID() string {
@@ -5108,7 +5107,7 @@ func (t *ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	}
 	return t.PingedAt
 }
-func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Cluster{}
 	}
@@ -5188,8 +5187,8 @@ func (t *ServiceDeploymentForAgent_Configuration) GetValue() string {
 }
 
 type ServiceDeploymentForAgent_Contexts struct {
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
 func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
@@ -5198,7 +5197,7 @@ func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Contexts{}
 	}
@@ -5206,17 +5205,17 @@ func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]inter
 }
 
 type ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -5854,16 +5853,16 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
-	ID             string                 "json:\"id\" graphql:\"id\""
-	Name           string                 "json:\"name\" graphql:\"name\""
-	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
@@ -5902,7 +5901,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 	}
 	return t.PingedAt
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -5982,8 +5981,8 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Co
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
@@ -5992,7 +5991,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Co
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -6000,17 +5999,17 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Co
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -7275,7 +7274,7 @@ type CreateCluster_CreateCluster struct {
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]interface{}   "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -7355,7 +7354,7 @@ func (t *CreateCluster_CreateCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *CreateCluster_CreateCluster) GetMetadata() map[string]interface{} {
+func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
@@ -8061,7 +8060,7 @@ type GetClusterWithToken_Cluster struct {
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]interface{}   "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -8136,7 +8135,7 @@ func (t *GetClusterWithToken_Cluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]interface{} {
+func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
@@ -8682,7 +8681,7 @@ type UpsertVirtualCluster_UpsertVirtualCluster struct {
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]interface{}   "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -8762,7 +8761,7 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]interface{} {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
@@ -10100,16 +10099,16 @@ func (t *GetServiceDeploymentComponents_ServiceDeployment) GetComponents() []*Ge
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster struct {
-	ID             string                 "json:\"id\" graphql:\"id\""
-	Name           string                 "json:\"name\" graphql:\"name\""
-	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetID() string {
@@ -10148,7 +10147,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.PingedAt
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -10228,8 +10227,8 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts struct {
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetName() string {
@@ -10238,7 +10237,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -10246,17 +10245,17 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -10500,16 +10499,16 @@ func (t *PagedClusterServices_PagedClusterServices) GetEdges() []*ServiceDeploym
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
-	ID             string                 "json:\"id\" graphql:\"id\""
-	Name           string                 "json:\"name\" graphql:\"name\""
-	Handle         *string                "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                  "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string                "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string                "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro         "json:\"distro,omitempty\" graphql:\"distro\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
@@ -10548,7 +10547,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.PingedAt
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -10628,8 +10627,8 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
-	Name          string                 "json:\"name\" graphql:\"name\""
-	Configuration map[string]interface{} "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
+	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
@@ -10638,7 +10637,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.Name
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -10646,17 +10645,17 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]interface{} "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations map[string]interface{} "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}

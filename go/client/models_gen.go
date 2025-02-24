@@ -107,13 +107,13 @@ type AddonVersion struct {
 
 // a representation of a bulk operation to be performed on all agent services
 type AgentMigration struct {
-	ID            string                 `json:"id"`
-	Name          *string                `json:"name,omitempty"`
-	Ref           *string                `json:"ref,omitempty"`
-	Configuration map[string]interface{} `json:"configuration,omitempty"`
-	Completed     *bool                  `json:"completed,omitempty"`
-	InsertedAt    *string                `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                `json:"updatedAt,omitempty"`
+	ID            string         `json:"id"`
+	Name          *string        `json:"name,omitempty"`
+	Ref           *string        `json:"ref,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
+	Completed     *bool          `json:"completed,omitempty"`
+	InsertedAt    *string        `json:"insertedAt,omitempty"`
+	UpdatedAt     *string        `json:"updatedAt,omitempty"`
 }
 
 type AgentMigrationAttributes struct {
@@ -227,7 +227,7 @@ type Alert struct {
 	Title       *string                  `json:"title,omitempty"`
 	Message     *string                  `json:"message,omitempty"`
 	Fingerprint *string                  `json:"fingerprint,omitempty"`
-	Annotations map[string]interface{}   `json:"annotations,omitempty"`
+	Annotations map[string]any           `json:"annotations,omitempty"`
 	URL         *string                  `json:"url,omitempty"`
 	// key/value tags to filter clusters
 	Tags []*Tag `json:"tags,omitempty"`
@@ -405,25 +405,25 @@ type AvailableFeatures struct {
 }
 
 // aws node customizations
-type AwsCloud struct {
+type AWSCloud struct {
 	// custom launch template for your nodes, useful for Golden AMI setups
 	LaunchTemplateID *string `json:"launchTemplateId,omitempty"`
 }
 
-type AwsCloudAttributes struct {
+type AWSCloudAttributes struct {
 	Region *string `json:"region,omitempty"`
 }
 
 // aws specific cloud configuration
-type AwsCloudSettings struct {
+type AWSCloudSettings struct {
 	Region *string `json:"region,omitempty"`
 }
 
-type AwsNodeCloudAttributes struct {
+type AWSNodeCloudAttributes struct {
 	LaunchTemplateID *string `json:"launchTemplateId,omitempty"`
 }
 
-type AwsSettingsAttributes struct {
+type AWSSettingsAttributes struct {
 	AccessKeyID     string `json:"accessKeyId"`
 	SecretAccessKey string `json:"secretAccessKey"`
 }
@@ -787,21 +787,21 @@ type CloudAddonVersionInformation struct {
 }
 
 type CloudProviderSettingsAttributes struct {
-	Aws   *AwsSettingsAttributes   `json:"aws,omitempty"`
-	Gcp   *GcpSettingsAttributes   `json:"gcp,omitempty"`
+	AWS   *AWSSettingsAttributes   `json:"aws,omitempty"`
+	GCP   *GCPSettingsAttributes   `json:"gcp,omitempty"`
 	Azure *AzureSettingsAttributes `json:"azure,omitempty"`
 }
 
 // the cloud configuration for a cluster
 type CloudSettings struct {
-	Aws   *AwsCloudSettings   `json:"aws,omitempty"`
-	Gcp   *GcpCloudSettings   `json:"gcp,omitempty"`
+	AWS   *AWSCloudSettings   `json:"aws,omitempty"`
+	GCP   *GCPCloudSettings   `json:"gcp,omitempty"`
 	Azure *AzureCloudSettings `json:"azure,omitempty"`
 }
 
 type CloudSettingsAttributes struct {
-	Aws   *AwsCloudAttributes   `json:"aws,omitempty"`
-	Gcp   *GcpCloudAttributes   `json:"gcp,omitempty"`
+	AWS   *AWSCloudAttributes   `json:"aws,omitempty"`
+	GCP   *GCPCloudAttributes   `json:"gcp,omitempty"`
 	Azure *AzureCloudAttributes `json:"azure,omitempty"`
 }
 
@@ -822,7 +822,7 @@ type Cluster struct {
 	// the distribution of kubernetes this cluster is running
 	Distro *ClusterDistro `json:"distro,omitempty"`
 	// arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
 	// current k8s version as told to us by the deployment operator
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 	// The lowest discovered kubelet version for all nodes in the cluster
@@ -1265,8 +1265,8 @@ type ClusterRegistration struct {
 	// the tags to apply to the given cluster
 	Tags []*Tag `json:"tags,omitempty"`
 	// additional metadata to apply to the cluster
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
-	Creator  *User                  `json:"creator,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
+	Creator  *User          `json:"creator,omitempty"`
 	// the project the cluster will live in
 	Project    *Project `json:"project,omitempty"`
 	InsertedAt *string  `json:"insertedAt,omitempty"`
@@ -1397,7 +1397,7 @@ type ClusterStatusInfo struct {
 // A spec for targeting clusters
 type ClusterTarget struct {
 	// the cluster tags to target
-	Tags map[string]interface{} `json:"tags,omitempty"`
+	Tags map[string]any `json:"tags,omitempty"`
 	// kubernetes distribution to target
 	Distro *ClusterDistro `json:"distro,omitempty"`
 }
@@ -1573,9 +1573,9 @@ type ConfigAttributes struct {
 }
 
 type ConfigMap struct {
-	Metadata Metadata               `json:"metadata"`
-	Data     map[string]interface{} `json:"data"`
-	Raw      string                 `json:"raw"`
+	Metadata Metadata       `json:"metadata"`
+	Data     map[string]any `json:"data"`
+	Raw      string         `json:"raw"`
 }
 
 // Validations to apply to this configuration entry prior to PR creation
@@ -2128,20 +2128,20 @@ type GateUpdateAttributes struct {
 	Status *GateStatusAttributes `json:"status,omitempty"`
 }
 
-type GcpCloudAttributes struct {
+type GCPCloudAttributes struct {
 	Project *string `json:"project,omitempty"`
 	Network *string `json:"network,omitempty"`
 	Region  *string `json:"region,omitempty"`
 }
 
 // gcp specific cluster cloud configuration
-type GcpCloudSettings struct {
+type GCPCloudSettings struct {
 	Project *string `json:"project,omitempty"`
 	Network *string `json:"network,omitempty"`
 	Region  *string `json:"region,omitempty"`
 }
 
-type GcpSettingsAttributes struct {
+type GCPSettingsAttributes struct {
 	ApplicationCredentials string `json:"applicationCredentials"`
 }
 
@@ -2359,12 +2359,12 @@ type GroupMemberEdge struct {
 type HelmAuthAttributes struct {
 	Basic  *HelmBasicAuthAttributes  `json:"basic,omitempty"`
 	Bearer *HelmBearerAuthAttributes `json:"bearer,omitempty"`
-	Aws    *HelmAwsAuthAttributes    `json:"aws,omitempty"`
+	AWS    *HelmAWSAuthAttributes    `json:"aws,omitempty"`
 	Azure  *HelmAzureAuthAttributes  `json:"azure,omitempty"`
-	Gcp    *HelmGcpAuthAttributes    `json:"gcp,omitempty"`
+	GCP    *HelmGCPAuthAttributes    `json:"gcp,omitempty"`
 }
 
-type HelmAwsAuthAttributes struct {
+type HelmAWSAuthAttributes struct {
 	AccessKey       *string `json:"accessKey,omitempty"`
 	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
 	AssumeRoleArn   *string `json:"assumeRoleArn,omitempty"`
@@ -2422,7 +2422,7 @@ type HelmConfigAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 }
 
-type HelmGcpAuthAttributes struct {
+type HelmGCPAuthAttributes struct {
 	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
 }
 
@@ -2549,7 +2549,7 @@ type InfrastructureStack struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables    map[string]interface{} `json:"variables,omitempty"`
+	Variables    map[string]any         `json:"variables,omitempty"`
 	Runs         *StackRunConnection    `json:"runs,omitempty"`
 	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
 	// files bound to a run of this stack
@@ -2679,9 +2679,9 @@ type JobGateSpec struct {
 	// list of containers to run in this job
 	Containers []*ContainerSpec `json:"containers,omitempty"`
 	// any pod labels to apply
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// any pod annotations to apply
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
 	// equivalent to resources, present for backwards compatibility
@@ -2714,12 +2714,12 @@ type KubeconfigAttributes struct {
 }
 
 type KubernetesUnstructured struct {
-	Group    *string                `json:"group,omitempty"`
-	Version  string                 `json:"version"`
-	Kind     string                 `json:"kind"`
-	Raw      map[string]interface{} `json:"raw,omitempty"`
-	Metadata Metadata               `json:"metadata"`
-	Events   []*Event               `json:"events,omitempty"`
+	Group    *string        `json:"group,omitempty"`
+	Version  string         `json:"version"`
+	Kind     string         `json:"kind"`
+	Raw      map[string]any `json:"raw,omitempty"`
+	Metadata Metadata       `json:"metadata"`
+	Events   []*Event       `json:"events,omitempty"`
 }
 
 // metadata needed for configuring kustomize
@@ -2768,8 +2768,8 @@ type LogLine struct {
 }
 
 type LogStream struct {
-	Stream map[string]interface{} `json:"stream,omitempty"`
-	Values []*MetricResult        `json:"values,omitempty"`
+	Stream map[string]any  `json:"stream,omitempty"`
+	Values []*MetricResult `json:"values,omitempty"`
 }
 
 type LogTimeRange struct {
@@ -2838,9 +2838,9 @@ type ManagedNamespace struct {
 	// A short description of the purpose of this namespace
 	Description *string `json:"description,omitempty"`
 	// labels for this namespace
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// annotations for this namespace
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// a list of pull secrets to attach to this namespace
 	PullSecrets []*string `json:"pullSecrets,omitempty"`
 	// The targeting criteria to select clusters this namespace is bound to
@@ -2914,8 +2914,8 @@ type MetadataAttributes struct {
 }
 
 type MetricResponse struct {
-	Metric map[string]interface{} `json:"metric,omitempty"`
-	Values []*MetricResult        `json:"values,omitempty"`
+	Metric map[string]any  `json:"metric,omitempty"`
+	Values []*MetricResult `json:"values,omitempty"`
 }
 
 type MetricResult struct {
@@ -2933,8 +2933,8 @@ type Namespace struct {
 
 // metadata fields for created namespaces
 type NamespaceMetadata struct {
-	Labels      map[string]interface{} `json:"labels,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Labels      map[string]any `json:"labels,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 type NamespaceSpec struct {
@@ -2973,7 +2973,7 @@ type Node struct {
 
 // cloud specific settings for a node pool
 type NodeCloudSettings struct {
-	Aws *AwsCloud `json:"aws,omitempty"`
+	AWS *AWSCloud `json:"aws,omitempty"`
 }
 
 type NodeCondition struct {
@@ -3005,7 +3005,7 @@ type NodePool struct {
 	// whether this is a spot pool or not
 	Spot *bool `json:"spot,omitempty"`
 	// kubernetes labels to apply to the nodes in this pool, useful for node selectors
-	Labels map[string]interface{} `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// any taints you'd want to apply to a node, for eg preventing scheduling on spot instances
 	Taints []*Taint `json:"taints,omitempty"`
 	// cloud specific settings for the node groups
@@ -3025,7 +3025,7 @@ type NodePoolAttributes struct {
 }
 
 type NodePoolCloudAttributes struct {
-	Aws *AwsNodeCloudAttributes `json:"aws,omitempty"`
+	AWS *AWSNodeCloudAttributes `json:"aws,omitempty"`
 }
 
 type NodeSpec struct {
@@ -3035,10 +3035,10 @@ type NodeSpec struct {
 }
 
 type NodeStatus struct {
-	Allocatable map[string]interface{} `json:"allocatable,omitempty"`
-	Capacity    map[string]interface{} `json:"capacity,omitempty"`
-	Phase       *string                `json:"phase,omitempty"`
-	Conditions  []*NodeCondition       `json:"conditions,omitempty"`
+	Allocatable map[string]any   `json:"allocatable,omitempty"`
+	Capacity    map[string]any   `json:"capacity,omitempty"`
+	Phase       *string          `json:"phase,omitempty"`
+	Conditions  []*NodeCondition `json:"conditions,omitempty"`
 }
 
 type NodeUsage struct {
@@ -3047,18 +3047,18 @@ type NodeUsage struct {
 }
 
 type Notification struct {
-	ID          string                 `json:"id"`
-	Title       string                 `json:"title"`
-	Description *string                `json:"description,omitempty"`
-	Fingerprint string                 `json:"fingerprint"`
-	Status      *NotificationStatus    `json:"status,omitempty"`
-	Labels      map[string]interface{} `json:"labels,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
-	Repository  string                 `json:"repository"`
-	SeenAt      *string                `json:"seenAt,omitempty"`
-	Severity    *Severity              `json:"severity,omitempty"`
-	InsertedAt  *string                `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                `json:"updatedAt,omitempty"`
+	ID          string              `json:"id"`
+	Title       string              `json:"title"`
+	Description *string             `json:"description,omitempty"`
+	Fingerprint string              `json:"fingerprint"`
+	Status      *NotificationStatus `json:"status,omitempty"`
+	Labels      map[string]any      `json:"labels,omitempty"`
+	Annotations map[string]any      `json:"annotations,omitempty"`
+	Repository  string              `json:"repository"`
+	SeenAt      *string             `json:"seenAt,omitempty"`
+	Severity    *Severity           `json:"severity,omitempty"`
+	InsertedAt  *string             `json:"insertedAt,omitempty"`
+	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
 
 type NotificationConnection struct {
@@ -3359,7 +3359,7 @@ type ObserverOciRepo struct {
 type ObserverPipelineAction struct {
 	PipelineID string `json:"pipelineId"`
 	// the context to apply, use $value to interject the observed value
-	Context map[string]interface{} `json:"context"`
+	Context map[string]any `json:"context"`
 }
 
 // Configuration for setting a pipeline context in an observer
@@ -3663,8 +3663,8 @@ type PipelineConnection struct {
 type PipelineContext struct {
 	ID string `json:"id"`
 	// the context map that will be passed to the pipeline
-	Context  map[string]interface{} `json:"context"`
-	Pipeline *Pipeline              `json:"pipeline,omitempty"`
+	Context  map[string]any `json:"context"`
+	Pipeline *Pipeline      `json:"pipeline,omitempty"`
 	// a history of pull requests created by this context thus far
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	// a list of pipeline-specific PRs for this context
@@ -4249,11 +4249,11 @@ type PrDeleteSpec struct {
 
 // the details of where to find and place a templated file
 type PrTemplateSpec struct {
-	Source      string                 `json:"source"`
-	Destination string                 `json:"destination"`
-	Context     map[string]interface{} `json:"context,omitempty"`
-	External    bool                   `json:"external"`
-	Condition   *string                `json:"condition,omitempty"`
+	Source      string         `json:"source"`
+	Destination string         `json:"destination"`
+	Context     map[string]any `json:"context,omitempty"`
+	External    bool           `json:"external"`
+	Condition   *string        `json:"condition,omitempty"`
 }
 
 // existing file updates that can be performed in a PR
@@ -4781,9 +4781,9 @@ type ScopeAttributes struct {
 }
 
 type Secret struct {
-	Metadata Metadata               `json:"metadata"`
-	Type     *string                `json:"type,omitempty"`
-	Data     map[string]interface{} `json:"data"`
+	Metadata Metadata       `json:"metadata"`
+	Type     *string        `json:"type,omitempty"`
+	Data     map[string]any `json:"data"`
 }
 
 type Service struct {
@@ -4853,7 +4853,7 @@ type ServiceConfiguration struct {
 type ServiceContext struct {
 	ID            string                  `json:"id"`
 	Name          string                  `json:"name"`
-	Configuration map[string]interface{}  `json:"configuration,omitempty"`
+	Configuration map[string]any          `json:"configuration,omitempty"`
 	Secrets       []*ServiceConfiguration `json:"secrets,omitempty"`
 	InsertedAt    *string                 `json:"insertedAt,omitempty"`
 	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
@@ -5036,10 +5036,10 @@ type ServicePort struct {
 }
 
 type ServiceSpec struct {
-	Type      *string                `json:"type,omitempty"`
-	ClusterIP *string                `json:"clusterIp,omitempty"`
-	Selector  map[string]interface{} `json:"selector,omitempty"`
-	Ports     []*ServicePort         `json:"ports,omitempty"`
+	Type      *string        `json:"type,omitempty"`
+	ClusterIP *string        `json:"clusterIp,omitempty"`
+	Selector  map[string]any `json:"selector,omitempty"`
+	Ports     []*ServicePort `json:"ports,omitempty"`
 }
 
 type ServiceStatus struct {
@@ -5397,7 +5397,7 @@ type StackRun struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables map[string]interface{} `json:"variables,omitempty"`
+	Variables map[string]any `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
 	CancellationReason *string    `json:"cancellationReason,omitempty"`
 	StateUrls          *StateUrls `json:"stateUrls,omitempty"`
@@ -5499,7 +5499,7 @@ type StackStateResource struct {
 	// the name of the resource within that type
 	Name string `json:"name"`
 	// arbitrary configuration used to create the resource
-	Configuration map[string]interface{} `json:"configuration,omitempty"`
+	Configuration map[string]any `json:"configuration,omitempty"`
 	// identifiers this resource is linked to for graphing in the UI
 	Links []*string `json:"links,omitempty"`
 }
@@ -6134,7 +6134,7 @@ func (e AiProvider) String() string {
 	return string(e)
 }
 
-func (e *AiProvider) UnmarshalGQL(v interface{}) error {
+func (e *AiProvider) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6178,7 +6178,7 @@ func (e AiRole) String() string {
 	return string(e)
 }
 
-func (e *AiRole) UnmarshalGQL(v interface{}) error {
+func (e *AiRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6225,7 +6225,7 @@ func (e AlertSeverity) String() string {
 	return string(e)
 }
 
-func (e *AlertSeverity) UnmarshalGQL(v interface{}) error {
+func (e *AlertSeverity) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6266,7 +6266,7 @@ func (e AlertState) String() string {
 	return string(e)
 }
 
-func (e *AlertState) UnmarshalGQL(v interface{}) error {
+func (e *AlertState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6313,7 +6313,7 @@ func (e AuditAction) String() string {
 	return string(e)
 }
 
-func (e *AuditAction) UnmarshalGQL(v interface{}) error {
+func (e *AuditAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6388,7 +6388,7 @@ func (e AuditType) String() string {
 	return string(e)
 }
 
-func (e *AuditType) UnmarshalGQL(v interface{}) error {
+func (e *AuditType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6429,7 +6429,7 @@ func (e AuthMethod) String() string {
 	return string(e)
 }
 
-func (e *AuthMethod) UnmarshalGQL(v interface{}) error {
+func (e *AuthMethod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6470,7 +6470,7 @@ func (e AutoscalingTarget) String() string {
 	return string(e)
 }
 
-func (e *AutoscalingTarget) UnmarshalGQL(v interface{}) error {
+func (e *AutoscalingTarget) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6511,7 +6511,7 @@ func (e ChatType) String() string {
 	return string(e)
 }
 
-func (e *ChatType) UnmarshalGQL(v interface{}) error {
+func (e *ChatType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6560,7 +6560,7 @@ func (e ClusterDistro) String() string {
 	return string(e)
 }
 
-func (e *ClusterDistro) UnmarshalGQL(v interface{}) error {
+func (e *ClusterDistro) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6605,7 +6605,7 @@ func (e ComponentState) String() string {
 	return string(e)
 }
 
-func (e *ComponentState) UnmarshalGQL(v interface{}) error {
+func (e *ComponentState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6664,7 +6664,7 @@ func (e ConfigurationType) String() string {
 	return string(e)
 }
 
-func (e *ConfigurationType) UnmarshalGQL(v interface{}) error {
+func (e *ConfigurationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6705,7 +6705,7 @@ func (e Conjunction) String() string {
 	return string(e)
 }
 
-func (e *Conjunction) UnmarshalGQL(v interface{}) error {
+func (e *Conjunction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6748,7 +6748,7 @@ func (e ConstraintEnforcement) String() string {
 	return string(e)
 }
 
-func (e *ConstraintEnforcement) UnmarshalGQL(v interface{}) error {
+func (e *ConstraintEnforcement) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6789,7 +6789,7 @@ func (e ConstraintViolationField) String() string {
 	return string(e)
 }
 
-func (e *ConstraintViolationField) UnmarshalGQL(v interface{}) error {
+func (e *ConstraintViolationField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6831,7 +6831,7 @@ func (e ContextSource) String() string {
 	return string(e)
 }
 
-func (e *ContextSource) UnmarshalGQL(v interface{}) error {
+func (e *ContextSource) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6874,7 +6874,7 @@ func (e Delta) String() string {
 	return string(e)
 }
 
-func (e *Delta) UnmarshalGQL(v interface{}) error {
+func (e *Delta) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6915,7 +6915,7 @@ func (e EvidenceType) String() string {
 	return string(e)
 }
 
-func (e *EvidenceType) UnmarshalGQL(v interface{}) error {
+func (e *EvidenceType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6960,7 +6960,7 @@ func (e GateState) String() string {
 	return string(e)
 }
 
-func (e *GateState) UnmarshalGQL(v interface{}) error {
+func (e *GateState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7003,7 +7003,7 @@ func (e GateType) String() string {
 	return string(e)
 }
 
-func (e *GateType) UnmarshalGQL(v interface{}) error {
+func (e *GateType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7044,7 +7044,7 @@ func (e GitHealth) String() string {
 	return string(e)
 }
 
-func (e *GitHealth) UnmarshalGQL(v interface{}) error {
+func (e *GitHealth) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7066,22 +7066,22 @@ type HelmAuthProvider string
 const (
 	HelmAuthProviderBasic  HelmAuthProvider = "BASIC"
 	HelmAuthProviderBearer HelmAuthProvider = "BEARER"
-	HelmAuthProviderGcp    HelmAuthProvider = "GCP"
+	HelmAuthProviderGCP    HelmAuthProvider = "GCP"
 	HelmAuthProviderAzure  HelmAuthProvider = "AZURE"
-	HelmAuthProviderAws    HelmAuthProvider = "AWS"
+	HelmAuthProviderAWS    HelmAuthProvider = "AWS"
 )
 
 var AllHelmAuthProvider = []HelmAuthProvider{
 	HelmAuthProviderBasic,
 	HelmAuthProviderBearer,
-	HelmAuthProviderGcp,
+	HelmAuthProviderGCP,
 	HelmAuthProviderAzure,
-	HelmAuthProviderAws,
+	HelmAuthProviderAWS,
 }
 
 func (e HelmAuthProvider) IsValid() bool {
 	switch e {
-	case HelmAuthProviderBasic, HelmAuthProviderBearer, HelmAuthProviderGcp, HelmAuthProviderAzure, HelmAuthProviderAws:
+	case HelmAuthProviderBasic, HelmAuthProviderBearer, HelmAuthProviderGCP, HelmAuthProviderAzure, HelmAuthProviderAWS:
 		return true
 	}
 	return false
@@ -7091,7 +7091,7 @@ func (e HelmAuthProvider) String() string {
 	return string(e)
 }
 
-func (e *HelmAuthProvider) UnmarshalGQL(v interface{}) error {
+func (e *HelmAuthProvider) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7135,7 +7135,7 @@ func (e InsightFreshness) String() string {
 	return string(e)
 }
 
-func (e *InsightFreshness) UnmarshalGQL(v interface{}) error {
+func (e *InsightFreshness) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7176,7 +7176,7 @@ func (e ListMerge) String() string {
 	return string(e)
 }
 
-func (e *ListMerge) UnmarshalGQL(v interface{}) error {
+func (e *ListMerge) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7217,7 +7217,7 @@ func (e LogDriver) String() string {
 	return string(e)
 }
 
-func (e *LogDriver) UnmarshalGQL(v interface{}) error {
+func (e *LogDriver) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7260,7 +7260,7 @@ func (e MatchStrategy) String() string {
 	return string(e)
 }
 
-func (e *MatchStrategy) UnmarshalGQL(v interface{}) error {
+func (e *MatchStrategy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7303,7 +7303,7 @@ func (e NotificationPriority) String() string {
 	return string(e)
 }
 
-func (e *NotificationPriority) UnmarshalGQL(v interface{}) error {
+func (e *NotificationPriority) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7344,7 +7344,7 @@ func (e NotificationStatus) String() string {
 	return string(e)
 }
 
-func (e *NotificationStatus) UnmarshalGQL(v interface{}) error {
+func (e *NotificationStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7385,7 +7385,7 @@ func (e ObservabilityProviderType) String() string {
 	return string(e)
 }
 
-func (e *ObservabilityProviderType) UnmarshalGQL(v interface{}) error {
+func (e *ObservabilityProviderType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7424,7 +7424,7 @@ func (e ObservabilityWebhookType) String() string {
 	return string(e)
 }
 
-func (e *ObservabilityWebhookType) UnmarshalGQL(v interface{}) error {
+func (e *ObservabilityWebhookType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7465,7 +7465,7 @@ func (e ObserverActionType) String() string {
 	return string(e)
 }
 
-func (e *ObserverActionType) UnmarshalGQL(v interface{}) error {
+func (e *ObserverActionType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7504,7 +7504,7 @@ func (e ObserverGitTargetType) String() string {
 	return string(e)
 }
 
-func (e *ObserverGitTargetType) UnmarshalGQL(v interface{}) error {
+func (e *ObserverGitTargetType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7545,7 +7545,7 @@ func (e ObserverStatus) String() string {
 	return string(e)
 }
 
-func (e *ObserverStatus) UnmarshalGQL(v interface{}) error {
+func (e *ObserverStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7586,7 +7586,7 @@ func (e ObserverTargetOrder) String() string {
 	return string(e)
 }
 
-func (e *ObserverTargetOrder) UnmarshalGQL(v interface{}) error {
+func (e *ObserverTargetOrder) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7629,7 +7629,7 @@ func (e ObserverTargetType) String() string {
 	return string(e)
 }
 
-func (e *ObserverTargetType) UnmarshalGQL(v interface{}) error {
+func (e *ObserverTargetType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7671,7 +7671,7 @@ func (e OidcAuthMethod) String() string {
 	return string(e)
 }
 
-func (e *OidcAuthMethod) UnmarshalGQL(v interface{}) error {
+func (e *OidcAuthMethod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7711,7 +7711,7 @@ func (e OidcProviderType) String() string {
 	return string(e)
 }
 
-func (e *OidcProviderType) UnmarshalGQL(v interface{}) error {
+func (e *OidcProviderType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7764,7 +7764,7 @@ func (e Operation) String() string {
 	return string(e)
 }
 
-func (e *Operation) UnmarshalGQL(v interface{}) error {
+func (e *Operation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7809,7 +7809,7 @@ func (e Permission) String() string {
 	return string(e)
 }
 
-func (e *Permission) UnmarshalGQL(v interface{}) error {
+func (e *Permission) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7852,7 +7852,7 @@ func (e PolicyAggregate) String() string {
 	return string(e)
 }
 
-func (e *PolicyAggregate) UnmarshalGQL(v interface{}) error {
+func (e *PolicyAggregate) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7891,7 +7891,7 @@ func (e PolicyEngineType) String() string {
 	return string(e)
 }
 
-func (e *PolicyEngineType) UnmarshalGQL(v interface{}) error {
+func (e *PolicyEngineType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7938,7 +7938,7 @@ func (e PrRole) String() string {
 	return string(e)
 }
 
-func (e *PrRole) UnmarshalGQL(v interface{}) error {
+func (e *PrRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7981,7 +7981,7 @@ func (e PrStatus) String() string {
 	return string(e)
 }
 
-func (e *PrStatus) UnmarshalGQL(v interface{}) error {
+func (e *PrStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8022,7 +8022,7 @@ func (e ReadType) String() string {
 	return string(e)
 }
 
-func (e *ReadType) UnmarshalGQL(v interface{}) error {
+func (e *ReadType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8067,7 +8067,7 @@ func (e RestoreStatus) String() string {
 	return string(e)
 }
 
-func (e *RestoreStatus) UnmarshalGQL(v interface{}) error {
+func (e *RestoreStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8112,7 +8112,7 @@ func (e ScalingRecommendationType) String() string {
 	return string(e)
 }
 
-func (e *ScalingRecommendationType) UnmarshalGQL(v interface{}) error {
+func (e *ScalingRecommendationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8155,7 +8155,7 @@ func (e ScmType) String() string {
 	return string(e)
 }
 
-func (e *ScmType) UnmarshalGQL(v interface{}) error {
+func (e *ScmType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8202,7 +8202,7 @@ func (e ServiceDeploymentStatus) String() string {
 	return string(e)
 }
 
-func (e *ServiceDeploymentStatus) UnmarshalGQL(v interface{}) error {
+func (e *ServiceDeploymentStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8245,7 +8245,7 @@ func (e ServicePromotion) String() string {
 	return string(e)
 }
 
-func (e *ServicePromotion) UnmarshalGQL(v interface{}) error {
+func (e *ServicePromotion) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8292,7 +8292,7 @@ func (e Severity) String() string {
 	return string(e)
 }
 
-func (e *Severity) UnmarshalGQL(v interface{}) error {
+func (e *Severity) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8335,7 +8335,7 @@ func (e SinkType) String() string {
 	return string(e)
 }
 
-func (e *SinkType) UnmarshalGQL(v interface{}) error {
+func (e *SinkType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8386,7 +8386,7 @@ func (e StackStatus) String() string {
 	return string(e)
 }
 
-func (e *StackStatus) UnmarshalGQL(v interface{}) error {
+func (e *StackStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8429,7 +8429,7 @@ func (e StackType) String() string {
 	return string(e)
 }
 
-func (e *StackType) UnmarshalGQL(v interface{}) error {
+func (e *StackType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8476,7 +8476,7 @@ func (e StepStage) String() string {
 	return string(e)
 }
 
-func (e *StepStage) UnmarshalGQL(v interface{}) error {
+func (e *StepStage) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8521,7 +8521,7 @@ func (e StepStatus) String() string {
 	return string(e)
 }
 
-func (e *StepStatus) UnmarshalGQL(v interface{}) error {
+func (e *StepStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8562,7 +8562,7 @@ func (e TagType) String() string {
 	return string(e)
 }
 
-func (e *TagType) UnmarshalGQL(v interface{}) error {
+func (e *TagType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8607,7 +8607,7 @@ func (e UpgradeInsightStatus) String() string {
 	return string(e)
 }
 
-func (e *UpgradeInsightStatus) UnmarshalGQL(v interface{}) error {
+func (e *UpgradeInsightStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8648,7 +8648,7 @@ func (e ValidationUniqScope) String() string {
 	return string(e)
 }
 
-func (e *ValidationUniqScope) UnmarshalGQL(v interface{}) error {
+func (e *ValidationUniqScope) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8687,7 +8687,7 @@ func (e VectorStore) String() string {
 	return string(e)
 }
 
-func (e *VectorStore) UnmarshalGQL(v interface{}) error {
+func (e *VectorStore) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8732,7 +8732,7 @@ func (e VulnAttackVector) String() string {
 	return string(e)
 }
 
-func (e *VulnAttackVector) UnmarshalGQL(v interface{}) error {
+func (e *VulnAttackVector) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8779,7 +8779,7 @@ func (e VulnReportGrade) String() string {
 	return string(e)
 }
 
-func (e *VulnReportGrade) UnmarshalGQL(v interface{}) error {
+func (e *VulnReportGrade) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8828,7 +8828,7 @@ func (e VulnSeverity) String() string {
 	return string(e)
 }
 
-func (e *VulnSeverity) UnmarshalGQL(v interface{}) error {
+func (e *VulnSeverity) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8869,7 +8869,7 @@ func (e VulnUserInteraction) String() string {
 	return string(e)
 }
 
-func (e *VulnUserInteraction) UnmarshalGQL(v interface{}) error {
+func (e *VulnUserInteraction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

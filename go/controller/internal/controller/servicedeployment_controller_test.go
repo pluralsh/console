@@ -355,7 +355,116 @@ var _ = Describe("Service Controller", Ordered, func() {
 
 		})
 	})
+})
 
+var _ = Describe("Wait for resources", Ordered, func() {
+	Context("When reconciling a resource", func() {
+		const (
+			serviceName = "service-test"
+			clusterName = "cluster-test"
+			repoName    = "repo-test"
+			namespace   = "default"
+			sha         = "TO6UV6AVUGFXETYC4GY3ESV5KIW3P2Z23Y45K4YGAIKCBGTMJP7Q===="
+		)
+
+		ctx := context.Background()
+
+		typeNamespacedName := types.NamespacedName{
+			Name:      serviceName,
+			Namespace: namespace,
+		}
+
+		BeforeAll(func() {
+			By("creating the custom resource for the Kind ServiceDeployment")
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, service); err == nil {
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
+			}
+			resource := &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      serviceName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ServiceSpec{
+					Version:       lo.ToPtr("1.24"),
+					ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+					SyncConfig: &v1alpha1.SyncConfigAttributes{
+						CreateNamespace: lo.ToPtr(true),
+						Labels:          map[string]string{"a": "a"},
+						Annotations:     map[string]string{"b": "b"},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: namespace}, service); err == nil {
+				By("Cleanup the specific resource instance ServiceDeployment")
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
+			}
+		})
+
+		It("should wait for resources", func() {
+			By("Create resource")
+			test := struct {
+				returnGetService *gqlclient.ServiceDeploymentExtended
+				expectedStatus   v1alpha1.ServiceStatus
+			}{
+				expectedStatus: v1alpha1.ServiceStatus{
+					Status: v1alpha1.Status{
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+							},
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "",
+							},
+							{
+								Type:    v1alpha1.SynchronizedConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+								Message: "clusters.deployments.plural.sh \"cluster-test\" not found",
+							},
+						},
+					},
+				},
+				returnGetService: &gqlclient.ServiceDeploymentExtended{
+					ID: "123",
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
+			serviceReconciler := &controller.ServiceReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.RequeueAfter).ToNot(BeZero())
+
+			service := &v1alpha1.ServiceDeployment{}
+			err = k8sClient.Get(ctx, typeNamespacedName, service)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeServiceConditions(service.Status)).To(Equal(sanitizeServiceConditions(test.expectedStatus)))
+		})
+	})
 })
 
 var _ = Describe("Merge Helm Values", Ordered, func() {

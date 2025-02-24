@@ -1,8 +1,9 @@
 import { QueryResult } from '@apollo/client'
+import { usePrevious } from '@pluralsh/design-system'
 import { VirtualItem } from '@tanstack/react-virtual'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
-import { usePrevious } from 'honorable'
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 

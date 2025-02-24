@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import { ReactNode, RefObject } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
@@ -85,14 +84,8 @@ export function ScrollablePage({
   return (
     <>
       {(heading || headingContent) && (
-        <Div paddingRight={scrollable && fullWidth ? 'large' : undefined}>
-          <Div
-            position="relative"
-            width="100%"
-            marginLeft="auto"
-            marginRight="auto"
-            maxWidth={maxContentWidth}
-          >
+        <PaddingWrapperSC $pad={scrollable && fullWidth}>
+          <TitleWrapperSC $maxContentWidth={maxContentWidth}>
             {scrollable && <ScrollShadow />}
             <ConsolePageTitle
               heading={heading}
@@ -100,8 +93,8 @@ export function ScrollablePage({
             >
               {headingContent}
             </ConsolePageTitle>
-          </Div>
-        </Div>
+          </TitleWrapperSC>
+        </PaddingWrapperSC>
       )}
       <ScrollablePageContent
         $scrollable={scrollable}
@@ -116,3 +109,17 @@ export function ScrollablePage({
     </>
   )
 }
+
+const PaddingWrapperSC = styled.div<{ $pad?: boolean }>(({ $pad, theme }) => ({
+  paddingRight: $pad ? theme.spacing.large : undefined,
+}))
+
+const TitleWrapperSC = styled.div<{ $maxContentWidth?: number }>(
+  ({ $maxContentWidth }) => ({
+    position: 'relative',
+    width: '100%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    maxWidth: $maxContentWidth,
+  })
+)

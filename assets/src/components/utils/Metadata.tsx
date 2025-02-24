@@ -1,8 +1,14 @@
-import { Card, Flex, FlexProps, SidecarProps } from '@pluralsh/design-system'
-import { CardProps, Div, H2 } from 'honorable'
+import {
+  Card,
+  CardProps,
+  Flex,
+  FlexProps,
+  SidecarProps,
+} from '@pluralsh/design-system'
 import { Children } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
+import { Body1BoldP } from './typography/Text'
 
 const MAX_COLS = 4
 
@@ -19,6 +25,7 @@ const MetadataGridGrid = styled.div<{ $maxCols: number }>(
 )
 
 export function MetadataCard({ children, ...props }: CardProps) {
+  const { spacing } = useTheme()
   return (
     <Card
       display="flex"
@@ -26,13 +33,15 @@ export function MetadataCard({ children, ...props }: CardProps) {
       {...props}
     >
       {/* 1526 is magic number which is the card's width when screen is 1940px wide */}
-      <Div
-        maxWidth={CARD_CONTENT_MAX_WIDTH}
-        width="100%"
-        padding="xlarge"
+      <div
+        css={{
+          maxWidth: CARD_CONTENT_MAX_WIDTH,
+          width: '100%',
+          padding: spacing.xlarge,
+        }}
       >
         {children}
-      </Div>
+      </div>
     </Card>
   )
 }
@@ -58,6 +67,7 @@ export function MetadataItem({
   children,
   ...props
 }: SidecarProps & FlexProps) {
+  const theme = useTheme()
   return (
     <Flex
       direction="column"
@@ -65,24 +75,25 @@ export function MetadataItem({
       {...props}
     >
       {heading && (
-        <H2
-          body1
-          bold
-          color="text-default"
+        <Body1BoldP
+          as="h2"
+          $color="text"
           {...headingProps}
         >
           {heading}
-        </H2>
+        </Body1BoldP>
       )}
       {children && (
-        <Div
-          body1
-          color="text-xlight"
-          overflowWrap="anywhere"
+        <div
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-xlight'],
+            overflowWrap: 'anywhere',
+          }}
           {...contentProps}
         >
           {children}
-        </Div>
+        </div>
       )}
     </Flex>
   )

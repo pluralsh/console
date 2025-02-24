@@ -228,9 +228,9 @@ func (cs *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
 	}
 
 	return &console.CloudSettingsAttributes{
-		Aws:   cs.AWS.Attributes(),
+		AWS:   cs.AWS.Attributes(),
 		Azure: cs.Azure.Attributes(),
-		Gcp:   cs.GCP.Attributes(),
+		GCP:   cs.GCP.Attributes(),
 	}
 }
 
@@ -241,12 +241,12 @@ type ClusterAWSCloudSettings struct {
 	Region string `json:"region"`
 }
 
-func (cs *ClusterAWSCloudSettings) Attributes() *console.AwsCloudAttributes {
+func (cs *ClusterAWSCloudSettings) Attributes() *console.AWSCloudAttributes {
 	if cs == nil {
 		return nil
 	}
 
-	return &console.AwsCloudAttributes{
+	return &console.AWSCloudAttributes{
 		Region: &cs.Region,
 	}
 }
@@ -306,12 +306,12 @@ type ClusterGCPCloudSettings struct {
 	Region string `json:"region"`
 }
 
-func (cs *ClusterGCPCloudSettings) Attributes() *console.GcpCloudAttributes {
+func (cs *ClusterGCPCloudSettings) Attributes() *console.GCPCloudAttributes {
 	if cs == nil {
 		return nil
 	}
 
-	return &console.GcpCloudAttributes{
+	return &console.GCPCloudAttributes{
 		Project: &cs.Project,
 		Network: &cs.Network,
 		Region:  &cs.Region,
@@ -392,7 +392,7 @@ func (cs *ClusterNodePoolCloudSettings) Attributes() *console.NodePoolCloudAttri
 	}
 
 	return &console.NodePoolCloudAttributes{
-		Aws: cs.AWS.Attributes(),
+		AWS: cs.AWS.Attributes(),
 	}
 }
 
@@ -403,12 +403,12 @@ type ClusterNodePoolAWSCloudSettings struct {
 	LaunchTemplateId *string `json:"launchTemplateId,omitempty"`
 }
 
-func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AwsNodeCloudAttributes {
+func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AWSNodeCloudAttributes {
 	if cs == nil {
 		return nil
 	}
 
-	return &console.AwsNodeCloudAttributes{
+	return &console.AWSNodeCloudAttributes{
 		LaunchTemplateID: cs.LaunchTemplateId,
 	}
 }

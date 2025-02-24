@@ -2,11 +2,11 @@ import { Flex } from '@pluralsh/design-system'
 import { ansiToJson } from 'anser'
 import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
-import { Span } from 'honorable'
 import { useEffect, useMemo, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 function CommandLogLine({ line, number, follow }) {
+  const theme = useTheme()
   const mounted = useRef<any>(undefined)
   const lineRef = useRef<any>(undefined)
 
@@ -27,20 +27,17 @@ function CommandLogLine({ line, number, follow }) {
 
   return (
     <LineWrapperSC ref={lineRef}>
-      <Span
-        color="text-xlight"
-        width={35}
-      >
+      <span css={{ color: theme.colors['text-xlight'], width: 35 }}>
         {number}
-      </Span>
+      </span>
       {blocks.map((json, i) => (
-        <Span
+        <span
           key={i}
+          css={{ whiteSpace: 'pre' }}
           style={textStyle(json)}
-          whiteSpace="pre"
         >
           {json.content}
-        </Span>
+        </span>
       ))}
     </LineWrapperSC>
   )

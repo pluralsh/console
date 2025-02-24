@@ -103,7 +103,7 @@ var _ = Describe("PR Automation Controller", func() {
 
 					prAutomation := &v1alpha1.PrAutomation{}
 					err = k8sClient.Get(ctx, prAutomationObjectKey, prAutomation)
-					attrs, _ := controllerReconciler.Attributes(ctx, prAutomation)
+					attrs, _, _ := controllerReconciler.Attributes(ctx, prAutomation)
 					sha, _ := utils.HashObject(attrs)
 
 					Expect(err).NotTo(HaveOccurred())
@@ -241,7 +241,7 @@ var _ = Describe("PR Automation Controller", func() {
 					prAutomation := &v1alpha1.PrAutomation{}
 					err = k8sClient.Get(ctx, prAutomationObjectKey, prAutomation)
 
-					attrs, _ := controllerReconciler.Attributes(ctx, prAutomation)
+					attrs, _, _ := controllerReconciler.Attributes(ctx, prAutomation)
 					sha, _ := utils.HashObject(attrs)
 
 					Expect(err).NotTo(HaveOccurred())
