@@ -24,6 +24,8 @@ func ToProvider(s string) (Provider, error) {
 		return ProviderAnthropic, nil
 	case ProviderVertex.String():
 		return ProviderVertex, nil
+	case ProviderBedrock.String():
+		return ProviderBedrock, nil
 	}
 
 	return "", fmt.Errorf("invalid provider: %s", s)

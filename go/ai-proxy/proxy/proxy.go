@@ -24,34 +24,22 @@ func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) 
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIProxy(p api.Provider, host, token string) (api.OpenAIProxy, error) {
+func NewOpenAIProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIProxy(host, token)
+		return openai.NewOpenAIProxy(host, credentials)
+	case api.ProviderBedrock:
+		return bedrock.NewBedrockProxy(credentials)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIEmbeddingsProxy(p api.Provider, host, token string) (api.OpenAIProxy, error) {
+func NewOpenAIEmbeddingsProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIEmbeddingsProxy(host, token)
-	}
-	return nil, fmt.Errorf("invalid provider: %s", p)
-}
-
-func NewBedrockProxy(p api.Provider, region string) (api.OpenAIProxy, error) {
-	switch p {
+		return openai.NewOpenAIEmbeddingsProxy(host, credentials)
 	case api.ProviderBedrock:
-		return bedrock.NewBedrockProxy(region)
-	}
-	return nil, fmt.Errorf("invalid provider: %s", p)
-}
-
-func NewBedrockEmbeddingsProxy(p api.Provider, region string) (api.OpenAIProxy, error) {
-	switch p {
-	case api.ProviderBedrock:
-		return bedrock.NewBedrockEmbeddingsProxy(region)
+		return bedrock.NewBedrockEmbeddingsProxy(credentials)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }

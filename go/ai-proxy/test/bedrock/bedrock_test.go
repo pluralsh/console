@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/ai-proxy/api/bedrock"
 	"github.com/pluralsh/console/go/ai-proxy/test/helpers"
 )
 
@@ -50,7 +49,7 @@ func TestBedrockProxy(t *testing.T) {
 		{
 			Name:     "chat request should return correct openai response",
 			Method:   "POST",
-			Endpoint: bedrock.EndpointChat,
+			Endpoint: "/openai/v1/chat/completions",
 			Request: openai.ChatCompletionRequest{
 				Model: "anthropic.claude-v2",
 				Messages: []openai.Message{{
@@ -102,7 +101,7 @@ func TestBedrockProxy_Streaming(t *testing.T) {
 	streamTest := helpers.TestStruct[openai.ChatCompletionRequest, any]{
 		Name:     "chat request with streaming should return SSE headers",
 		Method:   "POST",
-		Endpoint: bedrock.EndpointChat,
+		Endpoint: "/openai/v1/chat/completions",
 		Request: openai.ChatCompletionRequest{
 			Model:  "testmodel",
 			Stream: true,
@@ -153,7 +152,7 @@ func TestBedrockEmbeddingsProxy(t *testing.T) {
 		{
 			Name:     "embeddings request should return correct openai response",
 			Method:   "POST",
-			Endpoint: bedrock.EndpointEmbeddings,
+			Endpoint: "/v1/embeddings",
 			Request: openai.EmbedRequest{
 				Model: "amazon.titan-embed-text-v2:0",
 				Input: "Hello from Titan embeddings test.",

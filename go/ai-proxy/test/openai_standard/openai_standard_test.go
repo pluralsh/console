@@ -30,8 +30,7 @@ var (
 )
 
 const (
-	endpointChat       = "/openai/chat/completions"
-	endpointEmbeddings = "/embeddings/bedrock"
+	endpointChat = "/openai/chat/completions"
 )
 
 func TestMain(m *testing.M) {
@@ -156,7 +155,7 @@ func TestOpenAIEmbeddingsProxy(t *testing.T) {
 		{
 			Name:     "chat request should return correct openai response",
 			Method:   "POST",
-			Endpoint: endpointEmbeddings,
+			Endpoint: "/v1/embeddings",
 			Request: openai.EmbedRequest{
 				Model: "openai-embedding-model",
 				Input: "Hello from embeddings test.",
