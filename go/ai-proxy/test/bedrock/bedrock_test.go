@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/ai-proxy/api/bedrock"
 	"github.com/pluralsh/console/go/ai-proxy/test/helpers"
 )
 
@@ -50,7 +49,7 @@ func TestBedrockProxy(t *testing.T) {
 		{
 			Name:     "chat request should return correct openai response",
 			Method:   "POST",
-			Endpoint: bedrock.EndpointChat,
+			Endpoint: "/openai/v1/chat/completions",
 			Request: openai.ChatCompletionRequest{
 				Model: "anthropic.claude-v2",
 				Messages: []openai.Message{{
@@ -102,7 +101,7 @@ func TestBedrockProxy_Streaming(t *testing.T) {
 	streamTest := helpers.TestStruct[openai.ChatCompletionRequest, any]{
 		Name:     "chat request with streaming should return SSE headers",
 		Method:   "POST",
-		Endpoint: bedrock.EndpointChat,
+		Endpoint: "/openai/v1/chat/completions",
 		Request: openai.ChatCompletionRequest{
 			Model:  "testmodel",
 			Stream: true,
@@ -146,4 +145,52 @@ func TestBedrockProxy_Streaming(t *testing.T) {
 			t.Errorf("expected SSE body %q, got %q", wantSSE, string(resBody))
 		}
 	})
+}
+
+func TestBedrockEmbeddingsProxy(t *testing.T) {
+	cases := []helpers.TestStruct[any, any]{
+		{
+			Name:     "embeddings request should return correct openai response",
+			Method:   "POST",
+			Endpoint: "/openai/v1/embeddings",
+			Request: openai.EmbedRequest{
+				Model: "amazon.titan-embed-text-v2:0",
+				Input: "Hello from Titan embeddings test.",
+			},
+			WantData: openai.EmbeddingList{
+				Model: "amazon.titan-embed-text-v2:0",
+				Data: []openai.Embedding{
+					{
+						Embedding: make([]float32, 5)},
+				},
+			},
+			WantErr:    nil,
+			WantStatus: http.StatusOK,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			wantDataBytes, err := json.Marshal(tc.WantData)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			mockResponseFunc := helpers.MockResponse(tc.Endpoint, wantDataBytes, tc.WantErr, tc.WantStatus)
+			err = mockResponseFunc(handlers)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			requestFunc := helpers.CreateRequest(tc.Method, tc.Endpoint, tc.Request)
+			res, err := requestFunc(server, providerServer)
+			if !errors.Is(err, tc.WantErr) {
+				t.Fatalf("\nwant:\n%v\ngot:\n%v", tc.WantErr, err)
+			}
+
+			if !bytes.Equal(wantDataBytes, res) {
+				t.Errorf("\nwant:\n%s\ngot:\n%s", tc.WantData, res)
+			}
+		})
+	}
 }

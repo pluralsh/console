@@ -8,12 +8,13 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/console/go/ai-proxy/api/bedrock"
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
@@ -21,26 +22,33 @@ import (
 )
 
 func SetupServer() (*httptest.Server, error) {
+	router := mux.NewRouter()
 	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 	if err != nil {
-		fmt.Println("Failed")
-		return nil, err
+		if args.Provider() == api.ProviderBedrock {
+
+		} else {
+			klog.ErrorS(err, "Could not create proxy")
+			os.Exit(1)
+		}
+	} else {
+		router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	}
 
-	op, err := proxy.NewOpenAIProxy(api.ProviderOpenAI, args.ProviderHost(), args.ProviderCredentials())
-	if err != nil {
-		return nil, err
+	if args.OpenAICompatible() {
+		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+		if err != nil {
+			klog.ErrorS(err, "Could not create proxy")
+			os.Exit(1)
+		}
+		ep, err := proxy.NewOpenAIEmbeddingsProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+		if err != nil {
+			klog.ErrorS(err, "Could not create embedding proxy")
+			os.Exit(1)
+		}
+		router.HandleFunc(openai.EndpointChat, op.Proxy())
+		router.HandleFunc(openai.EndpointEmbeddings, ep.Proxy())
 	}
-
-	bp, err := proxy.NewBedrockProxy(api.ProviderBedrock, args.ProviderCredentials())
-	if err != nil {
-		return nil, err
-	}
-
-	router := mux.NewRouter()
-	router.HandleFunc(ollama.EndpointChat, p.Proxy())
-	router.HandleFunc(openai.EndpointChat, op.Proxy())
-	router.HandleFunc(bedrock.EndpointChat, bp.Proxy())
 
 	return httptest.NewServer(router), nil
 }

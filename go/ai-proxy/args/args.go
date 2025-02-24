@@ -65,6 +65,10 @@ func Provider() api.Provider {
 }
 
 func ProviderHost() string {
+	if Provider() == api.ProviderBedrock {
+		return ""
+	}
+
 	if len(*argProviderHost) == 0 {
 		panic(fmt.Errorf("provider host is required"))
 	}
@@ -107,4 +111,8 @@ func Address() string {
 	}
 
 	return fmt.Sprintf("%s:%d", *argAddress, *argPort)
+}
+
+func OpenAICompatible() bool {
+	return Provider() == api.ProviderOpenAI || Provider() == api.ProviderBedrock
 }
