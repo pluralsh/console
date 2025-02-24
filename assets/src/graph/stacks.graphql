@@ -9,6 +9,7 @@ fragment StackPolicyViolation on StackPolicyViolation {
   description
   title
   causes {
+    filename
     resource
     start
     end
