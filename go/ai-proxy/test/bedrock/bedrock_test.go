@@ -152,7 +152,7 @@ func TestBedrockEmbeddingsProxy(t *testing.T) {
 		{
 			Name:     "embeddings request should return correct openai response",
 			Method:   "POST",
-			Endpoint: "/v1/embeddings",
+			Endpoint: "/openai/v1/embeddings",
 			Request: openai.EmbedRequest{
 				Model: "amazon.titan-embed-text-v2:0",
 				Input: "Hello from Titan embeddings test.",

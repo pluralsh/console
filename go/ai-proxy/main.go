@@ -21,15 +21,11 @@ func main() {
 
 	router := mux.NewRouter()
 	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
-	if err != nil {
-		if args.Provider() == api.ProviderBedrock {
-
-		} else {
-			klog.ErrorS(err, "Could not create proxy")
-			os.Exit(1)
-		}
-	} else {
+	if err == nil {
 		router.HandleFunc(ollama.EndpointChat, p.Proxy())
+	} else if args.Provider() != api.ProviderBedrock {
+		klog.ErrorS(err, "Could not create proxy")
+		os.Exit(1)
 	}
 
 	if args.OpenAICompatible() {

@@ -155,7 +155,7 @@ func TestOpenAIEmbeddingsProxy(t *testing.T) {
 		{
 			Name:     "chat request should return correct openai response",
 			Method:   "POST",
-			Endpoint: "/v1/embeddings",
+			Endpoint: "/openai/v1/embeddings",
 			Request: openai.EmbedRequest{
 				Model: "openai-embedding-model",
 				Input: "Hello from embeddings test.",
