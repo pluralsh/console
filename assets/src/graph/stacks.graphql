@@ -97,6 +97,10 @@ fragment Stack on InfrastructureStack {
   insight {
     ...AiInsight
   }
+  policyEngine {
+    type
+    maxSeverity
+  }
 }
 
 fragment StackRun on StackRun {
