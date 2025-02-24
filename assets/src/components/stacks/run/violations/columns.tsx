@@ -1,6 +1,7 @@
 import { Chip, Tooltip } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, SortingFnOption } from '@tanstack/react-table'
 import dayjs from 'dayjs'
+import { ReactElement } from 'react'
 import {
   StackPolicyViolation,
   VulnSeverity,
@@ -11,6 +12,41 @@ import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { TooltipTime } from '../../../utils/TooltipTime.tsx'
 
 const columnHelper = createColumnHelper<StackPolicyViolation>()
+
+const sortSeverity: SortingFnOption<StackPolicyViolation> = (
+  rowA,
+  rowB,
+  colId
+): number => {
+  const severityToPriority: Record<VulnSeverity, number> = {
+    [VulnSeverity.Critical]: 0,
+    [VulnSeverity.High]: 1,
+    [VulnSeverity.Medium]: 2,
+    [VulnSeverity.Low]: 3,
+    [VulnSeverity.Unknown]: 4,
+    [VulnSeverity.None]: 4,
+  }
+
+  const first =
+    severityToPriority[rowA.getValue<StackPolicyViolation>(colId)?.severity] ??
+    0
+  const second =
+    severityToPriority[rowB.getValue<StackPolicyViolation>(colId)?.severity] ??
+    0
+  return first == second ? 0 : first < second ? -1 : 1
+}
+
+function ViolationSeverity({
+  severity,
+}: {
+  severity: Nullable<VulnSeverity>
+}): ReactElement {
+  return (
+    <Chip severity={vulnSeverityToChipSeverity[severity ?? 'Unknown']}>
+      {severity}
+    </Chip>
+  )
+}
 
 const columns = [
   ColExpander,
@@ -72,35 +108,11 @@ const columns = [
     id: 'severity',
     header: 'Severity',
     enableSorting: true,
-    sortingFn: (rowA, rowB, colId): number => {
-      const severityToPriority: Record<VulnSeverity, number> = {
-        [VulnSeverity.Critical]: 0,
-        [VulnSeverity.High]: 1,
-        [VulnSeverity.Medium]: 2,
-        [VulnSeverity.Low]: 3,
-        [VulnSeverity.Unknown]: 4,
-        [VulnSeverity.None]: 4,
-      }
-
-      const first =
-        severityToPriority[
-          rowA.getValue<StackPolicyViolation>(colId)?.severity
-        ] ?? 0
-      const second =
-        severityToPriority[
-          rowB.getValue<StackPolicyViolation>(colId)?.severity
-        ] ?? 0
-      return first == second ? 0 : first < second ? -1 : 1
-    },
-    cell: ({ getValue }) => {
-      const severity = getValue()?.severity
-      return (
-        <Chip severity={vulnSeverityToChipSeverity[severity ?? 'Unknown']}>
-          {severity}
-        </Chip>
-      )
-    },
+    sortingFn: sortSeverity,
+    cell: ({ getValue }) => (
+      <ViolationSeverity severity={getValue()?.severity} />
+    ),
   }),
 ]
 
-export { columns }
+export { columns, ViolationSeverity }

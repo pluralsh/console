@@ -189,6 +189,10 @@ fragment StackRunDetails on StackRun {
   violations {
     ...StackPolicyViolation
   }
+  policyEngine {
+    type
+    maxSeverity
+  }
 }
 
 fragment CustomStackRun on CustomStackRun {
