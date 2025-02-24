@@ -1,4 +1,4 @@
-import { Card, Prop, SidecarItem } from '@pluralsh/design-system'
+import { Card, Prop } from '@pluralsh/design-system'
 
 import capitalize from 'lodash/capitalize'
 import { Link, useOutletContext } from 'react-router-dom'
@@ -10,10 +10,10 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { OverlineH1 } from '../../utils/typography/Text'
-import { ViolationSeverity } from '../run/violations/columns.tsx'
-import { StackOutletContextT } from '../Stacks'
 import StackApprovalChip from '../common/StackApprovalChip'
 import StackStatusChip from '../common/StackStatusChip'
+import { ViolationSeverity } from '../run/violations/columns.tsx'
+import { StackOutletContextT } from '../Stacks'
 
 export default function StackMetadata() {
   const theme = useTheme()
