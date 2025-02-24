@@ -112,3 +112,7 @@ func Address() string {
 
 	return fmt.Sprintf("%s:%d", *argAddress, *argPort)
 }
+
+func OpenAICompatible() bool {
+	return Provider() == api.ProviderOpenAI || Provider() == api.ProviderBedrock
+}

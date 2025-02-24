@@ -35,7 +35,7 @@ func SetupServer() (*httptest.Server, error) {
 		router.HandleFunc(ollama.EndpointChat, p.Proxy())
 	}
 
-	if args.Provider() == api.ProviderOpenAI || args.Provider() == api.ProviderBedrock {
+	if args.OpenAICompatible() {
 		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 		if err != nil {
 			klog.ErrorS(err, "Could not create proxy")
