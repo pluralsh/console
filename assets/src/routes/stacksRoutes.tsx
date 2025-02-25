@@ -11,6 +11,7 @@ import RunJobPods from 'components/stacks/run/job/RunJobPods'
 import RunJobSpecs from 'components/stacks/run/job/RunJobSpecs'
 
 import { StackPrs } from 'components/stacks/prs/StackPrs'
+import Violations from '../components/stacks/run/violations/Violations.tsx'
 
 import Stacks from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
@@ -51,6 +52,7 @@ import {
   STACK_RUNS_STATE_REL_PATH,
   STACK_STATE_REL_PATH,
   STACK_VARS_REL_PATH,
+  STACK_RUNS_VIOLATIONS_REL_PATH,
 } from './stacksRoutesConsts'
 import StackVariables from '../components/stacks/variables/StackVariables.tsx'
 import { StackInsights } from 'components/stacks/insights/StackInsights.tsx'
@@ -170,5 +172,10 @@ export const stacksRoutes = [
         element={<RunJobSpecs />}
       />
     </Route>
+    <Route
+      key="violations"
+      path={STACK_RUNS_VIOLATIONS_REL_PATH}
+      element={<Violations />}
+    />
   </Route>,
 ]

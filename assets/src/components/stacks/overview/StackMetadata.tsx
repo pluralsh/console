@@ -10,9 +10,10 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { OverlineH1 } from '../../utils/typography/Text'
-import { StackOutletContextT } from '../Stacks'
 import StackApprovalChip from '../common/StackApprovalChip'
 import StackStatusChip from '../common/StackStatusChip'
+import { ViolationSeverity } from '../run/violations/columns.tsx'
+import { StackOutletContextT } from '../Stacks'
 
 export default function StackMetadata() {
   const theme = useTheme()
@@ -127,6 +128,22 @@ export default function StackMetadata() {
         >
           {stack.id}
         </Prop>
+        {stack.policyEngine?.type && (
+          <Prop
+            title="Security scanner"
+            margin={0}
+          >
+            {stack.policyEngine?.type}
+          </Prop>
+        )}
+        {stack.policyEngine?.maxSeverity && (
+          <Prop
+            title="Max violation severity"
+            margin={0}
+          >
+            <ViolationSeverity severity={stack.policyEngine?.maxSeverity} />
+          </Prop>
+        )}
       </div>
     </Card>
   )

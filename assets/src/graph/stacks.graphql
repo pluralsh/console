@@ -1,3 +1,27 @@
+fragment StackPolicyViolation on StackPolicyViolation {
+  id
+  insertedAt
+  resolution
+  severity
+  policyUrl
+  policyModule
+  policyId
+  description
+  title
+  causes {
+    filename
+    resource
+    start
+    end
+    lines {
+      line
+      content
+      first
+      last
+    }
+  }
+}
+
 fragment StackTiny on InfrastructureStack {
   id
   insertedAt
@@ -72,6 +96,10 @@ fragment Stack on InfrastructureStack {
   }
   insight {
     ...AiInsight
+  }
+  policyEngine {
+    type
+    maxSeverity
   }
 }
 
@@ -161,6 +189,13 @@ fragment StackRunDetails on StackRun {
   }
   insight {
     ...AiInsight
+  }
+  violations {
+    ...StackPolicyViolation
+  }
+  policyEngine {
+    type
+    maxSeverity
   }
 }
 

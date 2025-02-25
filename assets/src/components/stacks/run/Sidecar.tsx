@@ -23,6 +23,7 @@ import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
 import { StackedText } from '../../utils/table/StackedText'
 import StackStatusChip from '../common/StackStatusChip'
 import StackObservabilityMetrics from '../common/StackObservabilityMetrics'
+import { ViolationSeverity } from './violations/columns.tsx'
 
 interface StackRunSidecarProps {
   stackRun: StackRunDetailsFragment
@@ -115,6 +116,16 @@ export default function StackRunSidecar({
             </InlineLink>
           </div>
         </SidecarItem>
+        {stackRun.policyEngine?.type && (
+          <SidecarItem heading="Security scanner">
+            {stackRun.policyEngine?.type}
+          </SidecarItem>
+        )}
+        {stackRun.policyEngine?.maxSeverity && (
+          <SidecarItem heading="Max violation severity">
+            <ViolationSeverity severity={stackRun.policyEngine?.maxSeverity} />
+          </SidecarItem>
+        )}
         <SidecarItem heading="Created at">
           {formatLocalizedDateTime(stackRun.insertedAt)}
         </SidecarItem>

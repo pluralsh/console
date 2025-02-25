@@ -34,6 +34,7 @@ import {
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
   getStackRunsAbsPath,
+  STACK_RUNS_VIOLATIONS_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { TRUNCATE } from '../../utils/truncate'
@@ -63,6 +64,11 @@ function getDirectory(stackRun: StackRunDetailsFragment) {
       condition: (s: StackRunDetailsFragment) => !isEmpty(s.output),
     },
     { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
+    {
+      path: STACK_RUNS_VIOLATIONS_REL_PATH,
+      label: 'Violations',
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.violations),
+    },
   ]
 }
 
