@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	console "github.com/pluralsh/console/go/client"
-	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	console "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
 
 func (c *client) UpsertCatalog(ctx context.Context, attributes *console.CatalogAttributes) (*console.CatalogFragment, error) {
