@@ -5,6 +5,7 @@ defmodule Console.AI.Evidence.Context do
 
   defstruct [:history, evidence: []]
 
+  def new(%__MODULE__{} = ctx), do: ctx
   def new(history), do: %__MODULE__{history: history}
 
   def evidence(%__MODULE__{} = ctx, %{} = e) when map_size(e) > 0, do: %{ctx | evidence: [e | ctx.evidence]}

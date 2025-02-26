@@ -404,6 +404,36 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["clusterNodeMetrics"]["cpu"])
     end
 
+    test "it can filter by upgradeability" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      upgradeable = insert(:cluster, upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
+      unupgradeable = insert(:cluster, upgrade_plan: %{compatibilities: false, incompatibilities: true, deprecations: true})
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 5, upgradeable: true) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([upgradeable])
+
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 5, upgradeable: false) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+            |> ids_equal([cluster, unupgradeable])
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])

@@ -276,15 +276,15 @@ defmodule Console.Schema.Cluster do
 
   def upgradeable(query \\ __MODULE__) do
     from(c in query,
-      where: not is_nil(c.upgrade_plan) and c.upgrade_plan["compatibilities"]
-        and c.upgrade_plan["incompatibilities"] and c.upgrade_plan["deprecations"]
+      where: not is_nil(c.upgrade_plan) and fragment("? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb",
+        c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])
     )
   end
 
   def not_upgradeable(query \\ __MODULE__) do
     from(c in query,
-      where: is_nil(c.upgrade_plan) or not c.upgrade_plan["compatibilities"]
-        or not c.upgrade_plan["incompatibilities"] or not c.upgrade_plan["deprecations"]
+      where: is_nil(c.upgrade_plan) or not fragment("? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb",
+        c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])
     )
   end
 

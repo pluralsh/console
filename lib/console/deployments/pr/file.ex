@@ -18,23 +18,4 @@ defmodule Console.Deployments.Pr.File do
   end
 
   def valid?(%__MODULE__{filename: name}), do: Path.extname(name) not in @extension_blacklist
-
-  defimpl Console.AI.Vector.Storable, for: __MODULE__ do
-    alias Console.AI.Utils
-
-    def content(%@for{} = file) do
-      """
-      url: #{file.url}
-      title: #{file.title}
-      repo: #{file.repo}
-      filename: #{file.filename}
-      #{Utils.stopword()}
-      #{file.contents}
-      #{Utils.stopword()}
-      #{file.patch}
-      """
-    end
-
-    def datatype(_), do: "pr_file"
-  end
 end

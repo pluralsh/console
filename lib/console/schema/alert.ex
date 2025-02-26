@@ -6,7 +6,8 @@ defmodule Console.Schema.Alert do
     Service,
     Tag,
     ObservabilityWebhook,
-    AiInsight
+    AiInsight,
+    AlertResolution
   }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
@@ -30,6 +31,8 @@ defmodule Console.Schema.Alert do
     belongs_to :project, Project
     belongs_to :cluster, Cluster
     belongs_to :service, Service
+
+    has_one :resolution, AlertResolution
 
     has_many :tags, Tag, on_replace: :delete
 

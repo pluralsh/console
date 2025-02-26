@@ -209,9 +209,11 @@ export type AiInsight = {
 
 export type AiInsightEvidence = {
   __typename?: 'AiInsightEvidence';
+  alert?: Maybe<AlertEvidence>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   logs?: Maybe<LogsEvidence>;
+  pullRequest?: Maybe<PullRequestEvidence>;
   type: EvidenceType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -308,6 +310,8 @@ export type Alert = {
   message?: Maybe<Scalars['String']['output']>;
   /** the project this alert was associated with */
   project?: Maybe<Project>;
+  /** the resolution for this alert */
+  resolution?: Maybe<AlertResolution>;
   /** the service this alert was associated with */
   service?: Maybe<Service>;
   severity: AlertSeverity;
@@ -330,6 +334,29 @@ export type AlertEdge = {
   __typename?: 'AlertEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Alert>;
+};
+
+export type AlertEvidence = {
+  __typename?: 'AlertEvidence';
+  alertId?: Maybe<Scalars['ID']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  resolution?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+};
+
+export type AlertResolution = {
+  __typename?: 'AlertResolution';
+  /** the alert this resolution was associated with */
+  alert?: Maybe<Alert>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the resolution for this alert */
+  resolution: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AlertResolutionAttributes = {
+  resolution: Scalars['String']['input'];
 };
 
 export enum AlertSeverity {
@@ -2539,6 +2566,7 @@ export type Event = {
 };
 
 export enum EvidenceType {
+  Alert = 'ALERT',
   Log = 'LOG',
   Pr = 'PR'
 }
@@ -5275,6 +5303,17 @@ export type PullRequestEdge = {
   node?: Maybe<PullRequest>;
 };
 
+export type PullRequestEvidence = {
+  __typename?: 'PullRequestEvidence';
+  contents?: Maybe<Scalars['String']['output']>;
+  filename?: Maybe<Scalars['String']['output']>;
+  patch?: Maybe<Scalars['String']['output']>;
+  repo?: Maybe<Scalars['String']['output']>;
+  sha?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 /** attributes for a pull request pointer record */
 export type PullRequestUpdateAttributes = {
   cluster?: InputMaybe<NamespacedName>;
@@ -5521,6 +5560,7 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
+  createAlertResolution?: Maybe<AlertResolution>;
   createBootstrapToken?: Maybe<BootstrapToken>;
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
@@ -5793,6 +5833,12 @@ export type RootMutationTypeCreateAccessTokenArgs = {
 
 export type RootMutationTypeCreateAgentMigrationArgs = {
   attributes: AgentMigrationAttributes;
+};
+
+
+export type RootMutationTypeCreateAlertResolutionArgs = {
+  attributes: AlertResolutionAttributes;
+  id: Scalars['ID']['input'];
 };
 
 

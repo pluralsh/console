@@ -54,6 +54,11 @@ defmodule ElasticsearchUtils do
     |> HTTPoison.post!("")
   end
 
+  def drop_index(index_name) do
+    Path.join([@host, index_name])
+    |> HTTPoison.delete!()
+  end
+
   def count_index(index_name) do
     with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{@host}/#{index_name}/_count"),
          {:ok, %{"count" => count}} <- Jason.decode(body) do

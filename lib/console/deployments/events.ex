@@ -77,5 +77,6 @@ defmodule Console.PubSub.StackStateInsight, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AlertInsight, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.AlertCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AlertResolutionCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ScmWebhook, do: use Piazza.PubSub.Event

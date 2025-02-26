@@ -852,6 +852,8 @@ type RootMutationType {
 
   deleteObservabilityWebhook(id: ID!): ObservabilityWebhook
 
+  createAlertResolution(id: ID!, attributes: AlertResolutionAttributes!): AlertResolution
+
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 
   enableDeployments: DeploymentSettings
@@ -1568,6 +1570,10 @@ input ObservableMetricAttributes {
   providerId: ID!
 }
 
+input AlertResolutionAttributes {
+  resolution: String!
+}
+
 "input data to persist a webhook receiver for an observability provider like grafana or datadog"
 input ObservabilityWebhookAttributes {
   type: ObservabilityWebhookType!
@@ -1629,6 +1635,9 @@ type Alert {
   "key\/value tags to filter clusters"
   tags: [Tag]
 
+  "the resolution for this alert"
+  resolution: AlertResolution
+
   "an insight explaining the state of this alert"
   insight: AiInsight
 
@@ -1640,6 +1649,20 @@ type Alert {
 
   "the project this alert was associated with"
   project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AlertResolution {
+  id: ID!
+
+  "the resolution for this alert"
+  resolution: String!
+
+  "the alert this resolution was associated with"
+  alert: Alert
 
   insertedAt: DateTime
 
@@ -6877,6 +6900,7 @@ enum ChatType {
 enum EvidenceType {
   LOG
   PR
+  ALERT
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -7017,6 +7041,8 @@ type AiInsightEvidence {
   id: ID!
   type: EvidenceType!
   logs: LogsEvidence
+  alert: AlertEvidence
+  pullRequest: PullRequestEvidence
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -7025,6 +7051,23 @@ type LogsEvidence {
   serviceId: ID
   clusterId: ID
   lines: [LogLine]
+}
+
+type AlertEvidence {
+  title: String
+  message: String
+  alertId: ID
+  resolution: String
+}
+
+type PullRequestEvidence {
+  url: String
+  title: String
+  repo: String
+  sha: String
+  filename: String
+  contents: String
+  patch: String
 }
 
 "A kubernetes object used in the course of generating a cluster insight"

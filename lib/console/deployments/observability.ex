@@ -7,13 +7,16 @@ defmodule Console.Deployments.Observability do
   alias Console.Deployments.Settings
   alias Console.PubSub
   alias Console.Schema.{
+    User,
     Alert,
+    Cluster,
+    Project,
+    Service,
+    AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
     ObservabilityWebhook,
-    User,
     ServiceComponent,
-    Cluster
   }
 
   @cache Console.conf(:cache_adapter)
@@ -52,6 +55,9 @@ defmodule Console.Deployments.Observability do
   @spec get_webhook_by_ext_id(binary) :: ObservabilityWebhook.t | nil
   @decorate cacheable(cache: @cache, key: {:obs_webhook, id}, opts: [ttl: @ttl])
   def get_webhook_by_ext_id(id), do: Repo.get_by!(ObservabilityWebhook, external_id: id)
+
+  @spec get_alert!(binary) :: Alert.t | nil
+  def get_alert!(id), do: Repo.get!(Alert, id)
 
   @doc """
   Create or update a provider, must inclue name in attrs
@@ -99,6 +105,41 @@ defmodule Console.Deployments.Observability do
     get_webhook!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Determines if an individual alert is accessible from a user to perform the given action
+  """
+  @spec accessible(Alert.t, User.t, atom) :: {:ok, any} | error
+  def accessible(%Alert{} = alert, %User{} = user, action) do
+    case Repo.preload(alert, [:service, :cluster, :project]) do
+      %Alert{service: %Service{} = svc} -> allow(svc, user, action)
+      %Alert{cluster: %Cluster{} = cluster} -> allow(cluster, user, action)
+      %Alert{project: %Project{} = project} -> allow(project, user, action)
+      _ -> {:error, :forbidden}
+    end
+  end
+
+  @doc """
+  Persists the resolution associated with this alert, cannot be done if the user doesn't have write access
+  """
+  @spec set_resolution(map, binary, User.t) :: {:ok, AlertResolution.t} | Console.error
+  def set_resolution(attrs, alert_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:alert, fn _ ->
+      get_alert!(alert_id)
+      |> accessible(user, :write)
+    end)
+    |> add_operation(:upsert, fn _ ->
+      case Repo.get_by(AlertResolution, alert_id: alert_id) do
+        %AlertResolution{} = res -> res
+        nil -> %AlertResolution{alert_id: alert_id}
+      end
+      |> AlertResolution.changeset(attrs)
+      |> Repo.insert_or_update()
+    end)
+    |> execute(extract: :upsert)
+    |> notify(:create)
   end
 
   @doc """
@@ -187,4 +228,8 @@ defmodule Console.Deployments.Observability do
   defp find(%DeploymentSettings{loki_connection: loki}, :loki), do: loki
   defp find(%DeploymentSettings{prometheus_connection: prometheus}, :prometheus), do: prometheus
   defp find(_, _), do: nil
+
+  defp notify({:ok, %AlertResolution{} = res}, :create),
+    do: handle_notify(PubSub.AlertResolutionCreated, res)
+  defp notify(pass, _), do: pass
 end

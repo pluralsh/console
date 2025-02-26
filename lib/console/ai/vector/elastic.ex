@@ -54,7 +54,7 @@ defmodule Console.AI.Vector.Elastic do
       |> HTTPoison.post(Jason.encode!(%{
         passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
         datatype: datatype,
-        "#{datatype}": Map.from_struct(data)
+        "#{datatype}": Console.mapify(data)
       }), headers(es))
       |> handle_response("could not insert vector into elasticsearch:")
     end

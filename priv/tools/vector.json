@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "required": {
+            "type": "boolean",
+            "description": "whether it would be useful to query a vector store for additional data to troubleshoot this issue"
+        },
+        "query": {
+            "type": "string",
+            "description": "a query to run against a vector store to extract additional data to troubleshoot this issue"
+        }
+    },
+    "required": ["required", "query"],
+    "additionalProperties": false
+}
