@@ -2,7 +2,7 @@ module github.com/pluralsh/console/go/tools
 
 go 1.22.5
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	github.com/99designs/gqlgen v0.17.61
