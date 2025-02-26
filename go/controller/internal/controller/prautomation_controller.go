@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/go/controller/internal/errors"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -207,6 +209,7 @@ func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) (*
 func (in *PrAutomationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "prautomation_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.PrAutomation{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(in)
 }

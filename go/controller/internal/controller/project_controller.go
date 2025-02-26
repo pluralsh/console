@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -255,6 +256,7 @@ func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
 func (in *ProjectReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "project_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.Project{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(in)
 }

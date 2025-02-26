@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/pluralsh/polly/template"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -19,11 +17,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -277,7 +279,8 @@ func requestFromSecret() handler.EventHandler {
 // SetupWithManager sets up the controller with the Manager.
 func (r *GeneratedSecretReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.GeneratedSecret{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		For(&v1alpha1.GeneratedSecret{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Watches(&corev1.Secret{}, requestFromSecret()).
 		Complete(r)

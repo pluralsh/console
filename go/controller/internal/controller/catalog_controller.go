@@ -10,9 +10,12 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
@@ -69,7 +72,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Handle proper resource deletion via finalizer
 	result := r.addOrRemoveFinalizer(ctx, catalog)
 	if result != nil {
-		return *result, nil
+		return *result, retErr
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -90,7 +93,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if err := r.ensure(catalog); err != nil {
 		if goerrors.Is(err, operrors.ErrRetriable) {
 			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
+			return requeue, retErr
 		}
 		return ctrl.Result{}, err
 	}
@@ -120,7 +123,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, retErr
 }
 
 func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Catalog) (*v1alpha1.Project, *ctrl.Result, error) {
@@ -143,7 +146,7 @@ func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Ca
 }
 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {
-	exists, err := r.ConsoleClient.IsProjectExists(ctx, catalog.CatalogName())
+	exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -205,9 +208,14 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 			return &requeue
 		}
 
+		apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
+		if err != nil {
+			return &requeue
+		}
+
 		// Remove Pipeline from Console API if it exists.
-		if exists {
-			if err := r.ConsoleClient.DeleteCatalog(ctx, catalog.Status.GetID()); err != nil {
+		if exists && !catalog.Status.IsReadonly() {
+			if err := r.ConsoleClient.DeleteCatalog(ctx, apiCatalog.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -257,6 +265,7 @@ func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
 // SetupWithManager sets up the controller with the Manager.
 func (r *CatalogReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Catalog{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		For(&v1alpha1.Catalog{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
