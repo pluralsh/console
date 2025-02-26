@@ -25,6 +25,7 @@ defmodule ConsoleWeb.Router do
       pipe_through [:api]
 
       scope "/v1", ConsoleWeb do
+        get "/agent/chart", GitController, :agent_chart
         post "/webhooks/observability/:type/:id", WebhookController, :observability
         post "/webhooks/:type/:id", WebhookController, :scm
 

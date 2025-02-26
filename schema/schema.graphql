@@ -446,7 +446,7 @@ type RootMutationType {
 
   signup(inviteId: String!, attributes: UserAttributes!): User
 
-  oauthCallback(code: String!, redirect: String): User
+  oauthCallback(code: String!, redirect: String, state: String): User
 
   createInvite(attributes: InviteAttributes!): Invite
 
@@ -2120,6 +2120,9 @@ type StackRun {
 
   "reference w\/in the repository where the IaC lives"
   git: GitRef!
+
+  "whether this run is a dry run"
+  dryRun: Boolean!
 
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec

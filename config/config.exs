@@ -14,7 +14,7 @@ config :botanist,
 config :piazza_core,
   shutdown_delay: 60 * 1000
 
-config :console, :oidc_providers, :ignore
+config :console, :oidc_providers, []
 config :console,
     plural_login: false
 

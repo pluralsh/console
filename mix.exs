@@ -91,7 +91,6 @@ defmodule Console.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
-      {:openid_connect, "~> 0.2.2", git: "https://github.com/pluralsh/openid_connect", commit: "58bda539debd81dc1a253139ae9b5cbbd65c8047q"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.12.0"},
@@ -167,6 +166,8 @@ defmodule Console.MixProject do
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.13"},
+      {:oidcc, "~> 3.3"},
+      {:hackney, "== 1.20.1"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},
@@ -184,7 +185,7 @@ defmodule Console.MixProject do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "elasticsearch.down", "elasticsearch.up", "test"]
+      test: ["ecto.create --quiet", "agent.chart", "ecto.migrate", "elasticsearch.down", "elasticsearch.up", "test"]
     ]
   end
 end

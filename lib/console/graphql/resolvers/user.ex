@@ -12,7 +12,7 @@ defmodule Console.GraphQl.Resolvers.User do
     Persona,
     RefreshToken
   }
-  alias Console.Services.Users
+  alias Console.Services.{Users, OAuth}
   require Logger
 
   def query(Group, _), do: Group
@@ -112,7 +112,7 @@ defmodule Console.GraphQl.Resolvers.User do
   def login_info(args, _) do
     case Console.conf(:plural_login) do
       true -> {:ok, %{
-        oidc_uri: oidc_uri(args),
+        oidc_uri: OAuth.redirect_uri(args[:redirect]),
         external: Console.conf(:oidc_login),
         oidc_name: Console.conf(:oidc_name)
       }}
@@ -120,26 +120,9 @@ defmodule Console.GraphQl.Resolvers.User do
     end
   end
 
-  defp oidc_uri(args) do
-    OpenIDConnect.authorization_uri(:plural, hydrate_redirect_uri(%{state: state_token()}, args))
-  end
-
-  defp state_token() do
-    :crypto.strong_rand_bytes(32)
-    |> Base.url_encode64()
-  end
-
-  defp hydrate_redirect_uri(params, %{redirect: uri}) when is_binary(uri),
-    do: Map.put(params, :redirect_uri, uri)
-  defp hydrate_redirect_uri(params, _), do: params
-
-  def oauth_callback(%{code: code} = args, _) do
-    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, hydrate_redirect_uri(%{code: code}, args)),
-         {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) do
-      Logger.info "found claims #{inspect(claims)}"
-
+  def oauth_callback(args, _) do
+    with {:ok, %Oidcc.Token{id: %Oidcc.Token.Id{claims: claims}}} <- OAuth.retrieve_token(args) do
       claims
-      |> Map.put("plural_id", claims["sub"])
       |> Users.bootstrap_user()
       |> with_jwt()
     else

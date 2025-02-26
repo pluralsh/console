@@ -56,7 +56,7 @@ RUN ls -al
 
 COPY --from=node /app/build ./priv/static
 
-RUN mix release
+RUN mix do agent.chart, release
 
 FROM ${TOOLS_IMAGE} as tools
 
@@ -69,10 +69,12 @@ ARG TARGETARCH=amd64
 # ENV TERRAFORM_VERSION=v1.9.8
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.12.1
+ENV CLI_VERSION=v0.12.2
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 # ENV KUBECTL_VERSION=v1.31.3
+
+COPY AGENT_VERSION AGENT_VERSION
 
 RUN apk update && apk add curl wget unzip
 RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION#v}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
