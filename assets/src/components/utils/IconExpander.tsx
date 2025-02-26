@@ -144,16 +144,13 @@ export function ExpandedInput({
 } & ComponentProps<typeof Input>) {
   const inputRef = useRef<HTMLElement>(undefined)
 
-  useEffect(() => {
-    // only using querySelector because honorable input refs point to the div wrapper around the input
-    inputRef.current?.querySelector('input')?.focus()
-  }, [])
+  useEffect(() => inputRef.current?.focus(), [])
 
   return (
     <Input
       border="none"
       borderRadius={0}
-      ref={inputRef}
+      inputProps={{ ref: inputRef }}
       placeholder="Filter by name"
       value={inputValue}
       width={250}
