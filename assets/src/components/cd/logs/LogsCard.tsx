@@ -5,18 +5,20 @@ import {
   IconFrame,
   InfoOutlineIcon,
 } from '@pluralsh/design-system'
-import LogsScrollIndicator from 'components/cd/logs/LogsScrollIndicator'
+import { LogsScrollIndicator } from 'components/cd/logs/LogsScrollIndicator'
 import { GqlError } from 'components/utils/Alert'
 import {
   LogFacetInput,
   LogLineFragment,
-  LogTimeRange,
   useLogAggregationQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { memo, useCallback, useMemo, useState } from 'react'
+import { toISOStringOrUndef } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
 import { LogContextPanel } from './LogContextPanel'
 import { secondsToDuration } from './Logs'
+import { type LogsFiltersT } from './LogsFilters'
 import LogsLegend from './LogsLegend'
 import { LogsTable } from './LogsTable'
 
@@ -27,8 +29,7 @@ export const LogsCard = memo(function LogsCard({
   serviceId,
   clusterId,
   query,
-  limit,
-  time,
+  filters,
   labels,
   addLabel,
   showLegendTooltip = true,
@@ -36,25 +37,31 @@ export const LogsCard = memo(function LogsCard({
   serviceId?: string
   clusterId?: string
   query?: string
-  limit?: number
-  time?: LogTimeRange
+  filters: LogsFiltersT
   labels?: LogFacetInput[]
   addLabel?: (key: string, value: string) => void
   showLegendTooltip?: boolean
 }) {
+  const { queryLength, sinceSeconds, date } = filters
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
   const [live, setLive] = useState(true)
   const [hasNextPage, setHasNextPage] = useState(true)
 
+  const filterDateStr = toISOStringOrUndef(date)
+  const duration = secondsToDuration(sinceSeconds)
   const { data, loading, error, fetchMore, startPolling, stopPolling } =
     useLogAggregationQuery({
       variables: {
         clusterId,
         query,
-        limit: limit || LIMIT,
+        limit: filters.queryLength || LIMIT,
         serviceId,
-        time,
+        time: {
+          before: live ? undefined : filterDateStr,
+          duration,
+          reverse: false,
+        },
         facets: labels,
       },
       fetchPolicy: 'cache-and-network',
@@ -63,10 +70,7 @@ export const LogsCard = memo(function LogsCard({
     })
 
   const logs = useMemo(
-    () =>
-      data?.logAggregation?.filter(
-        (log): log is LogLineFragment => log !== null
-      ) ?? [],
+    () => data?.logAggregation?.filter(isNonNullable) ?? [],
     [data]
   )
 
@@ -80,10 +84,10 @@ export const LogsCard = memo(function LogsCard({
     if (loading || !hasNextPage) return
     fetchMore({
       variables: {
-        limit: limit || LIMIT,
+        limit: queryLength || LIMIT,
         time: {
           before: logs[logs.length - 1]?.timestamp,
-          duration: time?.duration,
+          duration,
         },
       },
       updateQuery: (prev, { fetchMoreResult }) => {
@@ -96,7 +100,7 @@ export const LogsCard = memo(function LogsCard({
         return { logAggregation: [...(prev.logAggregation ?? []), ...newLogs] }
       },
     })
-  }, [loading, hasNextPage, fetchMore, limit, logs, time?.duration])
+  }, [loading, hasNextPage, fetchMore, queryLength, logs, duration])
 
   const initialLoading = !data && loading
 
@@ -142,7 +146,7 @@ export const LogsCard = memo(function LogsCard({
         loading={loading}
         initialLoading={initialLoading}
         fetchMore={fetchOlderLogs}
-        hasNextPage={hasNextPage && logs.length >= (limit || LIMIT)}
+        hasNextPage={hasNextPage && logs.length >= (queryLength || LIMIT)}
         onRowClick={(_, row) => {
           setLogLine(row.original)
           setContextPanelOpen(true)
@@ -159,7 +163,7 @@ export const LogsCard = memo(function LogsCard({
           <LogContextPanel
             logLine={logLine}
             addLabel={addLabel}
-            curDuration={time?.duration ?? secondsToDuration(900)}
+            curDuration={duration}
             queryVars={{
               clusterId,
               serviceId,

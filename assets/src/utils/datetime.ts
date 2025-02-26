@@ -6,7 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import updateLocale from 'dayjs/plugin/updateLocale'
 import utc from 'dayjs/plugin/utc'
 
-type DateParam = dayjs.ConfigType
+export type DateParam = dayjs.ConfigType
 
 // Time constants
 export const MINUTE_TO_SECONDS = 60
@@ -88,6 +88,12 @@ export const formatDateTime = (date: DateParam, pattern?: string) => {
   return dayjs(date).format('MMM D, YYYY h:mm a')
 }
 
+export const toISOStringOrUndef = (date: DateParam) => {
+  if (!date) return undefined
+  const dateObj = dayjs(date)
+  return dateObj.isValid() ? dateObj.toISOString() : undefined
+}
+
 export const isSameDay = (date: DateParam) =>
   date ? dayjs(date).isSame(dayjs(), 'day') : false
 
@@ -115,4 +121,13 @@ export const toDateOrUndef = (d: unknown) => {
 export const formatLocalizedDateTime = (date: DateParam) => {
   if (!date) return ''
   return dayjs(date).format('lll')
+}
+
+export const isValidDateTime = (
+  date: DateParam,
+  format?: string,
+  strict: boolean = false
+): boolean => {
+  if (!date) return false
+  return dayjs(date, format, strict).isValid()
 }
