@@ -133,8 +133,12 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 			err = k8sClient.Delete(ctx, resource)
 			Expect(err).NotTo(HaveOccurred())
 
+			catalogFragment := &gqlclient.CatalogFragment{
+				ID: id,
+			}
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("IsCatalogExists", mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(catalogFragment, nil)
 			fakeConsoleClient.On("DeleteCatalog", mock.Anything, mock.Anything).Return(nil)
 
 			nsReconciler := &controller.CatalogReconciler{
