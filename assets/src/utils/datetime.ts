@@ -88,9 +88,9 @@ export const formatDateTime = (date: DateParam, pattern?: string) => {
   return dayjs(date).format('MMM D, YYYY h:mm a')
 }
 
-export const toISOStringOrUndef = (date: DateParam) => {
+export const toISOStringOrUndef = (date: DateParam, isUtc: boolean = false) => {
   if (!date) return undefined
-  const dateObj = dayjs(date)
+  const dateObj = isUtc ? dayjs(date).utc(true) : dayjs(date)
   return dateObj.isValid() ? dateObj.toISOString() : undefined
 }
 
