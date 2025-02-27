@@ -4,6 +4,7 @@ package tools
 
 import (
 	_ "github.com/99designs/gqlgen"
+	_ "github.com/Yamashou/gqlgenc"
 	_ "github.com/a8m/envsubst/cmd/envsubst"
 	_ "github.com/arttor/helmify/cmd/helmify"
 	_ "github.com/elastic/crd-ref-docs"

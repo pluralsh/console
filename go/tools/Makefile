@@ -8,9 +8,12 @@ tools: --tool
 %--tool: TOOL = .*
 --tool: # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
 	@echo Installing required tools
-	@go install github.com/Yamashou/gqlgenc@v0.29.0
 	@cat main.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
 	@echo Tools installed successfully
+
+.PHONY: gqlgenc
+gqlgenc: TOOL = gqlgenc
+gqlgenc: --tool ## Download and install gqlgenc in the $GOPATH/bin
 
 .PHONY: controller-gen
 controller-gen: TOOL = controller-gen
