@@ -4,7 +4,6 @@ package client
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
@@ -216,7 +215,7 @@ type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
+func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
@@ -455,7 +454,7 @@ func (t *ClusterFragment) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *ClusterFragment) GetMetadata() map[string]interface{} {
+func (t *ClusterFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ClusterFragment{}
 	}
@@ -663,7 +662,7 @@ func (t *NodePoolFragment) GetInstanceType() string {
 	}
 	return t.InstanceType
 }
-func (t *NodePoolFragment) GetLabels() map[string]interface{} {
+func (t *NodePoolFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &NodePoolFragment{}
 	}
@@ -916,7 +915,7 @@ func (t *ClusterRegistrationFragment) GetHandle() *string {
 	}
 	return t.Handle
 }
-func (t *ClusterRegistrationFragment) GetMetadata() map[string]interface{} {
+func (t *ClusterRegistrationFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ClusterRegistrationFragment{}
 	}
@@ -1105,13 +1104,13 @@ func (t *JobSpecFragment) GetContainers() []*ContainerSpecFragment {
 	}
 	return t.Containers
 }
-func (t *JobSpecFragment) GetLabels() map[string]interface{} {
+func (t *JobSpecFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &JobSpecFragment{}
 	}
 	return t.Labels
 }
-func (t *JobSpecFragment) GetAnnotations() map[string]interface{} {
+func (t *JobSpecFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &JobSpecFragment{}
 	}
@@ -1415,7 +1414,7 @@ func (t *ServiceContextFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceContextFragment) GetConfiguration() map[string]interface{} {
+func (t *ServiceContextFragment) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceContextFragment{}
 	}
@@ -1957,7 +1956,7 @@ func (t *BaseClusterFragment) GetKasURL() *string {
 	}
 	return t.KasURL
 }
-func (t *BaseClusterFragment) GetMetadata() map[string]interface{} {
+func (t *BaseClusterFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &BaseClusterFragment{}
 	}
@@ -2372,7 +2371,7 @@ func (t *PipelineContextFragment) GetID() string {
 	}
 	return t.ID
 }
-func (t *PipelineContextFragment) GetContext() map[string]interface{} {
+func (t *PipelineContextFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &PipelineContextFragment{}
 	}
@@ -2441,13 +2440,13 @@ type NamespaceMetadataFragment struct {
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *NamespaceMetadataFragment) GetLabels() map[string]interface{} {
+func (t *NamespaceMetadataFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &NamespaceMetadataFragment{}
 	}
 	return t.Labels
 }
-func (t *NamespaceMetadataFragment) GetAnnotations() map[string]interface{} {
+func (t *NamespaceMetadataFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &NamespaceMetadataFragment{}
 	}
@@ -2459,7 +2458,7 @@ type ClusterTargetFragment struct {
 	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
 }
 
-func (t *ClusterTargetFragment) GetTags() map[string]interface{} {
+func (t *ClusterTargetFragment) GetTags() map[string]any {
 	if t == nil {
 		t = &ClusterTargetFragment{}
 	}
@@ -2577,13 +2576,13 @@ func (t *ManagedNamespaceFragment) GetDescription() *string {
 	}
 	return t.Description
 }
-func (t *ManagedNamespaceFragment) GetLabels() map[string]interface{} {
+func (t *ManagedNamespaceFragment) GetLabels() map[string]any {
 	if t == nil {
 		t = &ManagedNamespaceFragment{}
 	}
 	return t.Labels
 }
-func (t *ManagedNamespaceFragment) GetAnnotations() map[string]interface{} {
+func (t *ManagedNamespaceFragment) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ManagedNamespaceFragment{}
 	}
@@ -3019,7 +3018,7 @@ func (t *ObserverPipelineActionFragment) GetPipelineID() string {
 	}
 	return t.PipelineID
 }
-func (t *ObserverPipelineActionFragment) GetContext() map[string]interface{} {
+func (t *ObserverPipelineActionFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &ObserverPipelineActionFragment{}
 	}
@@ -3676,7 +3675,7 @@ func (t *InfrastructureStackFragment) GetType() *StackType {
 	}
 	return &t.Type
 }
-func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
+func (t *InfrastructureStackFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &InfrastructureStackFragment{}
 	}
@@ -3873,7 +3872,7 @@ func (t *StackRunFragment) GetManageState() *bool {
 	}
 	return t.ManageState
 }
-func (t *StackRunFragment) GetVariables() map[string]interface{} {
+func (t *StackRunFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &StackRunFragment{}
 	}
@@ -4132,7 +4131,7 @@ func (t *StackRunBaseFragment) GetManageState() *bool {
 	}
 	return t.ManageState
 }
-func (t *StackRunBaseFragment) GetVariables() map[string]interface{} {
+func (t *StackRunBaseFragment) GetVariables() map[string]any {
 	if t == nil {
 		t = &StackRunBaseFragment{}
 	}
@@ -4467,7 +4466,7 @@ func (t *StackStateResourceFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *StackStateResourceFragment) GetConfiguration() map[string]interface{} {
+func (t *StackStateResourceFragment) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &StackStateResourceFragment{}
 	}
@@ -5108,7 +5107,7 @@ func (t *ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	}
 	return t.PingedAt
 }
-func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Cluster{}
 	}
@@ -5198,7 +5197,7 @@ func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Contexts{}
 	}
@@ -5210,13 +5209,13 @@ type ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -5902,7 +5901,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 	}
 	return t.PingedAt
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -5992,7 +5991,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Co
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -6004,13 +6003,13 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncCo
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -7355,7 +7354,7 @@ func (t *CreateCluster_CreateCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *CreateCluster_CreateCluster) GetMetadata() map[string]interface{} {
+func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
@@ -8136,7 +8135,7 @@ func (t *GetClusterWithToken_Cluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]interface{} {
+func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
@@ -8762,7 +8761,7 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]interface{} {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
@@ -10148,7 +10147,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.PingedAt
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -10238,7 +10237,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -10250,13 +10249,13 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Sy
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
@@ -10548,7 +10547,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.PingedAt
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
@@ -10638,7 +10637,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.Name
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
@@ -10650,13 +10649,13 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Labels
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]interface{} {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
