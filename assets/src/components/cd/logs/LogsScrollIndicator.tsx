@@ -1,4 +1,4 @@
-import { Button } from '@pluralsh/design-system'
+import { Button, Tooltip } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
 export const LiveIcon = styled.div<{ $live: boolean }>(({ theme, $live }) => ({
@@ -11,26 +11,31 @@ export const LiveIcon = styled.div<{ $live: boolean }>(({ theme, $live }) => ({
   transition: 'background-color 0.2s ease-in-out',
 }))
 
-export default function LogsScrollIndicator({
+export function LogsScrollIndicator({
   live,
-  toggleLive,
+  setLive,
 }: {
   live: boolean
-  toggleLive: () => void
+  setLive: (live: boolean) => void
 }) {
   const theme = useTheme()
   return (
-    <Button
-      small
-      {...(live ? { floating: true } : { secondary: true })}
-      startIcon={<LiveIcon $live={live} />}
-      onClick={toggleLive}
-      style={{
-        color: live ? theme.colors.text : theme.colors['text-xlight'],
-        transition: 'color 0.2s ease-in-out',
-      }}
+    <Tooltip
+      label="Note: enabling live logs will ignore any specified end date/time filters"
+      placement="top"
     >
-      Live
-    </Button>
+      <Button
+        small
+        floating
+        startIcon={<LiveIcon $live={live} />}
+        onClick={() => setLive(!live)}
+        style={{
+          color: live ? theme.colors.text : theme.colors['text-xlight'],
+          transition: 'color 0.2s ease-in-out',
+        }}
+      >
+        Live
+      </Button>
+    </Tooltip>
   )
 }

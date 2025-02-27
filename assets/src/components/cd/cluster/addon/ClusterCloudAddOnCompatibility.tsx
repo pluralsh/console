@@ -44,10 +44,6 @@ const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
           options: { meta },
         },
       }) => {
-        console.log(original.version)
-        console.log(highlight)
-        console.log(kubeVersion)
-
         return (
           <Compatibility
             isCompatible={!!getValue()}

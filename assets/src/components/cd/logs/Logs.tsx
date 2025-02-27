@@ -1,25 +1,29 @@
 import {
-  Input,
-  ListBoxItem,
-  SearchIcon,
-  Select,
+  Card,
+  Flex,
+  IconFrame,
+  InfoOutlineIcon,
   Toast,
 } from '@pluralsh/design-system'
-import { LogsLabels } from 'components/cd/logs/LogsLabels'
 import { useCallback, useMemo, useState } from 'react'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useThrottle } from 'components/hooks/useThrottle'
-import { Body2P } from 'components/utils/typography/Text'
-import { LogFacetInput } from 'generated/graphql'
-import { clamp } from 'lodash'
+import { GqlError } from 'components/utils/Alert'
+import { LogFacetInput, useLogAggregationQuery } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
+import { toISOStringOrUndef } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
 import {
-  SinceSecondsOptions,
-  SinceSecondsSelectOptions,
-} from '../cluster/pod/logs/Logs'
-import { LogsCard } from './LogsCard'
+  DEFAULT_LOG_FLYOVER_FILTERS,
+  LogsFilters,
+  LogsFlyoverFiltersT,
+} from './LogsFilters'
+import LogsLegend from './LogsLegend'
+import { LogsScrollIndicator } from './LogsScrollIndicator'
+import { LogsTable } from './LogsTable'
 
-const MAX_QUERY_LENGTH = 250
+export const DEFAULT_LOG_QUERY_LENGTH = 250
 
 export function Logs({
   serviceId,
@@ -33,21 +37,47 @@ export function Logs({
   const theme = useTheme()
   const [showErrorToast, setShowErrorToast] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
-  const [sinceSeconds, setSinceSeconds] = useState(
-    SinceSecondsOptions.QuarterHour
-  )
+
   const [labels, setLabels] = useState<LogFacetInput[]>([])
   const [q, setQ] = useState('')
-  const [queryLimit, setQueryLimit] = useState(100)
   const throttledQ = useThrottle(q, 1000)
-  const throttledQueryLimit = useThrottle(queryLimit, 300)
+  const [filters, setFilters] = useState<LogsFlyoverFiltersT>(
+    DEFAULT_LOG_FLYOVER_FILTERS
+  )
 
-  const time = useMemo(
-    () => ({
-      duration: secondsToDuration(sinceSeconds),
-      reverse: false,
-    }),
-    [sinceSeconds]
+  const [live, setLiveState] = useState(true)
+
+  const { data, loading, error, fetchMore, startPolling, stopPolling } =
+    useLogAggregationQuery({
+      variables: {
+        clusterId,
+        query: throttledQ,
+        limit: filters.queryLength || DEFAULT_LOG_QUERY_LENGTH,
+        serviceId,
+        time: {
+          before: live ? undefined : toISOStringOrUndef(filters.date, true),
+          duration: secondsToDuration(filters.sinceSeconds),
+          reverse: false,
+        },
+        facets: labels,
+      },
+      fetchPolicy: 'cache-and-network',
+      notifyOnNetworkStatusChange: true,
+      skip: !(clusterId || serviceId),
+    })
+
+  const logs = useMemo(
+    () => data?.logAggregation?.filter(isNonNullable) ?? [],
+    [data]
+  )
+
+  const setLive = useCallback(
+    (live: boolean) => {
+      if (live) stopPolling()
+      else startPolling(POLL_INTERVAL)
+      setLiveState(live)
+    },
+    [startPolling, stopPolling]
   )
 
   const addLabel = useCallback(
@@ -69,63 +99,60 @@ export function Logs({
   )
 
   return (
-    <PageWrapperSC>
+    <>
       <MainContentWrapperSC>
-        <FiltersWrapperSC>
-          <Input
-            placeholder="Filter logs"
-            startIcon={<SearchIcon size={14} />}
-            value={q}
-            onChange={({ target: { value } }) => setQ(value)}
-            flex={1}
-          />
-          <Input
-            endIcon={<Body2P $color="text-xlight">lines</Body2P>}
-            inputProps={{
-              css: {
-                textAlign: 'right',
-                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                },
-              },
-            }}
-            width={220}
-            prefix="Query length"
-            type="number"
-            value={queryLimit || ''}
-            onChange={({ target: { value } }) =>
-              setQueryLimit(clamp(Number(value), 10, MAX_QUERY_LENGTH))
-            }
-          />
-          <Select
-            selectedKey={`${sinceSeconds}`}
-            onSelectionChange={(key) =>
-              setSinceSeconds(key as SinceSecondsOptions)
-            }
-          >
-            {SinceSecondsSelectOptions.map((opts) => (
-              <ListBoxItem
-                key={`${opts.key}`}
-                label={opts.label}
-                selected={opts.key === sinceSeconds}
-              />
-            ))}
-          </Select>
-        </FiltersWrapperSC>
-        <LogsLabels
+        <LogsFilters
+          q={q}
+          setQ={setQ}
+          filters={filters}
+          setFilters={setFilters}
           labels={labels}
           removeLabel={removeLabel}
+          setLive={setLive}
         />
-        <LogsCard
-          serviceId={serviceId}
-          clusterId={clusterId}
-          query={throttledQ}
-          limit={throttledQueryLimit}
-          time={time}
-          labels={labels}
-          addLabel={addLabel}
-          showLegendTooltip={showLegendTooltip}
-        />
+        {error ? (
+          <GqlError error={error} />
+        ) : (
+          <Card
+            height="100%"
+            overflow="hidden"
+            header={{
+              size: 'large',
+              content: (
+                <Flex
+                  width="100%"
+                  justify="space-between"
+                >
+                  <LogsScrollIndicator
+                    live={live}
+                    setLive={setLive}
+                  />
+                  {showLegendTooltip && (
+                    <IconFrame
+                      icon={<InfoOutlineIcon color="icon-default" />}
+                      tooltip={<LogsLegend />}
+                      tooltipProps={{ placement: 'right' }}
+                    />
+                  )}
+                </Flex>
+              ),
+            }}
+          >
+            <LogsTable
+              logs={logs}
+              loading={loading}
+              initialLoading={!data && loading}
+              fetchMore={fetchMore}
+              filters={filters}
+              live={live}
+              setLive={setLive}
+              addLabel={addLabel}
+              labels={labels}
+              clusterId={clusterId}
+              serviceId={serviceId}
+            />
+          </Card>
+        )}
       </MainContentWrapperSC>
       <Toast
         severity="danger"
@@ -147,7 +174,7 @@ export function Logs({
       >
         Label added
       </Toast>
-    </PageWrapperSC>
+    </>
   )
 }
 
@@ -156,21 +183,10 @@ export const secondsToDuration = (seconds: number) => {
   return `PT${seconds}S`
 }
 
-const PageWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.large,
-  height: '100%',
-  width: '100%',
-}))
-
-const FiltersWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-}))
-
 const MainContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  flex: 1,
+  height: '100%',
+  width: '100%',
 }))
