@@ -5381,8 +5381,6 @@ type StackRun struct {
 	Type StackType `json:"type"`
 	// reference w/in the repository where the IaC lives
 	Git GitRef `json:"git"`
-	// whether this run is a dry run
-	DryRun bool `json:"dryRun"`
 	// optional k8s job configuration for the job that will apply this stack
 	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
