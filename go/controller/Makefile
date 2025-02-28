@@ -86,7 +86,8 @@ e2e: ## run e2e tests
 codegen: manifests generate genmock codegen-helm codegen-crd-docs ## runs all codegen-related targets
 
 .PHONY: manifests
-manifests: ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
+manifests: TOOL = controller-gen
+manifests: --tool ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=true webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s codegen-chart-crds
 
