@@ -48,3 +48,6 @@ data/
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
+
+# Ignore locally vendored project tools binaries
+binaries/

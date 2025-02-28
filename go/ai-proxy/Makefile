@@ -1,7 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
-include $(TOOLS_BINARIES_MAKEFILE)
+include $(TOOLS_MAKEFILE)
 
 DIST_DIR := dist
 BINARY_NAME := ai-proxy
@@ -57,7 +57,7 @@ docker:
 check: vet lint test ## run all code checks/tests
 
 .PHONY: goimports
-goimports: ## format code imports
+goimports: install-goimports ## format code imports
 	@$(GOIMPORTS) -w ./
 
 .PHONY: fmt
@@ -69,11 +69,11 @@ vet: ## run go vet
 	@go vet ./...
 
 .PHONY: lint
-lint: ## run linters
+lint: install-golangci-lint ## run linters
 	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: fix
-fix: fmt ## fix issues found by linters
+fix: install-golangci-lint fmt ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
