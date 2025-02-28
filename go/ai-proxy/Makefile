@@ -54,7 +54,7 @@ docker:
 ##@ Tests / Lint
 
 .PHONY: check
-check: TOOL = goimports
+check: TOOL = goimports golangci-lint
 check: --tool vet lint test ## run all code checks/tests
 
 .PHONY: goimports
