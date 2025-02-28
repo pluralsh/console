@@ -79,13 +79,18 @@ dayjs.extend(localizedFormat)
 
 export { dayjs as dayjsExtended }
 
-export const formatDateTime = (date: DateParam, pattern?: string) => {
+export const formatDateTime = (
+  date: DateParam,
+  pattern?: string,
+  isUtc: boolean = false
+) => {
   if (!date) return ''
-  if (pattern) return dayjs(date).format(pattern)
+  const dateObj = isUtc ? dayjs(date).utc(true) : dayjs(date)
+  if (pattern) return dateObj.format(pattern)
 
-  if (isSameDay(date)) return dayjs(date).format('h:mm a')
+  if (isSameDay(date)) return dateObj.format('h:mm a')
 
-  return dayjs(date).format('MMM D, YYYY h:mm a')
+  return dateObj.format('MMM D, YYYY h:mm a')
 }
 
 export const toISOStringOrUndef = (date: DateParam, isUtc: boolean = false) => {

@@ -7,6 +7,7 @@ import {
   SegmentedInputHandle,
   SemanticColorKey,
   Toast,
+  useIsFocused,
 } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 
@@ -43,6 +44,7 @@ export function DateTimeFormInput({
   const [isEnteringTimestamp, setIsEnteringTimestamp] = useState(false)
   const [customTimestamp, setCustomTimestamp] = useState('')
   const [timestampError, setTimestampError] = useState(false)
+  const [isFocused, focusCallbacks] = useIsFocused({})
 
   const initDateStr = formatDateTime(initialDate, DATE_FORMAT) || EMPTY_DATE_STR
   const initTimeStr = formatDateTime(initialDate, TIME_FORMAT) || EMPTY_TIME_STR
@@ -86,15 +88,15 @@ export function DateTimeFormInput({
     else setDate?.(initialDate)
   }, [dateStr, dateValid, initialDate, isSetToNow, setDate, timeStr, timeValid])
 
-  const setValsFromTimestamp = (val?: DateParam) => {
-    const timestamp = val ?? customTimestamp
+  const setValsFromTimestamp = (val?: string) => {
+    const timestamp = handleUnixTS(val ?? customTimestamp)
     if (!isValidDateTime(timestamp)) {
       setTimestampError(true)
       return
     }
     setIsEnteringTimestamp(false)
-    const date = formatDateTime(timestamp, DATE_FORMAT)
-    const time = formatDateTime(timestamp, TIME_FORMAT)
+    const date = formatDateTime(timestamp, DATE_FORMAT, true)
+    const time = formatDateTime(timestamp, TIME_FORMAT, true)
     runAfterLayout(() => {
       dateInputRef.current?.setValue(date)
       timeInputRef.current?.setValue(time)
@@ -130,6 +132,7 @@ export function DateTimeFormInput({
         )
       }
       {...props}
+      {...focusCallbacks}
     >
       {isEnteringTimestamp ? (
         <Input
@@ -159,7 +162,7 @@ export function DateTimeFormInput({
         >
           <SegmentedInput
             ref={dateInputRef}
-            {...(isSetToNow && { value: 'Today' })}
+            {...(isSetToNow && !isFocused && { value: 'Today' })}
             style={{ borderColor: dateError && colors['border-danger'] }}
             prefix="Date"
             endIcon={<Body2P $color="text-xlight">MM/DD/YYYY</Body2P>}
@@ -173,7 +176,7 @@ export function DateTimeFormInput({
           />
           <SegmentedInput
             ref={timeInputRef}
-            {...(isSetToNow && { value: 'Now' })}
+            {...(isSetToNow && !isFocused && { value: 'Now' })}
             style={{ borderColor: timeError && colors['border-danger'] }}
             prefix="Time"
             endIcon={<Body2P $color="text-xlight">UTC</Body2P>}
@@ -220,3 +223,11 @@ const CaptionTextBtnSC = styled.span<{
   opacity: $disabled ? 0.4 : 1,
   '&:hover': { textDecoration: $disabled ? 'none' : 'underline' },
 }))
+
+const handleUnixTS = (val: string) => {
+  // parse as a unix timestamp if it's a valid number
+  // otherwise keep it as is
+  const valNum = Number(val)
+  if (!isNaN(valNum)) return val.length === 10 ? valNum * 1000 : valNum
+  return val
+}

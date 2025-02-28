@@ -45,6 +45,7 @@ import { useCDEnabled } from '../utils/useCDEnabled'
 import {
   ClusterStatusTabKey,
   ClustersFilters,
+  UpgradeableFilterKey,
 } from '../services/ClustersFilters'
 
 import { TagsFilter } from '../services/ClusterTagsFilter'
@@ -109,6 +110,8 @@ export default function Clusters() {
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
+  const [upgradeableFilter, setUpgradeableFilter] =
+    useState<UpgradeableFilterKey>('ALL')
 
   const [searchString, setSearchString] = useState<string>()
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -145,6 +148,10 @@ export default function Clusters() {
       ...(!isEmpty(searchTags)
         ? { tagQuery: { op: tagOp, tags: searchTags } }
         : {}),
+      upgradeable:
+        upgradeableFilter === 'ALL'
+          ? undefined
+          : upgradeableFilter === 'UPGRADEABLE',
     }
   )
 
@@ -194,9 +201,11 @@ export default function Clusters() {
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   const clusterEdges = data?.clusters?.edges
-  const isDemo = statusCounts.ALL === 0 || !cdIsEnabled
+  const hasStatFilters = !!debouncedSearchString || !!projectId
+  const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
-  const showGettingStarted = isDemo || (statusCounts.ALL ?? 0) < 2
+  const showGettingStarted =
+    isDemo || ((statusCounts.ALL ?? 0) < 2 && !hasStatFilters)
 
   useSetPageScrollable(showGettingStarted || isDemo)
 
@@ -229,6 +238,9 @@ export default function Clusters() {
             setTagOp={
               setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']
             }
+            upgradeableFilter={upgradeableFilter}
+            setUpgradeableFilter={setUpgradeableFilter}
+            upgradeStats={data.upgradeStatistics}
           />
           <TabPanel
             stateRef={tabStateRef}

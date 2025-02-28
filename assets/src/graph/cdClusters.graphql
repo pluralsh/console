@@ -361,6 +361,7 @@ query Clusters(
   $healthy: Boolean
   $tagQuery: TagQuery
   $projectId: ID
+  $upgradeable: Boolean
 ) {
   clusters(
     first: $first
@@ -369,6 +370,7 @@ query Clusters(
     healthy: $healthy
     tagQuery: $tagQuery
     projectId: $projectId
+    upgradeable: $upgradeable
   ) {
     pageInfo {
       ...PageInfo
@@ -379,8 +381,12 @@ query Clusters(
       }
     }
   }
-  clusterStatuses {
+  clusterStatuses(q: $q, projectId: $projectId) {
     ...ClusterStatusInfo
+  }
+  upgradeStatistics(q: $q, projectId: $projectId) {
+    upgradeable
+    count
   }
   tags
 }

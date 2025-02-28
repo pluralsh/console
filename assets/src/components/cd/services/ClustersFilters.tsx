@@ -1,21 +1,33 @@
-import { type ComponentProps, useDeferredValue, useState } from 'react'
 import {
   Chip,
   Input,
+  ListBoxItem,
   SearchIcon,
+  Select,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import styled from 'styled-components'
-import { Dispatch, MutableRefObject, SetStateAction, useEffect } from 'react'
 import isNil from 'lodash/isNil'
+import {
+  type ComponentProps,
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useDeferredValue,
+  useEffect,
+  useState,
+} from 'react'
+import styled from 'styled-components'
 
 import { useDebounce } from '@react-hooks-library/core'
 
-import { serviceStatusToSeverity } from './ServiceStatusChip'
+import { UpgradeStatistics } from 'generated/graphql'
+import { isNumber } from 'lodash'
 import { TagsFilter } from './ClusterTagsFilter'
+import { serviceStatusToSeverity } from './ServiceStatusChip'
 
 export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
+export type UpgradeableFilterKey = 'ALL' | 'UPGRADEABLE' | 'NON-UPGRADEABLE'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
   HEALTHY: {
@@ -46,20 +58,28 @@ export function ClustersFilters({
   setSelectedTagKeys,
   tagOp,
   setTagOp,
+  upgradeableFilter,
+  setUpgradeableFilter,
+  upgradeStats,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
   setQueryString: (string) => void
-  tabStateRef: MutableRefObject<any>
+  tabStateRef: RefObject<any>
   statusCounts: Record<ClusterStatusTabKey, number | undefined>
   selectedTagKeys: ComponentProps<typeof TagsFilter>['selectedTagKeys']
   setSelectedTagKeys: ComponentProps<typeof TagsFilter>['setSelectedTagKeys']
   tagOp: ComponentProps<typeof TagsFilter>['searchOp']
   setTagOp: ComponentProps<typeof TagsFilter>['setSearchOp']
+  upgradeableFilter: UpgradeableFilterKey
+  setUpgradeableFilter: (val: UpgradeableFilterKey) => void
+  upgradeStats: Nullable<Pick<UpgradeStatistics, 'upgradeable' | 'count'>>
 }) {
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 400)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const deferredStatusFilter = useDeferredValue(statusFilter)
+  const { count, upgradeable } = upgradeStats ?? {}
+  const hasUpgradeStats = isNumber(count) && isNumber(upgradeable)
 
   useEffect(() => {
     setQueryString(debouncedSearchString)
@@ -79,7 +99,7 @@ export function ClustersFilters({
           setSearchOp={setTagOp}
         />
       </div>
-      <div css={{ flex: '1 1 50%' }}>
+      <div css={{ flex: '1 1 50%', minWidth: 120 }}>
         <Input
           placeholder="Search"
           startIcon={<SearchIcon />}
@@ -118,6 +138,35 @@ export function ClustersFilters({
           </SubTab>
         ))}
       </TabList>
+      <div css={{ minWidth: 240 }}>
+        <Select
+          label={upgradeableFilter}
+          selectedKey={upgradeableFilter}
+          onSelectionChange={(key) =>
+            setUpgradeableFilter(key as UpgradeableFilterKey)
+          }
+        >
+          <ListBoxItem
+            key="ALL"
+            label="All upgrade statuses"
+            rightContent={hasUpgradeStats && <Chip size="small">{count}</Chip>}
+          />
+          <ListBoxItem
+            key="UPGRADEABLE"
+            label="Upgradeable only"
+            rightContent={
+              hasUpgradeStats && <Chip size="small">{upgradeable}</Chip>
+            }
+          />
+          <ListBoxItem
+            key="NON-UPGRADEABLE"
+            label="Non-upgradeable only"
+            rightContent={
+              hasUpgradeStats && <Chip size="small">{count - upgradeable}</Chip>
+            }
+          />
+        </Select>
+      </div>
     </ClustersFiltersSC>
   )
 }

@@ -9,6 +9,7 @@ import {
   ListBoxItem,
   SearchIcon,
   Select,
+  Toast,
 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { LogFacetInput } from 'generated/graphql'
@@ -114,8 +115,10 @@ function FiltersForm({
   onSubmit: (form: LogsFlyoverFiltersT) => void
   setLive: (live: boolean) => void
 }) {
+  const { spacing } = useTheme()
   const [hasDTErrors, setHasDTErrors] = useState(false)
   const clearDTFormRef = useRef<() => void>(null)
+  const [showSuccessToast, setShowSuccessToast] = useState(false)
 
   const { state, update, initialState, hasUpdates } =
     useUpdateState(initialForm)
@@ -125,6 +128,7 @@ function FiltersForm({
     onSubmit(state)
     // by default, logs should be live if no specific date is set, and vice versa
     setLive(!state.date)
+    setShowSuccessToast(true)
   }
 
   const resetToDefault = () => {
@@ -202,6 +206,14 @@ function FiltersForm({
           </Button>
         </Flex>
       </WrapperFormSC>
+      <Toast
+        show={showSuccessToast}
+        closeTimeout={2000}
+        onClose={() => setShowSuccessToast(false)}
+        margin={spacing.xlarge}
+      >
+        Filters applied
+      </Toast>
     </FillLevelContext>
   )
 }
