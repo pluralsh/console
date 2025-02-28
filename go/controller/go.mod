@@ -1,8 +1,6 @@
 module github.com/pluralsh/console/go/controller
 
-go 1.23.0
-
-toolchain go1.23.5
+go 1.23.4
 
 require (
 	github.com/Yamashou/gqlgenc v0.29.0
