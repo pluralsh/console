@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.5
 
 require (
-	github.com/Yamashou/gqlgenc v0.30.2
+	github.com/Yamashou/gqlgenc v0.29.0
 	github.com/onsi/ginkgo/v2 v2.22.1
 	github.com/onsi/gomega v1.36.2
 	github.com/orcaman/concurrent-map/v2 v2.0.1

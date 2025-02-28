@@ -4,20 +4,25 @@ import (
 	"context"
 	"fmt"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/utils"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 )
 
 const ObserverFinalizer = "deployments.plural.sh/observer-protection"
@@ -362,6 +367,7 @@ func (r *ObserverReconciler) isAlreadyExists(ctx context.Context, observer *v1al
 // SetupWithManager sets up the controller with the Manager.
 func (r *ObserverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Observer{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		For(&v1alpha1.Observer{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

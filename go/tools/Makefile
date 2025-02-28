@@ -11,6 +11,10 @@ tools: --tool
 	@cat main.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
 	@echo Tools installed successfully
 
+.PHONY: gqlgenc
+gqlgenc: TOOL = gqlgenc
+gqlgenc: --tool ## Download and install gqlgenc in the $GOPATH/bin
+
 .PHONY: controller-gen
 controller-gen: TOOL = controller-gen
 controller-gen: --tool ## Download and install controller-gen in the $GOPATH/bin
