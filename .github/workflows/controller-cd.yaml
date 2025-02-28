@@ -37,8 +37,6 @@ jobs:
         cache: true
     - name: Download dependencies
       run: go mod download
-    - name: Download tools
-      run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
     - name: Test
       run: PATH=$PATH:$GOPATH/bin make test
   publish-docker:

@@ -21,9 +21,6 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           cache: true
-      - name: Download tools
-        working-directory: go
-        run: PATH=$PATH:$GOPATH/bin make tools
       - name: Regenerate docs
         working-directory: go/controller
         run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs

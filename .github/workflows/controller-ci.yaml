@@ -34,8 +34,6 @@ jobs:
           cache: true
       - name: Download dependencies
         run: go mod download
-      - name: Download tools
-        run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
@@ -53,8 +51,6 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           cache: true
-      - name: Download tools
-        run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - name: Test
         run: PATH=$PATH:$GOPATH/bin make test
   lint:
