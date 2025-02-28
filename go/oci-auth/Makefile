@@ -40,11 +40,13 @@ release: lint test ## builds release version of the app, requires GoReleaser to 
 ##@ Checks
 
 .PHONY: lint
-lint: install-golangci-lint ## run linters
+lint: TOOL = golangci-lint
+lint: --tool ## run linters
 	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: fix
-fix: install-golangci-lint ## run linters and fix found issues
+fix: TOOL = golangci-lint
+fix: --tool ## run linters and fix found issues
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test

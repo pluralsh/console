@@ -21,7 +21,8 @@ tools: --tool install-kubebuilder
   		dependency=$$(echo $${tool} | cut -d'@' -f1) ;\
   		version=$$(echo $$tool | cut -d'@' -f2) ;\
   		for path in $(GO_INSTALL_TOOLS); do \
-  		  if echo $${path} | grep -q "$(TOOL)"; then \
+  		  match=$$(echo "$(TOOL)" | tr ' ' '|') ;\
+  		  if echo $${path} | grep -qE "$${match}"; then \
   		  	if echo $${path} | grep -q $${dependency}; then \
 			  echo Installing $${path}@$${version} ;\
   		  	  GOBIN=$(BINARIES_DIR) go install $${path}@$${version} ;\

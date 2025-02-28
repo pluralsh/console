@@ -57,7 +57,8 @@ docker:
 check: vet lint test ## run all code checks/tests
 
 .PHONY: goimports
-goimports: install-goimports ## format code imports
+goimports: TOOL = goimports
+goimports: --tool ## format code imports
 	@$(GOIMPORTS) -w ./
 
 .PHONY: fmt
@@ -69,11 +70,13 @@ vet: ## run go vet
 	@go vet ./...
 
 .PHONY: lint
-lint: install-golangci-lint ## run linters
+lint: TOOL = golangci-lint
+lint: --tool ## run linters
 	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: fix
-fix: install-golangci-lint fmt ## fix issues found by linters
+fix: TOOL = golangci-lint
+fix: --tool fmt ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
