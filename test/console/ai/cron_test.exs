@@ -310,5 +310,66 @@ defmodule Console.AI.CronTest do
 
       assert_receive {:event, %PubSub.AlertInsight{item: {%{id: ^id}, _}}}
     end
+
+    test "it will gather extra info from vector stores and generate" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+        {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
+      end)
+      expect(Console.AI.VectorStore, :fetch, fn "some query" -> {:ok, [
+        %Console.AI.VectorStore.Response{
+          pr_file: %Console.Deployments.Pr.File{
+            url: "https://github.com/pr/url",
+            repo: "some/repo",
+            title: "a pr",
+            sha: "asdfsa",
+            contents: "file contents",
+            filename: "example.js",
+            patch: "some patch"
+          }
+        }
+      ]} end)
+      svc = insert(:service)
+      alert = insert(:alert, state: :firing, service: svc)
+
+      log_document(svc, "error what is happening") |> index_doc()
+      log_document(svc, "another valid log message") |> index_doc()
+      refresh()
+
+      Cron.alerts()
+
+      %{id: id} = alert = refetch(alert) |> Console.Repo.preload([insight: :evidence])
+
+      assert alert.insight.text
+
+      %{evidence: evidence} = alert.insight
+      %{log: [log], pr: [pr]} = Enum.group_by(evidence, & &1.type)
+      assert log.type == :log
+      assert hd(log.logs.lines).log == "error what is happening"
+
+      assert pr.type == :pr
+      assert pr.pull_request.url == "https://github.com/pr/url"
+      assert pr.pull_request.repo == "some/repo"
+      assert pr.pull_request.title == "a pr"
+      assert pr.pull_request.sha == "asdfsa"
+      assert pr.pull_request.contents == "file contents"
+      assert pr.pull_request.filename == "example.js"
+      assert pr.pull_request.patch == "some patch"
+
+      assert_receive {:event, %PubSub.AlertInsight{item: {%{id: ^id}, _}}}
+    end
   end
 end

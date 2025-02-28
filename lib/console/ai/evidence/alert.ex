@@ -1,17 +1,18 @@
 defimpl Console.AI.Evidence, for: Console.Schema.Alert do
   use Console.AI.Evidence.Base
-  alias Console.AI.Evidence.{Logs, Context}
+  alias Console.AI.Evidence.{Logs, Context, Vector}
   alias Console.Schema.{Alert, Service, Cluster}
   alias Console.Repo
 
   def generate(%Alert{state: :firing, service: %Service{} = service} = alert) do
     [{:user, alert_prompt(alert)}]
     |> Logs.with_logging(service, force: true, lines: 100)
+    |> Vector.with_vector_data()
     |> Context.prompt({:user, "Please use the data I've listed above to give a clear root cause analysis of this issue."})
     |> Context.result()
   end
   def generate(%Alert{state: :resolved}), do: {:error, "alert is already resolved"}
-  def generate(_), do: {:error, "insights only supported for service bound alerts"}
+  def generate(_), do: {:error, "insights only supported for service-bound alerts"}
 
   def preload(%Alert{} = alert), do: Repo.preload(alert, [insight: :evidence, service: :cluster])
 

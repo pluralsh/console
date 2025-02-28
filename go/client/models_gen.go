@@ -153,11 +153,13 @@ type AiInsight struct {
 }
 
 type AiInsightEvidence struct {
-	ID         string        `json:"id"`
-	Type       EvidenceType  `json:"type"`
-	Logs       *LogsEvidence `json:"logs,omitempty"`
-	InsertedAt *string       `json:"insertedAt,omitempty"`
-	UpdatedAt  *string       `json:"updatedAt,omitempty"`
+	ID          string               `json:"id"`
+	Type        EvidenceType         `json:"type"`
+	Logs        *LogsEvidence        `json:"logs,omitempty"`
+	Alert       *AlertEvidence       `json:"alert,omitempty"`
+	PullRequest *PullRequestEvidence `json:"pullRequest,omitempty"`
+	InsertedAt  *string              `json:"insertedAt,omitempty"`
+	UpdatedAt   *string              `json:"updatedAt,omitempty"`
 }
 
 // A saved item for future ai-based investigation
@@ -231,6 +233,8 @@ type Alert struct {
 	URL         *string                  `json:"url,omitempty"`
 	// key/value tags to filter clusters
 	Tags []*Tag `json:"tags,omitempty"`
+	// the resolution for this alert
+	Resolution *AlertResolution `json:"resolution,omitempty"`
 	// an insight explaining the state of this alert
 	Insight *AiInsight `json:"insight,omitempty"`
 	// the cluster this alert was associated with
@@ -251,6 +255,27 @@ type AlertConnection struct {
 type AlertEdge struct {
 	Node   *Alert  `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+type AlertEvidence struct {
+	Title      *string `json:"title,omitempty"`
+	Message    *string `json:"message,omitempty"`
+	AlertID    *string `json:"alertId,omitempty"`
+	Resolution *string `json:"resolution,omitempty"`
+}
+
+type AlertResolution struct {
+	ID string `json:"id"`
+	// the resolution for this alert
+	Resolution string `json:"resolution"`
+	// the alert this resolution was associated with
+	Alert      *Alert  `json:"alert,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type AlertResolutionAttributes struct {
+	Resolution string `json:"resolution"`
 }
 
 // Anthropic connection information
@@ -4394,6 +4419,16 @@ type PullRequestEdge struct {
 	Cursor *string      `json:"cursor,omitempty"`
 }
 
+type PullRequestEvidence struct {
+	URL      *string `json:"url,omitempty"`
+	Title    *string `json:"title,omitempty"`
+	Repo     *string `json:"repo,omitempty"`
+	Sha      *string `json:"sha,omitempty"`
+	Filename *string `json:"filename,omitempty"`
+	Contents *string `json:"contents,omitempty"`
+	Patch    *string `json:"patch,omitempty"`
+}
+
 // attributes for a pull request pointer record
 type PullRequestUpdateAttributes struct {
 	Title     string          `json:"title"`
@@ -6896,18 +6931,20 @@ func (e Delta) MarshalGQL(w io.Writer) {
 type EvidenceType string
 
 const (
-	EvidenceTypeLog EvidenceType = "LOG"
-	EvidenceTypePr  EvidenceType = "PR"
+	EvidenceTypeLog   EvidenceType = "LOG"
+	EvidenceTypePr    EvidenceType = "PR"
+	EvidenceTypeAlert EvidenceType = "ALERT"
 )
 
 var AllEvidenceType = []EvidenceType{
 	EvidenceTypeLog,
 	EvidenceTypePr,
+	EvidenceTypeAlert,
 }
 
 func (e EvidenceType) IsValid() bool {
 	switch e {
-	case EvidenceTypeLog, EvidenceTypePr:
+	case EvidenceTypeLog, EvidenceTypePr, EvidenceTypeAlert:
 		return true
 	}
 	return false

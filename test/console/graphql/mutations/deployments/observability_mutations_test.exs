@@ -71,4 +71,23 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       refute refetch(webhook)
     end
   end
+
+  describe "createAletResolution" do
+    test "it can create a resolution for an alert" do
+      service = insert(:service)
+      alert = insert(:alert, service: service)
+
+      {:ok, %{data: %{"createAlertResolution" => res}}} = run_query("""
+        mutation Create($id: ID!, $attrs: AlertResolutionAttributes!) {
+          createAlertResolution(id: $id, attributes: $attrs) {
+            resolution
+            alert { id }
+          }
+        }
+      """, %{"id" => alert.id, "attrs" => %{"resolution" => "resolved"}}, %{current_user: admin_user()})
+
+      assert res["resolution"] == "resolved"
+      assert res["alert"]["id"] == alert.id
+    end
+  end
 end

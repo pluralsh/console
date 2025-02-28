@@ -33,6 +33,10 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :provider_id, non_null(:id)
   end
 
+  input_object :alert_resolution_attributes do
+    field :resolution, non_null(:string)
+  end
+
   @desc "input data to persist a webhook receiver for an observability provider like grafana or datadog"
   input_object :observability_webhook_attributes do
     field :type,   non_null(:observability_webhook_type)
@@ -83,10 +87,19 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
 
-    field :insight, :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this alert"
-    field :cluster, :cluster,    resolve: dataloader(Deployments), description: "the cluster this alert was associated with"
-    field :service, :service,    resolve: dataloader(Deployments), description: "the service this alert was associated with"
-    field :project, :project,    resolve: dataloader(Deployments), description: "the project this alert was associated with"
+    field :resolution, :alert_resolution, resolve: dataloader(Deployments), description: "the resolution for this alert"
+    field :insight,    :ai_insight,       resolve: dataloader(Deployments), description: "an insight explaining the state of this alert"
+    field :cluster,    :cluster,          resolve: dataloader(Deployments), description: "the cluster this alert was associated with"
+    field :service,    :service,          resolve: dataloader(Deployments), description: "the service this alert was associated with"
+    field :project,    :project,          resolve: dataloader(Deployments), description: "the project this alert was associated with"
+
+    timestamps()
+  end
+
+  object :alert_resolution do
+    field :id,         non_null(:id)
+    field :resolution, non_null(:string), description: "the resolution for this alert"
+    field :alert,      :alert, resolve: dataloader(Deployments), description: "the alert this resolution was associated with"
 
     timestamps()
   end
@@ -152,6 +165,14 @@ defmodule Console.GraphQl.Deployments.Observability do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_observability_webhook/2
+    end
+
+    field :create_alert_resolution, :alert_resolution do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:alert_resolution_attributes)
+
+      resolve &Deployments.create_alert_resolution/2
     end
   end
 end

@@ -39,6 +39,7 @@ Mimic.copy(Console.Deployments.Observer.Runner)
 Mimic.copy(Console.AI.OpenAI)
 Mimic.copy(ExAws)
 Mimic.copy(Console.AI.Memoizer)
+Mimic.copy(Console.AI.VectorStore)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

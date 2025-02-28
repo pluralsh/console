@@ -51,6 +51,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def delete_observability_webhook(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.delete_webhook(id, user)
 
+  def create_alert_resolution(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.set_resolution(attrs, id, user)
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

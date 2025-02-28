@@ -93,6 +93,41 @@ defmodule Console.Deployments.ObservabilityTest do
     end
   end
 
+  describe "#set_resolution/3" do
+    test "it can set a resolution for an alert" do
+      service = insert(:service)
+      alert   = insert(:alert, service: service)
+
+      {:ok, res} = Observability.set_resolution(%{
+        resolution: "resolved"
+      }, alert.id, admin_user())
+
+      assert res.alert_id   == alert.id
+      assert res.resolution == "resolved"
+    end
+
+    test "it can update a resolution for an alert" do
+      service    = insert(:service)
+      alert      = insert(:alert, service: service)
+      resolution = insert(:alert_resolution, alert: alert)
+
+      {:ok, res} = Observability.set_resolution(%{
+        resolution: "updated"
+      }, alert.id, admin_user())
+
+      assert res.id         == resolution.id
+      assert res.alert_id   == alert.id
+      assert res.resolution == "updated"
+    end
+
+    test "non accessible users cannot update alerts" do
+      service    = insert(:service)
+      alert      = insert(:alert, service: service)
+
+      {:error, _} = Observability.set_resolution(%{resolution: "updated"}, alert.id, insert(:user))
+    end
+  end
+
   describe "#delete_webhook/2" do
     test "it can delete a webhook by id" do
       webhook = insert(:observability_webhook)

@@ -188,28 +188,3 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
     end
   end
 end
-
-defimpl Console.PubSub.Recurse, for: Console.PubSub.ScmWebhook do
-  alias Console.AI.{Tool, VectorStore}
-  alias Console.Deployments.{Pr.Dispatcher, Settings}
-  alias Console.Schema.{ScmWebhook, ScmConnection, DeploymentSettings}
-
-  def process(%@for{
-    item: %{"action" => "pull_request", "pull_request" => %{"merged" => true} = pr},
-    actor: %ScmWebhook{type: :github}
-  }) do
-    with true <- enabled?(),
-         %ScmConnection{} = conn <- Tool.scm_connection(),
-         {:ok, [_ | _] = files} <- Dispatcher.files(conn, pr) do
-      Enum.each(files, &VectorStore.insert/1)
-    end
-  end
-  def process(_), do: :ok
-
-  defp enabled?() do
-    case Settings.cached() do
-      %DeploymentSettings{ai: %{vector_store: %{enabled: enabled}}} -> enabled
-      _ -> false
-    end
-  end
-end

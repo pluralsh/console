@@ -854,6 +854,13 @@ defmodule Console.Factory do
     }
   end
 
+  def alert_resolution_factory do
+    %Schema.AlertResolution{
+      alert: build(:alert),
+      resolution: "resolved",
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
