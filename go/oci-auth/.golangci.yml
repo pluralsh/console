@@ -8,7 +8,6 @@ linters:
     - dupl
     - durationcheck
     - errcheck
-    - exportloopref
     - forcetypeassert
     - goconst
     - gocyclo

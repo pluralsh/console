@@ -33,7 +33,6 @@ jobs:
           go-version-file: go/oci-auth/go.mod
           cache: true
       - run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
@@ -50,7 +49,6 @@ jobs:
           go-version-file: go/oci-auth/go.mod
           cache: true
       - run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - run: PATH=$PATH:$GOPATH/bin make test
   lint:
     name: Lint
@@ -63,6 +61,6 @@ jobs:
           check-latest: true
       - uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64 # v6.0.1
         with:
-          version: v1.59
+          version: v1.61
           working-directory: go/oci-auth
           args: --timeout=30m

@@ -1,7 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
-include $(TOOLS_BINARIES_MAKEFILE)
+include $(TOOLS_MAKEFILE)
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
@@ -40,11 +40,13 @@ release: lint test ## builds release version of the app, requires GoReleaser to 
 ##@ Checks
 
 .PHONY: lint
-lint: ## run linters
+lint: TOOL = golangci-lint
+lint: --tool ## run linters
 	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: fix
-fix: ## run linters and fix found issues
+fix: TOOL = golangci-lint
+fix: --tool ## run linters and fix found issues
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test

@@ -1,54 +1,86 @@
 ##@ Build Dependencies
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+
+include $(ROOT_DIRECTORY)/go/paths.mk
+
+GO_INSTALL_TOOLS := $(shell cat $(TOOLS_DIR)/tools.go | grep _ | awk -F'"' '$$2 ~ /.*/ {print $$2}')
+TOOL_VERSIONS := $(shell awk '/require \(/{flag=1; next} flag&&/\)/{exit} flag' $(TOOLS_DIR)/go.mod | awk '{sub(/[ \t\r]+/, "");}1' | awk '{sub(/ /, "@");}1' | tr '\n' ' ')
+
+ARCH := $(shell go env GOARCH)
+OS := $(shell go env GOOS)
+KUBEBUILDER_VERSION := 4.5.1
 
 .PHONY: tools
 tools: ## install required tools
-tools: --tool
+tools: --tool install-kubebuilder
 
 .PHONY: --tool
 %--tool: TOOL = .*
---tool: # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
-	@echo Installing required tools
-	@cat main.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
-	@echo Tools installed successfully
+--tool: --ensure-binaries-dir # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
+	@for tool in $(TOOL_VERSIONS); do \
+  		dependency=$$(echo $${tool} | cut -d'@' -f1) ;\
+  		version=$$(echo $$tool | cut -d'@' -f2) ;\
+  		for path in $(GO_INSTALL_TOOLS); do \
+  		  match=$$(echo "$(TOOL)" | tr ' ' '|') ;\
+  		  if echo $${path} | grep -qE "$${match}"; then \
+  		  	if echo $${path} | grep -q $${dependency}; then \
+			  echo Installing $${path}@$${version} ;\
+  		  	  GOBIN=$(BINARIES_DIR) go install $${path}@$${version} ;\
+  		  	fi ;\
+  		  fi ;\
+  		done ;\
+  	done
 
-.PHONY: gqlgenc
-gqlgenc: TOOL = gqlgenc
-gqlgenc: --tool ## Download and install gqlgenc in the $GOPATH/bin
+.PHONY: --ensure-binaries-dir
+--ensure-binaries-dir:
+	@mkdir -p $(BINARIES_DIR)
 
-.PHONY: controller-gen
-controller-gen: TOOL = controller-gen
-controller-gen: --tool ## Download and install controller-gen in the $GOPATH/bin
+.PHONY: install-controller-gen
+install-controller-gen: TOOL = controller-gen
+install-controller-gen: --tool ## Download and install controller-gen in the $BINARIES_DIR
 
-.PHONY: kustomize
-kustomize: TOOL = kustomize
-kustomize: --tool ## Download and install kustomize in the $GOPATH/bin
+.PHONY: install-crd-ref-docs
+install-crd-ref-docs: TOOL = crd-ref-docs
+install-crd-ref-docs: --tool ## Download and install crd-ref-docs in the $BINARIES_DIR
 
-.PHONY: helmify
-helmify: TOOL = helmify
-helmify: --tool ## Download and install helmify in the $GOPATH/bin
+.PHONY: install-envsubst
+install-envsubst: TOOL = envsubst
+install-envsubst: --tool ## Download and install envsubst in the $BINARIES_DIR
 
-.PHONY: golangci-lint
-golangci-lint: TOOL = golangci-lint
-golangci-lint: --tool ## Download and install golangci-lint in the $GOPATH/bin
+.PHONY: install-goimports
+install-goimports: TOOL = goimports
+install-goimports: --tool ## Download and install goimports in the $BINARIES_DIR
 
-.PHONY: envtest
-envtest: TOOL = setup-envtest
-envtest: --tool ## Download and install setup-envtest in the $GOPATH/bin
+.PHONY: install-golangci-lint
+install-golangci-lint: TOOL = golangci-lint
+install-golangci-lint: --tool ## Download and install golangci-lint in the $BINARIES_DIR
 
-.PHONY: mockery
-mockery: TOOL = mockery
-mockery: --tool ## Download and install mockery in the $GOPATH/bin
+.PHONY: install-gqlgen
+install-gqlgen: TOOL = gqlgen
+install-gqlgen: --tool ## Download and install gqlgenc in the $BINARIES_DIR
 
-.PHONY: envsubst
-envsubst: TOOL = envsubst
-envsubst: --tool ## Download and install envsubst in the $GOPATH/bin
+.PHONY: install-gqlgenc
+install-gqlgenc: TOOL = gqlgenc
+install-gqlgenc: --tool ## Download and install gqlgenc in the $BINARIES_DIR
 
-.PHONY: crd-ref-docs
-crd-ref-docs: TOOL = crd-ref-docs
-crd-ref-docs: --tool ## Download and install crd-ref-docs in the $GOPATH/bin
+.PHONY: install-helmify
+install-helmify: TOOL = helmify
+install-helmify: --tool ## Download and install helmify in the $BINARIES_DIR
 
-.PHONY: kubebuilder
-kubebuilder: ## ## Download and install kubebuilder in the $GOPATH/bin
-	@curl -L -O --output-dir bin/ "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${OS}_${ARCH}"
-	@chmod +x bin/kubebuilder_${OS}_${ARCH}
-	@mv bin/kubebuilder_${OS}_${ARCH} ${GOPATH}/bin/kubebuilder
+.PHONY: install-kubebuilder
+install-kubebuilder: --ensure-binaries-dir ## ## Download and install kubebuilder in the $BINARIES_DIR
+	@curl -L -O -s --output-dir $(BINARIES_DIR) "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_$(OS)_$(ARCH)"
+	@chmod +x $(BINARIES_DIR)/kubebuilder_$(OS)_$(ARCH)
+	@mv $(BINARIES_DIR)/kubebuilder_$(OS)_$(ARCH) $(BINARIES_DIR)/kubebuilder
+
+.PHONY: install-kustomize
+install-kustomize: TOOL = kustomize
+install-kustomize: --tool ## Download and install kustomize in the $BINARIES_DIR
+
+.PHONY: install-mockery
+install-mockery: TOOL = mockery
+install-mockery: --tool ## Download and install mockery in the $BINARIES_DIR
+
+.PHONY: install-envtest
+install-envtest: TOOL = setup-envtest
+install-envtest: --tool ## Download and install setup-envtest in the $BINARIES_DIR

@@ -1,7 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
-include $(TOOLS_BINARIES_MAKEFILE)
+include $(TOOLS_MAKEFILE)
 
 # Image tag used to deploy controller with helm
 IMG_TAG ?= master
@@ -62,16 +62,19 @@ vet: ## run go vet against code
 	@go vet ./...
 
 .PHONY: lint
-lint: ## run linters
+lint: TOOL = golangci-lint
+lint: --tool ## run linters
 	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: fix
-fix: ## fix issues found by linters
+fix: TOOL = golangci-lint
+fix: --tool ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
-test: manifests generate genmock fmt vet ## run tests
-	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e) -v
+test: TOOL = envtest controller-gen mockery
+test: --tool manifests generate genmock fmt vet ## run tests
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
 .PHONY: e2e
 e2e: ## run e2e tests
@@ -83,20 +86,24 @@ e2e: ## run e2e tests
 codegen: manifests generate genmock codegen-helm codegen-crd-docs ## runs all codegen-related targets
 
 .PHONY: manifests
-manifests: ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
+manifests: TOOL = controller-gen
+manifests: --tool ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=true webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s codegen-chart-crds
 
 .PHONY: generate
-generate: ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
+generate: TOOL = controller-gen
+generate: --tool ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	$(CONTROLLER_GEN) object:headerFile=$(BOILERPLATE_FILE) paths="./..."
 
 .PHONY: genmock
+genmock: TOOL = mockery
 genmock: ## generates mocks before running tests
 	$(MOCKERY)
 
 .PHONY: codegen-helm
-codegen-helm: manifests ## generate controller helm chart with kustomize
+codegen-helm: TOOL = kustomize helmify
+codegen-helm: --tool manifests ## generate controller helm chart with kustomize
 	@rm -rf tmp/
 	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir tmp/charts/controller
 	@find tmp/charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
@@ -107,13 +114,15 @@ codegen-chart-crds: ## copy CRDs to the controller helm chart
 	@cp -a $(CONTROLLER_CHART_DIR)/crds/. $(PLURAL_CONSOLE_CHART_DIR)/crds
 
 .PHONY: codegen-crd-docs
-codegen-crd-docs: ## generate docs from the CRDs
+codegen-crd-docs: TOOL = crd-ref-docs
+codegen-crd-docs: --tool ## generate docs from the CRDs
 	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
 
 ##@ Deployment
 
 .PHONY: deploy-crds-kustomize
-deploy-crds-kustomize: manifests ## deploy CRDs into the K8s cluster specified in ~/.kube/config.
+deploy-crds-kustomize: TOOL = kustomize
+deploy-crds-kustomize: --tool manifests ## deploy CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) apply -f -
 
 ifndef ignore-not-found
@@ -121,15 +130,18 @@ ifndef ignore-not-found
 endif
 
 .PHONY: undeploy-crds-kustomize
-undeploy-crds-kustomize: manifests ## undeploy CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+undeploy-crds-kustomize: TOOL = kustomize
+undeploy-crds-kustomize: --tool manifests ## undeploy CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
 .PHONY: deploy-kustomize
-deploy-kustomize: manifests deploy-crds-kustomize ## deploy controller to the K8s cluster specified in ~/.kube/config.
+deploy-kustomize: TOOL = kustomize
+deploy-kustomize: --tool manifests deploy-crds-kustomize ## deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy-kustomize
-undeploy-kustomize: manifests ## undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+undeploy-kustomize: TOOL = kustomize
+undeploy-kustomize: --tool manifests ## undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
 .PHONY: deploy-helm

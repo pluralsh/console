@@ -40,7 +40,6 @@ jobs:
           go-version-file: go/ai-proxy/go.mod
           cache: true
       - run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - run: PATH=$PATH:$GOPATH/bin make test
   
   publish-docker:
