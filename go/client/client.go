@@ -3805,6 +3805,7 @@ type StackRunFragment struct {
 	Workdir       *string                                            "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                                              "json:\"manageState,omitempty\" graphql:\"manageState\""
 	Variables     map[string]any                                     "json:\"variables,omitempty\" graphql:\"variables\""
+	DryRun        bool                                               "json:\"dryRun\" graphql:\"dryRun\""
 	StateUrls     *StackRunFragment_StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunFragment_StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                                      "json:\"actor,omitempty\" graphql:\"actor\""
@@ -3877,6 +3878,12 @@ func (t *StackRunFragment) GetVariables() map[string]any {
 		t = &StackRunFragment{}
 	}
 	return t.Variables
+}
+func (t *StackRunFragment) GetDryRun() bool {
+	if t == nil {
+		t = &StackRunFragment{}
+	}
+	return t.DryRun
 }
 func (t *StackRunFragment) GetStateUrls() *StackRunFragment_StackRunBaseFragment_StateUrls {
 	if t == nil {
@@ -4065,6 +4072,7 @@ type StackRunBaseFragment struct {
 	Workdir       *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
 	ManageState   *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
 	Variables     map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
+	DryRun        bool                              "json:\"dryRun\" graphql:\"dryRun\""
 	StateUrls     *StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
 	PluralCreds   *StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Actor         *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
@@ -4136,6 +4144,12 @@ func (t *StackRunBaseFragment) GetVariables() map[string]any {
 		t = &StackRunBaseFragment{}
 	}
 	return t.Variables
+}
+func (t *StackRunBaseFragment) GetDryRun() bool {
+	if t == nil {
+		t = &StackRunBaseFragment{}
+	}
+	return t.DryRun
 }
 func (t *StackRunBaseFragment) GetStateUrls() *StackRunBaseFragment_StateUrls {
 	if t == nil {
@@ -26287,6 +26301,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address
@@ -27062,6 +27077,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address
@@ -27369,6 +27385,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address
@@ -27676,6 +27693,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address
@@ -29074,6 +29092,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address
@@ -29385,6 +29404,7 @@ fragment StackRunBaseFragment on StackRun {
 	workdir
 	manageState
 	variables
+	dryRun
 	stateUrls {
 		terraform {
 			address

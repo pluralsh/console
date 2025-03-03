@@ -83,6 +83,7 @@ fragment StackRunBaseFragment on StackRun {
     workdir
     manageState
     variables
+    dryRun
     stateUrls {
         terraform {
             address
