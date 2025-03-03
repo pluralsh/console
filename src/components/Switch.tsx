@@ -30,6 +30,7 @@ export type SwitchProps = UseSwitchProps & { className?: string }
 
 const SwitchSC = styled.label<SwitchStyleProps>(
   ({ $checked, $disabled, $readOnly, theme }) => ({
+    position: 'relative',
     display: 'flex',
     columnGap: theme.spacing.xsmall,
     alignItems: 'center',
