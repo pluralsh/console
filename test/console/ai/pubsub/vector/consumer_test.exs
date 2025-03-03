@@ -31,11 +31,11 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _ -> {:ok, %HTTPoison.Response{status_code: 200, body: "terraform"}} end)
+      expect(HTTPoison, :get, fn "https://test.url", _, [follow_redirect: true] -> {:ok, %HTTPoison.Response{status_code: 200, body: "terraform"}} end)
 
       event = %PubSub.ScmWebhook{
         item: %{
-          "action" => "pull_request",
+          "action" => "closed",
           "pull_request" => %{"merged" => true, "html_url" => "https://github.com/owner/repo/pull/1"},
         },
         actor: hook

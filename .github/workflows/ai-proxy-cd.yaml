@@ -27,7 +27,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -44,7 +44,7 @@ jobs:
   
   publish-docker:
     name: Build and push ai-proxy container
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash

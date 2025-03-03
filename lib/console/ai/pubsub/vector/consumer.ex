@@ -12,7 +12,7 @@ defmodule Console.AI.PubSub.Vector.Consumer do
     end
   end
 
-  defp insert({:ok, [_ | _] = resources}), do: Enum.each(resources, &VectorStore.insert/1)
+  defp insert({:ok, resources}) when is_list(resources), do: Enum.each(resources, &VectorStore.insert/1)
   defp insert({:ok, res}), do: VectorStore.insert(res)
   defp insert(pass), do: pass
 end

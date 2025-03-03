@@ -331,6 +331,7 @@ defmodule Console.AI.CronTest do
       end)
       expect(Console.AI.VectorStore, :fetch, fn "some query" -> {:ok, [
         %Console.AI.VectorStore.Response{
+          type: :pr,
           pr_file: %Console.Deployments.Pr.File{
             url: "https://github.com/pr/url",
             repo: "some/repo",
