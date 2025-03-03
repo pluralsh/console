@@ -1,0 +1,68 @@
+fragment PodDisruptionBudgetList on poddisruptionbudget_PodDisruptionBudgetList {
+  errors
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "poddisruptionbudget_PodDisruptionBudget") {
+    ...PodDisruptionBudget
+  }
+}
+
+fragment PodDisruptionBudget on poddisruptionbudget_PodDisruptionBudget {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  currentHealthy
+  desiredHealthy
+  disruptionsAllowed
+  expectedPods
+}
+
+fragment PodDisruptionBudgetDetail on poddisruptionbudget_PodDisruptionBudgetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  currentHealthy
+  desiredHealthy
+  disruptionsAllowed
+  expectedPods
+  disruptedPods
+}
+
+query PodDisruptionBudgets(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetPodDisruptionBudgetList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "poddisruptionbudget_PodDisruptionBudgetList"
+      path: "poddisruptionbudget/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...PodDisruptionBudgetList
+  }
+}
+
+query PodDisruptionBudget($name: String!, $namespace: String!) {
+  handleGetPodDisruptionBudgetDetail(namespace: $namespace, name: $name)
+    @rest(
+      type: "poddisruptionbudget_PodDisruptionBudgetDetail"
+      path: "poddisruptionbudget/{args.namespace}/{args.name}"
+    ) {
+    ...PodDisruptionBudgetDetail
+  }
+}
