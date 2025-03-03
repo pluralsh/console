@@ -1,5 +1,9 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { CloudAddonFragment, RuntimeServicesQuery } from 'generated/graphql'
+import {
+  CloudAddonFragment,
+  ClusterDistro,
+  RuntimeServicesQuery,
+} from 'generated/graphql'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
@@ -11,6 +15,7 @@ import {
 } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
+import { getDistroProviderIconUrl } from '../../../utils/ClusterDistro.tsx'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
 export type RuntimeService = NonNullable<
@@ -138,7 +143,29 @@ export const cloudColumns = [
   columnHelperCloud.accessor((row) => row?.name, {
     id: 'name',
     header: 'Name',
-    cell: ({ getValue }) => getValue(),
+    cell: function Cell({ getValue }) {
+      const theme = useTheme()
+
+      return (
+        <ColWithIcon
+          icon={getDistroProviderIconUrl({
+            distro: ClusterDistro.Eks,
+            provider: 'AWS',
+            mode: theme.mode,
+          })}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.xxsmall,
+            }}
+          >
+            {getValue()}
+          </div>
+        </ColWithIcon>
+      )
+    },
   }),
   columnHelperCloud.accessor((row) => row?.version, {
     id: 'version',
