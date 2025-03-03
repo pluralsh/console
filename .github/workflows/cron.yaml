@@ -6,25 +6,25 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  api-deprecations-update:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'write'
-      id-token: 'write'
-      pull-requests: 'write'
-    steps:
-      - uses: actions/checkout@v3
-      - run: make liquid-docs
-      - id: date
-        run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
-      - uses: peter-evans/create-pull-request@v5
-        with:
-          title: "Upgrade deprecated apis list"
-          body: Upgrade our deprecations table with all current data
-          commit-message: Upgrade our deprecations table with all current data
-          branch: deprecations-${{steps.date.outputs.date}}
-          labels: enhancement
-          base: master
+  # api-deprecations-update:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: 'write'
+  #     id-token: 'write'
+  #     pull-requests: 'write'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: make liquid-docs
+  #     - id: date
+  #       run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+  #     - uses: peter-evans/create-pull-request@v5
+  #       with:
+  #         title: "Upgrade deprecated apis list"
+  #         body: Upgrade our deprecations table with all current data
+  #         commit-message: Upgrade our deprecations table with all current data
+  #         branch: deprecations-${{steps.date.outputs.date}}
+  #         labels: enhancement
+  #         base: master
 
   run-compatibility-updater:
     runs-on: ubuntu-latest
@@ -37,13 +37,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: setup pyenv
-      uses: "gabrielfalcao/pyenv-action@v18"
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip' # caching pip dependencies
     
     - name: Run compatibility matrix updater
       run: |
         cd utils/compatibility
-        source setup_env.sh
+        pip install -r requirements.txt
         python main.py    
 
     - name: Get current date
