@@ -36,9 +36,6 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getClusterBreadcrumbs } from './Cluster'
 import { UsageBar } from '../../utils/UsageBar.tsx'
-import { ApolloProvider } from '@apollo/client'
-import { client } from '../../../helpers/client.ts'
-import { useParams } from 'react-router-dom'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -176,7 +173,6 @@ const colActions = columnHelper.accessor(() => null, {
 
 export default function Nodes() {
   const cluster = useCluster()
-  const { clusterId } = useParams()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -197,13 +193,11 @@ export default function Nodes() {
   )
 
   return (
-    <ApolloProvider client={KubernetesClient(clusterId ?? '') ?? client}>
-      <ResourceList<NodeListT, NodeT, NodesQuery, NodesQueryVariables>
-        columns={columns}
-        query={useNodesQuery}
-        queryName="handleGetNodeList"
-        itemsKey="nodes"
-      />
-    </ApolloProvider>
+    <ResourceList<NodeListT, NodeT, NodesQuery, NodesQueryVariables>
+      columns={columns}
+      query={useNodesQuery}
+      queryName="handleGetNodeList"
+      itemsKey="nodes"
+    />
   )
 }
