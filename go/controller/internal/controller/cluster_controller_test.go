@@ -2,11 +2,11 @@ package controller_test
 
 import (
 	"context"
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"sort"
 
+	"github.com/Yamashou/gqlgenc/clientv2"
 	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
