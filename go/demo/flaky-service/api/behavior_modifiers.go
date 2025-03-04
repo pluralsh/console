@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/pluralsh/console/go/demo/flaky-service/metrics"
@@ -26,13 +27,14 @@ func HandleRequestTimestampModulus(timestampModulus int64) http.HandlerFunc {
 
 		if time_now%timestampModulus == 0 {
 			slog.Error("found unknown error, returning status.InternalServerError", "time_now", time_now, "modulus", timestampModulus)
+			slog.Error("dumping stacktrace", "stacktrace", string(debug.Stack()))
 
 			metrics.IncrementRequestCounter(http.StatusInternalServerError, r.Method)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"message": "req failed"}`))
 		} else {
-			slog.Info("Timestamp is not multiple of modulus, returning status.OK", "time_now", time_now, "modulus", timestampModulus)
+			slog.Info("Everything seems fine, returning status.OK", "time_now", time_now, "modulus", timestampModulus)
 
 			metrics.IncrementRequestCounter(http.StatusOK, r.Method)
 			w.WriteHeader(http.StatusOK)

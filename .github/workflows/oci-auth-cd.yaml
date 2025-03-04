@@ -21,7 +21,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -37,7 +37,7 @@ jobs:
     - run: PATH=$PATH:$GOPATH/bin make test
   publish-docker:
     name: Build and push oci-auth container
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash

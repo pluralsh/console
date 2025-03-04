@@ -98,7 +98,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
   end
 
   defp get_content(client, url) when is_binary(url) do
-    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}]) do
+    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}], follow_redirect: true) do
       {:ok, %HTTPoison.Response{status_code: code, body: content}}
         when code >= 200 and code < 300 -> content
       _ -> nil

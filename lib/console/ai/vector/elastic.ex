@@ -78,9 +78,7 @@ defmodule Console.AI.Vector.Elastic do
   defp vector_query(embedding) do
     %{
       size: 5,
-      query: %{
-        knn: %{field: "passages.vector", query_vector: embedding, k: 5}
-      }
+      knn: %{field: "passages.vector", query_vector: embedding, k: 5}
     }
   end
 

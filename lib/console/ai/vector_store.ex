@@ -8,12 +8,15 @@ defmodule Console.AI.VectorStore do
   alias Console.Deployments.Settings
 
   defmodule Response do
+    @type type :: :alert | :pr
+
     @type t :: %__MODULE__{
+      type: type,
       pr_file: Console.Deployments.Pr.File.t,
       alert_resolution: Console.Schema.AlertResolution.Mini.t
     }
 
-    defstruct [:pr_file, :alert_resolution]
+    defstruct [:pr_file, :alert_resolution, :type]
   end
 
   @type store :: Console.AI.Vector.Elastic.t

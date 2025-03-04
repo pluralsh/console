@@ -22,7 +22,7 @@ defmodule Console.AI.Evidence.Vector do
     with true <- VectorStore.enabled?(),
          {:ok, %Vector{query: query}} <- use_vector(ctx.history),
          {:ok, [_ | _] = vdata} <- VectorStore.fetch(query) do
-      Context.prompt(ctx, {:user, "I've also found some relevent external data that could add additional context to what caused the issue:"})
+      Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue.:"})
       |> Context.reduce(vdata, &Context.prompt(&2, {:user, vector_prompt(&1)}))
       |> Context.evidence(vector_evidence(vdata))
     else
@@ -32,9 +32,32 @@ defmodule Console.AI.Evidence.Vector do
     end
   end
 
-  defp vector_prompt(%VectorStore.Response{alert_resolution: alert_resolution}),
-    do: "A prior alert resolution with data like so: #{json!(alert_resolution)}"
-  defp vector_prompt(%VectorStore.Response{pr_file: pr_file}), do: "A file from a given pr with data like so: #{json!(pr_file)}"
+  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: alert_resolution}),
+    do: "A prior alert resolution with data like so that likely was caused by the same issue: #{json!(alert_resolution)}"
+  defp vector_prompt(%VectorStore.Response{type: :pr, pr_file: pr_file}) do
+    """
+    A file from a given pull request with information like so, containing a possible code change that caused the issue, described below:
+
+    Pull Request URL: #{pr_file.url}
+    Repo: #{pr_file.repo}
+    PR Title: #{pr_file.title}
+    Commit SHA: #{pr_file.sha}
+    Filename: #{pr_file.filename}
+
+    The full contents of the file is:
+
+    ```
+    #{pr_file.contents}
+    ```
+
+    The git patch of the change is:
+
+    ```
+    #{pr_file.patch}
+    ```
+    """
+  end
+  defp vector_prompt(_), do: nil
 
   defp vector_evidence(vdata) do
     Enum.map(vdata, fn

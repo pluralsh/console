@@ -37,7 +37,7 @@ jobs:
       - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
