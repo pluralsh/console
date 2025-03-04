@@ -179,6 +179,7 @@ import {
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
 } from './kubernetesRoutesConsts'
+import PodDisruptionBudget from '../components/kubernetes/cluster/PodDisruptionBudget.tsx'
 
 export const kubernetesRoutes = (
   <Route
@@ -817,6 +818,16 @@ export const kubernetesRoutes = (
       />
       <Route
         path="raw"
+        element={<Raw />}
+      />
+    </Route>
+    <Route
+      path={`${PDBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+      element={<PodDisruptionBudget />}
+    >
+      <Route
+        index
+        path=""
         element={<Raw />}
       />
     </Route>

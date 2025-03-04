@@ -77,6 +77,7 @@ enum Kind {
   Event = 'event',
   Namespace = 'namespace',
   HorizontalPodAutoscaler = 'horizontalpodautoscaler',
+  PodDisruptionBudget = 'poddisruptionbudget',
   // CRD
   CustomResourceDefinition = 'customresourcedefinition',
   None = '',
