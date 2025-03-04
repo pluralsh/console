@@ -14,14 +14,14 @@ import { Confirm } from 'components/utils/Confirm'
 import { ApolloError } from '@apollo/client'
 
 import {
-  BaseNode,
-  EdgeNode,
+  PipelineBaseNode,
   IconHeading,
   NodeCardList,
   StatusCard,
   gateStateToCardStatus,
   gateStateToSeverity,
-} from './BaseNode'
+  PipelineGateNodeProps,
+} from './PipelineBaseNode'
 
 export const gateStateToApprovalText = {
   [GateState.Open]: 'Approved',
@@ -80,15 +80,13 @@ export function ApproverCard({
   )
 }
 
-export function ApprovalNode(props: EdgeNode) {
-  const {
-    data: { meta, ...edge },
-  } = props
+export function ApprovalNode({ id, data }: PipelineGateNodeProps) {
+  const { meta, ...edge } = data
 
   const gates = edge?.gates
 
   return (
-    <BaseNode {...props}>
+    <PipelineBaseNode id={id}>
       <div className="headerArea">
         <h2 className="heading">Action</h2>
         {meta.state && (
@@ -120,7 +118,7 @@ export function ApprovalNode(props: EdgeNode) {
           )
         )}
       </NodeCardList>
-    </BaseNode>
+    </PipelineBaseNode>
   )
 }
 

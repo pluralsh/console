@@ -6,7 +6,7 @@ import {
   PipelineStageEdgeFragment,
   PipelineStageFragment,
 } from 'generated/graphql'
-import { type Edge } from 'reactflow'
+import { type Edge } from '@xyflow/react'
 import isEmpty from 'lodash/isEmpty'
 import { isNonNullable } from 'utils/isNonNullable'
 import { groupBy } from 'lodash'

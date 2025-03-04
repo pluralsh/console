@@ -1,7 +1,7 @@
 import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { ReactFlowProvider } from 'reactflow'
+import { ReactFlowProvider } from '@xyflow/react'
 
 import { useStackStateQuery } from '../../../generated/graphql'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'

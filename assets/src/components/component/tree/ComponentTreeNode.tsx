@@ -5,7 +5,7 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
-import { type NodeProps, Position } from 'reactflow'
+import { type NodeProps, Position, type Node } from '@xyflow/react'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
@@ -22,14 +22,15 @@ import {
 import { CLUSTER_PARAM_ID } from 'routes/cdRoutesConsts'
 
 import { RawYaml } from '../ComponentRaw'
-import { NodeBaseCard, NodeHandle } from '../../utils/reactflow/nodes'
+import { NodeBaseCardSC, NodeHandleSC } from '../../utils/reactflow/nodes'
 import { ComponentIcon } from '../../cd/services/service/component/misc.tsx'
+
+type ComponentNode = Node<TreeNodeMeta>
 
 export function ComponentTreeNode({
   id,
   data,
-  ...props
-}: NodeProps<TreeNodeMeta> & ComponentProps<typeof NodeBaseCard>) {
+}: NodeProps<ComponentNode> & ComponentProps<typeof NodeBaseCardSC>) {
   const theme = useTheme()
   const clusterId = useParams()[CLUSTER_PARAM_ID]
   const [open, setOpen] = useState(false)
@@ -53,8 +54,8 @@ export function ComponentTreeNode({
       : getResourceDetailsAbsPath(clusterId, kind, name, namespace)
 
   return (
-    <NodeBaseCard
-      {...props}
+    <NodeBaseCardSC
+      id={id}
       css={{
         alignItems: 'center',
         overflow: 'hidden',
@@ -78,11 +79,10 @@ export function ComponentTreeNode({
             }
       }
     >
-      <NodeHandle
+      <NodeHandleSC
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
-        $isOpen
         position={Position.Left}
       />
       <ComponentIcon
@@ -147,15 +147,14 @@ export function ComponentTreeNode({
           placement: 'right',
         }}
       />
-      <NodeHandle
+      <NodeHandleSC
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
-        $isOpen
         position={Position.Right}
       />
       <DetailsModal {...{ open, data, onClose: () => setOpen(false) }} />
-    </NodeBaseCard>
+    </NodeBaseCardSC>
   )
 }
 

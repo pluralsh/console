@@ -1,4 +1,4 @@
-import { NodeProps } from 'reactflow'
+import { NodeProps, Node } from '@xyflow/react'
 import {
   Code,
   IconFrame,
@@ -10,14 +10,19 @@ import { useState } from 'react'
 
 import { StackStateResource } from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
+import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 
-export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
+type StackStateNodeType = Node<StackStateResource, typeof NodeType.Stage>
+
+export function StackStateGraphNode({
+  id,
+  data,
+}: NodeProps<StackStateNodeType>) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const { data } = props
 
   return (
-    <NodeBase {...props}>
+    <NodeBase id={id}>
       <div
         css={{
           display: 'flex',

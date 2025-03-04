@@ -4,16 +4,16 @@ import {
   GlobalServiceFragment,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { type Node, type Edge } from 'reactflow'
-import 'reactflow/dist/style.css'
+import { type Node, type Edge } from '@xyflow/react'
+
 import { chunk } from 'lodash'
 
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import { EdgeType } from '../../utils/reactflow/edges'
 import { pairwise } from '../../../utils/array'
 import {
-  GlobalServiceNodeType,
-  ServiceNodeType,
+  GlobalServiceNodeKey,
+  ServiceNodeKey,
   nodeTypes,
 } from './ServicesTreeDiagramNodes'
 import { DagreGraphOptions } from '../pipelines/utils/nodeLayouter'
@@ -33,14 +33,14 @@ function getNodesAndEdges(
     nodes.push({
       id: service.id,
       position: { x: 0, y: 0 },
-      type: ServiceNodeType,
+      type: ServiceNodeKey,
       data: { ...service },
     })
 
     if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
       edges.push({
         type: EdgeType.Smooth,
-        updatable: false,
+        reconnectable: false,
         id: `${service.id}${service.parent.id}`,
         source: service.parent.id,
         target: service.id,
@@ -50,7 +50,7 @@ function getNodesAndEdges(
     if (service.owner?.id) {
       edges.push({
         type: EdgeType.Smooth,
-        updatable: false,
+        reconnectable: false,
         id: `${service.id}${service.owner.id}`,
         source: service.owner.id,
         target: service.id,
@@ -62,14 +62,14 @@ function getNodesAndEdges(
     nodes.push({
       id: service.id,
       position: { x: 0, y: 0 },
-      type: GlobalServiceNodeType,
+      type: GlobalServiceNodeKey,
       data: { ...service },
     })
 
     if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
       edges.push({
         type: EdgeType.Smooth,
-        updatable: false,
+        reconnectable: false,
         id: `${service.id}${service.parent.id}`,
         source: service.parent.id,
         target: service.id,
@@ -96,7 +96,7 @@ function positionOrphanedNodes(nodes: Node[], edges: Edge[]) {
     for (const [source, target] of pairwise(chunk)) {
       edges.push({
         type: EdgeType.Invisible,
-        updatable: false,
+        reconnectable: false,
         id: `positioning${source.id}${target.id}`,
         source: source.id,
         target: target.id,

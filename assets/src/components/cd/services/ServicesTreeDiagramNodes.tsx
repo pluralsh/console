@@ -15,7 +15,7 @@ import {
 } from '@pluralsh/design-system'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { NodeProps } from 'reactflow'
+import { NodeProps, Node } from '@xyflow/react'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 
@@ -52,27 +52,33 @@ import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
 import { ComponentIcon, ComponentStateChip } from './service/component/misc.tsx'
 
-export const ServiceNodeType = 'plural-services-tree-service-node'
-export const GlobalServiceNodeType = 'plural-services-tree-global-service-node'
+export const ServiceNodeKey = 'plural-services-tree-service-node'
+export const GlobalServiceNodeKey = 'plural-services-tree-global-service-node'
+
+type ServiceNodeType = Node<ServiceTreeNodeFragment, typeof ServiceNodeKey>
+type GlobalServiceNodeType = Node<
+  GlobalServiceFragment,
+  typeof GlobalServiceNodeKey
+>
 
 export const nodeTypes = {
-  [ServiceNodeType]: ServicesTreeDiagramServiceNode,
-  [GlobalServiceNodeType]: ServicesTreeDiagramGlobalServiceNode,
+  [ServiceNodeKey]: ServicesTreeDiagramServiceNode,
+  [GlobalServiceNodeKey]: ServicesTreeDiagramGlobalServiceNode,
 }
 
-export function ServicesTreeDiagramServiceNode(
-  props: NodeProps<ServiceTreeNodeFragment>
-) {
+export function ServicesTreeDiagramServiceNode({
+  id,
+  data,
+}: NodeProps<ServiceNodeType>) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { data } = props
   const [open, setOpen] = useState(false)
   // const componentsLimit = data.components?.length === 20 ? 20 : 19
   // const hiddenComponents = (data.components?.length ?? 0) - componentsLimit
 
   return (
     <NodeBase
-      {...props}
+      id={id}
       // additionalContent={
       //   !isEmpty(data.components) ? (
       //     <NodeBaseCard
@@ -484,16 +490,16 @@ function ModalProp({
   )
 }
 
-export function ServicesTreeDiagramGlobalServiceNode(
-  props: NodeProps<GlobalServiceFragment>
-) {
+export function ServicesTreeDiagramGlobalServiceNode({
+  id,
+  data,
+}: NodeProps<GlobalServiceNodeType>) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { data } = props
 
   return (
     <NodeBase
-      {...props}
+      id={id}
       gap={0}
       padding={0}
       width={336}

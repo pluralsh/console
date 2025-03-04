@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import 'reactflow/dist/style.css'
 
+import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
 import {
   ComponentTreeFragment,
   ServiceDeploymentComponentFragment,
@@ -8,7 +8,6 @@ import {
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import { ComponentTreeNode } from './ComponentTreeNode'
 import { getTreeNodesAndEdges } from './getTreeNodesAndEdges'
-import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
 
 const nodeTypes = {
   component: ComponentTreeNode,

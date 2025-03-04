@@ -1,6 +1,11 @@
+import {
+  BezierEdge,
+  type Edge,
+  EdgeProps,
+  SmoothStepEdge,
+  StepEdge,
+} from '@xyflow/react'
 import { useTheme } from 'styled-components'
-import { BezierEdge, type Edge, SmoothStepEdge, StepEdge } from 'reactflow'
-import { ComponentProps } from 'react'
 
 import { GateState } from '../../../generated/graphql'
 import { useEdgeNodes } from '../../hooks/reactFlowHooks'
@@ -27,22 +32,20 @@ export function isVisible(edge: Edge): boolean {
   return edge.type !== EdgeType.Invisible
 }
 
-function Invisible({ ...props }: ComponentProps<typeof BezierEdge>) {
+function Invisible({ ...props }: EdgeProps) {
   return (
     <BezierEdge
-      data-something="data-something"
       {...props}
       style={{ display: 'none' }}
     />
   )
 }
 
-function Bezier({ style, ...props }: ComponentProps<typeof BezierEdge>) {
+function Bezier({ style, ...props }: EdgeProps) {
   const theme = useTheme()
 
   return (
     <BezierEdge
-      data-something="data-something"
       {...props}
       style={{
         ...style,
@@ -52,12 +55,11 @@ function Bezier({ style, ...props }: ComponentProps<typeof BezierEdge>) {
   )
 }
 
-function Smooth({ style, ...props }: ComponentProps<typeof SmoothStepEdge>) {
+function Smooth({ style, ...props }: EdgeProps) {
   const theme = useTheme()
 
   return (
     <SmoothStepEdge
-      data-something="data-something"
       {...props}
       pathOptions={{ borderRadius: theme.borderRadiuses.medium }}
       style={{
@@ -68,12 +70,11 @@ function Smooth({ style, ...props }: ComponentProps<typeof SmoothStepEdge>) {
   )
 }
 
-function Directed({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Directed({ style, ...props }: EdgeProps) {
   const theme = useTheme()
 
   return (
     <StepEdge
-      data-something="data-something"
       {...props}
       style={{
         ...style,
@@ -84,7 +85,7 @@ function Directed({ style, ...props }: ComponentProps<typeof StepEdge>) {
   )
 }
 
-function Pipeline({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Pipeline({ style, ...props }: EdgeProps) {
   const theme = useTheme()
   const { source } = useEdgeNodes({
     source: props.source,
@@ -95,7 +96,6 @@ function Pipeline({ style, ...props }: ComponentProps<typeof StepEdge>) {
 
   return (
     <StepEdge
-      data-something="data-something"
       {...props}
       style={{
         ...style,

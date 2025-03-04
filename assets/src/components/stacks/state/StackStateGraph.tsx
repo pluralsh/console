@@ -1,7 +1,6 @@
 import { StackState } from 'generated/graphql'
 import { useMemo } from 'react'
-import { type Edge, type Node } from 'reactflow'
-import 'reactflow/dist/style.css'
+import { type Edge, type Node } from '@xyflow/react'
 
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'

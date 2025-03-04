@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 import { StackStateGraph } from 'components/stacks/state/StackStateGraph'
-import { ReactFlowProvider } from 'reactflow'
+import { ReactFlowProvider } from '@xyflow/react'
 
 import { StackRun } from '../../../../generated/graphql'
 
