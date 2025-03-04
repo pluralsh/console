@@ -1,6 +1,6 @@
 import { Card } from '@pluralsh/design-system'
 import { ComponentProps, ReactNode, use } from 'react'
-import { Handle, NodeProps, Position } from 'reactflow'
+import { Handle, NodeProps, Position } from '@xyflow/react'
 import styled, { useTheme } from 'styled-components'
 
 import isEmpty from 'lodash/isEmpty'
@@ -13,9 +13,8 @@ import { DagreDirection } from 'components/cd/pipelines/utils/nodeLayouter'
 
 const HANDLE_SIZE = 8
 
-export const NodeHandle = styled(Handle)<{
+export const NodeHandleSC = styled(Handle)<{
   $isConnected?: boolean
-  $isOpen?: boolean
 }>(({ theme, $isConnected }) => ({
   '&&': {
     visibility: $isConnected ? 'visible' : 'hidden',
@@ -24,16 +23,10 @@ export const NodeHandle = styled(Handle)<{
     borderColor: theme.colors['border-selected'],
     borderWidth: theme.borderWidths.default,
     backgroundColor: theme.colors['border-selected'],
-    '&.react-flow__handle-left': {
-      left: -HANDLE_SIZE / 2,
-    },
-    '&.react-flow__handle-right': {
-      right: -HANDLE_SIZE / 2,
-    },
   },
 }))
 
-export const NodeBaseCard = styled(Card)(({ theme }) => ({
+export const NodeBaseCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   borderColor: theme.colors['border-fill-two'],
   backgroundColor:
@@ -47,17 +40,17 @@ export function NodeBase({
   additionalContent,
   children,
   ...props
-}: NodeProps & {
+}: Pick<NodeProps, 'id'> & {
   additionalContent?: ReactNode
   children: ReactNode
-} & ComponentProps<typeof NodeBaseCard>) {
+} & ComponentProps<typeof NodeBaseCardSC>) {
   const theme = useTheme()
   const { incomers, outgoers } = useNodeEdges(id)
   const { rankdir = 'LR' } = use(GraphLayoutCtx) ?? {}
 
   return (
     <>
-      <NodeBaseCard
+      <NodeBaseCardSC
         {...props}
         css={{
           flexDirection: 'column',
@@ -67,20 +60,20 @@ export function NodeBase({
           padding: theme.spacing.small,
         }}
       >
-        <NodeHandle
+        <NodeHandleSC
           type="target"
           isConnectable={false}
           $isConnected={!isEmpty(incomers.filter(isVisible))}
           position={directionToTargetPosition[rankdir]}
         />
         {children}
-        <NodeHandle
+        <NodeHandleSC
           type="source"
           isConnectable={false}
           $isConnected={!isEmpty(outgoers.filter(isVisible))}
           position={directionToSourcePosition[rankdir]}
         />
-      </NodeBaseCard>
+      </NodeBaseCardSC>
       {additionalContent}
     </>
   )

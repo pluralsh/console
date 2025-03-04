@@ -20,14 +20,14 @@ import { Link } from 'react-router-dom'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import {
-  BaseNode,
-  EdgeNode,
+  PipelineBaseNode,
   IconHeading,
   NodeCardList,
   StatusCard,
   gateStateToCardStatus,
   gateStateToSeverity,
-} from './BaseNode'
+  PipelineGateNodeProps,
+} from './PipelineBaseNode'
 
 export const gateStateToJobText = {
   [GateState.Open]: 'Approved',
@@ -118,14 +118,12 @@ export function ContainerCard({
   )
 }
 
-const JobNodeSC = styled(BaseNode)(({ theme }) => ({
+const JobNodeSC = styled(PipelineBaseNode)(({ theme }) => ({
   '.headerArea2': { display: 'flex', columnGap: theme.spacing.medium },
 }))
 
-export function JobNode(props: EdgeNode) {
-  const {
-    data: { meta, ...edge },
-  } = props
+export function JobNode({ id, data }: PipelineGateNodeProps) {
+  const { meta, ...edge } = data
 
   const gate = edge?.gates?.[0]
   const containers = gate?.spec?.job?.containers
@@ -133,7 +131,7 @@ export function JobNode(props: EdgeNode) {
   if (!gate) return null
 
   return (
-    <JobNodeSC {...props}>
+    <JobNodeSC id={id}>
       <div className="headerArea">
         <h2 className="heading">Action</h2>
         {meta.state && (

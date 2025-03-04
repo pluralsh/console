@@ -2,14 +2,14 @@ import { Chip, TestTubeIcon } from '@pluralsh/design-system'
 import { GateState } from 'generated/graphql'
 
 import {
-  BaseNode,
-  EdgeNode,
-  IconHeading,
-  NodeCardList,
-  StatusCard,
   gateStateToCardStatus,
   gateStateToSeverity,
-} from './BaseNode'
+  IconHeading,
+  NodeCardList,
+  PipelineBaseNode,
+  PipelineGateNodeProps,
+  StatusCard,
+} from './PipelineBaseNode'
 
 const gateStateToTestText = {
   [GateState.Open]: 'Passed',
@@ -18,14 +18,12 @@ const gateStateToTestText = {
   [GateState.Running]: 'Running',
 } as const satisfies Record<GateState, string>
 
-export function TestsNode(props: EdgeNode) {
-  const {
-    data: { meta, ...edge },
-  } = props
+export function TestsNode({ id, data }: PipelineGateNodeProps) {
+  const { meta, ...edge } = data
   const gates = edge?.gates
 
   return (
-    <BaseNode {...props}>
+    <PipelineBaseNode id={id}>
       {meta.state && (
         <div className="headerArea">
           <h2 className="heading">Action</h2>
@@ -59,6 +57,6 @@ export function TestsNode(props: EdgeNode) {
             )
         )}
       </NodeCardList>
-    </BaseNode>
+    </PipelineBaseNode>
   )
 }

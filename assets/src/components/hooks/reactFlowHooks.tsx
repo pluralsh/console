@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { type Edge, useEdges, useNodes } from 'reactflow'
+import { type Edge, useEdges, useNodes } from '@xyflow/react'
 
 export const useNodeEdges = (nodeId: Nullable<string>) => {
   const edges = useEdges()

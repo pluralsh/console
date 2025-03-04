@@ -6,18 +6,22 @@ import {
   StatusOkIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { GateState, PipelineStageEdgeFragment } from 'generated/graphql'
+import { type Node, type NodeProps } from '@xyflow/react'
+import {
+  GateState,
+  PipelineStageEdgeFragment,
+  PipelineStageFragment,
+} from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import {
   cloneElement,
   ComponentProps,
   ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
   ReactElement,
   ReactNode,
   use,
-  useMemo,
 } from 'react'
-import { type Node, type NodeProps, useNodes } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
@@ -26,10 +30,19 @@ import { GraphLayoutCtx } from 'components/utils/reactflow/graph'
 import {
   directionToSourcePosition,
   directionToTargetPosition,
-  NodeBaseCard,
-  NodeHandle,
+  NodeBaseCardSC,
+  NodeHandleSC,
 } from '../../../utils/reactflow/nodes'
-import { reduceGateStates } from '../utils/reduceGateStatuses'
+import { StageStatus } from './StageNode'
+
+type PipelineGateNodeMeta = { meta: { state: GateState } }
+type PipelineStageNodeMeta = { meta: { stageStatus: StageStatus } }
+
+type PipelineStageNode = Node<PipelineStageFragment & PipelineStageNodeMeta>
+type PipelineGateNode = Node<PipelineStageEdgeFragment & PipelineGateNodeMeta>
+
+export type PipelineStageNodeProps = NodeProps<PipelineStageNode>
+export type PipelineGateNodeProps = NodeProps<PipelineGateNode>
 
 export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
 
@@ -46,7 +59,7 @@ export const NodeCardList = styled.ul(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-export const BaseNodeSC = styled(NodeBaseCard)(({ theme }) => ({
+export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
   '&&': {
     position: 'relative',
     padding: theme.spacing.small,
@@ -84,45 +97,28 @@ export const BaseNodeSC = styled(NodeBaseCard)(({ theme }) => ({
   },
 }))
 
-export function BaseNode({
+export function PipelineBaseNode({
   id,
-  data: { meta },
   children,
   ...props
-}: NodeProps<NodeMeta> & { children: ReactNode } & ComponentProps<
-    typeof BaseNodeSC
-  >) {
+}: Pick<PipelineStageNodeProps | PipelineGateNodeProps, 'id'> &
+  ComponentPropsWithRef<typeof BaseNodeSC>) {
   const { incomers, outgoers } = useNodeEdges(id)
-  const nodes = useNodes()
   const { rankdir = 'LR' } = use(GraphLayoutCtx) ?? {}
-
-  const reducedInState = useMemo(() => {
-    const incomingNodes = nodes.filter((node) =>
-      incomers.some((incomer) => incomer.source === node.id)
-    )
-
-    return reduceGateStates(
-      incomingNodes.map((inNode) => ({
-        state: (inNode as Node<NodeMeta>)?.data?.meta?.state,
-      }))
-    )
-  }, [incomers, nodes])
 
   return (
     <BaseNodeSC {...props}>
-      <NodeHandle
+      <NodeHandleSC
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
-        $isOpen={reducedInState === GateState.Open}
         position={directionToTargetPosition[rankdir]}
       />
       {children}
-      <NodeHandle
+      <NodeHandleSC
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
-        $isOpen={meta.state === GateState.Open}
         position={directionToSourcePosition[rankdir]}
       />
     </BaseNodeSC>
@@ -163,10 +159,6 @@ export function IconHeading({
     </IconHeadingSC>
   )
 }
-
-export type NodeMeta = { meta: { state: GateState } }
-
-export type EdgeNode = NodeProps<PipelineStageEdgeFragment & NodeMeta>
 
 const StatusCardSC = styled(Card)(({ theme }) => ({
   '&&': {

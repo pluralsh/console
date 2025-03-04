@@ -21,7 +21,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { DateParam, formatDateTime, isValidDateTime } from 'utils/datetime'
-import { runAfterLayout } from '../pipelines/utils/nodeLayouter'
+import { runAfterBrowserLayout } from '../pipelines/utils/nodeLayouter'
 
 const EMPTY_DATE_STR = '//'
 const EMPTY_TIME_STR = '::'
@@ -97,7 +97,7 @@ export function DateTimeFormInput({
     setIsEnteringTimestamp(false)
     const date = formatDateTime(timestamp, DATE_FORMAT, true)
     const time = formatDateTime(timestamp, TIME_FORMAT, true)
-    runAfterLayout(() => {
+    runAfterBrowserLayout(() => {
       dateInputRef.current?.setValue(date)
       timeInputRef.current?.setValue(time)
     })
