@@ -66,7 +66,20 @@ export default function PodDisruptionBudget(): ReactElement<any> {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={pdb}>
-          <SidecarItem heading="Volume">asd</SidecarItem>
+          <SidecarItem heading="Min available">...</SidecarItem>
+          <SidecarItem heading="Max unavailable">...</SidecarItem>
+          <SidecarItem heading="Unhealthy Pod eviction policy">...</SidecarItem>
+          <SidecarItem heading="Label selector">...</SidecarItem>
+          <SidecarItem heading="Current healthy">
+            {pdb?.currentHealthy}
+          </SidecarItem>
+          <SidecarItem heading="Desired healthy">
+            {pdb?.desiredHealthy}
+          </SidecarItem>
+          <SidecarItem heading="Disruptions allowed">
+            {pdb?.disruptionsAllowed}
+          </SidecarItem>
+          <SidecarItem heading="Expected Pods">{pdb?.expectedPods}</SidecarItem>
         </MetadataSidecar>
       }
     >
