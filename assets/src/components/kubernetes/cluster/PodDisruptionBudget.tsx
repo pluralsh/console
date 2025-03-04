@@ -63,6 +63,8 @@ export default function PodDisruptionBudget(): ReactElement<any> {
 
   if (loading) return <LoadingIndicator />
 
+  console.log(pdb)
+
   return (
     <ResourceDetails
       tabs={directory}
@@ -73,12 +75,16 @@ export default function PodDisruptionBudget(): ReactElement<any> {
               <LabelSelector selector={pdb?.labelSelector} />
             </SidecarItem>
           )}
-          <SidecarItem heading="Min available">
-            {pdb?.minAvailable?.IntVal} TODO
-          </SidecarItem>
-          <SidecarItem heading="Max unavailable">
-            {pdb?.maxUnavailable?.IntVal} TODO
-          </SidecarItem>
+          {!isNullish(pdb?.minAvailable) && (
+            <SidecarItem heading="Min available">
+              {pdb?.minAvailable}
+            </SidecarItem>
+          )}
+          {!isNullish(pdb?.maxUnavailable) && (
+            <SidecarItem heading="Max unavailable">
+              {pdb?.maxUnavailable}
+            </SidecarItem>
+          )}
           {pdb?.unhealthyPodEvictionPolicy && (
             <SidecarItem heading="Unhealthy Pod eviction policy">
               {pdb?.unhealthyPodEvictionPolicy}

@@ -2574,8 +2574,8 @@ export type Poddisruptionbudget_PodDisruptionBudget = {
   disruptionsAllowed: Scalars['Int']['output'];
   expectedPods: Scalars['Int']['output'];
   labelSelector?: Maybe<V1_LabelSelector>;
-  maxUnavailable: Intstr_IntOrString;
-  minAvailable: Intstr_IntOrString;
+  maxUnavailable: Scalars['String']['output'];
+  minAvailable: Scalars['String']['output'];
   objectMeta: Types_ObjectMeta;
   typeMeta: Types_TypeMeta;
   unhealthyPodEvictionPolicy: Scalars['String']['output'];
@@ -2589,8 +2589,8 @@ export type Poddisruptionbudget_PodDisruptionBudgetDetail = {
   disruptionsAllowed: Scalars['Int']['output'];
   expectedPods: Scalars['Int']['output'];
   labelSelector?: Maybe<V1_LabelSelector>;
-  maxUnavailable: Intstr_IntOrString;
-  minAvailable: Intstr_IntOrString;
+  maxUnavailable: Scalars['String']['output'];
+  minAvailable: Scalars['String']['output'];
   objectMeta: Types_ObjectMeta;
   typeMeta: Types_TypeMeta;
   unhealthyPodEvictionPolicy: Scalars['String']['output'];
@@ -5090,11 +5090,11 @@ export type DrainNodeMutationVariables = Exact<{
 
 export type DrainNodeMutation = { __typename?: 'Mutation', handleNodeDrain?: any | null };
 
-export type PodDisruptionBudgetListFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, minAvailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, maxUnavailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> };
+export type PodDisruptionBudgetListFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> };
 
-export type PodDisruptionBudgetFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudget', unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, minAvailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, maxUnavailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
+export type PodDisruptionBudgetFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
 
-export type PodDisruptionBudgetDetailFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, minAvailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, maxUnavailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
+export type PodDisruptionBudgetDetailFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
 
 export type PodDisruptionBudgetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5105,7 +5105,7 @@ export type PodDisruptionBudgetsQueryVariables = Exact<{
 }>;
 
 
-export type PodDisruptionBudgetsQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetList?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, minAvailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, maxUnavailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> } | null };
+export type PodDisruptionBudgetsQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetList?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> } | null };
 
 export type PodDisruptionBudgetQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5113,7 +5113,7 @@ export type PodDisruptionBudgetQueryVariables = Exact<{
 }>;
 
 
-export type PodDisruptionBudgetQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetDetail?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, minAvailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, maxUnavailable: { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null };
+export type PodDisruptionBudgetQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetDetail?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -5122,8 +5122,6 @@ export type TypeMetaFragment = { __typename?: 'types_TypeMeta', kind?: string | 
 export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
 
 export type ConditionFragment = { __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string };
-
-export type IntOrStringFragment = { __typename?: 'intstr_IntOrString', Type: any, IntVal: number, StrVal: string };
 
 export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
@@ -6016,13 +6014,6 @@ export const EventListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${EventFragmentDoc}`;
-export const IntOrStringFragmentDoc = gql`
-    fragment IntOrString on intstr_IntOrString {
-  Type
-  IntVal
-  StrVal
-}
-    `;
 export const SelectorFragmentDoc = gql`
     fragment Selector on v1_LabelSelector {
   matchLabels
@@ -6041,15 +6032,11 @@ export const PodDisruptionBudgetFragmentDoc = gql`
   objectMeta @type(name: "types_ObjectMeta") {
     ...ObjectMeta
   }
-  minAvailable @type(name: "intstr_IntOrString") {
-    ...IntOrString
-  }
-  maxUnavailable @type(name: "intstr_IntOrString") {
-    ...IntOrString
-  }
   labelSelector @type(name: "v1_LabelSelector") {
     ...Selector
   }
+  minAvailable
+  maxUnavailable
   unhealthyPodEvictionPolicy
   currentHealthy
   desiredHealthy
@@ -6058,7 +6045,6 @@ export const PodDisruptionBudgetFragmentDoc = gql`
 }
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
-${IntOrStringFragmentDoc}
 ${SelectorFragmentDoc}`;
 export const PodDisruptionBudgetListFragmentDoc = gql`
     fragment PodDisruptionBudgetList on poddisruptionbudget_PodDisruptionBudgetList {
@@ -6080,15 +6066,11 @@ export const PodDisruptionBudgetDetailFragmentDoc = gql`
   objectMeta @type(name: "types_ObjectMeta") {
     ...ObjectMeta
   }
-  minAvailable @type(name: "intstr_IntOrString") {
-    ...IntOrString
-  }
-  maxUnavailable @type(name: "intstr_IntOrString") {
-    ...IntOrString
-  }
   labelSelector @type(name: "v1_LabelSelector") {
     ...Selector
   }
+  minAvailable
+  maxUnavailable
   unhealthyPodEvictionPolicy
   currentHealthy
   desiredHealthy
@@ -6098,7 +6080,6 @@ export const PodDisruptionBudgetDetailFragmentDoc = gql`
 }
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
-${IntOrStringFragmentDoc}
 ${SelectorFragmentDoc}`;
 export const NetworkPolicyPortFragmentDoc = gql`
     fragment NetworkPolicyPort on v1_NetworkPolicyPort {

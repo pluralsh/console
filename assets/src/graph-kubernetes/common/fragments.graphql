@@ -26,12 +26,6 @@ fragment Condition on common_Condition {
   reason
 }
 
-fragment IntOrString on intstr_IntOrString {
-  Type
-  IntVal
-  StrVal
-}
-
 fragment Probe on v1_Probe {
   failureThreshold
   initialDelaySeconds
