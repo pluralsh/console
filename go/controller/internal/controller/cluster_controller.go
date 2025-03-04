@@ -5,6 +5,13 @@ import (
 	goerrors "errors"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -17,17 +24,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	console "github.com/pluralsh/console/go/client"
-
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-
-	"github.com/pluralsh/console/go/controller/internal/cache"
-
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -187,15 +183,20 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
 	}
-
+	if err := r.ensureCluster(cluster); err != nil {
+		if goerrors.Is(err, operrors.ErrRetriable) {
+			utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, nil
+		}
+	}
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(cluster.TagUpdateAttributes())
+	sha, err := utils.HashObject(cluster.ReadOnlyUpdateAttributes())
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if !cluster.Status.IsSHAEqual(sha) {
-		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.TagUpdateAttributes()); err != nil {
+		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.ReadOnlyUpdateAttributes()); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

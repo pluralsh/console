@@ -110,6 +110,20 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	return attr
 }
 
+func (c *Cluster) ReadOnlyUpdateAttributes() console.ClusterUpdateAttributes {
+	tagAttr := c.TagUpdateAttributes()
+	attr := console.ClusterUpdateAttributes{
+		Handle:   c.Spec.Handle,
+		Tags:     tagAttr.Tags,
+		Metadata: tagAttr.Metadata,
+	}
+	if c.Spec.Bindings != nil {
+		attr.ReadBindings = PolicyBindings(c.Spec.Bindings.Read)
+		attr.WriteBindings = PolicyBindings(c.Spec.Bindings.Write)
+	}
+	return attr
+}
+
 func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
 	var tags []*console.TagAttributes
 	if len(c.Spec.Tags) > 0 {
