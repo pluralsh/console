@@ -2,7 +2,11 @@ defmodule Console.Schema.OperationalLayout do
   use Piazza.Ecto.Schema
   alias Console.Schema.Cluster
 
+  defenum ServiceMesh, linkerd: 0, istio: 1, cilium: 2
+
   schema "operational_layouts" do
+    field :service_mesh, ServiceMesh
+
     embeds_one :namespaces, Namespaces, on_replace: :update do
       field :external_dns,   {:array, :string}
       field :cert_manager,   :string
@@ -19,7 +23,7 @@ defmodule Console.Schema.OperationalLayout do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(cluster_id)a)
+    |> cast(attrs, ~w(cluster_id service_mesh)a)
     |> cast_embed(:namespaces, with: &namespace_changeset/2)
   end
 

@@ -3,11 +3,11 @@
     "properties": {
         "required": {
             "type": "boolean",
-            "description": "whether it would be useful to query a vector store for additional data to troubleshoot this issue"
+            "description": "Whether it would be useful to query a vector store for additional data to troubleshoot this issue"
         },
         "query": {
             "type": "string",
-            "description": "a query to run against a vector store to extract additional data to troubleshoot this issue"
+            "description": "A few sentences to run as a query against a vector store to extract additional data to troubleshoot this issue. This should ideally include useful semantic information like function names, error messages, etc. to explain what's happening."
         }
     },
     "required": ["required", "query"],

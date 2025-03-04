@@ -49,7 +49,7 @@ defmodule Console.AI.VectorStore do
       do: mod.fetch(store, text)
   end
 
-  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %{initialized: true}}}, _), do: :ok
+  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true}}}, _), do: :ok
   defp maybe_init(_, %{__struct__: mod} = store), do: mod.init(store)
 
   defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :elastic, elastic: elastic}}}),

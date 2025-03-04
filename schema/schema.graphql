@@ -4463,6 +4463,12 @@ enum ScalingRecommendationType {
   ROLLOUT
 }
 
+enum ServiceMesh {
+  LINKERD
+  ISTIO
+  CILIUM
+}
+
 enum Conjunction {
   AND
   OR
@@ -4896,6 +4902,7 @@ input ClusterIsoImageAttributes {
 }
 
 input OperationalLayoutAttributes {
+  serviceMesh: ServiceMesh
   namespaces: ClusterNamespacesAttributes
 }
 

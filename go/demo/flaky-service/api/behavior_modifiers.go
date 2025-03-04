@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
@@ -27,7 +28,7 @@ func HandleRequestTimestampModulus(timestampModulus int64) http.HandlerFunc {
 
 		if time_now%timestampModulus == 0 {
 			slog.Error("found unknown error, returning status.InternalServerError", "time_now", time_now, "modulus", timestampModulus)
-			slog.Error("dumping stacktrace", "stacktrace", string(debug.Stack()))
+			slog.Error(fmt.Sprintf("printing stacktrace: %s", string(debug.Stack())))
 
 			metrics.IncrementRequestCounter(http.StatusInternalServerError, r.Method)
 			w.WriteHeader(http.StatusInternalServerError)
