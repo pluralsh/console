@@ -2,7 +2,11 @@ package controller_test
 
 import (
 	"context"
+	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"sort"
+
+	"github.com/pluralsh/console/go/controller/internal/cache"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -25,6 +29,8 @@ import (
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
+
+const namespace = "default"
 
 func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
 	for i := range status.Conditions {
@@ -55,10 +61,10 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		)
 
 		ctx := context.Background()
-		awsNamespacedName := types.NamespacedName{Name: awsClusterName, Namespace: "default"}
-		byokNamespacedName := types.NamespacedName{Name: byokClusterName, Namespace: "default"}
-		awsReadonlyNamespacedName := types.NamespacedName{Name: awsReadonlyClusterName, Namespace: "default"}
-		byokReadonlyNamespacedName := types.NamespacedName{Name: byokReadonlyClusterName, Namespace: "default"}
+		awsNamespacedName := types.NamespacedName{Name: awsClusterName, Namespace: namespace}
+		byokNamespacedName := types.NamespacedName{Name: byokClusterName, Namespace: namespace}
+		awsReadonlyNamespacedName := types.NamespacedName{Name: awsReadonlyClusterName, Namespace: namespace}
+		byokReadonlyNamespacedName := types.NamespacedName{Name: byokReadonlyClusterName, Namespace: namespace}
 
 		BeforeAll(func() {
 			By("Creating AWS provider")
@@ -76,7 +82,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      awsClusterName,
-					Namespace: "default",
+					Namespace: namespace,
 				},
 				Spec: v1alpha1.ClusterSpec{
 					Handle:      lo.ToPtr(awsClusterName),
@@ -90,7 +96,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      byokClusterName,
-					Namespace: "default",
+					Namespace: namespace,
 				},
 				Spec: v1alpha1.ClusterSpec{
 					Handle: lo.ToPtr(byokClusterName),
@@ -102,7 +108,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      awsReadonlyClusterName,
-					Namespace: "default",
+					Namespace: namespace,
 				},
 				Spec: v1alpha1.ClusterSpec{
 					Handle: lo.ToPtr(awsReadonlyClusterName),
@@ -114,7 +120,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      byokReadonlyClusterName,
-					Namespace: "default",
+					Namespace: namespace,
 				},
 				Spec: v1alpha1.ClusterSpec{
 					Handle: lo.ToPtr(byokReadonlyClusterName),
@@ -536,6 +542,100 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				},
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			})))
+		})
+
+		It("should successfully update readonly cluster bindings", func() {
+			cluster := &v1alpha1.Cluster{}
+			Expect(k8sClient.Get(ctx, byokReadonlyNamespacedName, cluster)).NotTo(HaveOccurred())
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{Name: byokReadonlyClusterName, Namespace: namespace},
+			}, func(stack *v1alpha1.Cluster) {
+				stack.Spec.Bindings = &v1alpha1.Bindings{
+					Read: []v1alpha1.Binding{
+						{
+							UserEmail: lo.ToPtr("test@plural.sh"),
+						},
+					},
+				}
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             byokReadonlyClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+			}, nil)
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = k8sClient.Get(ctx, byokReadonlyNamespacedName, cluster)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
+				Status: v1alpha1.Status{
+					ID:  lo.ToPtr(byokReadonlyClusterConsoleID),
+					SHA: lo.ToPtr("QEFWK4PFO6XYSBXXXLRFYEF6FTBAEGSJU2ID3R43IZ2QL4VNVOTQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				CurrentVersion: lo.ToPtr("1.24.11"),
+			})))
+		})
+
+		It("should requeue after get bindings error", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             byokReadonlyClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+			}, nil)
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
+				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
+			})
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
 		})
 	})
 })

@@ -187,15 +187,20 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
 	}
-
+	if err := r.ensureCluster(cluster); err != nil {
+		if goerrors.Is(err, operrors.ErrRetriable) {
+			utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, nil
+		}
+	}
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(cluster.TagUpdateAttributes())
+	sha, err := utils.HashObject(cluster.ReadOnlyUpdateAttributes())
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if !cluster.Status.IsSHAEqual(sha) {
-		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.TagUpdateAttributes()); err != nil {
+		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.ReadOnlyUpdateAttributes()); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
