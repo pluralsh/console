@@ -4,8 +4,8 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  Persistentvolumeclaim_PersistentVolumeClaimList as PodDisruptionBudgetListT, // TODO
-  Persistentvolumeclaim_PersistentVolumeClaim as PodDisruptionBudgetT, // TODO
+  Poddisruptionbudget_PodDisruptionBudgetList as PodDisruptionBudgetListT,
+  Poddisruptionbudget_PodDisruptionBudget as PodDisruptionBudgetT,
   usePodDisruptionBudgetsQuery,
   PodDisruptionBudgetsQuery,
   PodDisruptionBudgetsQueryVariables,
@@ -36,7 +36,23 @@ export const usePodDisruptionBudgetListColumns = () => {
     useDefaultColumns(columnHelper)
 
   return useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp, colAction],
+    () => [
+      colName,
+      colNamespace,
+      columnHelper.accessor((pdb) => pdb.minAvailable, {
+        id: 'minAvailable',
+        header: 'Min available',
+        cell: ({ getValue }) => getValue(),
+      }),
+      columnHelper.accessor((pdb) => pdb.maxUnavailable, {
+        id: 'maxUnavailable',
+        header: 'Max unavailable',
+        cell: ({ getValue }) => getValue(),
+      }),
+      colLabels,
+      colCreationTimestamp,
+      colAction,
+    ],
     [colCreationTimestamp, colLabels, colName, colNamespace, colAction]
   )
 }
