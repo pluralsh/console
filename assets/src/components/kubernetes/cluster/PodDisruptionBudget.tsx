@@ -20,6 +20,8 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './PodDisruptionBudgets'
+import { LabelSelector } from '../common/LabelSelector.tsx'
+import { isNullish } from '@apollo/client/cache/inmemory/helpers'
 
 const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
@@ -66,20 +68,42 @@ export default function PodDisruptionBudget(): ReactElement<any> {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={pdb}>
-          <SidecarItem heading="Min available">...</SidecarItem>
-          <SidecarItem heading="Max unavailable">...</SidecarItem>
-          <SidecarItem heading="Unhealthy Pod eviction policy">...</SidecarItem>
-          <SidecarItem heading="Label selector">...</SidecarItem>
-          <SidecarItem heading="Current healthy">
-            {pdb?.currentHealthy}
+          {pdb?.labelSelector && (
+            <SidecarItem heading="Label selector">
+              <LabelSelector selector={pdb?.labelSelector} />
+            </SidecarItem>
+          )}
+          <SidecarItem heading="Min available">
+            {pdb?.minAvailable?.IntVal} TODO
           </SidecarItem>
-          <SidecarItem heading="Desired healthy">
-            {pdb?.desiredHealthy}
+          <SidecarItem heading="Max unavailable">
+            {pdb?.maxUnavailable?.IntVal} TODO
           </SidecarItem>
-          <SidecarItem heading="Disruptions allowed">
-            {pdb?.disruptionsAllowed}
-          </SidecarItem>
-          <SidecarItem heading="Expected Pods">{pdb?.expectedPods}</SidecarItem>
+          {pdb?.unhealthyPodEvictionPolicy && (
+            <SidecarItem heading="Unhealthy Pod eviction policy">
+              {pdb?.unhealthyPodEvictionPolicy}
+            </SidecarItem>
+          )}
+          {!isNullish(pdb?.currentHealthy) && (
+            <SidecarItem heading="Current healthy">
+              {pdb?.currentHealthy}
+            </SidecarItem>
+          )}
+          {!isNullish(pdb?.desiredHealthy) && (
+            <SidecarItem heading="Desired healthy">
+              {pdb?.desiredHealthy}
+            </SidecarItem>
+          )}
+          {!isNullish(pdb?.disruptionsAllowed) && (
+            <SidecarItem heading="Disruptions allowed">
+              {pdb?.disruptionsAllowed}
+            </SidecarItem>
+          )}
+          {!isNullish(pdb?.expectedPods) && (
+            <SidecarItem heading="Expected Pods">
+              {pdb?.expectedPods}
+            </SidecarItem>
+          )}
         </MetadataSidecar>
       }
     >

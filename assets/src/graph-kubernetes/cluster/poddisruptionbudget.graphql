@@ -15,6 +15,16 @@ fragment PodDisruptionBudget on poddisruptionbudget_PodDisruptionBudget {
   objectMeta @type(name: "types_ObjectMeta") {
     ...ObjectMeta
   }
+  minAvailable @type(name: "intstr_IntOrString") {
+    ...IntOrString
+  }
+  maxUnavailable @type(name: "intstr_IntOrString") {
+    ...IntOrString
+  }
+  labelSelector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  unhealthyPodEvictionPolicy
   currentHealthy
   desiredHealthy
   disruptionsAllowed
@@ -28,6 +38,16 @@ fragment PodDisruptionBudgetDetail on poddisruptionbudget_PodDisruptionBudgetDet
   objectMeta @type(name: "types_ObjectMeta") {
     ...ObjectMeta
   }
+  minAvailable @type(name: "intstr_IntOrString") {
+    ...IntOrString
+  }
+  maxUnavailable @type(name: "intstr_IntOrString") {
+    ...IntOrString
+  }
+  labelSelector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  unhealthyPodEvictionPolicy
   currentHealthy
   desiredHealthy
   disruptionsAllowed
