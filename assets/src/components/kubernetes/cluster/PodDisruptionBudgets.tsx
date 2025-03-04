@@ -6,9 +6,9 @@ import {
   Maybe,
   Persistentvolumeclaim_PersistentVolumeClaimList as PodDisruptionBudgetListT, // TODO
   Persistentvolumeclaim_PersistentVolumeClaim as PodDisruptionBudgetT, // TODO
-  PodDisruptionBudgetQuery,
-  PodDisruptionBudgetQueryVariables,
-  usePodDisruptionBudgetQuery,
+  usePodDisruptionBudgetsQuery,
+  PodDisruptionBudgetsQuery,
+  PodDisruptionBudgetsQueryVariables,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
@@ -51,13 +51,13 @@ export default function PodDisruptionBudgets() {
     <ResourceList<
       PodDisruptionBudgetListT,
       PodDisruptionBudgetT,
-      PodDisruptionBudgetQuery,
-      PodDisruptionBudgetQueryVariables
+      PodDisruptionBudgetsQuery,
+      PodDisruptionBudgetsQueryVariables
     >
       namespaced
       columns={columns}
-      query={usePodDisruptionBudgetQuery}
-      queryName="handleGetPodDisruptionBudgetDetail"
+      query={usePodDisruptionBudgetsQuery}
+      queryName="handleGetPodDisruptionBudgetList"
       itemsKey="items"
     />
   )
