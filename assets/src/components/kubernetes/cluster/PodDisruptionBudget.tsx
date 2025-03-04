@@ -63,8 +63,6 @@ export default function PodDisruptionBudget(): ReactElement<any> {
 
   if (loading) return <LoadingIndicator />
 
-  console.log(pdb)
-
   return (
     <ResourceDetails
       tabs={directory}
