@@ -94,8 +94,8 @@ agent:
   backend: localhost:8150
   proxy:
     image:
-      repository: docker.io/nginx
-      tag: stable-alpine3.17-slim
+      repository: ghcr.io/pluralsh/registry/nginx
+      tag: stable-alpine3.20-slim
       pullPolicy: IfNotPresent
     port: 8180
 
