@@ -118,6 +118,12 @@ ingress:
 redis:
   enabled: true
   architecture: standalone
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: ghcr.io
+    repository: pluralsh/registry/bitnami/redis
   auth:
     enabled: true
     sentinel: false
