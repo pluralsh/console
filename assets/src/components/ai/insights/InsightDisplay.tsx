@@ -61,7 +61,7 @@ export function InsightDisplay({
           type="single"
           value={openItem}
           orientation="horizontal"
-          css={{ border: 'none' }}
+          css={{ border: 'none', maxWidth: '50%' }}
         >
           <AccordionItem
             value={ARBITRARY_VALUE_NAME}
@@ -118,13 +118,12 @@ const ContentHeaderSC = styled.div(({ theme }) => ({
 const LeftSideSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  width: '100%',
+  minWidth: '50%', // overrides flex min width, prevents crowding out the right side
 })
 
 const RightSideSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  width: 450,
   height: '100%',
   borderLeft: theme.borders['fill-three'],
 }))

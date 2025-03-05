@@ -11,12 +11,14 @@ import {
   LogsEvidenceFragment,
   PullRequestEvidenceFragment,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { groupBy, isEmpty } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { LogsEvidencePanel } from './LogsEvidencePanel'
-import { PrEvidencePanel } from './PrEvidencePanel'
 import { PrEvidenceDetails } from './PrEvidenceDetails'
+import { GroupedPrEvidence, PrEvidencePanel } from './PrEvidencePanel'
+
+const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
 
 export function InsightEvidence({
   evidence,
@@ -25,8 +27,7 @@ export function InsightEvidence({
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const [selectedPr, setSelectedPr] =
-    useState<PullRequestEvidenceFragment | null>(null)
+  const [selectedPr, setSelectedPr] = useState<GroupedPrEvidence | null>(null)
 
   const { logEvidence, prEvidence } = useMemo(() => {
     const logEvidence: LogsEvidenceFragment[] = []
@@ -36,7 +37,16 @@ export function InsightEvidence({
       if (type === EvidenceType.Log && logs) logEvidence.push(logs)
       else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
     })
-    return { logEvidence, prEvidence }
+
+    const groupedPrEvidence: GroupedPrEvidence[] = Object.entries(
+      groupBy(prEvidence, (pr) => `${pr.url}${DELIMITER}${pr.title}`)
+    ).map(([key, files]) => ({
+      url: key.split(DELIMITER)[0],
+      title: key.split(DELIMITER)[1],
+      files,
+    }))
+
+    return { logEvidence, prEvidence: groupedPrEvidence }
   }, [evidence])
 
   const [evidenceType, setEvidenceType] = useState(

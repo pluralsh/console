@@ -10,12 +10,18 @@ import styled from 'styled-components'
 import { getURLPath } from 'utils/url'
 import { EvidenceWrapperSC } from './LogsEvidencePanel'
 
+export type GroupedPrEvidence = {
+  url: string
+  title: string
+  files: PullRequestEvidenceFragment[]
+}
+
 export function PrEvidencePanel({
   prs,
   setSelectedPr,
 }: {
-  prs: PullRequestEvidenceFragment[]
-  setSelectedPr: (pr: PullRequestEvidenceFragment) => void
+  prs: GroupedPrEvidence[]
+  setSelectedPr: (pr: GroupedPrEvidence) => void
 }) {
   return (
     <EvidenceWrapperSC>
@@ -29,9 +35,9 @@ export function PrEvidencePanel({
           />
           <StackedText
             truncate
-            first={pr.filename}
+            first={getURLPath(pr.url)}
             firstColor="text"
-            second={getURLPath(pr.url)}
+            second={pr.title}
             css={{ flex: 1 }}
           />
           <IconFrame
@@ -46,7 +52,7 @@ export function PrEvidencePanel({
           />
           <IconFrame
             clickable
-            tooltip="View file diff"
+            tooltip="View file diffs"
             style={{ flexShrink: 0 }}
             icon={<DocumentIcon css={{ '& svg': { width: 20 } }} />}
             onClick={() => setSelectedPr(pr)}

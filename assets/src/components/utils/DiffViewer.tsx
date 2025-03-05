@@ -1,92 +1,91 @@
-import ReactDiffViewer from 'react-diff-viewer'
+import ReactDiffViewer, { ReactDiffViewerProps } from 'react-diff-viewer'
 import { useTheme } from 'styled-components'
-import { Card } from '@pluralsh/design-system'
+import { Card, CardProps, WrapWithIf } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
+import { merge } from 'lodash'
+import { useMemo } from 'react'
 
-type DiffViewerProps = {
-  oldValue: string
-  oldTitle?: string
-  newValue: string
-  newTitle?: string
-  splitView?: boolean
+const opacity = (color: string, opacity: number) => {
+  return chroma(color).alpha(opacity).hex()
 }
 
 export default function DiffViewer({
-  oldValue,
-  oldTitle,
-  newValue,
-  newTitle,
-  splitView = true,
-}: DiffViewerProps) {
+  styles,
+  asCard = true,
+  cardProps,
+  ...props
+}: Omit<ReactDiffViewerProps, 'leftTitle' | 'rightTitle'> & {
+  asCard?: boolean
+  cardProps?: CardProps
+}) {
   const theme = useTheme()
 
-  const commonColors = {
-    diffViewerBackground: theme.colors['fill-one'],
-    highlightBackground: theme.colors['fill-one-selected'],
-    gutterBackground: theme.colors['fill-one-hover'],
-    gutterColor: theme.colors['text-xlight'],
-    codeFoldGutterBackground: theme.colors['fill-one-selected'],
-    codeFoldBackground: theme.colors['fill-one-selected'],
-    codeFoldContentColor: theme.colors.text,
-    emptyLineBackground: theme.colors['fill-one-hover'],
-  }
+  const mergedStyles = useMemo(() => {
+    const commonColors = {
+      diffViewerBackground: 'transparent',
+      gutterBackground: 'transparent',
+      codeFoldGutterBackground: 'transparent',
+    }
+    return merge(
+      {
+        line: { ...theme.partials.text.code },
+        gutter: {
+          '&& pre': { opacity: 1, color: theme.colors['text-xlight'] },
+          minWidth: 'fit-content',
+          paddingLeft: theme.spacing.medium,
+          paddingRight: theme.spacing.large,
+          wordBreak: 'normal',
+        },
+        codeFold: { '& a': { color: theme.colors['text-xlight'] } },
+        codeFoldContent: { color: theme.colors['text-xlight'] },
+        contentText: { paddingRight: theme.spacing.medium },
+        emptyLine: { backgroundColor: 'transparent' },
+        diffContainer: { wordBreak: 'break-word', tabSize: 2 },
+        variables: {
+          dark: {
+            ...commonColors,
+            removedBackground: opacity(theme.colors.red[800], 0.2),
+            removedGutterBackground: opacity(theme.colors.red[800], 0.2),
+            wordRemovedBackground: opacity(theme.colors.red[500], 0.15),
+            addedBackground: opacity(theme.colors.green[850], 0.2),
+            addedGutterBackground: opacity(theme.colors.green[850], 0.2),
+            wordAddedBackground: opacity(theme.colors.green[600], 0.15),
+          },
+          light: {
+            ...commonColors,
+            removedBackground: opacity(theme.colors.red[100], 0.2),
+            removedGutterBackground: opacity(theme.colors.red[100], 0.2),
+            wordRemovedBackground: opacity(theme.colors.red[500], 0.07),
+            addedBackground: opacity(theme.colors.green[100], 0.2),
+            addedGutterBackground: opacity(theme.colors.green[100], 0.2),
+            wordAddedBackground: opacity(theme.colors.green[600], 0.07),
+          },
+        },
+      },
+      styles
+    )
+  }, [styles, theme])
 
   return (
-    <Card
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        maxHeight: '100%',
-        overflow: 'auto',
-      }}
+    <WrapWithIf
+      condition={asCard}
+      wrapper={
+        <Card
+          {...cardProps}
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '100%',
+            overflow: 'auto',
+          }}
+        />
+      }
     >
       <ReactDiffViewer
-        oldValue={oldValue}
-        newValue={newValue}
-        leftTitle={oldTitle}
-        rightTitle={newTitle}
-        splitView={splitView}
         useDarkTheme={theme.mode === 'dark'}
-        styles={{
-          line: { ...theme.partials.text.code },
-          variables: {
-            dark: {
-              ...commonColors,
-              removedBackground: chroma(theme.colors.red[800]).alpha(0.2).hex(),
-              removedGutterBackground: chroma(theme.colors.red[800])
-                .alpha(0.2)
-                .hex(),
-              wordRemovedBackground: chroma(theme.colors.red[500])
-                .alpha(0.15)
-                .hex(),
-              addedBackground: chroma(theme.colors.green[850]).alpha(0.2).hex(),
-              addedGutterBackground: chroma(theme.colors.green[850])
-                .alpha(0.2)
-                .hex(),
-              wordAddedBackground: chroma(theme.colors.green[600])
-                .alpha(0.15)
-                .hex(),
-            },
-            light: {
-              ...commonColors,
-              removedBackground: chroma(theme.colors.red[100]).alpha(0.2).hex(),
-              removedGutterBackground: chroma(theme.colors.red[100])
-                .alpha(0.2)
-                .hex(),
-              wordRemovedBackground: chroma(theme.colors.red[500])
-                .alpha(0.07)
-                .hex(),
-              addedBackground: chroma(theme.colors.green[100]).alpha(0.2).hex(),
-              addedGutterBackground: chroma(theme.colors.green[100])
-                .alpha(0.2)
-                .hex(),
-              wordAddedBackground: chroma(theme.colors.green[600])
-                .alpha(0.07)
-                .hex(),
-            },
-          },
-        }}
+        styles={mergedStyles}
+        {...props}
       />
-    </Card>
+    </WrapWithIf>
   )
 }
