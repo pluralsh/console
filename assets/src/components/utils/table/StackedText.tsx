@@ -71,6 +71,7 @@ export const StackedText = memo(
       </FirstSC>
       {second && (
         <SecondSC
+          $truncate={truncate}
           $partialType={secondPartialType}
           $color={secondColor}
         >

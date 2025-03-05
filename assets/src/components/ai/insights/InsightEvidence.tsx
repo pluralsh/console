@@ -1,11 +1,22 @@
-import { LogsIcon, PrOpenIcon, Tab, TabList } from '@pluralsh/design-system'
-import { AiInsightEvidenceFragment, EvidenceType } from 'generated/graphql'
-import styled, { useTheme } from 'styled-components'
-import { useRef, useState } from 'react'
+import {
+  LogsIcon,
+  Modal,
+  PrOpenIcon,
+  Tab,
+  TabList,
+} from '@pluralsh/design-system'
+import {
+  AiInsightEvidenceFragment,
+  EvidenceType,
+  LogsEvidenceFragment,
+  PullRequestEvidenceFragment,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useMemo, useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { LogsEvidencePanel } from './LogsEvidencePanel'
 import { PrEvidencePanel } from './PrEvidencePanel'
-import { isNonNullable } from 'utils/isNonNullable'
+import { PrEvidenceDetails } from './PrEvidenceDetails'
 
 export function InsightEvidence({
   evidence,
@@ -14,15 +25,19 @@ export function InsightEvidence({
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [selectedPr, setSelectedPr] =
+    useState<PullRequestEvidenceFragment | null>(null)
 
-  const logEvidence = evidence
-    ?.filter((item) => item.type === EvidenceType.Log)
-    .map((item) => item.logs)
-    .filter(isNonNullable)
+  const { logEvidence, prEvidence } = useMemo(() => {
+    const logEvidence: LogsEvidenceFragment[] = []
+    const prEvidence: PullRequestEvidenceFragment[] = []
 
-  // TODO: Add PR evidence when backend supports
-  // const prEvidence = evidence?.filter((item) => item.type === EvidenceType.Pr)
-  const prEvidence = []
+    evidence?.forEach(({ type, logs, pullRequest: pr }) => {
+      if (type === EvidenceType.Log && logs) logEvidence.push(logs)
+      else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
+    })
+    return { logEvidence, prEvidence }
+  }, [evidence])
 
   const [evidenceType, setEvidenceType] = useState(
     !isEmpty(logEvidence) ? EvidenceType.Log : EvidenceType.Pr
@@ -60,10 +75,25 @@ export function InsightEvidence({
         ) : null}
       </TabList>
       {evidenceType === EvidenceType.Log ? (
-        <LogsEvidencePanel logs={logEvidence ?? []} />
+        <LogsEvidencePanel logs={logEvidence} />
       ) : (
-        <PrEvidencePanel />
+        <PrEvidencePanel
+          prs={prEvidence}
+          setSelectedPr={setSelectedPr}
+        />
       )}
+      <Modal
+        open={!!selectedPr}
+        onClose={() => setSelectedPr(null)}
+        size="custom"
+      >
+        {selectedPr && (
+          <PrEvidenceDetails
+            pr={selectedPr}
+            onGoBack={() => setSelectedPr(null)}
+          />
+        )}
+      </Modal>
     </WrapperSC>
   )
 }

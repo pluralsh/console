@@ -1,6 +1,7 @@
 import ReactDiffViewer from 'react-diff-viewer'
 import { useTheme } from 'styled-components'
 import { Card } from '@pluralsh/design-system'
+import chroma from 'chroma-js'
 
 type DiffViewerProps = {
   oldValue: string
@@ -18,6 +19,17 @@ export default function DiffViewer({
   splitView = true,
 }: DiffViewerProps) {
   const theme = useTheme()
+
+  const commonColors = {
+    diffViewerBackground: theme.colors['fill-one'],
+    highlightBackground: theme.colors['fill-one-selected'],
+    gutterBackground: theme.colors['fill-one-hover'],
+    gutterColor: theme.colors['text-xlight'],
+    codeFoldGutterBackground: theme.colors['fill-one-selected'],
+    codeFoldBackground: theme.colors['fill-one-selected'],
+    codeFoldContentColor: theme.colors.text,
+    emptyLineBackground: theme.colors['fill-one-hover'],
+  }
 
   return (
     <Card
@@ -39,14 +51,38 @@ export default function DiffViewer({
           line: { ...theme.partials.text.code },
           variables: {
             dark: {
-              diffViewerBackground: theme.colors['fill-one'],
-              highlightBackground: theme.colors['fill-one-selected'],
-              gutterBackground: theme.colors['fill-one-hover'],
-              gutterColor: theme.colors['text-xlight'],
-              codeFoldGutterBackground: theme.colors['fill-one-selected'],
-              codeFoldBackground: theme.colors['fill-one-selected'],
-              codeFoldContentColor: theme.colors.text,
-              emptyLineBackground: theme.colors['fill-one-hover'],
+              ...commonColors,
+              removedBackground: chroma(theme.colors.red[800]).alpha(0.2).hex(),
+              removedGutterBackground: chroma(theme.colors.red[800])
+                .alpha(0.2)
+                .hex(),
+              wordRemovedBackground: chroma(theme.colors.red[500])
+                .alpha(0.15)
+                .hex(),
+              addedBackground: chroma(theme.colors.green[850]).alpha(0.2).hex(),
+              addedGutterBackground: chroma(theme.colors.green[850])
+                .alpha(0.2)
+                .hex(),
+              wordAddedBackground: chroma(theme.colors.green[600])
+                .alpha(0.15)
+                .hex(),
+            },
+            light: {
+              ...commonColors,
+              removedBackground: chroma(theme.colors.red[100]).alpha(0.2).hex(),
+              removedGutterBackground: chroma(theme.colors.red[100])
+                .alpha(0.2)
+                .hex(),
+              wordRemovedBackground: chroma(theme.colors.red[500])
+                .alpha(0.07)
+                .hex(),
+              addedBackground: chroma(theme.colors.green[100]).alpha(0.2).hex(),
+              addedGutterBackground: chroma(theme.colors.green[100])
+                .alpha(0.2)
+                .hex(),
+              wordAddedBackground: chroma(theme.colors.green[600])
+                .alpha(0.07)
+                .hex(),
             },
           },
         }}

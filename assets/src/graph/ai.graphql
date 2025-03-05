@@ -83,6 +83,9 @@ fragment AiInsightEvidence on AiInsightEvidence {
   logs {
     ...LogsEvidence
   }
+  pullRequest {
+    ...PullRequestEvidence
+  }
   insertedAt
   updatedAt
 }
@@ -93,6 +96,16 @@ fragment LogsEvidence on LogsEvidence {
   lines {
     ...LogLine
   }
+}
+
+fragment PullRequestEvidence on PullRequestEvidence {
+  contents
+  filename
+  patch
+  repo
+  sha
+  title
+  url
 }
 
 fragment ClusterInsightComponent on ClusterInsightComponent {

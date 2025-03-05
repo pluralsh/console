@@ -21,7 +21,7 @@ export function LogsEvidencePanel({ logs }: { logs: LogsEvidenceFragment[] }) {
     selectedLog?.lines?.filter(isNonNullable).map((line) => line) ?? []
 
   return (
-    <WrapperSC>
+    <EvidenceWrapperSC>
       {selectedLog ? (
         <>
           <Flex padding="medium">
@@ -53,15 +53,19 @@ export function LogsEvidencePanel({ logs }: { logs: LogsEvidenceFragment[] }) {
               type="floating"
             />
             <span css={{ ...TRUNCATE, flex: 1 }}>{log.lines?.[0]?.log}</span>
-            <IconFrame icon={<CaretRightIcon />} />
+            <IconFrame
+              clickable
+              icon={<CaretRightIcon />}
+              onClick={() => setSelectedLog(log)}
+            />
           </LogEvidenceLineSC>
         ))
       )}
-    </WrapperSC>
+    </EvidenceWrapperSC>
   )
 }
 
-const WrapperSC = styled.div((_) => ({
+export const EvidenceWrapperSC = styled.div((_) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
