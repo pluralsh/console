@@ -32,8 +32,21 @@ defmodule Console.AI.Evidence.Vector do
     end
   end
 
-  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: alert_resolution}),
-    do: "A prior alert resolution with data like so that likely was caused by the same issue: #{json!(alert_resolution)}"
+  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: res}) do
+    """
+    A prior alert resolution with data like so that likely was caused by the same issue, with information below:
+
+    Metadata:
+      Title: #{res.title}
+      Message: #{res.message}
+      Severity: #{res.severity}
+
+    And the logged resolution was:
+
+    #{res.resolution}
+    """
+  end
+
   defp vector_prompt(%VectorStore.Response{type: :pr, pr_file: pr_file}) do
     """
     A file from a given pull request with information like so, containing a possible code change that caused the issue, described below:
@@ -75,7 +88,4 @@ defmodule Console.AI.Evidence.Vector do
       _ -> false
     end
   end
-
-  defp json!(%{__struct: _} = args), do: Map.from_struct(args) |> json!()
-  defp json!(data), do: Jason.encode!(data)
 end
