@@ -105,8 +105,7 @@ defmodule Console.AI.Cron do
     |> Enum.each(fn
       {res, {:ok, insight}} ->
         handle_notify(event, {res, insight})
-      res ->
-        Logger.info "not sending event for result: #{inspect(res)}"
+      _ -> :ok
     end)
   end
 

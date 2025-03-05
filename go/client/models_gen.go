@@ -3505,7 +3505,8 @@ type OpenaiSettingsAttributes struct {
 }
 
 type OperationalLayoutAttributes struct {
-	Namespaces *ClusterNamespacesAttributes `json:"namespaces,omitempty"`
+	ServiceMesh *ServiceMesh                 `json:"serviceMesh,omitempty"`
+	Namespaces  *ClusterNamespacesAttributes `json:"namespaces,omitempty"`
 }
 
 type PageInfo struct {
@@ -8255,6 +8256,49 @@ func (e *ServiceDeploymentStatus) UnmarshalGQL(v any) error {
 }
 
 func (e ServiceDeploymentStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ServiceMesh string
+
+const (
+	ServiceMeshLinkerd ServiceMesh = "LINKERD"
+	ServiceMeshIstio   ServiceMesh = "ISTIO"
+	ServiceMeshCilium  ServiceMesh = "CILIUM"
+)
+
+var AllServiceMesh = []ServiceMesh{
+	ServiceMeshLinkerd,
+	ServiceMeshIstio,
+	ServiceMeshCilium,
+}
+
+func (e ServiceMesh) IsValid() bool {
+	switch e {
+	case ServiceMeshLinkerd, ServiceMeshIstio, ServiceMeshCilium:
+		return true
+	}
+	return false
+}
+
+func (e ServiceMesh) String() string {
+	return string(e)
+}
+
+func (e *ServiceMesh) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ServiceMesh(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ServiceMesh", str)
+	}
+	return nil
+}
+
+func (e ServiceMesh) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

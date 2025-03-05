@@ -22,7 +22,7 @@ defmodule Console.AI.Evidence.Vector do
     with true <- VectorStore.enabled?(),
          {:ok, %Vector{query: query}} <- use_vector(ctx.history),
          {:ok, [_ | _] = vdata} <- VectorStore.fetch(query) do
-      Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue.:"})
+      Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue in rough order of relevance:"})
       |> Context.reduce(vdata, &Context.prompt(&2, {:user, vector_prompt(&1)}))
       |> Context.evidence(vector_evidence(vdata))
     else

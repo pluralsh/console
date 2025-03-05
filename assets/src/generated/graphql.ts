@@ -4256,6 +4256,7 @@ export enum Operation {
 
 export type OperationalLayoutAttributes = {
   namespaces?: InputMaybe<ClusterNamespacesAttributes>;
+  serviceMesh?: InputMaybe<ServiceMesh>;
 };
 
 export type PageInfo = {
@@ -8463,6 +8464,12 @@ export type ServiceImport = {
 export type ServiceImportAttributes = {
   stackId: Scalars['ID']['input'];
 };
+
+export enum ServiceMesh {
+  Cilium = 'CILIUM',
+  Istio = 'ISTIO',
+  Linkerd = 'LINKERD'
+}
 
 export type ServicePort = {
   __typename?: 'ServicePort';

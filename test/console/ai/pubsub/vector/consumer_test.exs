@@ -45,6 +45,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       {:ok, c} = count_index(vector_index())
       assert c > 0
+
+      settings = Console.Deployments.Settings.fetch_consistent()
+      assert settings.ai.vector_store.initialized
     end
   end
 

@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   ecto_enum :cluster_distro, Cluster.Distro
   ecto_enum :upgrade_insight_status, Console.Schema.UpgradeInsight.Status
   ecto_enum :scaling_recommendation_type, Console.Schema.ClusterScalingRecommendation.Type
+  ecto_enum :service_mesh, Console.Schema.OperationalLayout.ServiceMesh
 
   enum :conjunction do
     value :and
@@ -318,7 +319,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :operational_layout_attributes do
-    field :namespaces, :cluster_namespaces_attributes
+    field :service_mesh, :service_mesh
+    field :namespaces,   :cluster_namespaces_attributes
   end
 
   input_object :cluster_namespaces_attributes do
