@@ -124,6 +124,7 @@ redis:
   image:
     registry: ghcr.io
     repository: pluralsh/registry/bitnami/redis
+    tag: 7.4.2-debian-12-r5
   auth:
     enabled: true
     sentinel: false
