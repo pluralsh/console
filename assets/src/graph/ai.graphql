@@ -6,9 +6,6 @@ fragment AiInsight on AiInsight {
   freshness
   updatedAt
   insertedAt
-  evidence {
-    ...AiInsightEvidence
-  }
   error {
     message
     source
@@ -26,6 +23,9 @@ fragment AiInsightSummary on AiInsight {
 }
 
 fragment AiInsightContext on AiInsight {
+  evidence {
+    ...AiInsightEvidence
+  }
   cluster {
     id
     name

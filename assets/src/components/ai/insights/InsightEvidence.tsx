@@ -23,30 +23,14 @@ const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be i
 export function InsightEvidence({
   evidence,
 }: {
-  evidence?: AiInsightEvidenceFragment[]
+  evidence: AiInsightEvidenceFragment[]
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const [selectedPr, setSelectedPr] = useState<GroupedPrEvidence | null>(null)
 
   const { logEvidence, prEvidence } = useMemo(() => {
-    const logEvidence: LogsEvidenceFragment[] = []
-    const prEvidence: PullRequestEvidenceFragment[] = []
-
-    evidence?.forEach(({ type, logs, pullRequest: pr }) => {
-      if (type === EvidenceType.Log && logs) logEvidence.push(logs)
-      else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
-    })
-
-    const groupedPrEvidence: GroupedPrEvidence[] = Object.entries(
-      groupBy(prEvidence, (pr) => `${pr.url}${DELIMITER}${pr.title}`)
-    ).map(([key, files]) => ({
-      url: key.split(DELIMITER)[0],
-      title: key.split(DELIMITER)[1],
-      files,
-    }))
-
-    return { logEvidence, prEvidence: groupedPrEvidence }
+    return aggregateInsightEvidence(evidence)
   }, [evidence])
 
   const [evidenceType, setEvidenceType] = useState(
@@ -106,6 +90,28 @@ export function InsightEvidence({
       </Modal>
     </WrapperSC>
   )
+}
+
+export const aggregateInsightEvidence = (
+  evidence: AiInsightEvidenceFragment[]
+) => {
+  const logEvidence: LogsEvidenceFragment[] = []
+  const prEvidence: PullRequestEvidenceFragment[] = []
+
+  evidence?.forEach(({ type, logs, pullRequest: pr }) => {
+    if (type === EvidenceType.Log && logs) logEvidence.push(logs)
+    else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
+  })
+
+  const groupedPrEvidence: GroupedPrEvidence[] = Object.entries(
+    groupBy(prEvidence, (pr) => `${pr.url}${DELIMITER}${pr.title}`)
+  ).map(([key, files]) => ({
+    url: key.split(DELIMITER)[0],
+    title: key.split(DELIMITER)[1],
+    files,
+  }))
+
+  return { logEvidence, prEvidence: groupedPrEvidence }
 }
 
 const WrapperSC = styled.div({

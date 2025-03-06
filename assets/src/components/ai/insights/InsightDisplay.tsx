@@ -84,7 +84,7 @@ export function InsightDisplay({
                   tooltip="Close panel"
                 />
               </ContentHeaderSC>
-              <InsightEvidence evidence={evidence} />
+              <InsightEvidence evidence={evidence ?? []} />
             </RightSideSC>
           </AccordionItem>
         </Accordion>
@@ -110,6 +110,7 @@ const ContentHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   height: HEADER_HEIGHT,
+  minWidth: 'max-content',
   background: theme.colors['fill-two'],
   borderBottom: theme.borders['fill-two'],
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
@@ -118,6 +119,7 @@ const ContentHeaderSC = styled.div(({ theme }) => ({
 const LeftSideSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   minWidth: '50%', // overrides flex min width, prevents crowding out the right side
 })
 
