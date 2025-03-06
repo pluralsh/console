@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: flaky-service
-          image: ghcr.io/pluralsh/flaky-service:{{ configuration.tag | default: "v1.0.0" }}
+          image: ghcr.io/pluralsh/flaky-service:v1.0.0  # Consider a stable version here
           imagePullPolicy: Always
           ports:
             - containerPort: 8080  # API Server
@@ -30,7 +30,6 @@ spec:
             requests:
               cpu: "20m"
               memory: "100Mi"
-        
         - name: flaky-service-sidecar
           image: ghcr.io/pluralsh/flaky-service-sidecar:v1.0.0
           imagePullPolicy: Always
