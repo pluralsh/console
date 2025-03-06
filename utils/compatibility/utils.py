@@ -236,8 +236,7 @@ def sort_versions(versions):
 def merge_versions(existing_versions, new_versions):
     for new_version in new_versions:
         version_num = new_version["version"]
-        if version_num not in existing_versions:
-            existing_versions[version_num] = new_version
+        existing_versions[version_num] = new_version
     return existing_versions
 
 
