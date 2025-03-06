@@ -26,6 +26,9 @@ export const CaptionP = styled.p<TextProps>(({ theme, $color }) => ({
   ...theme.partials.text.caption,
   color: $color && theme.colors[$color],
 }))
+export const StrongSC = styled.strong<TextProps>(({ theme, $color }) => ({
+  color: $color && theme.colors[$color],
+}))
 export const OverlineH1 = styled.h1<TextProps>(({ theme, $color }) => ({
   ...theme.partials.text.overline,
   color: $color && theme.colors[$color],

@@ -33,6 +33,8 @@ import {
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -50,6 +52,7 @@ export function ChatbotPanelThread({
       behavior: 'smooth',
     })
   }, [messageListRef])
+  const evidence = currentThread.insight?.evidence?.filter(isNonNullable)
 
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
   useAiChatStreamSubscription({
@@ -159,6 +162,9 @@ export function ChatbotPanelThread({
           ) : (
             <GeneratingResponseMessage />
           ))}
+        {evidence && !sendingMessage && (
+          <ChatbotPanelEvidence evidence={evidence} />
+        )}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}

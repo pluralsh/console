@@ -1,10 +1,12 @@
 import {
   Button,
+  Card,
   CaretRightIcon,
   Flex,
   IconFrame,
   LogsIcon,
   ReturnIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -13,7 +15,13 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
-export function LogsEvidencePanel({ logs }: { logs: LogsEvidenceFragment[] }) {
+export function LogsEvidencePanel({
+  logs,
+  isTable = true,
+}: {
+  logs: LogsEvidenceFragment[]
+  isTable?: boolean
+}) {
   const [selectedLog, setSelectedLog] = useState<LogsEvidenceFragment | null>(
     null
   )
@@ -21,9 +29,12 @@ export function LogsEvidencePanel({ logs }: { logs: LogsEvidenceFragment[] }) {
     selectedLog?.lines?.filter(isNonNullable).map((line) => line) ?? []
 
   return (
-    <WrapperSC>
+    <EvidenceWrapperSC $table={isTable}>
       {selectedLog ? (
-        <>
+        <WrapWithIf
+          condition={!isTable}
+          wrapper={<Card css={{ maxHeight: 300, overflow: 'auto' }} />}
+        >
           <Flex padding="medium">
             <Button
               secondary
@@ -40,45 +51,65 @@ export function LogsEvidencePanel({ logs }: { logs: LogsEvidenceFragment[] }) {
               line={line}
             />
           ))}
-        </>
+        </WrapWithIf>
       ) : (
         logs.map((log, i) => (
-          <LogEvidenceLineSC
-            key={i}
-            onClick={() => setSelectedLog(log)}
+          <WrapWithIf
+            condition={!isTable}
+            wrapper={
+              <Card
+                clickable
+                key={i}
+              />
+            }
           >
-            <IconFrame
-              icon={<LogsIcon />}
-              css={{ flexShrink: 0 }}
-              type="floating"
-            />
-            <span css={{ ...TRUNCATE, flex: 1 }}>{log.lines?.[0]?.log}</span>
-            <IconFrame icon={<CaretRightIcon />} />
-          </LogEvidenceLineSC>
+            <LogEvidenceLineSC
+              key={i}
+              $table={isTable}
+              onClick={() => setSelectedLog(log)}
+            >
+              <IconFrame
+                icon={<LogsIcon />}
+                css={{ flexShrink: 0 }}
+                type="floating"
+              />
+              <span css={{ ...TRUNCATE, flex: 1 }}>{log.lines?.[0]?.log}</span>
+              <IconFrame
+                clickable
+                icon={<CaretRightIcon />}
+                onClick={() => setSelectedLog(log)}
+              />
+            </LogEvidenceLineSC>
+          </WrapWithIf>
         ))
       )}
-    </WrapperSC>
+    </EvidenceWrapperSC>
   )
 }
 
-const WrapperSC = styled.div((_) => ({
+export const EvidenceWrapperSC = styled.div<{
+  $table?: boolean
+}>(({ theme, $table }) => ({
   display: 'flex',
   flexDirection: 'column',
+  gap: $table ? 0 : theme.spacing.medium,
   height: '100%',
   overflow: 'auto',
 }))
 
-const LogEvidenceLineSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
-  width: '100%',
-  color: theme.colors['text-light'],
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  cursor: 'pointer',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders.input,
-  '&:hover': {
-    backgroundColor: theme.colors['fill-one-hover'],
-  },
-}))
+const LogEvidenceLineSC = styled.div<{ $table: boolean }>(
+  ({ theme, $table }) => ({
+    ...theme.partials.text.body2Bold,
+    width: '100%',
+    color: theme.colors['text-light'],
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.small,
+    cursor: 'pointer',
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    borderBottom: $table ? theme.borders.input : 'none',
+    '&:hover': {
+      backgroundColor: $table ? theme.colors['fill-one-hover'] : 'transparent',
+    },
+  })
+)

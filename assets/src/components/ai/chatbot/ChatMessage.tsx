@@ -70,7 +70,10 @@ export function ChatMessage({
   }
 
   return pullRequest ? (
-    <PrLinkout pullRequest={pullRequest} />
+    <PrChatMesssage
+      url={pullRequest.url}
+      title={pullRequest.title ?? ''}
+    />
   ) : (
     <ChatMessageSC
       $role={role}
@@ -226,7 +229,7 @@ function ChatMessageActions({
   )
 }
 
-function PrLinkout({ pullRequest }: { pullRequest: PullRequestFragment }) {
+function PrChatMesssage({ url, title }: { url: string; title: string }) {
   const theme = useTheme()
   return (
     <Flex
@@ -238,37 +241,47 @@ function PrLinkout({ pullRequest }: { pullRequest: PullRequestFragment }) {
       gap="xsmall"
     >
       <CaptionP $color="text-light">PR generated from chat context</CaptionP>
-      <Card
-        clickable
-        onClick={() => {
-          window.open(pullRequest.url, '_blank')
-        }}
-        css={{
-          padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
-          width: '100%',
-        }}
+      <PrLinkoutCard
+        url={url}
+        title={title}
+      />
+    </Flex>
+  )
+}
+
+export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
+  const theme = useTheme()
+  return (
+    <Card
+      clickable
+      onClick={() => {
+        window.open(url, '_blank')
+      }}
+      css={{
+        padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
+        width: '100%',
+      }}
+    >
+      <Flex
+        justify="space-between"
+        align="center"
       >
         <Flex
-          justify="space-between"
+          gap="small"
           align="center"
         >
-          <Flex
-            gap="small"
-            align="center"
-          >
-            <AppIcon
-              icon={<GitHubLogoIcon size={32} />}
-              size="xsmall"
-            />
-            <Body2BoldP $color="text-light">{pullRequest.title}</Body2BoldP>
-          </Flex>
-          <ArrowTopRightIcon
-            color="icon-light"
-            size={20}
+          <AppIcon
+            icon={<GitHubLogoIcon size={32} />}
+            size="xsmall"
           />
+          <Body2BoldP $color="text-light">{title}</Body2BoldP>
         </Flex>
-      </Card>
-    </Flex>
+        <ArrowTopRightIcon
+          color="icon-light"
+          size={20}
+        />
+      </Flex>
+    </Card>
   )
 }
 
