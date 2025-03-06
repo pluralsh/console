@@ -273,12 +273,12 @@ def reduce_versions(versions):
 
         if version and (
             cur_major != version.major      # add to reduced_versions if it's a new major version
-            # or cur_minor != version.minor # or if it's a new minor version
+            or cur_minor != version.minor   # or if it's a new minor version
             or cur_kube != set(kube)        # or if kube list changed
             or i == 0                       # or if it's the latest version
         ):
             cur_major = version.major
-            # cur_minor = version.minor
+            cur_minor = version.minor
             cur_kube = set(kube)
 
             version_info = OrderedDict(
