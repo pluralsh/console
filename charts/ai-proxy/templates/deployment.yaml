@@ -24,7 +24,7 @@ spec:
         {{- end }}
     spec:
       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: ai-proxy
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
