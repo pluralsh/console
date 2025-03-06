@@ -3,6 +3,7 @@ defmodule Console.AI.Evidence.Vector do
     Provider,
     VectorStore,
     Tools.Vector,
+    Vector.Storable,
     Evidence.Context
   }
 
@@ -32,44 +33,8 @@ defmodule Console.AI.Evidence.Vector do
     end
   end
 
-  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: res}) do
-    """
-    A prior alert resolution with data like so that likely was caused by the same issue, with information below:
-
-    Metadata:
-      Title: #{res.title}
-      Message: #{res.message}
-      Severity: #{res.severity}
-
-    And the logged resolution was:
-
-    #{res.resolution}
-    """
-  end
-
-  defp vector_prompt(%VectorStore.Response{type: :pr, pr_file: pr_file}) do
-    """
-    A file from a given pull request with information like so, containing a possible code change that caused the issue, described below:
-
-    Pull Request URL: #{pr_file.url}
-    Repo: #{pr_file.repo}
-    PR Title: #{pr_file.title}
-    Commit SHA: #{pr_file.sha}
-    Filename: #{pr_file.filename}
-
-    The full contents of the file is:
-
-    ```
-    #{pr_file.contents}
-    ```
-
-    The git patch of the change is:
-
-    ```
-    #{pr_file.patch}
-    ```
-    """
-  end
+  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: res}), do: Storable.prompt(res)
+  defp vector_prompt(%VectorStore.Response{type: :pr, pr_file: pr_file}), do: Storable.prompt(pr_file)
   defp vector_prompt(_), do: nil
 
   defp vector_evidence(vdata) do

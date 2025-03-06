@@ -3,7 +3,7 @@ defmodule Console.Deployments.Pr.File do
 
   @type t :: %__MODULE__{sha: binary, contents: binary, filename: binary, patch: binary}
 
-  defstruct [:url, :repo, :title, :sha, :contents, :filename, :patch]
+  defstruct [:url, :repo, :title, :sha, :contents, :filename, :patch, :base, :head]
 
   def new(args) do
     %__MODULE__{
@@ -13,7 +13,9 @@ defmodule Console.Deployments.Pr.File do
       sha: args["sha"],
       contents: args["contents"],
       filename: args["filename"],
-      patch: args["patch"]
+      patch: args["patch"],
+      base: args["base"],
+      head: args["head"]
     }
   end
 

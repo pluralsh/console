@@ -91,6 +91,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
         filename: f["filename"],
         sha: f["sha"],
         patch: f["patch"],
+        base: get_in(f, ~w(base ref)),
+        head: get_in(f, ~w(head ref))
       }
     end)
     |> Enum.filter(& &1.contents)

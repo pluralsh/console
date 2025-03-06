@@ -27,7 +27,7 @@ func HandleRequestTimestampModulus(timestampModulus int64) http.HandlerFunc {
 		time_now := time.Now().UnixNano() / int64(time.Millisecond)
 
 		if time_now%timestampModulus == 0 {
-			slog.Error("found unknown error, returning status.InternalServerError", "time_now", time_now, "modulus", timestampModulus)
+			slog.Error("found mysterious error, returning status.InternalServerError", "time_now", time_now, "modulus", timestampModulus)
 			slog.Error(fmt.Sprintf("printing stacktrace: %s", string(debug.Stack())))
 
 			metrics.IncrementRequestCounter(http.StatusInternalServerError, r.Method)
