@@ -8,23 +8,17 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 34.4.1
-- version: 3.3.3
+- version: 3.3.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  chart_version: 34.3.0
-- version: 3.3.2
-  kube: ['1.31', '1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  chart_version: 34.1.0
-- version: 3.1.5
+- version: 3.2.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  chart_version: 32.1.0
+  chart_version: 33.0.0
 - version: 3.1.4
-  kube: ['1.31', '1.30', '1.29', '1.28']
+  kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   chart_version: 31.1.1

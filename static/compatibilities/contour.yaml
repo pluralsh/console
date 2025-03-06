@@ -13,10 +13,20 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 19.0.0
+- version: 1.29.0
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  chart_version: 18.0.0
 - version: 1.28.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+- version: 1.27.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  chart_version: 15.0.0
 - version: 1.26.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -41,6 +51,11 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 9.0.0
+- version: 1.21.0
+  kube: ['1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  chart_version: 8.0.0
 - version: 1.20.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
@@ -49,12 +64,36 @@ versions:
   kube: ['1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+- version: 1.18.0
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+- version: 1.17.0
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+- version: 1.16.0
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
 - version: 1.15.0
   kube: ['1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+- version: 1.14.0
+  kube: ['1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
 - version: 1.13.0
   kube: ['1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+- version: 1.12.0
+  kube: ['1.19', '1.18', '1.17']
+  requirements: []
+  incompatibilities: []
+- version: 1.11.0
+  kube: ['1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
 - version: 1.10.0
