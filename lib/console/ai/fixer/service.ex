@@ -8,7 +8,7 @@ defmodule Console.AI.Fixer.Service do
   alias Console.Deployments.{Services}
 
   def prompt(%Service{} = svc, insight) do
-    svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent])
+    svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent, insight: :evidence])
     with {:ok, f} <- Services.tarstream(svc),
          {:ok, code} <- svc_code_prompt(f, svc) do
       Enum.concat([
@@ -27,6 +27,7 @@ defmodule Console.AI.Fixer.Service do
         cr: "ServiceDeployment",
         cr_additional: " specifying the name #{svc.name} and namespace #{svc.namespace}"
       ))
+      |> Enum.concat(evidence_prompts(svc.insight))
       |> ok()
     end
   end
