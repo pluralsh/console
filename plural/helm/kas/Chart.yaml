@@ -1,7 +1,7 @@
 apiVersion: v2
 name: kas
 description: k8s agent server
-version: 0.2.0
+version: 0.3.0
 appVersion: "0.1.0"
 dependencies:
   - name: redis
