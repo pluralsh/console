@@ -8,6 +8,7 @@ import {
   NAMESPACES_REL_PATH,
   NODES_REL_PATH,
   getClusterAbsPath,
+  PDBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
@@ -34,6 +35,7 @@ const directory = [
   { path: EVENTS_REL_PATH, label: 'Events' },
   { path: NAMESPACES_REL_PATH, label: 'Namespaces' },
   { path: HPAS_REL_PATH, label: 'Horizontal Pod Autoscalers' },
+  { path: PDBS_REL_PATH, label: 'Pod Disruption Budgets' },
 ] as const
 
 export default function Cluster() {

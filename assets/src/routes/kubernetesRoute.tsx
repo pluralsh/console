@@ -137,6 +137,7 @@ import StatefulSet, {
 } from '../components/kubernetes/workloads/StatefulSet'
 import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
 import Workloads from '../components/kubernetes/workloads/Workloads'
+import PodDisruptionBudgets from '../components/kubernetes/cluster/PodDisruptionBudgets.tsx'
 
 import {
   AUDIT_REL_PATH,
@@ -160,6 +161,7 @@ import {
   NETWORK_POLICIES_REL_PATH,
   NETWORK_REL_PATH,
   NODES_REL_PATH,
+  PDBS_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   PERSISTENT_VOLUMES_REL_PATH,
   PODS_REL_PATH,
@@ -177,6 +179,7 @@ import {
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
 } from './kubernetesRoutesConsts'
+import PodDisruptionBudget from '../components/kubernetes/cluster/PodDisruptionBudget.tsx'
 
 export const kubernetesRoutes = (
   <Route
@@ -348,6 +351,10 @@ export const kubernetesRoutes = (
         <Route
           path={HPAS_REL_PATH}
           element={<HorizontalPodAutoscalers />}
+        />
+        <Route
+          path={PDBS_REL_PATH}
+          element={<PodDisruptionBudgets />}
         />
       </Route>
       <Route
@@ -811,6 +818,16 @@ export const kubernetesRoutes = (
       />
       <Route
         path="raw"
+        element={<Raw />}
+      />
+    </Route>
+    <Route
+      path={`${PDBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+      element={<PodDisruptionBudget />}
+    >
+      <Route
+        index
+        path=""
         element={<Raw />}
       />
     </Route>
