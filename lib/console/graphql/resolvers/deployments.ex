@@ -75,7 +75,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackPolicyViolation,
     StackViolationCause,
     Alert,
-    AlertResolution
+    AlertResolution,
+    Flow
   }
 
   def query(Project, _), do: Project
@@ -149,6 +150,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(StackViolationCause, _), do: StackViolationCause
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
+  def query(Flow, _), do: Flow
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -163,6 +165,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Stack
   delegates Console.GraphQl.Resolvers.Deployments.Settings
   delegates Console.GraphQl.Resolvers.Deployments.OAuth
+  delegates Console.GraphQl.Resolvers.Deployments.Flow
 
   def list_addons(_, _), do: AddOns.addons()
 
