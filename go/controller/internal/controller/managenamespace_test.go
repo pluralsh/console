@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -137,6 +138,72 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 			})
 
 			Expect(err).NotTo(HaveOccurred())
+
+			mns := &v1alpha1.ManagedNamespace{}
+			err = k8sClient.Get(ctx, typeNamespacedName, mns)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should wait for project", func() {
+			By("Project doesn't exist, should wait for project to be created")
+			test := struct {
+				returnCreateNamespace *gqlclient.ManagedNamespaceFragment
+				expectedStatus        v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("5X23O5JAH5SOHTKEQIEEJDQV4ZGYBN7QSOG3RAU3TOM57XYOEALQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "projects.deployments.plural.sh \"some-project\" not found",
+						},
+					},
+				},
+				returnCreateNamespace: &gqlclient.ManagedNamespaceFragment{
+					ID: "123",
+				},
+			}
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.ManagedNamespace{
+				ObjectMeta: metav1.ObjectMeta{Name: managedNamespaceName, Namespace: namespace},
+			}, func(p *v1alpha1.ManagedNamespace) {
+				p.Spec.ProjectRef = &corev1.ObjectReference{
+					Namespace: namespace,
+					Name:      "some-project",
+				}
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetNamespaceByName", mock.Anything, mock.Anything).Return(test.returnCreateNamespace, nil)
+			namespaceReconciler := &controller.ManagedNamespaceReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			result, err := namespaceReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
 
 			mns := &v1alpha1.ManagedNamespace{}
 			err = k8sClient.Get(ctx, typeNamespacedName, mns)
