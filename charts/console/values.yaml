@@ -241,3 +241,10 @@ flux2:
     create: true
   policies:
     create: false
+
+gitServer:
+  enabled: false
+  sshPort: 23231
+  httpPort: 23232
+  metricsPort: 23233
+  gitPort: 9418
