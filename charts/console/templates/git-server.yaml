@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: softserve
+  name: git-server
   labels:
 {{ include "console.labels" . | indent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: softserve
+      app.kubernetes.io/name: git-server
   template:
     metadata:
-      name: softserve
+      name: git-server
       labels:
-        app.kubernetes.io/name: softserve
+        app.kubernetes.io/name: git-server
         app.kubernetes.io/instance: {{ .Release.Name }}
         {{ if .Values.podLabels }}
         {{ toYaml .Values.podLabels | nindent 8 }}
@@ -28,9 +28,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}     
-      {{ if .Values.console.securityContext }}
+      {{ if .Values.gitServer.securityContext }}
       securityContext:
-      {{ toYaml .Values.console.securityContext | nindent 8 }}
+      {{ toYaml .Values.gitServer.securityContext | nindent 8 }}
       {{ end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -45,12 +45,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: softserve
-        {{ if .Values.console.containerSecurityContext }}
+      - name: git-server
+        {{ if .Values.gitServer.containerSecurityContext }}
         securityContext:
-        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{- toYaml .Values.gitServer.containerSecurityContext | nindent 10 }}
         {{ end }}
-        image: "ghcr.io/pluralsh/softserve:{{ .Chart.AppVersion }}"
+        image: "{{ .Values.gitServer.image.repository }}:{{ .Values.gitServer.tag | default (printf "v%s" .Chart.AppVersion) }}"
         imagePullPolicy: Never
         ports:
           - containerPort: {{ .Values.gitServer.sshPort }}
@@ -65,11 +65,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: softserve
+  name: git-server
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: softserve
+    app.kubernetes.io/name: git-server
   ports:
     - port: {{ .Values.gitServer.sshPort }}
       targetPort: {{ .Values.gitServer.sshPort }}

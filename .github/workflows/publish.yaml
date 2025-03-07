@@ -69,16 +69,6 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
-      - name: Softserve meta
-        id: meta-softserve
-        uses: docker/metadata-action@v4
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ghcr.io/pluralsh/softserve
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -127,20 +117,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            GIT_COMMIT=${{ github.sha }}
-            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
-      - name: Build and push softserve
-        uses: docker/build-push-action@v3
-        with:
-          context: ".softserve"
-          file: "./softserve/Dockerfile.softserve"
-          push: true
-          tags: ${{ steps.meta-softserve.outputs.tags }}
-          labels: ${{ steps.meta-softserve.outputs.labels }}
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max

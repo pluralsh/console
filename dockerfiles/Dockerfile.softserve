@@ -29,7 +29,7 @@ RUN mv /go/bin/soft /usr/bin/
 RUN mkdir -p /data
 
 # copy soft-serve setup script
-COPY softserve_setup.sh .
+COPY bin/softserve_setup.sh .
 RUN chmod 777 softserve_setup.sh
 RUN sh softserve_setup.sh
 ENTRYPOINT [ "soft", "serve" ]
