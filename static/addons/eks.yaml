@@ -2375,6 +2375,17 @@
   publisher: Cribl
 - name: datadog_operator
   versions:
+  - version: v0.1.10-eksbuild.1
+    compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
   - version: v0.1.9-eksbuild.1
     compatibilities:
     - '1.30'
@@ -3970,6 +3981,12 @@
   publisher: teleport
 - name: tetrate-io_istio-distro
   versions:
+  - version: v1.25.10010-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.24.300040-eksbuild.1
     compatibilities:
     - '1.31'
@@ -3982,6 +3999,12 @@
     - '1.30'
     - '1.29'
     - '1.28'
+  - version: v1.23.500060-eksbuild.1
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.23.20001-eksbuild.1
     compatibilities:
     - '1.30'
