@@ -347,5 +347,86 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeRepoConditions(repository.Status)).To(Equal(sanitizeRepoConditions(test.expectedStatus)))
 		})
+
+		It("should wait for SCM connection", func() {
+			By("Reconciling the updated resource")
+			test := struct {
+				returnGetRepository      *gqlclient.GetGitRepository
+				returnErrorGetRepository error
+				existingObjects          []ctrlruntimeclient.Object
+				expectedStatus           v1alpha1.GitRepositoryStatus
+			}{
+				expectedStatus: v1alpha1.GitRepositoryStatus{
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr(repoID),
+						SHA: lo.ToPtr("NIDONAJF4QLR3LFF2JF6EAWMZ3CE53R4OZNEWGAXYZSNPO5UHVSA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:   v1alpha1.ReadonlyConditionType.String(),
+								Status: metav1.ConditionFalse,
+								Reason: v1alpha1.ReadonlyConditionReason.String(),
+							},
+							{
+								Type:   v1alpha1.ReadyConditionType.String(),
+								Status: metav1.ConditionFalse,
+								Reason: v1alpha1.ReadyConditionReason.String(),
+							},
+							{
+								Type:    v1alpha1.SynchronizedConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+								Message: "scmconnections.deployments.plural.sh \"test-connection\" not found",
+							},
+						},
+					},
+				},
+				returnGetRepository: &gqlclient.GetGitRepository{
+					GitRepository: &gqlclient.GitRepositoryFragment{
+						ID: repoID,
+					},
+				},
+			}
+
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.GitRepository{
+				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
+			}, func(p *v1alpha1.GitRepository) {
+				p.Status.ID = nil
+				p.Status.SHA = nil
+			})).To(Succeed())
+
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.GitRepository{
+				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
+			}, func(p *v1alpha1.GitRepository) {
+				p.Spec.ConnectionRef = &corev1.ObjectReference{
+					Name:      "test-connection",
+					Namespace: namespace,
+				}
+			})).To(Succeed())
+
+			repository := &v1alpha1.GitRepository{}
+			err := k8sClient.Get(ctx, typeNamespacedName, repository)
+			Expect(err).NotTo(HaveOccurred())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetRepository", mock.AnythingOfType("*string")).Return(test.returnGetRepository, test.returnErrorGetRepository)
+			fakeConsoleClient.On("UpdateRepository", mock.Anything, mock.Anything).Return(&gqlclient.UpdateGitRepository{}, nil)
+
+			controllerReconciler := &controller.GitRepositoryReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			resp, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.RequeueAfter).ToNot(BeZero())
+
+			err = k8sClient.Get(ctx, typeNamespacedName, repository)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeRepoConditions(repository.Status)).To(Equal(sanitizeRepoConditions(test.expectedStatus)))
+		})
 	})
 })

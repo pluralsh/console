@@ -3,6 +3,10 @@ package controller_test
 import (
 	"context"
 
+	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
@@ -117,6 +121,95 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should successfully update readonly cluster bindings", func() {
+			test := struct {
+				catalogFragment *gqlclient.CatalogFragment
+				expectedStatus  v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("CRG6KJ3SGV5U7RW5SGUEULFPE5G2RL33FB7NZCU2VT7ISA4VOQHA===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				catalogFragment: &gqlclient.CatalogFragment{
+					ID: id,
+				},
+			}
+
+			catalog := &v1alpha1.Catalog{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, catalog)).NotTo(HaveOccurred())
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Catalog{
+				ObjectMeta: metav1.ObjectMeta{Name: catalogName, Namespace: namespace},
+			}, func(c *v1alpha1.Catalog) {
+				c.Spec.Bindings = &v1alpha1.CatalogBindings{
+					Read: []v1alpha1.Binding{
+						{
+							UserEmail: lo.ToPtr("test@plural.sh"),
+						},
+					},
+				}
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			fakeConsoleClient.On("UpsertCatalog", mock.Anything, mock.Anything).Return(test.catalogFragment, nil)
+
+			nr := &controller.CatalogReconciler{
+				Client:         k8sClient,
+				Scheme:         k8sClient.Scheme(),
+				ConsoleClient:  fakeConsoleClient,
+				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+			}
+
+			_, err := nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should requeue when binding is not ready", func() {
+			catalog := &v1alpha1.Catalog{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, catalog)).NotTo(HaveOccurred())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
+				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
+			})
+
+			nr := &controller.CatalogReconciler{
+				Client:         k8sClient,
+				Scheme:         k8sClient.Scheme(),
+				ConsoleClient:  fakeConsoleClient,
+				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+			}
+
+			result, err := nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
 		})
 
 		It("should successfully reconcile the resource", func() {
