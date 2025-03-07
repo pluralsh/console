@@ -3025,6 +3025,33 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.11.3
+    created: "2025-03-07T21:42:36.908053559Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.2.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.108
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.11.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 4507171f3c87f1c8c57ba104d1f740144c9b8a7f6f89e32c2d1f8b20d3ea0133
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.92/console-rapid-0.3.92.tgz
+    version: 0.3.92
+  - apiVersion: v2
     appVersion: 0.11.2
     created: "2025-03-06T12:06:15.416991593Z"
     dependencies:
@@ -4427,6 +4454,16 @@ entries:
     version: 0.3.40
   controller:
   - apiVersion: v2
+    appVersion: 0.11.3
+    created: "2025-03-07T21:42:37.120891283Z"
+    description: deploys the deployment operator for plural cd
+    digest: 5790e95bbdae5740fca7703c701a7879b9ca385b8b63fccdde13bfde0863edd2
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.108/controller-0.0.108.tgz
+    version: 0.0.108
+  - apiVersion: v2
     appVersion: 0.11.2
     created: "2025-02-28T21:38:55.467186603Z"
     description: deploys the deployment operator for plural cd
@@ -5644,4 +5681,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-06T12:06:15.417511584Z"
+generated: "2025-03-07T21:42:37.121413036Z"
