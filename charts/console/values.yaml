@@ -244,7 +244,12 @@ flux2:
 
 gitServer:
   enabled: false
+
   sshPort: 23231
   httpPort: 23232
   metricsPort: 23233
   gitPort: 9418
+
+  image: 
+    repository: ghcr.io/pluralsh/git-server
+    tag: ~
