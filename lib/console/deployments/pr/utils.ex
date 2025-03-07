@@ -1,20 +1,21 @@
 defmodule Console.Deployments.Pr.Utils do
   use Nebulex.Caching
-  alias Console.Deployments.{Stacks, Clusters, Services}
+  alias Console.Deployments.{Stacks, Clusters, Services, Flows}
   alias Console.Schema.{PrAutomation, ScmConnection}
 
   @ttl :timer.hours(1)
 
   @ansi_code ~r/\x1b\[[0-9;]*m/
 
-  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural Stacks?:\s+([[:alnum:]_\-]+)/]
-  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural Services?:\s+([[:alnum:]_\/\-]+)/]
-  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural Clusters?:\s+([[:alnum:]_\-]+)/]
+  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural [sS]tacks?:\s+([[:alnum:]_\-]+)/]
+  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural [sS]ervices?:\s+([[:alnum:]_\/\-]+)/]
+  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural [cC]lusters?:\s+([[:alnum:]_\-]+)/]
+  @flow_regex [~r/plrl\/flow\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(flow:([[:alnum:]_\-]*)\)/, ~r/Plural [fF]low:\s+([[:alnum:]_\-]+)/]
 
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
-  def pr_associations(content) do
-    Enum.reduce(~w(stack service cluster)a, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
+  def pr_associations(content, scopes \\ ~w(stack service cluster flow)a) do
+    Enum.reduce(scopes, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
   end
 
   defp maybe_add(attrs, field, %{id: id}), do: Map.put(attrs, field, id)
@@ -30,18 +31,20 @@ defmodule Console.Deployments.Pr.Utils do
       end)
       |> Enum.filter(& &1)
     end)
-    |> Enum.find_value(&fetch(:stack, &1))
+    |> Enum.find_value(&fetch(scope, &1))
   end
 
   defp regexes(:stack), do: @stack_regex
   defp regexes(:service), do: @svc_regex
   defp regexes(:cluster), do: @cluster_regex
+  defp regexes(:flow), do: @flow_regex
 
   @decorate cacheable(cache: Console.Cache, key: {:pr_fetch, scope, id}, opts: [ttl: @ttl])
   def fetch(scope, id), do: do_fetch(scope, id)
 
   defp do_fetch(:stack, name), do: Stacks.get_stack_by_name(name)
   defp do_fetch(:cluster, handle), do: Clusters.get_cluster_by_handle(handle)
+  defp do_fetch(:flow, name), do: Flows.get_by_name(name)
   defp do_fetch(:service, identifier) do
     case String.split(identifier, "/") do
       [handle, name] -> Services.get_service_by_handle(handle, name)

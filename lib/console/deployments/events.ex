@@ -80,3 +80,7 @@ defmodule Console.PubSub.AlertCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AlertResolutionCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ScmWebhook, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.FlowCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.FlowUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.FlowDeleted, do: use Piazza.PubSub.Event

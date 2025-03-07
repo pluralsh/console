@@ -2571,6 +2571,70 @@ export enum EvidenceType {
   Pr = 'PR'
 }
 
+export type Flow = {
+  __typename?: 'Flow';
+  description?: Maybe<Scalars['String']['output']>;
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  pipelines?: Maybe<PipelineConnection>;
+  /** the project this flow belongs to */
+  project?: Maybe<Project>;
+  pullRequests?: Maybe<PullRequestConnection>;
+  /** read policy for this flow */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  services?: Maybe<ServiceDeploymentConnection>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy for this flow */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type FlowPipelinesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowPullRequestsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type FlowAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  icon?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type FlowConnection = {
+  __typename?: 'FlowConnection';
+  edges?: Maybe<Array<Maybe<FlowEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type FlowEdge = {
+  __typename?: 'FlowEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Flow>;
+};
+
 /** a Flux crd representation of a Helm repository */
 export type FluxHelmRepository = {
   __typename?: 'FluxHelmRepository';
@@ -4423,6 +4487,8 @@ export type Pipeline = {
   contexts?: Maybe<PipelineContextConnection>;
   /** edges linking two stages w/in the pipeline in a full DAG */
   edges?: Maybe<Array<Maybe<PipelineStageEdge>>>;
+  /** the flow this pipeline belongs to */
+  flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the pipeline */
@@ -4451,6 +4517,7 @@ export type PipelineContextsArgs = {
 /** the top level input object for creating/deleting pipelines */
 export type PipelineAttributes = {
   edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   stages?: InputMaybe<Array<InputMaybe<PipelineStageAttributes>>>;
@@ -5269,6 +5336,8 @@ export type PullRequest = {
   /** the cluster this pr is meant to modify */
   cluster?: Maybe<Cluster>;
   creator?: Maybe<Scalars['String']['output']>;
+  /** the flow this pr is meant to modify */
+  flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -5613,6 +5682,7 @@ export type RootMutationType = {
   deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
+  deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
@@ -5737,6 +5807,7 @@ export type RootMutationType = {
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   upsertCatalog?: Maybe<Catalog>;
+  upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
@@ -6084,6 +6155,11 @@ export type RootMutationTypeDeleteClusterRegistrationArgs = {
 
 
 export type RootMutationTypeDeleteCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteFlowArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6660,6 +6736,11 @@ export type RootMutationTypeUpsertCatalogArgs = {
 };
 
 
+export type RootMutationTypeUpsertFlowArgs = {
+  attributes: FlowAttributes;
+};
+
+
 export type RootMutationTypeUpsertHelmRepositoryArgs = {
   attributes?: InputMaybe<HelmRepositoryAttributes>;
   url: Scalars['String']['input'];
@@ -6783,6 +6864,8 @@ export type RootQueryType = {
   deploymentSettings?: Maybe<DeploymentSettings>;
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  flow?: Maybe<Flow>;
+  flows?: Maybe<FlowConnection>;
   fluxHelmRepositories?: Maybe<Array<Maybe<FluxHelmRepository>>>;
   fluxHelmRepository?: Maybe<FluxHelmRepository>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
@@ -7236,6 +7319,20 @@ export type RootQueryTypeDeploymentArgs = {
 
 export type RootQueryTypeFetchManifestsArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeFlowArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeFlowsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8295,6 +8392,8 @@ export type ServiceDeployment = {
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** a list of errors generated by the deployment operator */
   errors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** the flow this service belongs to */
+  flow?: Maybe<Flow>;
   /** description on where in git the service's manifests should be fetched */
   git?: Maybe<GitRef>;
   /** the global service this service is the source for */
@@ -8399,6 +8498,7 @@ export type ServiceDeploymentAttributes = {
   dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   docsPath?: InputMaybe<Scalars['String']['input']>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
   imports?: InputMaybe<Array<InputMaybe<ServiceImportAttributes>>>;

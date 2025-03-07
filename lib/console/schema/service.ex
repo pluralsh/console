@@ -21,7 +21,8 @@ defmodule Console.Schema.Service do
     ServiceDependency,
     AiInsight,
     ServiceVuln,
-    ClusterScalingRecommendation
+    ClusterScalingRecommendation,
+    Flow
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -137,6 +138,7 @@ defmodule Console.Schema.Service do
     belongs_to :owner,      GlobalService
     belongs_to :insight,    AiInsight, on_replace: :update
     belongs_to :parent,     __MODULE__
+    belongs_to :flow,       Flow
 
     has_one :reference_cluster,  Cluster
     has_one :provider,           ClusterProvider
@@ -166,6 +168,10 @@ defmodule Console.Schema.Service do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(s in query, where: s.flow_id == ^flow_id)
   end
 
   def search(query \\ __MODULE__, sq) do
@@ -301,7 +307,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval parent_id docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval flow_id parent_id docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -325,6 +331,7 @@ defmodule Console.Schema.Service do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)
+    |> foreign_key_constraint(:flow_id)
     |> foreign_key_constraint(:global_service, name: :global_services, match: :prefix, message: "Cannot delete due to existing global services bound to this cluster")
     |> unique_constraint([:cluster_id, :name], message: "there is already a service with that name for this cluster")
     |> unique_constraint([:cluster_id, :owner_id])

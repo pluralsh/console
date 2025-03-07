@@ -1,6 +1,6 @@
 defmodule Console.Schema.PullRequest do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack}
+  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow}
 
   defenum Status, open: 0, merged: 1, closed: 2
 
@@ -21,6 +21,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :cluster, Cluster
     belongs_to :service, Service
     belongs_to :stack,   Stack
+    belongs_to :flow,    Flow
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -54,6 +55,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.stack_id == ^stack_id)
   end
 
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(pr in query, where: pr.flow_id == ^flow_id)
+  end
+
   def stack(query \\ __MODULE__) do
     from(pr in query, where: not is_nil(pr.stack_id))
   end
@@ -64,7 +69,7 @@ defmodule Console.Schema.PullRequest do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(url ref sha status title cluster_id stack_id service_id review_id creator labels)a
+  @valid ~w(url ref sha status title cluster_id stack_id service_id flow_id review_id creator labels)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -73,6 +78,7 @@ defmodule Console.Schema.PullRequest do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:stack_id)
+    |> foreign_key_constraint(:flow_id)
     |> put_new_change(:notifications_policy_id, &Ecto.UUID.generate/0)
     |> unique_constraint(:url)
     |> validate_required(~w(url title)a)

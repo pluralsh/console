@@ -2105,6 +2105,43 @@ type Event struct {
 	Type          *string `json:"type,omitempty"`
 }
 
+type Flow struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	Icon        *string `json:"icon,omitempty"`
+	// read policy for this flow
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this flow
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
+	// the project this flow belongs to
+	Project      *Project                     `json:"project,omitempty"`
+	Services     *ServiceDeploymentConnection `json:"services,omitempty"`
+	Pipelines    *PipelineConnection          `json:"pipelines,omitempty"`
+	PullRequests *PullRequestConnection       `json:"pullRequests,omitempty"`
+	InsertedAt   *string                      `json:"insertedAt,omitempty"`
+	UpdatedAt    *string                      `json:"updatedAt,omitempty"`
+}
+
+type FlowAttributes struct {
+	Name          string                     `json:"name"`
+	Description   *string                    `json:"description,omitempty"`
+	Icon          *string                    `json:"icon,omitempty"`
+	ProjectID     *string                    `json:"projectId,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+}
+
+type FlowConnection struct {
+	PageInfo PageInfo    `json:"pageInfo"`
+	Edges    []*FlowEdge `json:"edges,omitempty"`
+}
+
+type FlowEdge struct {
+	Node   *Flow   `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // a Flux crd representation of a Helm repository
 type FluxHelmRepository struct {
 	Metadata Metadata           `json:"metadata"`
@@ -3659,6 +3696,8 @@ type Pipeline struct {
 	Status *PipelineStatus  `json:"status,omitempty"`
 	// the project this pipeline belongs to
 	Project *Project `json:"project,omitempty"`
+	// the flow this pipeline belongs to
+	Flow *Flow `json:"flow,omitempty"`
 	// read policy for this pipeline
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this pipeline
@@ -3674,6 +3713,7 @@ type Pipeline struct {
 // the top level input object for creating/deleting pipelines
 type PipelineAttributes struct {
 	ProjectID     *string                    `json:"projectId,omitempty"`
+	FlowID        *string                    `json:"flowId,omitempty"`
 	Stages        []*PipelineStageAttributes `json:"stages,omitempty"`
 	Edges         []*PipelineEdgeAttributes  `json:"edges,omitempty"`
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
@@ -4390,6 +4430,8 @@ type PullRequest struct {
 	Title   *string   `json:"title,omitempty"`
 	Creator *string   `json:"creator,omitempty"`
 	Labels  []*string `json:"labels,omitempty"`
+	// the flow this pr is meant to modify
+	Flow *Flow `json:"flow,omitempty"`
 	// the cluster this pr is meant to modify
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the service this pr is meant to modify
@@ -4992,6 +5034,8 @@ type ServiceDeployment struct {
 	Insight *AiInsight `json:"insight,omitempty"`
 	// sideload detected vulnerabilities for this service
 	Vulns *ServiceVuln `json:"vulns,omitempty"`
+	// the flow this service belongs to
+	Flow *Flow `json:"flow,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service
@@ -5020,6 +5064,7 @@ type ServiceDeploymentAttributes struct {
 	Helm            *HelmConfigAttributes          `json:"helm,omitempty"`
 	Kustomize       *KustomizeAttributes           `json:"kustomize,omitempty"`
 	ParentID        *string                        `json:"parentId,omitempty"`
+	FlowID          *string                        `json:"flowId,omitempty"`
 	Configuration   []*ConfigAttributes            `json:"configuration,omitempty"`
 	Dependencies    []*ServiceDependencyAttributes `json:"dependencies,omitempty"`
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`

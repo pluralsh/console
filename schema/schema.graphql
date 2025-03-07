@@ -397,6 +397,10 @@ type RootQueryType {
 
   project(id: ID, name: String): Project
 
+  flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
+
+  flow(id: ID!): Flow
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -870,6 +874,10 @@ type RootMutationType {
 
   deleteOidcProvider(type: OidcProviderType!, id: ID!): OidcProvider
 
+  upsertFlow(attributes: FlowAttributes!): Flow
+
+  deleteFlow(id: ID!): Flow
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
@@ -968,6 +976,49 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+input FlowAttributes {
+  name: String!
+  description: String
+  icon: String
+  projectId: ID
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+type Flow {
+  id: ID!
+
+  name: String!
+
+  description: String
+
+  icon: String
+
+  "read policy for this flow"
+  readBindings: [PolicyBinding]
+
+  "write policy for this flow"
+  writeBindings: [PolicyBinding]
+
+  "the project this flow belongs to"
+  project: Project
+
+  services(after: String, first: Int, before: String, last: Int): ServiceDeploymentConnection
+
+  pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
+
+  pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type FlowConnection {
+  pageInfo: PageInfo!
+  edges: [FlowEdge]
 }
 
 "Supported OIDC-compatible Auth Providers"
@@ -3348,6 +3399,7 @@ enum GateType {
 "the top level input object for creating\/deleting pipelines"
 input PipelineAttributes {
   projectId: ID
+  flowId: ID
   stages: [PipelineStageAttributes]
   edges: [PipelineEdgeAttributes]
   readBindings: [PolicyBindingAttributes]
@@ -3519,6 +3571,9 @@ type Pipeline {
 
   "the project this pipeline belongs to"
   project: Project
+
+  "the flow this pipeline belongs to"
+  flow: Flow
 
   "read policy for this pipeline"
   readBindings: [PolicyBinding]
@@ -3875,6 +3930,8 @@ input ServiceDeploymentAttributes {
 
   parentId: ID
 
+  flowId: ID
+
   configuration: [ConfigAttributes]
 
   dependencies: [ServiceDependencyAttributes]
@@ -4147,6 +4204,9 @@ type ServiceDeployment {
 
   "sideload detected vulnerabilities for this service"
   vulns: ServiceVuln
+
+  "the flow this service belongs to"
+  flow: Flow
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
@@ -6686,6 +6746,9 @@ type PullRequest {
 
   labels: [String]
 
+  "the flow this pr is meant to modify"
+  flow: Flow
+
   "the cluster this pr is meant to modify"
   cluster: Cluster
 
@@ -8709,5 +8772,10 @@ type ObservabilityProviderEdge {
 
 type ProjectEdge {
   node: Project
+  cursor: String
+}
+
+type FlowEdge {
+  node: Flow
   cursor: String
 }

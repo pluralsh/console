@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   @desc "the top level input object for creating/deleting pipelines"
   input_object :pipeline_attributes do
     field :project_id,       :id
+    field :flow_id,          :id
     field :stages,           list_of(:pipeline_stage_attributes)
     field :edges,            list_of(:pipeline_edge_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
@@ -136,6 +137,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     end
 
     field :project, :project, resolve: dataloader(Deployments), description: "the project this pipeline belongs to"
+    field :flow,    :flow, resolve: dataloader(Deployments), description: "the flow this pipeline belongs to"
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this pipeline"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this pipeline"

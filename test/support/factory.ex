@@ -861,6 +861,15 @@ defmodule Console.Factory do
     }
   end
 
+  def flow_factory do
+    %Schema.Flow{
+      name: sequence(:flows, & "flow-#{&1}"),
+      project: Settings.default_project!(),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -570,6 +570,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :creator, :string
     field :labels,  list_of(:string)
 
+    field :flow,    :flow, description: "the flow this pr is meant to modify",
+      resolve: dataloader(Deployments)
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
       resolve: dataloader(Deployments)
     field :service, :service_deployment, description: "the service this pr is meant to modify",
