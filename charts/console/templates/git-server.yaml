@@ -1,4 +1,4 @@
-{{- if .Values.gitServer }}
+{{- if .Values.gitServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,7 +51,7 @@ spec:
         {{- toYaml .Values.gitServer.containerSecurityContext | nindent 10 }}
         {{ end }}
         image: "{{ .Values.gitServer.image.repository }}:{{ .Values.gitServer.tag | default (printf "v%s" .Chart.AppVersion) }}"
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: {{ .Values.gitServer.sshPort }}
           - containerPort: {{ .Values.gitServer.httpPort }}
