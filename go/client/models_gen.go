@@ -3324,6 +3324,7 @@ type Observer struct {
 	Name       string            `json:"name"`
 	Status     ObserverStatus    `json:"status"`
 	Crontab    string            `json:"crontab"`
+	LastValue  *string           `json:"lastValue,omitempty"`
 	LastRunAt  string            `json:"lastRunAt"`
 	NextRunAt  string            `json:"nextRunAt"`
 	Target     ObserverTarget    `json:"target"`
@@ -3364,6 +3365,7 @@ type ObserverAttributes struct {
 	Crontab   string                      `json:"crontab"`
 	Target    ObserverTargetAttributes    `json:"target"`
 	Actions   []*ObserverActionAttributes `json:"actions,omitempty"`
+	Initial   *string                     `json:"initial,omitempty"`
 	ProjectID *string                     `json:"projectId,omitempty"`
 }
 

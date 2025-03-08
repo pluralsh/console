@@ -3482,6 +3482,11 @@ func (in *ObserverSpec) DeepCopyInto(out *ObserverSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Initial != nil {
+		in, out := &in.Initial, &out.Initial
+		*out = new(string)
+		**out = **in
+	}
 	in.Target.DeepCopyInto(&out.Target)
 	if in.Actions != nil {
 		in, out := &in.Actions, &out.Actions

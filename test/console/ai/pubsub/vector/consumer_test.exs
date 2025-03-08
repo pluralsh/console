@@ -27,11 +27,13 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
         {:ok, [%{
           "filename" => "terraform/main.tf",
           "sha" => "sha",
-          "raw_url" => "https://test.url",
+          "contents_url" => "https://test.url",
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _, [follow_redirect: true] -> {:ok, %HTTPoison.Response{status_code: 200, body: "terraform"}} end)
+      expect(HTTPoison, :get, fn "https://test.url", _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
+      end)
 
       event = %PubSub.ScmWebhook{
         item: %{

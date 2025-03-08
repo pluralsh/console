@@ -581,6 +581,7 @@ defmodule Console.Deployments.GitTest do
 
       {:ok, observer} = Git.upsert_observer(%{
         name: "observer",
+        initial: "v0.11.3",
         target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
         actions: [
           %{type: :pr, configuration: %{
@@ -598,6 +599,7 @@ defmodule Console.Deployments.GitTest do
       assert observer.crontab == "*/5 * * *"
       assert observer.next_run_at
       assert observer.last_run_at
+      assert observer.last_value == "v0.11.3"
       assert observer.project_id == Settings.default_project!().id
     end
 

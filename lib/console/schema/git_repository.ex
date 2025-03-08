@@ -58,7 +58,7 @@ defmodule Console.Schema.GitRepository do
 
   defp add_auth_method(cs) do
     case get_field(cs, :url) do
-      "https" <> _ -> put_change(cs, :auth_method, :basic)
+      "http" <> _ -> put_change(cs, :auth_method, :basic)
       _ -> put_change(cs, :auth_method, :ssh)
     end
   end

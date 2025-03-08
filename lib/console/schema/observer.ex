@@ -2,11 +2,11 @@ defmodule Console.Schema.Observer do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Project, OCIAuth, HelmRepository, ServiceError}
 
-  defenum Action, pipeline: 0, pr: 1
-  defenum Status, healthy: 0, failed: 1
-  defenum TargetType, oci: 0, helm: 1, git: 2
+  defenum Action,        pipeline: 0, pr: 1
+  defenum Status,        healthy: 0, failed: 1
+  defenum TargetType,    oci: 0, helm: 1, git: 2
   defenum GitTargetType, tags: 0
-  defenum TargetOrder, semver: 0, latest: 1
+  defenum TargetOrder,   semver: 0, latest: 1
 
   schema "observers" do
     field :name,           :string
@@ -16,8 +16,10 @@ defmodule Console.Schema.Observer do
     field :last_run_at,    :utc_datetime_usec
     field :next_run_at,    :utc_datetime_usec
 
+    field :initial, :string, virtual: true
+
     embeds_one :target, Target, on_replace: :update do
-      field :type, TargetType, default: :oci
+      field :type,   TargetType, default: :oci
       field :format, :string
       field :order,  TargetOrder, default: :semver
 
@@ -42,6 +44,7 @@ defmodule Console.Schema.Observer do
 
     embeds_many :actions, ObserverAction, on_replace: :delete do
       field :type, Action, default: :pipeline
+
       embeds_one :configuration, Configuration, on_replace: :update do
         embeds_one :pr, PrAction, on_replace: :update do
           field :automation_id,   :binary_id
@@ -76,7 +79,7 @@ defmodule Console.Schema.Observer do
     from(o in query, order_by: ^order)
   end
 
-  @valid ~w(name status project_id last_value crontab last_run_at next_run_at)a
+  @valid ~w(name status project_id last_value crontab last_run_at next_run_at initial)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -86,6 +89,7 @@ defmodule Console.Schema.Observer do
     |> cast_embed(:actions, with: &action_changeset/2, required: true)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:last_run_at, &Timex.now/0)
+    |> set_initial()
     |> determine_next_run()
     |> validate_required(~w(name target crontab last_run_at next_run_at)a)
   end
@@ -98,6 +102,8 @@ defmodule Console.Schema.Observer do
     |> cast_embed(:git, with: &git_changeset/2)
     |> validate_required([:type, :order])
   end
+
+  defp set_initial(cs), do: put_new_change(cs, :last_value, fn -> get_field(cs, :initial) end)
 
   defp mv_target(%{type: _} = attrs), do: attrs
   defp mv_target(%{target: t} = attrs), do: Map.put(attrs, :type, t)

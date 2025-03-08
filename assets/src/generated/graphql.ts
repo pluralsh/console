@@ -4041,6 +4041,7 @@ export type Observer = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   lastRunAt: Scalars['DateTime']['output'];
+  lastValue?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   nextRunAt: Scalars['DateTime']['output'];
   project?: Maybe<Project>;
@@ -4084,6 +4085,7 @@ export enum ObserverActionType {
 export type ObserverAttributes = {
   actions?: InputMaybe<Array<InputMaybe<ObserverActionAttributes>>>;
   crontab: Scalars['String']['input'];
+  initial?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
   target: ObserverTargetAttributes;
