@@ -3,4 +3,4 @@ name: ai-proxy
 description: A Helm chart for ai-proxy
 type: application
 version: 0.2.2
-appVersion: "v1.2.0"
+appVersion: "v1.3.0"
