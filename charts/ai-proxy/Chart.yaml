@@ -2,5 +2,5 @@ apiVersion: v2
 name: ai-proxy
 description: A Helm chart for ai-proxy
 type: application
-version: 0.2.2
+version: 0.2.3
 appVersion: "v1.3.0"
