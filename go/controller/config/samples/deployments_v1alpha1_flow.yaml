@@ -13,7 +13,7 @@ spec:
   description: "test flow"
   bindings:
     read:
-      - userEmail: lukasz@plural.sh
+      - userEmail: test@plural.sh
     write:
-      - userEmail: lukasz@plural.sh
+      - userEmail: test@plural.sh
 

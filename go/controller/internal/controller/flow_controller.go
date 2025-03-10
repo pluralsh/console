@@ -103,6 +103,9 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
+		if !controllerutil.ContainsFinalizer(flow, FlowFinalizer) {
+			controllerutil.AddFinalizer(flow, FlowFinalizer)
+		}
 		flow.Status.ID = &apiFlow.ID
 		flow.Status.SHA = &sha
 	}
