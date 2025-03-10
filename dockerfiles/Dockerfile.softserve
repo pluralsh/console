@@ -43,6 +43,10 @@ EXPOSE 23232
 EXPOSE 23233
 EXPOSE 9418
 
+# needs git for repos to be accessible
+RUN apk update --no-cache
+RUN apk add git
+
 COPY --from=builder /usr/bin/soft /usr/bin/
 COPY --from=builder /go/data /go/data
 
