@@ -1,0 +1,19 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Flow
+metadata:
+  labels:
+    app.kubernetes.io/name: flow
+    app.kubernetes.io/instance: flow-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: flow-sample
+spec:
+  name: test
+  description: "test flow"
+  bindings:
+    read:
+      - userEmail: lukasz@plural.sh
+    write:
+      - userEmail: lukasz@plural.sh
+
