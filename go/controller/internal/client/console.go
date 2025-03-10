@@ -151,6 +151,9 @@ type ConsoleClient interface {
 	DeleteOIDCProvider(ctx context.Context, id string, pType console.OidcProviderType) error
 	CreateBootstrapToken(ctx context.Context, attributes console.BootstrapTokenAttributes) (*console.BootstrapTokenBase, error)
 	DeleteBootstrapToken(ctx context.Context, id string) error
+	GetFlow(ctx context.Context, id string) (*console.FlowFragment, error)
+	DeleteFlow(ctx context.Context, id string) error
+	UpsertFlow(ctx context.Context, attr console.FlowAttributes) (*console.FlowFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

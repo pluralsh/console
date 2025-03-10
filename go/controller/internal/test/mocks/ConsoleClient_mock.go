@@ -1471,6 +1471,53 @@ func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// DeleteFlow provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteFlow(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteFlow")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteFlow_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteFlow'
+type ConsoleClientMock_DeleteFlow_Call struct {
+	*mock.Call
+}
+
+// DeleteFlow is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteFlow(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteFlow_Call {
+	return &ConsoleClientMock_DeleteFlow_Call{Call: _e.mock.On("DeleteFlow", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteFlow_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteFlow_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteFlow_Call) Return(_a0 error) *ConsoleClientMock_DeleteFlow_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteFlow_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteFlow_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteGlobalService provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeleteGlobalService(id string) error {
 	ret := _m.Called(id)
@@ -2780,6 +2827,65 @@ func (_c *ConsoleClientMock_GetDeploymentSettings_Call) Return(_a0 *client.Deplo
 }
 
 func (_c *ConsoleClientMock_GetDeploymentSettings_Call) RunAndReturn(run func(context.Context) (*client.DeploymentSettingsFragment, error)) *ConsoleClientMock_GetDeploymentSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetFlow provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetFlow(ctx context.Context, id string) (*client.FlowFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFlow")
+	}
+
+	var r0 *client.FlowFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.FlowFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.FlowFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.FlowFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetFlow_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFlow'
+type ConsoleClientMock_GetFlow_Call struct {
+	*mock.Call
+}
+
+// GetFlow is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetFlow(ctx interface{}, id interface{}) *ConsoleClientMock_GetFlow_Call {
+	return &ConsoleClientMock_GetFlow_Call{Call: _e.mock.On("GetFlow", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetFlow_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetFlow_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFlow_Call) Return(_a0 *client.FlowFragment, _a1 error) *ConsoleClientMock_GetFlow_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFlow_Call) RunAndReturn(run func(context.Context, string) (*client.FlowFragment, error)) *ConsoleClientMock_GetFlow_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -6667,6 +6773,65 @@ func (_c *ConsoleClientMock_UpsertCatalog_Call) Return(_a0 *client.CatalogFragme
 }
 
 func (_c *ConsoleClientMock_UpsertCatalog_Call) RunAndReturn(run func(context.Context, *client.CatalogAttributes) (*client.CatalogFragment, error)) *ConsoleClientMock_UpsertCatalog_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertFlow provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) UpsertFlow(ctx context.Context, attr client.FlowAttributes) (*client.FlowFragment, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertFlow")
+	}
+
+	var r0 *client.FlowFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.FlowAttributes) (*client.FlowFragment, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.FlowAttributes) *client.FlowFragment); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.FlowFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.FlowAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertFlow_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertFlow'
+type ConsoleClientMock_UpsertFlow_Call struct {
+	*mock.Call
+}
+
+// UpsertFlow is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr client.FlowAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertFlow(ctx interface{}, attr interface{}) *ConsoleClientMock_UpsertFlow_Call {
+	return &ConsoleClientMock_UpsertFlow_Call{Call: _e.mock.On("UpsertFlow", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_UpsertFlow_Call) Run(run func(ctx context.Context, attr client.FlowAttributes)) *ConsoleClientMock_UpsertFlow_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.FlowAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertFlow_Call) Return(_a0 *client.FlowFragment, _a1 error) *ConsoleClientMock_UpsertFlow_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertFlow_Call) RunAndReturn(run func(context.Context, client.FlowAttributes) (*client.FlowFragment, error)) *ConsoleClientMock_UpsertFlow_Call {
 	_c.Call.Return(run)
 	return _c
 }

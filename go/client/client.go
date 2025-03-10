@@ -85,6 +85,9 @@ type ConsoleClient interface {
 	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
+	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
+	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
+	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
 	GetClusterGates(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetClusterGates, error)
 	PagedClusterGates(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGates, error)
 	PagedClusterGateIDs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGateIDs, error)
@@ -977,6 +980,52 @@ func (t *ClusterIsoImageFragment) GetUser() *string {
 		t = &ClusterIsoImageFragment{}
 	}
 	return t.User
+}
+
+type FlowFragment struct {
+	ID            string                   "json:\"id\" graphql:\"id\""
+	Name          string                   "json:\"name\" graphql:\"name\""
+	Description   *string                  "json:\"description,omitempty\" graphql:\"description\""
+	ReadBindings  []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	WriteBindings []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	Project       *ProjectFragment         "json:\"project,omitempty\" graphql:\"project\""
+}
+
+func (t *FlowFragment) GetID() string {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.ID
+}
+func (t *FlowFragment) GetName() string {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.Name
+}
+func (t *FlowFragment) GetDescription() *string {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.Description
+}
+func (t *FlowFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.ReadBindings
+}
+func (t *FlowFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.WriteBindings
+}
+func (t *FlowFragment) GetProject() *ProjectFragment {
+	if t == nil {
+		t = &FlowFragment{}
+	}
+	return t.Project
 }
 
 type PipelineGateIDsEdgeFragment struct {
@@ -11128,6 +11177,17 @@ func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterR
 	return t.Edges
 }
 
+type DeleteFlow_DeleteFlow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteFlow_DeleteFlow) GetID() string {
+	if t == nil {
+		t = &DeleteFlow_DeleteFlow{}
+	}
+	return t.ID
+}
+
 type GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14447,6 +14507,39 @@ func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
 		t = &GetClusterIsoImage{}
 	}
 	return t.ClusterIsoImage
+}
+
+type GetFlow struct {
+	Flow *FlowFragment "json:\"flow,omitempty\" graphql:\"flow\""
+}
+
+func (t *GetFlow) GetFlow() *FlowFragment {
+	if t == nil {
+		t = &GetFlow{}
+	}
+	return t.Flow
+}
+
+type DeleteFlow struct {
+	DeleteFlow *DeleteFlow_DeleteFlow "json:\"deleteFlow,omitempty\" graphql:\"deleteFlow\""
+}
+
+func (t *DeleteFlow) GetDeleteFlow() *DeleteFlow_DeleteFlow {
+	if t == nil {
+		t = &DeleteFlow{}
+	}
+	return t.DeleteFlow
+}
+
+type UpsertFlow struct {
+	UpsertFlow *FlowFragment "json:\"upsertFlow,omitempty\" graphql:\"upsertFlow\""
+}
+
+func (t *UpsertFlow) GetUpsertFlow() *FlowFragment {
+	if t == nil {
+		t = &UpsertFlow{}
+	}
+	return t.UpsertFlow
 }
 
 type GetClusterGates struct {
@@ -22224,6 +22317,172 @@ func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *stri
 
 	var res GetClusterIsoImage
 	if err := c.Client.Post(ctx, "GetClusterIsoImage", GetClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetFlowDocument = `query GetFlow ($id: ID!) {
+	flow(id: $id) {
+		... FlowFragment
+	}
+}
+fragment FlowFragment on Flow {
+	id
+	name
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	project {
+		... ProjectFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+`
+
+func (c *Client) GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetFlow
+	if err := c.Client.Post(ctx, "GetFlow", GetFlowDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteFlowDocument = `mutation DeleteFlow ($id: ID!) {
+	deleteFlow(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteFlow
+	if err := c.Client.Post(ctx, "DeleteFlow", DeleteFlowDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertFlowDocument = `mutation UpsertFlow ($attributes: FlowAttributes!) {
+	upsertFlow(attributes: $attributes) {
+		... FlowFragment
+	}
+}
+fragment FlowFragment on Flow {
+	id
+	name
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	project {
+		... ProjectFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+`
+
+func (c *Client) UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertFlow
+	if err := c.Client.Post(ctx, "UpsertFlow", UpsertFlowDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -30440,6 +30699,9 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
+	GetFlowDocument:                                   "GetFlow",
+	DeleteFlowDocument:                                "DeleteFlow",
+	UpsertFlowDocument:                                "UpsertFlow",
 	GetClusterGatesDocument:                           "GetClusterGates",
 	PagedClusterGatesDocument:                         "PagedClusterGates",
 	PagedClusterGateIDsDocument:                       "PagedClusterGateIDs",
