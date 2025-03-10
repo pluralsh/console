@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ReactFlowProvider } from 'reactflow'
+import { ReactFlowProvider } from '@xyflow/react'
 import { useTheme } from 'styled-components'
 
 import {

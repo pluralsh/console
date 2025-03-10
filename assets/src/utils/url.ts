@@ -74,11 +74,22 @@ export function isValidURL(url: string): boolean {
   return urlRegex.test(url)
 }
 
-// In most of the cases if URL fails validity check it is missing protocol.
-// This method adds protocol shorthand when it is missing.
-// It doesn't support local paths.
-export function ensureURLValidity(url: string): string {
-  if (isValidURL(url)) return url
+export function ensureURLValidity(url: Nullable<string>): string {
+  if (!url) return ''
 
-  return `//${url}`
+  // check if URL already has a protocol
+  if (!/^(?:https?|ftp|ftps|file|ssh|sftp|ws|wss):\/\//i.test(url))
+    url = `https://${url}`
+
+  if (!isValidURL(url)) return ''
+
+  return url
+}
+
+export function getURLPath(url: Nullable<string>) {
+  const validUrl = ensureURLValidity(url)
+
+  if (!validUrl) return ''
+
+  return new URL(validUrl).pathname
 }

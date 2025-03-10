@@ -13,14 +13,16 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ScmWebhook do
   alias Console.AI.Tool
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Schema.{ScmWebhook, ScmConnection}
+  require Logger
 
   def resource(%@for{
-    item: %{"action" => "pull_request", "pull_request" => %{"merged" => true} = pr},
+    item: %{"action" => "closed", "pull_request" => %{"merged" => true} = pr},
     actor: %ScmWebhook{type: :github}
   }) do
     with %ScmConnection{} = conn <- Tool.scm_connection(),
       do: Dispatcher.files(conn, pr)
   end
+
   def resource(_), do: :ok
 end
 

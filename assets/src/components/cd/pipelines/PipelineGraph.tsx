@@ -1,8 +1,6 @@
 import { PipelineFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 
-import 'reactflow/dist/style.css'
-
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
 import { ApprovalNode } from './nodes/ApprovalNode'

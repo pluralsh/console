@@ -1,7 +1,14 @@
 defmodule Console.AI.Fixer.Base do
   use Console.AI.Evidence.Base
   alias Console.Deployments.Tar
-  alias Console.Schema.Service
+  alias Console.Deployments.Pr.File
+  alias Console.AI.Vector.Storable
+  alias Console.Schema.{
+    Service,
+    AiInsightEvidence,
+    AiInsight,
+    Alert
+  }
 
   @extension_blacklist ~w(.tgz .png .jpeg .jpg .gz .tar .zip .tar.gz)
 
@@ -51,6 +58,27 @@ defmodule Console.AI.Fixer.Base do
       {_, txt}, acc when is_binary(txt) -> acc + byte_size(txt)
     end)
   end
+
+  def evidence_prompts(%AiInsight{evidence: [_ | _] = evidence}) do
+    Enum.map(evidence, fn
+      %AiInsightEvidence{alert: %AiInsightEvidence.Alert{} = alert} ->
+        struct(Alert.Mini, Map.take(alert, ~w(title message severity resolution)a))
+      %AiInsightEvidence{pull_request: %AiInsightEvidence.PullRequest{} = pr} ->
+        struct(File, Map.take(pr, ~w(url title repo sha filename contents patch)a))
+      %AiInsightEvidence{logs: %AiInsightEvidence.Logs{} = logs} ->
+        logs = Enum.map(logs.lines, &Jason.encode!(%{timestamp: &1.timestamp, log: &1.log}))
+        "The following application logs might also be relevant listed below in json format:\n #{Enum.join(logs, "\n")}"
+      _ -> nil
+    end)
+    |> Enum.map(fn
+      str when is_binary(str) -> {:user, str}
+      %{} = struct -> {:user, Storable.prompt(struct)}
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+    |> prepend({:user, "There's also a number of pieces of associated evidence gathered from application logs, pull requests, or prior alert resolutions that could be useful."})
+  end
+  def evidence_prompts(_), do: []
 
   defp values_files(contents, %Service{helm: %Service.Helm{values_files: fs} = helm} = svc) do
     subfolder  = folder(svc)

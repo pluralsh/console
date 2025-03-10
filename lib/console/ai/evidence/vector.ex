@@ -3,6 +3,7 @@ defmodule Console.AI.Evidence.Vector do
     Provider,
     VectorStore,
     Tools.Vector,
+    Vector.Storable,
     Evidence.Context
   }
 
@@ -22,7 +23,7 @@ defmodule Console.AI.Evidence.Vector do
     with true <- VectorStore.enabled?(),
          {:ok, %Vector{query: query}} <- use_vector(ctx.history),
          {:ok, [_ | _] = vdata} <- VectorStore.fetch(query) do
-      Context.prompt(ctx, {:user, "I've also found some relevent external data that could add additional context to what caused the issue:"})
+      Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue in rough order of relevance:"})
       |> Context.reduce(vdata, &Context.prompt(&2, {:user, vector_prompt(&1)}))
       |> Context.evidence(vector_evidence(vdata))
     else
@@ -32,9 +33,9 @@ defmodule Console.AI.Evidence.Vector do
     end
   end
 
-  defp vector_prompt(%VectorStore.Response{alert_resolution: alert_resolution}),
-    do: "A prior alert resolution with data like so: #{json!(alert_resolution)}"
-  defp vector_prompt(%VectorStore.Response{pr_file: pr_file}), do: "A file from a given pr with data like so: #{json!(pr_file)}"
+  defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: res}), do: Storable.prompt(res)
+  defp vector_prompt(%VectorStore.Response{type: :pr, pr_file: pr_file}), do: Storable.prompt(pr_file)
+  defp vector_prompt(_), do: nil
 
   defp vector_evidence(vdata) do
     Enum.map(vdata, fn
@@ -52,7 +53,4 @@ defmodule Console.AI.Evidence.Vector do
       _ -> false
     end
   end
-
-  defp json!(%{__struct: _} = args), do: Map.from_struct(args) |> json!()
-  defp json!(data), do: Jason.encode!(data)
 end

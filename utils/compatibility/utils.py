@@ -236,8 +236,7 @@ def sort_versions(versions):
 def merge_versions(existing_versions, new_versions):
     for new_version in new_versions:
         version_num = new_version["version"]
-        if version_num not in existing_versions:
-            existing_versions[version_num] = new_version
+        existing_versions[version_num] = new_version
     return existing_versions
 
 
@@ -272,15 +271,11 @@ def reduce_versions(versions):
         version = validate_semver(data["version"])
         kube = data["kube"]
 
-        # Add to reduced_versions if:
-        # - It's a new major version
-        # - OR if the minor version changes AND kube list changes
-        # - OR it's the latest version
         if version and (
-            cur_major != version.major
-            # or cur_minor != version.minor
-            or cur_kube != set(kube)
-            or i == 0 # actually latest version
+            cur_major != version.major      # add to reduced_versions if it's a new major version
+            or cur_minor != version.minor   # or if it's a new minor version
+            or cur_kube != set(kube)        # or if kube list changed
+            or i == 0                       # or if it's the latest version
         ):
             cur_major = version.major
             cur_minor = version.minor

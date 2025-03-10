@@ -3,7 +3,7 @@ defmodule Console.AI.Vector.Utils do
 
   @spec initialized() :: :ok | Console.error
   def initialized() do
-    case Settings.update(%{ai: %{vector_store: %{initialized: true}}}) do
+    case Settings.vector_store_initialized() do
       {:ok, _} -> :ok
       err -> err
     end

@@ -55,9 +55,7 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 					Name:      restoreName,
 					Namespace: "default",
 				},
-				Spec: v1alpha1.ClusterRestoreSpec{
-					BackupID: lo.ToPtr(restoreBackupID),
-				},
+				Spec: v1alpha1.ClusterRestoreSpec{},
 			}, nil)).To(Succeed())
 		})
 
@@ -69,7 +67,61 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 			Expect(k8sClient.Delete(ctx, restore)).To(Succeed())
 		})
 
+		It("should requeue when cluster is not ready", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterRestore", mock.Anything, mock.AnythingOfType("string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, restoreName))
+			fakeConsoleClient.On("IsClusterRestoreExisting", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
+			controllerReconciler := &controller.ClusterRestoreReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
+
+			restore := &v1alpha1.ClusterRestore{}
+			err = k8sClient.Get(ctx, namespacedName, restore)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeClusterRestoreStatus(restore.Status)).To(Equal(sanitizeClusterRestoreStatus(v1alpha1.ClusterRestoreStatus{
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionFalse,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+					{
+						Type:    v1alpha1.SynchronizedConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+						Message: "cluster is not ready",
+					},
+				},
+			})))
+
+		})
+
 		It("should successfully reconcile cluster restore", func() {
+			cr := &v1alpha1.ClusterRestore{}
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.ClusterRestore{
+				ObjectMeta: metav1.ObjectMeta{Name: restoreName, Namespace: namespace},
+			}, func(c *v1alpha1.ClusterRestore) {
+				c.Spec = v1alpha1.ClusterRestoreSpec{
+					BackupID: lo.ToPtr(restoreBackupID),
+				}
+			})).To(Succeed())
+			Expect(k8sClient.Get(ctx, namespacedName, cr)).NotTo(HaveOccurred())
+			Expect(cr.Spec.HasBackupID()).To(BeTrue())
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetClusterRestore", mock.Anything, mock.AnythingOfType("string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, restoreName))
@@ -111,5 +163,6 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 				},
 			})))
 		})
+
 	})
 })

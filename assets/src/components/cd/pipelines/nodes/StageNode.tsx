@@ -22,9 +22,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { type NodeProps } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
-import { MergeDeep } from 'type-fest'
 
 import {
   PipelineContextsDocument,
@@ -51,13 +49,13 @@ import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 import { CountBadge } from '../../../utils/CountBadge'
 
 import {
-  BaseNode,
   CardStatus,
   IconHeading,
   NodeCardList,
-  NodeMeta,
+  PipelineBaseNode,
+  PipelineStageNodeProps,
   StatusCard,
-} from './BaseNode'
+} from './PipelineBaseNode'
 
 const serviceStateToCardStatus = {
   [ServiceDeploymentStatus.Healthy]: 'ok',
@@ -109,7 +107,7 @@ export function getStageStatus(stage: PipelineStageFragment) {
     : StageStatus.Pending
 }
 
-const StageNodeSC = styled(BaseNode)(() => ({
+const StageNodeSC = styled(PipelineBaseNode)(() => ({
   '&&': { minWidth: 240 },
 }))
 
@@ -209,20 +207,13 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
   )
 }
 
-export function StageNode(
-  props: NodeProps<
-    PipelineStageFragment &
-      MergeDeep<NodeMeta, { meta: { stageStatus: StageStatus } }>
-  >
-) {
+export function StageNode({ id, data }: PipelineStageNodeProps) {
   const navigate = useNavigate()
-  const { incomers, outgoers } = useNodeEdges(props.id)
+  const { incomers, outgoers } = useNodeEdges(id)
   const pipelineId = useParams().pipelineId!
   const [isOpen, setIsOpen] = useState(false)
 
-  const {
-    data: { meta, ...stage },
-  } = props
+  const { meta, ...stage } = data
   const status = meta.stageStatus
 
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
@@ -242,7 +233,7 @@ export function StageNode(
   )
 
   return (
-    <StageNodeSC {...props}>
+    <StageNodeSC id={id}>
       <div className="headerArea">
         <h2 className="heading">STAGE</h2>
         <HeaderChip

@@ -59,6 +59,8 @@ export type Mutation = {
   handleCreateImagePullSecret?: Maybe<Secret_Secret>;
   /** create a Namespace */
   handleCreateNamespace: Namespace_NamespaceSpec;
+  /** rollout restart of the Daemon Set */
+  handleDaemonSetRestart?: Maybe<Daemonset_DaemonSetDetail>;
   /** deletes a resource from a namespace */
   handleDeleteResource?: Maybe<Scalars['Void']['output']>;
   /** creates an application based on provided deployment.AppDeploymentSpec */
@@ -85,6 +87,8 @@ export type Mutation = {
   handlePutResource?: Maybe<Scalars['Void']['output']>;
   /** scales a non-namespaced resource */
   handleScaleResource?: Maybe<Scaling_ReplicaCounts>;
+  /** rollout restart of the Daemon Set */
+  handleStatefulSetRestart?: Maybe<Statefulset_StatefulSetDetail>;
   /** triggers a Job based on CronJob */
   handleTriggerCronJob?: Maybe<Scalars['JSON']['output']>;
   /** scales ReplicationController to a number of replicas */
@@ -109,6 +113,18 @@ export type MutationHandleCreateNamespaceArgs = {
   input: Namespace_NamespaceSpec_Input;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleDaemonSetRestartArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  daemonSet: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
@@ -273,6 +289,18 @@ export type MutationHandleScaleResourceArgs = {
 };
 
 
+export type MutationHandleStatefulSetRestartArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  statefulset: Scalars['String']['input'];
+};
+
+
 export type MutationHandleTriggerCronJobArgs = {
   aggregations?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -411,6 +439,10 @@ export type Query = {
   handleGetPodContainers?: Maybe<Pod_PodDetail>;
   /** returns detailed information about Pod */
   handleGetPodDetail?: Maybe<Pod_PodDetail>;
+  /** returns detailed information about PodDisruptionBudget */
+  handleGetPodDisruptionBudgetDetail?: Maybe<Poddisruptionbudget_PodDisruptionBudgetDetail>;
+  /** returns a list of PodDisruptionBudget from specified namespace */
+  handleGetPodDisruptionBudgetList?: Maybe<Poddisruptionbudget_PodDisruptionBudgetList>;
   /** returns a list of Events for Pod */
   handleGetPodEvents?: Maybe<Common_EventList>;
   /** returns a list of containers for Pod */
@@ -1131,6 +1163,29 @@ export type QueryHandleGetPodDetailArgs = {
   namespace: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
   pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodDisruptionBudgetDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodDisruptionBudgetListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2512,6 +2567,42 @@ export type Pod_VolumeMount = {
   volume: V1_Volume;
 };
 
+export type Poddisruptionbudget_PodDisruptionBudget = {
+  __typename?: 'poddisruptionbudget_PodDisruptionBudget';
+  currentHealthy: Scalars['Int']['output'];
+  desiredHealthy: Scalars['Int']['output'];
+  disruptionsAllowed: Scalars['Int']['output'];
+  expectedPods: Scalars['Int']['output'];
+  labelSelector?: Maybe<V1_LabelSelector>;
+  maxUnavailable: Scalars['String']['output'];
+  minAvailable: Scalars['String']['output'];
+  objectMeta: Types_ObjectMeta;
+  typeMeta: Types_TypeMeta;
+  unhealthyPodEvictionPolicy: Scalars['String']['output'];
+};
+
+export type Poddisruptionbudget_PodDisruptionBudgetDetail = {
+  __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail';
+  currentHealthy: Scalars['Int']['output'];
+  desiredHealthy: Scalars['Int']['output'];
+  disruptedPods: Scalars['JSON']['output'];
+  disruptionsAllowed: Scalars['Int']['output'];
+  expectedPods: Scalars['Int']['output'];
+  labelSelector?: Maybe<V1_LabelSelector>;
+  maxUnavailable: Scalars['String']['output'];
+  minAvailable: Scalars['String']['output'];
+  objectMeta: Types_ObjectMeta;
+  typeMeta: Types_TypeMeta;
+  unhealthyPodEvictionPolicy: Scalars['String']['output'];
+};
+
+export type Poddisruptionbudget_PodDisruptionBudgetList = {
+  __typename?: 'poddisruptionbudget_PodDisruptionBudgetList';
+  errors: Array<Maybe<Scalars['JSON']['output']>>;
+  items: Array<Maybe<Poddisruptionbudget_PodDisruptionBudget>>;
+  listMeta: Types_ListMeta;
+};
+
 export type Query_HandleGetNamespaceDetail_ResourceQuotaList_Items_Items_StatusList = {
   __typename?: 'query_handleGetNamespaceDetail_resourceQuotaList_items_items_statusList';
   additionalProperties?: Maybe<Array<Maybe<Resourcequota_ResourceStatus_Entry>>>;
@@ -3073,7 +3164,14 @@ export type Types_ObjectMeta = {
   labels?: Maybe<Scalars['JSON']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   namespace?: Maybe<Scalars['String']['output']>;
+  ownerReferences?: Maybe<Array<Maybe<Types_OwnerReference>>>;
   uid?: Maybe<Scalars['String']['output']>;
+};
+
+export type Types_OwnerReference = {
+  __typename?: 'types_OwnerReference';
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type Types_TypeMeta = {
@@ -3160,7 +3258,7 @@ export type V1_AzureFileVolumeSource = {
   shareName: Scalars['String']['output'];
 };
 
-/** Represents storage that is managed by an external CSI volume driver (Beta feature) */
+/** Represents storage that is managed by an external CSI volume driver */
 export type V1_CsiPersistentVolumeSource = {
   __typename?: 'v1_CSIPersistentVolumeSource';
   controllerExpandSecretRef?: Maybe<V1_SecretReference>;
@@ -3360,6 +3458,8 @@ export type V1_ContainerStateWaiting = {
 export type V1_ContainerStatus = {
   __typename?: 'v1_ContainerStatus';
   allocatedResources: Scalars['ObjMap']['output'];
+  /** AllocatedResourcesStatus represents the status of various resources allocated for this Pod. */
+  allocatedResourcesStatus?: Maybe<Array<Maybe<V1_ResourceStatus>>>;
   /** ContainerID is the ID of the container in the format '<type>://<container_id>'. Where type is a container runtime identifier, returned from Version call of CRI API (for example "containerd"). */
   containerID?: Maybe<Scalars['String']['output']>;
   /** Image is the name of container image that the container is running. The container image may not match the image used in the PodSpec, as it may have been resolved by the runtime. More info: https://kubernetes.io/docs/concepts/containers/images. */
@@ -3381,8 +3481,15 @@ export type V1_ContainerStatus = {
   /** Started indicates whether the container has finished its postStart lifecycle hook and passed its startup probe. Initialized as false, becomes true after startupProbe is considered successful. Resets to false when the container is restarted, or if kubelet loses state temporarily. In both cases, startup probes will run again. Is always true when no startupProbe is defined and container is running and has passed the postStart lifecycle hook. The null value must be treated the same as false. */
   started?: Maybe<Scalars['Boolean']['output']>;
   state?: Maybe<V1_ContainerState>;
+  user?: Maybe<V1_ContainerUser>;
   /** Status of volume mounts. */
   volumeMounts?: Maybe<Array<Maybe<V1_VolumeMountStatus>>>;
+};
+
+/** ContainerUser represents user identity information */
+export type V1_ContainerUser = {
+  __typename?: 'v1_ContainerUser';
+  linux?: Maybe<V1_LinuxContainerUser>;
 };
 
 /** Represents downward API info for projecting into a projected volume. Note that this is identical to a downwardAPI volume source without the default mode. */
@@ -3535,6 +3642,7 @@ export type V1_GcePersistentDiskVolumeSource = {
   readOnly?: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** GRPCAction specifies an action involving a GRPC service. */
 export type V1_GrpcAction = {
   __typename?: 'v1_GRPCAction';
   /** Port number of the gRPC service. Number must be in the range 1 to 65535. */
@@ -3708,6 +3816,15 @@ export type V1_IscsiVolumeSource = {
   targetPortal: Scalars['String']['output'];
 };
 
+/** ImageVolumeSource represents a image volume resource. */
+export type V1_ImageVolumeSource = {
+  __typename?: 'v1_ImageVolumeSource';
+  /** Policy for pulling OCI objects. Possible values are: Always: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails. Never: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present. IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. */
+  pullPolicy?: Maybe<Scalars['String']['output']>;
+  /** Required: Image or artifact reference to be used. Behaves in the same way as pod.spec.containers[*].image. Pull secrets will be assembled in the same way as for the container image by looking up node credentials, SA image pull secrets, and pod spec image pull secrets. More info: https://kubernetes.io/docs/concepts/containers/images This field is optional to allow higher level config management to default or override container images in workload controllers like Deployments and StatefulSets. */
+  reference?: Maybe<Scalars['String']['output']>;
+};
+
 /** IngressBackend describes all endpoints for a given service and port. */
 export type V1_IngressBackend = {
   __typename?: 'v1_IngressBackend';
@@ -3832,6 +3949,17 @@ export type V1_LabelSelectorRequirement = {
   values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
+/** LinuxContainerUser represents user identity information in Linux containers */
+export type V1_LinuxContainerUser = {
+  __typename?: 'v1_LinuxContainerUser';
+  /** GID is the primary gid initially attached to the first process in the container */
+  gid: Scalars['BigInt']['output'];
+  /** SupplementalGroups are the supplemental groups initially attached to the first process in the container */
+  supplementalGroups?: Maybe<Array<Maybe<Scalars['BigInt']['output']>>>;
+  /** UID is the primary uid initially attached to the first process in the container */
+  uid: Scalars['BigInt']['output'];
+};
+
 /** LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace. */
 export type V1_LocalObjectReference = {
   __typename?: 'v1_LocalObjectReference';
@@ -3839,7 +3967,7 @@ export type V1_LocalObjectReference = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
-/** Local represents directly-attached storage with node affinity (Beta feature) */
+/** Local represents directly-attached storage with node affinity */
 export type V1_LocalVolumeSource = {
   __typename?: 'v1_LocalVolumeSource';
   /** fsType is the filesystem type to mount. It applies only when the Path is a block device. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". The default value is to auto-select a filesystem if unspecified. */
@@ -3939,7 +4067,7 @@ export type V1_NodeSystemInfo = {
   containerRuntimeVersion: Scalars['String']['output'];
   /** Kernel Version reported by the node from 'uname -r' (e.g. 3.16.0-0.bpo.4-amd64). */
   kernelVersion: Scalars['String']['output'];
-  /** KubeProxy Version reported by the node. */
+  /** Deprecated: KubeProxy Version reported by the node. */
   kubeProxyVersion: Scalars['String']['output'];
   /** Kubelet Version reported by the node. */
   kubeletVersion: Scalars['String']['output'];
@@ -4060,7 +4188,7 @@ export type V1_PersistentVolumeClaimSpec = {
   selector?: Maybe<V1_LabelSelector>;
   /** storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 */
   storageClassName?: Maybe<Scalars['String']['output']>;
-  /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/ (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled. */
+  /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/ (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default). */
   volumeAttributesClassName?: Maybe<Scalars['String']['output']>;
   /** volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not included in claim spec. */
   volumeMode?: Maybe<Scalars['String']['output']>;
@@ -4138,10 +4266,26 @@ export type V1_PodSecurityContext = {
   runAsNonRoot?: Maybe<Scalars['Boolean']['output']>;
   /** The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence for that container. Note that this field cannot be set when spec.os.name is windows. */
   runAsUser?: Maybe<Scalars['BigInt']['output']>;
+  /**
+   * seLinuxChangePolicy defines how the container's SELinux label is applied to all volumes used by the Pod. It has no effect on nodes that do not support SELinux or to volumes does not support SELinux. Valid values are "MountOption" and "Recursive".
+   *
+   * "Recursive" means relabeling of all files on all Pod volumes by the container runtime. This may be slow for large volumes, but allows mixing privileged and unprivileged Pods sharing the same volume on the same node.
+   *
+   * "MountOption" mounts all eligible Pod volumes with `-o context` mount option. This requires all Pods that share the same volume to use the same SELinux label. It is not possible to share the same volume among privileged and unprivileged Pods. Eligible volumes are in-tree FibreChannel and iSCSI volumes, and all CSI volumes whose CSI driver announces SELinux support by setting spec.seLinuxMount: true in their CSIDriver instance. Other volumes are always re-labelled recursively. "MountOption" value is allowed only when SELinuxMount feature gate is enabled.
+   *
+   * If not specified and SELinuxMount feature gate is enabled, "MountOption" is used. If not specified and SELinuxMount feature gate is disabled, "MountOption" is used for ReadWriteOncePod volumes and "Recursive" for all other volumes.
+   *
+   * This field affects only Pods that have SELinux label set, either in PodSecurityContext or in SecurityContext of all containers.
+   *
+   * All Pods that use the same volume should use the same seLinuxChangePolicy, otherwise some pods can get stuck in ContainerCreating state. Note that this field cannot be set when spec.os.name is windows.
+   */
+  seLinuxChangePolicy?: Maybe<Scalars['String']['output']>;
   seLinuxOptions?: Maybe<V1_SeLinuxOptions>;
   seccompProfile?: Maybe<V1_SeccompProfile>;
-  /** A list of groups applied to the first process run in each container, in addition to the container's primary GID, the fsGroup (if specified), and group memberships defined in the container image for the uid of the container process. If unspecified, no additional groups are added to any container. Note that group memberships defined in the container image for the uid of the container process are still effective, even if they are not included in this list. Note that this field cannot be set when spec.os.name is windows. */
+  /** A list of groups applied to the first process run in each container, in addition to the container's primary GID and fsGroup (if specified).  If the SupplementalGroupsPolicy feature is enabled, the supplementalGroupsPolicy field determines whether these are in addition to or instead of any group memberships defined in the container image. If unspecified, no additional groups are added, though group memberships defined in the container image may still be used, depending on the supplementalGroupsPolicy field. Note that this field cannot be set when spec.os.name is windows. */
   supplementalGroups?: Maybe<Array<Maybe<Scalars['BigInt']['output']>>>;
+  /** Defines how supplemental groups of the first container processes are calculated. Valid values are "Merge" and "Strict". If not specified, "Merge" is used. (Alpha) Using the field requires the SupplementalGroupsPolicy feature gate to be enabled and the container runtime must implement support for this feature. Note that this field cannot be set when spec.os.name is windows. */
+  supplementalGroupsPolicy?: Maybe<Scalars['String']['output']>;
   /** Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported sysctls (by the container runtime) might fail to launch. Note that this field cannot be set when spec.os.name is windows. */
   sysctls?: Maybe<Array<Maybe<V1_Sysctl>>>;
   windowsOptions?: Maybe<V1_WindowsSecurityContextOptions>;
@@ -4199,7 +4343,7 @@ export type V1_ProjectedVolumeSource = {
   __typename?: 'v1_ProjectedVolumeSource';
   /** defaultMode are the mode bits used to set permissions on created files by default. Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal values for mode bits. Directories within the path are not affected by this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and the result can be other mode bits set. */
   defaultMode?: Maybe<Scalars['Int']['output']>;
-  /** sources is the list of volume projections */
+  /** sources is the list of volume projections. Each entry in this list handles one source. */
   sources: Array<Maybe<V1_VolumeProjection>>;
 };
 
@@ -4265,6 +4409,8 @@ export type V1_ResourceClaim = {
   __typename?: 'v1_ResourceClaim';
   /** Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container. */
   name: Scalars['String']['output'];
+  /** Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request. */
+  request?: Maybe<Scalars['String']['output']>;
 };
 
 /** ResourceFieldSelector represents container resources (cpu, memory) and their output format */
@@ -4275,6 +4421,25 @@ export type V1_ResourceFieldSelector = {
   divisor?: Maybe<Scalars['String']['output']>;
   /** Required: resource to select */
   resource: Scalars['String']['output'];
+};
+
+/** ResourceHealth represents the health of a resource. It has the latest device health information. This is a part of KEP https://kep.k8s.io/4680. */
+export type V1_ResourceHealth = {
+  __typename?: 'v1_ResourceHealth';
+  /**
+   * Health of the resource. can be one of:
+   * - Healthy: operates as normal
+   * - Unhealthy: reported unhealthy. We consider this a temporary health issue
+   * since we do not have a mechanism today to distinguish
+   * temporary and permanent issues.
+   * - Unknown: The status cannot be determined.
+   * For example, Device Plugin got unregistered and hasn't been re-registered since.
+   *
+   * In future we may want to introduce the PermanentlyUnhealthy Status.
+   */
+  health?: Maybe<Scalars['String']['output']>;
+  /** ResourceID is the unique identifier of the resource. See the ResourceID type for more information. */
+  resourceID: Scalars['String']['output'];
 };
 
 /** ResourceRequirements describes the compute resource requirements. */
@@ -4290,6 +4455,15 @@ export type V1_ResourceRequirements = {
   claims?: Maybe<Array<Maybe<V1_ResourceClaim>>>;
   limits: Scalars['ObjMap']['output'];
   requests: Scalars['ObjMap']['output'];
+};
+
+/** ResourceStatus represents the status of a single resource allocated to a Pod. */
+export type V1_ResourceStatus = {
+  __typename?: 'v1_ResourceStatus';
+  /** Name of the resource. Must be unique within the pod and in case of non-DRA resource, match one of the resources from the pod spec. For DRA resources, the value must be "claim:<claim_name>/<request>". When this status is reported about a container, the "claim_name" and "request" must match one of the claims of this container. */
+  name: Scalars['String']['output'];
+  /** List of unique resources health. Each element in the list contains an unique resource ID and its health. At a minimum, for the lifetime of a Pod, resource ID must uniquely identify the resource allocated to the Pod on the Node. If other Pod on the same Node reports the status with the same resource ID, it must be the same resource they share. See ResourceID type definition for a specific format it has in various use cases. */
+  resources?: Maybe<Array<Maybe<V1_ResourceHealth>>>;
 };
 
 /** RoleRef contains information that points to the role being used */
@@ -4438,7 +4612,7 @@ export type V1_SecurityContext = {
   capabilities?: Maybe<V1_Capabilities>;
   /** Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false. Note that this field cannot be set when spec.os.name is windows. */
   privileged?: Maybe<Scalars['Boolean']['output']>;
-  /** procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows. */
+  /** procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows. */
   procMount?: Maybe<Scalars['String']['output']>;
   /** Whether this container has a read-only root filesystem. Default is false. Note that this field cannot be set when spec.os.name is windows. */
   readOnlyRootFilesystem?: Maybe<Scalars['Boolean']['output']>;
@@ -4568,6 +4742,7 @@ export type V1_TypedLocalObjectReference = {
   name: Scalars['String']['output'];
 };
 
+/** TypedObjectReference contains enough information to let you locate the typed referenced object */
 export type V1_TypedObjectReference = {
   __typename?: 'v1_TypedObjectReference';
   /** APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required. */
@@ -4600,6 +4775,7 @@ export type V1_Volume = {
   gitRepo?: Maybe<V1_GitRepoVolumeSource>;
   glusterfs?: Maybe<V1_GlusterfsVolumeSource>;
   hostPath?: Maybe<V1_HostPathVolumeSource>;
+  image?: Maybe<V1_ImageVolumeSource>;
   iscsi?: Maybe<V1_IscsiVolumeSource>;
   /** name of the volume. Must be a DNS_LABEL and unique within the pod. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name: Scalars['String']['output'];
@@ -4629,7 +4805,7 @@ export type V1_VolumeMountStatus = {
   recursiveReadOnly?: Maybe<Scalars['String']['output']>;
 };
 
-/** Projection that may be projected along with other supported volume types */
+/** Projection that may be projected along with other supported volume types. Exactly one of these fields must be set. */
 export type V1_VolumeProjection = {
   __typename?: 'v1_VolumeProjection';
   clusterTrustBundle?: Maybe<V1_ClusterTrustBundleProjection>;
@@ -4913,6 +5089,31 @@ export type DrainNodeMutationVariables = Exact<{
 
 
 export type DrainNodeMutation = { __typename?: 'Mutation', handleNodeDrain?: any | null };
+
+export type PodDisruptionBudgetListFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> };
+
+export type PodDisruptionBudgetFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
+
+export type PodDisruptionBudgetDetailFragment = { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
+
+export type PodDisruptionBudgetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PodDisruptionBudgetsQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetList?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'poddisruptionbudget_PodDisruptionBudget', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null> } | null };
+
+export type PodDisruptionBudgetQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type PodDisruptionBudgetQuery = { __typename?: 'Query', handleGetPodDisruptionBudgetDetail?: { __typename?: 'poddisruptionbudget_PodDisruptionBudgetDetail', minAvailable: string, maxUnavailable: string, unhealthyPodEvictionPolicy: string, currentHealthy: number, desiredHealthy: number, disruptionsAllowed: number, expectedPods: number, disruptedPods: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -5813,6 +6014,73 @@ export const EventListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${EventFragmentDoc}`;
+export const SelectorFragmentDoc = gql`
+    fragment Selector on v1_LabelSelector {
+  matchLabels
+  matchExpressions {
+    key
+    operator
+    values
+  }
+}
+    `;
+export const PodDisruptionBudgetFragmentDoc = gql`
+    fragment PodDisruptionBudget on poddisruptionbudget_PodDisruptionBudget {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  labelSelector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  minAvailable
+  maxUnavailable
+  unhealthyPodEvictionPolicy
+  currentHealthy
+  desiredHealthy
+  disruptionsAllowed
+  expectedPods
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${SelectorFragmentDoc}`;
+export const PodDisruptionBudgetListFragmentDoc = gql`
+    fragment PodDisruptionBudgetList on poddisruptionbudget_PodDisruptionBudgetList {
+  errors
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "poddisruptionbudget_PodDisruptionBudget") {
+    ...PodDisruptionBudget
+  }
+}
+    ${ListMetaFragmentDoc}
+${PodDisruptionBudgetFragmentDoc}`;
+export const PodDisruptionBudgetDetailFragmentDoc = gql`
+    fragment PodDisruptionBudgetDetail on poddisruptionbudget_PodDisruptionBudgetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  labelSelector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  minAvailable
+  maxUnavailable
+  unhealthyPodEvictionPolicy
+  currentHealthy
+  desiredHealthy
+  disruptionsAllowed
+  expectedPods
+  disruptedPods
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${SelectorFragmentDoc}`;
 export const NetworkPolicyPortFragmentDoc = gql`
     fragment NetworkPolicyPort on v1_NetworkPolicyPort {
   port
@@ -6069,16 +6337,6 @@ export const DaemonSetListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${DaemonSetFragmentDoc}`;
-export const SelectorFragmentDoc = gql`
-    fragment Selector on v1_LabelSelector {
-  matchLabels
-  matchExpressions {
-    key
-    operator
-    values
-  }
-}
-    `;
 export const DaemonSetDetailFragmentDoc = gql`
     fragment DaemonSetDetail on daemonset_DaemonSetDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -7836,6 +8094,97 @@ export function useDrainNodeMutation(baseOptions?: Apollo.MutationHookOptions<Dr
 export type DrainNodeMutationHookResult = ReturnType<typeof useDrainNodeMutation>;
 export type DrainNodeMutationResult = Apollo.MutationResult<DrainNodeMutation>;
 export type DrainNodeMutationOptions = Apollo.BaseMutationOptions<DrainNodeMutation, DrainNodeMutationVariables>;
+export const PodDisruptionBudgetsDocument = gql`
+    query PodDisruptionBudgets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetPodDisruptionBudgetList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "poddisruptionbudget_PodDisruptionBudgetList", path: "poddisruptionbudget/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...PodDisruptionBudgetList
+  }
+}
+    ${PodDisruptionBudgetListFragmentDoc}`;
+
+/**
+ * __usePodDisruptionBudgetsQuery__
+ *
+ * To run a query within a React component, call `usePodDisruptionBudgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodDisruptionBudgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodDisruptionBudgetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePodDisruptionBudgetsQuery(baseOptions: Apollo.QueryHookOptions<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>(PodDisruptionBudgetsDocument, options);
+      }
+export function usePodDisruptionBudgetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>(PodDisruptionBudgetsDocument, options);
+        }
+export function usePodDisruptionBudgetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>(PodDisruptionBudgetsDocument, options);
+        }
+export type PodDisruptionBudgetsQueryHookResult = ReturnType<typeof usePodDisruptionBudgetsQuery>;
+export type PodDisruptionBudgetsLazyQueryHookResult = ReturnType<typeof usePodDisruptionBudgetsLazyQuery>;
+export type PodDisruptionBudgetsSuspenseQueryHookResult = ReturnType<typeof usePodDisruptionBudgetsSuspenseQuery>;
+export type PodDisruptionBudgetsQueryResult = Apollo.QueryResult<PodDisruptionBudgetsQuery, PodDisruptionBudgetsQueryVariables>;
+export const PodDisruptionBudgetDocument = gql`
+    query PodDisruptionBudget($name: String!, $namespace: String!) {
+  handleGetPodDisruptionBudgetDetail(namespace: $namespace, name: $name) @rest(type: "poddisruptionbudget_PodDisruptionBudgetDetail", path: "poddisruptionbudget/{args.namespace}/{args.name}") {
+    ...PodDisruptionBudgetDetail
+  }
+}
+    ${PodDisruptionBudgetDetailFragmentDoc}`;
+
+/**
+ * __usePodDisruptionBudgetQuery__
+ *
+ * To run a query within a React component, call `usePodDisruptionBudgetQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodDisruptionBudgetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodDisruptionBudgetQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function usePodDisruptionBudgetQuery(baseOptions: Apollo.QueryHookOptions<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>(PodDisruptionBudgetDocument, options);
+      }
+export function usePodDisruptionBudgetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>(PodDisruptionBudgetDocument, options);
+        }
+export function usePodDisruptionBudgetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>(PodDisruptionBudgetDocument, options);
+        }
+export type PodDisruptionBudgetQueryHookResult = ReturnType<typeof usePodDisruptionBudgetQuery>;
+export type PodDisruptionBudgetLazyQueryHookResult = ReturnType<typeof usePodDisruptionBudgetLazyQuery>;
+export type PodDisruptionBudgetSuspenseQueryHookResult = ReturnType<typeof usePodDisruptionBudgetSuspenseQuery>;
+export type PodDisruptionBudgetQueryResult = Apollo.QueryResult<PodDisruptionBudgetQuery, PodDisruptionBudgetQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(method: "GET", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {

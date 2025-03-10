@@ -1,15 +1,15 @@
 dependencies:
 - name: kas
   repository: file://../../plural/helm/kas
-  version: 0.3.0
+  version: 0.2.0
 - name: controller
   repository: file://../controller
-  version: 0.0.107
+  version: 0.0.108
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard
-  version: 7.11.1
+  version: 7.11.0
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.0
-digest: sha256:7f37e9239dd39154c827e512862d57bb7e1ac1a0693ecc0d9fb33f3bf3886b7e
-generated: "2025-03-05T13:52:54.986680355+01:00"
+digest: sha256:65dc2831e96d364adb2ec6e3af64e557a42f010ba5cf8bfa82404d29d4d0791a
+generated: "2025-03-07T20:55:01.275339004Z"

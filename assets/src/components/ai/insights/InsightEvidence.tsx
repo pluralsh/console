@@ -1,28 +1,37 @@
-import { LogsIcon, PrOpenIcon, Tab, TabList } from '@pluralsh/design-system'
-import { AiInsightEvidenceFragment, EvidenceType } from 'generated/graphql'
+import {
+  LogsIcon,
+  Modal,
+  PrOpenIcon,
+  Tab,
+  TabList,
+} from '@pluralsh/design-system'
+import {
+  AiInsightEvidenceFragment,
+  EvidenceType,
+  LogsEvidenceFragment,
+  PullRequestEvidenceFragment,
+} from 'generated/graphql'
+import { groupBy, isEmpty } from 'lodash'
+import { useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useRef, useState } from 'react'
-import { isEmpty } from 'lodash'
 import { LogsEvidencePanel } from './LogsEvidencePanel'
-import { PrEvidencePanel } from './PrEvidencePanel'
-import { isNonNullable } from 'utils/isNonNullable'
+import { PrEvidenceDetails } from './PrEvidenceDetails'
+import { GroupedPrEvidence, PrEvidencePanel } from './PrEvidencePanel'
+
+const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
 
 export function InsightEvidence({
   evidence,
 }: {
-  evidence?: AiInsightEvidenceFragment[]
+  evidence: AiInsightEvidenceFragment[]
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [selectedPr, setSelectedPr] = useState<GroupedPrEvidence | null>(null)
 
-  const logEvidence = evidence
-    ?.filter((item) => item.type === EvidenceType.Log)
-    .map((item) => item.logs)
-    .filter(isNonNullable)
-
-  // TODO: Add PR evidence when backend supports
-  // const prEvidence = evidence?.filter((item) => item.type === EvidenceType.Pr)
-  const prEvidence = []
+  const { logEvidence, prEvidence } = useMemo(() => {
+    return aggregateInsightEvidence(evidence)
+  }, [evidence])
 
   const [evidenceType, setEvidenceType] = useState(
     !isEmpty(logEvidence) ? EvidenceType.Log : EvidenceType.Pr
@@ -60,12 +69,49 @@ export function InsightEvidence({
         ) : null}
       </TabList>
       {evidenceType === EvidenceType.Log ? (
-        <LogsEvidencePanel logs={logEvidence ?? []} />
+        <LogsEvidencePanel logs={logEvidence} />
       ) : (
-        <PrEvidencePanel />
+        <PrEvidencePanel
+          prs={prEvidence}
+          setSelectedPr={setSelectedPr}
+        />
       )}
+      <Modal
+        open={!!selectedPr}
+        onClose={() => setSelectedPr(null)}
+        size="custom"
+      >
+        {selectedPr && (
+          <PrEvidenceDetails
+            pr={selectedPr}
+            onGoBack={() => setSelectedPr(null)}
+          />
+        )}
+      </Modal>
     </WrapperSC>
   )
+}
+
+export const aggregateInsightEvidence = (
+  evidence: AiInsightEvidenceFragment[]
+) => {
+  const logEvidence: LogsEvidenceFragment[] = []
+  const prEvidence: PullRequestEvidenceFragment[] = []
+
+  evidence?.forEach(({ type, logs, pullRequest: pr }) => {
+    if (type === EvidenceType.Log && logs) logEvidence.push(logs)
+    else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
+  })
+
+  const groupedPrEvidence: GroupedPrEvidence[] = Object.entries(
+    groupBy(prEvidence, (pr) => `${pr.url}${DELIMITER}${pr.title}`)
+  ).map(([key, files]) => ({
+    url: key.split(DELIMITER)[0],
+    title: key.split(DELIMITER)[1],
+    files,
+  }))
+
+  return { logEvidence, prEvidence: groupedPrEvidence }
 }
 
 const WrapperSC = styled.div({

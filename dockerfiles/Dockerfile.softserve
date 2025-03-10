@@ -1,0 +1,49 @@
+# in order to get a soft-serve server with the repos we want, we need to:
+# 1. install soft-serve (and its dependencies)
+# 2. create and set the admin SSH key
+# 2. run "soft serve" to start the server (done inside the shellscript)
+# 3. import the repos (also done inside the shellscript)
+# This is all done in builder image since we want our actual soft-serve image to not require github interaction for imports
+FROM golang:alpine3.20 AS builder
+
+EXPOSE 23231
+EXPOSE 23232
+EXPOSE 23233
+EXPOSE 9418
+
+# basics, in case need to access shell to debug/troubleshoot
+RUN apk update --no-cache
+RUN apk add sudo git vim curl
+
+# create keys
+RUN apk add openssh-client
+
+# soft-serve install
+# Reason that we manually install soft-serve instead of using the soft-serve docker image is that
+# the soft-serve image starts the server without allowing us to set admin ssh keys, thus preventing
+# us from importing repos
+RUN go install github.com/charmbracelet/soft-serve/cmd/soft@latest
+RUN mv /go/bin/soft /usr/bin/
+
+# soft-serve data folder
+RUN mkdir -p /data
+
+# copy soft-serve setup script
+COPY bin/softserve_setup.sh .
+RUN chmod 777 softserve_setup.sh
+RUN sh softserve_setup.sh
+ENTRYPOINT [ "soft", "serve" ]
+
+# soft-serve server which will actually run indefinitely
+# we want to copy the /data folder from the builder image since that contains all the files used by soft-serve
+FROM golang:alpine3.20 AS server
+
+EXPOSE 23231
+EXPOSE 23232
+EXPOSE 23233
+EXPOSE 9418
+
+COPY --from=builder /usr/bin/soft /usr/bin/
+COPY --from=builder /go/data /go/data
+
+ENTRYPOINT [ "soft", "serve" ]

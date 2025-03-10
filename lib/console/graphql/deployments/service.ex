@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :helm,             :helm_config_attributes
     field :kustomize,        :kustomize_attributes
     field :parent_id,        :id
+    field :flow_id,          :id
     field :configuration,    list_of(:config_attributes)
     field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
@@ -204,6 +205,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :imports,        list_of(:service_import), resolve: dataloader(Deployments), description: "imports from stack outputs"
     field :insight,        :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this service"
     field :vulns,          :service_vuln, resolve: dataloader(Deployments), description: "sideload detected vulnerabilities for this service"
+    field :flow,           :flow, resolve: dataloader(Deployments), description: "the flow this service belongs to"
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do

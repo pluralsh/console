@@ -194,6 +194,17 @@ defmodule Console.Deployments.Settings do
   @doc """
   Updates global deployment settings and busts cache
   """
+  @spec vector_store_initialized() :: settings_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
+  def vector_store_initialized() do
+    fetch_consistent()
+    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true}}})
+    |> Repo.update()
+  end
+
+  @doc """
+  Updates global deployment settings and busts cache
+  """
   @spec update(map, User.t) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do

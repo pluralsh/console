@@ -15,6 +15,7 @@ defmodule Console.AI.Evidence.Context do
   def claims(%__MODULE__{} = ctx, %{evidence: [_ | _] = evidence}), do: evidence(ctx, evidence)
   def claims(%__MODULE__{} = ctx, _), do: ctx
 
+  def prompt(ctx, {_, nil}), do: ctx
   def prompt(%__MODULE__{history: hist} = ctx, msg), do: %{ctx | history: append(hist, msg)}
 
   def reduce(%__MODULE__{} = ctx, enum, fun) when is_function(fun, 2), do: Enum.reduce(enum, ctx, fun)

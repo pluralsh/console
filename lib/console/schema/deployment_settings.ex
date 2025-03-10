@@ -95,9 +95,9 @@ defmodule Console.Schema.DeploymentSettings do
       field :embedding_provider, AIProvider
 
       embeds_one :vector_store, VectorStore, on_replace: :update do
-        field :enabled,    :boolean, default: false
-        field :initalized, :boolean, default: false
-        field :store,      VectorStore, default: :elastic
+        field :enabled,     :boolean, default: false
+        field :initialized, :boolean, default: false
+        field :store,       VectorStore, default: :elastic
 
         embeds_one :elastic, Elastic, on_replace: :update
       end

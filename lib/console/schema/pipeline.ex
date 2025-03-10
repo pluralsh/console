@@ -1,7 +1,7 @@
 defmodule Console.Schema.Pipeline do
   use Piazza.Ecto.Schema
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{PolicyBinding, PipelineStage, PipelineEdge, User, Project}
+  alias Console.Schema.{PolicyBinding, PipelineStage, PipelineEdge, User, Project, Flow}
 
   schema "pipelines" do
     field :name,            :string
@@ -9,6 +9,7 @@ defmodule Console.Schema.Pipeline do
     field :read_policy_id,  :binary_id
 
     belongs_to :project, Project
+    belongs_to :flow,    Flow
 
     has_many :stages, PipelineStage, on_replace: :delete
     has_many :edges,  PipelineEdge, on_replace: :delete
@@ -24,6 +25,10 @@ defmodule Console.Schema.Pipeline do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(p in query, where: p.flow_id == ^flow_id)
   end
 
   def search(query \\ __MODULE__, q) do
@@ -66,11 +71,13 @@ defmodule Console.Schema.Pipeline do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name project_id)a)
+    |> cast(attrs, ~w(name project_id flow_id)a)
     |> cast_assoc(:stages)
     |> cast_assoc(:edges)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> foreign_key_constraint(:project_id)
+    |> foreign_key_constraint(:flow_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required(~w(name project_id)a)

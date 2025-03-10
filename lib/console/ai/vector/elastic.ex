@@ -26,6 +26,7 @@ defmodule Console.AI.Vector.Elastic do
             }
           }
         },
+        "@timestamp": %{type: "date"},
         datatype: %{type: "keyword"}
       }
     }
@@ -54,15 +55,17 @@ defmodule Console.AI.Vector.Elastic do
       |> HTTPoison.post(Jason.encode!(%{
         passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
         datatype: datatype,
+        "@timestamp": DateTime.utc_now(),
         "#{datatype}": Console.mapify(data)
       }), headers(es))
       |> handle_response("could not insert vector into elasticsearch:")
     end
   end
 
-  def fetch(%__MODULE__{conn: %Elastic{} = es}, text) do
+  def fetch(%__MODULE__{conn: %Elastic{} = es}, text, opts) do
+    count = Keyword.get(opts, :count, 5)
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
-         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, vector_query(embedding)) do
+         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, vector_query(embedding, count)) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
         case source[datatype] do
@@ -75,12 +78,10 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  defp vector_query(embedding) do
+  defp vector_query(embedding, count) do
     %{
-      size: 5,
-      query: %{
-        knn: %{field: "passages.vector", query_vector: embedding, k: 5}
-      }
+      size: count,
+      knn: %{field: "passages.vector", query_vector: embedding, k: count}
     }
   end
 

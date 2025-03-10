@@ -9,7 +9,7 @@ import {
 } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-import { ReactFlowProvider } from 'reactflow'
+import { ReactFlowProvider } from '@xyflow/react'
 import { useOutletContext } from 'react-router-dom'
 
 import { useProjectId } from '../../contexts/ProjectsContext'

@@ -22,6 +22,7 @@ defmodule Console.Schema.AiInsightEvidence do
       field :message,    :string
       field :alert_id,   :binary_id
       field :resolution, :string
+      field :severity,   Console.Schema.Alert.Severity
     end
 
     embeds_one :pull_request, PullRequest, on_replace: :update do
@@ -63,7 +64,7 @@ defmodule Console.Schema.AiInsightEvidence do
 
   defp alert_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(title message alert_id resolution)a)
+    |> cast(attrs, ~w(title message alert_id severity resolution)a)
   end
 
   defp pr_changeset(model, attrs) do

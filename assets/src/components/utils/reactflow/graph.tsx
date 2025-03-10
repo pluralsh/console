@@ -5,25 +5,28 @@ import {
   ReloadIcon,
 } from '@pluralsh/design-system'
 import { useKeyDown } from '@react-hooks-library/core'
-import { createContext, useCallback, useEffect, useState } from 'react'
-import FocusLock from 'react-focus-lock'
-import ReactFlow, {
+import {
   Background,
   BackgroundVariant,
   Edge,
+  ReactFlow,
   ReactFlowProps,
   useReactFlow,
   type Node as FlowNode,
-} from 'reactflow'
+} from '@xyflow/react'
+import { createContext, useCallback, useState } from 'react'
+import FocusLock from 'react-focus-lock'
 import styled, { useTheme } from 'styled-components'
 
 import {
   DagreGraphOptions,
-  runAfterLayout,
+  runAfterBrowserLayout,
   useLayoutNodes,
 } from 'components/cd/pipelines/utils/nodeLayouter'
 import { edgeTypes } from './edges'
 import { MarkerDefs } from './markers'
+
+import '@xyflow/react/dist/style.css'
 
 export const GraphLayoutCtx = createContext<DagreGraphOptions | undefined>(
   undefined
@@ -104,26 +107,20 @@ export function ReactFlowGraph({
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
   const { fitView } = useReactFlow()
-  const { nodes, edges, layoutNodes } = useLayoutNodes({
-    baseNodes,
-    baseEdges,
-    options: dagreOptions,
-  })
+  const { nodes, edges, showGraph, onNodesChange, onEdgesChange } =
+    useLayoutNodes({
+      baseNodes,
+      baseEdges,
+      options: dagreOptions,
+    })
 
   const defaultResetView = useCallback(() => {
-    layoutNodes()
     fitView({ duration: 500 })
-  }, [fitView, layoutNodes])
-
-  // initial layout
-  useEffect(() => {
-    layoutNodes()
-    runAfterLayout(fitView)
-  }, [layoutNodes, fitView])
+  }, [fitView])
 
   const toggleFullscreen = useCallback(() => {
     setFullscreen(!fullscreen)
-    runAfterLayout(() => fitView({ duration: 500 }))
+    runAfterBrowserLayout(() => fitView({ duration: 500 }))
   }, [fitView, fullscreen])
 
   useKeyDown('Escape', () => fullscreen && toggleFullscreen())
@@ -135,19 +132,21 @@ export function ReactFlowGraph({
         $fullscreen={fullscreen}
       >
         <ReactFlowAreaSC $fullscreen={fullscreen}>
-          <ReactFlowWrapperSC>
+          <ReactFlowWrapperSC style={{ opacity: showGraph ? 1 : 0 }}>
             <ReactFlow
               fitView
               draggable
               minZoom={0.08}
               edgeTypes={edgeTypes}
               edgesFocusable={false}
-              edgesUpdatable={false}
+              edgesReconnectable={false}
               nodesDraggable={false}
               nodesConnectable={false}
               {...props}
               nodes={nodes}
               edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
             >
               <Background
                 variant={BackgroundVariant.Dots}

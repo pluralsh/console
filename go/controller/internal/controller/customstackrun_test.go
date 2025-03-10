@@ -88,6 +88,9 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 				ObjectMeta: metav1.ObjectMeta{Name: stackName, Namespace: namespace},
 				Spec: v1alpha1.CustomStackRunSpec{
 					Name: lo.ToPtr(stackName),
+					StackRef: &corev1.LocalObjectReference{
+						Name: stackName,
+					},
 				},
 			}, nil)).To(Succeed())
 		})
@@ -120,15 +123,13 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			}
 		})
 
-		It("should successfully reconcile the resource CustomStackRun", func() {
-			By("Create Custom Stack Run")
+		It("should wait for infrastructure stack", func() {
+			By("Wait for infrastructure stack")
 			test := struct {
 				returnCreateCustomStackRun *gqlclient.CustomStackRunFragment
 				expectedStatus             v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
-					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("HQOM6JFXYFND7G7CYINDOXMSLWQSMBMJFLE3GK4AVDNPDBCU6COQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -138,13 +139,14 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
-							Status: metav1.ConditionTrue,
+							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadyConditionReason.String(),
 						},
 						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: "stack is not ready",
 						},
 					},
 				},
@@ -176,6 +178,68 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
+		It("should successfully reconcile the resource CustomStackRun", func() {
+			By("Create Custom Stack Run")
+			test := struct {
+				returnCreateCustomStackRun *gqlclient.CustomStackRunFragment
+				expectedStatus             v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr(id),
+					SHA: lo.ToPtr("G3UMYOT66ETGYFUYV3S54WCWITWZN5MIBHD73OCGQDAH4ZHI46YQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				returnCreateCustomStackRun: &gqlclient.CustomStackRunFragment{
+					ID: id,
+				},
+			}
+
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: stackName, Namespace: namespace},
+			}, func(c *v1alpha1.InfrastructureStack) {
+				c.Status.ID = lo.ToPtr(id)
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("CreateCustomStackRun", mock.Anything, mock.Anything).Return(test.returnCreateCustomStackRun, nil)
+			reconciler := &controller.CustomStackRunReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			resource := &v1alpha1.CustomStackRun{}
+			err = k8sClient.Get(ctx, typeNamespacedName, resource)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
 		It("should successfully reconcile and update previously created custom stack run", func() {
 			test := struct {
 				returnUpdateCustomStack *gqlclient.CustomStackRunFragment
@@ -183,7 +247,7 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("22DSNVGBN5ZUDLAIPTN7WE74JXC5X4BXNHRQUN4BQ6EW47CYCJNA===="),
+					SHA: lo.ToPtr("OIO264HOFLVR3M7A5I4DIS6V3JX4TSTXE7JWRVG6FH3S4BCZ5DLA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

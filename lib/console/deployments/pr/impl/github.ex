@@ -91,6 +91,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
         filename: f["filename"],
         sha: f["sha"],
         patch: f["patch"],
+        base: get_in(f, ~w(base ref)),
+        head: get_in(f, ~w(head ref))
       }
     end)
     |> Enum.filter(& &1.contents)
@@ -98,7 +100,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
   end
 
   defp get_content(client, url) when is_binary(url) do
-    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}]) do
+    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}], follow_redirect: true) do
       {:ok, %HTTPoison.Response{status_code: code, body: content}}
         when code >= 200 and code < 300 -> content
       _ -> nil

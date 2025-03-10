@@ -8,12 +8,15 @@ defmodule Console.AI.VectorStore do
   alias Console.Deployments.Settings
 
   defmodule Response do
+    @type type :: :alert | :pr
+
     @type t :: %__MODULE__{
+      type: type,
       pr_file: Console.Deployments.Pr.File.t,
       alert_resolution: Console.Schema.AlertResolution.Mini.t
     }
 
-    defstruct [:pr_file, :alert_resolution]
+    defstruct [:pr_file, :alert_resolution, :type]
   end
 
   @type store :: Console.AI.Vector.Elastic.t
@@ -22,7 +25,7 @@ defmodule Console.AI.VectorStore do
 
   @callback init(store) :: :ok | error
   @callback insert(store, struct) :: :ok | error
-  @callback fetch(store, [float]) :: {:ok, [data]} | error
+  @callback fetch(store, [float], keyword) :: {:ok, [data]} | error
 
   @spec enabled?() :: boolean
   def enabled?() do
@@ -39,14 +42,14 @@ defmodule Console.AI.VectorStore do
       do: mod.insert(store, struct)
   end
 
-  @spec fetch(binary) :: {:ok, [data]} | error
-  def fetch(text) when is_binary(text) do
+  @spec fetch(binary, keyword) :: {:ok, [data]} | error
+  def fetch(text, opts \\ []) when is_binary(text) do
     settings = Settings.cached()
     with {:ok, %{__struct__: mod} = store} <- store(settings),
-      do: mod.fetch(store, text)
+      do: mod.fetch(store, text, opts)
   end
 
-  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %{initialized: true}}}, _), do: :ok
+  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true}}}, _), do: :ok
   defp maybe_init(_, %{__struct__: mod} = store), do: mod.init(store)
 
   defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :elastic, elastic: elastic}}}),

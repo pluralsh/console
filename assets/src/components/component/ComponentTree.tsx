@@ -1,6 +1,6 @@
 import { EmptyState, Flex } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
-import { ReactFlowProvider } from 'reactflow'
+import { ReactFlowProvider } from '@xyflow/react'
 
 import { useComponentTreeQuery } from 'generated/graphql'
 
