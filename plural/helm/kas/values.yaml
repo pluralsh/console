@@ -94,8 +94,8 @@ agent:
   backend: localhost:8150
   proxy:
     image:
-      repository: docker.io/nginx
-      tag: stable-alpine3.17-slim
+      repository: ghcr.io/pluralsh/registry/nginx
+      tag: stable-alpine3.20-slim
       pullPolicy: IfNotPresent
     port: 8180
 
@@ -118,6 +118,13 @@ ingress:
 redis:
   enabled: true
   architecture: standalone
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: ghcr.io
+    repository: pluralsh/registry/bitnami/redis
+    tag: 7.4.2-debian-12-r5
   auth:
     enabled: true
     sentinel: false

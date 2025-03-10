@@ -5,14 +5,14 @@ appVersion: 0.11.3
 version: 0.3.94
 dependencies:
   - name: kas
-    version: 0.2.0
+    version: 0.3.0
     repository: file://../../plural/helm/kas
   - name: controller
     version: 0.0.108
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
-    version: 7.11.0
+    version: 7.11.1
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
