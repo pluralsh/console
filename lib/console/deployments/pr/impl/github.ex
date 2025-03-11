@@ -3,6 +3,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
   alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   alias Console.Jwt.Github
+  require Logger
+
   @behaviour Console.Deployments.Pr.Dispatcher
 
   def create(pr, branch, ctx) do
@@ -68,14 +70,16 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
-  def files(conn, %{"html_url" => url} = pr) do
+  def files(conn, url) do
     with {:ok, owner, repo, number} <- get_pull_id(url),
-         {:ok, client} <- client(conn) do
-      case Tentacat.Pulls.Files.list(client, owner, repo, number) do
-        {_, [_ | _] = files, _} -> {:ok, to_files(client, url, pr, files)}
-        {_, body, _} ->
-          {:error, "failed to list pr files: #{Jason.encode!(body)}"}
-      end
+         {:ok, client} <- client(conn),
+         {_, %{} = pr, _} <- Tentacat.Pulls.find(client, owner, repo, number),
+         {_, [_ | _] = files, _} <- Tentacat.Pulls.Files.list(client, owner, repo, number) do
+      {:ok, to_files(client, url, pr, files)}
+    else
+      err ->
+        Logger.info("failed to list pr files #{inspect(err)}")
+        err
     end
   end
 

@@ -3,7 +3,7 @@ defmodule Console.Deployments.Pr.File do
 
   @type t :: %__MODULE__{sha: binary, contents: binary, filename: binary, patch: binary}
 
-  defstruct [:url, :repo, :title, :sha, :contents, :filename, :patch, :base, :head]
+  defstruct [:url, :repo, :title, :sha, :contents, :filename, :patch, :base, :head, :flow_id]
 
   def new(args) do
     %__MODULE__{

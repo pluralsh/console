@@ -7,7 +7,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Alert do
   def generate(%Alert{state: :firing, service: %Service{} = service} = alert) do
     [{:user, alert_prompt(alert)}]
     |> Logs.with_logging(service, force: true, lines: 100)
-    |> Vector.with_vector_data()
+    |> add_vector_data(service)
     |> Context.prompt({:user, "Please use the data I've listed above to give a clear root cause analysis of this issue."})
     |> Context.result()
   end
@@ -34,4 +34,9 @@ defimpl Console.AI.Evidence, for: Console.Schema.Alert do
     I'll list some of the logs related to this workload to help analyze the root cause.
     """
   end
+
+  defp add_vector_data(ctx, %Service{flow_id: flow_id}) when is_binary(flow_id) do
+    Vector.with_vector_data(ctx, flow_id: flow_id)
+  end
+  defp add_vector_data(ctx, _), do: ctx
 end

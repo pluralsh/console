@@ -5,7 +5,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
   alias Console.AI.PubSub.Vector.Consumer
   import ElasticsearchUtils
 
-  describe "ScmWebhook" do
+  describe "PullRequestCreated" do
     test "it can vector index pr files" do
       deployment_settings(ai: %{
         enabled: true,
@@ -19,10 +19,14 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       })
       drop_index(vector_index())
 
-      hook = insert(:scm_webhook, type: :github)
       insert(:scm_connection, default: true, type: :github)
+      flow = insert(:flow)
+      pr = insert(:pull_request, flow: flow, status: :merged, url: "https://github.com/owner/repo/pull/1")
 
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
+      expect(Tentacat.Pulls, :find, fn _, "owner", "repo", "1" ->
+        {:ok, %{"merged" => true, "html_url" => "https://github.com/owner/repo/pull/1"}, %{}}
+      end)
       expect(Tentacat.Pulls.Files, :list, fn _, _, _, _ ->
         {:ok, [%{
           "filename" => "terraform/main.tf",
@@ -35,13 +39,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
         {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
-      event = %PubSub.ScmWebhook{
-        item: %{
-          "action" => "closed",
-          "pull_request" => %{"merged" => true, "html_url" => "https://github.com/owner/repo/pull/1"},
-        },
-        actor: hook
-      }
+      event = %PubSub.PullRequestCreated{item: pr}
       Consumer.handle_event(event)
       refresh(vector_index())
 

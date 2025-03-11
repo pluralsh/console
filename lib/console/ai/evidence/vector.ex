@@ -17,12 +17,12 @@ defmodule Console.AI.Evidence.Vector do
   container.
   """
 
-  @spec with_vector_data(Provider.history | Context.t) :: Context.t
-  def with_vector_data(history) do
+  @spec with_vector_data(Provider.history | Context.t, keyword) :: Context.t
+  def with_vector_data(history, filters \\ []) do
     ctx = Context.new(history)
     with true <- VectorStore.enabled?(),
          {:ok, %Vector{query: query}} <- use_vector(ctx.history),
-         {:ok, [_ | _] = vdata} <- VectorStore.fetch(query) do
+         {:ok, [_ | _] = vdata} <- VectorStore.fetch(query, filters: filters) do
       Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue in rough order of relevance:"})
       |> Context.reduce(vdata, &Context.prompt(&2, {:user, vector_prompt(&1)}))
       |> Context.evidence(vector_evidence(vdata))
@@ -39,8 +39,8 @@ defmodule Console.AI.Evidence.Vector do
 
   defp vector_evidence(vdata) do
     Enum.map(vdata, fn
-      %VectorStore.Response{pr_file: pr_file} -> %{pull_request: Map.from_struct(pr_file), type: :pr}
-      %VectorStore.Response{alert_resolution: res}  -> %{alert_resolution: Map.from_struct(res), type: :alert}
+      %VectorStore.Response{type: :pr, pr_file: pr_file} -> %{pull_request: Map.from_struct(pr_file), type: :pr}
+      %VectorStore.Response{type: :alert, alert_resolution: res} -> %{alert_resolution: Map.from_struct(res), type: :alert}
       _ -> nil
     end)
     |> Enum.filter(& &1)
