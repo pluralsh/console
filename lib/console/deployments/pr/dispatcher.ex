@@ -30,7 +30,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
 
-  @callback files(conn :: ScmConnection.t, msg :: map) :: {:ok, [File.t]} | Console.error
+  @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -66,9 +66,9 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl.review(conn, pr, body)
   end
 
-  def files(%ScmConnection{} = conn, map) do
+  def files(%ScmConnection{} = conn, url) do
     impl = dispatcher(conn)
-    impl.files(conn, map)
+    impl.files(conn, url)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do

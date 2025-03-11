@@ -24,7 +24,7 @@ defmodule Console.AI.VectorStore do
   @type error :: Console.error
 
   @callback init(store) :: :ok | error
-  @callback insert(store, struct) :: :ok | error
+  @callback insert(store, struct, keyword) :: :ok | error
   @callback fetch(store, [float], keyword) :: {:ok, [data]} | error
 
   @spec enabled?() :: boolean
@@ -35,11 +35,11 @@ defmodule Console.AI.VectorStore do
     end
   end
 
-  def insert(struct) do
+  def insert(struct, opts \\ []) do
     settings = Settings.cached()
     with {:ok, %{__struct__: mod} = store} <- store(settings),
          :ok <- maybe_init(settings, store),
-      do: mod.insert(store, struct)
+      do: mod.insert(store, struct, opts)
   end
 
   @spec fetch(binary, keyword) :: {:ok, [data]} | error

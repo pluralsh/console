@@ -325,11 +325,14 @@ defmodule Console.AI.CronTest do
           },
         }
       )
+      %{id: flow_id} = flow = insert(:flow)
+      svc = insert(:service, flow: flow)
+
       expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)
-      expect(Console.AI.VectorStore, :fetch, fn "some query" -> {:ok, [
+      expect(Console.AI.VectorStore, :fetch, fn "some query", filters: [flow_id: ^flow_id] -> {:ok, [
         %Console.AI.VectorStore.Response{
           type: :pr,
           pr_file: %Console.Deployments.Pr.File{
@@ -343,7 +346,7 @@ defmodule Console.AI.CronTest do
           }
         }
       ]} end)
-      svc = insert(:service)
+
       alert = insert(:alert, state: :firing, service: svc)
 
       log_document(svc, "error what is happening") |> index_doc()
