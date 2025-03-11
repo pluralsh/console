@@ -3102,6 +3102,33 @@ entries:
   console-rapid:
   - apiVersion: v2
     appVersion: 0.11.4
+    created: "2025-03-11T20:31:38.561956109Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.109
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.11.1
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: aac957f9314b18b5ad9affd76c2063f98994990c6f38b411598ceb2020d53154
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.96/console-rapid-0.3.96.tgz
+    version: 0.3.96
+  - apiVersion: v2
+    appVersion: 0.11.4
     created: "2025-03-11T18:26:46.369338725Z"
     dependencies:
     - name: kas
@@ -5821,4 +5848,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-11T18:45:52.044362108Z"
+generated: "2025-03-11T20:31:38.74698308Z"
