@@ -165,6 +165,10 @@ type ServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 
+	// reference to a Flow this service belongs within
+	// +kubebuilder:validation:Optional
+	FlowRef *corev1.ObjectReference `json:"flowRef,omitempty"`
+
 	// Configuration is a set of non-secret configuration to apply for lightweight templating of manifests in this service
 	// +kubebuilder:validation:Optional
 	Configuration map[string]string `json:"configuration,omitempty"`

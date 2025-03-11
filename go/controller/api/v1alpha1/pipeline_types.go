@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	console "github.com/pluralsh/console/go/client"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +32,10 @@ type PipelineSpec struct {
 
 	// Edges of a pipeline.
 	Edges []PipelineEdge `json:"edges,omitempty"`
+
+	// reference to a Flow this pipeline belongs within
+	// +kubebuilder:validation:Optional
+	FlowRef *corev1.ObjectReference `json:"flowRef,omitempty"`
 
 	// ProjectRef references project this stack belongs to.
 	// If not provided, it will use the default project.

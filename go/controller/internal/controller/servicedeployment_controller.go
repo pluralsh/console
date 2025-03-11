@@ -264,6 +264,18 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		}
 	}
 
+	if service.Spec.FlowRef != nil {
+		flow := &v1alpha1.Flow{}
+		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: service.Spec.FlowRef.Namespace}
+		if err = r.Get(ctx, nsn, flow); err != nil {
+			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
+		}
+		if !flow.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("flow is not ready")
+		}
+		attr.FlowID = flow.Status.ID
+	}
+
 	if service.Spec.ConfigurationRef != nil {
 		secret := &corev1.Secret{}
 		if err = r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
