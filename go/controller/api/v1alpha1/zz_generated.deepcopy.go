@@ -3894,6 +3894,11 @@ func (in *PipelineSpec) DeepCopyInto(out *PipelineSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.FlowRef != nil {
+		in, out := &in.FlowRef, &out.FlowRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.ProjectRef != nil {
 		in, out := &in.ProjectRef, &out.ProjectRef
 		*out = new(v1.ObjectReference)
@@ -5333,6 +5338,11 @@ func (in *ServiceSpec) DeepCopyInto(out *ServiceSpec) {
 	if in.ConfigurationRef != nil {
 		in, out := &in.ConfigurationRef, &out.ConfigurationRef
 		*out = new(v1.SecretReference)
+		**out = **in
+	}
+	if in.FlowRef != nil {
+		in, out := &in.FlowRef, &out.FlowRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
 	if in.Configuration != nil {

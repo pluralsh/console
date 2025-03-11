@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	v1 "k8s.io/api/core/v1"
@@ -73,6 +74,18 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 		Stages:    stages,
 		Edges:     edges,
 		ProjectID: projectID,
+	}
+
+	if p.Spec.FlowRef != nil {
+		flow := &v1alpha1.Flow{}
+		nsn := types.NamespacedName{Name: p.Spec.FlowRef.Name, Namespace: p.Spec.FlowRef.Namespace}
+		if err := r.Get(ctx, nsn, flow); err != nil {
+			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
+		}
+		if !flow.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("flow is not ready")
+		}
+		attr.FlowID = flow.Status.ID
 	}
 
 	if p.Spec.Bindings != nil {
