@@ -85,8 +85,11 @@ func ProviderCredentials() string {
 		return *argProviderServiceAccount
 	}
 
-	if len(*argsProviderAWSRegion) > 0 && Provider() == api.ProviderBedrock {
-		return *argsProviderAWSRegion
+	if Provider() == api.ProviderBedrock {
+		if len(*argsProviderAWSRegion) > 0 {
+			return *argsProviderAWSRegion
+		}
+		return ""
 	}
 
 	if Provider() == defaultProvider {
