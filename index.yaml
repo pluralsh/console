@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   ai-proxy:
   - apiVersion: v2
+    appVersion: v1.3.1
+    created: "2025-03-11T10:18:34.296641078Z"
+    description: A Helm chart for ai-proxy
+    digest: 2cccd7ff266100f06399fa83cdc928ef900b39200094b76f94129bcd7875825e
+    name: ai-proxy
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/ai-proxy-chart-v0.2.4/ai-proxy-0.2.4.tgz
+    version: 0.2.4
+  - apiVersion: v2
     appVersion: v1.3.0
     created: "2025-03-10T21:16:50.881089201Z"
     description: A Helm chart for ai-proxy
@@ -5746,4 +5756,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-10T21:16:50.881578765Z"
+generated: "2025-03-11T10:18:34.297209333Z"
