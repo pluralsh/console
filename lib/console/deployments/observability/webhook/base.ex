@@ -11,6 +11,14 @@ defmodule Console.Deployments.Observability.Webhook.Base do
   @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :cluster, name}, opts: [ttl: @ttl])
   def cluster(name), do: Clusters.get_cluster_by_handle(name) |> maybe_id()
 
+  @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :svc, name}, opts: [ttl: @ttl])
+  def service(name) do
+    case String.split(name, "/") do
+      [handle, name] -> Services.get_service_by_handle(handle, name) |> maybe_id()
+      _ -> nil
+    end
+  end
+
   @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :svc, cid, name}, opts: [ttl: @ttl])
   def service(cid, name), do: Services.get_service_by_name(cid, name) |> maybe_id()
 

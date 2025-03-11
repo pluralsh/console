@@ -78,7 +78,11 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 
 	if p.Spec.FlowRef != nil {
 		flow := &v1alpha1.Flow{}
-		nsn := types.NamespacedName{Name: p.Spec.FlowRef.Name, Namespace: p.Spec.FlowRef.Namespace}
+		ns := p.Spec.FlowRef.Namespace
+		if ns == "" {
+			ns = p.Namespace
+		}
+		nsn := types.NamespacedName{Name: p.Spec.FlowRef.Name, Namespace: ns}
 		if err := r.Get(ctx, nsn, flow); err != nil {
 			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
 		}

@@ -350,6 +350,8 @@ defmodule Console.Deployments.Git do
         create_pr(attrs, url)
       {%{service_id: service_id} = attrs, nil} when is_binary(service_id) ->
         create_pr(attrs, url)
+      {%{flow_id: flow_id} = attrs, nil} when is_binary(flow_id) ->
+        create_pr(attrs, url)
       _ -> {:error, :not_found}
     end
   end
