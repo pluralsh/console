@@ -17,6 +17,10 @@ type ObserverSpec struct {
 	// The crontab you will poll the given Target with
 	Crontab string `json:"crontab"`
 
+	// The initial polled value of this observer, useful when you don't want to cause duplicate actions on initialization
+	// +kubebuilder:validation:Optional
+	Initial *string `json:"initial,omitempty"`
+
 	// The target object to poll, triggering the list of Actions w/ the discovered value
 	Target ObserverTarget `json:"target"`
 
@@ -68,6 +72,7 @@ type ObserverTarget struct {
 	// +kubebuilder:validation:Enum:=OCI;HELM;GIT
 	Type console.ObserverTargetType `json:"type"`
 
+	// Format is a regex with a capture group matching a well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)`
 	// +kubebuilder:validation:Optional
 	Format *string `json:"format,omitempty"`
 
@@ -181,6 +186,7 @@ func (o *Observer) Attributes(target console.ObserverTargetAttributes, actions [
 		Target:    target,
 		Actions:   actions,
 		ProjectID: projectID,
+		Initial:   o.Spec.Initial,
 	}
 	return attributes
 }

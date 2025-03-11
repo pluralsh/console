@@ -6361,6 +6361,7 @@ input ObserverAttributes {
   crontab: String!
   target: ObserverTargetAttributes!
   actions: [ObserverActionAttributes]
+  initial: String
   projectId: ID
 }
 
@@ -6793,6 +6794,7 @@ type Observer {
   name: String!
   status: ObserverStatus!
   crontab: String!
+  lastValue: String
   lastRunAt: DateTime!
   nextRunAt: DateTime!
   target: ObserverTarget!

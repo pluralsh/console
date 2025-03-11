@@ -182,6 +182,10 @@ spec:
               crontab:
                 description: The crontab you will poll the given Target with
                 type: string
+              initial:
+                description: The initial polled value of this observer, useful when
+                  you don't want to cause duplicate actions on initialization
+                type: string
               name:
                 description: the name of this observer, if not provided Observer's
                   own name from Observer.ObjectMeta will be used.
@@ -236,6 +240,8 @@ spec:
                   w/ the discovered value
                 properties:
                   format:
+                    description: Format is a regex with a capture group matching a
+                      well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)`
                     type: string
                   git:
                     properties:

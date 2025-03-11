@@ -283,6 +283,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :crontab,    non_null(:string)
     field :target,     non_null(:observer_target_attributes)
     field :actions,    list_of(:observer_action_attributes)
+    field :initial,    :string
     field :project_id, :id
   end
 
@@ -611,6 +612,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,        non_null(:string)
     field :status,      non_null(:observer_status)
     field :crontab,     non_null(:string)
+    field :last_value,  :string
     field :last_run_at, non_null(:datetime)
     field :next_run_at, non_null(:datetime)
     field :target,      non_null(:observer_target)

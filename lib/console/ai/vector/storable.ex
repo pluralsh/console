@@ -26,12 +26,13 @@ defimpl Console.AI.Vector.Storable, for: Console.Deployments.Pr.File do
     title: #{file.title}
     repo: #{file.repo}
     filename: #{file.filename}
-    #{Utils.stopword()}
-    #{file.contents}
-    #{Utils.stopword()}
+    #{safe_content(file)}#{Utils.stopword()}
     #{file.patch}
     """
   end
+
+  defp safe_content(%@for{contents: c}) when is_binary(c), do: "#{Utils.stopword()}\n#{c}\n"
+  defp safe_content(_), do: ""
 
   def datatype(_), do: "pr_file"
 
@@ -47,12 +48,7 @@ defimpl Console.AI.Vector.Storable, for: Console.Deployments.Pr.File do
     Base Branch: #{pr_file.base || "n/a"}
     Head Branch: #{pr_file.head || "n/a"}
 
-    The full contents of the file is:
-
-    ```
-    #{pr_file.contents}
-    ```
-
+    #{full_contents(pr_file)}
     The git patch of the change is:
 
     ```
@@ -60,6 +56,18 @@ defimpl Console.AI.Vector.Storable, for: Console.Deployments.Pr.File do
     ```
     """
   end
+
+  defp full_contents(%@for{contents: c}) when is_binary(c) do
+    """
+    The full contents of the file is:
+
+    ```
+    #{c}
+    ```
+
+    """
+  end
+  defp full_contents(_), do: ""
 end
 
 defimpl Console.AI.Vector.Storable, for: Console.Schema.AlertResolution.Mini do

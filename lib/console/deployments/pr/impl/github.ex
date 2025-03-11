@@ -72,7 +72,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     with {:ok, owner, repo, number} <- get_pull_id(url),
          {:ok, client} <- client(conn) do
       case Tentacat.Pulls.Files.list(client, owner, repo, number) do
-        {_, [_ | _] = files, _} -> {:ok, to_files(client, url, pr["title"], files)}
+        {_, [_ | _] = files, _} -> {:ok, to_files(client, url, pr, files)}
         {_, body, _} ->
           {:error, "failed to list pr files: #{Jason.encode!(body)}"}
       end
@@ -81,28 +81,36 @@ defmodule Console.Deployments.Pr.Impl.Github do
 
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
-  defp to_files(client, url, title, files) do
+  defp to_files(client, url, pr, files) do
     Enum.map(files, fn f ->
       %File{
         url: url,
         repo: to_repo_url(url),
-        title: title,
-        contents: get_content(client, f["raw_url"]),
+        title: pr["title"],
+        contents: get_content(client, f["contents_url"]),
         filename: f["filename"],
         sha: f["sha"],
         patch: f["patch"],
-        base: get_in(f, ~w(base ref)),
-        head: get_in(f, ~w(head ref))
+        base: get_in(pr, ~w(base ref)),
+        head: get_in(pr, ~w(head ref))
       }
     end)
-    |> Enum.filter(& &1.contents)
     |> Enum.filter(&File.valid?/1)
   end
 
   defp get_content(client, url) when is_binary(url) do
-    case HTTPoison.get(url, [{"authorization", "Token #{client.auth.access_token}"}], follow_redirect: true) do
-      {:ok, %HTTPoison.Response{status_code: code, body: content}}
-        when code >= 200 and code < 300 -> content
+    headers = [{"authorization", "Token #{client.auth.access_token}"}]
+    with {:ok, %HTTPoison.Response{status_code: 200, body: content}} <- HTTPoison.get(url, headers),
+         {:ok, %{"content" => content}} <- Jason.decode(content) do
+      String.split(content)
+      |> Enum.map(fn line ->
+        case Base.decode64(line) do
+          {:ok, l} -> l
+          _ -> nil
+        end
+      end)
+      |> Enum.join("")
+    else
       _ -> nil
     end
   end
