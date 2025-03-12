@@ -137,7 +137,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#observability/2" do
-    test "it can handle an observability provider webhook", %{conn: conn} do
+    test "it will ignore if no associated plural resource is found", %{conn: conn} do
       hook = insert(:observability_webhook)
 
       conn
@@ -146,9 +146,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> post("/ext/v1/webhooks/observability/grafana/#{hook.external_id}", String.trim(Console.conf(:grafana_webhook_payload)))
       |> response(200)
 
-      [_, _] = Console.Repo.all(Console.Schema.Alert)
-
-      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+      [] = Console.Repo.all(Console.Schema.Alert)
     end
 
     test "it can handle payloads with text in body", %{conn: conn} do

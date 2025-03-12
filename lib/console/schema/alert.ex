@@ -78,5 +78,6 @@ defmodule Console.Schema.Alert do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(type title state severity message fingerprint)a)
+    |> validate_one_present(~w(project_id cluster_id service_id)a)
   end
 end

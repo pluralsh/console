@@ -9,7 +9,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Any do
   def resource(_), do: :ok
 end
 
-defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.PullRequestCreated do
+defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.AI.Tool
   alias Console.AI.PubSub.Vector.Indexable
   alias Console.Deployments.Pr.Dispatcher
@@ -27,12 +27,17 @@ end
 
 
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.AlertResolutionCreated do
-  alias Console.Schema.AlertResolution
+  alias Console.Schema.{AlertResolution, Alert, Service}
   alias Console.AI.PubSub.Vector.Indexable
 
   def resource(%@for{item: resolution}) do
-    mini = Console.Repo.preload(resolution, [:alert])
-           |> AlertResolution.Mini.new()
-    %Indexable{data: mini}
+    res = Console.Repo.preload(resolution, [alert: :service])
+    %Indexable{
+      data: AlertResolution.Mini.new(res),
+      filters: filters(res.alert)
+    }
   end
+
+  defp filters(%Alert{service: %Service{flow_id: f}}) when is_binary(f), do: [flow_id: f]
+  defp filters(_), do: []
 end
