@@ -108,6 +108,32 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       assert_receive {:event, %Console.PubSub.PullRequestCreated{item: %{id: ^id}}}
     end
+
+    test "it can detect and create flow prs", %{conn: conn} do
+      flow = insert(:flow, name: "flow-test")
+      hook = insert(:scm_webhook)
+      url = "https://github.com/pr/url"
+
+      payload = Jason.encode!(%{"pull_request" => %{
+        "html_url" => url,
+        "title" => "some title",
+        "body" => "some body\nPlural Flow: flow-test",
+        "head" => %{"ref" => "some-branch"}
+      }})
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      %{id: id} = pr = Console.Repo.get_by(Console.Schema.PullRequest, url: url)
+      assert pr.flow_id == flow.id
+
+      assert_receive {:event, %Console.PubSub.PullRequestCreated{item: %{id: ^id}}}
+    end
   end
 
   describe "#observability/2" do
@@ -122,6 +148,26 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       [_, _] = Console.Repo.all(Console.Schema.Alert)
 
+      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+    end
+
+    test "it can handle payloads with text in body", %{conn: conn} do
+      hook = insert(:observability_webhook)
+      svc = insert(:service)
+
+      %{"alerts" => [alert | _]} = webhook = String.trim(Console.conf(:grafana_webhook_payload)) |> Jason.decode!()
+      alert = put_in(alert["annotations"]["summary"], "alert on\nPlural Service: #{svc.name}\nPlural Cluster: #{svc.cluster.handle}")
+      webhook = Map.put(webhook, "alerts", [alert])
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/grafana/#{hook.external_id}", Jason.encode!(webhook))
+      |> response(200)
+
+      [alert] = Console.Repo.all(Console.Schema.Alert)
+
+      assert alert.service_id == svc.id
       assert_receive {:event, %Console.PubSub.AlertCreated{}}
     end
   end

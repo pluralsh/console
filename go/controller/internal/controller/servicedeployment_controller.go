@@ -266,7 +266,11 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 
 	if service.Spec.FlowRef != nil {
 		flow := &v1alpha1.Flow{}
-		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: service.Spec.FlowRef.Namespace}
+		ns := service.Spec.FlowRef.Namespace
+		if ns == "" {
+			ns = service.Namespace
+		}
+		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
 			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
 		}
