@@ -94,7 +94,7 @@ defmodule Console.AI.Vector.Elastic do
   end
 
   defp query_filters(query, [_ | _] = filters) do
-    put_in(query, [:knn, :filter], %{term: Map.new(filters, fn {k, v} -> {"#{k}.keyword", v} end)})
+    put_in(query, [:knn, :filter], %{term: Map.new(filters, fn {k, v} -> {"filters.#{k}.keyword", v} end)})
   end
   defp query_filters(query, _), do: query
 
