@@ -57,7 +57,7 @@ function LoginError({
       const to = setTimeout(() => {
         wipeToken()
         wipeRefreshToken()
-        window.location = '/login' as any as Location
+        ;(window as Window).location = '/login'
       }, 2000)
 
       return () => clearTimeout(to)
@@ -160,7 +160,7 @@ export default function Login() {
     })
 
   if (!loginMError && data?.me) {
-    window.location = '/' as any as Location
+    ;(window as Window).location = '/'
   }
 
   if (loading)
