@@ -5983,6 +5983,8 @@ enum ObserverTargetType {
   OCI
   HELM
   GIT
+  EKS_ADDON
+  ADDON
 }
 
 enum ObserverGitTargetType {
@@ -6381,6 +6383,10 @@ input ObserverTargetAttributes {
   oci: ObserverOciAttributes
 
   git: ObserverGitAttributes
+
+  addon: ObserverAddonAttributes
+
+  eksAddon: ObserverAddonAttributes
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -6434,6 +6440,12 @@ input ObserverPipelineActionAttributes {
 
   "the context to apply, use $value to interject the observed value"
   context: Json!
+}
+
+"The settings for configuring add-on scraping"
+input ObserverAddonAttributes {
+  name: String!
+  kubernetesVersion: String
 }
 
 "a git repository available for deployments"

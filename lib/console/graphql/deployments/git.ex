@@ -289,13 +289,15 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A spec for a target to poll"
   input_object :observer_target_attributes do
-    field :type,   :observer_target_type
-    field :target, :observer_target_type, description: "present for backwards compat"
-    field :format, :string
-    field :order,  non_null(:observer_target_order)
-    field :helm,   :observer_helm_attributes
-    field :oci,    :observer_oci_attributes
-    field :git,    :observer_git_attributes
+    field :type,      :observer_target_type
+    field :target,    :observer_target_type, description: "present for backwards compat"
+    field :format,    :string
+    field :order,     non_null(:observer_target_order)
+    field :helm,      :observer_helm_attributes
+    field :oci,       :observer_oci_attributes
+    field :git,       :observer_git_attributes
+    field :addon,     :observer_addon_attributes
+    field :eks_addon, :observer_addon_attributes
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -342,6 +344,12 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_pipeline_action_attributes do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "The settings for configuring add-on scraping"
+  input_object :observer_addon_attributes do
+    field :name,               non_null(:string)
+    field :kubernetes_version, :string
   end
 
   @desc "a git repository available for deployments"

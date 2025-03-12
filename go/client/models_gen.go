@@ -3359,6 +3359,12 @@ type ObserverActionConfigurationAttributes struct {
 	Pipeline *ObserverPipelineActionAttributes `json:"pipeline,omitempty"`
 }
 
+// The settings for configuring add-on scraping
+type ObserverAddonAttributes struct {
+	Name              string  `json:"name"`
+	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+}
+
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response
 type ObserverAttributes struct {
 	Name      string                      `json:"name"`
@@ -3472,12 +3478,14 @@ type ObserverTarget struct {
 type ObserverTargetAttributes struct {
 	Type *ObserverTargetType `json:"type,omitempty"`
 	// present for backwards compat
-	Target *ObserverTargetType     `json:"target,omitempty"`
-	Format *string                 `json:"format,omitempty"`
-	Order  ObserverTargetOrder     `json:"order"`
-	Helm   *ObserverHelmAttributes `json:"helm,omitempty"`
-	Oci    *ObserverOciAttributes  `json:"oci,omitempty"`
-	Git    *ObserverGitAttributes  `json:"git,omitempty"`
+	Target   *ObserverTargetType      `json:"target,omitempty"`
+	Format   *string                  `json:"format,omitempty"`
+	Order    ObserverTargetOrder      `json:"order"`
+	Helm     *ObserverHelmAttributes  `json:"helm,omitempty"`
+	Oci      *ObserverOciAttributes   `json:"oci,omitempty"`
+	Git      *ObserverGitAttributes   `json:"git,omitempty"`
+	Addon    *ObserverAddonAttributes `json:"addon,omitempty"`
+	EksAddon *ObserverAddonAttributes `json:"eksAddon,omitempty"`
 }
 
 // A representation of a created OIDC provider client
@@ -7693,20 +7701,24 @@ func (e ObserverTargetOrder) MarshalGQL(w io.Writer) {
 type ObserverTargetType string
 
 const (
-	ObserverTargetTypeOci  ObserverTargetType = "OCI"
-	ObserverTargetTypeHelm ObserverTargetType = "HELM"
-	ObserverTargetTypeGit  ObserverTargetType = "GIT"
+	ObserverTargetTypeOci      ObserverTargetType = "OCI"
+	ObserverTargetTypeHelm     ObserverTargetType = "HELM"
+	ObserverTargetTypeGit      ObserverTargetType = "GIT"
+	ObserverTargetTypeEksAddon ObserverTargetType = "EKS_ADDON"
+	ObserverTargetTypeAddon    ObserverTargetType = "ADDON"
 )
 
 var AllObserverTargetType = []ObserverTargetType{
 	ObserverTargetTypeOci,
 	ObserverTargetTypeHelm,
 	ObserverTargetTypeGit,
+	ObserverTargetTypeEksAddon,
+	ObserverTargetTypeAddon,
 }
 
 func (e ObserverTargetType) IsValid() bool {
 	switch e {
-	case ObserverTargetTypeOci, ObserverTargetTypeHelm, ObserverTargetTypeGit:
+	case ObserverTargetTypeOci, ObserverTargetTypeHelm, ObserverTargetTypeGit, ObserverTargetTypeEksAddon, ObserverTargetTypeAddon:
 		return true
 	}
 	return false

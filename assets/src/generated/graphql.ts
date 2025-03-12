@@ -4081,6 +4081,12 @@ export enum ObserverActionType {
   Pr = 'PR'
 }
 
+/** The settings for configuring add-on scraping */
+export type ObserverAddonAttributes = {
+  kubernetesVersion?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
 /** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
 export type ObserverAttributes = {
   actions?: InputMaybe<Array<InputMaybe<ObserverActionAttributes>>>;
@@ -4211,6 +4217,8 @@ export type ObserverTarget = {
 
 /** A spec for a target to poll */
 export type ObserverTargetAttributes = {
+  addon?: InputMaybe<ObserverAddonAttributes>;
+  eksAddon?: InputMaybe<ObserverAddonAttributes>;
   format?: InputMaybe<Scalars['String']['input']>;
   git?: InputMaybe<ObserverGitAttributes>;
   helm?: InputMaybe<ObserverHelmAttributes>;
@@ -4227,6 +4235,8 @@ export enum ObserverTargetOrder {
 }
 
 export enum ObserverTargetType {
+  Addon = 'ADDON',
+  EksAddon = 'EKS_ADDON',
   Git = 'GIT',
   Helm = 'HELM',
   Oci = 'OCI'

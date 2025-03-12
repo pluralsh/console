@@ -239,11 +239,38 @@ spec:
                 description: The target object to poll, triggering the list of Actions
                   w/ the discovered value
                 properties:
+                  addon:
+                    description: Configuration for Plural AddOn table scraping
+                    properties:
+                      kubernetesVersion:
+                        description: The Kubernetes Version you want to ensure this
+                          add-on is compatible with
+                        type: string
+                      name:
+                        description: The name of the add-on you want to poll
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  eksAddon:
+                    description: Configuration for EKS AddOn scraping
+                    properties:
+                      kubernetesVersion:
+                        description: The Kubernetes Version you want to ensure this
+                          add-on is compatible with
+                        type: string
+                      name:
+                        description: The name of the add-on you want to poll
+                        type: string
+                    required:
+                    - name
+                    type: object
                   format:
                     description: Format is a regex with a capture group matching a
                       well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)`
                     type: string
                   git:
+                    description: Configuration for Git tags scaping
                     properties:
                       gitRepositoryRef:
                         description: GitRepositoryRef references to Git repository.
@@ -297,6 +324,7 @@ spec:
                     - type
                     type: object
                   helm:
+                    description: Configuration for helm scraping
                     properties:
                       auth:
                         description: Auth contains authentication credentials for
@@ -554,6 +582,7 @@ spec:
                     - url
                     type: object
                   oci:
+                    description: Configuration for OCI repository scraping
                     properties:
                       auth:
                         description: Auth contains authentication credentials for
@@ -816,6 +845,8 @@ spec:
                     - OCI
                     - HELM
                     - GIT
+                    - ADDON
+                    - EKS_ADDON
                     type: string
                 required:
                 - order
