@@ -67,6 +67,7 @@ export function ServiceErrorsTable({
 } & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   return (
     <Table
+      fullHeightWrap
       data={errors || []}
       columns={columns}
       emptyStateProps={{ message: 'No errors' }}
@@ -111,10 +112,7 @@ export default function ServiceErrors() {
       {isEmpty(service.errors) ? (
         <EmptyState message="No errors" />
       ) : (
-        <ServiceErrorsTable
-          fullHeightWrap
-          errors={service.errors}
-        />
+        <ServiceErrorsTable errors={service.errors} />
       )}
     </ScrollablePage>
   )

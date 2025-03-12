@@ -48,6 +48,7 @@ export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
       header={header}
       open={isOpen}
       onClose={() => setIsOpen(false)}
+      scrollable={false}
     >
       <ServiceErrorsTable errors={errors} />
     </Modal>
