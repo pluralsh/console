@@ -55,7 +55,7 @@ export const useIsManager = () => {
 function completeLogout() {
   wipeToken()
   wipeRefreshToken()
-  window.location = '/login' as any as Location
+  ;(window as Window).location = '/login'
 }
 
 export function LoginContextProvider({

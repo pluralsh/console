@@ -1,11 +1,5 @@
-import {
-  Card,
-  CardProps,
-  Flex,
-  FlexProps,
-  SidecarProps,
-} from '@pluralsh/design-system'
-import { Children } from 'react'
+import { Card, CardProps, Flex, FlexProps } from '@pluralsh/design-system'
+import { Children, ComponentPropsWithRef, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
 import { Body1BoldP } from './typography/Text'
@@ -66,7 +60,11 @@ export function MetadataItem({
   contentProps,
   children,
   ...props
-}: SidecarProps & FlexProps) {
+}: {
+  heading: ReactNode
+  headingProps?: ComponentPropsWithRef<typeof Body1BoldP>
+  contentProps?: ComponentPropsWithRef<'div'>
+} & FlexProps) {
   const theme = useTheme()
   return (
     <Flex
