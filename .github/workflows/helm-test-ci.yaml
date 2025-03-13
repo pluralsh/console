@@ -4,10 +4,10 @@ on:
   pull_request:
     branches:
       - "**"
-#    paths:
-#      - ".github/workflows/helm-test-ci.yaml"
-#      - "go/helm-test/**"
-#      - "charts/console/**"
+    paths:
+      - ".github/workflows/helm-test-ci.yaml"
+      - "go/helm-test/**"
+      - "charts/console/**"
 permissions:
   contents: read
 

@@ -20,7 +20,7 @@ var _ = Describe("Console Chart", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("should contain core console resources", func() {
+		It("should have core console resources", func() {
 			By("deployment")
 			_, exists := manifests[console.DefaultResources().Console.Deployment.String()]
 			Expect(exists).To(BeTrue())
@@ -34,7 +34,7 @@ var _ = Describe("Console Chart", func() {
 			Expect(exists).To(BeTrue())
 		})
 
-		It("should contain dashboard api resources", func() {
+		It("should have dashboard api resources", func() {
 			By("deployment")
 			_, exists := manifests[console.DefaultResources().Dashboard.Deployment.String()]
 			Expect(exists).To(BeTrue())
@@ -44,7 +44,7 @@ var _ = Describe("Console Chart", func() {
 			Expect(exists).To(BeTrue())
 		})
 
-		It("should contain kas resources", func() {
+		It("should have kas resources", func() {
 			By("deployment")
 			_, exists := manifests[console.DefaultResources().Kas.Deployment.String()]
 			Expect(exists).To(BeTrue())
@@ -58,13 +58,13 @@ var _ = Describe("Console Chart", func() {
 			Expect(exists).To(BeTrue())
 		})
 
-		It("should contain operator controller deployment", func() {
+		It("should have operator controller deployment", func() {
 			By("deployment")
 			_, exists := manifests[console.DefaultResources().Operator.Deployment.String()]
 			Expect(exists).To(BeTrue())
 		})
 
-		It("should contain redis resources", func() {
+		It("should have redis resources", func() {
 			By("statefulSet")
 			_, exists := manifests[console.DefaultResources().Redis.StatefulSet.String()]
 			Expect(exists).To(BeTrue())
