@@ -227,6 +227,20 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 	}
 
+	if addon := observer.Spec.Target.AddOn; addon != nil {
+		target.Addon = &console.ObserverAddonAttributes{
+			Name:              addon.Name,
+			KubernetesVersion: addon.KubernetesVersion,
+		}
+	}
+
+	if addon := observer.Spec.Target.EksAddOn; addon != nil {
+		target.EksAddon = &console.ObserverAddonAttributes{
+			Name:              addon.Name,
+			KubernetesVersion: addon.KubernetesVersion,
+		}
+	}
+
 	if len(observer.Spec.Actions) > 0 {
 		actions = make([]*console.ObserverActionAttributes, len(observer.Spec.Actions))
 		for i, action := range observer.Spec.Actions {

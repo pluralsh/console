@@ -2,6 +2,7 @@ defmodule Console.Deployments.Observer.Poller do
   import Console.Helm.Utils
   alias Console.Deployments.Git
   alias Console.Schema.{Observer, HelmRepository}
+  alias Console.Deployments.Compatibilities.{Utils, Table, CloudAddOns, CloudAddOn, Version}
   alias Console.{Helm, OCI}
 
   def poll(%Observer{last_value: last, target: %Observer.Target{type: :helm, helm: %{url: u}} = target}) when is_binary(u),
@@ -10,6 +11,10 @@ defmodule Console.Deployments.Observer.Poller do
     do: poll_oci(target, last)
   def poll(%Observer{last_value: last, target: %Observer.Target{type: :git, git: %{repository_id: id}} = target}) when is_binary(id),
     do: poll_git(target, last)
+  def poll(%Observer{last_value: last, target: %Observer.Target{type: :addon, addon: %{}} = target}),
+    do: poll_addon(target, last)
+  def poll(%Observer{last_value: last, target: %Observer.Target{type: :eks_addon, eks_addon: %{}} = target}),
+    do: poll_eks_addon(target, last)
   def poll(_), do: {:error, "no valid poller"}
 
   defp poll_helm(%{helm:  %{url: "oci://" <> url} = helm} = target, last) do
@@ -61,6 +66,40 @@ defmodule Console.Deployments.Observer.Poller do
       nil -> {:error, "no git repository with id #{id}"}
     end
   end
+
+  def poll_addon(%{addon: %{name: name, kubernetes_version: vsn}} = target, last) do
+    with %{versions: versions} <- Table.fetch(name),
+         filtered = Enum.filter(versions, &supports_version?(&1, vsn)),
+         versions = Enum.map(filtered, & &1.chart_version) |> Enum.filter(& &1),
+         [vsn | _] <- sorted(versions, target),
+         {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
+      {:ok, vsn}
+    else
+      {:vsn, _} -> :ignore
+      nil -> {:error, "no CNCF add-on found with name #{name}"}
+      _ -> {:error, "could not process cncf addon #{name}"}
+    end
+  end
+
+  def poll_eks_addon(%{eks_addon: %{name: name, kubernetes_version: vsn}} = target, last) do
+    with %{versions: versions} <- CloudAddOns.fetch("eks", name),
+         filtered = Enum.filter(versions, &supports_version?(&1, vsn)),
+         versions = Enum.map(filtered, & &1.version),
+         [vsn | _] <- sorted(versions, target),
+         {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
+      {:ok, vsn}
+    else
+      {:vsn, _} -> :ignore
+      nil -> {:error, "no eks addon found with name #{name}"}
+      _ -> {:error, "could not process eks addon #{name}"}
+    end
+  end
+
+  defp supports_version?(%Version{kube: reqs}, vsn) when is_binary(vsn),
+    do: !Utils.blocking?(reqs, vsn, 0)
+  defp supports_version?(%CloudAddOn.Version{compatibilities: reqs}, vsn) when is_binary(vsn),
+    do: !Utils.blocking?(reqs, vsn, 0)
+  defp supports_version?(_, _), do: true # take any version if not specified
 
   defp formatted(val, %Observer.Target{format: f}) when is_binary(f) and is_binary(val) do
     with {:ok, r} <- Regex.compile(f),

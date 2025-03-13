@@ -86,6 +86,56 @@ defmodule Console.Deployments.Observer.RunnerTest do
       assert obs.last_value == context.context["some"]
     end
 
+    test "it can poll an addon and add a pipeline context" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{type: :addon, addon: %{name: "ingress-nginx", kubernetes_version: "1.30"}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
+    test "it can poll an eks addon and add a pipeline context" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{type: :eks_addon, eks_addon: %{name: "coredns", kubernetes_version: "1.30"}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
     test "it can poll a helm repo and execute a pr automation" do
       user = bot("console")
       conn = insert(:scm_connection, token: "some-pat")

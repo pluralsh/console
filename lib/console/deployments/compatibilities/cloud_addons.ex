@@ -30,6 +30,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   @spec fetch(AddOn.t) :: CloudAddOn.t | nil
   def fetch(%AddOn{name: name, distro: platform}), do: fetch("#{platform}", name)
 
+  @spec fetch(binary, binary) :: CloudAddOn.t | nil
   def fetch(platform, name) do
     case KeyValueSet.wrap_existing(@table) do
       {:ok, set} -> set[{platform, name}]
