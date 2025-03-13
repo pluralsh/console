@@ -32,7 +32,7 @@ func WithOCIPath(path string) Option {
 }
 
 func loadOCIChart(url string) (*chart.Chart, error) {
-	klog.InfoS("Loading OCI chart from remote", "url", url)
+	klog.V(LogLevel()).InfoS("Loading OCI chart from remote", "url", url)
 	get, err := getter.NewOCIGetter()
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func LoadChart(option ...Option) (*chart.Chart, error) {
 	}
 
 	if len(config.localPath) > 0 {
-		klog.V(1).InfoS("Loading local chart", "path", config.localPath)
+		klog.V(LogLevel()).InfoS("Loading local chart", "path", config.localPath)
 		return loader.Load(config.localPath)
 	}
 
@@ -67,7 +67,7 @@ func LoadChart(option ...Option) (*chart.Chart, error) {
 // RenderChart takes the chart and runs a helm dry run. It does not set namespace.
 func RenderChart(chart *chart.Chart, values map[string]interface{}) ([]*unstructured.Unstructured, error) {
 	if values == nil {
-		klog.Info("Values not provided, using default values.yaml")
+		klog.V(LogLevel()).Info("Values not provided, using default values.yaml")
 		values = chart.Values
 	}
 

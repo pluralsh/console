@@ -142,19 +142,19 @@ func DefaultResources() struct {
 }
 
 func LoadConsoleChart(values map[string]interface{}) (common.ManifestMap, error) {
-	klog.Info("Loading console chart")
+	klog.V(common.LogLevel()).Info("Loading console chart")
 	chart, err := common.LoadChart(common.WithLocalPath(RelativeConsoleChartPath))
 	if err != nil {
 		return nil, err
 	}
 
-	klog.Info("Rendering console chart")
+	klog.V(common.LogLevel()).Info("Rendering console chart")
 	manifestList, err := common.RenderChart(chart, values)
 	if err != nil {
 		return nil, err
 	}
 
-	klog.Info("Parsing console chart manifests")
+	klog.V(common.LogLevel()).Info("Parsing console chart manifests")
 	manifests, err := common.NewManifestMap(manifestList)
 	if err != nil {
 		return nil, err
