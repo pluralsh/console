@@ -56,11 +56,6 @@ func ManifestKeyFromUnstructured(obj *unstructured.Unstructured) ManifestKey {
 	return ManifestKey(object.UnstructuredToObjMetadata(obj))
 }
 
-func ManifestKeyFromString(key string) (ManifestKey, error) {
-	objMetadata, err := object.ParseObjMetadata(key)
-	return ManifestKey(objMetadata), err
-}
-
 func NewManifestMap(manifests []*unstructured.Unstructured) (ManifestMap, error) {
 	result := make(map[string]*unstructured.Unstructured)
 
