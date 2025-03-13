@@ -22,6 +22,7 @@ HELMIFY := $(BINARIES_DIR)/helmify
 KUBEBUILDER ?= $(BINARIES_DIR)/kubebuilder
 KUSTOMIZE ?= $(BINARIES_DIR)/kustomize
 MOCKERY ?= $(BINARIES_DIR)/mockery
+GINKGO ?= $(BINARIES_DIR)/ginkgo
 
 # Global tool binaries
 HELM ?= $(shell which helm)
