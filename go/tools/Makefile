@@ -84,3 +84,7 @@ install-mockery: --tool ## Download and install mockery in the $BINARIES_DIR
 .PHONY: install-envtest
 install-envtest: TOOL = setup-envtest
 install-envtest: --tool ## Download and install setup-envtest in the $BINARIES_DIR
+
+.PHONY: install-ginkgo
+install-ginkgo: TOOL = ginkgo
+install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
