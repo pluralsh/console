@@ -137,7 +137,7 @@ func (r *ObserverReconciler) sync(
 		return apiObserver, nil, nil
 	}
 
-	projectID, result, err := r.getProjectID(ctx, observer)
+	project, result, err := GetProject(ctx, r.Client, r.Scheme, observer)
 	if result != nil || err != nil {
 		return nil, result, err
 	}
@@ -147,25 +147,8 @@ func (r *ObserverReconciler) sync(
 		return nil, result, err
 	}
 
-	apiObserver, err := r.ConsoleClient.UpsertObserver(ctx, observer.Attributes(target, actions, projectID))
+	apiObserver, err := r.ConsoleClient.UpsertObserver(ctx, observer.Attributes(target, actions, project.Status.ID))
 	return apiObserver, nil, err
-}
-
-func (r *ObserverReconciler) getProjectID(ctx context.Context, observer *v1alpha1.Observer) (*string, *ctrl.Result, error) {
-	if observer.Spec.ProjectRef == nil {
-		return nil, nil, nil
-	}
-
-	project := &v1alpha1.Project{}
-	if err := r.Get(ctx, client.ObjectKey{Name: observer.Spec.ProjectRef.Name, Namespace: observer.Spec.ProjectRef.Namespace}, project); err != nil {
-		return nil, nil, err
-	}
-
-	if project.ConsoleID() == nil {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
-	}
-
-	return project.ConsoleID(), nil, nil
 }
 
 func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alpha1.Observer) (target console.ObserverTargetAttributes, actions []*console.ObserverActionAttributes, result *ctrl.Result, err error) {
