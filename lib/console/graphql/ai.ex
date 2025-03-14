@@ -46,6 +46,7 @@ defmodule Console.GraphQl.AI do
     field :summarized, :boolean, description: "controls whether this thread is autosummarized, set true when users explicitly set summary"
     field :messages,   list_of(:chat_message), description: "a list of messages to add initially when creating this thread"
     field :insight_id, :id, description: "an ai insight this thread was created from"
+    field :flow_id,    :id, description: "the flow this thread was created in"
   end
 
   object :chat do
@@ -80,6 +81,7 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
+    field :flow,     :flow, resolve: dataloader(Deployments)
     field :user,     :user, resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 

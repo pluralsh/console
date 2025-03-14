@@ -1,12 +1,12 @@
-defmodule Console.Schema.Flow do
+defmodule Console.Schema.McpServer do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Project, PolicyBinding, User, McpServerAssociation}
+  alias Console.Schema.{PolicyBinding, Project, User}
   alias Console.Deployments.Policies.Rbac
 
-  schema "flows" do
-    field :name,        :string
-    field :description, :string
-    field :icon,        :string
+  schema "mcp_servers" do
+    field :name,    :string
+    field :url,     :string
+    field :confirm, :boolean, default: false
 
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
@@ -17,11 +17,24 @@ defmodule Console.Schema.Flow do
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :read_policy_id
+
     has_many :write_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :write_policy_id
-    has_many :server_associations, McpServerAssociation, on_replace: :delete
+
+    embeds_one :authentication, Authentication, on_replace: :update do
+      field :plural, :boolean
+
+      embeds_many :headers, Header, on_replace: :delete do
+        field :name,  :string
+        field :value, :string
+      end
+    end
+
+    embeds_one :capabilities, Capabilities, on_replace: :update do
+      field :tools, :map
+    end
 
     timestamps()
   end
@@ -48,17 +61,28 @@ defmodule Console.Schema.Flow do
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
-    from(f in query, order_by: ^order)
+    from(m in query, order_by: ^order)
   end
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description icon project_id)a)
-    |> cast_assoc(:server_associations)
-    |> unique_constraint(:name)
+    |> cast(attrs, ~w(url name confirm project_id)a)
+    |> cast_embed(:authentication, with: &auth_changeset/2)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required([:name, :project_id])
+    |> validate_required(~w(url name project_id)a)
+  end
+
+  defp auth_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(plural)a)
+    |> cast_embed(:headers, with: &header_changeset/2)
+  end
+
+  defp header_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name value)a)
+    |> validate_required(~w(name value)a)
   end
 end

@@ -924,6 +924,7 @@ export type ChatThread = {
   __typename?: 'ChatThread';
   chats?: Maybe<ChatConnection>;
   default: Scalars['Boolean']['output'];
+  flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
@@ -944,6 +945,8 @@ export type ChatThreadChatsArgs = {
 
 /** basic user-supplied input for creating an AI chat thread */
 export type ChatThreadAttributes = {
+  /** the flow this thread was created in */
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   /** an ai insight this thread was created from */
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
@@ -2584,6 +2587,8 @@ export type Flow = {
   pullRequests?: Maybe<PullRequestConnection>;
   /** read policy for this flow */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** servers that are bound to this flow */
+  servers?: Maybe<Array<Maybe<McpServer>>>;
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** write policy for this flow */
@@ -2620,6 +2625,7 @@ export type FlowAttributes = {
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  serverAssociations?: InputMaybe<Array<InputMaybe<McpServerAssociationAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
@@ -3616,6 +3622,103 @@ export enum MatchStrategy {
   Any = 'ANY',
   Recursive = 'RECURSIVE'
 }
+
+export type McpHeaderAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type McpServer = {
+  __typename?: 'McpServer';
+  audits?: Maybe<McpServerAuditConnection>;
+  /** authentication specs for this server */
+  authentication?: Maybe<McpServerAuthentication>;
+  /** whether a tool call against this server should require user confirmation */
+  confirm?: Maybe<Scalars['Boolean']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name for this server */
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the HTTP url the server is hosted on */
+  url: Scalars['String']['output'];
+};
+
+
+export type McpServerAuditsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type McpServerAssociationAttributes = {
+  serverId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Input attributes for creating an mcp server */
+export type McpServerAttributes = {
+  authentication?: InputMaybe<McpServerAuthenticationAttributes>;
+  /** whether tool calls against this server should require a confirmation */
+  confirm?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
+export type McpServerAudit = {
+  __typename?: 'McpServerAudit';
+  actor?: Maybe<User>;
+  arguments?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  server?: Maybe<McpServer>;
+  tool: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type McpServerAuditConnection = {
+  __typename?: 'McpServerAuditConnection';
+  edges?: Maybe<Array<Maybe<McpServerAuditEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type McpServerAuditEdge = {
+  __typename?: 'McpServerAuditEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<McpServerAudit>;
+};
+
+export type McpServerAuthentication = {
+  __typename?: 'McpServerAuthentication';
+  /** any custom HTTP headers needed for authentication */
+  headers?: Maybe<Array<Maybe<McpServerHeader>>>;
+  /** built-in Plural JWT authentication */
+  plural?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type McpServerAuthenticationAttributes = {
+  headers?: InputMaybe<Array<InputMaybe<McpHeaderAttributes>>>;
+  /** whether to use Plural's built-in JWT authentication */
+  plural?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type McpServerConnection = {
+  __typename?: 'McpServerConnection';
+  edges?: Maybe<Array<Maybe<McpServerEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type McpServerEdge = {
+  __typename?: 'McpServerEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<McpServer>;
+};
+
+export type McpServerHeader = {
+  __typename?: 'McpServerHeader';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
 
 export type Metadata = {
   __typename?: 'Metadata';
@@ -5701,6 +5804,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
+  deleteMcpServer?: Maybe<McpServer>;
   deleteNode?: Maybe<Node>;
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
@@ -5821,6 +5925,7 @@ export type RootMutationType = {
   upsertCatalog?: Maybe<Catalog>;
   upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
+  upsertMcpServer?: Maybe<McpServer>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
@@ -6205,6 +6310,11 @@ export type RootMutationTypeDeleteJobArgs = {
 
 
 export type RootMutationTypeDeleteManagedNamespaceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteMcpServerArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6759,6 +6869,11 @@ export type RootMutationTypeUpsertHelmRepositoryArgs = {
 };
 
 
+export type RootMutationTypeUpsertMcpServerArgs = {
+  attributes: McpServerAttributes;
+};
+
+
 export type RootMutationTypeUpsertNotificationRouterArgs = {
   attributes: NotificationRouterAttributes;
 };
@@ -6899,6 +7014,8 @@ export type RootQueryType = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
   managedNamespaces?: Maybe<ManagedNamespaceConnection>;
+  mcpServer?: Maybe<McpServer>;
+  mcpServers?: Maybe<McpServerConnection>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
   /** tells you what cluster a deploy token points to */
@@ -7490,6 +7607,20 @@ export type RootQueryTypeManagedNamespacesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeMcpServerArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeMcpServersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 

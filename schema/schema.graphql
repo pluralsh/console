@@ -401,6 +401,10 @@ type RootQueryType {
 
   flow(id: ID!): Flow
 
+  mcpServers(after: String, first: Int, before: String, last: Int, q: String): McpServerConnection
+
+  mcpServer(id: ID!): McpServer
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -878,6 +882,10 @@ type RootMutationType {
 
   deleteFlow(id: ID!): Flow
 
+  upsertMcpServer(attributes: McpServerAttributes!): McpServer
+
+  deleteMcpServer(id: ID!): McpServer
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
@@ -985,6 +993,35 @@ input FlowAttributes {
   projectId: ID
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+  serverAssociations: [McpServerAssociationAttributes]
+}
+
+"Input attributes for creating an mcp server"
+input McpServerAttributes {
+  name: String!
+
+  url: String!
+
+  "whether tool calls against this server should require a confirmation"
+  confirm: Boolean
+
+  authentication: McpServerAuthenticationAttributes
+}
+
+input McpServerAssociationAttributes {
+  serverId: ID
+}
+
+input McpServerAuthenticationAttributes {
+  "whether to use Plural's built-in JWT authentication"
+  plural: Boolean
+
+  headers: [McpHeaderAttributes]
+}
+
+input McpHeaderAttributes {
+  name: String!
+  value: String!
 }
 
 type Flow {
@@ -995,6 +1032,9 @@ type Flow {
   description: String
 
   icon: String
+
+  "servers that are bound to this flow"
+  servers: [McpServer]
 
   "read policy for this flow"
   readBindings: [PolicyBinding]
@@ -1016,9 +1056,64 @@ type Flow {
   updatedAt: DateTime
 }
 
+type McpServer {
+  id: ID!
+
+  "the name for this server"
+  name: String!
+
+  "the HTTP url the server is hosted on"
+  url: String!
+
+  "authentication specs for this server"
+  authentication: McpServerAuthentication
+
+  "whether a tool call against this server should require user confirmation"
+  confirm: Boolean
+
+  audits(after: String, first: Int, before: String, last: Int): McpServerAuditConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type McpServerAuthentication {
+  "built-in Plural JWT authentication"
+  plural: Boolean
+
+  "any custom HTTP headers needed for authentication"
+  headers: [McpServerHeader]
+}
+
+type McpServerHeader {
+  name: String!
+  value: String!
+}
+
+type McpServerAudit {
+  id: ID!
+  tool: String!
+  arguments: Map
+  server: McpServer
+  actor: User
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type FlowConnection {
   pageInfo: PageInfo!
   edges: [FlowEdge]
+}
+
+type McpServerConnection {
+  pageInfo: PageInfo!
+  edges: [McpServerEdge]
+}
+
+type McpServerAuditConnection {
+  pageInfo: PageInfo!
+  edges: [McpServerAuditEdge]
 }
 
 "Supported OIDC-compatible Auth Providers"
@@ -7032,6 +7127,9 @@ input ChatThreadAttributes {
 
   "an ai insight this thread was created from"
   insightId: ID
+
+  "the flow this thread was created in"
+  flowId: ID
 }
 
 type Chat {
@@ -7063,6 +7161,7 @@ type ChatThread {
   summary: String!
   default: Boolean!
   lastMessageAt: DateTime
+  flow: Flow
   user: User
   insight: AiInsight
   chats(after: String, first: Int, before: String, last: Int): ChatConnection
@@ -8786,6 +8885,16 @@ type ObservabilityProviderEdge {
 
 type ProjectEdge {
   node: Project
+  cursor: String
+}
+
+type McpServerAuditEdge {
+  node: McpServerAudit
+  cursor: String
+}
+
+type McpServerEdge {
+  node: McpServer
   cursor: String
 }
 

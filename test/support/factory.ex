@@ -870,6 +870,32 @@ defmodule Console.Factory do
     }
   end
 
+  def mcp_server_factory do
+    %Schema.McpServer{
+      name: sequence(:mcp_server, & "flow-#{&1}"),
+      url: "http://example.com",
+      project: Settings.default_project!(),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
+  def mcp_server_association_factory do
+    %Schema.McpServerAssociation{
+      flow: build(:flow),
+      server: build(:server)
+    }
+  end
+
+  def mcp_server_audit_factory do
+    %Schema.McpServerAudit{
+      tool: "some_tool",
+      arguments: %{"my" => "arg"},
+      actor: build(:user),
+      server: build(:mcp_server)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -3,9 +3,10 @@ defmodule Console.Deployments.Flows do
   alias Console.PubSub
   import Console.Deployments.Policies
   alias Console.Deployments.Settings
-  alias Console.Schema.{Flow, User}
+  alias Console.Schema.{Flow, User, McpServer, McpServerAssociation}
 
   @type flow_resp :: {:ok, Flow.t} | Console.error
+  @type server_resp :: {:ok, McpServer.t} | Console.error
 
   @spec get!(binary) :: Flow.t
   def get!(id), do: Repo.get!(Flow, id)
@@ -19,10 +20,29 @@ defmodule Console.Deployments.Flows do
   @spec get_by_name(binary) :: Flow.t | nil
   def get_by_name(name), do: Repo.get_by(Flow, name: name)
 
+  @spec get_mcp_server!(binary) :: McpServer.t
+  def get_mcp_server!(id), do: Repo.get!(McpServer, id)
+
+  @spec get_mcp_server(binary) :: McpServer.t | nil
+  def get_mcp_server(id), do: Repo.get(McpServer, id)
+
+  @spec get_mcp_server_by_name!(binary) :: McpServer.t
+  def get_mcp_server_by_name!(name), do: Repo.get_by!(McpServer, name: name)
+
+  @spec get_mcp_server_by_name(binary) :: McpServer.t | nil
+  def get_mcp_server_by_name(name), do: Repo.get_by(McpServer, name: name)
+
   @doc "fetches and determines if the user has access to the given flow"
   @spec accessible(binary, User.t) :: flow_resp
   def accessible(id, %User{} = user) do
     get!(id)
+    |> allow(user, :read)
+  end
+
+  @doc "fetches and determines if the user has access to the given mcp server"
+  @spec server_accessible(binary, User.t) :: flow_resp
+  def server_accessible(id, %User{} = user) do
+    get_mcp_server!(id)
     |> allow(user, :read)
   end
 
@@ -42,10 +62,15 @@ defmodule Console.Deployments.Flows do
   """
   @spec create_flow(map, User.t) :: flow_resp
   def create_flow(attrs, %User{} = user) do
-    %Flow{}
-    |> Flow.changeset(Settings.add_project_id(attrs))
-    |> allow(user, :create)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:flow, fn _ ->
+      %Flow{}
+      |> Flow.changeset(Settings.add_project_id(attrs))
+      |> allow(user, :create)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:authz, fn %{flow: flow} -> post_validate(flow, user) end)
+    |> execute(extract: :flow)
     |> notify(:create, user)
   end
 
@@ -57,15 +82,28 @@ defmodule Console.Deployments.Flows do
       allow(flow, user, :write)
     end)
     |> add_operation(:update, fn %{allow: flow} ->
-      Flow.changeset(flow, attrs)
+      Repo.preload(flow, [:server_associations])
+      |> Flow.changeset(attrs)
       |> Repo.update()
     end)
+    |> add_operation(:authz, fn %{update: flow} -> post_validate(flow, user) end)
     |> execute(extract: :update)
     |> notify(:update, user)
   end
+  def update_flow(attrs, id, %User{} = user) when is_binary(id),
+    do: update_flow(attrs, get!(id), user)
 
-  def update_flow(attrs, id, %User{} = user) when is_binary(id) do
-    update_flow(attrs, get!(id), user)
+  defp post_validate(%Flow{} = flow, %User{} = user) do
+    case Repo.preload(flow, [server_associations: [:server]]) do
+      %Flow{server_associations: [_ | _] = assocs} ->
+        Enum.reduce_while(assocs, {:ok, flow}, fn %McpServerAssociation{server: server}, acc ->
+          case allow(server, user, :write) do
+            {:ok, _} -> {:cont, acc}
+            _ -> {:halt, {:error, "you cannot edit this flow without access to mcp server #{server.name}"}}
+          end
+        end)
+      _ -> {:ok, flow}
+    end
   end
 
   @doc """
@@ -74,6 +112,58 @@ defmodule Console.Deployments.Flows do
   @spec delete_flow(binary, User.t) :: flow_resp
   def delete_flow(id, %User{} = user) do
     get!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates or updates a MCP server, respecting authz policies
+  """
+  @spec upsert_mcp_server(map, User.t) :: server_resp
+  def upsert_mcp_server(%{name: name} = attrs, %User{} = user) do
+    case get_mcp_server_by_name(name) do
+      %McpServer{} = server -> update_mcp_server(attrs, server, user)
+      nil -> create_mcp_server(attrs, user)
+    end
+  end
+
+  @doc """
+  Creates a new MCP server, with appropriate authz and project defaults
+  """
+  @spec create_mcp_server(map, User.t) :: server_resp
+  def create_mcp_server(attrs, %User{} = user) do
+    %McpServer{}
+    |> McpServer.changeset(Settings.add_project_id(attrs))
+    |> allow(user, :create)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates an existing MCP server
+  """
+  @spec update_mcp_server(binary, McpServer.t | binary, User.t) :: server_resp
+  def update_mcp_server(attrs, %McpServer{} = server, %User{} = user) do
+    start_transaction()
+    |> add_operation(:allow, fn _ -> allow(server, user, :write) end)
+    |> add_operation(:update, fn %{allow: server} ->
+      server
+      |> McpServer.changeset(attrs)
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+    |> notify(:update, user)
+  end
+  def update_mcp_server(attrs, id, %User{} = user) when is_binary(id),
+    do: update_mcp_server(attrs, get_mcp_server!(id), user)
+
+  @doc """
+  Deletes an existing flow, will throw if not found
+  """
+  @spec delete_mcp_server(binary, User.t) :: server_resp
+  def delete_mcp_server(id, %User{} = user) do
+    get_mcp_server!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)

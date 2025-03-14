@@ -1,6 +1,6 @@
 defmodule Console.Schema.ChatThread do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, Chat, AiInsight}
+  alias Console.Schema.{User, Chat, AiInsight, Flow}
 
   @max_threads 50
 
@@ -15,6 +15,7 @@ defmodule Console.Schema.ChatThread do
 
     belongs_to :user, User
     belongs_to :insight, AiInsight
+    belongs_to :flow, Flow
 
     timestamps()
   end
@@ -68,13 +69,14 @@ defmodule Console.Schema.ChatThread do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(summary last_message_at summarized default user_id insight_id)a
+  @valid ~w(summary last_message_at summarized default user_id flow_id insight_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:insight_id)
+    |> foreign_key_constraint(:flow_id)
     |> unique_constraint(:user_id, name: :chat_threads_user_id_uniq_index)
     |> validate_required([:user_id])
   end
