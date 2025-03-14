@@ -156,6 +156,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.3",
     "eslint-plugin-react": "7.37.4",
+    "eslint-plugin-react-compiler": "beta",
     "eslint-plugin-react-hooks": "4.6.2",
     "globals": "15.10.0",
     "husky": "8.0.3",
