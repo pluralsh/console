@@ -5,8 +5,10 @@ defmodule Console.AI.Provider do
   alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
 
   @type sender :: :system | :user | :assistant
+  @type error :: Console.error
   @type history :: [{sender, binary}]
   @type tool_result :: [Tool.t]
+  @type completion_result :: {:ok, binary} | {:ok, binary, [Tool.t]} | Console.error
 
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
@@ -20,11 +22,11 @@ defmodule Console.AI.Provider do
   Please provide a brief, easily digestable summary of this in at most 3 sentences.
   """
 
-  @callback completion(struct, history) :: {:ok, binary} | {:error, binary}
+  @callback completion(struct, history, keyword) :: completion_result
 
-  @callback tool_call(struct, history, [atom]) :: {:ok, binary | [tool_result]} | {:error, binary}
+  @callback tool_call(struct, history, [atom]) :: {:ok, binary | tool_result} | error
 
-  @callback embeddings(struct, binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
+  @callback embeddings(struct, binary) :: {:ok, [{binary, [float]}]} | error
 
   @callback tools?() :: boolean
 
@@ -40,7 +42,7 @@ defmodule Console.AI.Provider do
   def completion(history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),
-      do: mod.completion(client, add_preface(history, opts))
+      do: mod.completion(client, add_preface(history, opts), opts)
   end
 
   def tool_call(history, tools, opts \\ []) do

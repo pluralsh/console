@@ -897,6 +897,9 @@ type RootMutationType {
   "saves a set of messages and generates a new one transactionally"
   chat(threadId: ID, messages: [ChatMessage]): Chat
 
+  "Chat mutation that can also execute MCP servers in line with the overall completion"
+  hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
+
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
 
@@ -7278,6 +7281,7 @@ type ClusterInsightComponent {
 type AiDelta {
   seq: Int!
   content: String!
+  message: Int
 }
 
 type ChatConnection {

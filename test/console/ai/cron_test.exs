@@ -45,7 +45,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -83,7 +83,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: true}}]}
       end)
@@ -167,7 +167,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -194,7 +194,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.clusters()
 
@@ -231,7 +231,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
       end)
@@ -268,7 +268,7 @@ defmodule Console.AI.CronTest do
       run   = insert(:stack_run, status: :failed, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
       insert(:run_log, step: step, logs: "blah blah blah")
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.stacks()
 
@@ -290,7 +290,7 @@ defmodule Console.AI.CronTest do
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
       )
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
       svc = insert(:service)
       alert = insert(:alert, state: :firing, service: svc)
 
@@ -328,7 +328,7 @@ defmodule Console.AI.CronTest do
       %{id: flow_id} = flow = insert(:flow)
       svc = insert(:service, flow: flow)
 
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)

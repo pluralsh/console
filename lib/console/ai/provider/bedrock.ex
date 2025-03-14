@@ -24,8 +24,8 @@ defmodule Console.AI.Bedrock do
   @doc """
   Generate a anthropic completion from
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{model_id: model} = bedrock, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{model_id: model} = bedrock, messages, _) do
     %ExAws.Operation.JSON{
       http_method: :post,
       path: "/model/#{model}/converse",

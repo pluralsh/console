@@ -88,13 +88,16 @@ defmodule Console.AI.OpenAI do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = openai, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{} = openai, messages, opts) do
     history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
-    case chat(openai, history) do
+    case chat(openai, history, opts) do
+      {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
+        {:ok, content, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
         {:ok, content}
       {:ok, content} when is_binary(content) -> {:ok, content}
+      {:ok, content, tools} when is_binary(content) -> {:ok, content, tools}
       {:ok, _} -> {:error, "could not generate an ai completion for this context"}
       error -> error
     end
@@ -107,7 +110,7 @@ defmodule Console.AI.OpenAI do
   def tool_call(%__MODULE__{} = openai, messages, tools) do
     model = tool_model(openai)
     history = Enum.map(messages, fn {role, msg} -> %{role: tool_role(role, model), content: msg} end)
-    case chat(%{openai | stream: nil, model: model}, history, tools) do
+    case chat(%{openai | stream: nil, model: model}, history, plural: tools) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -132,12 +135,14 @@ defmodule Console.AI.OpenAI do
 
   def tools?(), do: true
 
-  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history) do
+  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
+      tools = Keyword.get(opts, :tools)
       body = Jason.encode!(%{
         model: model || "gpt-4o-mini",
         messages: history,
-        stream: true
+        stream: true,
+        tools: tools && Enum.map(tools, &tool_args/1)
       })
 
       url(openai, "/chat/completions")
@@ -145,13 +150,17 @@ defmodule Console.AI.OpenAI do
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model} = openai, history, tools \\ nil) do
+  defp chat(%__MODULE__{access_key: token, model: model} = openai, history, opts) do
+    plural = Keyword.get(opts, :plural)
+    tools  = Keyword.get(opts, :tools)
+    all = Enum.concat(tools || [], plural || [])
+
     body = Console.drop_nils(%{
       model: model || "gpt-4o-mini",
       messages: history,
-      tools: tools && Enum.map(tools, &tool_args(&1)),
+      tools: (tools || plural) && Enum.map(all, &tool_args/1),
     })
-    |> Map.merge((if tools, do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge((if plural, do: %{tool_choice: "required"}, else: %{}))
     |> Jason.encode!()
 
     url(openai, "/chat/completions")
@@ -205,6 +214,17 @@ defmodule Console.AI.OpenAI do
   defp tool_role(r, _), do: r
 
   defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o-mini"
+
+  defp tool_args(%Console.AI.MCP.Tool{name: name, description: description, input_schema: schema}) do
+    %{
+      type: :function,
+      function: %{
+        name: name,
+        description: description,
+        parameters: schema
+      }
+    }
+  end
 
   defp tool_args(tool) do
     %{

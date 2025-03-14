@@ -73,7 +73,7 @@ defmodule Console.GraphQl.AiQueriesTest do
   describe "aiCompletion" do
     test "it can generate an ai summary for the given input" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      expect(Console.AI.OpenAI, :completion, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       {:ok, %{data: %{"aiCompletion" => summary}}} = run_query("""
         query Summary($input: String!, $system: String!) {
@@ -103,7 +103,7 @@ defmodule Console.GraphQl.AiQueriesTest do
       insight = insert(:ai_insight, service: svc)
 
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      expect(Console.AI.OpenAI, :completion, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       {:ok, %{data: %{"aiSuggestedFix" => result}}} = run_query("""
         query Suggestion($insightId: ID!) {

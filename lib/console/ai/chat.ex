@@ -1,8 +1,9 @@
 defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
-  import Console.AI.Evidence.Base, only: [prepend: 2]
-  alias Console.AI.{Provider, Tools.Pr, Fixer}
+  import Console.AI.Evidence.Base, only: [prepend: 2, maybe_prepend: 2, append: 2]
+  alias Console.AI.{Provider, Tools.Pr, Fixer, Tool, Stream}
+  alias Console.AI.MCP.{Discovery, Agent}
   alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{
     AiInsight,
@@ -13,7 +14,10 @@ defmodule Console.AI.Chat do
     AiPin,
     PullRequest,
     Service,
-    Stack
+    Stack,
+    Flow,
+    McpServer,
+    McpServerAudit
   }
 
   @type context_source :: :service | :stack
@@ -21,6 +25,7 @@ defmodule Console.AI.Chat do
   @type pin_resp :: {:ok, AiPin.t} | Console.error
   @type chat_list_resp :: {:ok, [Chat.t]} | Console.error
   @type chat_resp :: {:ok, Chat.t} | Console.error
+  @type chats_resp :: {:ok, [Chat.t]} | Console.error
 
   @context_window 128_000 * 4
 
@@ -60,6 +65,9 @@ defmodule Console.AI.Chat do
       _ -> make_default_thread!(user)
     end
   end
+
+  def servers(%ChatThread{flow: %Flow{servers: servers}}), do: servers
+  def servers(_), do: []
 
   def make_default_thread!(%User{id: uid}) do
     %ChatThread{user_id: uid}
@@ -218,14 +226,120 @@ defmodule Console.AI.Chat do
       |> Enum.map(&Chat.message/1)
       |> Provider.completion(preface: @chat)
     end)
-    |> add_operation(:msg, fn %{chat: c} ->
-      save_message(%{role: :assistant, content: c}, thread_id, user)
+    |> add_operation(:msg, fn %{chat: content} ->
+      save_message(%{role: :assistant, content: content}, thread_id, user)
     end)
     |> add_operation(:bump, fn %{access: thread} ->
       ChatThread.changeset(thread, %{last_message_at: Timex.now()})
       |> Repo.update()
     end)
     |> execute(extract: :msg, timeout: 300_000)
+  end
+
+  @doc """
+  Saves a message history, then generates a new assistant-derived messages from there
+  """
+  @spec hybrid_chat([map], binary | nil, User.t) :: chats_resp
+  def hybrid_chat(messages, tid \\ nil, %User{} = user) do
+    thread_id = tid || default_thread!(user).id
+    thread = get_thread!(thread_id) |> Repo.preload(flow: :servers)
+    start_transaction()
+    |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
+    |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
+    |> add_operation(:chat, fn _ ->
+      Chat.for_thread(thread_id)
+      |> Chat.ordered()
+      |> Repo.all()
+      |> fit_context_window()
+      |> Enum.map(&Chat.message/1)
+      |> recursive_completion(thread, user)
+    end)
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(timeout: 300_000)
+    |> case do
+      {:ok, %{chat: %Chat{} = chat}} -> {:ok, [chat]}
+      {:ok, %{chat: [%Chat{} | _] = chats}} -> {:ok, chats}
+      err -> err
+    end
+  end
+
+  ~s"""
+  This will run a sequence of completions in a row gathering tools so users don't have to drive the RAG process manually.
+
+  Automatically cuts off at a depth of three to avoid runaway scenarios.
+  """
+  @spec recursive_completion(Provider.history, ChatThread.t, User.t, [binary], integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
+  defp recursive_completion(messages, thread, user, completion \\ [], level \\ 0)
+  defp recursive_completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
+    Enum.map(completion, & %{role: :assistant, content: &1})
+    |> save_messages(thread_id, user)
+  end
+
+  defp recursive_completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
+    Enum.concat(messages, completion)
+    |> Enum.map(fn
+      msg when is_binary(msg) -> {:assistant, msg}
+      msg -> msg
+    end)
+    |> Provider.completion(include_tools([preface: @chat], thread))
+    |> case do
+      {:ok, content} ->
+        append(completion, content)
+        |> Enum.map(& %{role: :assistant, content: &1})
+        |> save_messages(thread_id, user)
+      {:ok, content, tools} ->
+        case call_tools(tools, thread, user) do
+          {:ok, results} ->
+            completion = completion ++ maybe_prepend(content, results)
+            recursive_completion(messages, thread, user, completion, level + 1)
+          err -> err
+        end
+      err -> err
+    end
+  end
+
+  @spec call_tools([Tool.t], ChatThread.t, User.t) :: {:ok, [binary]} | {:error, binary}
+  defp call_tools(tools, %ChatThread{} = thread, %User{} = user) do
+    servers_by_name = Map.new(servers(thread), & {&1.name, &1})
+    stream = Stream.stream()
+    Enum.reduce_while(tools, [], fn %Tool{name: name} = tool, acc ->
+      with {sname, _} <- Agent.tool_name(name),
+           %McpServer{} = server <- servers_by_name[sname],
+           {:ok, content} <- call_tool(tool, thread, server, user) do
+        Stream.publish(stream, content, 1)
+        Stream.offset(1)
+        {:cont, [content | acc]}
+      else
+        {:error, err} -> {:halt, {:error, err}}
+        _ -> {:halt, {:error, "tool calling error: invalid tool name #{name}"}}
+      end
+    end)
+    |> case do
+      res when is_list(res) -> {:ok, Enum.reverse(res)}
+      err -> err
+    end
+  end
+
+  @spec call_tool(Tool.t, ChatThread.t, McpServer.t, User.t) :: {:ok, binary} | {:error, binary}
+  defp call_tool(%Tool{name: name, arguments: arguments}, thread, %McpServer{name: sname} = server, %User{} = user) do
+    {_, tname} = Agent.tool_name(name)
+    start_transaction()
+    |> add_operation(:audit, fn _ ->
+      %McpServerAudit{server_id: server.id, actor_id: user.id}
+      |> McpServerAudit.changeset(%{tool: tname, arguments: arguments})
+      |> Repo.insert()
+    end)
+    |> add_operation(:tool, fn _ ->
+      case Discovery.invoke(thread, name, arguments) do
+        {:ok, result} ->
+          {:ok, "Result from calling MCP server #{sname} with tool #{tname}:\n#{result}"}
+        {:error, err} -> {:error, "Internal tool call failure for tool #{name}: #{inspect(err)}"}
+      end
+    end)
+    |> execute(extract: :tool)
   end
 
   @doc """
@@ -238,15 +352,32 @@ defmodule Console.AI.Chat do
     |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
     |> maybe_save_messages(messages, user)
     |> execute()
-    |> when_ok(fn results ->
-      Enum.filter(results, fn
-        {{:msg, _}, _} -> true
-        _ -> false
-      end)
-      |> Enum.map(&elem(&1, 1))
-      |> Enum.sort_by(& &1.seq)
-    end)
+    |> extract_messages()
   end
+
+  @doc """
+  Saves a list of messages, this does not perform authorization and should only be used internally
+  """
+  @spec save_messages([map], binary, User.t) :: chat_list_resp
+  def save_messages(messages, thread_id, %User{} = user) do
+    Enum.with_index(messages)
+    |> Enum.reduce(start_transaction(), fn {msg, ind}, xact ->
+      add_operation(xact, {:msg, ind}, fn _ -> save_message(msg, thread_id, user) end)
+    end)
+    |> execute()
+    |> extract_messages()
+  end
+
+  defp extract_messages({:ok, results}) do
+    Enum.filter(results, fn
+      {{:msg, _}, _} -> true
+      _ -> false
+    end)
+    |> Enum.map(&elem(&1, 1))
+    |> Enum.sort_by(& &1.seq)
+    |> ok()
+  end
+  defp extract_messages(err), do: err
 
   @doc """
   Adds context to the given chat thread from a source, eg a service or stack
@@ -292,6 +423,14 @@ defmodule Console.AI.Chat do
       |> handle_tool_call(thread, user)
     end
   end
+
+  defp include_tools(opts, %ChatThread{flow: %Flow{servers: [_ | _]}} = thread) do
+    case Discovery.tools(thread) do
+      {:ok, tools} -> [{:tools, tools} | opts]
+      _ -> opts
+    end
+  end
+  defp include_tools(opts, _), do: opts
 
   defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
     thread = Repo.preload(thread, [:insight])

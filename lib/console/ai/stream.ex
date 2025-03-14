@@ -2,7 +2,7 @@ defmodule Console.AI.Stream do
   alias Console.Schema.User
   alias ConsoleWeb.AIChannel
 
-  defstruct [:topic]
+  defstruct [:topic, offset: 0, msg: 0]
 
   @stream {__MODULE__, :ai, :stream}
 
@@ -10,8 +10,16 @@ defmodule Console.AI.Stream do
 
   def stream(), do: Process.get(@stream)
 
-  def publish(%__MODULE__{topic: topic}, c, ind) when is_binary(topic) do
-    msg = %{content: c, seq: ind}
+  def offset(ind) do
+    case stream() do
+      %__MODULE__{offset: off, msg: msg} = s ->
+        Process.put(@stream, %{s | offset: off + ind + 1, msg: msg + 1})
+      _ -> :ok
+    end
+  end
+
+  def publish(%__MODULE__{topic: topic, offset: offset, msg: msg}, c, ind) when is_binary(topic) do
+    msg = %{content: c, seq: ind + offset, message: msg}
     AIChannel.stream(topic, msg)
     Absinthe.Subscription.publish(
       ConsoleWeb.Endpoint,
@@ -19,7 +27,7 @@ defmodule Console.AI.Stream do
       [ai_stream: topic]
     )
   end
-  def publish(_, _), do: :ok
+  def publish(_, _, _), do: :ok
 
   def topic(:insight, id, %User{id: uid}), do: "ai:insight:#{id}:#{uid}"
   def topic(:thread, id, %User{id: uid}), do: "ai:thread:#{id}:#{uid}"

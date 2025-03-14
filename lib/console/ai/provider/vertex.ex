@@ -28,8 +28,8 @@ defmodule Console.AI.Vertex do
   @doc """
   Generate a openai completion from
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = vertex, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{} = vertex, messages, opts) do
     with {:ok, %{token: token}} <- client(vertex) do
       OpenAI.new(%{
         base_url: openai_url(vertex),
@@ -37,7 +37,7 @@ defmodule Console.AI.Vertex do
         model: openai_model(vertex),
         tool_model: openai_model(vertex)
       })
-      |> OpenAI.completion(messages)
+      |> OpenAI.completion(messages, opts)
     end
   end
 

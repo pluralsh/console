@@ -185,6 +185,7 @@ defmodule Console.GraphQl.AI do
   object :ai_delta do
     field :seq,     non_null(:integer)
     field :content, non_null(:string)
+    field :message, :integer
   end
 
   connection node_type: :chat
@@ -279,6 +280,15 @@ defmodule Console.GraphQl.AI do
       arg :messages,  list_of(:chat_message)
 
       resolve &AI.chat/2
+    end
+
+    @desc "Chat mutation that can also execute MCP servers in line with the overall completion"
+    field :hybrid_chat, list_of(:chat) do
+      middleware Authenticated
+      arg :thread_id, :id
+      arg :messages,  list_of(:chat_message)
+
+      resolve &AI.hybrid_chat/2
     end
 
     @desc "Creates a pull request given the thread message history"

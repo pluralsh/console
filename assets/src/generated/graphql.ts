@@ -178,6 +178,7 @@ export type AgentMigrationAttributes = {
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
+  message?: Maybe<Scalars['Int']['output']>;
   seq: Scalars['Int']['output'];
 };
 
@@ -5841,6 +5842,8 @@ export type RootMutationType = {
   enableDeployments?: Maybe<DeploymentSettings>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  /** Chat mutation that can also execute MCP servers in line with the overall completion */
+  hybridChat?: Maybe<Array<Maybe<Chat>>>;
   impersonateServiceAccount?: Maybe<User>;
   ingestClusterCost?: Maybe<Scalars['Boolean']['output']>;
   installAddOn?: Maybe<ServiceDeployment>;
@@ -6480,6 +6483,12 @@ export type RootMutationTypeDetachStackArgs = {
 export type RootMutationTypeForceGateArgs = {
   id: Scalars['ID']['input'];
   state?: InputMaybe<GateState>;
+};
+
+
+export type RootMutationTypeHybridChatArgs = {
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

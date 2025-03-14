@@ -49,8 +49,8 @@ defmodule Console.AI.Anthropic do
   @doc """
   Generate a anthropic completion from
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = anthropic, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{} = anthropic, messages, _opts) do
     case chat(anthropic, messages) do
       {:ok, %MessageResponse{content: content}} ->
         {:ok, format_content(content)}

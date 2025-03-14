@@ -27,12 +27,12 @@ defmodule Console.AI.Azure do
   @doc """
   Generate a openai completion from the azure openai credentials chain
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{api_version: vsn, model: model} = azure, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{api_version: vsn, model: model} = azure, messages, opts) do
     OpenAI.new(azure)
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:model, model || OpenAI.default_model())
-    |> OpenAI.completion(messages)
+    |> OpenAI.completion(messages, opts)
   end
 
   @doc """

@@ -22,6 +22,7 @@ defmodule Console.Schema.Flow do
       foreign_key: :policy_id,
       references: :write_policy_id
     has_many :server_associations, McpServerAssociation, on_replace: :delete
+    has_many :servers, through: [:server_associations, :server]
 
     timestamps()
   end

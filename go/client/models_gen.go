@@ -125,6 +125,7 @@ type AgentMigrationAttributes struct {
 type AiDelta struct {
 	Seq     int64  `json:"seq"`
 	Content string `json:"content"`
+	Message *int64 `json:"message,omitempty"`
 }
 
 // A representation of a LLM-derived insight
