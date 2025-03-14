@@ -55,13 +55,9 @@ export function LogsEvidencePanel({
       ) : (
         logs.map((log, i) => (
           <WrapWithIf
+            key={i}
             condition={!isTable}
-            wrapper={
-              <Card
-                clickable
-                key={i}
-              />
-            }
+            wrapper={<Card clickable />}
           >
             <LogEvidenceLineSC
               key={i}
