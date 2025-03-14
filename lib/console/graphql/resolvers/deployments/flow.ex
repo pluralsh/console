@@ -5,13 +5,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Flow,
     Service,
     Pipeline,
-    PullRequest
+    McpServer,
+    PullRequest,
+    McpServerAudit
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
     Flow.ordered()
     |> Flow.for_user(user)
     |> maybe_search(Flow, args)
+    |> paginate(args)
+  end
+
+  def list_mcp_servers(args, %{context: %{current_user: user}}) do
+    McpServer.ordered()
+    |> McpServer.for_user(user)
+    |> maybe_search(McpServer, args)
     |> paginate(args)
   end
 
@@ -33,6 +42,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> paginate(args)
   end
 
+  def list_audits_for_flow(flow, args, _) do
+    McpServerAudit.for_server(flow.id)
+    |> McpServerAudit.ordered()
+    |> paginate(args)
+  end
+
   def resolve_flow(%{id: id}, %{context: %{current_user: user}}),
     do: Flows.accessible(id, user)
 
@@ -41,4 +56,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
 
   def delete_flow(%{id: id}, %{context: %{current_user: user}}),
     do: Flows.delete_flow(id, user)
+
+  def resolve_mcp_server(%{id: id}, %{context: %{current_user: user}}),
+    do: Flows.server_accessible(id, user)
+
+  def upsert_mcp_server(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Flows.upsert_mcp_server(attrs, user)
+
+  def delete_mcp_server(%{id: id}, %{context: %{current_user: user}}),
+    do: Flows.delete_mcp_server(id, user)
 end

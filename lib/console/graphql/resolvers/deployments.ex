@@ -76,7 +76,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackViolationCause,
     Alert,
     AlertResolution,
-    Flow
+    Flow,
+    McpServer
   }
 
   def query(Project, _), do: Project
@@ -151,6 +152,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
   def query(Flow, _), do: Flow
+  def query(McpServer, _), do: McpServer
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

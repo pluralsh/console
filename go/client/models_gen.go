@@ -747,6 +747,7 @@ type ChatThread struct {
 	Summary       string          `json:"summary"`
 	Default       bool            `json:"default"`
 	LastMessageAt *string         `json:"lastMessageAt,omitempty"`
+	Flow          *Flow           `json:"flow,omitempty"`
 	User          *User           `json:"user,omitempty"`
 	Insight       *AiInsight      `json:"insight,omitempty"`
 	Chats         *ChatConnection `json:"chats,omitempty"`
@@ -763,6 +764,8 @@ type ChatThreadAttributes struct {
 	Messages []*ChatMessage `json:"messages,omitempty"`
 	// an ai insight this thread was created from
 	InsightID *string `json:"insightId,omitempty"`
+	// the flow this thread was created in
+	FlowID *string `json:"flowId,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -2110,6 +2113,8 @@ type Flow struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Icon        *string `json:"icon,omitempty"`
+	// servers that are bound to this flow
+	Servers []*McpServer `json:"servers,omitempty"`
 	// read policy for this flow
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy for this flow
@@ -2124,12 +2129,13 @@ type Flow struct {
 }
 
 type FlowAttributes struct {
-	Name          string                     `json:"name"`
-	Description   *string                    `json:"description,omitempty"`
-	Icon          *string                    `json:"icon,omitempty"`
-	ProjectID     *string                    `json:"projectId,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name               string                            `json:"name"`
+	Description        *string                           `json:"description,omitempty"`
+	Icon               *string                           `json:"icon,omitempty"`
+	ProjectID          *string                           `json:"projectId,omitempty"`
+	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
+	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
 }
 
 type FlowConnection struct {
@@ -2959,6 +2965,87 @@ type ManagedNamespaceEdge struct {
 type ManifestNetwork struct {
 	PluralDNS *bool   `json:"pluralDns,omitempty"`
 	Subdomain *string `json:"subdomain,omitempty"`
+}
+
+type McpHeaderAttributes struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type McpServer struct {
+	ID string `json:"id"`
+	// the name for this server
+	Name string `json:"name"`
+	// the HTTP url the server is hosted on
+	URL string `json:"url"`
+	// authentication specs for this server
+	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
+	// whether a tool call against this server should require user confirmation
+	Confirm    *bool                     `json:"confirm,omitempty"`
+	Audits     *McpServerAuditConnection `json:"audits,omitempty"`
+	InsertedAt *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+}
+
+type McpServerAssociationAttributes struct {
+	ServerID *string `json:"serverId,omitempty"`
+}
+
+// Input attributes for creating an mcp server
+type McpServerAttributes struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	// whether tool calls against this server should require a confirmation
+	Confirm        *bool                              `json:"confirm,omitempty"`
+	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
+}
+
+type McpServerAudit struct {
+	ID         string         `json:"id"`
+	Tool       string         `json:"tool"`
+	Arguments  map[string]any `json:"arguments,omitempty"`
+	Server     *McpServer     `json:"server,omitempty"`
+	Actor      *User          `json:"actor,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+type McpServerAuditConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*McpServerAuditEdge `json:"edges,omitempty"`
+}
+
+type McpServerAuditEdge struct {
+	Node   *McpServerAudit `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+type McpServerAuthentication struct {
+	// built-in Plural JWT authentication
+	Plural *bool `json:"plural,omitempty"`
+	// any custom HTTP headers needed for authentication
+	Headers []*McpServerHeader `json:"headers,omitempty"`
+}
+
+type McpServerAuthenticationAttributes struct {
+	// whether to use Plural's built-in JWT authentication
+	Plural  *bool                  `json:"plural,omitempty"`
+	Headers []*McpHeaderAttributes `json:"headers,omitempty"`
+}
+
+type McpServerConnection struct {
+	PageInfo PageInfo         `json:"pageInfo"`
+	Edges    []*McpServerEdge `json:"edges,omitempty"`
+}
+
+type McpServerEdge struct {
+	Node   *McpServer `json:"node,omitempty"`
+	Cursor *string    `json:"cursor,omitempty"`
+}
+
+type McpServerHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type Metadata struct {

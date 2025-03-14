@@ -33,7 +33,8 @@ defmodule Console.Deployments.Policies.Rbac do
     VulnerabilityReport,
     ClusterRegistration,
     ClusterISOImage,
-    Flow
+    Flow,
+    McpServer
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -93,6 +94,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(reg, user, action, & &1.project)
   def evaluate(%Flow{} = flow, user, action),
     do: recurse(flow, user, action, & &1.project)
+  def evaluate(%McpServer{} = mcp, user, action),
+    do: recurse(mcp, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -159,6 +162,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(obs, [project: @bindings])
   def preload(%Flow{} = flow),
     do: Repo.preload(flow, @top_preloads)
+  def preload(%McpServer{} = mcp),
+    do: Repo.preload(mcp, @top_preloads)
   def preload(%PolicyConstraint{} = pr),
     do: Repo.preload(pr, [cluster: @top_preloads])
   def preload(%PinnedCustomResource{} = pcr),
