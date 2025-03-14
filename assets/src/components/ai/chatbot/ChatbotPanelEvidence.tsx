@@ -8,8 +8,10 @@ import { PrLinkoutCard } from './ChatMessage'
 
 export function ChatbotPanelEvidence({
   evidence,
+  headerText = 'This chat was created from an insight based on the evidence below:',
 }: {
   evidence: AiInsightEvidenceFragment[]
+  headerText?: string
 }) {
   const { logEvidence, prEvidence } = aggregateInsightEvidence(evidence)
   return (
@@ -19,7 +21,7 @@ export function ChatbotPanelEvidence({
         css={{ fontStyle: 'italic' }}
         $color="text-light"
       >
-        This chat was created from an insight based on the evidence below:
+        {headerText}
       </Body1P>
       <Flex
         direction="column"
