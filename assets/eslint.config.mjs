@@ -3,6 +3,7 @@ import importPlugin from 'eslint-plugin-import'
 import prettier from 'eslint-plugin-prettier/recommended'
 import react from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import reactCompiler from 'eslint-plugin-react-compiler'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -31,6 +32,7 @@ export default [
     plugins: {
       react,
       'react-hooks': fixupPluginRules(reactHooksPlugin),
+      'react-compiler': reactCompiler,
     },
 
     settings: {
@@ -80,6 +82,8 @@ export default [
       'react/prop-types': 'off',
       'react/display-name': 'off',
       'react/jsx-key': 'off',
+      // React Compiler
+      'react-compiler/react-compiler': 'warn',
 
       // Prettier
       'prettier/prettier': 'error',

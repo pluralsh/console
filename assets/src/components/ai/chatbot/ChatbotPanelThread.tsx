@@ -21,6 +21,7 @@ import {
   ChatThreadDetailsQuery,
   ChatThreadFragment,
   ChatType,
+  EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
   useChatThreadDetailsQuery,
@@ -52,7 +53,9 @@ export function ChatbotPanelThread({
       behavior: 'smooth',
     })
   }, [messageListRef])
-  const evidence = currentThread.insight?.evidence?.filter(isNonNullable)
+  const evidence = currentThread.insight?.evidence
+    ?.filter(isNonNullable)
+    .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
   useAiChatStreamSubscription({
@@ -144,10 +147,17 @@ export function ChatbotPanelThread({
       >
         {isEmpty(messages) && <EmptyState message="No messages yet." />}
         {messages.map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            {...msg}
-          />
+          <>
+            <ChatMessage
+              key={msg.id}
+              {...msg}
+            />
+            {!isEmpty(evidence) && // only attaches evidence to the initial insight
+              msg.seq === 0 &&
+              msg.role === AiRole.Assistant && (
+                <ChatbotPanelEvidence evidence={evidence ?? []} />
+              )}
+          </>
         ))}
         {sendingMessage &&
           (streamedMessage.length ? (
@@ -162,9 +172,6 @@ export function ChatbotPanelThread({
           ) : (
             <GeneratingResponseMessage />
           ))}
-        {evidence && !sendingMessage && (
-          <ChatbotPanelEvidence evidence={evidence} />
-        )}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
