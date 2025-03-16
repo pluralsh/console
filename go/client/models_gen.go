@@ -123,9 +123,10 @@ type AgentMigrationAttributes struct {
 }
 
 type AiDelta struct {
-	Seq     int64  `json:"seq"`
-	Content string `json:"content"`
-	Message *int64 `json:"message,omitempty"`
+	Seq     int64   `json:"seq"`
+	Content string  `json:"content"`
+	Message *int64  `json:"message,omitempty"`
+	Role    *AiRole `json:"role,omitempty"`
 }
 
 // A representation of a LLM-derived insight

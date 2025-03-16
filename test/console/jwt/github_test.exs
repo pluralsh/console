@@ -1,5 +1,5 @@
 defmodule Console.Jwt.GithubTest do
-  use Console.DataCase
+  use Console.DataCase, async: true
   alias Console.Jwt.Github
 
   describe "#app_token" do

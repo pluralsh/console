@@ -186,6 +186,7 @@ defmodule Console.GraphQl.AI do
     field :seq,     non_null(:integer)
     field :content, non_null(:string)
     field :message, :integer
+    field :role,    :ai_role
   end
 
   connection node_type: :chat

@@ -1,7 +1,7 @@
 defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
-  import Console.AI.Evidence.Base, only: [prepend: 2, maybe_prepend: 2, append: 2]
+  import Console.AI.Evidence.Base, only: [prepend: 2, append: 2]
   alias Console.AI.{Provider, Tools.Pr, Fixer, Tool, Stream}
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.Deployments.{Services, Stacks}
@@ -242,7 +242,8 @@ defmodule Console.AI.Chat do
   @spec hybrid_chat([map], binary | nil, User.t) :: chats_resp
   def hybrid_chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
-    thread = get_thread!(thread_id) |> Repo.preload(flow: :servers)
+    thread = get_thread!(thread_id)
+             |> Repo.preload(user: :groups, flow: :servers)
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
@@ -271,29 +272,25 @@ defmodule Console.AI.Chat do
 
   Automatically cuts off at a depth of three to avoid runaway scenarios.
   """
-  @spec recursive_completion(Provider.history, ChatThread.t, User.t, [binary], integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
+  @spec recursive_completion(Provider.history, ChatThread.t, User.t, Provider.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
   defp recursive_completion(messages, thread, user, completion \\ [], level \\ 0)
   defp recursive_completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
-    Enum.map(completion, & %{role: :assistant, content: &1})
+    Enum.map(completion, fn {r, c} -> %{role: r, content: c} end)
     |> save_messages(thread_id, user)
   end
 
   defp recursive_completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
     Enum.concat(messages, completion)
-    |> Enum.map(fn
-      msg when is_binary(msg) -> {:assistant, msg}
-      msg -> msg
-    end)
     |> Provider.completion(include_tools([preface: @chat], thread))
     |> case do
       {:ok, content} ->
-        append(completion, content)
-        |> Enum.map(& %{role: :assistant, content: &1})
+        append(completion, {:assistant, content})
+        |> Enum.map(fn {r, c} -> %{role: r, content: c} end)
         |> save_messages(thread_id, user)
       {:ok, content, tools} ->
         case call_tools(tools, thread, user) do
           {:ok, results} ->
-            completion = completion ++ maybe_prepend(content, results)
+            completion = completion ++ tool_msgs(content, results)
             recursive_completion(messages, thread, user, completion, level + 1)
           err -> err
         end
@@ -301,10 +298,14 @@ defmodule Console.AI.Chat do
     end
   end
 
+  defp tool_msgs(content, tools) when is_binary(content) and byte_size(content) > 0,
+    do: [{:assistant, content} | Enum.map(tools, & {:user, &1})]
+  defp tool_msgs(_, tools), do: Enum.map(tools, & {:user, &1})
+
   @spec call_tools([Tool.t], ChatThread.t, User.t) :: {:ok, [binary]} | {:error, binary}
   defp call_tools(tools, %ChatThread{} = thread, %User{} = user) do
     servers_by_name = Map.new(servers(thread), & {&1.name, &1})
-    stream = Stream.stream()
+    stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{name: name} = tool, acc ->
       with {sname, _} <- Agent.tool_name(name),
            %McpServer{} = server <- servers_by_name[sname],

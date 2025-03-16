@@ -179,6 +179,7 @@ export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
   message?: Maybe<Scalars['Int']['output']>;
+  role?: Maybe<AiRole>;
   seq: Scalars['Int']['output'];
 };
 

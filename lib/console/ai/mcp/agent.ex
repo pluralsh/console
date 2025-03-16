@@ -37,7 +37,7 @@ defmodule Console.AI.MCP.Agent do
   end
 
   def init(%ChatThread{} = thread) do
-    thread = Repo.preload(thread, [flow: :servers])
+    thread = Repo.preload(thread, [user: :groups, flow: :servers])
     {:ok, _} = ClientSupervisor.start_link(thread)
     :timer.send_interval(@poll, :ping)
     send self(), :init
