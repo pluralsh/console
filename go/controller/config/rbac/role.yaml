@@ -40,6 +40,7 @@ rules:
   - helmrepositories
   - infrastructurestacks
   - managednamespaces
+  - mcpservers
   - namespacecredentialss
   - notificationrouters
   - notificationsinks
@@ -81,6 +82,7 @@ rules:
   - helmrepositories/finalizers
   - infrastructurestacks/finalizers
   - managednamespaces/finalizers
+  - mcpservers/finalizers
   - namespacecredentialss/finalizers
   - notificationrouters/finalizers
   - notificationsinks/finalizers
@@ -116,6 +118,7 @@ rules:
   - helmrepositories/status
   - infrastructurestacks/status
   - managednamespaces/status
+  - mcpservers/status
   - namespacecredentialss/status
   - notificationrouters/status
   - notificationsinks/status
