@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -98,7 +99,12 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(projectID))
+		serverAssociationAttributes, res, err := r.getServerAssociationAttributes(ctx, flow)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, flow.SetCondition)
+		}
+
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(projectID, serverAssociationAttributes))
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -189,4 +195,29 @@ func (r *FlowReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, flow *v
 	}
 
 	return project.Status.ID, nil, nil
+}
+
+func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flow *v1alpha1.Flow) ([]*console.McpServerAssociationAttributes, *ctrl.Result, error) {
+	if flow.Spec.ServerAssociations == nil {
+		return nil, nil, nil
+	}
+
+	serverAssociationAttrs := make([]*console.McpServerAssociationAttributes, 0)
+	for _, serverAssociation := range flow.Spec.ServerAssociations {
+		ref := serverAssociation.MCPServerRef
+		mcpServer := new(v1alpha1.MCPServer)
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, mcpServer); err != nil {
+			return nil, nil, err
+		}
+
+		if !mcpServer.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("MCP server %s is not ready", ref.Name)
+		}
+
+		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{
+			ServerID: mcpServer.Status.ID,
+		})
+	}
+
+	return serverAssociationAttrs, nil, nil
 }

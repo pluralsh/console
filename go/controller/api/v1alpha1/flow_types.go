@@ -26,6 +26,14 @@ type FlowSpec struct {
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
+}
+
+type FlowServerAssociation struct {
+	// +kubebuilder:validation:Required
+	MCPServerRef corev1.ObjectReference `json:"mcpServerRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -67,12 +75,13 @@ func (in *Flow) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *Flow) Attributes(projectID *string) console.FlowAttributes {
+func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpServerAssociationAttributes) console.FlowAttributes {
 	attrs := console.FlowAttributes{
-		Name:        in.FlowName(),
-		Description: in.Spec.Description,
-		Icon:        in.Spec.Icon,
-		ProjectID:   projectID,
+		Name:               in.FlowName(),
+		Description:        in.Spec.Description,
+		Icon:               in.Spec.Icon,
+		ProjectID:          projectID,
+		ServerAssociations: serverAssociations,
 	}
 
 	if in.Spec.Bindings != nil {
