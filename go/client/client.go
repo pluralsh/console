@@ -5642,21 +5642,21 @@ func (t *MCPServerFragment_Authentication_Headers) GetValue() string {
 }
 
 type MCPServerFragment_Authentication struct {
-	Headers []*MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 	Plural  *bool                                       "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 }
 
-func (t *MCPServerFragment_Authentication) GetHeaders() []*MCPServerFragment_Authentication_Headers {
-	if t == nil {
-		t = &MCPServerFragment_Authentication{}
-	}
-	return t.Headers
-}
 func (t *MCPServerFragment_Authentication) GetPlural() *bool {
 	if t == nil {
 		t = &MCPServerFragment_Authentication{}
 	}
 	return t.Plural
+}
+func (t *MCPServerFragment_Authentication) GetHeaders() []*MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &MCPServerFragment_Authentication{}
+	}
+	return t.Headers
 }
 
 type ServiceDeploymentFragment_Components struct {
@@ -11575,21 +11575,21 @@ func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_He
 }
 
 type GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication struct {
-	Headers []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 	Plural  *bool                                                                           "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 }
 
-func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers {
-	if t == nil {
-		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
-	}
-	return t.Headers
-}
 func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetPlural() *bool {
 	if t == nil {
 		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
 	}
 	return t.Plural
+}
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
 }
 
 type GetMCPServers_McpServers_Edges struct {
@@ -11640,21 +11640,21 @@ func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers) GetVal
 }
 
 type GetMCPServer_McpServer_MCPServerFragment_Authentication struct {
-	Headers []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 	Plural  *bool                                                              "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 }
 
-func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers {
-	if t == nil {
-		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
-	}
-	return t.Headers
-}
 func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
 	if t == nil {
 		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
 	}
 	return t.Plural
+}
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
 }
 
 type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers struct {
@@ -11676,21 +11676,21 @@ func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Header
 }
 
 type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication struct {
-	Headers []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 	Plural  *bool                                                                       "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
 }
 
-func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetHeaders() []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers {
-	if t == nil {
-		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
-	}
-	return t.Headers
-}
 func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetPlural() *bool {
 	if t == nil {
 		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
 	}
 	return t.Plural
+}
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetHeaders() []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
 }
 
 type DeleteMCPServer_DeleteMcpServer struct {
@@ -24076,11 +24076,11 @@ fragment MCPServerFragment on McpServer {
 	name
 	url
 	authentication {
+		plural
 		headers {
 			name
 			value
 		}
-		plural
 	}
 	confirm
 }
@@ -24117,11 +24117,11 @@ fragment MCPServerFragment on McpServer {
 	name
 	url
 	authentication {
+		plural
 		headers {
 			name
 			value
 		}
-		plural
 	}
 	confirm
 }
@@ -24154,11 +24154,11 @@ fragment MCPServerFragment on McpServer {
 	name
 	url
 	authentication {
+		plural
 		headers {
 			name
 			value
 		}
-		plural
 	}
 	confirm
 }
