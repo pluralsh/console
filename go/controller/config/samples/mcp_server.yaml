@@ -1,0 +1,32 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MCPServer
+metadata:
+  labels:
+    app.kubernetes.io/name: mcpserver
+    app.kubernetes.io/instance: mcpserver-minimal
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: mcpserver-minimal
+spec:
+  name: minimal
+  url: mcpserver.minimal.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MCPServer
+metadata:
+  labels:
+    app.kubernetes.io/name: mcpserver
+    app.kubernetes.io/instance: mcpserver-full
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: mcpserver-full
+spec:
+  name: full
+  url: mcpserver.full.com
+  authentication:
+    plural: true
+    headers:
+      USER: admin
+      TEST: true
