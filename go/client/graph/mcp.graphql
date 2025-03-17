@@ -3,11 +3,11 @@ fragment MCPServerFragment on McpServer {
     name
     url
     authentication {
+        plural
         headers {
             name
             value
         }
-        plural
     }
     confirm
 }
