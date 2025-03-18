@@ -52,7 +52,7 @@ defmodule Prometheus.Client do
     end
   end
 
-  defp variable_subst(value, variables) do
+  def variable_subst(value, variables) do
     Enum.reduce(variables, value, fn
       %{name: key, value: value}, str ->
         String.replace(str, "$#{key}", value)
