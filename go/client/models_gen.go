@@ -3450,8 +3450,9 @@ type ObserverActionConfigurationAttributes struct {
 
 // The settings for configuring add-on scraping
 type ObserverAddonAttributes struct {
-	Name              string  `json:"name"`
-	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+	Name               string   `json:"name"`
+	KubernetesVersion  *string  `json:"kubernetesVersion,omitempty"`
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
 }
 
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response

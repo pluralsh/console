@@ -4189,6 +4189,7 @@ export enum ObserverActionType {
 /** The settings for configuring add-on scraping */
 export type ObserverAddonAttributes = {
   kubernetesVersion?: InputMaybe<Scalars['String']['input']>;
+  kubernetesVersions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
 };
 

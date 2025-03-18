@@ -398,10 +398,13 @@ defmodule Console.Services.Users do
   end
 
   @spec create_group_member(map, binary) :: group_member_resp
-  def create_group_member(attrs, group_id) do
-    %GroupMember{group_id: group_id}
+  def create_group_member(%{user_id: user_id} = attrs, group_id) do
+    case get_group_member(group_id, user_id) do
+      nil -> %GroupMember{group_id: group_id, user_id: user_id}
+      %GroupMember{} = gm -> gm
+    end
     |> GroupMember.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert_or_update()
   end
 
   @spec delete_group_member(binary, binary) :: group_member_resp

@@ -152,9 +152,13 @@ type ObserverAddOn struct {
 	// The name of the add-on you want to poll
 	Name string `json:"name"`
 
-	// The Kubernetes Version you want to ensure this add-on is compatible with
+	// The Kubernetes version you want to ensure this add-on is compatible with
 	// +kubebuilder:validation:Optional
 	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+
+	// The Kubernetes versions you want to ensure this add-on is compatible with, useful if working with a kubernetes version boundary during upgrade
+	// +kubebuilder:validation:Optional
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
 }
 
 //+kubebuilder:object:root=true

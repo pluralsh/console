@@ -6544,6 +6544,7 @@ input ObserverPipelineActionAttributes {
 input ObserverAddonAttributes {
   name: String!
   kubernetesVersion: String
+  kubernetesVersions: [String!]
 }
 
 "a git repository available for deployments"
