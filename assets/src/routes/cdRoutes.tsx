@@ -136,7 +136,6 @@ import {
   REPOS_REL_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_COMPONENTS_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_POD_REL_PATH,
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
@@ -225,7 +224,7 @@ const mainRoutes = (
       element={<Clusters />}
     />
     <Route
-      path={`${SERVICES_REL_PATH}/:${SERVICE_PARAM_CLUSTER_ID}?`}
+      path={SERVICES_REL_PATH}
       element={<Services />}
     >
       <Route
