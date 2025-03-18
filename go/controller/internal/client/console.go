@@ -154,6 +154,9 @@ type ConsoleClient interface {
 	GetFlow(ctx context.Context, id string) (*console.FlowFragment, error)
 	DeleteFlow(ctx context.Context, id string) error
 	UpsertFlow(ctx context.Context, attr console.FlowAttributes) (*console.FlowFragment, error)
+	GetMCPServer(ctx context.Context, id string) (*console.MCPServerFragment, error)
+	UpsertMCPServer(ctx context.Context, attr console.McpServerAttributes) (*console.MCPServerFragment, error)
+	DeleteMCPServer(ctx context.Context, id string) error
 }
 
 func New(url, token string) ConsoleClient {
