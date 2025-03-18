@@ -45,6 +45,7 @@ const (
 	GeneratedSecretReconciler       Reconciler = "generatedsecret"
 	BootstrapTokenReconciler        Reconciler = "bootstraptoken"
 	FlowReconciler                  Reconciler = "flow"
+	MCPServerReconciler             Reconciler = "mcpserver"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -77,6 +78,7 @@ var validReconcilers = map[string]Reconciler{
 	"GeneratedSecretReconciler":       GeneratedSecretReconciler,
 	"BootstrapTokenReconciler":        BootstrapTokenReconciler,
 	"FlowReconciler":                  FlowReconciler,
+	"MCPServerReconciler":             MCPServerReconciler,
 	"ProviderReconciler":              ProviderReconciler,
 }
 
@@ -342,6 +344,15 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			UserGroupCache:   userGroupCache,
 		}
 	},
+	MCPServerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.MCPServerReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			CredentialsCache: credentialsCache,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -400,6 +411,7 @@ func Reconcilers() ReconcilerList {
 		GeneratedSecretReconciler,
 		BootstrapTokenReconciler,
 		FlowReconciler,
+		MCPServerReconciler,
 	}
 }
 
