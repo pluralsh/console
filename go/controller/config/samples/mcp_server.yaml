@@ -35,10 +35,10 @@ spec:
   authentication:
     plural: true
     headers:
-      USER: admin
-      TEST: true
+      USER: "admin"
+      TEST: "true"
 ---
-aapiVersion: deployments.plural.sh/v1alpha1
+apiVersion: deployments.plural.sh/v1alpha1
 kind: Flow
 metadata:
   labels:
