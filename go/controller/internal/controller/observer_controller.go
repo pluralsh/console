@@ -229,15 +229,17 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 
 	if addon := observer.Spec.Target.AddOn; addon != nil {
 		target.Addon = &console.ObserverAddonAttributes{
-			Name:              addon.Name,
-			KubernetesVersion: addon.KubernetesVersion,
+			Name:               addon.Name,
+			KubernetesVersion:  addon.KubernetesVersion,
+			KubernetesVersions: addon.KubernetesVersions,
 		}
 	}
 
 	if addon := observer.Spec.Target.EksAddOn; addon != nil {
 		target.EksAddon = &console.ObserverAddonAttributes{
-			Name:              addon.Name,
-			KubernetesVersion: addon.KubernetesVersion,
+			Name:               addon.Name,
+			KubernetesVersion:  addon.KubernetesVersion,
+			KubernetesVersions: addon.KubernetesVersions,
 		}
 	}
 

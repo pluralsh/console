@@ -929,8 +929,6 @@ defmodule Console.Deployments.Services do
 
   defp notify({:ok, %Service{} = svc}, :components),
     do: handle_notify(PubSub.ServiceComponentsUpdated, svc)
-  defp notify({:ok, %Service{} = svc}, :update),
-    do: handle_notify(PubSub.ServiceUpdated, svc)
   defp notify({:ok, %Service{} = svc}, :hard_delete),
     do: handle_notify(PubSub.ServiceHardDeleted, svc)
   defp notify(pass, _), do: pass

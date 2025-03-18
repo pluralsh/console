@@ -123,8 +123,10 @@ type AgentMigrationAttributes struct {
 }
 
 type AiDelta struct {
-	Seq     int64  `json:"seq"`
-	Content string `json:"content"`
+	Seq     int64   `json:"seq"`
+	Content string  `json:"content"`
+	Message *int64  `json:"message,omitempty"`
+	Role    *AiRole `json:"role,omitempty"`
 }
 
 // A representation of a LLM-derived insight
@@ -3448,8 +3450,9 @@ type ObserverActionConfigurationAttributes struct {
 
 // The settings for configuring add-on scraping
 type ObserverAddonAttributes struct {
-	Name              string  `json:"name"`
-	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+	Name               string   `json:"name"`
+	KubernetesVersion  *string  `json:"kubernetesVersion,omitempty"`
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
 }
 
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response

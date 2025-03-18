@@ -897,6 +897,9 @@ type RootMutationType {
   "saves a set of messages and generates a new one transactionally"
   chat(threadId: ID, messages: [ChatMessage]): Chat
 
+  "Chat mutation that can also execute MCP servers in line with the overall completion"
+  hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
+
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
 
@@ -6541,6 +6544,7 @@ input ObserverPipelineActionAttributes {
 input ObserverAddonAttributes {
   name: String!
   kubernetesVersion: String
+  kubernetesVersions: [String!]
 }
 
 "a git repository available for deployments"
@@ -7278,6 +7282,8 @@ type ClusterInsightComponent {
 type AiDelta {
   seq: Int!
   content: String!
+  message: Int
+  role: AiRole
 }
 
 type ChatConnection {

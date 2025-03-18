@@ -24,7 +24,7 @@ defmodule Console.GraphQl.AIMutationsTest do
     test "it will transactionally generate a new chat completion" do
       user = insert(:user)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ -> {:ok, "openai completion"} end)
 
       {:ok, %{data: %{"chat" => response}}} = run_query("""
         mutation Chat($messages: [ChatMessage]) {

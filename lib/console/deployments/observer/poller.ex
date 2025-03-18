@@ -67,9 +67,9 @@ defmodule Console.Deployments.Observer.Poller do
     end
   end
 
-  def poll_addon(%{addon: %{name: name, kubernetes_version: vsn}} = target, last) do
+  def poll_addon(%{addon: %{name: name} = addon} = target, last) do
     with %{versions: versions} <- Table.fetch(name),
-         filtered = Enum.filter(versions, &supports_version?(&1, vsn)),
+         filtered = Enum.filter(versions, &supports_version?(&1, addon)),
          versions = Enum.map(filtered, & &1.chart_version) |> Enum.filter(& &1),
          [vsn | _] <- sorted(versions, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
@@ -81,9 +81,9 @@ defmodule Console.Deployments.Observer.Poller do
     end
   end
 
-  def poll_eks_addon(%{eks_addon: %{name: name, kubernetes_version: vsn}} = target, last) do
+  def poll_eks_addon(%{eks_addon: %{name: name} = addon} = target, last) do
     with %{versions: versions} <- CloudAddOns.fetch("eks", name),
-         filtered = Enum.filter(versions, &supports_version?(&1, vsn)),
+         filtered = Enum.filter(versions, &supports_version?(&1, addon)),
          versions = Enum.map(filtered, & &1.version),
          [vsn | _] <- sorted(versions, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
@@ -95,6 +95,10 @@ defmodule Console.Deployments.Observer.Poller do
     end
   end
 
+  defp supports_version?(res, %Observer.Target.Addon{kubernetes_versions: [_ | _] = versions}),
+    do: Enum.all?(versions, &supports_version?(res, &1))
+  defp supports_version?(res, %Observer.Target.Addon{kubernetes_version: vsn}) when is_binary(vsn),
+    do: supports_version?(res, vsn)
   defp supports_version?(%Version{kube: reqs}, vsn) when is_binary(vsn),
     do: !Utils.blocking?(reqs, vsn, 0)
   defp supports_version?(%CloudAddOn.Version{compatibilities: reqs}, vsn) when is_binary(vsn),

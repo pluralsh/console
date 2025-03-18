@@ -7,7 +7,7 @@ defmodule Console.Buffers.TokenAuditTest do
       tok = insert(:access_token)
       now = Timex.now()
             |> Timex.set(minute: 0, second: 0, microsecond: {0, 6})
-      ip = '1.2.3.4'
+      ip = ~c"1.2.3.4"
 
       {:ok, pid} = TokenAudit.start()
       Process.monitor(pid)

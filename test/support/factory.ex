@@ -883,7 +883,7 @@ defmodule Console.Factory do
   def mcp_server_association_factory do
     %Schema.McpServerAssociation{
       flow: build(:flow),
-      server: build(:server)
+      server: build(:mcp_server)
     }
   end
 

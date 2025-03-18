@@ -42,13 +42,15 @@ defmodule Console.Schema.Observer do
       end
 
       embeds_one :eks_addon, Addon, on_replace: :update do
-        field :name,               :string
-        field :kubernetes_version, :string
+        field :name,                :string
+        field :kubernetes_version,  :string
+        field :kubernetes_versions, {:array, :string}
       end
 
       embeds_one :addon, EksAddon, on_replace: :update do
-        field :name,               :string
-        field :kubernetes_version, :string
+        field :name,                :string
+        field :kubernetes_version,  :string
+        field :kubernetes_versions, {:array, :string}
       end
     end
 
@@ -149,7 +151,7 @@ defmodule Console.Schema.Observer do
 
   defp addon_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(name kubernetes_version)a)
+    |> cast(attrs, ~w(name kubernetes_version kubernetes_versions)a)
     |> validate_required(~w(name)a)
   end
 

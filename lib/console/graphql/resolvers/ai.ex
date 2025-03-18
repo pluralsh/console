@@ -103,6 +103,13 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatSvc.chat(msgs, args[:thread_id], user)
   end
 
+  def hybrid_chat(%{messages: msgs} = args, %{context: %{current_user: user}}) do
+    Stream.topic(:thread, args[:thread_id], user)
+    |> Stream.enable()
+
+    ChatSvc.hybrid_chat(msgs, args[:thread_id], user)
+  end
+
   def thread_pr(%{thread_id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.pr(id, user)
 

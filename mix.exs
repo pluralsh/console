@@ -2,7 +2,7 @@ defmodule Console.MixProject do
   use Mix.Project
 
   defp version do
-    case :file.consult('hex_metadata.config') do
+    case :file.consult(~c"hex_metadata.config") do
       {:ok, data} ->
         {"version", version} = List.keyfind(data, "version", 0)
         version
@@ -105,7 +105,8 @@ defmodule Console.MixProject do
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.16"},
-      {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", branch: "master", override: true},
+      {:hermes_mcp, "~> 0.2.3", git: "https://github.com/pluralsh/hermes-mcp", commit: "455adc0b2f7a389dfcc6bf2d2cba8dbbd591b71c", branch: "extend-naming-schema"},
+      {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
       {:tiktoken, "~> 0.3"},
@@ -137,7 +138,7 @@ defmodule Console.MixProject do
       {:reverse_proxy_plug, "~> 1.2.1"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
       {:comeonin, "~> 5.3"},
-      {:argon2_elixir, "~> 4.0"},
+      {:argon2_elixir, "~> 4.1"},
       {:nimble_parsec, "~> 1.4", override: true},
       {:guardian, "~> 2.3"},
       {:accessible, "~> 0.3.0"},
@@ -175,7 +176,7 @@ defmodule Console.MixProject do
       {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
-      {:mimic, "~> 1.10", only: :test},
+      {:mimic, "~> 1.11", only: :test},
       {:hammer, "~> 6.0"},
       {:hammer_plug, "~> 3.0", git: "https://github.com/pluralsh/hammer-plug.git", branch: "runtime-config"}
     ]

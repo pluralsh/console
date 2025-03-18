@@ -790,8 +790,6 @@ defmodule Console.Deployments.Stacks do
     do: handle_notify(PubSub.RunLogsCreated, log)
   defp notify({:ok, %StackRun{} = stack}, :update),
     do: handle_notify(PubSub.StackRunUpdated, stack)
-  defp notify({:ok, %StackRun{} = stack}, :delete),
-    do: handle_notify(PubSub.StackRunDeleted, stack)
   defp notify({:ok, %StackRun{} = stack}, :complete),
     do: handle_notify(PubSub.StackRunCompleted, stack)
 

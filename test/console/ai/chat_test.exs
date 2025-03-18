@@ -65,7 +65,7 @@ defmodule Console.AI.ChatTest do
       old_other = insert_list(3, :chat, inserted_at: Timex.now() |> Timex.shift(days: -7))
       old_other2 = insert_list(3, :chat, user: user, inserted_at: Timex.now() |> Timex.shift(days: -7))
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ -> {:ok, "openai completion"} end)
 
       {:ok, summary} = Chat.rollup(thread)
 
@@ -89,7 +89,7 @@ defmodule Console.AI.ChatTest do
       insert_list(3, :chat)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "ai thread summary"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ -> {:ok, "ai thread summary"} end)
 
       {:ok, summarized} = Chat.summarize(thread)
 
@@ -156,7 +156,7 @@ defmodule Console.AI.ChatTest do
     test "it will persist a set of messages and generate a new one transactionally in whatever thread" do
       user = insert(:user)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      expect(Console.AI.OpenAI, :completion, 2, fn _, [_, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, [_, _, _], _ -> {:ok, "openai completion"} end)
 
       {:ok, next} = Chat.chat([
         %{role: :assistant, content: "blah"},
@@ -186,7 +186,7 @@ defmodule Console.AI.ChatTest do
       user = insert(:user)
       thread = insert(:chat_thread, user: user)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ -> {:ok, "openai completion"} end)
 
       {:ok, next} = Chat.chat([
         %{role: :assistant, content: "blah"},
@@ -305,7 +305,9 @@ end
 
 defmodule Console.AI.ChatSyncTest do
   use Console.DataCase, async: false
-  alias Console.AI.Chat
+  alias Console.Repo
+  alias Console.AI.{Chat, Tool}
+  alias Console.Schema.{McpServerAudit}
   use Mimic
 
   describe "#add_context/2" do
@@ -341,6 +343,44 @@ defmodule Console.AI.ChatSyncTest do
       thread = insert(:chat_thread, user: user)
 
       {:error, _} = Chat.add_context(:service, svc.id, thread.id, user)
+    end
+  end
+
+  describe "#hybrid_chat/3" do
+    @tag :skip
+    test "it can chat with a toolcall" do
+      user   = insert(:user)
+      flow   = insert(:flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "everything.echo", arguments: %{"message" => "a message"}}]}
+      end)
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      {:ok, [next, tool, finish]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      assert tool.content == "Result from calling MCP server everything with tool echo:\nEcho: a message"
+      assert finish.content == "openai completion"
+
+      [audit] = Repo.all(McpServerAudit)
+
+      assert audit.server_id == server.id
+      assert audit.actor_id == user.id
+      assert audit.tool == "echo"
     end
   end
 end

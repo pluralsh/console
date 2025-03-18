@@ -38,6 +38,9 @@ defmodule Console.AI.Evidence.Base do
   def prepend(list, l) when is_list(l), do: l ++ list
   def prepend(list, msg), do: [msg | list]
 
+  def maybe_prepend(nil, l), do: l
+  def maybe_prepend(v, l), do: prepend(l, v)
+
   def append(list, l) when is_list(l), do: list ++ l
   def append(list, msg), do: list ++ [msg]
 

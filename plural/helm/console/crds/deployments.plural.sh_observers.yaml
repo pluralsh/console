@@ -243,9 +243,16 @@ spec:
                     description: Configuration for Plural AddOn table scraping
                     properties:
                       kubernetesVersion:
-                        description: The Kubernetes Version you want to ensure this
+                        description: The Kubernetes version you want to ensure this
                           add-on is compatible with
                         type: string
+                      kubernetesVersions:
+                        description: The Kubernetes versions you want to ensure this
+                          add-on is compatible with, useful if working with a kubernetes
+                          version boundary during upgrade
+                        items:
+                          type: string
+                        type: array
                       name:
                         description: The name of the add-on you want to poll
                         type: string
@@ -256,9 +263,16 @@ spec:
                     description: Configuration for EKS AddOn scraping
                     properties:
                       kubernetesVersion:
-                        description: The Kubernetes Version you want to ensure this
+                        description: The Kubernetes version you want to ensure this
                           add-on is compatible with
                         type: string
+                      kubernetesVersions:
+                        description: The Kubernetes versions you want to ensure this
+                          add-on is compatible with, useful if working with a kubernetes
+                          version boundary during upgrade
+                        items:
+                          type: string
+                        type: array
                       name:
                         description: The name of the add-on you want to poll
                         type: string

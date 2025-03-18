@@ -28,14 +28,15 @@ defimpl Console.PubSub.Auditable, for: [
   alias Console.Schema.{Audit, User, PipelineGate}
 
   def audit(%{item: item, actor: %User{} = user}) do
-    {type, action} = details(@for)
-    %Audit{
-      type: type,
-      action: action,
-      item_id: item.id,
-      data: (if embeddable?(@for), do: item, else: nil),
-      actor_id: user.id
-    }
+    with {type, action} <- details(@for) do
+      %Audit{
+        type: type,
+        action: action,
+        item_id: item.id,
+        data: (if embeddable?(@for), do: item, else: nil),
+        actor_id: user.id
+      }
+    end
   end
   def audit(_), do: :ok
 
@@ -73,8 +74,8 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.ObjectStoreCreated), do: {:object_store, :create}
   def details(Console.PubSub.ObjectStoreDeleted), do: {:object_store, :delete}
   def details(Console.PubSub.ObjectStoreUpdated), do: {:object_store, :update}
-
   def details(Console.PubSub.PipelineApproved), do: {:pipeline, :approve}
+  def details(_), do: :ok
 
   def item_id(%PipelineGate{edge: %{pipeline_id: id}}), do: id
   def item_id(%{id: id}), do: id

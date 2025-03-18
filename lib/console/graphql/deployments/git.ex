@@ -348,8 +348,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "The settings for configuring add-on scraping"
   input_object :observer_addon_attributes do
-    field :name,               non_null(:string)
-    field :kubernetes_version, :string
+    field :name,                non_null(:string)
+    field :kubernetes_version,  :string
+    field :kubernetes_versions, list_of(non_null(:string))
   end
 
   @desc "a git repository available for deployments"
