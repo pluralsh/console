@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	goerrors "errors"
-	"fmt"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,7 +105,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 	if changed {
-		project, res, err := r.getProject(ctx, catalog)
+		project, res, err := GetProject(ctx, r.Client, r.Scheme, catalog)
 		if res != nil || err != nil {
 			return handleRequeue(res, err, catalog.SetCondition)
 		}
@@ -124,25 +123,6 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, retErr
-}
-
-func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Catalog) (*v1alpha1.Project, *ctrl.Result, error) {
-	project := &v1alpha1.Project{}
-	if catalog.Spec.ProjectRef != nil {
-		if err := r.Get(ctx, client.ObjectKey{Name: catalog.Spec.ProjectRef.Name}, project); err != nil {
-			return nil, nil, err
-		}
-
-		if !project.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("project is not ready")
-		}
-
-		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {
-			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-		}
-	}
-
-	return project, nil, nil
 }
 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {

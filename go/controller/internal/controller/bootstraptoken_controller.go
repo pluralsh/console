@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	goerrors "errors"
-	"fmt"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -85,7 +84,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
-	project, result, err := in.getProject(ctx, bootstrapToken)
+	project, result, err := GetProject(ctx, in.Client, in.Scheme, bootstrapToken)
 	if result != nil || err != nil {
 		return handleRequeue(result, err, bootstrapToken.SetCondition)
 	}
@@ -107,23 +106,6 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
-}
-
-func (in *BootstrapTokenReconciler) getProject(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) (*v1alpha1.Project, *ctrl.Result, error) {
-	project := &v1alpha1.Project{}
-	if err := in.Get(ctx, client.ObjectKey{Name: bootstrapToken.Spec.ProjectRef.Name}, project); err != nil {
-		return nil, nil, err
-	}
-
-	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
-	}
-
-	if err := controllerutil.SetOwnerReference(project, bootstrapToken, in.Scheme); err != nil {
-		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-	}
-
-	return project, nil, nil
 }
 
 func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bootstrapToken *v1alpha1.BootstrapToken) *ctrl.Result {

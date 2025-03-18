@@ -275,7 +275,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		attr.Service = st
 	}
 
-	project, result, err := r.getProject(ctx, ns)
+	project, result, err := GetProject(ctx, r.Client, r.Scheme, ns)
 	if result != nil || err != nil {
 		return nil, result, err
 	}
@@ -300,23 +300,4 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 	}
 	return repository, nil, nil
-}
-
-func (r *ManagedNamespaceReconciler) getProject(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.Project, *ctrl.Result, error) {
-	project := &v1alpha1.Project{}
-	if ns.Spec.ProjectRef != nil {
-		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
-			return nil, nil, err
-		}
-
-		if !project.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("project is not ready")
-		}
-
-		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
-			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-		}
-	}
-
-	return project, nil, nil
 }

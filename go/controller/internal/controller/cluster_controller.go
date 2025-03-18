@@ -108,8 +108,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return handleRequeue(result, err, cluster.SetCondition)
 	}
 
-	// Get Project ID from the reference if it is set and ensure that controller reference is set properly.
-	projectId, res, err := r.getProjectIdAndSetOwnerRef(ctx, cluster)
+	// Get Project from the reference if it is set and ensure that controller reference is set properly.
+	project, res, err := GetProject(ctx, r.Client, r.Scheme, cluster)
 	if res != nil || err != nil {
 		return handleRequeue(res, err, cluster.SetCondition)
 	}
@@ -122,7 +122,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Sync resource with Console API.
-	apiCluster, err := r.sync(ctx, cluster, providerId, projectId, sha)
+	apiCluster, err := r.sync(ctx, cluster, providerId, project.Status.ID, sha)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, nil
@@ -301,27 +301,6 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 	}
 
 	return nil, nil, nil
-}
-
-func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (*string, *ctrl.Result, error) {
-	if !cluster.Spec.HasProjectRef() {
-		return nil, nil, nil
-	}
-
-	project := &v1alpha1.Project{}
-	if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProjectRef.Name}, project); err != nil {
-		return nil, nil, err
-	}
-
-	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
-	}
-
-	if err := controllerutil.SetOwnerReference(project, cluster, r.Scheme); err != nil {
-		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-	}
-
-	return project.Status.ID, nil, nil
 }
 
 func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId, projectId *string, sha string) (*console.ClusterFragment, error) {
