@@ -171,8 +171,7 @@ function Highlight({
 
   useEffect(() => {
     if (hljs.getLanguage(language) && codeRef.current) {
-      hljs.initHighlighting()
-      hljs.highlightBlock(codeRef.current)
+      hljs.highlightElement(codeRef.current)
     }
   }, [language, children])
 

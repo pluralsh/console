@@ -336,7 +336,12 @@ function CodeContent({
         paddingHorizontal="medium"
         paddingVertical={multiLine ? 'medium' : 'small'}
       >
-        <Highlight {...props}>{codeString}</Highlight>
+        <Highlight
+          key={codeString}
+          {...props}
+        >
+          {codeString}
+        </Highlight>
       </Div>
     </Div>
   )

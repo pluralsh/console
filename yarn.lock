@@ -2774,7 +2774,7 @@ __metadata:
     firebase-tools: 11.30.0
     fuse.js: 6.6.2
     globals: 15.10.0
-    highlight.js: 11.9.0
+    highlight.js: 11.11.1
     honorable: 1.0.0-beta.17
     honorable-recipe-mapper: 0.2.0
     honorable-theme-default: 1.0.0-beta.5
@@ -11472,10 +11472,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:11.9.0":
-  version: 11.9.0
-  resolution: "highlight.js@npm:11.9.0"
-  checksum: 4043d31c5de9d27d13387d9a9e5e1939557254b7b85f0fab85d9cae0e420e131a3456ebf6148552020a1d8a216d671d583f2433d6c4de6179b8a66487a8325cb
+"highlight.js@npm:11.11.1":
+  version: 11.11.1
+  resolution: "highlight.js@npm:11.11.1"
+  checksum: 841ddd329a92be123a61ef4051698f824c3575deef588fbb810bd638f1575ddc96b7bdd925b97c05a29276bb119dfcb8e5bcb0acb31c86249371bf046e131d72
   languageName: node
   linkType: hard
 
