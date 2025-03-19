@@ -1,6 +1,7 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
 import {
+  Fragment,
   ReactNode,
   RefObject,
   useCallback,
@@ -147,17 +148,14 @@ export function ChatbotPanelThread({
       >
         {isEmpty(messages) && <EmptyState message="No messages yet." />}
         {messages.map((msg) => (
-          <>
-            <ChatMessage
-              key={msg.id}
-              {...msg}
-            />
+          <Fragment key={msg.id}>
+            <ChatMessage {...msg} />
             {!isEmpty(evidence) && // only attaches evidence to the initial insight
               msg.seq === 0 &&
               msg.role === AiRole.Assistant && (
                 <ChatbotPanelEvidence evidence={evidence ?? []} />
               )}
-          </>
+          </Fragment>
         ))}
         {sendingMessage &&
           (streamedMessage.length ? (

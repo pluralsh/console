@@ -16,7 +16,14 @@ fragment Alert on Alert {
   insight {
     ...AiInsight
   }
+  resolution {
+    ...AlertResolution
+  }
   updatedAt
+}
+
+fragment AlertResolution on AlertResolution {
+  resolution
 }
 
 query ClusterAlerts(
@@ -60,5 +67,15 @@ query ServiceAlerts(
         ...PageInfo
       }
     }
+  }
+}
+
+mutation UpsertAlertResolution(
+  $id: ID!
+  $attributes: AlertResolutionAttributes!
+) {
+  # createAlertResolution upserts on the server
+  createAlertResolution(id: $id, attributes: $attributes) {
+    ...AlertResolution
   }
 }
