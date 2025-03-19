@@ -8,4 +8,5 @@ use (
 	./tools // github.com/pluralsh/console/go/tools
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
 	./helm-test // github.com/pluralsh/console/go/helm-test
+	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 )
