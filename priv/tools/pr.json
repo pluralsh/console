@@ -54,6 +54,6 @@
             }
         }
     },
-    "required": ["repo_url", "branch_name", "file_updates", "commit_message", "pr_body", "pr_description"],
+    "required": ["repo_url", "branch_name", "file_updates", "commit_message", "pr_title", "pr_body", "pr_description"],
     "additionalProperties": false
 }

@@ -1091,6 +1091,7 @@ export type Cluster = {
   metricsSummary?: Maybe<ClusterMetricsSummary>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
+  networkGraph?: Maybe<Array<Maybe<NetworkMeshEdge>>>;
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   /** list of node pool specs managed by CAPI */
@@ -1194,6 +1195,13 @@ export type ClusterLogsArgs = {
   limit: Scalars['Int']['input'];
   query: LokiQuery;
   start?: InputMaybe<Scalars['Long']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterNetworkGraphArgs = {
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -3787,6 +3795,32 @@ export type NamespaceVulnAttributes = {
 export type NamespacedName = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+/** An edge representing traffic statistics between two workloads in a service mesh */
+export type NetworkMeshEdge = {
+  __typename?: 'NetworkMeshEdge';
+  from: NetworkMeshWorkload;
+  id: Scalars['String']['output'];
+  statistics: NetworkMeshStatistics;
+  to: NetworkMeshWorkload;
+};
+
+/** The relevant statistics for traffic within a service mesh */
+export type NetworkMeshStatistics = {
+  __typename?: 'NetworkMeshStatistics';
+  bytesReceived?: Maybe<Scalars['Float']['output']>;
+  bytesSent?: Maybe<Scalars['Float']['output']>;
+  connections?: Maybe<Scalars['Float']['output']>;
+};
+
+/** An abstract workload discovered by querying statistics on a service mesh */
+export type NetworkMeshWorkload = {
+  __typename?: 'NetworkMeshWorkload';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  service?: Maybe<Scalars['String']['output']>;
 };
 
 export type NewRelicCredentialsAttributes = {

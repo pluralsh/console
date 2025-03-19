@@ -5313,6 +5313,8 @@ type Cluster {
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
+  networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
+
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
 
@@ -5936,6 +5938,29 @@ type CloudAddonVersionInformation {
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+"An abstract workload discovered by querying statistics on a service mesh"
+type NetworkMeshWorkload {
+  id: String!
+  name: String!
+  namespace: String!
+  service: String
+}
+
+"The relevant statistics for traffic within a service mesh"
+type NetworkMeshStatistics {
+  bytesSent: Float
+  bytesReceived: Float
+  connections: Float
+}
+
+"An edge representing traffic statistics between two workloads in a service mesh"
+type NetworkMeshEdge {
+  id: String!
+  from: NetworkMeshWorkload!
+  to: NetworkMeshWorkload!
+  statistics: NetworkMeshStatistics!
 }
 
 type ClusterConnection {

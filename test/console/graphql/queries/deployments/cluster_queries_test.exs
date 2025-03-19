@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Compatibilities
+  alias Prometheus.{Response, Data, Result}
   use Mimic
 
   describe "clusters" do
@@ -486,6 +487,60 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert ids_equal(found["pinnedCustomResources"], first ++ second)
     end
+
+    test "it can fetch a network graph for a cluster" do
+      cluster = insert(:cluster, operational_layout: %{service_mesh: :istio})
+      deployment_settings(prometheus_connection: %{host: "https://prom.example.com"})
+
+      expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
+        {:ok,
+          %Response{data: %Data{result: [
+            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 13324.0]}
+          ]}}
+        }
+      end)
+
+      expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
+        {:ok,
+          %Response{data: %Data{result: [
+            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 20000.0]}
+          ]}}
+        }
+      end)
+
+      expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
+        {:ok,
+          %Response{data: %Data{result: [
+            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 100.0]}
+          ]}}
+        }
+      end)
+
+      {:ok, %{data: %{"cluster" => %{"networkGraph" => [edge]}}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            networkGraph(namespace: "default") {
+              id
+              from { id name namespace service }
+              to { id name namespace service }
+              statistics { bytesSent bytesReceived connections }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert edge["id"]
+      assert edge["from"]["id"]
+      assert edge["from"]["name"] == "nginx"
+      assert edge["from"]["namespace"] == "from"
+      assert edge["to"]["id"]
+      assert edge["to"]["name"] == "nginx"
+      assert edge["to"]["namespace"] == "to"
+
+      assert trunc(edge["statistics"]["bytesSent"]) == 13324
+      assert trunc(edge["statistics"]["bytesReceived"]) == 20000
+      assert trunc(edge["statistics"]["connections"]) == 100
+    end
   end
 
   describe "runtimeService" do
@@ -938,5 +993,14 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       v
     end)
     |> Enum.find(& &1)
+  end
+
+  defp metric(source, destination) do
+    %{
+      "source_workload" => "nginx",
+      "source_workload_namespace" => source,
+      "destination_workload" => "nginx",
+      "destination_workload_namespace" => destination
+    }
   end
 end

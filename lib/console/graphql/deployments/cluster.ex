@@ -509,6 +509,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.metrics/3
     end
 
+    field :network_graph, list_of(:network_mesh_edge) do
+      arg :namespace, :string
+      arg :time,      :datetime
+
+      resolve &Deployments.network_graph/3
+    end
+
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 
@@ -977,6 +984,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :kube_version, non_null(:string)
       resolve fn me, %{kube_version: vsn}, _ -> {:ok, Compatibilities.CloudAddOn.Version.blocking?(me, vsn)} end
     end
+  end
+
+  @desc "An abstract workload discovered by querying statistics on a service mesh"
+  object :network_mesh_workload do
+    field :id,        non_null(:string)
+    field :name,      non_null(:string)
+    field :namespace, non_null(:string)
+    field :service,   :string
+  end
+
+  @desc "The relevant statistics for traffic within a service mesh"
+  object :network_mesh_statistics do
+    field :bytes_sent,     :float
+    field :bytes_received, :float
+    field :connections,    :float
+  end
+
+  @desc "An edge representing traffic statistics between two workloads in a service mesh"
+  object :network_mesh_edge do
+    field :id,          non_null(:string)
+    field :from,        non_null(:network_mesh_workload)
+    field :to,          non_null(:network_mesh_workload)
+    field :statistics,  non_null(:network_mesh_statistics)
   end
 
   connection node_type: :cluster

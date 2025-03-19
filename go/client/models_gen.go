@@ -935,6 +935,7 @@ type Cluster struct {
 	Logs               []*LogStream        `json:"logs,omitempty"`
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
+	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
@@ -3107,6 +3108,29 @@ type NamespaceVulnAttributes struct {
 type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+// An edge representing traffic statistics between two workloads in a service mesh
+type NetworkMeshEdge struct {
+	ID         string                `json:"id"`
+	From       NetworkMeshWorkload   `json:"from"`
+	To         NetworkMeshWorkload   `json:"to"`
+	Statistics NetworkMeshStatistics `json:"statistics"`
+}
+
+// The relevant statistics for traffic within a service mesh
+type NetworkMeshStatistics struct {
+	BytesSent     *float64 `json:"bytesSent,omitempty"`
+	BytesReceived *float64 `json:"bytesReceived,omitempty"`
+	Connections   *float64 `json:"connections,omitempty"`
+}
+
+// An abstract workload discovered by querying statistics on a service mesh
+type NetworkMeshWorkload struct {
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Namespace string  `json:"namespace"`
+	Service   *string `json:"service,omitempty"`
 }
 
 type NewRelicCredentialsAttributes struct {
