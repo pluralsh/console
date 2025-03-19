@@ -24,10 +24,8 @@ const servicesLimit = 1000
 export default function ServicesTree() {
   const theme = useTheme()
   const projectId = useProjectId()
-  const [clusterIdInternal, setClusterId] = useState<string>('')
-  const { setRefetch, clusterId: clusterIdProp } =
+  const { setRefetch, clusterId, setClusterId } =
     useOutletContext<ServicesContextT>()
-  const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
   const [queryStatusFilter, setQueryStatusFilter] =
     useState<StatusTabKey>('ALL')
@@ -86,7 +84,7 @@ export default function ServicesTree() {
       <ServicesFilters
         setQueryStatusFilter={setQueryStatusFilter}
         clusterId={clusterId}
-        setClusterId={clusterIdProp ? undefined : setClusterId}
+        setClusterId={setClusterId}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
       />

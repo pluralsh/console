@@ -1,9 +1,12 @@
 import { ApolloError } from '@apollo/client'
 import {
+  Button,
   Chip,
   ChipSeverity,
   ErrorIcon,
+  EyeIcon,
   Flex,
+  IconFrame,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -24,6 +27,8 @@ import {
 } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
 import { AlertsTableExpander } from './AlertsTableExpander'
+import { useState } from 'react'
+import { AlertResolutionModal } from './AlertResolutionModal'
 
 const columnHelper = createColumnHelper<AlertFragment>()
 
@@ -154,6 +159,54 @@ const cols = [
             navPath={`insight/${insight?.id}`}
           />
         </Flex>
+      )
+    },
+  }),
+  columnHelper.accessor((alert) => alert, {
+    id: 'resolution',
+    header: '',
+    cell: function Cell({ getValue }) {
+      const { id, resolution } = getValue()
+      const [isOpen, setIsOpen] = useState(false)
+      const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setIsOpen(!isOpen)
+      }
+      return (
+        <>
+          {resolution ? (
+            <Flex gap="xsmall">
+              <Button
+                small
+                floating
+                disabled
+              >
+                Resolved
+              </Button>
+              <IconFrame
+                clickable
+                onClick={handleClick}
+                type="floating"
+                tooltip="View resolution"
+                icon={<EyeIcon />}
+              />
+            </Flex>
+          ) : (
+            <Button
+              small
+              floating
+              onClick={handleClick}
+            >
+              Resolve
+            </Button>
+          )}
+          <AlertResolutionModal
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            initialResolution={resolution}
+            alertId={id}
+          />
+        </>
       )
     },
   }),

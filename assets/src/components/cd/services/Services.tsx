@@ -3,9 +3,9 @@ import {
   NetworkInterfaceIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useMatch, useSearchParams } from 'react-router-dom'
 
 import {
   CD_ABS_PATH,
@@ -70,8 +70,9 @@ export function getServiceStatuses(
 }
 
 export type ServicesContextT = {
-  setRefetch?: Dispatch<SetStateAction<() => () => void>>
-  clusterId?: string
+  setRefetch?: (refetch: () => void) => void
+  clusterId?: Nullable<string>
+  setClusterId?: (clusterId: string) => void
 }
 
 const directory = [
@@ -84,6 +85,7 @@ export default function Services() {
   const pathMatch = useMatch(`${CD_ABS_PATH}/${SERVICES_REL_PATH}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const [refetch, setRefetch] = useState(() => () => {})
+  const [params, setParams] = useSearchParams()
 
   useSetBreadcrumbs(
     useMemo(
@@ -120,9 +122,13 @@ export default function Services() {
     )
   )
 
-  const context = useMemo(
-    () => ({ setRefetch }) as ServicesContextT,
-    [setRefetch]
+  const context: ServicesContextT = useMemo(
+    () => ({
+      setRefetch,
+      clusterId: params.get('clusterId'),
+      setClusterId: (clusterId: string) => setParams({ clusterId }),
+    }),
+    [setRefetch, params, setParams]
   )
 
   return <Outlet context={context} />

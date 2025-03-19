@@ -1,17 +1,17 @@
-import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
-import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import isEmpty from 'lodash/isEmpty'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { useTheme } from 'styled-components'
 import { Edge } from 'utils/graphql'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
 
 import { useOutletContext } from 'react-router-dom'
 
@@ -22,17 +22,15 @@ import {
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
-import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesContextT, columns, getServiceStatuses } from './Services'
+import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 
 export default function ServicesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
-  const { setRefetch, clusterId: clusterIdProp } =
+  const { setRefetch, clusterId, setClusterId } =
     useOutletContext<ServicesContextT>()
-  const [clusterIdInternal, setClusterId] = useState<string>('')
-  const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
   const [queryString, setQueryString] = useState()
   const [queryStatusFilter, setQueryStatusFilter] =
@@ -47,10 +45,7 @@ export default function ServicesTable() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useServiceDeploymentsQuery,
-      keyPath: ['serviceDeployments'],
-    },
+    { queryHook: useServiceDeploymentsQuery, keyPath: ['serviceDeployments'] },
     {
       q: queryString,
       projectId,
@@ -69,21 +64,10 @@ export default function ServicesTable() {
   }, [refetch, setRefetch])
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        meta: {
-          refetch,
-        },
-      }),
-      [refetch]
-    )
+    useMemo(() => ({ meta: { refetch } }), [refetch])
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data) return <LoadingIndicator />
 
   return (
     <div
@@ -98,7 +82,7 @@ export default function ServicesTable() {
         setQueryStatusFilter={setQueryStatusFilter}
         setQueryString={setQueryString}
         clusterId={clusterId}
-        setClusterId={clusterIdProp ? undefined : setClusterId}
+        setClusterId={setClusterId}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
       />
