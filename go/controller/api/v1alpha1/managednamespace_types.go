@@ -104,6 +104,10 @@ type ServiceTemplate struct {
 	// ConfigurationRef is a secret reference which should contain service configuration.
 	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
+
+	// Configuration is a set of non-secret service specific configuration useful for templating
+	// +kubebuilder:validation:Optional
+	Configuration map[string]string `json:"configuration,omitempty"`
 }
 
 // +kubebuilder:object:root=true
