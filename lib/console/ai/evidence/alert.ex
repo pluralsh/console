@@ -36,7 +36,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Alert do
   end
 
   defp add_vector_data(ctx, %Service{flow_id: flow_id}) when is_binary(flow_id) do
-    Vector.with_vector_data(ctx, flow_id: flow_id)
+    Vector.with_vector_data(ctx, flow_id: flow_id, types: [:pr_file, :alert_resolution])
   end
   defp add_vector_data(ctx, _), do: ctx
 end
