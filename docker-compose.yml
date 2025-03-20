@@ -20,15 +20,15 @@ services:
     - xpack.security.enabled=false
     volumes:
     - es_data:/usr/share/elasticsearch/data
-  # mcp:
-  #   image: supercorp/supergateway:latest
-  #   ports:
-  #   - 3001:8000
-  #   command:
-  #     - "--stdio"
-  #     - "npx -y @modelcontextprotocol/server-everything"
-  #     - "--port"
-  #     - "8000"
+  mcp:
+    image: ghcr.io/pluralsh/supergateway:sha-04d2627
+    ports:
+    - 3001:8000
+    command:
+      - "--stdio"
+      - "npx -y @modelcontextprotocol/server-everything"
+      - "--port"
+      - "8000"
 volumes:
   database_data:
     driver: local

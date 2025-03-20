@@ -151,6 +151,7 @@ defmodule Console.Schema.Configuration do
     |> cast(attrs, ~w(type name default values documentation longform placeholder optional)a)
     |> cast_embed(:condition)
     |> cast_embed(:validation, with: &validation_changeset/2)
+    |> validate_types()
     |> validate_required([:type, :name])
   end
 
@@ -163,5 +164,16 @@ defmodule Console.Schema.Configuration do
   defp uniq_changeset(model, attrs) do
     cast(model, attrs, ~w(scope)a)
     |> validate_required(~w(scope)a)
+  end
+
+  defp validate_types(cs) do
+    case get_field(cs, :type) do
+      :enum ->
+        validate_length(cs, :values,
+          message: "must have at least one value for ENUM type configuration items",
+          min: 1
+        )
+      _ -> cs
+    end
   end
 end
