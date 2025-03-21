@@ -120,7 +120,7 @@ func (in *PrAutomation) SetCondition(condition metav1.Condition) {
 // PrAutomationSpec ...
 type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum=CLUSTER;SERVICE;PIPELINE;UPDATE;UPGRADE
+	// +kubebuilder:validation:Enum=CLUSTER;SERVICE;PIPELINE;UPDATE;UPGRADE;COST
 	Role *console.PrRole `json:"role,omitempty"`
 
 	// Addon is a link to an addon name

@@ -24,6 +24,9 @@ defmodule Console.Deployments.Pr.Git do
       do: git(conn, "commit", ["-m", msg])
   end
 
+  @spec patch(ScmConnection.t, binary) :: git_resp
+  def patch(%ScmConnection{} = conn, f), do: git(conn, "apply", [f])
+
   @spec branch(ScmConnection.t) :: {:ok, binary} | Console.error
   def branch(conn), do: git(conn, "rev-parse", ["--abbrev-ref", "HEAD"])
 

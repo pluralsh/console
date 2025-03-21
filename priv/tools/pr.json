@@ -39,17 +39,22 @@
             "description": "A list of files to update in this PR",
             "items": {
                 "type": "object",
+                "description": "An update to an indiviual file.  Be sure to include surrounding lines to allow us to find the appropriate block being replaced, AND leading whitespace on each line should be preserved.",
                 "properties": {
                     "file_name": {
                       "description": "the relative file path name for this update",
                       "type": "string"
                     },
-                    "content": {
-                        "description": "the full file content for this file",
+                    "replacement": {
+                        "description": "the file content you want to write to this file",
+                        "type": "string"
+                    },
+                    "previous": {
+                        "description": "the previous content within the file this will be replacing, including all whitespace and line characters.  Provide an empty string if you want to simply append to the file.",
                         "type": "string"
                     }
                 },
-                "required": ["file_name", "content"],
+                "required": ["file_name", "replacement", "previous"],
                 "additionalProperties": false
             }
         }

@@ -2127,6 +2127,7 @@ type Flow struct {
 	Services     *ServiceDeploymentConnection `json:"services,omitempty"`
 	Pipelines    *PipelineConnection          `json:"pipelines,omitempty"`
 	PullRequests *PullRequestConnection       `json:"pullRequests,omitempty"`
+	Alerts       *AlertConnection             `json:"alerts,omitempty"`
 	InsertedAt   *string                      `json:"insertedAt,omitempty"`
 	UpdatedAt    *string                      `json:"updatedAt,omitempty"`
 }
@@ -8129,6 +8130,7 @@ const (
 	PrRolePipeline PrRole = "PIPELINE"
 	PrRoleUpdate   PrRole = "UPDATE"
 	PrRoleUpgrade  PrRole = "UPGRADE"
+	PrRoleCost     PrRole = "COST"
 )
 
 var AllPrRole = []PrRole{
@@ -8137,11 +8139,12 @@ var AllPrRole = []PrRole{
 	PrRolePipeline,
 	PrRoleUpdate,
 	PrRoleUpgrade,
+	PrRoleCost,
 }
 
 func (e PrRole) IsValid() bool {
 	switch e {
-	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade:
+	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade, PrRoleCost:
 		return true
 	}
 	return false

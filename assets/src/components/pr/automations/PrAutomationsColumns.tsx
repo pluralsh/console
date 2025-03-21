@@ -101,6 +101,7 @@ const roleToLabel = {
   [PrRole.Service]: 'Service',
   [PrRole.Update]: 'Update',
   [PrRole.Upgrade]: 'Upgrade',
+  [PrRole.Cost]: 'Cost',
   '': 'Unknown',
 } as const satisfies Record<PrRole | '', string>
 
@@ -110,6 +111,7 @@ const roleToIcon = {
   [PrRole.Service]: <DeploymentIcon />,
   [PrRole.Update]: <ClusterIcon />,
   [PrRole.Upgrade]: <ClusterIcon />,
+  [PrRole.Cost]: <ClusterIcon />,
   '': <ClusterIcon />,
 } as const satisfies Record<PrRole | '', ReactElement<any>>
 

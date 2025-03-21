@@ -60,6 +60,10 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.prs_for_flow/3
     end
 
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.alerts_for_flow/3
+    end
+
     timestamps()
   end
 
