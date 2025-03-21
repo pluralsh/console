@@ -4422,9 +4422,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.9.0":
-  version: 5.9.0
-  resolution: "@pluralsh/design-system@npm:5.9.0"
+"@pluralsh/design-system@npm:5.9.1":
+  version: 5.9.1
+  resolution: "@pluralsh/design-system@npm:5.9.1"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -4445,7 +4445,7 @@ __metadata:
     chroma-js: 2.4.2
     classnames: 2.3.2
     dayjs: 1.11.13
-    highlight.js: 11.9.0
+    highlight.js: 11.11.1
     honorable: 1.0.0-beta.17
     honorable-recipe-mapper: 0.2.0
     honorable-theme-default: 1.0.0-beta.5
@@ -4469,7 +4469,7 @@ __metadata:
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 2da5a0e56acac190b114950138f574c2cc9703d3e8999cab09abaa62af5fe1770b891feaf29cef86ea5abd5035cee5251e409fe6b5ac005de98222793185b32f
+  checksum: 07c22e86a64aeba6070452ec5bec740fff1b100ac7c3bc6a9073966d100c818c9a268ed1bab2a15b34ea6a7dde1cc6339819c3809dd5b05e2dc392eab7b5a025
   languageName: node
   linkType: hard
 
@@ -10153,7 +10153,7 @@ __metadata:
     "@nivo/radial-bar": 0.88.0
     "@nivo/tooltip": 0.88.0
     "@nivo/treemap": 0.88.0
-    "@pluralsh/design-system": 5.9.0
+    "@pluralsh/design-system": 5.9.1
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -13681,10 +13681,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:11.9.0":
-  version: 11.9.0
-  resolution: "highlight.js@npm:11.9.0"
-  checksum: 4043d31c5de9d27d13387d9a9e5e1939557254b7b85f0fab85d9cae0e420e131a3456ebf6148552020a1d8a216d671d583f2433d6c4de6179b8a66487a8325cb
+"highlight.js@npm:11.11.1":
+  version: 11.11.1
+  resolution: "highlight.js@npm:11.11.1"
+  checksum: 841ddd329a92be123a61ef4051698f824c3575deef588fbb810bd638f1575ddc96b7bdd925b97c05a29276bb119dfcb8e5bcb0acb31c86249371bf046e131d72
   languageName: node
   linkType: hard
 
