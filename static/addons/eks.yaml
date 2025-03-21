@@ -674,6 +674,16 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.41.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.40.1-eksbuild.1
     compatibilities:
     - '1.32'
@@ -1817,6 +1827,16 @@
   publisher: eks
 - name: aws-mountpoint-s3-csi-driver
   versions:
+  - version: v1.13.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.12.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -2022,6 +2042,19 @@
     - '1.24'
     - '1.23'
   publisher: Catalogic Software
+- name: cert-manager
+  versions:
+  - version: v1.17.1-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+  publisher: eks
 - name: cisco_cisco-cloud-observability-collectors
   versions:
   - version: v1.16.1125-eksbuild.1
@@ -2694,6 +2727,16 @@
   publisher: FriendliAI
 - name: grafana-labs_kubernetes-monitoring
   versions:
+  - version: v1.6.29-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.6.21-eksbuild.1
     compatibilities:
     - '1.31'
