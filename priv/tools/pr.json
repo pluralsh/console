@@ -39,7 +39,7 @@
             "description": "A list of files to update in this PR",
             "items": {
                 "type": "object",
-                "description": "An update to an indiviual file.  Be sure to include surrounding lines to allow us to find the appropriate block being replaced, AND leading whitespace on each line should be preserved.",
+                "description": "An update to an individual file.  Be sure to include surrounding lines to allow us to find the appropriate block being replaced, AND leading whitespace on each line should be preserved.",
                 "properties": {
                     "file_name": {
                       "description": "the relative file path name for this update",

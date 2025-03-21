@@ -745,16 +745,17 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string          `json:"id"`
-	Summary       string          `json:"summary"`
-	Default       bool            `json:"default"`
-	LastMessageAt *string         `json:"lastMessageAt,omitempty"`
-	Flow          *Flow           `json:"flow,omitempty"`
-	User          *User           `json:"user,omitempty"`
-	Insight       *AiInsight      `json:"insight,omitempty"`
-	Chats         *ChatConnection `json:"chats,omitempty"`
-	InsertedAt    *string         `json:"insertedAt,omitempty"`
-	UpdatedAt     *string         `json:"updatedAt,omitempty"`
+	ID            string           `json:"id"`
+	Summary       string           `json:"summary"`
+	Default       bool             `json:"default"`
+	LastMessageAt *string          `json:"lastMessageAt,omitempty"`
+	Flow          *Flow            `json:"flow,omitempty"`
+	User          *User            `json:"user,omitempty"`
+	Insight       *AiInsight       `json:"insight,omitempty"`
+	Tools         []*McpServerTool `json:"tools,omitempty"`
+	Chats         *ChatConnection  `json:"chats,omitempty"`
+	InsertedAt    *string          `json:"insertedAt,omitempty"`
+	UpdatedAt     *string          `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -3050,6 +3051,19 @@ type McpServerEdge struct {
 type McpServerHeader struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+// A tool related to an mcp server
+type McpServerTool struct {
+	Server *McpServer `json:"server,omitempty"`
+	Tool   *McpTool   `json:"tool,omitempty"`
+}
+
+// The description of a tool extracted from its MCP server
+type McpTool struct {
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
 }
 
 type Metadata struct {

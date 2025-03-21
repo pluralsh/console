@@ -932,6 +932,7 @@ export type ChatThread = {
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
   summary: Scalars['String']['output'];
+  tools?: Maybe<Array<Maybe<McpServerTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
 };
@@ -3737,6 +3738,21 @@ export type McpServerHeader = {
   __typename?: 'McpServerHeader';
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
+};
+
+/** A tool related to an mcp server */
+export type McpServerTool = {
+  __typename?: 'McpServerTool';
+  server?: Maybe<McpServer>;
+  tool?: Maybe<McpTool>;
+};
+
+/** The description of a tool extracted from its MCP server */
+export type McpTool = {
+  __typename?: 'McpTool';
+  description?: Maybe<Scalars['String']['output']>;
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+  name: Scalars['String']['output'];
 };
 
 export type Metadata = {

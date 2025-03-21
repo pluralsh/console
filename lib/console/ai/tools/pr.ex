@@ -69,13 +69,11 @@ defmodule Console.AI.Tools.Pr do
 
   defp file_updates(_, %__MODULE__{file_updates: [_ | _] = updates}, dir) do
     Enum.reduce_while(updates, :ok, fn %__MODULE__.FileUpdate{file_name: f, previous: p, replacement: r}, _ ->
-      IO.inspect(f, label: "File to update:")
-      IO.inspect(p, label: "Previous content to replace:")
-      IO.inspect(r, label: "File replacement to make:")
-      case Editor.replace(Path.join(dir, f), p, r) do
+      Path.join(dir, f)
+      |> Editor.replace(p, r)
+      |> case do
         :ok -> {:cont, :ok}
-        {:error, err} ->
-          {:halt, {:error, "failed to write file #{f}, reason: #{inspect(err)}"}}
+        {:error, err} -> {:halt, {:error, "failed to write file #{f}, reason: #{inspect(err)}"}}
       end
     end)
   end

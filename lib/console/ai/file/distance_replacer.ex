@@ -20,7 +20,7 @@ defmodule Console.AI.File.DistanceReplacer do
   end
 
   defp do_replace(original, replacement, i, j) do
-    lines = Enum.take(original, i) ++ replacement ++ Enum.drop(original, j)
+    lines = left(original, i - 1) ++ replacement ++ Enum.drop(original, j + 1)
     {:ok, Enum.join(lines, "\n")}
   end
 
@@ -41,4 +41,7 @@ defmodule Console.AI.File.DistanceReplacer do
     end)
     |> Enum.max_by(fn {_, d} -> d end, fn -> nil end)
   end
+
+  defp left(_, i) when i < 0, do: []
+  defp left(original, i), do: Enum.take(original, i)
 end
