@@ -892,6 +892,7 @@ export type Chat = {
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
+  server?: Maybe<McpServer>;
   thread?: Maybe<ChatThread>;
   type: ChatType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -971,15 +972,24 @@ export type ChatThreadEdge = {
   node?: Maybe<ChatThread>;
 };
 
+/** Additional attributes for describing a tool call that derived this chat message */
+export type ChatTool = {
+  __typename?: 'ChatTool';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export enum ChatType {
   File = 'FILE',
-  Text = 'TEXT'
+  Text = 'TEXT',
+  Tool = 'TOOL'
 }
 
 /** Additional attributes of this chat message, used for formatting it in the display */
 export type ChatTypeAttributes = {
   __typename?: 'ChatTypeAttributes';
   file?: Maybe<ChatFile>;
+  tool?: Maybe<ChatTool>;
 };
 
 export type CloudAddon = {
