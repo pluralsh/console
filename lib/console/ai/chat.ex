@@ -299,10 +299,10 @@ defmodule Console.AI.Chat do
 
   Automatically cuts off at a depth of three to avoid runaway scenarios.
   """
-  @spec recursive_completion(Provider.history, ChatThread.t, User.t, Provider.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
+  @spec recursive_completion(Provider.history, ChatThread.t, User.t, Chat.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
   defp recursive_completion(messages, thread, user, completion \\ [], level \\ 0)
   defp recursive_completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
-    Enum.map(completion, fn {r, c} -> %{role: r, content: c} end)
+    Enum.map(completion, &Chat.message/1)
     |> save_messages(thread_id, user)
   end
 
@@ -312,7 +312,7 @@ defmodule Console.AI.Chat do
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})
-        |> Enum.map(fn {r, c} -> %{role: r, content: c} end)
+        |> Enum.map(&Chat.message/1)
         |> save_messages(thread_id, user)
       {:ok, content, tools} ->
         case call_tools(tools, thread, user) do
@@ -326,20 +326,20 @@ defmodule Console.AI.Chat do
   end
 
   defp tool_msgs(content, tools) when is_binary(content) and byte_size(content) > 0,
-    do: [{:assistant, content} | Enum.map(tools, & {:user, &1})]
-  defp tool_msgs(_, tools), do: Enum.map(tools, & {:user, &1})
+    do: [{:assistant, content} | tools]
+  defp tool_msgs(_, tools), do: tools
 
-  @spec call_tools([Tool.t], ChatThread.t, User.t) :: {:ok, [binary]} | {:error, binary}
+  @spec call_tools([Tool.t], ChatThread.t, User.t) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
   defp call_tools(tools, %ChatThread{} = thread, %User{} = user) do
     servers_by_name = Map.new(servers(thread), & {&1.name, &1})
     stream = Stream.stream(:user)
-    Enum.reduce_while(tools, [], fn %Tool{name: name} = tool, acc ->
-      with {sname, _} <- Agent.tool_name(name),
+    Enum.reduce_while(tools, [], fn %Tool{name: name, arguments: args} = tool, acc ->
+      with {sname, tname} <- Agent.tool_name(name),
            %McpServer{} = server <- servers_by_name[sname],
            {:ok, content} <- call_tool(tool, thread, server, user) do
         Stream.publish(stream, content, 1)
         Stream.offset(1)
-        {:cont, [content | acc]}
+        {:cont, [tool_msg(content, server, tname, args) | acc]}
       else
         {:error, err} -> {:halt, {:error, err}}
         _ -> {:halt, {:error, "tool calling error: invalid tool name #{name}"}}
@@ -368,6 +368,21 @@ defmodule Console.AI.Chat do
       end
     end)
     |> execute(extract: :tool)
+  end
+
+  @spec tool_msg(binary, McpServer.t, binary, map) :: map
+  defp tool_msg(content, server, name, args) do
+    %{
+      role: :user,
+      content: content,
+      server_id: server.id,
+      attributes: %{
+        tool: %{
+          name: name,
+          arguments: args
+        }
+      }
+    }
   end
 
   @doc """

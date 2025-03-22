@@ -6,7 +6,8 @@ defmodule Console.AI.Provider do
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
-  @type history :: [{sender, binary}]
+  @type message :: {sender, binary}
+  @type history :: [message]
   @type tool_result :: [Tool.t]
   @type completion_result :: {:ok, binary} | {:ok, binary, [Tool.t]} | Console.error
 

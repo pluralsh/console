@@ -7121,6 +7121,7 @@ type CatalogConnection {
 enum ChatType {
   TEXT
   FILE
+  TOOL
 }
 
 enum EvidenceType {
@@ -7188,6 +7189,7 @@ type Chat {
   attributes: ChatTypeAttributes
   pullRequest: PullRequest
   thread: ChatThread
+  server: McpServer
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -7195,11 +7197,18 @@ type Chat {
 "Additional attributes of this chat message, used for formatting it in the display"
 type ChatTypeAttributes {
   file: ChatFile
+  tool: ChatTool
 }
 
 "Additional attributes for describing a file type chat"
 type ChatFile {
   name: String
+}
+
+"Additional attributes for describing a tool call that derived this chat message"
+type ChatTool {
+  name: String
+  arguments: Map
 }
 
 "A list of chat messages around a specific topic created on demand"

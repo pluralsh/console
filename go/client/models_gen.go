@@ -718,6 +718,7 @@ type Chat struct {
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`
+	Server      *McpServer          `json:"server,omitempty"`
 	InsertedAt  *string             `json:"insertedAt,omitempty"`
 	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
@@ -781,9 +782,16 @@ type ChatThreadEdge struct {
 	Cursor *string     `json:"cursor,omitempty"`
 }
 
+// Additional attributes for describing a tool call that derived this chat message
+type ChatTool struct {
+	Name      *string        `json:"name,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
 	File *ChatFile `json:"file,omitempty"`
+	Tool *ChatTool `json:"tool,omitempty"`
 }
 
 type CloudAddon struct {
@@ -6714,16 +6722,18 @@ type ChatType string
 const (
 	ChatTypeText ChatType = "TEXT"
 	ChatTypeFile ChatType = "FILE"
+	ChatTypeTool ChatType = "TOOL"
 )
 
 var AllChatType = []ChatType{
 	ChatTypeText,
 	ChatTypeFile,
+	ChatTypeTool,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool:
 		return true
 	}
 	return false
