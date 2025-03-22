@@ -29,7 +29,18 @@ defmodule Console.Cost.PrTest do
                       pr_description: "some pr",
                       pr_title: "some pr",
                       commit_message: "a commit",
-                      file_updates: [%{file_name: "file.yaml", content: "first"}, %{file_name: "file2.yaml", content: "second"}]
+                      file_updates: [
+                        %{
+                          file_name: "file.yaml",
+                          replacement: "first",
+                          previous: "second"
+                        },
+                        %{
+                          file_name: "file2.yaml",
+                          replacement: "second",
+                          previous: "first"
+                        }
+                      ]
                     })
                   }
               }]

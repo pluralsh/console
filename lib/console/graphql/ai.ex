@@ -85,6 +85,10 @@ defmodule Console.GraphQl.AI do
     field :user,     :user, resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 
+    field :tools, list_of(:mcp_server_tool) do
+      resolve &AI.chat_tools/3
+    end
+
     connection field :chats, node_type: :chat do
       resolve &AI.list_chats/3
     end

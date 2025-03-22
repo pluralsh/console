@@ -12,7 +12,7 @@ defmodule Console.Schema.PrAutomation do
   }
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
-  defenum Role, cluster: 0, service: 1, pipeline: 2, update: 3, upgrade: 4
+  defenum Role, cluster: 0, service: 1, pipeline: 2, update: 3, upgrade: 4, cost: 5
   defenum ListMerge, overwrite: 0, append: 1
 
   schema "pr_automations" do
@@ -108,6 +108,10 @@ defmodule Console.Schema.PrAutomation do
 
   def for_project(query \\ __MODULE__, proj_id) do
     from(p in query, where: p.project_id == ^proj_id)
+  end
+
+  def for_role(query \\ __MODULE__, role) do
+    from(p in query, where: p.role == ^role)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do

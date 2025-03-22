@@ -932,6 +932,7 @@ export type ChatThread = {
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
   summary: Scalars['String']['output'];
+  tools?: Maybe<Array<Maybe<McpServerTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
 };
@@ -2586,6 +2587,7 @@ export enum EvidenceType {
 
 export type Flow = {
   __typename?: 'Flow';
+  alerts?: Maybe<AlertConnection>;
   description?: Maybe<Scalars['String']['output']>;
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -2603,6 +2605,14 @@ export type Flow = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** write policy for this flow */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type FlowAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3728,6 +3738,21 @@ export type McpServerHeader = {
   __typename?: 'McpServerHeader';
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
+};
+
+/** A tool related to an mcp server */
+export type McpServerTool = {
+  __typename?: 'McpServerTool';
+  server?: Maybe<McpServer>;
+  tool?: Maybe<McpTool>;
+};
+
+/** The description of a tool extracted from its MCP server */
+export type McpTool = {
+  __typename?: 'McpTool';
+  description?: Maybe<Scalars['String']['output']>;
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+  name: Scalars['String']['output'];
 };
 
 export type Metadata = {
@@ -5344,6 +5369,7 @@ export type PrDeleteSpec = {
 
 export enum PrRole {
   Cluster = 'CLUSTER',
+  Cost = 'COST',
   Pipeline = 'PIPELINE',
   Service = 'SERVICE',
   Update = 'UPDATE',
@@ -6818,6 +6844,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 export type RootMutationTypeUpdateRbacArgs = {
   catalogId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
@@ -7928,6 +7955,7 @@ export type RootQueryTypePrAutomationsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<PrRole>;
 };
 
 

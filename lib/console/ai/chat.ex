@@ -4,6 +4,7 @@ defmodule Console.AI.Chat do
   import Console.AI.Evidence.Base, only: [prepend: 2, append: 2]
   alias Console.AI.{Provider, Tools.Pr, Fixer, Tool, Stream}
   alias Console.AI.MCP.{Discovery, Agent}
+  alias Console.AI.MCP.Tool, as: MCPTool
   alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{
     AiInsight,
@@ -237,6 +238,32 @@ defmodule Console.AI.Chat do
   end
 
   @doc """
+  Finds all tools associated with servers in a given flow
+  """
+  @spec tools(binary, User.t) :: {:ok, [%{server: McpServer.t, tool: MCPTool.t}]} | Console.error
+  def tools(thread_id, %User{} = user) do
+    thread = get_thread!(thread_id) |> Repo.preload(flow: :servers)
+    with {:flow, %ChatThread{flow: %Flow{servers: servers}} = thread} <- {:flow, thread},
+         {:ok, thread} <- allow(thread, user, :read),
+         {:ok, tools} <- find_tools(thread) do
+      by_name = Map.new(servers, & {&1.name, &1})
+      Enum.map(tools, fn %MCPTool{name: n} = tool ->
+        with {server, name} <- Console.AI.MCP.Agent.tool_name(n),
+             %McpServer{} = server <- by_name[server] do
+          %{server: server, tool: %{tool | name: name}}
+        else
+          _ -> nil
+        end
+      end)
+      |> Enum.filter(& &1)
+      |> ok()
+    else
+      {:flow, _} -> {:ok, []}
+      err -> err
+    end
+  end
+
+  @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
   @spec hybrid_chat([map], binary | nil, User.t) :: chats_resp
@@ -425,13 +452,15 @@ defmodule Console.AI.Chat do
     end
   end
 
-  defp include_tools(opts, %ChatThread{flow: %Flow{servers: [_ | _]}} = thread) do
-    case Discovery.tools(thread) do
-      {:ok, tools} -> [{:tools, tools} | opts]
+  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread), do: Discovery.tools(thread)
+  def find_tools(_), do: {:ok, []}
+
+  defp include_tools(opts, thread) do
+    case find_tools(thread) do
+      {:ok, [_ | _] = tools} -> [{:tools, tools} | opts]
       _ -> opts
     end
   end
-  defp include_tools(opts, _), do: opts
 
   defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
     thread = Repo.preload(thread, [:insight])
