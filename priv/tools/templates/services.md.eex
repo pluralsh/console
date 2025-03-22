@@ -1,0 +1,6 @@
+Here are the Plural services within the Plural flow <%= @flow.name %> matching your search criteria:
+<%= for service <- @services do %>
+- Name: <%=  service.name %>
+  Cluster: <%= service.cluster.handle %>
+  Url: <%= Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components") %>
+<% end %>

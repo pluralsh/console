@@ -358,8 +358,7 @@ defmodule Console.AI.ChatSyncTest do
   end
 
   describe "#hybrid_chat/3" do
-    @tag :skip
-    test "it can chat with a toolcall" do
+    test "it can chat with a tool call" do
       user   = insert(:user)
       flow   = insert(:flow)
       thread = insert(:chat_thread, user: user, flow: flow)
@@ -392,6 +391,36 @@ defmodule Console.AI.ChatSyncTest do
       assert audit.server_id == server.id
       assert audit.actor_id == user.id
       assert audit.tool == "echo"
+    end
+
+    test "it can chat with a plural tool call" do
+      user   = insert(:user)
+      flow   = insert(:flow)
+      service = insert(:service, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__:clusters", arguments: %{}}]}
+      end)
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      assert tool.content =~ service.cluster.handle
+      assert tool.attributes.tool.name == "__plrl__:clusters"
     end
   end
 end

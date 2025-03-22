@@ -60,8 +60,7 @@ defmodule Console.AI.Fixer do
   """
   @spec pr(binary, Provider.history, User.t) :: pr_resp
   def pr(id, history, %User{} = user) do
-    Console.AI.Tool.set_actor(user)
-
+    Console.AI.Tool.context(%{user: user})
     Repo.get!(AiInsight, id)
     |> Repo.preload([:service, :stack, :alert])
     |> allow(user, :read)

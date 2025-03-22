@@ -1,0 +1,8 @@
+Ok I've found the following clusters in the Plural flow <%= @flow.name %>
+<%= for cluster <- @clusters do %>
+- Name: <%=  cluster.name %>
+  Handle: <%= cluster.handle %>
+  Kubernetes Distribution: <%= cluster.distro %>
+  Tags: <%= Enum.map(cluster.tags, & "#{&1.name}=#{&1.value}") |> Enum.join(", ") %>
+  Project: <%= cluster.project.name %>
+<% end %>

@@ -41,6 +41,10 @@ defmodule Console.Schema.Chat do
   def message(%{role: r, content: c}), do: {r, c}
   def message({r, c}), do: {r, c}
 
+  @spec attributes(msg | Provider.message) :: msg
+  def attributes(%{} = map), do: map
+  def attributes({r, c}), do: %{role: r, content: c}
+
   def for_thread(query \\ __MODULE__, thread_id) do
     from(c in query, where: c.thread_id == ^thread_id)
   end

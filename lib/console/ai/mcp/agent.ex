@@ -55,11 +55,7 @@ defmodule Console.AI.MCP.Agent do
       name(:client, thread, server)
       |> Hermes.Client.call_tool(name, args)
       |> case do
-        {:ok, %{"content" => content, "isError" => false}} ->
-          {:reply, {:ok, concat_content(content)}, State.touch(state)}
-        {:ok, %{"content" => content, "isError" => true}} ->
-          {:reply, {:ok, "Server #{server.name} error: #{concat_content(content)}"}, State.touch(state)}
-        {:ok, %{"content" => content}} ->
+        {:ok, %Hermes.MCP.Response{result: %{"content" => content}}} ->
           {:reply, {:ok, concat_content(content)}, State.touch(state)}
         {:error, error} ->
           {:reply, {:error, "MCP Server #{server.name} has error: #{inspect(error)}"}, State.touch(state)}
@@ -72,7 +68,7 @@ defmodule Console.AI.MCP.Agent do
   def handle_info(:init, %State{thread: thread} = state) do
     state = Enum.reduce(servers(thread), state, fn server, %State{tools: tools} = state ->
       case Console.Retrier.retry(fn -> Hermes.Client.list_tools(name(:client, thread, server)) end) do
-        {:ok, %{"tools" => found}} ->
+        {:ok, %Hermes.MCP.Response{result: %{"tools" => found}}} ->
           new_tools = Map.new(found, & {tool_name(server, &1["name"]), Tool.new(&1)})
           %{state | tools: Map.merge(tools, new_tools)}
         err ->

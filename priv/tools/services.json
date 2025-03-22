@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "a string to query for services by name"
+        },
+        "cluster": {
+            "type": "string",
+            "description": "the cluster handle to search for services in"
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}
