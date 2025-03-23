@@ -5,7 +5,8 @@ defmodule Console.AI.Chat do
   alias Console.AI.{Provider, Fixer, Tool, Stream}
   alias Console.AI.Tools.{
     Pr,
-    Clusters
+    Clusters,
+    Logs
   }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
@@ -253,8 +254,8 @@ defmodule Console.AI.Chat do
          {:ok, tools} <- find_tools(thread) do
       by_name = Map.new(servers, & {&1.name, &1})
       Enum.map(tools, fn %MCPTool{name: n} = tool ->
-        with {server, name} <- Console.AI.MCP.Agent.tool_name(n),
-             %McpServer{} = server <- by_name[server] do
+        with {sname, name} <- Agent.tool_name(n),
+             %McpServer{} = server <- by_name[sname] do
           %{server: server, tool: %{tool | name: name}}
         else
           _ -> nil
@@ -308,11 +309,12 @@ defmodule Console.AI.Chat do
   @spec recursive_completion(Provider.history, ChatThread.t, User.t, Chat.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
   defp recursive_completion(messages, thread, user, completion \\ [], level \\ 0)
   defp recursive_completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
-    Enum.map(completion, &Chat.attributes/1)
+    completion
+    |> Enum.map(&Chat.attributes/1)
     |> save_messages(thread_id, user)
   end
 
-  @plrl_tools [Clusters, SvcTool]
+  @plrl_tools [Clusters, SvcTool, Logs]
 
   defp recursive_completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
     Enum.concat(messages, completion)
@@ -412,6 +414,17 @@ defmodule Console.AI.Chat do
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err
 
+  defp find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread), do: Discovery.tools(thread)
+  defp find_tools(_), do: {:ok, []}
+
+  defp include_tools(opts, thread) do
+    case {thread, find_tools(thread)} do
+      {_, {:ok, [_ | _] = tools}} -> [{:tools, tools}, {:plural, @plrl_tools} | opts]
+      {%ChatThread{flow: %Flow{}}, _} -> [{:plural, @plrl_tools} | opts]
+      _ -> opts
+    end
+  end
+
   @doc """
   Saves a set of messages to a users chat history
   """
@@ -492,17 +505,6 @@ defmodule Console.AI.Chat do
       |> Enum.concat([{:user, @pr}])
       |> Provider.tool_call([Pr])
       |> handle_tool_call(thread, user)
-    end
-  end
-
-  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread), do: Discovery.tools(thread)
-  def find_tools(_), do: {:ok, []}
-
-  defp include_tools(opts, thread) do
-    case {thread, find_tools(thread)} do
-      {_, {:ok, [_ | _] = tools}} -> [{:tools, tools}, {:plural, @plrl_tools} | opts]
-      {%ChatThread{flow: %Flow{}}, _} -> [{:plural, @plrl_tools} | opts]
-      _ -> opts
     end
   end
 

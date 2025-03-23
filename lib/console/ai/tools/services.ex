@@ -29,7 +29,7 @@ defmodule Console.AI.Tools.Services do
       %Flow{id: flow_id} = flow ->
         services = Service.for_flow(flow_id)
                    |> Repo.all()
-                   |> Repo.preload([:cluster])
+                   |> Repo.preload([:cluster, :components])
                    |> maybe_search(query)
         {:ok, tool_content(:services, %{services: services, flow: flow})}
       _ -> {:error, "no flow found"}
