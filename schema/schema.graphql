@@ -61,10 +61,6 @@ type RootQueryType {
 
   secret(serviceId: ID, namespace: String!, name: String!): Secret
 
-  configMaps(namespace: String!): [ConfigMap]
-
-  secrets(namespace: String!): [Secret]
-
   pluralCluster(namespace: String!, name: String!, serviceId: ID): PluralCluster
 
   pluralServiceDeployment(namespace: String!, name: String!, serviceId: ID): PluralServiceDeployment
@@ -84,8 +80,6 @@ type RootQueryType {
   daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
 
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
-
-  nodes: [Node]
 
   node(name: String!, clusterId: ID): Node
 
@@ -508,13 +502,9 @@ type RootMutationType {
 
   deletePersona(id: ID!): Persona
 
-  deleteCertificate(name: String!, namespace: String!): Boolean
-
   deletePod(namespace: String!, name: String!, serviceId: ID): Pod
 
   deleteJob(namespace: String!, name: String!, serviceId: ID): Job
-
-  deleteNode(name: String!): Node
 
   createGitRepository(attributes: GitAttributes!): GitRepository
 

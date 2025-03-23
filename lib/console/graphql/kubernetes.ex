@@ -168,13 +168,6 @@ defmodule Console.GraphQl.Kubernetes do
       middleware CheckComponent
     end
 
-    field :nodes, list_of(:node) do
-      middleware Authenticated
-      middleware AdminRequired
-
-      safe_resolve &Kubernetes.list_nodes/2
-    end
-
     field :node, :node do
       middleware Authenticated
       arg :name, non_null(:string)
@@ -301,7 +294,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      service_authorized :operate
+      service_authorized :write
 
       safe_resolve &Kubernetes.delete_pod/2
     end
@@ -310,20 +303,10 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      service_authorized :operate
+      service_authorized :write
 
       safe_resolve &Kubernetes.delete_job/2
     end
-
-    field :delete_node, :node do
-      middleware Authenticated
-      middleware AdminRequired
-      arg :name, non_null(:string)
-
-      safe_resolve &Kubernetes.delete_node/2
-    end
-
-    import_fields :certificate_mutations
   end
 
   object :kubernetes_subscriptions do
