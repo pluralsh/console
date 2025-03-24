@@ -50,12 +50,14 @@ defmodule Console.GraphQl.AI do
   end
 
   object :chat do
-    field :id,         non_null(:id)
-    field :type,       non_null(:chat_type)
-    field :role,       non_null(:ai_role)
-    field :content,    non_null(:string)
-    field :seq,        non_null(:integer)
-    field :attributes, :chat_type_attributes
+    field :id,           non_null(:id)
+    field :type,         non_null(:chat_type)
+    field :role,         non_null(:ai_role)
+    field :content,      non_null(:string)
+    field :seq,          non_null(:integer)
+    field :confirm,      :boolean, description: "whether this chat requires confirmation"
+    field :confirmed_at, :datetime, description: "when the chat was confirmed"
+    field :attributes,   :chat_type_attributes
 
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
     field :thread,       :chat_thread,  resolve: dataloader(AI)
@@ -89,8 +91,8 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :flow,     :flow, resolve: dataloader(Deployments)
-    field :user,     :user, resolve: dataloader(User)
+    field :flow,     :flow,       resolve: dataloader(Deployments)
+    field :user,     :user,       resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 
     field :tools, list_of(:mcp_server_tool) do
@@ -302,6 +304,22 @@ defmodule Console.GraphQl.AI do
       arg :messages,  list_of(:chat_message)
 
       resolve &AI.hybrid_chat/2
+    end
+
+    @desc "Confirms a chat message and calls its MCP server, if the user has access to the thread"
+    field :confirm_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to confirm"
+
+      resolve &AI.confirm_chat/2
+    end
+
+    @desc "Cancels a chat message, if the user has access to the thread, by just deleting the chat record"
+    field :cancel_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to cancel"
+
+      resolve &AI.cancel_chat/2
     end
 
     @desc "Creates a pull request given the thread message history"

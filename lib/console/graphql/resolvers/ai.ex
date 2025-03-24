@@ -113,6 +113,12 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatSvc.hybrid_chat(msgs, args[:thread_id], user)
   end
 
+  def confirm_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.confirm_chat(id, user)
+
+  def cancel_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.cancel_chat(id, user)
+
   def thread_pr(%{thread_id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.pr(id, user)
 

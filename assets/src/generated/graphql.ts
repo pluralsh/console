@@ -886,6 +886,10 @@ export type CertificateStatus = {
 export type Chat = {
   __typename?: 'Chat';
   attributes?: Maybe<ChatTypeAttributes>;
+  /** whether this chat requires confirmation */
+  confirm?: Maybe<Scalars['Boolean']['output']>;
+  /** when the chat was confirmed */
+  confirmedAt?: Maybe<Scalars['DateTime']['output']>;
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -5806,6 +5810,8 @@ export type RootMutationType = {
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
+  /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
+  cancelChat?: Maybe<Chat>;
   /** saves a set of messages and generates a new one transactionally */
   chat?: Maybe<Chat>;
   /** Wipes your current chat history blank */
@@ -5814,6 +5820,8 @@ export type RootMutationType = {
   cloneService?: Maybe<ServiceDeployment>;
   completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
+  /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
+  confirmChat?: Maybe<Chat>;
   /** Reads and deletes a given shared secret */
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
@@ -6050,6 +6058,11 @@ export type RootMutationTypeApproveStackRunArgs = {
 };
 
 
+export type RootMutationTypeCancelChatArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeChatArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
@@ -6080,6 +6093,11 @@ export type RootMutationTypeCompleteStackRunArgs = {
 export type RootMutationTypeConfigureBackupsArgs = {
   clusterId: Scalars['ID']['input'];
   storeId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeConfirmChatArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

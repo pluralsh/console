@@ -14,6 +14,23 @@ defmodule Console.AI.ChatTest do
       refute thread.default
       assert thread.user_id == user.id
     end
+
+    test "flow readers can create flow threads" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+
+      {:ok, thread} = Chat.create_thread(%{summary: "a thread", flow_id: flow.id}, user)
+
+      assert thread.summary == "a thread"
+      assert thread.flow_id == flow.id
+    end
+
+    test "non-flow readers cannot create flow threads" do
+      user = insert(:user)
+      flow = insert(:flow)
+
+      {:error, _} = Chat.create_thread(%{summary: "a thread", flow_id: flow.id}, user)
+    end
   end
 
   describe "#update_thread/2" do
@@ -312,6 +329,18 @@ defmodule Console.AI.ChatTest do
       assert pr.url == "https://github.com/pr/url"
     end
   end
+
+  describe "cancel_chat/2" do
+    test "cancels a chat message" do
+      user   = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      chat   = insert(:chat, thread: thread, user: user, confirm: true)
+
+      {:ok, chat} = Chat.cancel_chat(chat, user)
+
+      refute refetch(chat)
+    end
+  end
 end
 
 defmodule Console.AI.ChatSyncTest do
@@ -394,6 +423,35 @@ defmodule Console.AI.ChatSyncTest do
       assert audit.tool == "echo"
     end
 
+    test "it won't recurse if a mcp call requires confirmation" do
+      user   = insert(:user)
+      flow   = insert(:flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      server = insert(:mcp_server, confirm: true, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "everything.echo", arguments: %{"message" => "a message"}}]}
+      end)
+
+      {:ok, [next, tool]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      refute tool.content
+      assert tool.server_id == server.id
+      assert tool.attributes.tool.name == "echo"
+      assert tool.attributes.tool.arguments == %{"message" => "a message"}
+
+      [] = Repo.all(McpServerAudit)
+    end
+
     test "it can chat with a plural tool call" do
       user   = insert(:user)
       flow   = insert(:flow)
@@ -467,6 +525,52 @@ defmodule Console.AI.ChatSyncTest do
       assert next.content == "openai toolcall"
       assert tool.content =~ "what is happening"
       assert tool.attributes.tool.name == "__plrl__:logs"
+    end
+  end
+
+  describe "confirm_chat/2" do
+    test "it can confirm a chat message and call its MCP server" do
+      user   = insert(:user)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      flow   = insert(:flow)
+      insert(:mcp_server_association, server: server, flow: flow)
+
+      chat = insert(:chat,
+        user: user,
+        thread: insert(:chat_thread, user: user, flow: flow),
+        confirm: true,
+        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
+        server: server
+      )
+
+      {:ok, chat} = Chat.confirm_chat(chat.id, user)
+
+      assert chat.content =~ "Result from calling MCP server everything with tool echo:\nEcho: a message"
+      assert chat.confirmed_at
+      assert chat.attributes.tool.name == "echo"
+      assert chat.attributes.tool.arguments == %{"message" => "a message"}
+
+      [audit] = Repo.all(McpServerAudit)
+
+      assert audit.server_id == server.id
+      assert audit.actor_id == user.id
+      assert audit.tool == "echo"
+    end
+
+    test "non thread members cannot confirm" do
+      user   = insert(:user)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      flow   = insert(:flow)
+      insert(:mcp_server_association, server: server, flow: flow)
+
+      chat = insert(:chat,
+        thread: insert(:chat_thread, user: user, flow: flow),
+        confirm: true,
+        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
+        server: server
+      )
+
+      {:error, _} = Chat.confirm_chat(chat.id, insert(:user))
     end
   end
 end

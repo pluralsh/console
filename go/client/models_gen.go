@@ -710,11 +710,15 @@ type CertificateStatus struct {
 }
 
 type Chat struct {
-	ID          string              `json:"id"`
-	Type        ChatType            `json:"type"`
-	Role        AiRole              `json:"role"`
-	Content     string              `json:"content"`
-	Seq         int64               `json:"seq"`
+	ID      string   `json:"id"`
+	Type    ChatType `json:"type"`
+	Role    AiRole   `json:"role"`
+	Content string   `json:"content"`
+	Seq     int64    `json:"seq"`
+	// whether this chat requires confirmation
+	Confirm *bool `json:"confirm,omitempty"`
+	// when the chat was confirmed
+	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`

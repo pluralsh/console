@@ -892,6 +892,18 @@ type RootMutationType {
   "Chat mutation that can also execute MCP servers in line with the overall completion"
   hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
 
+  "Confirms a chat message and calls its MCP server, if the user has access to the thread"
+  confirmChat(
+    "the id of the chat message to confirm"
+    id: ID!
+  ): Chat
+
+  "Cancels a chat message, if the user has access to the thread, by just deleting the chat record"
+  cancelChat(
+    "the id of the chat message to cancel"
+    id: ID!
+  ): Chat
+
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
 
@@ -7172,15 +7184,31 @@ input ChatThreadAttributes {
 
 type Chat {
   id: ID!
+
   type: ChatType!
+
   role: AiRole!
+
   content: String!
+
   seq: Int!
+
+  "whether this chat requires confirmation"
+  confirm: Boolean
+
+  "when the chat was confirmed"
+  confirmedAt: DateTime
+
   attributes: ChatTypeAttributes
+
   pullRequest: PullRequest
+
   thread: ChatThread
+
   server: McpServer
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
