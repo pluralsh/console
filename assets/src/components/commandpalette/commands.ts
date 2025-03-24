@@ -30,7 +30,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { useClustersTinyQuery } from '../../generated/graphql'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import {
   CD_ABS_PATH,

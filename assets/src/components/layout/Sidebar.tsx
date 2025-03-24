@@ -9,6 +9,7 @@ import {
   Sidebar as DSSidebar,
   EdgeComputeIcon,
   Flex,
+  FlowIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -42,7 +43,7 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { SECURITY_ABS_PATH } from 'routes/securityRoutesConsts'
 
 import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutesConsts.tsx'
 
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
@@ -55,6 +56,7 @@ import { TRUNCATE } from 'components/utils/truncate.ts'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 
 type MenuItem = {
   text: string
@@ -121,15 +123,22 @@ function getMenuItems({
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
-      path: `${AI_ABS_PATH}`,
+      path: AI_ABS_PATH,
       hotkeys: ['shift A', '6'],
+    },
+    {
+      text: 'Flows',
+      expandedLabel: 'Flows',
+      icon: <FlowIcon />,
+      path: FLOWS_ABS_PATH,
+      hotkeys: ['shift F', '7'],
     },
     {
       text: 'Edge',
       expandedLabel: 'Edge',
       icon: <EdgeComputeIcon />,
       path: EDGE_ABS_PATH,
-      hotkeys: ['shift E', '7'],
+      hotkeys: ['shift E', '8'],
     },
     {
       text: 'PRs',
@@ -140,7 +149,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P', '8'],
+      hotkeys: ['shift P', '9'],
     },
     {
       text: 'Security',
@@ -148,14 +157,14 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['9'],
+      hotkeys: ['0'],
     },
     {
       text: 'Cost Management',
       expandedLabel: 'Cost Management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
-      hotkeys: ['shift C+M', '0'],
+      hotkeys: ['shift C+M'],
     },
     // {
     //   text: 'Backups',
