@@ -1,32 +1,49 @@
 defmodule Console.Schema.Chat do
   use Piazza.Ecto.Schema
   alias Console.Schema.{User, ChatThread, PullRequest}
+  alias Console.AI.Provider
+
+  @type msg :: t | %{role: Provider.sender, content: binary} | Provider.message
+  @type history :: [msg]
 
   defenum Role, user: 0, assistant: 1, system: 2
-  defenum Type, text: 0, file: 1
+  defenum Type, text: 0, file: 1, tool: 2
 
   schema "chats" do
     field :type,    Type, default: :text
     field :role,    Role
     field :content, :string
     field :seq,     :integer
+    field :confirm, :boolean, default: false
 
     embeds_one :attributes, Attributes, on_replace: :update do
       embeds_one :file, FileAttributes, on_replace: :update do
         field :name, :string
       end
+
+      embeds_one :tool, ToolAttributes, on_replace: :update do
+        field :name, :string
+        field :arguments, :map
+      end
     end
 
+    belongs_to :server,       McpServer
     belongs_to :pull_request, PullRequest
-    belongs_to :user, User
-    belongs_to :thread, ChatThread
+    belongs_to :user,         User
+    belongs_to :thread,       ChatThread
 
     timestamps()
   end
 
+  @spec message(msg) :: {Provider.sender, binary}
   def message(%__MODULE__{type: :file, role: r, content: c, attributes: %{file: %{name: n}}}),
     do: {r, Jason.encode!(%{name: n, content: c})}
-  def message(%__MODULE__{role: r, content: c}), do: {r, c}
+  def message(%{role: r, content: c}), do: {r, c}
+  def message({r, c}), do: {r, c}
+
+  @spec attributes(msg | Provider.message) :: msg
+  def attributes(%{} = map), do: map
+  def attributes({r, c}), do: %{role: r, content: c}
 
   def for_thread(query \\ __MODULE__, thread_id) do
     from(c in query, where: c.thread_id == ^thread_id)
@@ -62,7 +79,7 @@ defmodule Console.Schema.Chat do
 
   defp expiry(), do: Timex.now() |> Timex.shift(days: -5)
 
-  @valid ~w(user_id type thread_id role content seq pull_request_id)a
+  @valid ~w(user_id type thread_id role content seq confirm server_id pull_request_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -77,11 +94,18 @@ defmodule Console.Schema.Chat do
     model
     |> cast(attrs, [])
     |> cast_embed(:file, with: &file_changeset/2)
+    |> cast_embed(:tool, with: &tool_changeset/2)
   end
 
   defp file_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name)a)
     |> validate_required(~w(name)a)
+  end
+
+  defp tool_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name arguments)a)
+    |> validate_required(~w(name arguments)a)
   end
 end

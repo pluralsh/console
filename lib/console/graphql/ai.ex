@@ -59,6 +59,7 @@ defmodule Console.GraphQl.AI do
 
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
     field :thread,       :chat_thread,  resolve: dataloader(AI)
+    field :server,       :mcp_server,   resolve: dataloader(Deployments)
 
     timestamps()
   end
@@ -66,11 +67,18 @@ defmodule Console.GraphQl.AI do
   @desc "Additional attributes of this chat message, used for formatting it in the display"
   object :chat_type_attributes do
     field :file, :chat_file
+    field :tool, :chat_tool
   end
 
   @desc "Additional attributes for describing a file type chat"
   object :chat_file do
     field :name, :string
+  end
+
+  @desc "Additional attributes for describing a tool call that derived this chat message"
+  object :chat_tool do
+    field :name,      :string
+    field :arguments, :map
   end
 
   @desc "A list of chat messages around a specific topic created on demand"

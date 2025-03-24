@@ -199,6 +199,13 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.name == ^name)
   end
 
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(c in query,
+      join: s in assoc(c, :services),
+      where: s.flow_id == ^flow_id
+    )
+  end
+
   def target(query \\ __MODULE__, %{} = resource) do
     Map.take(resource, [:provider_id, :project_id, :tags, :distro])
     |> Enum.reduce(query, fn

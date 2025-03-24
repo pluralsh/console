@@ -892,6 +892,7 @@ export type Chat = {
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
+  server?: Maybe<McpServer>;
   thread?: Maybe<ChatThread>;
   type: ChatType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -971,15 +972,24 @@ export type ChatThreadEdge = {
   node?: Maybe<ChatThread>;
 };
 
+/** Additional attributes for describing a tool call that derived this chat message */
+export type ChatTool = {
+  __typename?: 'ChatTool';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export enum ChatType {
   File = 'FILE',
-  Text = 'TEXT'
+  Text = 'TEXT',
+  Tool = 'TOOL'
 }
 
 /** Additional attributes of this chat message, used for formatting it in the display */
 export type ChatTypeAttributes = {
   __typename?: 'ChatTypeAttributes';
   file?: Maybe<ChatFile>;
+  tool?: Maybe<ChatTool>;
 };
 
 export type CloudAddon = {
@@ -5852,7 +5862,6 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
-  deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   /** deletes a chat from a users history */
   deleteChat?: Maybe<Chat>;
   deleteCluster?: Maybe<Cluster>;
@@ -5868,7 +5877,6 @@ export type RootMutationType = {
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
-  deleteNode?: Maybe<Node>;
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
@@ -6305,12 +6313,6 @@ export type RootMutationTypeDeleteCatalogArgs = {
 };
 
 
-export type RootMutationTypeDeleteCertificateArgs = {
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootMutationTypeDeleteChatArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6381,11 +6383,6 @@ export type RootMutationTypeDeleteManagedNamespaceArgs = {
 
 export type RootMutationTypeDeleteMcpServerArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeDeleteNodeArgs = {
-  name: Scalars['String']['input'];
 };
 
 
@@ -7051,7 +7048,6 @@ export type RootQueryType = {
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
   componentTree?: Maybe<ComponentTree>;
   configMap?: Maybe<ConfigMap>;
-  configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
   cronJob?: Maybe<CronJob>;
   customStackRun?: Maybe<CustomStackRun>;
@@ -7096,7 +7092,6 @@ export type RootQueryType = {
   node?: Maybe<Node>;
   nodeMetric?: Maybe<NodeMetric>;
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
-  nodes?: Maybe<Array<Maybe<Node>>>;
   notificationRouter?: Maybe<NotificationRouter>;
   notificationRouters?: Maybe<NotificationRouterConnection>;
   notificationSink?: Maybe<NotificationSink>;
@@ -7143,7 +7138,6 @@ export type RootQueryType = {
   scmConnections?: Maybe<ScmConnectionConnection>;
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
-  secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
   serviceContext?: Maybe<ServiceContext>;
@@ -7462,11 +7456,6 @@ export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootQueryTypeConfigMapsArgs = {
-  namespace: Scalars['String']['input'];
 };
 
 
@@ -8051,11 +8040,6 @@ export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootQueryTypeSecretsArgs = {
-  namespace: Scalars['String']['input'];
 };
 
 

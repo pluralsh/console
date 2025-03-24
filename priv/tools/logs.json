@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "service": {
+            "type": "string",
+            "description": "The name of the service to list logs for"
+        },
+        "cluster": {
+            "type": "string",
+            "description": "The cluster handle the service is deployed to"
+        },
+        "query": {
+            "type": "string",
+            "description": "A search query to use to filter logs, omit to list all recent logs"
+        }
+    },
+    "required": ["service", "cluster"],
+    "additionalProperties": false
+}

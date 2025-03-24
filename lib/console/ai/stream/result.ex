@@ -50,7 +50,8 @@ defmodule Console.AI.Stream.Result do
     |> case do
       {:error, _} = err -> err
       tools when is_list(tools) ->
-        text = Enum.reverse(l) |> IO.iodata_to_binary()
+        text = Enum.reverse(l)
+               |> IO.iodata_to_binary()
         {:ok, text, tools}
     end
   end

@@ -105,7 +105,7 @@ defmodule Console.MixProject do
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.16"},
-      {:hermes_mcp, "~> 0.2.3", git: "https://github.com/pluralsh/hermes-mcp", commit: "455adc0b2f7a389dfcc6bf2d2cba8dbbd591b71c", branch: "extend-naming-schema"},
+      {:hermes_mcp, "~> 0.3.3", git: "https://github.com/pluralsh/hermes-mcp", commit: "72d557ea16e3ff838fb699c9bf3842d77f2c4be5", branch: "extend-naming-schema"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},

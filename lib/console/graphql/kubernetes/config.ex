@@ -32,21 +32,5 @@ defmodule Console.GraphQl.Kubernetes.Config do
 
       safe_resolve &Kubernetes.resolve_secret/2
     end
-
-    field :config_maps, list_of(:config_map) do
-      middleware Authenticated
-      middleware Rbac, perm: :operate, arg: :namespace
-      arg :namespace, non_null(:string)
-
-      safe_resolve &Kubernetes.list_config_maps/2
-    end
-
-    field :secrets, list_of(:secret) do
-      middleware Authenticated
-      middleware Rbac, perm: :operate, arg: :namespace
-      arg :namespace, non_null(:string)
-
-      safe_resolve &Kubernetes.list_secrets/2
-    end
   end
 end

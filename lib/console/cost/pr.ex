@@ -19,7 +19,7 @@ defmodule Console.Cost.Pr do
   """
   @spec create(binary | ClusterScalingRecommendation.t, User.t) :: Fixer.pr_resp
   def create(%ClusterScalingRecommendation{} = rec, %User{} = user) do
-    Console.AI.Tool.set_actor(user)
+    Console.AI.Tool.context(%{user: user})
     with %{service: %Service{} = svc} = rec <- Repo.preload(rec, [:service]),
          {:ok, svc} <- allow(svc, user, :write),
          {:ok, [_ | prompt]} <- Fixer.Service.prompt(svc, "") do
