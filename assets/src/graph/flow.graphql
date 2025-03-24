@@ -1,0 +1,84 @@
+fragment FlowBasic on Flow {
+  id
+  name
+  description
+  icon
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  alerts(first: 500) {
+    # just to get the count
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}
+
+query Flows($first: Int = 100, $after: String, $q: String) {
+  flows(first: $first, after: $after, q: $q) {
+    edges {
+      node {
+        ...FlowBasic
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+query Flow($id: ID!) {
+  flow(id: $id) {
+    ...FlowBasic
+  }
+}
+
+query FlowServices($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    services(first: $first, after: $after) {
+      ...ServiceDeploymentsConnection
+    }
+  }
+}
+
+query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    pipelines(first: $first, after: $after) {
+      ...PipelineConnection
+    }
+  }
+}
+
+query FlowAlerts($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    alerts(first: $first, after: $after) {
+      ...AlertConnection
+    }
+  }
+}
+
+query FlowPrs($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    pullRequests(first: $first, after: $after) {
+      ...PullRequestConnection
+    }
+  }
+}
+
+query FlowMcpServers($id: ID!) {
+  flow(id: $id) {
+    id
+    servers {
+      ...McpServer
+    }
+  }
+}

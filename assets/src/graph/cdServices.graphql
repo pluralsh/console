@@ -202,6 +202,17 @@ fragment ServiceTreeNode on ServiceDeployment {
   }
 }
 
+fragment ServiceDeploymentsConnection on ServiceDeploymentConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...ServiceDeploymentsRow
+    }
+  }
+}
+
 query ServiceDeployments(
   $first: Int = 100
   $after: String
@@ -220,14 +231,7 @@ query ServiceDeployments(
     status: $status
     projectId: $projectId
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ServiceDeploymentsRow
-      }
-    }
+    ...ServiceDeploymentsConnection
   }
   serviceStatuses(clusterId: $clusterId) {
     ...ServiceStatusCount

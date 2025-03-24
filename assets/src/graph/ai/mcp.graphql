@@ -1,0 +1,75 @@
+fragment McpServer on McpServer {
+  id
+  name
+  url
+  confirm
+  authentication {
+    headers {
+      name
+      value
+    }
+    plural
+  }
+}
+
+fragment McpServerAudit on McpServerAudit {
+  id
+  actor {
+    ...User
+  }
+  arguments
+  tool
+  insertedAt
+  updatedAt
+}
+
+fragment McpServerConnection on McpServerConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...McpServer
+    }
+  }
+}
+
+query McpServers($first: Int = 100, $after: String, $q: String) {
+  mcpServers(first: $first, after: $after, q: $q) {
+    ...McpServerConnection
+  }
+}
+
+query McpServer($id: ID!) {
+  mcpServer(id: $id) {
+    ...McpServer
+  }
+}
+
+query McpServerAudits($id: ID!, $first: Int = 100, $after: String) {
+  mcpServer(id: $id) {
+    id
+    audits(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...McpServerAudit
+        }
+      }
+    }
+  }
+}
+
+mutation UpsertMcpServer($attributes: McpServerAttributes!) {
+  upsertMcpServer(attributes: $attributes) {
+    ...McpServer
+  }
+}
+
+mutation DeleteMcpServer($id: ID!) {
+  deleteMcpServer(id: $id) {
+    id
+  }
+}
