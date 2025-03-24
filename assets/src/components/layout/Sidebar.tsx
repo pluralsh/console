@@ -86,7 +86,7 @@ function getMenuItems({
       expandedLabel: 'Home',
       icon: <HomeIcon />,
       path: '/',
-      hotkeys: ['shift H', '1'],
+      hotkeys: ['shift H'],
     },
     {
       text: 'Continuous deployment',
@@ -95,21 +95,21 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
-      hotkeys: ['shift C', '2'],
+      hotkeys: ['shift C'],
     },
     {
       text: 'Stacks',
       expandedLabel: 'Stacks',
       icon: <StackIcon />,
       path: getStacksAbsPath(''),
-      hotkeys: ['shift S', '3'],
+      hotkeys: ['shift S'],
     },
     {
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
       path: CATALOGS_ABS_PATH,
-      hotkeys: ['4'],
+      hotkeys: ['shift S+C'],
     },
     {
       text: 'Kubernetes',
@@ -117,28 +117,28 @@ function getMenuItems({
       icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['shift K', '5'],
+      hotkeys: ['shift K'],
     },
     {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
       path: AI_ABS_PATH,
-      hotkeys: ['shift A', '6'],
+      hotkeys: ['shift A'],
     },
     {
       text: 'Flows',
       expandedLabel: 'Flows',
       icon: <FlowIcon />,
       path: FLOWS_ABS_PATH,
-      hotkeys: ['shift F', '7'],
+      hotkeys: ['shift F'],
     },
     {
       text: 'Edge',
       expandedLabel: 'Edge',
       icon: <EdgeComputeIcon />,
       path: EDGE_ABS_PATH,
-      hotkeys: ['shift E', '8'],
+      hotkeys: ['shift E'],
     },
     {
       text: 'PRs',
@@ -149,7 +149,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P', '9'],
+      hotkeys: ['shift P'],
     },
     {
       text: 'Security',
@@ -157,7 +157,6 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['0'],
     },
     {
       text: 'Cost Management',

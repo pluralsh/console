@@ -22,6 +22,7 @@ import {
   setThemeColorMode,
   useThemeColorMode,
   EdgeComputeIcon,
+  FlowIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -54,6 +55,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -140,7 +142,7 @@ export function useCommands(): CommandGroup[] {
             icon: HomeIcon,
             callback: () => navigate('/'),
             deps: [navigate],
-            hotkeys: ['shift H', '1'],
+            hotkeys: ['shift H'],
             autoFocus: true,
           },
           {
@@ -148,63 +150,69 @@ export function useCommands(): CommandGroup[] {
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift C', '2'],
+            hotkeys: ['shift C'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
             deps: [navigate],
-            hotkeys: ['shift S', '3'],
-          },
-          {
-            label: 'Kubernetes Dashboard',
-            icon: KubernetesAltIcon,
-            callback: () => navigate(KUBERNETES_ROOT_PATH),
-            deps: [navigate],
-            hotkeys: ['shift K', '4'],
-          },
-          {
-            label: 'Plural AI',
-            icon: AiSparkleOutlineIcon,
-            callback: () => navigate(AI_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift A', '5'],
-          },
-          {
-            label: 'Edge',
-            icon: EdgeComputeIcon,
-            callback: () => navigate(EDGE_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift E', '6'],
+            hotkeys: ['shift S'],
           },
           {
             label: 'Service catalog',
             icon: CatalogIcon,
             callback: () => navigate(CATALOGS_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['7'],
+            hotkeys: ['shift S+C'],
+          },
+          {
+            label: 'Kubernetes Dashboard',
+            icon: KubernetesAltIcon,
+            callback: () => navigate(KUBERNETES_ROOT_PATH),
+            deps: [navigate],
+            hotkeys: ['shift K'],
+          },
+          {
+            label: 'Plural AI',
+            icon: AiSparkleOutlineIcon,
+            callback: () => navigate(AI_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift A'],
+          },
+          {
+            label: 'Flows',
+            icon: FlowIcon,
+            callback: () => navigate(FLOWS_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift F'],
+          },
+          {
+            label: 'Edge',
+            icon: EdgeComputeIcon,
+            callback: () => navigate(EDGE_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift E'],
           },
           {
             label: "Pull requests (PR's)",
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift P', '8'],
+            hotkeys: ['shift P'],
           },
           {
             label: 'Security',
             icon: WarningShieldIcon,
             callback: () => navigate(SECURITY_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['9'],
           },
           {
             label: 'Cost Management',
             icon: CostManagementIcon,
             callback: () => navigate(COST_MANAGEMENT_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift C+M', '0'],
+            hotkeys: ['shift C+M'],
           },
           {
             label: 'Settings',
