@@ -11472,6 +11472,7 @@ export type UpdateRbacMutationVariables = Exact<{
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
   stackId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
 }>;
 
@@ -22239,13 +22240,14 @@ export type ProceedServiceMutationHookResult = ReturnType<typeof useProceedServi
 export type ProceedServiceMutationResult = Apollo.MutationResult<ProceedServiceMutation>;
 export type ProceedServiceMutationOptions = Apollo.BaseMutationOptions<ProceedServiceMutation, ProceedServiceMutationVariables>;
 export const UpdateRbacDocument = gql`
-    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $projectId: ID, $rbac: RbacAttributes!) {
+    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $projectId: ID, $flowId: ID, $rbac: RbacAttributes!) {
   updateRbac(
     serviceId: $serviceId
     clusterId: $clusterId
     pipelineId: $pipelineId
     stackId: $stackId
     projectId: $projectId
+    flowId: $flowId
     rbac: $rbac
   )
 }
@@ -22270,6 +22272,7 @@ export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, U
  *      pipelineId: // value for 'pipelineId'
  *      stackId: // value for 'stackId'
  *      projectId: // value for 'projectId'
+ *      flowId: // value for 'flowId'
  *      rbac: // value for 'rbac'
  *   },
  * });

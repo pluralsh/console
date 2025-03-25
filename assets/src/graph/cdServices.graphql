@@ -381,6 +381,7 @@ mutation UpdateRbac(
   $pipelineId: ID
   $stackId: ID
   $projectId: ID
+  $flowId: ID
   $rbac: RbacAttributes!
 ) {
   updateRbac(
@@ -389,6 +390,7 @@ mutation UpdateRbac(
     pipelineId: $pipelineId
     stackId: $stackId
     projectId: $projectId
+    flowId: $flowId
     rbac: $rbac
   )
 }

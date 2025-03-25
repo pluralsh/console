@@ -66,6 +66,7 @@ export enum PermissionsIdType {
   Pipeline = 'pipelineId',
   Stack = 'stackId',
   Project = 'projectId',
+  Flow = 'flowId',
 }
 
 export function PermissionsModal({
