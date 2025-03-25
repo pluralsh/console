@@ -1,4 +1,7 @@
-import { FlowAlerts } from 'components/flows/flow/FlowAlerts.tsx'
+import {
+  FlowAlerts,
+  FlowAlertInsight,
+} from 'components/flows/flow/FlowAlerts.tsx'
 import { FlowMcpConnections } from 'components/flows/flow/FlowMcpConnections.tsx'
 import { FlowPipelines } from 'components/flows/flow/FlowPipelines.tsx'
 import { FlowPrs } from 'components/flows/flow/FlowPrs.tsx'
@@ -6,6 +9,7 @@ import { FlowServices } from 'components/flows/flow/FlowServices.tsx'
 import { Navigate, Route } from 'react-router-dom'
 import { Flows } from '../components/flows/Flows.tsx'
 import { Flow } from '../components/flows/flow/Flow.tsx'
+import { ALERT_INSIGHT_REL_PATH } from './cdRoutesConsts.tsx'
 import {
   FLOWS_ABS_PATH,
   FLOW_MCP_CONNECTIONS_REL_PATH,
@@ -46,4 +50,8 @@ export const flowRoutes = [
       element={<FlowMcpConnections />}
     />
   </Route>,
+  <Route
+    path={`${FLOWS_ABS_PATH}/${FLOW_PARAM_ID}/${ALERT_INSIGHT_REL_PATH}`}
+    element={<FlowAlertInsight />}
+  />,
 ]

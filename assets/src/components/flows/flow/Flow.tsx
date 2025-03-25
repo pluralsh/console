@@ -154,6 +154,8 @@ const WrapperSC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
   height: '100%',
   width: '100%',
+  maxWidth: theme.breakpoints.desktop,
+  alignSelf: 'center',
   overflow: 'hidden',
 }))
 
@@ -165,6 +167,7 @@ const HeaderSC = styled.div(({ theme }) => ({
 
 const ContentSC = styled.div({
   display: 'flex',
+  flexDirection: 'column',
   height: '100%',
   width: '100%',
   overflow: 'hidden',

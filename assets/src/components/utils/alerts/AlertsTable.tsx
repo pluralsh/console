@@ -62,7 +62,7 @@ export function AlertsTable({
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      loading={loading && !isEmpty(alerts)}
+      loading={loading && isEmpty(alerts)}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       getRowCanExpand={() => true}
       renderExpanded={AlertsTableExpander}
