@@ -1,7 +1,11 @@
+import { FlowAlerts } from 'components/flows/flow/FlowAlerts.tsx'
+import { FlowMcpConnections } from 'components/flows/flow/FlowMcpConnections.tsx'
+import { FlowPipelines } from 'components/flows/flow/FlowPipelines.tsx'
+import { FlowPrs } from 'components/flows/flow/FlowPrs.tsx'
+import { FlowServices } from 'components/flows/flow/FlowServices.tsx'
 import { Navigate, Route } from 'react-router-dom'
-import { Flows } from '../components/flow/Flows.tsx'
-import { Flow } from '../components/flow/Flow.tsx'
-import { McpConnections } from 'components/flow/McpConnections.tsx'
+import { Flows } from '../components/flows/Flows.tsx'
+import { Flow } from '../components/flows/flow/Flow.tsx'
 import {
   FLOWS_ABS_PATH,
   FLOW_MCP_CONNECTIONS_REL_PATH,
@@ -23,23 +27,23 @@ export const flowRoutes = [
     />
     <Route
       path={'services'}
-      element={<div>Services</div>}
+      element={<FlowServices />}
     />
     <Route
       path={'pipelines'}
-      element={<div>Pipelines</div>}
+      element={<FlowPipelines />}
     />
     <Route
       path={'prs'}
-      element={<div>PRs</div>}
+      element={<FlowPrs />}
     />
     <Route
       path={'alerts'}
-      element={<div>Alerts</div>}
+      element={<FlowAlerts />}
     />
     <Route
       path={FLOW_MCP_CONNECTIONS_REL_PATH}
-      element={<McpConnections />}
+      element={<FlowMcpConnections />}
     />
   </Route>,
 ]
