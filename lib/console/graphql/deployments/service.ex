@@ -228,9 +228,20 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.metrics/3
     end
 
+    @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+    field :heat_map, :utilization_heat_map do
+      resolve &Deployments.heat_map/3
+    end
+
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether this service is editable"
 
     timestamps()
+  end
+
+  @desc "A representation of the metrics to render a utilization heat map"
+  object :utilization_heat_map do
+    field :cpu,    list_of(:metric_response)
+    field :memory, list_of(:metric_response)
   end
 
   object :service_component_metrics do

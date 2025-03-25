@@ -19,6 +19,8 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :url,            non_null(:string)
     field :confirm,        :boolean, description: "whether tool calls against this server should require a confirmation"
     field :authentication, :mcp_server_authentication_attributes
+    field :read_bindings,  list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   input_object :mcp_server_association_attributes do

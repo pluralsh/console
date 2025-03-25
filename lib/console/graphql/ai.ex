@@ -405,15 +405,18 @@ defmodule Console.GraphQl.AI do
   object :ai_subscriptions do
     @desc "streams chunks of ai text for a given parent scope"
     field :ai_stream, :ai_delta do
-      arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
-      arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
-      arg :scope_id,   :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :insight_id,        :id, description: "the insight id to use when streaming a fix suggestion"
+      arg :thread_id,         :id, description: "the thread id for streaming a chat suggestion"
+      arg :scope_id,          :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :recommendation_id, :id, description: "the id of the scaling recommendation you're streaming a cost PR suggestion for"
 
       config fn
         %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:insight, id, user)}
         %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:thread, id, user)}
+        %{recommendation_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:cost, id, user)}
         %{scope_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:freeform, id, user)}
         _, _ -> {:error, "no id provided for this subscription"}

@@ -603,7 +603,15 @@ type RootMutationType {
 
   addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
 
-  applyScalingRecommendation(id: ID!): PullRequest
+  applyScalingRecommendation(
+    "the id of the scaling recommendation to fix"
+    id: ID!
+  ): PullRequest
+
+  suggestScalingRecommendation(
+    "the id of the scaling recommendation to fix"
+    id: ID!
+  ): String
 
   createClusterRegistration(attributes: ClusterRegistrationCreateAttributes!): ClusterRegistration
 
@@ -880,7 +888,7 @@ type RootMutationType {
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
-    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID
+    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
@@ -951,6 +959,9 @@ type RootSubscriptionType {
 
     "an arbitrary scope id to use for explain w\/ ai"
     scopeId: String
+
+    "the id of the scaling recommendation you're streaming a cost PR suggestion for"
+    recommendationId: ID
   ): AiDelta
 }
 
@@ -1013,6 +1024,10 @@ input McpServerAttributes {
   confirm: Boolean
 
   authentication: McpServerAuthenticationAttributes
+
+  readBindings: [PolicyBindingAttributes]
+
+  writeBindings: [PolicyBindingAttributes]
 }
 
 input McpServerAssociationAttributes {
@@ -4335,12 +4350,21 @@ type ServiceDeployment {
 
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
+  "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+  heatMap: UtilizationHeatMap
+
   "whether this service is editable"
   editable: Boolean
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A representation of the metrics to render a utilization heat map"
+type UtilizationHeatMap {
+  cpu: [MetricResponse]
+  memory: [MetricResponse]
 }
 
 type ServiceComponentMetrics {
@@ -5206,6 +5230,9 @@ type Cluster {
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
 
+  "The helm values for the agent installation"
+  agentHelmValues: String
+
   "Whether this cluster was recently pinged"
   healthy: Boolean
 
@@ -5333,6 +5360,9 @@ type Cluster {
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
+
+  "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+  heatMap: UtilizationHeatMap
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]

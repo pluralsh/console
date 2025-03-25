@@ -3,6 +3,32 @@ defmodule Console.Cost.PrTest do
   use Mimic
   alias Console.Cost.Pr
 
+  describe "#suggestion/2" do
+    test "it can generate a completion describing the pr we want to suggest" do
+      insert(:scm_connection, token: "some-pat", default: true)
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
+      )
+      recommendation = insert(:cluster_scaling_recommendation, service: svc)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai pr completion"} end)
+
+      {:ok, pr} = Pr.suggestion(recommendation, user)
+
+      assert pr == "openai pr completion"
+    end
+  end
+
   describe "#create/2" do
     test "it can spawn a scaling pr" do
       insert(:scm_connection, token: "some-pat", default: true)

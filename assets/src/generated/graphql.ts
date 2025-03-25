@@ -1058,6 +1058,8 @@ export type CloudSettingsAttributes = {
 /** a representation of a cluster you can deploy to */
 export type Cluster = {
   __typename?: 'Cluster';
+  /** The helm values for the agent installation */
+  agentHelmValues?: Maybe<Scalars['String']['output']>;
   /** the url this clusters deployment operator will use for gql requests */
   agentUrl?: Maybe<Scalars['String']['output']>;
   /** list all alerts discovered for this cluster */
@@ -1085,6 +1087,8 @@ export type Cluster = {
   handle?: Maybe<Scalars['String']['output']>;
   /** Whether this cluster was recently pinged */
   healthy?: Maybe<Scalars['Boolean']['output']>;
+  /** A pod-level set of utilization metrics for this cluster for rendering a heat map */
+  heatMap?: Maybe<UtilizationHeatMap>;
   /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -3696,7 +3700,9 @@ export type McpServerAttributes = {
   /** whether tool calls against this server should require a confirmation */
   confirm?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   url: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type McpServerAudit = {
@@ -5966,6 +5972,7 @@ export type RootMutationType = {
   shareSecret?: Maybe<SharedSecret>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  suggestScalingRecommendation?: Maybe<Scalars['String']['output']>;
   syncGlobalService?: Maybe<GlobalService>;
   /** Creates a pull request given the thread message history */
   threadPr?: Maybe<Chat>;
@@ -6733,6 +6740,11 @@ export type RootMutationTypeSignupArgs = {
 };
 
 
+export type RootMutationTypeSuggestScalingRecommendationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeSyncGlobalServiceArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6864,6 +6876,7 @@ export type RootMutationTypeUpdateRbacArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
+  serverId?: InputMaybe<Scalars['ID']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   stackId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -8248,6 +8261,7 @@ export type RootSubscriptionType = {
 
 export type RootSubscriptionTypeAiStreamArgs = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
+  recommendationId?: InputMaybe<Scalars['ID']['input']>;
   scopeId?: InputMaybe<Scalars['String']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -8616,6 +8630,8 @@ export type ServiceDeployment = {
   git?: Maybe<GitRef>;
   /** the global service this service is the source for */
   globalService?: Maybe<GlobalService>;
+  /** A pod-level set of utilization metrics for this cluster for rendering a heat map */
+  heatMap?: Maybe<UtilizationHeatMap>;
   /** description of how helm charts should be applied */
   helm?: Maybe<HelmSpec>;
   helmRepository?: Maybe<FluxHelmRepository>;
@@ -9730,6 +9746,13 @@ export type UserRoleAttributes = {
 export type UserRoles = {
   __typename?: 'UserRoles';
   admin?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** A representation of the metrics to render a utilization heat map */
+export type UtilizationHeatMap = {
+  __typename?: 'UtilizationHeatMap';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  memory?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export enum ValidationUniqScope {

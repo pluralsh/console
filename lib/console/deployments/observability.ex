@@ -170,24 +170,41 @@ defmodule Console.Deployments.Observability do
   end
 
   @doc """
+  Gathers a heat map of pod utilization for the given cluster or service
+  """
+  @spec heat_map(Cluster.t | Service.t) :: {:ok, map} | error
+  def heat_map(%Cluster{handle: cluster}) do
+    queries(:heat)
+    |> bulk_query(%{cluster: cluster, filter: ""})
+  end
+
+  def heat_map(%Service{namespace: ns} = service) do
+    %Service{cluster: %Cluster{handle: cluster}} =
+      Repo.preload(service, [:cluster])
+
+    queries(:heat)
+    |> bulk_query(%{cluster: cluster, filter: ",namespace=\"#{ns}\""})
+  end
+
+  @doc """
   Queries opinionated metrics for a set of different, relevant scopes
   """
   @spec query(Cluster.t | {Cluster.t, binary} | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
-    |> bulk_query(%{cluster: cluster}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster}, start, stop, step)
   end
 
   def query({%Cluster{handle: cluster}, node}, start, stop, step) do
     queries(:node)
-    |> bulk_query(%{cluster: cluster, instance: node}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster, instance: node}, start, stop, step)
   end
 
   def query(%ServiceComponent{} = component, start, stop, step) do
     component = Repo.preload(component, [service: :cluster])
     with {:ok, args} <- component_args(component) do
       queries(:component)
-      |> bulk_query(args, start, stop, step)
+      |> bulk_range_query(args, start, stop, step)
     end
   end
 
@@ -197,7 +214,26 @@ defmodule Console.Deployments.Observability do
     do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[0-9]+"]}
   defp component_args(%ServiceComponent{group: g, kind: k}), do: {:error, "unsupported component kind #{g}/#{k}"}
 
-  defp bulk_query(queries, ctx, start, stop, step) do
+  defp bulk_query(queries, ctx) do
+    with {:ok, client} <- get_connection(:prometheus) do
+      Task.async_stream(queries, fn {name, query} ->
+        case PrometheusClient.query(client, query, ctx) do
+          {:ok, %{data: %{result: results}}} -> {name, results}
+          err ->
+            Logger.error "prometheus query #{query} failed: #{inspect(err)}"
+            {name, []}
+        end
+      end, max_concurrency: 5)
+      |> Enum.filter(fn
+        {:ok, _} -> true
+        _ -> false
+      end)
+      |> Map.new(fn {:ok, v} -> v end)
+      |> ok()
+    end
+  end
+
+  defp bulk_range_query(queries, ctx, start, stop, step) do
     with {:ok, client} <- get_connection(:prometheus) do
       Task.async_stream(queries, fn {name, query} ->
         case PrometheusClient.query(client, query, start, stop, step, ctx) do
