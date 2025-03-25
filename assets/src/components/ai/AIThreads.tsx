@@ -1,12 +1,10 @@
 import {
-  Breadcrumb,
   Button,
   Card,
   ChatOutlineIcon,
   Flex,
   GearTrainIcon,
   PushPinFilledIcon,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import {
@@ -27,22 +25,11 @@ import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
 import { isEmpty } from 'lodash'
 import { CSSProperties, useTheme } from 'styled-components'
-import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
-import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { AITable } from './AITable.tsx'
 import { sortThreadsOrPins } from './AITableEntry.tsx'
-import { AI_ABS_PATH, AI_THREADS_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
-
-const breadcrumbs: Breadcrumb[] = [
-  { label: 'plural-ai', url: AI_ABS_PATH },
-  { label: 'threads', url: AI_THREADS_ABS_PATH },
-]
 
 export function AIThreads() {
-  const aiEnabled = useAIEnabled()
-
   const threadsQuery = useFetchPaginatedData({
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
@@ -76,66 +63,28 @@ export function AIThreads() {
     [filteredPins, threadsQuery.data?.chatThreads?.edges]
   )
 
-  useSetBreadcrumbs(breadcrumbs)
-
-  if (aiEnabled === undefined) return <LoadingIndicator />
-
   return (
-    <ResponsivePageFullWidth
-      noPadding
-      maxContentWidth={1080}
+    <Flex
+      direction="column"
+      gap="medium"
+      paddingBottom="48px"
+      height="100%"
+      overflow="hidden"
     >
       <Flex
         direction="column"
-        gap="medium"
-        paddingBottom="48px"
+        gap="large"
         height="100%"
-        overflow="hidden"
       >
-        <Header />
-        {aiEnabled ? (
-          <Flex
-            direction="column"
-            gap="large"
-            height="100%"
-          >
-            <PinnedSection
-              filteredPins={filteredPins}
-              pinsQuery={pinsQuery}
-            />
-            <ThreadsSection
-              filteredThreads={filteredThreads}
-              threadsQuery={threadsQuery}
-            />
-          </Flex>
-        ) : (
-          <AIDisabledState />
-        )}
+        <PinnedSection
+          filteredPins={filteredPins}
+          pinsQuery={pinsQuery}
+        />
+        <ThreadsSection
+          filteredThreads={filteredThreads}
+          threadsQuery={threadsQuery}
+        />
       </Flex>
-    </ResponsivePageFullWidth>
-  )
-}
-
-function Header() {
-  const navigate = useNavigate()
-  return (
-    <Flex
-      justify="space-between"
-      align="center"
-    >
-      <StackedText
-        first="Plural AI"
-        second="View ongoing threads and saved insights at a glance."
-        firstPartialType="subtitle1"
-        secondPartialType="body2"
-      />
-      <Button
-        secondary
-        startIcon={<GearTrainIcon />}
-        onClick={() => navigate(`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`)}
-      >
-        Settings
-      </Button>
     </Flex>
   )
 }
@@ -276,7 +225,7 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
         />
       }
       message="Plural AI features are disabled"
-      description="Leverage Plural’s unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters."
+      description="Leverage Plural's unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters."
     >
       <Button
         startIcon={<GearTrainIcon />}
