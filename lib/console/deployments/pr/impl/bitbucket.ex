@@ -63,7 +63,14 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(conn, url) do
+    with {:ok, group, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      HTTPoison.get("#{conn.host}/repositories/#{URI.encode(group)}/pullrequests/#{number}/files", Connection.headers(conn))
+      |> IO.inspect()
+    end
+    {:ok, []}
+  end
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))

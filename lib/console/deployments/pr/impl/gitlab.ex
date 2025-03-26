@@ -70,7 +70,14 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(conn, url) do
+    with {:ok, group, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      HTTPoison.get("#{conn.host}/api/v4/projects/#{uri_encode(group)}/merge_requests/#{number}/changes")
+      |> IO.inspect()
+    end
+    {:ok, []}
+  end
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
