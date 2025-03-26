@@ -83,15 +83,8 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	if result != nil {
 		return *result, err
 	}
-	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, observer)
 	if err != nil {
-		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
-	}
-	if exists {
-		utils.MarkCondition(observer.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExisting(ctx, observer)
 	}
 
 	// Get ObservabilityProvider SHA that can be saved back in the status to check for changes
@@ -300,32 +293,6 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 	return target, actions, nil, err
 }
 
-func (r *ObserverReconciler) handleExisting(ctx context.Context, observer *v1alpha1.Observer) (ctrl.Result, error) {
-	exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if !exists {
-		observer.Status.ID = nil
-		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
-	}
-
-	apiProvider, err := r.ConsoleClient.GetObserver(ctx, nil, lo.ToPtr(observer.ObserverName()))
-	if err != nil {
-		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-
-	observer.Status.ID = &apiProvider.ID
-
-	utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(observer.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-
-	return requeue, nil
-}
-
 func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer *v1alpha1.Observer) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
@@ -342,7 +309,7 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 			return &ctrl.Result{}, err
 		}
 
-		if exists && !observer.Status.IsReadonly() {
+		if exists {
 			if err := r.ConsoleClient.DeleteObserver(ctx, observer.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -361,23 +328,6 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 	}
 
 	return nil, nil
-}
-
-func (r *ObserverReconciler) isAlreadyExists(ctx context.Context, observer *v1alpha1.Observer) (bool, error) {
-	if observer.Status.HasReadonlyCondition() {
-		return observer.Status.IsReadonly(), nil
-	}
-
-	exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
-	if err != nil {
-		return false, err
-	}
-
-	if !exists {
-		return false, nil
-	}
-
-	return !observer.Status.HasID(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
