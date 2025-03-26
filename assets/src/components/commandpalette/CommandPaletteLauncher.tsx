@@ -73,9 +73,9 @@ export default function CommandPaletteLauncher() {
         open={open}
         setOpen={setOpen}
       />
-      {commands.map(({ hotkeys, callback, options, deps }, i) => (
+      {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
-          key={i}
+          key={`${label}-${hotkeys[0]}`}
           hotkeys={hotkeys}
           callback={callback}
           options={options}

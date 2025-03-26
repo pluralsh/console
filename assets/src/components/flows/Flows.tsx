@@ -9,17 +9,17 @@ import {
 import { AIEmptyState } from 'components/ai/AIThreads'
 import { CardGrid } from 'components/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFlowsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useNavigate } from 'react-router-dom'
+import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { FlowCard } from './FlowCard'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useNavigate } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'flows', url: FLOWS_ABS_PATH }]
 // TODO: change this when we have actual docs for Flow

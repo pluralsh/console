@@ -26,7 +26,7 @@ import {
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
-import { ComponentType, useMemo } from 'react'
+import { ComponentType, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
@@ -56,6 +56,7 @@ import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
+import { FlowsContext } from 'components/flows/FlowsContext.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -100,8 +101,9 @@ export type CommandWithHotkeys = Command & { hotkeys: string[] }
 export const hasHotkeys = (command): command is CommandWithHotkeys =>
   !isEmpty(command.hotkeys)
 
+// just used for creating the hotkey listeners, not for displaying the commands in the palette
 export function useCommandsWithHotkeys() {
-  const commands = useCommands()
+  const commands = useCommands({ showHidden: true })
 
   return useMemo(
     () =>
@@ -113,11 +115,16 @@ export function useCommandsWithHotkeys() {
   )
 }
 
-export function useCommands(): CommandGroup[] {
+export function useCommands({
+  showHidden = false,
+}: {
+  showHidden?: boolean
+} = {}): CommandGroup[] {
   const open = useShareSecretOpen()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
+  const { flowsEnabled, setFlowsEnabled } = use(FlowsContext)
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -132,6 +139,27 @@ export function useCommands(): CommandGroup[] {
       ? (clusters.find(({ self }) => !!self) ?? clusters[0])
       : undefined
   }, [data?.clusters])
+
+  const hiddenCommands = useMemo(
+    () => [
+      {
+        commands: [
+          ...(!flowsEnabled
+            ? [
+                {
+                  label: 'Enable Flows',
+                  icon: FlowIcon,
+                  callback: () => setFlowsEnabled(true),
+                  deps: [setFlowsEnabled],
+                  hotkeys: ['shift F+L'],
+                },
+              ]
+            : []),
+        ],
+      },
+    ],
+    [flowsEnabled, setFlowsEnabled]
+  )
 
   return useMemo(
     () => [
@@ -180,13 +208,17 @@ export function useCommands(): CommandGroup[] {
             deps: [navigate],
             hotkeys: ['shift A'],
           },
-          {
-            label: 'Flows',
-            icon: FlowIcon,
-            callback: () => navigate(FLOWS_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift F'],
-          },
+          ...(flowsEnabled
+            ? [
+                {
+                  label: 'Flows',
+                  icon: FlowIcon,
+                  callback: () => navigate(FLOWS_ABS_PATH),
+                  deps: [navigate],
+                  hotkeys: ['shift F'],
+                },
+              ]
+            : []),
           {
             label: 'Edge',
             icon: EdgeComputeIcon,
@@ -306,7 +338,16 @@ export function useCommands(): CommandGroup[] {
           },
         ],
       },
+      ...(showHidden ? hiddenCommands : []),
     ],
-    [navigate, cluster?.id, mode, open]
+    [
+      navigate,
+      flowsEnabled,
+      cluster?.id,
+      open,
+      mode,
+      showHidden,
+      hiddenCommands,
+    ]
   )
 }

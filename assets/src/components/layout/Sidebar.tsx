@@ -31,7 +31,14 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  ReactElement,
+  use,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -51,12 +58,13 @@ import { useLogin } from '../contexts'
 
 import HelpLauncher from '../help/HelpLauncher'
 
+import { FlowsContext } from 'components/flows/FlowsContext.tsx'
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
-import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 
 type MenuItem = {
   text: string
@@ -72,11 +80,13 @@ type MenuItem = {
 // Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
 function getMenuItems({
   isCDEnabled,
+  flowsEnabled,
   cdPath,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
+  flowsEnabled: boolean
   cdPath: string
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
@@ -126,13 +136,17 @@ function getMenuItems({
       path: AI_ABS_PATH,
       hotkeys: ['shift A'],
     },
-    {
-      text: 'Flows',
-      expandedLabel: 'Flows',
-      icon: <FlowIcon />,
-      path: FLOWS_ABS_PATH,
-      hotkeys: ['shift F'],
-    },
+    ...(flowsEnabled
+      ? [
+          {
+            text: 'Flows',
+            expandedLabel: 'Flows',
+            icon: <FlowIcon />,
+            path: FLOWS_ABS_PATH,
+            hotkeys: ['shift F'],
+          },
+        ]
+      : []),
     {
       text: 'Edge',
       expandedLabel: 'Edge',
@@ -217,6 +231,7 @@ export default function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const { me, configuration, personaConfiguration } = useLogin()
+  const { flowsEnabled } = use(FlowsContext)
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -231,10 +246,17 @@ export default function Sidebar() {
       getMenuItems({
         isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
+        flowsEnabled,
         cdPath: defaultCDPath,
         personaConfig: personaConfiguration,
       }),
-    [personaConfiguration, configuration?.isSandbox, isCDEnabled, defaultCDPath]
+    [
+      configuration?.isSandbox,
+      isCDEnabled,
+      flowsEnabled,
+      defaultCDPath,
+      personaConfiguration,
+    ]
   )
 
   const { logout } = useLogin()
