@@ -9,7 +9,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { useAuditsQuery } from 'generated/graphql'
+import { AuditFragment, useAuditsQuery } from 'generated/graphql'
 import { useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -24,13 +24,12 @@ import { AUDITS_BREADCRUMBS } from './Audits'
 
 const FETCH_MARGIN = 30
 
-const COLUMN_HELPER = createColumnHelper<any>()
+const COLUMN_HELPER = createColumnHelper<AuditFragment>()
 
 const columns = [
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'action',
-    header: () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    header: function Cell() {
       const theme = useTheme()
 
       return (
@@ -99,8 +98,7 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'locationIp',
-    header: () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    header: function Cell() {
       const theme = useTheme()
 
       return (

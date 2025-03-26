@@ -1,24 +1,23 @@
-import { ArrowTopRightIcon, Button, Flex } from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button, Flex, Table } from '@pluralsh/design-system'
 import { FLOW_DOCS_URL } from 'components/flows/Flows'
+import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useMcpServersQuery } from 'generated/graphql'
+import { useMemo } from 'react'
 import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { mcpServerColsFull } from './McpServerTableCols'
 
 export function McpServers() {
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useMcpServersQuery,
-    keyPath: ['mcpServer'],
-  })
-  console.log({ data })
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useMcpServersQuery,
+      keyPath: ['mcpServers'],
+    })
+  const mcpServers = useMemo(() => mapExistingNodes(data?.mcpServers), [data])
+  if (error) return <GqlError error={error} />
+
   return (
     <WrapperSC>
       <Flex justifyContent="space-between">
@@ -41,7 +40,20 @@ export function McpServers() {
           Add MCP server via CRD
         </Button>
       </Flex>
-      <div>table</div>
+      <Table
+        fullHeightWrap
+        virtualizeRows
+        fillLevel={1}
+        hideHeader
+        rowBg="base"
+        loading={!data && loading}
+        data={mcpServers}
+        columns={mcpServerColsFull}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
     </WrapperSC>
   )
 }
@@ -49,6 +61,7 @@ export function McpServers() {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'hidden',
   height: '100%',
   gap: theme.spacing.medium,
 }))
