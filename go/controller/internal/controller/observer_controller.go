@@ -330,23 +330,6 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 	return nil, nil
 }
 
-func (r *ObserverReconciler) isAlreadyExists(ctx context.Context, observer *v1alpha1.Observer) (bool, error) {
-	if observer.Status.HasReadonlyCondition() {
-		return observer.Status.IsReadonly(), nil
-	}
-
-	exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
-	if err != nil {
-		return false, err
-	}
-
-	if !exists {
-		return false, nil
-	}
-
-	return !observer.Status.HasID(), nil
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *ObserverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
