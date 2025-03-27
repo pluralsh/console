@@ -39,13 +39,22 @@ defmodule Console.AI.Vector.Elastic do
   @headers [{"Content-Type", "application/json"}]
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
+    with {:ok, _} <- drop_index(es, index),
+         :ok <- create_index(es, index) do
+      initialized()
+    end
+  end
+
+  defp drop_index(%__MODULE__{conn: %Elastic{index: index} = es}, _) do
+    url(es, index)
+    |> HTTPoison.delete(headers(es))
+    |> handle_response("could not drop elasticsearch index:")
+  end
+
+  defp create_index(%__MODULE__{conn: %Elastic{index: index} = es}, _) do
     url(es, index)
     |> HTTPoison.put(Jason.encode!(@index_mappings), headers(es))
-    |> handle_response("could not initialize elasticsearch:")
-    |> case do
-      :ok -> initialized()
-      err -> err
-    end
+    |> handle_response("could not create elasticsearch index:")
   end
 
   def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts \\ []) do

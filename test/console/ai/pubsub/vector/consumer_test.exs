@@ -18,6 +18,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
         openai: %{access_token: "key"}
       })
       drop_index(vector_index())
+      refresh(vector_index())
 
       insert(:scm_connection, default: true, type: :github)
       flow = insert(:flow)

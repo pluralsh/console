@@ -8,6 +8,7 @@ defmodule Console.TestHelpers do
 
   def deployment_settings(args \\ []) do
     Console.Cache.flush()
+    Console.Repo.delete_all(Console.Schema.DeploymentSettings)
     insert(:deployment_settings, args)
   end
 

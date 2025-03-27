@@ -197,9 +197,18 @@ defmodule Console.Deployments.Settings do
   @spec vector_store_initialized() :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def vector_store_initialized() do
-    fetch_consistent()
-    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true}}})
+    settings = fetch_consistent()
+    ai = settings.ai || %{}
+    vector_store = (ai.vector_store || %{}) |> Map.put(:initialized, true)
+    ai = Map.put(ai, :vector_store, vector_store)
+
+    settings
+    |> Ecto.Changeset.change(%{ai: ai})
     |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, updated}
+      {:error, changeset} -> {:error, "Failed to update vector store initialization: #{inspect(changeset.errors)}"}
+    end
   end
 
   @doc """
