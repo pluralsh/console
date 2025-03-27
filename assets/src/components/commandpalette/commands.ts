@@ -56,7 +56,7 @@ import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
-import { FlowsContext } from 'components/flows/FlowsContext.tsx'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -124,7 +124,7 @@ export function useCommands({
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
-  const { flowsEnabled, setFlowsEnabled } = use(FlowsContext)
+  const { featureFlags, setFeatureFlag } = use(FeatureFlagContext)
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -144,21 +144,31 @@ export function useCommands({
     () => [
       {
         commands: [
-          ...(!flowsEnabled
+          ...(!featureFlags.Flows
             ? [
                 {
                   label: 'Enable Flows',
                   icon: FlowIcon,
-                  callback: () => setFlowsEnabled(true),
-                  deps: [setFlowsEnabled],
+                  callback: () => setFeatureFlag('Flows', true),
+                  deps: [setFeatureFlag],
                   hotkeys: ['shift F+L'],
+                },
+              ]
+            : []),
+          ...(!featureFlags.Edge
+            ? [
+                {
+                  label: 'Enable Edge',
+                  icon: EdgeComputeIcon,
+                  callback: () => setFeatureFlag('Edge', true),
+                  deps: [setFeatureFlag],
                 },
               ]
             : []),
         ],
       },
     ],
-    [flowsEnabled, setFlowsEnabled]
+    [featureFlags, setFeatureFlag]
   )
 
   return useMemo(
@@ -208,7 +218,7 @@ export function useCommands({
             deps: [navigate],
             hotkeys: ['shift A'],
           },
-          ...(flowsEnabled
+          ...(featureFlags.Flows
             ? [
                 {
                   label: 'Flows',
@@ -219,13 +229,17 @@ export function useCommands({
                 },
               ]
             : []),
-          {
-            label: 'Edge',
-            icon: EdgeComputeIcon,
-            callback: () => navigate(EDGE_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift E'],
-          },
+          ...(featureFlags.Edge
+            ? [
+                {
+                  label: 'Edge',
+                  icon: EdgeComputeIcon,
+                  callback: () => navigate(EDGE_ABS_PATH),
+                  deps: [navigate],
+                  hotkeys: ['shift E'],
+                },
+              ]
+            : []),
           {
             label: "Pull requests (PR's)",
             icon: PrOpenIcon,
@@ -342,7 +356,8 @@ export function useCommands({
     ],
     [
       navigate,
-      flowsEnabled,
+      featureFlags.Flows,
+      featureFlags.Edge,
       cluster?.id,
       open,
       mode,

@@ -58,7 +58,10 @@ import { useLogin } from '../contexts'
 
 import HelpLauncher from '../help/HelpLauncher'
 
-import { FlowsContext } from 'components/flows/FlowsContext.tsx'
+import {
+  FeatureFlagContext,
+  FeatureFlags,
+} from 'components/flows/FeatureFlagContext.tsx'
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
@@ -80,13 +83,13 @@ type MenuItem = {
 // Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
 function getMenuItems({
   isCDEnabled,
-  flowsEnabled,
+  featureFlags,
   cdPath,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
-  flowsEnabled: boolean
+  featureFlags: FeatureFlags
   cdPath: string
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
@@ -136,7 +139,7 @@ function getMenuItems({
       path: AI_ABS_PATH,
       hotkeys: ['shift A'],
     },
-    ...(flowsEnabled
+    ...(featureFlags.Flows
       ? [
           {
             text: 'Flows',
@@ -147,13 +150,17 @@ function getMenuItems({
           },
         ]
       : []),
-    {
-      text: 'Edge',
-      expandedLabel: 'Edge',
-      icon: <EdgeComputeIcon />,
-      path: EDGE_ABS_PATH,
-      hotkeys: ['shift E'],
-    },
+    ...(featureFlags.Edge
+      ? [
+          {
+            text: 'Edge',
+            expandedLabel: 'Edge',
+            icon: <EdgeComputeIcon />,
+            path: EDGE_ABS_PATH,
+            hotkeys: ['shift E'],
+          },
+        ]
+      : []),
     {
       text: 'PRs',
       expandedLabel: 'Pull requests',
@@ -231,7 +238,7 @@ export default function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const { me, configuration, personaConfiguration } = useLogin()
-  const { flowsEnabled } = use(FlowsContext)
+  const { featureFlags } = use(FeatureFlagContext)
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -246,14 +253,14 @@ export default function Sidebar() {
       getMenuItems({
         isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
-        flowsEnabled,
+        featureFlags,
         cdPath: defaultCDPath,
         personaConfig: personaConfiguration,
       }),
     [
       configuration?.isSandbox,
       isCDEnabled,
-      flowsEnabled,
+      featureFlags,
       defaultCDPath,
       personaConfiguration,
     ]

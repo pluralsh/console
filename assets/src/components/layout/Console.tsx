@@ -28,7 +28,7 @@ import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
 import { useTheme } from 'styled-components'
-import { FlowsEnabledProvider } from 'components/flows/FlowsContext'
+import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 
 export default function Console() {
   return (
@@ -43,9 +43,9 @@ export default function Console() {
                     <ShareSecretProvider>
                       <DeploymentSettingsProvider>
                         <AIContextProvider>
-                          <FlowsEnabledProvider>
+                          <FeatureFlagProvider>
                             <ConsoleContent />
-                          </FlowsEnabledProvider>
+                          </FeatureFlagProvider>
                         </AIContextProvider>
                       </DeploymentSettingsProvider>
                     </ShareSecretProvider>
