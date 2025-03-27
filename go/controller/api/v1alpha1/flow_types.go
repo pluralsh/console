@@ -23,7 +23,7 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Bindings contain read and write policies of this cluster
+	// Bindings contain read and write policies of this Flow
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 

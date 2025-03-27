@@ -56,6 +56,45 @@ spec:
                     description: Plural turns on built-in Plural JWT authentication.
                     type: boolean
                 type: object
+              bindings:
+                description: Bindings contain read and write policies of this MCP
+                  server
+                properties:
+                  read:
+                    description: Read bindings.
+                    items:
+                      description: Binding ...
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                  write:
+                    description: Write bindings.
+                    items:
+                      description: Binding ...
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                type: object
               confirm:
                 description: Confirm whether a tool call against this server should
                   require user confirmation.

@@ -1095,6 +1095,12 @@ type McpServer {
   "whether a tool call against this server should require user confirmation"
   confirm: Boolean
 
+  "read policy for this mcp server"
+  readBindings: [PolicyBinding]
+
+  "write policy for this mcp server"
+  writeBindings: [PolicyBinding]
+
   audits(after: String, first: Int, before: String, last: Int): McpServerAuditConnection
 
   insertedAt: DateTime
