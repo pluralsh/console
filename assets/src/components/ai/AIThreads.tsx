@@ -107,7 +107,7 @@ function PinnedSection({
         firstPartialType="subtitle2"
       />
       {isEmpty(filteredPins) && pinsQuery.data ? (
-        <AIEmptyState
+        <EmptyStateCompact
           icon={
             <PushPinFilledIcon
               color="icon-primary"
@@ -147,7 +147,7 @@ function ThreadsSection({
         firstPartialType="subtitle2"
       />
       {isEmpty(filteredThreads) && threadsQuery.data ? (
-        <AIEmptyState
+        <EmptyStateCompact
           icon={
             <ChatOutlineIcon
               color="icon-primary"
@@ -167,7 +167,7 @@ function ThreadsSection({
   )
 }
 
-export function AIEmptyState({
+export function EmptyStateCompact({
   message,
   description,
   icon,
@@ -215,7 +215,7 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
   const navigate = useNavigate()
 
   return (
-    <AIEmptyState
+    <EmptyStateCompact
       cssProps={{ justifyContent: 'start', ...cssProps }}
       icon={
         <img
@@ -233,6 +233,6 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
       >
         Go to settings
       </Button>
-    </AIEmptyState>
+    </EmptyStateCompact>
   )
 }

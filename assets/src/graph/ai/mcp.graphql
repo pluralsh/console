@@ -3,6 +3,12 @@ fragment McpServer on McpServer {
   name
   url
   confirm
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
   authentication {
     headers {
       name

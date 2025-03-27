@@ -375,26 +375,6 @@ mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
   }
 }
 
-mutation UpdateRbac(
-  $serviceId: ID
-  $clusterId: ID
-  $pipelineId: ID
-  $stackId: ID
-  $projectId: ID
-  $flowId: ID
-  $rbac: RbacAttributes!
-) {
-  updateRbac(
-    serviceId: $serviceId
-    clusterId: $clusterId
-    pipelineId: $pipelineId
-    stackId: $stackId
-    projectId: $projectId
-    flowId: $flowId
-    rbac: $rbac
-  )
-}
-
 mutation SelfManage($values: String!) {
   selfManage(values: $values) {
     ...ServiceDeploymentsRow

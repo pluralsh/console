@@ -1,5 +1,5 @@
 import { Flex, SubTab } from '@pluralsh/design-system'
-import { PageHeaderProvider } from 'components/cd/ContinuousDeployment'
+import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -22,7 +22,7 @@ export function Security() {
   const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
 
   return (
-    <PageHeaderProvider value={ctx}>
+    <PageHeaderContext value={ctx}>
       <WrapperSC>
         <HeaderWrapperSC>
           <Flex>
@@ -43,7 +43,7 @@ export function Security() {
         </HeaderWrapperSC>
         <Outlet />
       </WrapperSC>
-    </PageHeaderProvider>
+    </PageHeaderContext>
   )
 }
 

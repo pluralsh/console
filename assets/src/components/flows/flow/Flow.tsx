@@ -18,15 +18,14 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFlowQuery } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
-import { ChangeMcpConnectionsModal } from './ChangeMcpConnectionsModal'
+import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
@@ -47,12 +46,14 @@ export function Flow() {
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowId}/:tab/*`)?.params.tab
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(flowId, tab), [flowId, tab]))
   const [showPermissions, setShowPermissions] = useState(false)
-  const [showConnectionsModal, setShowConnectionsModal] = useState(false)
 
   const { data, loading, error, refetch } = useFlowQuery({
     variables: { id: flowId ?? '' },
   })
   const flow = data?.flow
+
+  const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)
+  const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
 
   if (error) return <GqlError error={error} />
   if (!data && loading) return <LoadingIndicator />
@@ -71,7 +72,7 @@ export function Flow() {
     )
 
   return (
-    <>
+    <PageHeaderContext value={ctx}>
       <WrapperSC>
         <HeaderSC>
           <IconFrame
@@ -109,31 +110,12 @@ export function Flow() {
         </HeaderSC>
         <Flex justify="space-between">
           <SubTabs directory={directory} />
-          <Flex gap="small">
-            <Button
-              secondary
-              as={Link}
-              to={AI_MCP_SERVERS_ABS_PATH}
-            >
-              View all MCP servers
-            </Button>
-            <Button
-              secondary
-              onClick={() => setShowConnectionsModal(true)}
-            >
-              Change MCP connections
-            </Button>
-          </Flex>
+          {headerContent}
         </Flex>
         <ContentSC>
-          <Outlet />
+          <Outlet context={flow} />
         </ContentSC>
       </WrapperSC>
-      {/* Modals */}
-      <ChangeMcpConnectionsModal
-        open={showConnectionsModal}
-        onClose={() => setShowConnectionsModal(false)}
-      />
       <PermissionsModal
         id={flow.id}
         type={PermissionsIdType.Flow}
@@ -143,7 +125,7 @@ export function Flow() {
         open={showPermissions}
         onClose={() => setShowPermissions(false)}
       />
-    </>
+    </PageHeaderContext>
   )
 }
 

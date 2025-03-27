@@ -7,14 +7,26 @@ import { useMcpServersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { mcpServerColsFull } from './McpServerTableCols'
+import {
+  ColActions,
+  ColConfirm,
+  ColInfo,
+  McpTableAction,
+} from './McpServerTableCols'
 
 export function McpServers() {
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useMcpServersQuery,
-      keyPath: ['mcpServers'],
-    })
+  const {
+    data,
+    loading,
+    error,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+    refetch,
+  } = useFetchPaginatedData({
+    queryHook: useMcpServersQuery,
+    keyPath: ['mcpServers'],
+  })
   const mcpServers = useMemo(() => mapExistingNodes(data?.mcpServers), [data])
   if (error) return <GqlError error={error} />
 
@@ -48,11 +60,13 @@ export function McpServers() {
         rowBg="base"
         loading={!data && loading}
         data={mcpServers}
-        columns={mcpServerColsFull}
+        columns={cols}
+        reactTableOptions={{ meta: { actions, refetch } }}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No MCP servers found.' }}
       />
     </WrapperSC>
   )
@@ -65,3 +79,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   gap: theme.spacing.medium,
 }))
+
+const cols = [ColInfo, ColConfirm, ColActions]
+const actions: McpTableAction[] = ['audit', 'permissions', 'view']

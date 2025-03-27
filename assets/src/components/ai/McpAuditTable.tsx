@@ -1,4 +1,4 @@
-import { AppIcon, Flex, Table } from '@pluralsh/design-system'
+import { AppIcon, Flex, Modal, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import {
@@ -35,6 +35,7 @@ export function McpAuditTable({ id }: { id: string }) {
       fillLevel={1}
       width={768}
       loading={!data && loading}
+      loadingSkeletonRows={4}
       data={audits}
       columns={columns}
       hasNextPage={pageInfo?.hasNextPage}
@@ -43,6 +44,29 @@ export function McpAuditTable({ id }: { id: string }) {
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No audits found.' }}
     />
+  )
+}
+
+export function McpAuditModal({
+  id,
+  name,
+  open,
+  onClose,
+}: {
+  id: string
+  name: string
+  open: boolean
+  onClose: () => void
+}) {
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      header={`"${name}" mcp server audit trail`}
+      size="custom"
+    >
+      <McpAuditTable id={id} />
+    </Modal>
   )
 }
 

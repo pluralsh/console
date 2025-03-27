@@ -6,7 +6,7 @@ import {
   FlowIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { AIEmptyState } from 'components/ai/AIThreads'
+import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { CardGrid } from 'components/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -84,7 +84,7 @@ export function Flows() {
 
 function FlowEmptyState() {
   return (
-    <AIEmptyState
+    <EmptyStateCompact
       message="You do not have any Flows yet"
       description="You can generate your first one via CRD"
       cssProps={{ height: 'fit-content' }}
@@ -104,7 +104,7 @@ function FlowEmptyState() {
       >
         Read the docs
       </Button>
-    </AIEmptyState>
+    </EmptyStateCompact>
   )
 }
 

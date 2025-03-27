@@ -1,19 +1,32 @@
 import {
   Chip,
-  EyeIcon,
+  Flex,
   IconFrame,
   ListIcon,
-  Modal,
+  PeopleIcon,
+  Spinner,
+  TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
-import { McpAuditTable } from './McpAuditTable'
+import { McpAuditModal } from './McpAuditTable'
+import { ViewMcpServerDetails } from './McpServerDetails'
+import {
+  PermissionsIdType,
+  PermissionsModal,
+} from 'components/cd/utils/PermissionsModal'
+
+export type McpTableAction =
+  | 'audit'
+  | 'permissions'
+  | 'view'
+  | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 
-const ColInfo = columnHelper.accessor((server) => server, {
+export const ColInfo = columnHelper.accessor((server) => server, {
   id: 'name',
   header: '',
   meta: { gridTemplate: '1fr' },
@@ -30,7 +43,7 @@ const ColInfo = columnHelper.accessor((server) => server, {
   },
 })
 
-const ColConfirm = columnHelper.accessor((server) => server.confirm, {
+export const ColConfirm = columnHelper.accessor((server) => server.confirm, {
   id: 'confirm',
   header: '',
   cell: function Cell({ getValue }) {
@@ -38,68 +51,133 @@ const ColConfirm = columnHelper.accessor((server) => server.confirm, {
   },
 })
 
-const ColAudit = columnHelper.accessor((server) => server, {
-  id: 'audit',
+export const ColActions = columnHelper.accessor((server) => server, {
+  id: 'actions',
   header: '',
-  cell: function Cell({ getValue }) {
-    const [showModal, setShowModal] = useState(false)
-    const { id, name } = getValue()
+  cell: function Cell({ getValue, table: { options } }) {
+    const { actions, removeServer, loading } =
+      (options.meta as {
+        actions?: McpTableAction[]
+        removeServer?: (server: McpServerFragment) => void
+        loading?: boolean
+      }) ?? {}
+    const server = getValue()
     return (
-      <>
-        <IconFrame
-          clickable
-          tooltip="Audit trail"
-          onClick={() => setShowModal(true)}
-          icon={<ListIcon />}
-        />
-        <Modal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          header={`"${name}" mcp server audit trail`}
-          size="custom"
-        >
-          <McpAuditTable id={id} />
-        </Modal>
-      </>
+      <Flex gap="xsmall">
+        {actions?.includes('audit') && (
+          <AuditAction
+            id={server.id}
+            name={server.name}
+          />
+        )}
+        {actions?.includes('permissions') && (
+          <PermissionsAction server={server} />
+        )}
+        {actions?.includes('view') && (
+          <ViewAction
+            server={server}
+            removeServer={removeServer}
+            loading={loading}
+          />
+        )}
+        {actions?.includes('removeConnection') && (
+          <RemoveConnectionAction
+            server={server}
+            removeServer={removeServer}
+            loading={loading}
+          />
+        )}
+      </Flex>
     )
   },
 })
 
-// TODO: once support added on server
-// const ColPermissions = columnHelper.accessor((server) => server, {
-//   id: 'permissions',
-//   header: '',
-//   cell: function Cell({ getValue }) {
-//     return (
-//       <IconFrame
-//         clickable
-//         tooltip="Permissions"
-//         icon={<PeopleIcon />}
-//       />
-//     )
-//   },
-// })
-
-const ColView = columnHelper.accessor((server) => server, {
-  id: 'view',
-  header: '',
-  cell: function Cell() {
-    return (
+function AuditAction({ id, name }: { id: string; name: string }) {
+  const [showModal, setShowModal] = useState(false)
+  return (
+    <>
       <IconFrame
         clickable
-        tooltip="View"
-        icon={<EyeIcon />}
+        tooltip="Audit trail"
+        onClick={() => setShowModal(true)}
+        icon={<ListIcon />}
       />
-    )
-  },
-})
+      <McpAuditModal
+        id={id}
+        name={name}
+        open={showModal}
+        onClose={() => setShowModal(false)}
+      />
+    </>
+  )
+}
 
-export const mcpServerColsBasic = [ColInfo, ColConfirm, ColView]
+function PermissionsAction({
+  server,
+  refetch,
+}: {
+  server: McpServerFragment
+  refetch?: () => void
+}) {
+  const [showPermissions, setShowPermissions] = useState(false)
+  return (
+    <>
+      <IconFrame
+        clickable
+        tooltip="Permissions"
+        onClick={() => setShowPermissions(true)}
+        icon={<PeopleIcon />}
+      />
+      <PermissionsModal
+        id={server.id}
+        type={PermissionsIdType.McpServer}
+        bindings={server}
+        header="MCP server permissions"
+        refetch={refetch}
+        open={showPermissions}
+        onClose={() => setShowPermissions(false)}
+      />
+    </>
+  )
+}
 
-export const mcpServerColsFull = [
-  ColInfo,
-  ColConfirm,
-  ColAudit,
-  // ColPermissions,
-  ColView,
-]
+function ViewAction({
+  server,
+  removeServer,
+  loading,
+}: {
+  server: McpServerFragment
+  removeServer?: (server: McpServerFragment) => void
+  loading?: boolean
+}) {
+  const onDisconnect = removeServer ? () => removeServer(server) : undefined
+  return (
+    <ViewMcpServerDetails
+      server={server}
+      onDisconnect={onDisconnect}
+      loading={loading}
+    />
+  )
+}
+
+function RemoveConnectionAction({
+  server,
+  removeServer,
+  loading,
+}: {
+  server: McpServerFragment
+  removeServer?: (server: McpServerFragment) => void
+  loading?: boolean
+}) {
+  const onDisconnect = removeServer ? () => removeServer(server) : undefined
+  if (!onDisconnect) return null
+  return (
+    <IconFrame
+      clickable
+      disabled={loading}
+      icon={loading ? <Spinner /> : <TrashCanIcon />}
+      tooltip="Remove connection"
+      onClick={onDisconnect}
+    />
+  )
+}

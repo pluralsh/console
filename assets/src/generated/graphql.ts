@@ -10253,11 +10253,11 @@ export type AiFixPrMutationVariables = Exact<{
 
 export type AiFixPrMutation = { __typename?: 'RootMutationType', aiFixPr?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null };
 
-export type McpServerFragment = { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null };
+export type McpServerFragment = { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null };
 
 export type McpServerAuditFragment = { __typename?: 'McpServerAudit', id: string, arguments?: Record<string, unknown> | null, tool: string, insertedAt?: string | null, updatedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
-export type McpServerConnectionFragment = { __typename?: 'McpServerConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'McpServerEdge', node?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null };
+export type McpServerConnectionFragment = { __typename?: 'McpServerConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'McpServerEdge', node?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null };
 
 export type McpServersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -10266,14 +10266,14 @@ export type McpServersQueryVariables = Exact<{
 }>;
 
 
-export type McpServersQuery = { __typename?: 'RootQueryType', mcpServers?: { __typename?: 'McpServerConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'McpServerEdge', node?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null } | null };
+export type McpServersQuery = { __typename?: 'RootQueryType', mcpServers?: { __typename?: 'McpServerConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'McpServerEdge', node?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null } | null };
 
 export type McpServerQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type McpServerQuery = { __typename?: 'RootQueryType', mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null };
+export type McpServerQuery = { __typename?: 'RootQueryType', mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null };
 
 export type McpServerAuditsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10289,7 +10289,7 @@ export type UpsertMcpServerMutationVariables = Exact<{
 }>;
 
 
-export type UpsertMcpServerMutation = { __typename?: 'RootMutationType', upsertMcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null };
+export type UpsertMcpServerMutation = { __typename?: 'RootMutationType', upsertMcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null };
 
 export type DeleteMcpServerMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11466,19 +11466,6 @@ export type ProceedServiceMutationVariables = Exact<{
 
 export type ProceedServiceMutation = { __typename?: 'RootMutationType', proceed?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', name: string, status?: ServiceDeploymentStatus | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, deletedAt?: string | null } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
 
-export type UpdateRbacMutationVariables = Exact<{
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
-  clusterId?: InputMaybe<Scalars['ID']['input']>;
-  pipelineId?: InputMaybe<Scalars['ID']['input']>;
-  stackId?: InputMaybe<Scalars['ID']['input']>;
-  projectId?: InputMaybe<Scalars['ID']['input']>;
-  flowId?: InputMaybe<Scalars['ID']['input']>;
-  rbac: RbacAttributes;
-}>;
-
-
-export type UpdateRbacMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
-
 export type SelfManageMutationVariables = Exact<{
   values: Scalars['String']['input'];
 }>;
@@ -11699,7 +11686,14 @@ export type FlowMcpServersQueryVariables = Exact<{
 }>;
 
 
-export type FlowMcpServersQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, servers?: Array<{ __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null> | null } | null };
+export type FlowMcpServersQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, servers?: Array<{ __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null> | null } | null };
+
+export type UpsertFlowMutationVariables = Exact<{
+  attributes: FlowAttributes;
+}>;
+
+
+export type UpsertFlowMutation = { __typename?: 'RootMutationType', upsertFlow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -12280,6 +12274,20 @@ export type DeleteProjectMutationVariables = Exact<{
 
 
 export type DeleteProjectMutation = { __typename?: 'RootMutationType', deleteProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type UpdateRbacMutationVariables = Exact<{
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  stackId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
+  serverId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+}>;
+
+
+export type UpdateRbacMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
 
 export type ServiceAccountsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -13081,6 +13089,12 @@ export const McpServerFragmentDoc = gql`
   name
   url
   confirm
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
   authentication {
     headers {
       name
@@ -13089,7 +13103,7 @@ export const McpServerFragmentDoc = gql`
     plural
   }
 }
-    `;
+    ${PolicyBindingFragmentDoc}`;
 export const McpServerConnectionFragmentDoc = gql`
     fragment McpServerConnection on McpServerConnection {
   pageInfo {
@@ -22239,51 +22253,6 @@ export function useProceedServiceMutation(baseOptions?: Apollo.MutationHookOptio
 export type ProceedServiceMutationHookResult = ReturnType<typeof useProceedServiceMutation>;
 export type ProceedServiceMutationResult = Apollo.MutationResult<ProceedServiceMutation>;
 export type ProceedServiceMutationOptions = Apollo.BaseMutationOptions<ProceedServiceMutation, ProceedServiceMutationVariables>;
-export const UpdateRbacDocument = gql`
-    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $projectId: ID, $flowId: ID, $rbac: RbacAttributes!) {
-  updateRbac(
-    serviceId: $serviceId
-    clusterId: $clusterId
-    pipelineId: $pipelineId
-    stackId: $stackId
-    projectId: $projectId
-    flowId: $flowId
-    rbac: $rbac
-  )
-}
-    `;
-export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, UpdateRbacMutationVariables>;
-
-/**
- * __useUpdateRbacMutation__
- *
- * To run a mutation, you first call `useUpdateRbacMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateRbacMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateRbacMutation, { data, loading, error }] = useUpdateRbacMutation({
- *   variables: {
- *      serviceId: // value for 'serviceId'
- *      clusterId: // value for 'clusterId'
- *      pipelineId: // value for 'pipelineId'
- *      stackId: // value for 'stackId'
- *      projectId: // value for 'projectId'
- *      flowId: // value for 'flowId'
- *      rbac: // value for 'rbac'
- *   },
- * });
- */
-export function useUpdateRbacMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRbacMutation, UpdateRbacMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateRbacMutation, UpdateRbacMutationVariables>(UpdateRbacDocument, options);
-      }
-export type UpdateRbacMutationHookResult = ReturnType<typeof useUpdateRbacMutation>;
-export type UpdateRbacMutationResult = Apollo.MutationResult<UpdateRbacMutation>;
-export type UpdateRbacMutationOptions = Apollo.BaseMutationOptions<UpdateRbacMutation, UpdateRbacMutationVariables>;
 export const SelfManageDocument = gql`
     mutation SelfManage($values: String!) {
   selfManage(values: $values) {
@@ -23308,6 +23277,39 @@ export type FlowMcpServersQueryHookResult = ReturnType<typeof useFlowMcpServersQ
 export type FlowMcpServersLazyQueryHookResult = ReturnType<typeof useFlowMcpServersLazyQuery>;
 export type FlowMcpServersSuspenseQueryHookResult = ReturnType<typeof useFlowMcpServersSuspenseQuery>;
 export type FlowMcpServersQueryResult = Apollo.QueryResult<FlowMcpServersQuery, FlowMcpServersQueryVariables>;
+export const UpsertFlowDocument = gql`
+    mutation UpsertFlow($attributes: FlowAttributes!) {
+  upsertFlow(attributes: $attributes) {
+    ...FlowBasic
+  }
+}
+    ${FlowBasicFragmentDoc}`;
+export type UpsertFlowMutationFn = Apollo.MutationFunction<UpsertFlowMutation, UpsertFlowMutationVariables>;
+
+/**
+ * __useUpsertFlowMutation__
+ *
+ * To run a mutation, you first call `useUpsertFlowMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertFlowMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertFlowMutation, { data, loading, error }] = useUpsertFlowMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertFlowMutation(baseOptions?: Apollo.MutationHookOptions<UpsertFlowMutation, UpsertFlowMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertFlowMutation, UpsertFlowMutationVariables>(UpsertFlowDocument, options);
+      }
+export type UpsertFlowMutationHookResult = ReturnType<typeof useUpsertFlowMutation>;
+export type UpsertFlowMutationResult = Apollo.MutationResult<UpsertFlowMutation>;
+export type UpsertFlowMutationOptions = Apollo.BaseMutationOptions<UpsertFlowMutation, UpsertFlowMutationVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $first: Int = 20, $after: String) {
   groups(q: $q, first: $first, after: $after) {
@@ -25663,6 +25665,53 @@ export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
 export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const UpdateRbacDocument = gql`
+    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $projectId: ID, $flowId: ID, $serverId: ID, $rbac: RbacAttributes!) {
+  updateRbac(
+    serviceId: $serviceId
+    clusterId: $clusterId
+    pipelineId: $pipelineId
+    stackId: $stackId
+    projectId: $projectId
+    flowId: $flowId
+    serverId: $serverId
+    rbac: $rbac
+  )
+}
+    `;
+export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, UpdateRbacMutationVariables>;
+
+/**
+ * __useUpdateRbacMutation__
+ *
+ * To run a mutation, you first call `useUpdateRbacMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRbacMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRbacMutation, { data, loading, error }] = useUpdateRbacMutation({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      clusterId: // value for 'clusterId'
+ *      pipelineId: // value for 'pipelineId'
+ *      stackId: // value for 'stackId'
+ *      projectId: // value for 'projectId'
+ *      flowId: // value for 'flowId'
+ *      serverId: // value for 'serverId'
+ *      rbac: // value for 'rbac'
+ *   },
+ * });
+ */
+export function useUpdateRbacMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRbacMutation, UpdateRbacMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateRbacMutation, UpdateRbacMutationVariables>(UpdateRbacDocument, options);
+      }
+export type UpdateRbacMutationHookResult = ReturnType<typeof useUpdateRbacMutation>;
+export type UpdateRbacMutationResult = Apollo.MutationResult<UpdateRbacMutation>;
+export type UpdateRbacMutationOptions = Apollo.BaseMutationOptions<UpdateRbacMutation, UpdateRbacMutationVariables>;
 export const ServiceAccountsDocument = gql`
     query ServiceAccounts($q: String, $first: Int = 100, $after: String) {
   serviceAccounts(q: $q, first: $first, after: $after) {
@@ -27834,13 +27883,13 @@ export const namedOperations = {
     DetachServiceDeployment: 'DetachServiceDeployment',
     RollbackService: 'RollbackService',
     ProceedService: 'ProceedService',
-    UpdateRbac: 'UpdateRbac',
     SelfManage: 'SelfManage',
     KickService: 'KickService',
     ApplyScalingRecommendation: 'ApplyScalingRecommendation',
     CreateClusterRegistration: 'CreateClusterRegistration',
     UpdateClusterRegistration: 'UpdateClusterRegistration',
     DeleteClusterRegistration: 'DeleteClusterRegistration',
+    UpsertFlow: 'UpsertFlow',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
@@ -27861,6 +27910,7 @@ export const namedOperations = {
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
+    UpdateRbac: 'UpdateRbac',
     CreateServiceAccount: 'CreateServiceAccount',
     UpdateServiceAccount: 'UpdateServiceAccount',
     CreateStack: 'CreateStack',

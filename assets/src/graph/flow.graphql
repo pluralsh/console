@@ -82,3 +82,9 @@ query FlowMcpServers($id: ID!) {
     }
   }
 }
+
+mutation UpsertFlow($attributes: FlowAttributes!) {
+  upsertFlow(attributes: $attributes) {
+    ...FlowBasic
+  }
+}
