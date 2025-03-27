@@ -1,7 +1,12 @@
 defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
+  alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest}
+  require Logger
+
   @behaviour Console.Deployments.Pr.Dispatcher
+
+  @bitbucket_api_url "https://api.bitbucket.org/2.0"
 
   defmodule Connection do
     defstruct [:host, :token]
@@ -49,9 +54,9 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   defp pr_content(pr), do: "#{pr["source"]["branch"]["name"]}\n#{pr["title"]}\n#{pr["summary"]["raw"]}"
 
   def review(conn, %PullRequest{url: url}, body) do
-    with {:ok, group, number} <- get_pull_id(url),
+    with {:ok, org, repo, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      case post(conn, Path.join(["/repositories", "#{URI.encode(group)}", "pullrequests", number, "comments"]), %{
+      case post(conn, Path.join(["/repositories", "#{URI.encode("#{org}/#{repo}")}", "pullrequests", number, "comments"]), %{
         content: %{
           raw: filter_ansi(body),
           markup: "markdown"
@@ -63,17 +68,66 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(scm_conn, url) do
+    with {:ok, workspace, repo, pr_id} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn),
+         {:ok, pr_body, diff_url, diffstat_url} <- get_pr_info(conn, workspace, repo, pr_id),
+         diff_map = get_diff_map(conn, diff_url),
+         {:ok, diff_list} <- files_diff_list(conn, diffstat_url) do
+
+      files_list = Enum.map(diff_list["values"], fn file ->
+        filename = file["new"]["escaped_path"]
+
+        %File{
+          url: url,
+          repo: pr_body["source"]["repository"]["full_name"],
+          title: pr_body["title"],
+          contents: get_file_from_raw(conn, file["new"]["links"]["self"]["href"]),
+          filename: filename,
+          sha: pr_body["source"]["commit"]["hash"],
+          patch: Map.get(diff_map, filename, "No diff found for #{filename}"),
+          base: pr_body["destination"]["branch"]["name"],
+          head: pr_body["source"]["branch"]["name"]
+        }
+      end)
+      |> Enum.filter(&File.valid?/1)
+      {:ok, files_list}
+    else
+      err ->
+        Logger.info("failed to list pr files #{inspect(err)}")
+        err
+    end
+  end
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
 
+  defp get(%Connection{} = conn, url) do
+    HTTPoison.get("#{conn.host}#{url}", Connection.headers(conn))
+    |> handle_response()
+  end
+
+  defp get(url, headers) when is_binary(url) and is_list(headers) do
+    HTTPoison.get(url, headers)
+    |> handle_response()
+  end
+
+  defp get_raw(url, headers) when is_binary(url) and is_list(headers) do
+    HTTPoison.get(url, headers)
+    |> handle_response_raw()
+  end
+
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
   defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
   defp handle_response(_), do: {:error, "unknown bitbucket error"}
+
+  defp handle_response_raw({:ok, %HTTPoison.Response{status_code: code, body: body}})
+    when code >= 200 and code < 300, do: body
+  defp handle_response_raw({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
+  defp handle_response_raw(_), do: {:error, "unknown bitbucket error"}
 
   defp state(%{"state" => "MERGED"}), do: :merged
   defp state(%{"state" => "DECLINED"}), do: :closed
@@ -84,16 +138,69 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   defp owner(_), do: nil
 
   defp connection(conn) do
-    with {:ok, url, token} <- url_and_token(conn, "https://api.bitbucket.org/2.0"),
+    with {:ok, url, token} <- url_and_token(conn, @bitbucket_api_url),
       do: Connection.new(url, token)
   end
 
   defp get_pull_id(url) do
-    with {:ok, %URI{path: "/" <> path}} <- URI.parse(url),
-         [org, repo, "pull-requests" <> number] <- String.split(path, "/") do
-      {:ok, "#{org}/#{repo}", number}
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         parts <- String.split(path, "/"),
+         [workspace, repo, "pull-requests", pr_id] <- parts do
+      {:ok, workspace, repo, pr_id}
     else
       _ -> {:error, "could not parse bitbucket url"}
     end
+  end
+
+  defp get_pr_info(conn, workspace, repo, pr_id) do
+    with {:ok, %{
+           "links" => %{
+             "diff" => %{"href" => diff_url},
+             "diffstat" => %{"href" => diffstat_url}
+           }
+         } = pr_body} <- get(conn, "/repositories/#{workspace}/#{repo}/pullrequests/#{pr_id}") do
+      {:ok, pr_body, diff_url, diffstat_url}
+    else
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "HTTP request failed: #{inspect(reason)}"}
+      {:error, %Jason.DecodeError{}} ->
+        {:error, "Invalid JSON response"}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp files_diff_list(conn, diffstat_url) do
+    get(diffstat_url, Connection.headers(conn))
+  end
+
+  defp get_file_from_raw(conn, url) do
+    get_raw(url, Connection.headers(conn))
+  end
+
+  defp get_diff_map(conn, diff_url) do
+    get_raw(diff_url, Connection.headers(conn))
+    |> parse_diff_to_map()
+  end
+
+  defp parse_diff_to_map(diff_content) do
+    # Split the diff content by file
+    diff_content
+    |> String.split(~r/diff --git a\//)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(fn file_diff ->
+      # Extract filename and diff content
+      case Regex.run(~r/^(.+?) b\/(.+?)(?:\n|$)/, file_diff) do
+        [_, _, filename] ->
+          {filename, "diff --git a/" <> file_diff}
+        _ ->
+          # Handle new files differently
+          case Regex.run(~r/^(.+?) b\/(.+?)(?:\n|$)/, "diff --git a/" <> file_diff) do
+            [_, _, filename] -> {filename, "diff --git a/" <> file_diff}
+            _ -> {"unknown", file_diff}
+          end
+      end
+    end)
+    |> Map.new()
   end
 end
