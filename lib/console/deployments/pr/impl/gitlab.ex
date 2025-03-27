@@ -70,7 +70,67 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(conn, url) do
+    with {:ok, group, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{conn.host}/api/v4/projects/#{uri_encode(group)}/merge_requests/#{number}/changes", Connection.headers(conn)),
+         {:ok, %{"changes" => changes}} <- Jason.decode(body) do
+
+      files = Enum.map(changes, fn change ->
+        # Get full file content for the new_path if it's not deleted
+        file_content = if change["deleted_file"] do
+          ""
+        else
+          # Get the full file content from the repository files API
+          case get_file_content(conn, group, change["new_path"], "HEAD") do
+            {:ok, content} -> content
+            _ -> change["diff"] # Fall back to diff if content retrieval fails
+          end
+        end
+
+        %Console.Deployments.Pr.File{
+          url: url,
+          repo: get_repo_url(url),
+          title: "MR #{number}",
+          contents: file_content,
+          filename: change["new_path"],
+          sha: nil,  # GitLab doesn't provide individual file SHAs in the diff API
+          patch: change["diff"],
+          base: change["old_path"],
+          head: change["new_path"]
+        }
+      end)
+
+      {:ok, files}
+    else
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "gitlab request failed with status #{code}: #{body}"}
+
+      {:error, error} ->
+        {:error, "gitlab request failed: #{inspect(error)}"}
+    end
+  end
+
+  # Helper function to get the full content of a file
+  defp get_file_content(conn, group, file_path, ref) do
+    url = "#{conn.host}/api/v4/projects/#{uri_encode(group)}/repository/files/#{uri_encode(file_path)}/raw?ref=#{ref}"
+
+    case HTTPoison.get(url, Connection.headers(conn)) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: content}} ->
+        {:ok, content}
+      {:ok, %HTTPoison.Response{status_code: code, body: error_body}} ->
+        {:error, "failed to get file content with status #{code}: #{error_body}"}
+      {:error, error} ->
+        {:error, "request failed: #{inspect(error)}"}
+    end
+  end
+
+  defp get_repo_url(url) do
+    url
+    |> String.replace("/api/v4/projects/", "")
+    |> String.replace("/merge_requests/", "/-/merge_requests/")
+    |> String.replace("/changes", ".git")
+  end
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
