@@ -4141,6 +4141,19 @@
     - '1.25'
     - '1.24'
   publisher: StormForge
+- name: suse_observability-agent
+  versions:
+  - version: v1.0.26-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+  publisher: SUSE
 - name: teleport_teleport
   versions:
   - version: v10.3.1-eksbuild.0
