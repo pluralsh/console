@@ -3002,10 +3002,14 @@ type McpServer struct {
 	// authentication specs for this server
 	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
 	// whether a tool call against this server should require user confirmation
-	Confirm    *bool                     `json:"confirm,omitempty"`
-	Audits     *McpServerAuditConnection `json:"audits,omitempty"`
-	InsertedAt *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+	Confirm *bool `json:"confirm,omitempty"`
+	// read policy for this mcp server
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this mcp server
+	WriteBindings []*PolicyBinding          `json:"writeBindings,omitempty"`
+	Audits        *McpServerAuditConnection `json:"audits,omitempty"`
+	InsertedAt    *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                   `json:"updatedAt,omitempty"`
 }
 
 type McpServerAssociationAttributes struct {

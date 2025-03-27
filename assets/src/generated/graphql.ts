@@ -3677,9 +3677,13 @@ export type McpServer = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name for this server */
   name: Scalars['String']['output'];
+  /** read policy for this mcp server */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the HTTP url the server is hosted on */
   url: Scalars['String']['output'];
+  /** write policy for this mcp server */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 

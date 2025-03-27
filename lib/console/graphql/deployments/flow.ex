@@ -76,6 +76,13 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :authentication, :mcp_server_authentication, description: "authentication specs for this server"
     field :confirm,        :boolean, description: "whether a tool call against this server should require user confirmation"
 
+    field :read_bindings,  list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "read policy for this mcp server"
+    field :write_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "write policy for this mcp server"
+
     connection field :audits, node_type: :mcp_server_audit do
       middleware AdminRequired
 

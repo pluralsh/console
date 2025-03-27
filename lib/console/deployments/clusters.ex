@@ -27,7 +27,8 @@ defmodule Console.Deployments.Clusters do
     ClusterUsage,
     ClusterRegistration,
     ClusterISOImage,
-    CloudAddon
+    CloudAddon,
+    DeploymentSettings
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -292,7 +293,8 @@ defmodule Console.Deployments.Clusters do
   @spec install(Cluster.t) :: cluster_resp
   def install(%Cluster{id: id, deploy_token: token, self: true} = cluster) do
     url = Console.graphql_endpoint()
-    with {:ok, _} <- Console.Commands.Plural.install_cd(url, token) do
+    args = with_agent_helm_values(cluster)
+    with {:ok, _} <- Console.Commands.Plural.install_cd(url, token, args) do
       get_cluster(id)
       |> Repo.preload([:service_errors])
       |> Cluster.changeset(%{installed: true, service_errors: []})
@@ -312,7 +314,8 @@ defmodule Console.Deployments.Clusters do
     cluster = Repo.preload(cluster, [:provider, :credential])
     with {:ok, %Kube.Cluster{status: %Kube.Cluster.Status{control_plane_ready: true}}} <- cluster_crd(cluster),
          {:ok, kubeconfig} <- kubeconfig(cluster),
-         {:ok, _} <- Console.Commands.Plural.install_cd(url, token, kubeconfig) do
+         args <- with_agent_helm_values(cluster),
+         {:ok, _} <- Console.Commands.Plural.install_cd(url, token, args, kubeconfig) do
       get_cluster(id)
       |> Repo.preload([:service_errors])
       |> Cluster.changeset(%{installed: true, service_errors: []})
@@ -324,6 +327,16 @@ defmodule Console.Deployments.Clusters do
       pass ->
         Logger.info "could not install operator to cluster: #{inspect(pass)}"
         {:error, :unready}
+    end
+  end
+
+  defp with_agent_helm_values(cluster) do
+    with vals when is_binary(vals) <- agent_helm_values(cluster),
+         {:ok, f} <- Briefly.create(),
+         :ok <- File.write(f, vals) do
+      ["--values", f]
+    else
+      _ -> []
     end
   end
 
@@ -874,6 +887,13 @@ defmodule Console.Deployments.Clusters do
     Repo.get!(ClusterISOImage, id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  def agent_helm_values(%Cluster{}) do
+    case Settings.fetch_consistent() do
+      %DeploymentSettings{agent_helm_values: values} -> values
+      _ -> nil
+    end
   end
 
   def create_agent_migration(attrs, %User{} = user) do

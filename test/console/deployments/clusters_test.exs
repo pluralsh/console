@@ -1203,7 +1203,7 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" ->
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, _, "kubeconfig" ->
         {:error, %Console.Commands.Tee{stdo: ["helm failure"]}}
       end)
 

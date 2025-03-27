@@ -155,6 +155,38 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
     end
   end
 
+  describe "StackRunUpdated" do
+    test "it will fire on a stack run" do
+      run = insert(:stack_run, status: :pending_approval)
+      router = insert(:notification_router, events: ["stack.pending"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, stack: run.stack)
+      me = self()
+      expect(HTTPoison, :post, fn _, body, _ ->
+        send me, {:body, body}
+        {:ok, %HTTPoison.Response{}}
+      end)
+
+      event = %PubSub.StackRunUpdated{item: run}
+      :ok = Notifications.handle_event(event)
+
+      assert_receive {:body, body}
+
+      {:ok, _} = Jason.decode(body)
+    end
+
+    test "it will ignore pr based stack runs" do
+      run = insert(:stack_run, status: :running)
+      router = insert(:notification_router, events: ["stack.pending"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, stack: run.stack)
+      reject(HTTPoison, :post, 3)
+
+      event = %PubSub.StackRunUpdated{item: run}
+      :ok = Notifications.handle_event(event)
+    end
+  end
+
   describe "ServiceInsight" do
     test "it can generate a slack message" do
       svc = insert(:service)

@@ -45,7 +45,7 @@ spec:
             description: FlowSpec defines the desired state of Flow
             properties:
               bindings:
-                description: Bindings contain read and write policies of this cluster
+                description: Bindings contain read and write policies of this Flow
                 properties:
                   read:
                     description: Read bindings.

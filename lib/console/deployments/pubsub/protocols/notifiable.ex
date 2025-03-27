@@ -123,6 +123,20 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreat
   end
 end
 
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunUpdated do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.StackRun
+
+  def message(%{item: %StackRun{pull_request_id: id}}) when is_binary(id), do: :ok
+  def message(%{item: %StackRun{id: id, status: :pending_approval} = run}) do
+    Utils.deduplicate({:stack_approval, id}, fn ->
+      run = Console.Repo.preload(run, [:stack, :repository])
+      {"stack.pending", Utils.filters(run), %{stack_run: run}}
+    end)
+  end
+  def message(_), do: :ok
+end
+
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsight do
   alias Console.Deployments.Notifications.Utils
   alias Console.Schema.AiInsight

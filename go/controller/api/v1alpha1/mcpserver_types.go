@@ -16,6 +16,10 @@ type MCPServerSpec struct {
 	// +kubebuilder:validation:Required
 	URL string `json:"url,omitempty"`
 
+	// Bindings contain read and write policies of this MCP server
+	// +kubebuilder:validation:Optional
+	Bindings *Bindings `json:"bindings,omitempty"`
+
 	// Authentication specs for this server.
 	// +kubebuilder:validation:Optional
 	Authentication *MCPServerAuthentication `json:"authentication,omitempty"`
@@ -78,6 +82,11 @@ func (in *MCPServer) Attributes() console.McpServerAttributes {
 		Name:    in.MCPServerName(),
 		URL:     in.Spec.URL,
 		Confirm: in.Spec.Confirm,
+	}
+
+	if in.Spec.Bindings != nil {
+		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
+		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
 	}
 
 	if in.Spec.Authentication != nil {
