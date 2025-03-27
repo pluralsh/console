@@ -61,10 +61,6 @@ type RootQueryType {
 
   secret(serviceId: ID, namespace: String!, name: String!): Secret
 
-  configMaps(namespace: String!): [ConfigMap]
-
-  secrets(namespace: String!): [Secret]
-
   pluralCluster(namespace: String!, name: String!, serviceId: ID): PluralCluster
 
   pluralServiceDeployment(namespace: String!, name: String!, serviceId: ID): PluralServiceDeployment
@@ -84,8 +80,6 @@ type RootQueryType {
   daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
 
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
-
-  nodes: [Node]
 
   node(name: String!, clusterId: ID): Node
 
@@ -135,7 +129,9 @@ type RootQueryType {
 
   scmConnection(id: ID, name: String): ScmConnection
 
-  prAutomations(after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String): PrAutomationConnection
+  prAutomations(
+    after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String, role: PrRole
+  ): PrAutomationConnection
 
   prAutomation(id: ID, name: String): PrAutomation
 
@@ -506,13 +502,9 @@ type RootMutationType {
 
   deletePersona(id: ID!): Persona
 
-  deleteCertificate(name: String!, namespace: String!): Boolean
-
   deletePod(namespace: String!, name: String!, serviceId: ID): Pod
 
   deleteJob(namespace: String!, name: String!, serviceId: ID): Job
-
-  deleteNode(name: String!): Node
 
   createGitRepository(attributes: GitAttributes!): GitRepository
 
@@ -888,7 +880,7 @@ type RootMutationType {
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
-    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
+    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
@@ -1054,6 +1046,8 @@ type Flow {
 
   pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
 
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1102,6 +1096,19 @@ type McpServerAudit {
   actor: User
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"The description of a tool extracted from its MCP server"
+type McpTool {
+  name: String!
+  description: String
+  inputSchema: Map
+}
+
+"A tool related to an mcp server"
+type McpServerTool {
+  server: McpServer
+  tool: McpTool
 }
 
 type FlowConnection {
@@ -6059,6 +6066,7 @@ enum PrRole {
   PIPELINE
   UPDATE
   UPGRADE
+  COST
 }
 
 enum PrStatus {
@@ -7103,6 +7111,7 @@ type CatalogConnection {
 enum ChatType {
   TEXT
   FILE
+  TOOL
 }
 
 enum EvidenceType {
@@ -7170,6 +7179,7 @@ type Chat {
   attributes: ChatTypeAttributes
   pullRequest: PullRequest
   thread: ChatThread
+  server: McpServer
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -7177,11 +7187,18 @@ type Chat {
 "Additional attributes of this chat message, used for formatting it in the display"
 type ChatTypeAttributes {
   file: ChatFile
+  tool: ChatTool
 }
 
 "Additional attributes for describing a file type chat"
 type ChatFile {
   name: String
+}
+
+"Additional attributes for describing a tool call that derived this chat message"
+type ChatTool {
+  name: String
+  arguments: Map
 }
 
 "A list of chat messages around a specific topic created on demand"
@@ -7193,6 +7210,7 @@ type ChatThread {
   flow: Flow
   user: User
   insight: AiInsight
+  tools: [McpServerTool]
   chats(after: String, first: Int, before: String, last: Int): ChatConnection
   insertedAt: DateTime
   updatedAt: DateTime

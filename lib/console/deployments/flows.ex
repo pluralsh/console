@@ -47,6 +47,18 @@ defmodule Console.Deployments.Flows do
   end
 
   @doc """
+  modifies rbac settings for this service
+  """
+  @spec rbac(map, binary, User.t) :: flow_resp
+  def rbac(attrs, flow_id, %User{} = user) do
+    get!(flow_id)
+    |> Repo.preload([:write_bindings, :read_bindings])
+    |> allow(user, :write)
+    |> when_ok(&Flow.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
+  end
+
+  @doc """
   Either creates a new flow or updates an existing one
   """
   @spec upsert_flow(map, User.t) :: flow_resp

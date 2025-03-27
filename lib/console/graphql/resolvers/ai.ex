@@ -43,6 +43,9 @@ defmodule Console.GraphQl.Resolvers.AI do
     end
   end
 
+  def chat_tools(%{id: id}, _, %{context: %{current_user: user}}),
+    do: ChatSvc.tools(id, user)
+
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
     |> Chat.ordered()

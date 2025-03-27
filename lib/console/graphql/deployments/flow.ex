@@ -60,6 +60,10 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.prs_for_flow/3
     end
 
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.alerts_for_flow/3
+    end
+
     timestamps()
   end
 
@@ -96,6 +100,19 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :server,    :mcp_server, resolve: dataloader(Deployments)
     field :actor,     :user,       resolve: dataloader(User)
     timestamps()
+  end
+
+  @desc "The description of a tool extracted from its MCP server"
+  object :mcp_tool do
+    field :name,         non_null(:string)
+    field :description,  :string
+    field :input_schema, :map
+  end
+
+  @desc "A tool related to an mcp server"
+  object :mcp_server_tool do
+    field :server, :mcp_server
+    field :tool,   :mcp_tool
   end
 
   connection node_type: :flow

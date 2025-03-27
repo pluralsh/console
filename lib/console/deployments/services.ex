@@ -281,6 +281,13 @@ defmodule Console.Deployments.Services do
     ]
   end
 
+  def write_authorized(%Service{} = svc, %User{} = user), do: allow(svc, user, :write)
+  def write_authorized(service_id, actor) when is_binary(service_id) do
+    get_service(service_id)
+    |> write_authorized(actor)
+  end
+  def write_authorized(_, _), do: {:error, "could not find service in cluster"}
+
   @spec authorized(binary, Cluster.t | User.t) :: service_resp
   def authorized(%Service{} = svc, %User{} = user), do: allow(svc, user, :read)
   def authorized(%Service{cluster_id: id} = svc, %Cluster{id: id}), do: {:ok, svc}

@@ -7,7 +7,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Pipeline,
     McpServer,
     PullRequest,
-    McpServerAudit
+    McpServerAudit,
+    Alert
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
@@ -39,6 +40,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   def prs_for_flow(%{id: id}, args, _) do
     PullRequest.for_flow(id)
     |> PullRequest.ordered()
+    |> paginate(args)
+  end
+
+  def alerts_for_flow(%{id: id}, args, _) do
+    Alert.for_flow(id)
+    |> Alert.ordered()
     |> paginate(args)
   end
 

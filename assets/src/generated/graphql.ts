@@ -892,6 +892,7 @@ export type Chat = {
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
+  server?: Maybe<McpServer>;
   thread?: Maybe<ChatThread>;
   type: ChatType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -932,6 +933,7 @@ export type ChatThread = {
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
   summary: Scalars['String']['output'];
+  tools?: Maybe<Array<Maybe<McpServerTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
 };
@@ -970,15 +972,24 @@ export type ChatThreadEdge = {
   node?: Maybe<ChatThread>;
 };
 
+/** Additional attributes for describing a tool call that derived this chat message */
+export type ChatTool = {
+  __typename?: 'ChatTool';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export enum ChatType {
   File = 'FILE',
-  Text = 'TEXT'
+  Text = 'TEXT',
+  Tool = 'TOOL'
 }
 
 /** Additional attributes of this chat message, used for formatting it in the display */
 export type ChatTypeAttributes = {
   __typename?: 'ChatTypeAttributes';
   file?: Maybe<ChatFile>;
+  tool?: Maybe<ChatTool>;
 };
 
 export type CloudAddon = {
@@ -2586,6 +2597,7 @@ export enum EvidenceType {
 
 export type Flow = {
   __typename?: 'Flow';
+  alerts?: Maybe<AlertConnection>;
   description?: Maybe<Scalars['String']['output']>;
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -2603,6 +2615,14 @@ export type Flow = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** write policy for this flow */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type FlowAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3728,6 +3748,21 @@ export type McpServerHeader = {
   __typename?: 'McpServerHeader';
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
+};
+
+/** A tool related to an mcp server */
+export type McpServerTool = {
+  __typename?: 'McpServerTool';
+  server?: Maybe<McpServer>;
+  tool?: Maybe<McpTool>;
+};
+
+/** The description of a tool extracted from its MCP server */
+export type McpTool = {
+  __typename?: 'McpTool';
+  description?: Maybe<Scalars['String']['output']>;
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+  name: Scalars['String']['output'];
 };
 
 export type Metadata = {
@@ -5344,6 +5379,7 @@ export type PrDeleteSpec = {
 
 export enum PrRole {
   Cluster = 'CLUSTER',
+  Cost = 'COST',
   Pipeline = 'PIPELINE',
   Service = 'SERVICE',
   Update = 'UPDATE',
@@ -5826,7 +5862,6 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
-  deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   /** deletes a chat from a users history */
   deleteChat?: Maybe<Chat>;
   deleteCluster?: Maybe<Cluster>;
@@ -5842,7 +5877,6 @@ export type RootMutationType = {
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
-  deleteNode?: Maybe<Node>;
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
@@ -6279,12 +6313,6 @@ export type RootMutationTypeDeleteCatalogArgs = {
 };
 
 
-export type RootMutationTypeDeleteCertificateArgs = {
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-};
-
-
 export type RootMutationTypeDeleteChatArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6355,11 +6383,6 @@ export type RootMutationTypeDeleteManagedNamespaceArgs = {
 
 export type RootMutationTypeDeleteMcpServerArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type RootMutationTypeDeleteNodeArgs = {
-  name: Scalars['String']['input'];
 };
 
 
@@ -6818,6 +6841,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 export type RootMutationTypeUpdateRbacArgs = {
   catalogId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
@@ -7024,7 +7048,6 @@ export type RootQueryType = {
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
   componentTree?: Maybe<ComponentTree>;
   configMap?: Maybe<ConfigMap>;
-  configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
   cronJob?: Maybe<CronJob>;
   customStackRun?: Maybe<CustomStackRun>;
@@ -7069,7 +7092,6 @@ export type RootQueryType = {
   node?: Maybe<Node>;
   nodeMetric?: Maybe<NodeMetric>;
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
-  nodes?: Maybe<Array<Maybe<Node>>>;
   notificationRouter?: Maybe<NotificationRouter>;
   notificationRouters?: Maybe<NotificationRouterConnection>;
   notificationSink?: Maybe<NotificationSink>;
@@ -7116,7 +7138,6 @@ export type RootQueryType = {
   scmConnections?: Maybe<ScmConnectionConnection>;
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
-  secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
   serviceContext?: Maybe<ServiceContext>;
@@ -7435,11 +7456,6 @@ export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootQueryTypeConfigMapsArgs = {
-  namespace: Scalars['String']['input'];
 };
 
 
@@ -7928,6 +7944,7 @@ export type RootQueryTypePrAutomationsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<PrRole>;
 };
 
 
@@ -8023,11 +8040,6 @@ export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootQueryTypeSecretsArgs = {
-  namespace: Scalars['String']['input'];
 };
 
 

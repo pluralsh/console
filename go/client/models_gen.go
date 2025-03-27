@@ -718,6 +718,7 @@ type Chat struct {
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`
+	Server      *McpServer          `json:"server,omitempty"`
 	InsertedAt  *string             `json:"insertedAt,omitempty"`
 	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
@@ -745,16 +746,17 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string          `json:"id"`
-	Summary       string          `json:"summary"`
-	Default       bool            `json:"default"`
-	LastMessageAt *string         `json:"lastMessageAt,omitempty"`
-	Flow          *Flow           `json:"flow,omitempty"`
-	User          *User           `json:"user,omitempty"`
-	Insight       *AiInsight      `json:"insight,omitempty"`
-	Chats         *ChatConnection `json:"chats,omitempty"`
-	InsertedAt    *string         `json:"insertedAt,omitempty"`
-	UpdatedAt     *string         `json:"updatedAt,omitempty"`
+	ID            string           `json:"id"`
+	Summary       string           `json:"summary"`
+	Default       bool             `json:"default"`
+	LastMessageAt *string          `json:"lastMessageAt,omitempty"`
+	Flow          *Flow            `json:"flow,omitempty"`
+	User          *User            `json:"user,omitempty"`
+	Insight       *AiInsight       `json:"insight,omitempty"`
+	Tools         []*McpServerTool `json:"tools,omitempty"`
+	Chats         *ChatConnection  `json:"chats,omitempty"`
+	InsertedAt    *string          `json:"insertedAt,omitempty"`
+	UpdatedAt     *string          `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -780,9 +782,16 @@ type ChatThreadEdge struct {
 	Cursor *string     `json:"cursor,omitempty"`
 }
 
+// Additional attributes for describing a tool call that derived this chat message
+type ChatTool struct {
+	Name      *string        `json:"name,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
 	File *ChatFile `json:"file,omitempty"`
+	Tool *ChatTool `json:"tool,omitempty"`
 }
 
 type CloudAddon struct {
@@ -2127,6 +2136,7 @@ type Flow struct {
 	Services     *ServiceDeploymentConnection `json:"services,omitempty"`
 	Pipelines    *PipelineConnection          `json:"pipelines,omitempty"`
 	PullRequests *PullRequestConnection       `json:"pullRequests,omitempty"`
+	Alerts       *AlertConnection             `json:"alerts,omitempty"`
 	InsertedAt   *string                      `json:"insertedAt,omitempty"`
 	UpdatedAt    *string                      `json:"updatedAt,omitempty"`
 }
@@ -3049,6 +3059,19 @@ type McpServerEdge struct {
 type McpServerHeader struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+// A tool related to an mcp server
+type McpServerTool struct {
+	Server *McpServer `json:"server,omitempty"`
+	Tool   *McpTool   `json:"tool,omitempty"`
+}
+
+// The description of a tool extracted from its MCP server
+type McpTool struct {
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
 }
 
 type Metadata struct {
@@ -6699,16 +6722,18 @@ type ChatType string
 const (
 	ChatTypeText ChatType = "TEXT"
 	ChatTypeFile ChatType = "FILE"
+	ChatTypeTool ChatType = "TOOL"
 )
 
 var AllChatType = []ChatType{
 	ChatTypeText,
 	ChatTypeFile,
+	ChatTypeTool,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool:
 		return true
 	}
 	return false
@@ -8129,6 +8154,7 @@ const (
 	PrRolePipeline PrRole = "PIPELINE"
 	PrRoleUpdate   PrRole = "UPDATE"
 	PrRoleUpgrade  PrRole = "UPGRADE"
+	PrRoleCost     PrRole = "COST"
 )
 
 var AllPrRole = []PrRole{
@@ -8137,11 +8163,12 @@ var AllPrRole = []PrRole{
 	PrRolePipeline,
 	PrRoleUpdate,
 	PrRoleUpgrade,
+	PrRoleCost,
 }
 
 func (e PrRole) IsValid() bool {
 	switch e {
-	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade:
+	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade, PrRoleCost:
 		return true
 	}
 	return false

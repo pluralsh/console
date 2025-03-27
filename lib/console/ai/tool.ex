@@ -1,8 +1,17 @@
 defmodule Console.AI.Tool do
-  alias Console.Schema.{DeploymentSettings, User}
+  alias Console.Schema.{DeploymentSettings, User, Flow}
   alias Console.Deployments.{Git, Settings}
 
   @type t :: %__MODULE__{}
+
+  defmodule Context do
+    alias Console.Schema.{Flow, User}
+    @type t :: %__MODULE__{flow: Flow.t, user: User.t}
+
+    defstruct [:flow, :user]
+
+    def new(args), do: struct(__MODULE__, args)
+  end
 
   defstruct [:name, :arguments]
 
@@ -12,9 +21,23 @@ defmodule Console.AI.Tool do
   @callback changeset(struct, map) :: Ecto.Changeset.t
   @callback implement(struct) :: {:ok, term} | Console.error
 
-  def set_actor(%User{} = user), do: Process.put({__MODULE__, :actor}, user)
+  @ctx {__MODULE__, :context}
 
-  def actor(), do: Process.get({__MODULE__, :actor})
+  def context(attrs), do: Process.put(@ctx, struct(Context, attrs))
+
+  def actor() do
+    case Process.get(@ctx) do
+      %Context{user: %User{} = user} -> user
+      _ -> nil
+    end
+  end
+
+  def flow() do
+    case Process.get(@ctx) do
+      %Context{flow: %Flow{} = flow} -> flow
+      _ -> nil
+    end
+  end
 
   def validate(tool, input) do
     struct(tool, %{})

@@ -68,6 +68,29 @@ defmodule Console.GraphQl.AiQueriesTest do
         }
       """, %{"id" => thread.id}, %{current_user: user})
     end
+
+    test "it can fetch tools for a thread" do
+      user = insert(:user)
+      flow = insert(:flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+
+      {:ok, %{data: %{"chatThread" => %{"tools" => tools}}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            tools {
+              server { name }
+              tool { name }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert Enum.any?(tools, & &1["server"]["name"] == "everything")
+      assert Enum.any?(tools, & &1["tool"]["name"] == "echo")
+    end
   end
 
   describe "aiCompletion" do

@@ -798,6 +798,7 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :catalog_id, :id
       arg :project_id, :id
       arg :q,          :string
+      arg :role,       :pr_role
 
       resolve &Deployments.list_pr_automations/2
     end

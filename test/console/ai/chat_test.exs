@@ -279,7 +279,18 @@ defmodule Console.AI.ChatTest do
                       pr_description: "some pr",
                       pr_title: "some pr",
                       commit_message: "a commit",
-                      file_updates: [%{file_name: "file.yaml", content: "first"}, %{file_name: "file2.yaml", content: "second"}]
+                      file_updates: [
+                        %{
+                          file_name: "file.yaml",
+                          replacement: "first",
+                          previous: "second"
+                        },
+                        %{
+                          file_name: "file2.yaml",
+                          replacement: "second",
+                          previous: "first"
+                        }
+                      ]
                     })
                   }
               }]
@@ -305,6 +316,7 @@ end
 
 defmodule Console.AI.ChatSyncTest do
   use Console.DataCase, async: false
+  import ElasticsearchUtils
   alias Console.Repo
   alias Console.AI.{Chat, Tool}
   alias Console.Schema.{McpServerAudit}
@@ -347,8 +359,7 @@ defmodule Console.AI.ChatSyncTest do
   end
 
   describe "#hybrid_chat/3" do
-    @tag :skip
-    test "it can chat with a toolcall" do
+    test "it can chat with a tool call" do
       user   = insert(:user)
       flow   = insert(:flow)
       thread = insert(:chat_thread, user: user, flow: flow)
@@ -381,6 +392,81 @@ defmodule Console.AI.ChatSyncTest do
       assert audit.server_id == server.id
       assert audit.actor_id == user.id
       assert audit.tool == "echo"
+    end
+
+    test "it can chat with a plural tool call" do
+      user   = insert(:user)
+      flow   = insert(:flow)
+      service = insert(:service, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__:clusters", arguments: %{}}]}
+      end)
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      assert tool.content =~ service.cluster.handle
+      assert tool.attributes.tool.name == "__plrl__:clusters"
+    end
+
+    test "it can chat with a plural logs tool call" do
+      user    = insert(:user)
+      flow    = insert(:flow)
+      service = insert(:service, flow: flow)
+      thread  = insert(:chat_thread, user: user, flow: flow)
+      server  = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      deployment_settings(
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: es_settings(),
+        },
+        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+      )
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__:logs", arguments: %{
+          "service" => service.name,
+          "cluster" => service.cluster.handle,
+          "query" => "error"
+        }}]}
+      end)
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      log_document(service, "error what is happening") |> index_doc()
+      log_document(service, "another valid log message") |> index_doc()
+      refresh()
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      assert tool.content =~ "what is happening"
+      assert tool.attributes.tool.name == "__plrl__:logs"
     end
   end
 end

@@ -13,7 +13,7 @@ spec:
   crontab: "5 4 * * *"
   target:
     order: SEMVER
-    target: GIT
+    type: GIT
   actions:
     - type: PR
       configuration:

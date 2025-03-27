@@ -56,10 +56,19 @@ defmodule Console.Schema.Flow do
     model
     |> cast(attrs, ~w(name description icon project_id)a)
     |> cast_assoc(:server_associations)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :project_id])
+  end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
   end
 end
