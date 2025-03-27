@@ -13,13 +13,27 @@ defmodule Mix.Tasks.Scmtest.GitlabTest do
     url = "https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{merge_request_iid}/diffs"
 
     # Get filenames and print them
-    filenames = get_filenames(url)
-    IO.puts("Files modified in merge request ##{merge_request_iid}:")
-    Enum.each(filenames, fn {path, status, diff_content} ->
-      IO.puts("- #{path} #{status}")
-      IO.puts("=================================================================")
-      IO.puts(Jason.encode!(diff_content, pretty: true))
-      IO.puts("=================================================================")
+    files = get_filenames(url)
+    IO.puts("\nFiles modified in merge request ##{merge_request_iid}:")
+    IO.puts("=================================================================")
+
+    Enum.each(files, fn file ->
+      IO.puts("\nFile: #{file.filename}")
+      IO.puts("Status: #{file.status}")
+      IO.puts("URL: #{file.url}")
+      IO.puts("Repo: #{file.repo}")
+      IO.puts("Title: #{file.title}")
+      IO.puts("Base path: #{file.base}")
+      IO.puts("Head path: #{file.head}")
+      IO.puts("\nPatch:")
+      IO.puts("-----------------------------------------------------------------")
+      IO.puts(file.patch)
+      IO.puts("-----------------------------------------------------------------")
+      IO.puts("\nContents:")
+      IO.puts("-----------------------------------------------------------------")
+      IO.puts(file.contents)
+      IO.puts("-----------------------------------------------------------------")
+      IO.puts("\n=================================================================")
     end)
   end
 
@@ -29,7 +43,7 @@ defmodule Mix.Tasks.Scmtest.GitlabTest do
         # Parse the JSON response
         diffs = Jason.decode!(body)
 
-        # Extract the list of changed files with their status
+        # Extract the list of changed files with their status and convert to File struct
         Enum.map(diffs, fn diff ->
           file_status = cond do
             diff["new_file"] -> "(added)"
@@ -38,7 +52,18 @@ defmodule Mix.Tasks.Scmtest.GitlabTest do
             true -> "(modified)"
           end
 
-          {diff["new_path"], file_status, diff}  # Pass the individual diff object instead of the whole body
+          %{
+            url: url,
+            repo: get_repo_url(url),
+            title: "MR #{get_mr_id(url)}",
+            contents: get_file_content(diff),
+            filename: diff["new_path"],
+            sha: nil,  # GitLab doesn't provide individual file SHAs in the diff API
+            patch: diff["diff"],
+            base: diff["old_path"],
+            head: diff["new_path"],
+            status: file_status
+          }
         end)
 
       {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
@@ -49,6 +74,28 @@ defmodule Mix.Tasks.Scmtest.GitlabTest do
       {:error, error} ->
         IO.puts("Error: #{inspect(error)}")
         []
+    end
+  end
+
+  defp get_repo_url(url) do
+    url
+    |> String.replace("/api/v4/projects/", "")
+    |> String.replace("/merge_requests/", "/-/merge_requests/")
+    |> String.replace("/diffs", ".git")
+  end
+
+  defp get_mr_id(url) do
+    url
+    |> String.split("/merge_requests/")
+    |> List.last()
+    |> String.split("/")
+    |> List.first()
+  end
+
+  defp get_file_content(diff) do
+    case diff["diff"] do
+      nil -> nil
+      content -> content
     end
   end
 end

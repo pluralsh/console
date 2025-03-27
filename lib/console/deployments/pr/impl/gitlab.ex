@@ -73,10 +73,50 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   def files(conn, url) do
     with {:ok, group, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      HTTPoison.get("#{conn.host}/api/v4/projects/#{uri_encode(group)}/merge_requests/#{number}/changes")
-      |> IO.inspect()
+      case HTTPoison.get("#{conn.host}/api/v4/projects/#{uri_encode(group)}/merge_requests/#{number}/changes", Connection.headers(conn)) do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          case Jason.decode(body) do
+            {:ok, %{"changes" => changes}} ->
+              files = Enum.map(changes, fn change ->
+                _file_status = cond do
+                  change["new_file"] -> "(added)"
+                  change["deleted_file"] -> "(deleted)"
+                  change["renamed_file"] -> "(renamed)"
+                  true -> "(modified)"
+                end
+
+                %Console.Deployments.Pr.File{
+                  url: url,
+                  repo: get_repo_url(url),
+                  title: "MR #{number}",
+                  contents: change["diff"],
+                  filename: change["new_path"],
+                  sha: nil,  # GitLab doesn't provide individual file SHAs in the diff API
+                  patch: change["diff"],
+                  base: change["old_path"],
+                  head: change["new_path"]
+                }
+              end)
+              {:ok, files}
+
+            {:error, error} ->
+              {:error, "failed to decode gitlab response: #{inspect(error)}"}
+          end
+
+        {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+          {:error, "gitlab request failed with status #{code}: #{body}"}
+
+        {:error, error} ->
+          {:error, "gitlab request failed: #{inspect(error)}"}
+      end
     end
-    {:ok, []}
+  end
+
+  defp get_repo_url(url) do
+    url
+    |> String.replace("/api/v4/projects/", "")
+    |> String.replace("/merge_requests/", "/-/merge_requests/")
+    |> String.replace("/changes", ".git")
   end
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
