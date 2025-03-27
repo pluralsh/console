@@ -39,4 +39,5 @@ defmodule Console.AI.Stream do
   def topic(:insight, id, %User{id: uid}), do: "ai:insight:#{id}:#{uid}"
   def topic(:thread, id, %User{id: uid}), do: "ai:thread:#{id}:#{uid}"
   def topic(:freeform, id, %User{id: uid}), do: "ai:freeform:#{id}:#{uid}"
+  def topic(:cost, id, %User{id: uid}), do: "ai:cost:#{id}:#{uid}"
 end

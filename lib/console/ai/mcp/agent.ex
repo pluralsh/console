@@ -73,6 +73,7 @@ defmodule Console.AI.MCP.Agent do
           %{state | tools: Map.merge(tools, new_tools)}
         err ->
           Logger.warning "failed to list tools for mcp server: #{server.url}: #{inspect(err)}"
+          Process.send_after(self(), :init, 1000)
           state
       end
     end)

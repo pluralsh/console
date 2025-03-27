@@ -50,12 +50,14 @@ defmodule Console.GraphQl.AI do
   end
 
   object :chat do
-    field :id,         non_null(:id)
-    field :type,       non_null(:chat_type)
-    field :role,       non_null(:ai_role)
-    field :content,    non_null(:string)
-    field :seq,        non_null(:integer)
-    field :attributes, :chat_type_attributes
+    field :id,           non_null(:id)
+    field :type,         non_null(:chat_type)
+    field :role,         non_null(:ai_role)
+    field :content,      non_null(:string)
+    field :seq,          non_null(:integer)
+    field :confirm,      :boolean, description: "whether this chat requires confirmation"
+    field :confirmed_at, :datetime, description: "when the chat was confirmed"
+    field :attributes,   :chat_type_attributes
 
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
     field :thread,       :chat_thread,  resolve: dataloader(AI)
@@ -89,8 +91,8 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :flow,     :flow, resolve: dataloader(Deployments)
-    field :user,     :user, resolve: dataloader(User)
+    field :flow,     :flow,       resolve: dataloader(Deployments)
+    field :user,     :user,       resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 
     field :tools, list_of(:mcp_server_tool) do
@@ -304,6 +306,22 @@ defmodule Console.GraphQl.AI do
       resolve &AI.hybrid_chat/2
     end
 
+    @desc "Confirms a chat message and calls its MCP server, if the user has access to the thread"
+    field :confirm_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to confirm"
+
+      resolve &AI.confirm_chat/2
+    end
+
+    @desc "Cancels a chat message, if the user has access to the thread, by just deleting the chat record"
+    field :cancel_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to cancel"
+
+      resolve &AI.cancel_chat/2
+    end
+
     @desc "Creates a pull request given the thread message history"
     field :thread_pr, :chat do
       middleware Authenticated
@@ -387,15 +405,18 @@ defmodule Console.GraphQl.AI do
   object :ai_subscriptions do
     @desc "streams chunks of ai text for a given parent scope"
     field :ai_stream, :ai_delta do
-      arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
-      arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
-      arg :scope_id,   :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :insight_id,        :id, description: "the insight id to use when streaming a fix suggestion"
+      arg :thread_id,         :id, description: "the thread id for streaming a chat suggestion"
+      arg :scope_id,          :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :recommendation_id, :id, description: "the id of the scaling recommendation you're streaming a cost PR suggestion for"
 
       config fn
         %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:insight, id, user)}
         %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:thread, id, user)}
+        %{recommendation_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:cost, id, user)}
         %{scope_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:freeform, id, user)}
         _, _ -> {:error, "no id provided for this subscription"}

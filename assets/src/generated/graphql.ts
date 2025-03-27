@@ -886,6 +886,10 @@ export type CertificateStatus = {
 export type Chat = {
   __typename?: 'Chat';
   attributes?: Maybe<ChatTypeAttributes>;
+  /** whether this chat requires confirmation */
+  confirm?: Maybe<Scalars['Boolean']['output']>;
+  /** when the chat was confirmed */
+  confirmedAt?: Maybe<Scalars['DateTime']['output']>;
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1054,6 +1058,8 @@ export type CloudSettingsAttributes = {
 /** a representation of a cluster you can deploy to */
 export type Cluster = {
   __typename?: 'Cluster';
+  /** The helm values for the agent installation */
+  agentHelmValues?: Maybe<Scalars['String']['output']>;
   /** the url this clusters deployment operator will use for gql requests */
   agentUrl?: Maybe<Scalars['String']['output']>;
   /** list all alerts discovered for this cluster */
@@ -1081,6 +1087,8 @@ export type Cluster = {
   handle?: Maybe<Scalars['String']['output']>;
   /** Whether this cluster was recently pinged */
   healthy?: Maybe<Scalars['Boolean']['output']>;
+  /** A pod-level set of utilization metrics for this cluster for rendering a heat map */
+  heatMap?: Maybe<UtilizationHeatMap>;
   /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -3692,7 +3700,9 @@ export type McpServerAttributes = {
   /** whether tool calls against this server should require a confirmation */
   confirm?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   url: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type McpServerAudit = {
@@ -5806,6 +5816,8 @@ export type RootMutationType = {
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
+  /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
+  cancelChat?: Maybe<Chat>;
   /** saves a set of messages and generates a new one transactionally */
   chat?: Maybe<Chat>;
   /** Wipes your current chat history blank */
@@ -5814,6 +5826,8 @@ export type RootMutationType = {
   cloneService?: Maybe<ServiceDeployment>;
   completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
+  /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
+  confirmChat?: Maybe<Chat>;
   /** Reads and deletes a given shared secret */
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
@@ -5958,6 +5972,7 @@ export type RootMutationType = {
   shareSecret?: Maybe<SharedSecret>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  suggestScalingRecommendation?: Maybe<Scalars['String']['output']>;
   syncGlobalService?: Maybe<GlobalService>;
   /** Creates a pull request given the thread message history */
   threadPr?: Maybe<Chat>;
@@ -6050,6 +6065,11 @@ export type RootMutationTypeApproveStackRunArgs = {
 };
 
 
+export type RootMutationTypeCancelChatArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeChatArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
@@ -6080,6 +6100,11 @@ export type RootMutationTypeCompleteStackRunArgs = {
 export type RootMutationTypeConfigureBackupsArgs = {
   clusterId: Scalars['ID']['input'];
   storeId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeConfirmChatArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -6715,6 +6740,11 @@ export type RootMutationTypeSignupArgs = {
 };
 
 
+export type RootMutationTypeSuggestScalingRecommendationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeSyncGlobalServiceArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6846,6 +6876,7 @@ export type RootMutationTypeUpdateRbacArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
+  serverId?: InputMaybe<Scalars['ID']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   stackId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -8230,6 +8261,7 @@ export type RootSubscriptionType = {
 
 export type RootSubscriptionTypeAiStreamArgs = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
+  recommendationId?: InputMaybe<Scalars['ID']['input']>;
   scopeId?: InputMaybe<Scalars['String']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -8598,6 +8630,8 @@ export type ServiceDeployment = {
   git?: Maybe<GitRef>;
   /** the global service this service is the source for */
   globalService?: Maybe<GlobalService>;
+  /** A pod-level set of utilization metrics for this cluster for rendering a heat map */
+  heatMap?: Maybe<UtilizationHeatMap>;
   /** description of how helm charts should be applied */
   helm?: Maybe<HelmSpec>;
   helmRepository?: Maybe<FluxHelmRepository>;
@@ -9712,6 +9746,13 @@ export type UserRoleAttributes = {
 export type UserRoles = {
   __typename?: 'UserRoles';
   admin?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** A representation of the metrics to render a utilization heat map */
+export type UtilizationHeatMap = {
+  __typename?: 'UtilizationHeatMap';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  memory?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export enum ValidationUniqScope {

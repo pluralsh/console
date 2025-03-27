@@ -357,6 +357,34 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["clusterMetrics"]["cpu"])
     end
 
+    test "it can fetch a cluster heat map" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 2, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [1, "1"]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            heatMap {
+              cpu { values { timestamp value } }
+              memory { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      refute Enum.empty?(found["heatMap"]["cpu"])
+      refute Enum.empty?(found["heatMap"]["memory"])
+    end
+
     test "it can fetch cluster audit logs" do
       user    = admin_user()
       cluster = insert(:cluster)

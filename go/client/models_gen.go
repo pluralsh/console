@@ -710,11 +710,15 @@ type CertificateStatus struct {
 }
 
 type Chat struct {
-	ID          string              `json:"id"`
-	Type        ChatType            `json:"type"`
-	Role        AiRole              `json:"role"`
-	Content     string              `json:"content"`
-	Seq         int64               `json:"seq"`
+	ID      string   `json:"id"`
+	Type    ChatType `json:"type"`
+	Role    AiRole   `json:"role"`
+	Content string   `json:"content"`
+	Seq     int64    `json:"seq"`
+	// whether this chat requires confirmation
+	Confirm *bool `json:"confirm,omitempty"`
+	// when the chat was confirmed
+	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`
@@ -874,6 +878,8 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// The helm values for the agent installation
+	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
 	Healthy *bool `json:"healthy,omitempty"`
 	// the url of the kas server you can access this cluster from
@@ -945,6 +951,8 @@ type Cluster struct {
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
 	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
@@ -3011,6 +3019,8 @@ type McpServerAttributes struct {
 	// whether tool calls against this server should require a confirmation
 	Confirm        *bool                              `json:"confirm,omitempty"`
 	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
+	ReadBindings   []*PolicyBindingAttributes         `json:"readBindings,omitempty"`
+	WriteBindings  []*PolicyBindingAttributes         `json:"writeBindings,omitempty"`
 }
 
 type McpServerAudit struct {
@@ -5189,6 +5199,8 @@ type ServiceDeployment struct {
 	Alerts                 *AlertConnection                `json:"alerts,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -6081,6 +6093,12 @@ type UserRoleAttributes struct {
 
 type UserRoles struct {
 	Admin *bool `json:"admin,omitempty"`
+}
+
+// A representation of the metrics to render a utilization heat map
+type UtilizationHeatMap struct {
+	CPU    []*MetricResponse `json:"cpu,omitempty"`
+	Memory []*MetricResponse `json:"memory,omitempty"`
 }
 
 type VectorStoreAttributes struct {

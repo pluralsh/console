@@ -238,4 +238,5 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{catalog_id: id}) when is_binary(id), do: {&Git.catalog_rbac/3, id}
   defp rbac_args(%{project_id: id}) when is_binary(id), do: {&Settings.project_rbac/3, id}
   defp rbac_args(%{flow_id: id}) when is_binary(id), do: {&Flows.rbac/3, id}
+  defp rbac_args(%{server_id: id}) when is_binary(id), do: {&Flows.server_rbac/3, id}
 end

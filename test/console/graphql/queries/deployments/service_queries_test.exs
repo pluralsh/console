@@ -396,6 +396,34 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       refute Enum.empty?(found["componentMetrics"]["cpu"])
     end
 
+    test "it can fetch a service heat map" do
+      user = admin_user()
+      service = insert(:service)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 2, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [1, "1"]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!) {
+          serviceDeployment(id: $id) {
+            id
+            heatMap {
+              cpu { values { timestamp value } }
+              memory { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert found["id"] == service.id
+      refute Enum.empty?(found["heatMap"]["cpu"])
+      refute Enum.empty?(found["heatMap"]["memory"])
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       service = insert(:service, read_bindings: [%{user_id: user.id}])
