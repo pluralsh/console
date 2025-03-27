@@ -17,13 +17,13 @@ defmodule Console.Commands.Plural do
   def install([_ | _] = repos), do: plural("deploy", ["--silence", "--ignore-console" | Enum.flat_map(repos, & ["--from", &1])])
   def install(repo), do: plural("deploy", ["--silence", "--ignore-console", "--from", repo])
 
-  def install_cd(url, token, kubeconfig \\ nil) do
+  def install_cd(url, token, args \\ [], kubeconfig \\ nil) do
     with conf when is_binary(conf) <- kubeconfig,
          {:ok, f} <- Briefly.create(),
          :ok <- File.write(f, conf) do
-      plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"]), [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"] ++ args), [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
     else
-      nil -> plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"]), [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      nil -> plural_home("deployments", add_chart(["install", "--url", url, "--token", token, "--force"] ++ args), [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
       err -> err
     end
   end
