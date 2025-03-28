@@ -72,11 +72,9 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	if err := r.Get(ctx, req.NamespacedName, settings); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	// make sure there is only one CRD object with the `global` name and the agent namespace
-	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {
-		return ctrl.Result{}, nil
-	}
+
 	scope, err := NewDefaultScope(ctx, r.Client, settings)
 	if err != nil {
 		logger.Error(err, "failed to create deployment settings scope")
@@ -89,6 +87,12 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 			reterr = err
 		}
 	}()
+
+	// make sure there is only one CRD object with the `global` name and the agent namespace
+	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {
+		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("ignoring because of invalid name/namespace, only the %s/%s DeploymentSettings will be reconciled", deploymentSettingsName, deploymentSettingsNamespace))
+		return ctrl.Result{}, nil
+	}
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
