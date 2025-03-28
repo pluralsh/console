@@ -35,22 +35,32 @@ const directory: SubtabDirectory = [
   { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
 ]
 
-const getBreadcrumbs = (flowId: string = '', tab: string = '') => [
+const getBreadcrumbs = (
+  flowId: string = '',
+  flowName: string = '',
+  tab: string = ''
+) => [
   { label: 'flows', url: FLOWS_ABS_PATH },
-  { label: flowId, url: `${FLOWS_ABS_PATH}/${flowId}` },
+  { label: flowName, url: `${FLOWS_ABS_PATH}/${flowId}` },
   { label: tab, url: `${FLOWS_ABS_PATH}/${flowId}/${tab}` },
 ]
 
 export function Flow() {
   const { flowId } = useParams()
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowId}/:tab/*`)?.params.tab
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(flowId, tab), [flowId, tab]))
   const [showPermissions, setShowPermissions] = useState(false)
 
   const { data, loading, error, refetch } = useFlowQuery({
     variables: { id: flowId ?? '' },
   })
   const flow = data?.flow
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => getBreadcrumbs(flowId, flow?.name || flowId, tab),
+      [flowId, flow, tab]
+    )
+  )
 
   const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)
   const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
