@@ -62,7 +62,6 @@ jobs:
       with:
         images: |
           ghcr.io/pluralsh/deployment-controller
-          gcr.io/pluralsh/deployment-controller
           docker.io/pluralsh/deployment-controller
         tags: |
           type=schedule
