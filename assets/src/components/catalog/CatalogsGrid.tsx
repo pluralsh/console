@@ -9,48 +9,27 @@ import { iconUrl } from '../../utils/icon.ts'
 
 const fetchMargin = 50
 
+type CardGridProps = {
+  onBottomReached?: () => void
+  styles?: CSSProperties
+  children?: ReactNode
+}
+
 export function CatalogsGrid({
   catalogs,
   emptyState,
-  onBottomReached,
-  styles,
+  ...props
 }: {
   catalogs: CatalogFragment[]
   emptyState?: ReactNode
-  onBottomReached?: () => void
-  styles?: CSSProperties
-}) {
+} & CardGridProps) {
   const theme = useTheme()
   const navigate = useNavigate()
-
-  const handleBottomReached = useCallback(
-    (element?: HTMLDivElement | undefined) => {
-      if (!onBottomReached || !element) return
-
-      const { scrollHeight, scrollTop, clientHeight } = element
-      if (scrollHeight - scrollTop - clientHeight < fetchMargin) {
-        onBottomReached()
-      }
-    },
-    [onBottomReached]
-  )
 
   if (isEmpty(catalogs)) return emptyState
 
   return (
-    <div
-      css={{
-        display: 'grid',
-        gap: theme.spacing.medium,
-        gridTemplateColumns: 'repeat(auto-fill, minmax(256px, 1fr))',
-        flexGrow: 1,
-        overflowY: 'auto',
-        paddingBottom: theme.spacing.large,
-        paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
-        ...styles,
-      }}
-      onScrollCapture={(e) => handleBottomReached(e?.target as HTMLDivElement)}
-    >
+    <CardGrid {...props}>
       {catalogs?.map(
         ({ id, name, author, description, category, icon, darkIcon }) => (
           <CatalogCard
@@ -64,6 +43,39 @@ export function CatalogsGrid({
           />
         )
       )}
+    </CardGrid>
+  )
+}
+export function CardGrid({ onBottomReached, styles, children }: CardGridProps) {
+  const theme = useTheme()
+
+  const handleBottomReached = useCallback(
+    (element?: HTMLDivElement | undefined) => {
+      if (!onBottomReached || !element) return
+
+      const { scrollHeight, scrollTop, clientHeight } = element
+      if (scrollHeight - scrollTop - clientHeight < fetchMargin) {
+        onBottomReached()
+      }
+    },
+    [onBottomReached]
+  )
+
+  return (
+    <div
+      css={{
+        display: 'grid',
+        gap: theme.spacing.medium,
+        gridTemplateColumns: 'repeat(auto-fill, minmax(256px, 1fr))',
+        flexGrow: 1,
+        overflowY: 'auto',
+        paddingBottom: theme.spacing.large,
+        paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
+        ...styles,
+      }}
+      onScrollCapture={(e) => handleBottomReached(e?.currentTarget)}
+    >
+      {children}
     </div>
   )
 }

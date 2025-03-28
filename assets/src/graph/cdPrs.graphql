@@ -45,6 +45,17 @@ mutation DeletePullRequest($id: ID!) {
   }
 }
 
+fragment PullRequestConnection on PullRequestConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...PullRequest
+    }
+  }
+}
+
 query PullRequests(
   $q: String
   $first: Int = 100
@@ -61,13 +72,6 @@ query PullRequests(
     serviceId: $serviceId
     open: $open
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...PullRequest
-      }
-    }
+    ...PullRequestConnection
   }
 }

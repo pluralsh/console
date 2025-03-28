@@ -21,10 +21,15 @@ import {
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import styled from 'styled-components'
 import { ComponentPropsWithoutRef } from 'react'
+import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 
-export function AlertInsight({ type }: { type: 'cluster' | 'service' }) {
+export function AlertInsight({
+  type,
+}: {
+  type: 'cluster' | 'service' | 'flow'
+}) {
   const navigate = useNavigate()
-  const { clusterId, serviceId, insightId } = useParams()
+  const { clusterId, serviceId, flowId, insightId } = useParams()
 
   const { data, loading, error, refetch } = useAiInsightQuery({
     variables: { id: insightId ?? '' },
@@ -55,7 +60,9 @@ export function AlertInsight({ type }: { type: 'cluster' | 'service' }) {
             navigate(
               type === 'cluster'
                 ? `${getClusterDetailsPath({ clusterId })}/alerts`
-                : `${getServiceDetailsPath({ clusterId, serviceId })}/alerts`
+                : type === 'service'
+                  ? `${getServiceDetailsPath({ clusterId, serviceId })}/alerts`
+                  : `${getFlowDetailsPath({ flowId })}/alerts`
             )
           }
           floating

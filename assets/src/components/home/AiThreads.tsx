@@ -12,9 +12,9 @@ import {
 } from '../../generated/graphql.ts'
 import { useMemo } from 'react'
 import { sortThreadsOrPins } from '../ai/AITableEntry.tsx'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutesConsts.tsx'
 import { isEmpty } from 'lodash'
-import { AIEmptyState } from '../ai/AI.tsx'
+import { EmptyStateCompact } from '../ai/AIThreads.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import { useTheme } from 'styled-components'
 
@@ -47,7 +47,7 @@ export function AiThreads() {
     >
       {aiEnabled !== undefined ? (
         isEmpty(threads) && threadsQuery.data ? (
-          <AIEmptyState
+          <EmptyStateCompact
             icon={
               aiEnabled ? (
                 <ChatOutlineIcon

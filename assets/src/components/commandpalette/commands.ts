@@ -22,15 +22,16 @@ import {
   setThemeColorMode,
   useThemeColorMode,
   EdgeComputeIcon,
+  FlowIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
-import { ComponentType, useMemo } from 'react'
+import { ComponentType, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { useClustersTinyQuery } from '../../generated/graphql'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import {
   CD_ABS_PATH,
@@ -54,6 +55,8 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -98,8 +101,9 @@ export type CommandWithHotkeys = Command & { hotkeys: string[] }
 export const hasHotkeys = (command): command is CommandWithHotkeys =>
   !isEmpty(command.hotkeys)
 
+// just used for creating the hotkey listeners, not for displaying the commands in the palette
 export function useCommandsWithHotkeys() {
-  const commands = useCommands()
+  const commands = useCommands({ showHidden: true })
 
   return useMemo(
     () =>
@@ -111,11 +115,16 @@ export function useCommandsWithHotkeys() {
   )
 }
 
-export function useCommands(): CommandGroup[] {
+export function useCommands({
+  showHidden = false,
+}: {
+  showHidden?: boolean
+} = {}): CommandGroup[] {
   const open = useShareSecretOpen()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
+  const { featureFlags, setFeatureFlag } = use(FeatureFlagContext)
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -131,6 +140,37 @@ export function useCommands(): CommandGroup[] {
       : undefined
   }, [data?.clusters])
 
+  const hiddenCommands = useMemo(
+    () => [
+      {
+        commands: [
+          ...(!featureFlags.Flows
+            ? [
+                {
+                  label: 'Enable Flows',
+                  icon: FlowIcon,
+                  callback: () => setFeatureFlag('Flows', true),
+                  deps: [setFeatureFlag],
+                  hotkeys: ['shift F+L'],
+                },
+              ]
+            : []),
+          ...(!featureFlags.Edge
+            ? [
+                {
+                  label: 'Enable Edge',
+                  icon: EdgeComputeIcon,
+                  callback: () => setFeatureFlag('Edge', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : []),
+        ],
+      },
+    ],
+    [featureFlags, setFeatureFlag]
+  )
+
   return useMemo(
     () => [
       {
@@ -140,7 +180,7 @@ export function useCommands(): CommandGroup[] {
             icon: HomeIcon,
             callback: () => navigate('/'),
             deps: [navigate],
-            hotkeys: ['shift H', '1'],
+            hotkeys: ['shift H'],
             autoFocus: true,
           },
           {
@@ -148,63 +188,77 @@ export function useCommands(): CommandGroup[] {
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift C', '2'],
+            hotkeys: ['shift C'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
             deps: [navigate],
-            hotkeys: ['shift S', '3'],
-          },
-          {
-            label: 'Kubernetes Dashboard',
-            icon: KubernetesAltIcon,
-            callback: () => navigate(KUBERNETES_ROOT_PATH),
-            deps: [navigate],
-            hotkeys: ['shift K', '4'],
-          },
-          {
-            label: 'Plural AI',
-            icon: AiSparkleOutlineIcon,
-            callback: () => navigate(AI_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift A', '5'],
-          },
-          {
-            label: 'Edge',
-            icon: EdgeComputeIcon,
-            callback: () => navigate(EDGE_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift E', '6'],
+            hotkeys: ['shift S'],
           },
           {
             label: 'Service catalog',
             icon: CatalogIcon,
             callback: () => navigate(CATALOGS_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['7'],
+            hotkeys: ['shift S+C'],
           },
+          {
+            label: 'Kubernetes Dashboard',
+            icon: KubernetesAltIcon,
+            callback: () => navigate(KUBERNETES_ROOT_PATH),
+            deps: [navigate],
+            hotkeys: ['shift K'],
+          },
+          {
+            label: 'Plural AI',
+            icon: AiSparkleOutlineIcon,
+            callback: () => navigate(AI_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift A'],
+          },
+          ...(featureFlags.Flows
+            ? [
+                {
+                  label: 'Flows',
+                  icon: FlowIcon,
+                  callback: () => navigate(FLOWS_ABS_PATH),
+                  deps: [navigate],
+                  hotkeys: ['shift F'],
+                },
+              ]
+            : []),
+          ...(featureFlags.Edge
+            ? [
+                {
+                  label: 'Edge',
+                  icon: EdgeComputeIcon,
+                  callback: () => navigate(EDGE_ABS_PATH),
+                  deps: [navigate],
+                  hotkeys: ['shift E'],
+                },
+              ]
+            : []),
           {
             label: "Pull requests (PR's)",
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift P', '8'],
+            hotkeys: ['shift P'],
           },
           {
             label: 'Security',
             icon: WarningShieldIcon,
             callback: () => navigate(SECURITY_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['9'],
           },
           {
             label: 'Cost Management',
             icon: CostManagementIcon,
             callback: () => navigate(COST_MANAGEMENT_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift C+M', '0'],
+            hotkeys: ['shift C+M'],
           },
           {
             label: 'Settings',
@@ -298,7 +352,17 @@ export function useCommands(): CommandGroup[] {
           },
         ],
       },
+      ...(showHidden ? hiddenCommands : []),
     ],
-    [navigate, cluster?.id, mode, open]
+    [
+      navigate,
+      featureFlags.Flows,
+      featureFlags.Edge,
+      cluster?.id,
+      open,
+      mode,
+      showHidden,
+      hiddenCommands,
+    ]
   )
 }

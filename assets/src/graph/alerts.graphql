@@ -26,6 +26,17 @@ fragment AlertResolution on AlertResolution {
   resolution
 }
 
+fragment AlertConnection on AlertConnection {
+  edges {
+    node {
+      ...Alert
+    }
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 query ClusterAlerts(
   $clusterId: ID!
   $after: String
@@ -36,14 +47,7 @@ query ClusterAlerts(
   cluster(id: $clusterId) {
     id
     alerts(after: $after, first: $first, before: $before, last: $last) {
-      edges {
-        node {
-          ...Alert
-        }
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...AlertConnection
     }
   }
 }
@@ -58,14 +62,7 @@ query ServiceAlerts(
   serviceDeployment(id: $serviceId) {
     id
     alerts(after: $after, first: $first, before: $before, last: $last) {
-      edges {
-        node {
-          ...Alert
-        }
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...AlertConnection
     }
   }
 }

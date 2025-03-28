@@ -82,20 +82,6 @@ export const PageHeaderContext = createContext<HeaderContext | undefined>(
   undefined
 )
 
-export function PageHeaderProvider({
-  value,
-  children,
-}: {
-  value: HeaderContext
-  children: ReactNode
-}) {
-  return (
-    <PageHeaderContext.Provider value={value}>
-      {children}
-    </PageHeaderContext.Provider>
-  )
-}
-
 export const usePageHeaderContext = (): HeaderContext => {
   const ctx = useContext(PageHeaderContext)
 

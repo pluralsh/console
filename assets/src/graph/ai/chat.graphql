@@ -1,132 +1,3 @@
-fragment AiInsight on AiInsight {
-  id
-  text
-  summary
-  sha
-  freshness
-  updatedAt
-  insertedAt
-  error {
-    message
-    source
-  }
-  ...AiInsightContext
-}
-
-fragment AiInsightSummary on AiInsight {
-  id
-  summary
-  freshness
-  insertedAt
-  updatedAt
-  ...AiInsightContext
-}
-
-fragment AiInsightContext on AiInsight {
-  evidence {
-    ...AiInsightEvidence
-  }
-  cluster {
-    id
-    name
-    distro
-    provider {
-      cloud
-    }
-  }
-  clusterInsightComponent {
-    id
-    name
-  }
-  service {
-    id
-    name
-    cluster {
-      ...ClusterMinimal
-    }
-  }
-  serviceComponent {
-    id
-    name
-    service {
-      id
-      name
-      cluster {
-        ...ClusterMinimal
-      }
-    }
-  }
-  stack {
-    id
-    name
-    type
-  }
-  stackRun {
-    id
-    message
-    type
-    stack {
-      id
-      name
-    }
-  }
-  alert {
-    id
-    title
-    message
-  }
-}
-
-fragment AiInsightEvidence on AiInsightEvidence {
-  id
-  type
-  logs {
-    ...LogsEvidence
-  }
-  pullRequest {
-    ...PullRequestEvidence
-  }
-  insertedAt
-  updatedAt
-}
-
-fragment LogsEvidence on LogsEvidence {
-  clusterId
-  serviceId
-  lines {
-    ...LogLine
-  }
-}
-
-fragment PullRequestEvidence on PullRequestEvidence {
-  contents
-  filename
-  patch
-  repo
-  sha
-  title
-  url
-}
-
-fragment ClusterInsightComponent on ClusterInsightComponent {
-  id
-  kind
-  name
-  namespace
-  group
-  version
-  insight {
-    ...AiInsight
-  }
-}
-
-fragment ClusterInsightComponentDetail on ClusterInsightComponent {
-  ...ClusterInsightComponent
-  resource {
-    raw
-  }
-}
-
 fragment AiPin on AiPin {
   id
   name
@@ -190,25 +61,6 @@ fragment ChatThread on ChatThread {
   }
 }
 
-query AiInsight($id: ID!) {
-  aiInsight(id: $id) {
-    ...AiInsight
-  }
-}
-
-query AICompletion(
-  $system: String!
-  $input: String
-  $chat: [ChatMessage]
-  $scopeId: String
-) {
-  aiCompletion(system: $system, input: $input, chat: $chat, scopeId: $scopeId)
-}
-
-query AISuggestedFix($insightID: ID!) {
-  aiSuggestedFix(insightId: $insightID)
-}
-
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
   aiPins(first: $first, last: $last, after: $after, before: $before) {
     pageInfo {
@@ -249,12 +101,6 @@ query ChatThreads(
 query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
     ...ChatThread
-  }
-}
-
-query ClusterInsightComponent($id: ID!) {
-  clusterInsightComponent(id: $id) {
-    ...ClusterInsightComponentDetail
   }
 }
 
@@ -307,12 +153,6 @@ mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
 mutation DeleteChatThread($id: ID!) {
   deleteThread(id: $id) {
     ...ChatThread
-  }
-}
-
-mutation AiFixPr($insightId: ID!, $messages: [ChatMessage]) {
-  aiFixPr(insightId: $insightId, messages: $messages) {
-    ...PullRequest
   }
 }
 
