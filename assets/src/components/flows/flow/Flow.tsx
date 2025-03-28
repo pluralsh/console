@@ -39,11 +39,14 @@ const getBreadcrumbs = (
   flowId: string = '',
   flowName: string = '',
   tab: string = ''
-) => [
-  { label: 'flows', url: FLOWS_ABS_PATH },
-  { label: flowName, url: `${FLOWS_ABS_PATH}/${flowId}` },
-  { label: tab, url: `${FLOWS_ABS_PATH}/${flowId}/${tab}` },
-]
+) =>
+  flowName
+    ? [
+        { label: 'flows', url: FLOWS_ABS_PATH },
+        { label: flowName, url: `${FLOWS_ABS_PATH}/${flowId}` },
+        { label: tab, url: `${FLOWS_ABS_PATH}/${flowId}/${tab}` },
+      ]
+    : []
 
 export function Flow() {
   const { flowId } = useParams()
@@ -57,7 +60,7 @@ export function Flow() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => getBreadcrumbs(flowId, flow?.name || flowId, tab),
+      () => getBreadcrumbs(flowId, flow?.name || '', tab),
       [flowId, flow, tab]
     )
   )
