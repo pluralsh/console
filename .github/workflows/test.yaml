@@ -94,6 +94,12 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-3
       - run: mix deps.get
       - run: mix test
+      - name: Verify Changed files
+        run: |
+          git diff --exit-code -- priv || {
+            echo "::error Agent chart not downloaded, run `mix test` to compile it locally."
+            exit 1
+          }
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}

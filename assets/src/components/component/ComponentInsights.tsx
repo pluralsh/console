@@ -4,7 +4,6 @@ import { useOutletContext } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
 import { AiInsight } from '../../generated/graphql.ts'
 import AIPinButton from '../ai/AIPinButton.tsx'
-import { AISuggestFix } from '../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -47,7 +46,7 @@ export function ComponentInsights() {
           insightId={component?.insight?.id}
           messages={[insightMessage(component?.insight)]}
         />
-        <AISuggestFix insight={component?.insight} />
+        {/* <AISuggestFix insight={component?.insight} /> */}
       </Flex>
       <InsightDisplay
         insight={component.insight}
