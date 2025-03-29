@@ -4367,7 +4367,7 @@ export type ObserverPrAction = {
   /** a template to use for the created branch, use $value to interject the observed value */
   branchTemplate?: Maybe<Scalars['String']['output']>;
   /** the context to apply, use $value to interject the observed value */
-  context: Scalars['Json']['output'];
+  context: Scalars['Map']['output'];
   repository?: Maybe<Scalars['String']['output']>;
 };
 

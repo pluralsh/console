@@ -3597,7 +3597,7 @@ type ObserverPrAction struct {
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
-	Context string `json:"context"`
+	Context map[string]any `json:"context"`
 }
 
 // Configuration for sending a pr in response to an observer

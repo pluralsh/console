@@ -689,7 +689,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :automation_id,   non_null(:id)
     field :repository,      :string
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
-    field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+    field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"
