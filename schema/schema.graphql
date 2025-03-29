@@ -7063,7 +7063,7 @@ type ObserverPrAction {
   branchTemplate: String
 
   "the context to apply, use $value to interject the observed value"
-  context: Json!
+  context: Map!
 }
 
 "Configuration for setting a pipeline context in an observer"

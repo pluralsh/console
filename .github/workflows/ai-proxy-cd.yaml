@@ -63,6 +63,7 @@ jobs:
         with:
           images: |
             ghcr.io/pluralsh/ai-proxy
+            gcr.io/pluralsh/ai-proxy
             docker.io/pluralsh/ai-proxy
           tags: |
             type=sha
