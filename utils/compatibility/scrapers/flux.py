@@ -40,7 +40,6 @@ def get_available_versions(soup):
             if version_text.startswith("v") and href:
                 version = version_text.lstrip("v")
                 try:
-
                     if version.count(".") == 0 and version.isdigit():
                         version = f"{version}.0.0"
                     elif version.count(".") == 1:
@@ -48,7 +47,6 @@ def get_available_versions(soup):
                         if major.isdigit() and minor.isdigit():
                             version = f"{major}.{minor}.0"
                 except Exception:
-
                     pass
 
                 if version in seen_versions:
@@ -56,7 +54,6 @@ def get_available_versions(soup):
                 seen_versions.add(version)
 
                 full_url = urllib.parse.urljoin(base_url, href)
-
                 if "/installation/" not in full_url.lower():
                     parsed_url = urllib.parse.urlparse(full_url)
                     if parsed_url.path.strip("/") == "":
@@ -103,7 +100,6 @@ def extract_table_data(table, flux_version):
                 break
 
         if flux_version_idx == -1:
-
             flux_version_idx = 0
 
         if kube_version_idx == -1:
@@ -122,9 +118,9 @@ def extract_table_data(table, flux_version):
                 row_flux_version = clean_version(
                     cols[flux_version_idx].get_text().strip()
                 )
-
                 if flux_version_idx > 0 and row_flux_version != flux_version:
                     continue
+
             kube_text_raw = cols[kube_version_idx].get_text().strip()
             kube_text_check = kube_text_raw.replace(">=", "").strip().lower()
             should_expand = "and later" in kube_text_check
@@ -133,14 +129,12 @@ def extract_table_data(table, flux_version):
                 base_version_text = kube_text_check.replace("and later", "").strip()
                 base_version = clean_version(base_version_text)
                 if base_version:
-
                     base_parts = base_version.split(".")
-                    if len(base_parts) > 2:
-
-                        base_version_2part = f"{base_parts[0]}.{base_parts[1]}"
-                    else:
-                        base_version_2part = base_version
-
+                    base_version_2part = (
+                        f"{base_parts[0]}.{base_parts[1]}"
+                        if len(base_parts) > 2
+                        else base_version
+                    )
                     try:
                         expanded_versions = expand_kube_versions(
                             base_version_2part, current_kube_version()
@@ -150,21 +144,21 @@ def extract_table_data(table, flux_version):
                         print_warning(
                             f"Could not expand versions from {base_version}: {str(e)}"
                         )
-
                         kube_versions_for_this_flux_version.append(base_version)
                 else:
-
                     versions_in_cell = [
                         clean_version(v.strip()) for v in kube_text_raw.split(",")
                     ]
-                    versions_to_add = [v for v in versions_in_cell if v]
-                    kube_versions_for_this_flux_version.extend(versions_to_add)
+                    kube_versions_for_this_flux_version.extend(
+                        [v for v in versions_in_cell if v]
+                    )
             else:
                 versions_in_cell = [
                     clean_version(v.strip()) for v in kube_text_raw.split(",")
                 ]
-                versions_to_add = [v for v in versions_in_cell if v]
-                kube_versions_for_this_flux_version.extend(versions_to_add)
+                kube_versions_for_this_flux_version.extend(
+                    [v for v in versions_in_cell if v]
+                )
 
         seen = set()
         final_kube_versions = [
@@ -174,7 +168,6 @@ def extract_table_data(table, flux_version):
         ]
 
         if not final_kube_versions:
-
             print_warning(f"No valid Kubernetes versions found for Flux {flux_version}")
             return []
 
@@ -189,8 +182,6 @@ def extract_table_data(table, flux_version):
             )
         ]
     except Exception as e:
-        import traceback
-
         print_error(f"Error in extract_table_data: {str(e)}")
         return []
 
@@ -213,7 +204,6 @@ def scrape():
             return
 
         version_map = {}
-
         for info in version_info:
             try:
                 version = info["version"]
@@ -225,7 +215,6 @@ def scrape():
                     continue
 
                 version_soup = parse_page(version_content)
-
                 try:
                     table = find_compatibility_table(version_soup)
                 except Exception as e:
@@ -245,7 +234,6 @@ def scrape():
                             existing_kube = version_map[version].get("kube", [])
                             new_kube = current_data.get("kube", [])
                             combined_kube = existing_kube + new_kube
-
                             seen_kube = set()
                             unique_kube = [
                                 k
@@ -270,7 +258,6 @@ def scrape():
         if version_map:
             all_rows_list = list(version_map.values())
             sorted_rows = sort_versions(all_rows_list)
-
             output_file = f"../../static/compatibilities/{app_name}.yaml"
             update_compatibility_info(output_file, sorted_rows)
 
@@ -279,14 +266,13 @@ def scrape():
                 if yaml_data:
                     yaml_data["helm_repository_url"] = helm_repository_url
                     write_yaml(output_file, yaml_data)
-
                 update_chart_versions(app_name, chart_name=chart_name)
             except Exception as e:
                 print_error(f"Error updating chart versions: {str(e)}")
         else:
             print_error("No compatibility information found across all versions.")
     except Exception as e:
+        print_error(f"An unexpected error occurred: {str(e)}")
         import traceback
 
-        print_error(f"An unexpected error occurred: {str(e)}")
         traceback.print_exc()
