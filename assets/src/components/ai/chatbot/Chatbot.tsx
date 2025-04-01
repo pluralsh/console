@@ -9,8 +9,10 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   AiInsightFragment,
   ChatThreadFragment,
+  ChatThreadTinyFragment,
   useChatThreadsQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { ComponentPropsWithRef, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -21,11 +23,10 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { isEmpty } from 'lodash'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
-  currentThread?: Nullable<ChatThreadFragment>
+  currentThread?: Nullable<ChatThreadTinyFragment>
   currentInsight?: Nullable<AiInsightFragment>
 }
 
@@ -114,7 +115,7 @@ function ChatbotPanelInner({
     const curPageThreads: ChatThreadFragment[] = []
     const otherThreads: ChatThreadFragment[] = []
     threads.forEach((thread) => {
-      const insightUrl = getInsightPathInfo(thread.insight).url
+      const insightUrl = getInsightPathInfo(thread.insight)?.url
       if (insightUrl && pathname?.includes(insightUrl))
         curPageThreads.push(thread)
       else otherThreads.push(thread)

@@ -29,6 +29,21 @@ fragment McpServerAudit on McpServerAudit {
   updatedAt
 }
 
+fragment McpTool on McpTool {
+  name
+  description
+  inputSchema
+}
+
+fragment McpServerTool on McpServerTool {
+  tool {
+    ...McpTool
+  }
+  server {
+    ...McpServer
+  }
+}
+
 fragment McpServerConnection on McpServerConnection {
   pageInfo {
     ...PageInfo

@@ -3,12 +3,6 @@ fragment FlowBasic on Flow {
   name
   description
   icon
-  readBindings {
-    ...PolicyBinding
-  }
-  writeBindings {
-    ...PolicyBinding
-  }
   alerts(first: 500) {
     # just to get the count
     edges {
@@ -19,11 +13,21 @@ fragment FlowBasic on Flow {
   }
 }
 
+fragment FlowBasicWithBindings on Flow {
+  ...FlowBasic
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
 query Flows($first: Int = 100, $after: String, $q: String) {
   flows(first: $first, after: $after, q: $q) {
     edges {
       node {
-        ...FlowBasic
+        ...FlowBasicWithBindings
       }
     }
     pageInfo {
@@ -34,7 +38,7 @@ query Flows($first: Int = 100, $after: String, $q: String) {
 
 query Flow($id: ID!) {
   flow(id: $id) {
-    ...FlowBasic
+    ...FlowBasicWithBindings
   }
 }
 
@@ -85,6 +89,6 @@ query FlowMcpServers($id: ID!) {
 
 mutation UpsertFlow($attributes: FlowAttributes!) {
   upsertFlow(attributes: $attributes) {
-    ...FlowBasic
+    ...FlowBasicWithBindings
   }
 }

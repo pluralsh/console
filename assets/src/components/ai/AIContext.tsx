@@ -1,7 +1,9 @@
 import {
+  AiInsightFragment,
   AiInsightSummaryFragment,
   ChatThreadAttributes,
   ChatThreadFragment,
+  ChatThreadTinyFragment,
   useCreateChatThreadMutation,
 } from 'generated/graphql.ts'
 import {
@@ -35,8 +37,8 @@ type ChatbotContextT = {
   setOpen: (open: boolean) => void
   fullscreen: boolean
   setFullscreen: Dispatch<SetStateAction<boolean>>
-  currentThread: Nullable<ChatThreadFragment>
-  setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
+  currentThread: Nullable<ChatThreadTinyFragment>
+  setCurrentThread: (thread: Nullable<ChatThreadTinyFragment>) => void
   currentInsight: Nullable<AiInsightSummaryFragment>
   setCurrentInsight: Dispatch<
     SetStateAction<Nullable<AiInsightSummaryFragment>>
@@ -141,12 +143,12 @@ export function useChatbot() {
         },
       })
     },
-    goToThread: (thread: ChatThreadFragment) => {
+    goToThread: (thread: ChatThreadTinyFragment) => {
       setCurrentThread(thread)
       setCurrentInsight(null)
       setOpen(true)
     },
-    goToInsight: (insight: AiInsightSummaryFragment) => {
+    goToInsight: (insight: AiInsightFragment) => {
       setCurrentThread(null)
       setCurrentInsight(insight)
       setOpen(true)

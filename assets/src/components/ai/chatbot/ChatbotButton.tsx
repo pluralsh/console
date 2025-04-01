@@ -47,12 +47,16 @@ export function insightMessage(
 export function ChatWithAIButton({
   messages,
   insightId,
+  flowId,
+  summaryText = 'Further questions about an insight from Plural AI',
   bodyText = 'Chat with AI',
   iconOnly = false,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
   insightId?: Nullable<string>
+  flowId?: Nullable<string>
+  summaryText?: string
   bodyText?: string
   iconOnly?: boolean
 } & ComponentPropsWithRef<typeof Button>) {
@@ -61,8 +65,8 @@ export function ChatWithAIButton({
   const handleClick = () => {
     createNewThread({
       insightId,
-      // TODO: update this
-      summary: 'Further questions about an insight from Plural AI',
+      flowId,
+      summary: summaryText,
       summarized: false,
       messages: messages || [],
     })

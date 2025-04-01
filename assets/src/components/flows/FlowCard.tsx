@@ -15,7 +15,7 @@ import {
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
-import { FlowBasicFragment } from 'generated/graphql'
+import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -25,7 +25,7 @@ export function FlowCard({
   flow,
   refetch,
 }: {
-  flow: FlowBasicFragment
+  flow: FlowBasicWithBindingsFragment
   refetch: () => void
 }) {
   const navigate = useNavigate()

@@ -9,6 +9,8 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ChatWithAIButton } from 'components/ai/chatbot/ChatbotButton'
+import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import {
   PermissionsIdType,
   PermissionsModal,
@@ -25,7 +27,6 @@ import {
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
-import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
@@ -120,6 +121,12 @@ export function Flow() {
           >
             Permissions
           </Button>
+          <ChatWithAIButton
+            floating
+            flowId={flowId}
+            bodyText="Start a Flow chat"
+            summaryText={`Further questions about "${flow.name}" Flow`}
+          />
         </HeaderSC>
         <Flex justify="space-between">
           <SubTabs directory={directory} />
