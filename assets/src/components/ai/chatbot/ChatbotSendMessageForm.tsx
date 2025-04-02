@@ -5,6 +5,7 @@ import {
   PlusIcon,
   PrOpenIcon,
   SendMessageIcon,
+  ServersIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
@@ -33,11 +34,17 @@ export function SendMessageForm({
   currentThread,
   sendMessage,
   fullscreen,
+  shouldUseMCP,
+  showMcpServers,
+  setShowMcpServers,
   ...props
 }: {
   currentThread: ChatThreadFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
+  shouldUseMCP: boolean
+  showMcpServers: boolean
+  setShowMcpServers: (show: boolean) => void
 } & ComponentPropsWithoutRef<'div'>) {
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
@@ -104,6 +111,23 @@ export function SendMessageForm({
       $fullscreen={fullscreen}
       ref={formRef}
     >
+      {shouldUseMCP && (
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="small"
+        >
+          <span>mcp server chips placeholder</span>
+          <Button
+            small
+            secondary
+            startIcon={showMcpServers ? null : <ServersIcon />}
+            onClick={() => setShowMcpServers(!showMcpServers)}
+          >
+            {showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'}
+          </Button>
+        </Flex>
+      )}
       <EditableContentWrapperSC $fullscreen={fullscreen}>
         {contextError && <GqlError error={contextError} />}
         {threadPrError && <GqlError error={threadPrError} />}
@@ -167,6 +191,9 @@ export function SendMessageForm({
 
 const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
     position: 'relative',
     borderRadius: $fullscreen ? theme.borderRadiuses.large : '0px',
     backgroundColor: $fullscreen

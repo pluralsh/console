@@ -17,11 +17,11 @@ import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
   AiDelta,
   AiRole,
+  ChatThreadDetailsQueryResult,
   ChatThreadTinyFragment,
   EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
-  useChatThreadDetailsQuery,
   useHybridChatMutation,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -39,12 +39,19 @@ import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 export function ChatbotPanelThread({
   currentThread,
   fullscreen,
+  threadDetailsQuery: { data, loading, error },
+  shouldUseMCP,
+  showMcpServers,
+  setShowMcpServers,
 }: {
   currentThread: ChatThreadTinyFragment
   fullscreen: boolean
+  threadDetailsQuery: ChatThreadDetailsQueryResult
+  shouldUseMCP: boolean
+  showMcpServers: boolean
+  setShowMcpServers: (show: boolean) => void
 }) {
   const theme = useTheme()
-  const shouldUseMCP = !!currentThread.flow
   const [streaming, setStreaming] = useState<boolean>(false)
   const messageListRef = useRef<HTMLDivElement>(null)
   const scrollToBottom = useCallback(() => {
@@ -73,10 +80,6 @@ export function ChatbotPanelThread({
     },
   })
 
-  const { data, loading, error } = useChatThreadDetailsQuery({
-    variables: { id: currentThread.id },
-    pollInterval: 20000,
-  })
   const messages = mapExistingNodes(data?.chatThread?.chats)
 
   const commonChatAttributes = {
@@ -86,7 +89,6 @@ export function ChatbotPanelThread({
   }
   // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
   // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
-  // this becomes buggy if you don't use cache-first (default) policy on the details query
   const [mutateRegChat, { loading: regLoading, error: regError }] =
     useChatMutation({
       ...commonChatAttributes,
@@ -175,6 +177,9 @@ export function ChatbotPanelThread({
         currentThread={currentThread}
         sendMessage={sendMessage}
         fullscreen={fullscreen}
+        shouldUseMCP={shouldUseMCP}
+        showMcpServers={showMcpServers}
+        setShowMcpServers={setShowMcpServers}
       />
     </>
   )
