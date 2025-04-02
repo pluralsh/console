@@ -2,6 +2,10 @@ defmodule Console.AI.Tools.Utils do
   alias Console.Schema.{Service}
   alias Console.Repo
 
+  def plrl_tool(tool), do: "__plrl__#{tool}"
+
+  def plrl_tool_name("__plrl__" <> name), do: name
+
   @spec tool_content(atom, map) :: binary
   def tool_content(tool, map) do
     Path.join([:code.priv_dir(:console), "tools", "templates", "#{tool}.md.eex"])

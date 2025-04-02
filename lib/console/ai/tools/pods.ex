@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Pods do
   @json_schema Console.priv_file!("tools/pods.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:pods"
+  def name(), do: plrl_tool("pods")
   def description(), do: "Lists pods for a given service and cluster"
 
   def implement(%__MODULE__{service: service, cluster: cluster}) do

@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Clusters do
   @json_schema Console.priv_file!("tools/clusters.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:clusters"
+  def name(), do: plrl_tool("clusters")
   def description(), do: "Shows the clusters currently being deployed into this flow"
 
   def implement(%__MODULE__{} = query) do

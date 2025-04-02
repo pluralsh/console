@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Logs do
   @json_schema Console.priv_file!("tools/logs.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:logs"
+  def name(), do: plrl_tool("logs")
   def description(), do: "Lists logs for a given service and cluster"
 
   def implement(%__MODULE__{service: service, cluster: cluster, query: query}) do

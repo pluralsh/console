@@ -30,7 +30,7 @@ defmodule Console.AI.Chat.Engine do
     start_transaction()
     |> add_operation(:call, fn _ ->
       call_tool(
-        %Tool{name: "#{mcp_server.name}.#{name}", arguments: args},
+        %Tool{name: Agent.tool_name(mcp_server.name, name), arguments: args},
         chat.thread,
         mcp_server,
         user
@@ -63,6 +63,7 @@ defmodule Console.AI.Chat.Engine do
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
     |> Provider.completion(include_tools([preface: @chat], thread))
+    |> IO.inspect(label: "hybrid chat completion")
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})

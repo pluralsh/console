@@ -396,8 +396,9 @@ defmodule Console.AI.ChatSyncTest do
       insert(:mcp_server_association, server: server, flow: flow)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
+      toolname = Console.AI.MCP.Agent.tool_name("everything", "echo")
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
-        {:ok, "openai toolcall", [%Tool{name: "everything.echo", arguments: %{"message" => "a message"}}]}
+        {:ok, "openai toolcall", [%Tool{name: toolname, arguments: %{"message" => "a message"}}]}
       end)
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
@@ -431,8 +432,9 @@ defmodule Console.AI.ChatSyncTest do
       insert(:mcp_server_association, server: server, flow: flow)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
+      toolname = Console.AI.MCP.Agent.tool_name("everything", "echo")
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
-        {:ok, "openai toolcall", [%Tool{name: "everything.echo", arguments: %{"message" => "a message"}}]}
+        {:ok, "openai toolcall", [%Tool{name: toolname, arguments: %{"message" => "a message"}}]}
       end)
 
       {:ok, [next, tool]} = Chat.hybrid_chat([
@@ -462,7 +464,7 @@ defmodule Console.AI.ChatSyncTest do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
-        {:ok, "openai toolcall", [%Tool{name: "__plrl__:clusters", arguments: %{}}]}
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__clusters", arguments: %{}}]}
       end)
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
@@ -479,7 +481,7 @@ defmodule Console.AI.ChatSyncTest do
       assert next.role == :assistant
       assert next.content == "openai toolcall"
       assert tool.content =~ service.cluster.handle
-      assert tool.attributes.tool.name == "__plrl__:clusters"
+      assert tool.attributes.tool.name == "__plrl__clusters"
     end
 
     test "it can chat with a plural logs tool call" do
@@ -499,7 +501,7 @@ defmodule Console.AI.ChatSyncTest do
       )
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
-        {:ok, "openai toolcall", [%Tool{name: "__plrl__:logs", arguments: %{
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__logs", arguments: %{
           "service" => service.name,
           "cluster" => service.cluster.handle,
           "query" => "error"
@@ -524,7 +526,7 @@ defmodule Console.AI.ChatSyncTest do
       assert next.role == :assistant
       assert next.content == "openai toolcall"
       assert tool.content =~ "what is happening"
-      assert tool.attributes.tool.name == "__plrl__:logs"
+      assert tool.attributes.tool.name == "__plrl__logs"
     end
   end
 

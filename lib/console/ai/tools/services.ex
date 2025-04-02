@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Services do
   @json_schema Console.priv_file!("tools/services.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:services"
+  def name(), do: plrl_tool("services")
   def description(), do: "Searches the service currently being deployed into this flow"
 
   def implement(%__MODULE__{} = query) do
