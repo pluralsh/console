@@ -11,7 +11,7 @@ defmodule Console.AI.Stream.Exec do
   @spec handle_openai(map) :: stream_message
   defp handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c), do: c
   defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}) do
-    {:tools, Enum.map(calls, fn %{"index" => ind} = call -> {ind, call} end)}
+    {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} -> {ind, call} end)}
   end
   defp handle_openai(_), do: :pass
 
@@ -25,7 +25,6 @@ defmodule Console.AI.Stream.Exec do
     |> Stream.with_index()
     |> Enum.reduce_while(Result.new(), fn
       {%AIStream.SSE.Event{data: data}, ind}, acc ->
-        IO.inspect(acc, label: "stream acc")
         acc = %{acc | ind: ind}
         case reducer.(data) do
           c when is_binary(c) ->
@@ -56,11 +55,9 @@ defmodule Console.AI.Stream.Exec do
         {{:error, err}, _} -> {[{:error, err}], :error}
 
         {:ok, %HTTPoison.AsyncResponse{}} = resp  ->
-          IO.inspect(resp, label: "first response")
           {[], {resp, ""}}
 
         {{:ok, %HTTPoison.AsyncResponse{id: id} = res}, acc}  ->
-          IO.inspect(res, label: "following response")
           receive do
             %HTTPoison.AsyncStatus{id: ^id, code: code} when code >= 200 and code < 400 ->
               {[], stream_next(res, acc)}
@@ -84,9 +81,6 @@ defmodule Console.AI.Stream.Exec do
       fn
         %{id: id} -> :hackney.stop_async(id)
         :error -> :ok
-        err ->
-          IO.inspect(err, label: "error")
-          :ok
       end
     )
   end

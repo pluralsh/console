@@ -63,7 +63,6 @@ defmodule Console.AI.Chat.Engine do
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
     |> Provider.completion(include_tools([preface: @chat], thread))
-    |> IO.inspect(label: "hybrid chat completion")
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})
