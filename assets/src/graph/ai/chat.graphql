@@ -25,6 +25,10 @@ fragment Chat on Chat {
     file {
       name
     }
+    tool {
+      name
+      arguments
+    }
   }
   insertedAt
   updatedAt

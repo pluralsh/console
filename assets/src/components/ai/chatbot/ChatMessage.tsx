@@ -1,13 +1,9 @@
 import {
-  Accordion,
-  AccordionItem,
   AppIcon,
   ArrowTopRightIcon,
   Card,
   CheckIcon,
-  Code,
   CopyIcon,
-  FileIcon,
   Flex,
   GitHubLogoIcon,
   IconFrame,
@@ -31,6 +27,7 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import { ChatMessageContent } from './ChatMessageContent'
 
 export function ChatMessage({
   id,
@@ -101,72 +98,7 @@ export function ChatMessage({
   )
 }
 
-function ChatMessageContent({
-  id,
-  showActions,
-  content,
-  type,
-  attributes,
-}: {
-  id: string
-  showActions: boolean
-  content: string
-  type: ChatType
-  attributes?: Nullable<ChatTypeAttributes>
-}) {
-  const theme = useTheme()
-  const fileName = attributes?.file?.name ?? ''
-  return type === ChatType.File ? (
-    <Accordion type="single">
-      <AccordionItem
-        padding="compact"
-        caret="right"
-        trigger={
-          <Flex
-            gap="small"
-            align="center"
-            wordBreak="break-word"
-            marginRight={theme.spacing.small}
-          >
-            <FileIcon
-              size={12}
-              color="icon-light"
-            />
-            <CaptionP $color="text-light">{fileName || 'File'}</CaptionP>
-            <ChatMessageActions
-              id={id}
-              content={fileName}
-              show={showActions}
-            />
-          </Flex>
-        }
-      >
-        <Code
-          css={{ background: theme.colors['fill-three'], maxWidth: '100%' }}
-        >
-          {content}
-        </Code>
-      </AccordionItem>
-    </Accordion>
-  ) : (
-    <Card
-      css={{ padding: theme.spacing.medium }}
-      fillLevel={2}
-    >
-      {content.split('\n').map((line, i, arr) => (
-        <div
-          key={`${i}-${line}`}
-          css={{ display: 'contents' }}
-        >
-          {line}
-          {i !== arr.length - 1 ? <br /> : null}
-        </div>
-      ))}
-    </Card>
-  )
-}
-
-function ChatMessageActions({
+export function ChatMessageActions({
   id,
   content,
   show = true,
