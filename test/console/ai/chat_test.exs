@@ -415,6 +415,9 @@ defmodule Console.AI.ChatSyncTest do
       assert next.role == :assistant
       assert next.content == "openai toolcall"
       assert tool.content == "Result from calling MCP server everything with tool echo:\nEcho: a message"
+      assert tool.type == :tool
+      assert tool.server_id == server.id
+      assert tool.attributes.tool.arguments
       assert finish.content == "openai completion"
 
       [audit] = Repo.all(McpServerAudit)

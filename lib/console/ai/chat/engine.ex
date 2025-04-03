@@ -55,6 +55,7 @@ defmodule Console.AI.Chat.Engine do
   def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
     completion
     |> Enum.map(&Chat.attributes/1)
+    |> IO.inspect()
     |> ChatSvc.save_messages(thread_id, user)
   end
 
@@ -160,6 +161,7 @@ defmodule Console.AI.Chat.Engine do
       role: :user,
       content: content,
       server_id: server && server.id,
+      type: :tool,
       attributes: %{
         tool: %{
           name: name,

@@ -259,6 +259,7 @@ defmodule Console.GraphQl.AI do
 
     connection field :chat_threads, node_type: :chat_thread do
       middleware Authenticated
+      arg :flow_id, :id, description: "only show threads for this flow"
 
       resolve &AI.threads/2
     end
