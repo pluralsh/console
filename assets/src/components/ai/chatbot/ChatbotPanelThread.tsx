@@ -19,6 +19,7 @@ import {
   AiRole,
   ChatThreadDetailsQueryResult,
   ChatThreadTinyFragment,
+  ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
@@ -35,6 +36,7 @@ import {
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { produce } from 'immer'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -64,19 +66,24 @@ export function ChatbotPanelThread({
     ?.filter(isNonNullable)
     .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
-  const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
+  const [streamedMessages, setStreamedMessages] = useState<AiDelta[][]>([])
   useAiChatStreamSubscription({
     variables: { threadId: currentThread.id },
     onData: ({ data: { data } }) => {
       setStreaming(true)
-      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
-      setStreamedMessage((streamedMessage) => [
-        ...streamedMessage,
-        {
-          seq: data?.aiStream?.seq ?? 0,
-          content: data?.aiStream?.content ?? '',
-        },
-      ])
+      const newDelta = data?.aiStream
+      if ((newDelta?.seq ?? 1) % 120 === 0) scrollToBottom()
+      setStreamedMessages((streamedMessages) =>
+        produce(streamedMessages, (draft) => {
+          const msgNum = newDelta?.message ?? 0
+          if (!draft[msgNum]) draft[msgNum] = []
+          draft[msgNum].push({
+            seq: newDelta?.seq ?? 0,
+            content: newDelta?.content ?? '',
+            role: newDelta?.role ?? AiRole.Assistant,
+          })
+        })
+      )
     },
   })
 
@@ -124,7 +131,7 @@ export function ChatbotPanelThread({
   useEffect(() => {
     if (length > prevLength) {
       scrollToBottom()
-      setStreamedMessage([])
+      setStreamedMessages([])
     }
   }, [length, prevLength, scrollToBottom])
 
@@ -150,11 +157,12 @@ export function ChatbotPanelThread({
         fullscreen={fullscreen}
       >
         {messageError && <GqlError error={messageError} />}
-        {isEmpty(messages) && error ? (
-          <GqlError error={error} />
-        ) : (
-          <EmptyState message="No messages yet." />
-        )}
+        {isEmpty(messages) &&
+          (error ? (
+            <GqlError error={error} />
+          ) : (
+            <EmptyState message="No messages yet." />
+          ))}
         {messages.map((msg) => (
           <Fragment key={msg.id}>
             <ChatMessage {...msg} />
@@ -166,15 +174,22 @@ export function ChatbotPanelThread({
           </Fragment>
         ))}
         {sendingMessage &&
-          (streamedMessage.length ? (
-            <ChatMessage
-              disableActions
-              role={AiRole.Assistant}
-              content={streamedMessage
-                .sort((a, b) => a.seq - b.seq)
-                .map((delta) => delta.content)
-                .join('')}
-            />
+          (!isEmpty(streamedMessages) ? (
+            streamedMessages.map((message, i) => {
+              const isToolCall = message[0]?.role === AiRole.User
+              return (
+                <ChatMessage
+                  key={i}
+                  disableActions
+                  role={AiRole.Assistant}
+                  type={isToolCall ? ChatType.Tool : ChatType.Text}
+                  content={message
+                    .toSorted((a, b) => a.seq - b.seq)
+                    .map((delta) => delta.content)
+                    .join('')}
+                />
+              )
+            })
           ) : (
             <GeneratingResponseMessage />
           ))}
