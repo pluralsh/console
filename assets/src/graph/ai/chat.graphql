@@ -49,15 +49,6 @@ fragment ChatThreadTiny on ChatThread {
     name
     icon
   }
-  tools {
-    tool {
-      name
-    }
-    server {
-      name
-      url
-    }
-  }
 }
 
 fragment ChatThread on ChatThread {

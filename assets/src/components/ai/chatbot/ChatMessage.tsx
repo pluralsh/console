@@ -14,7 +14,7 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentProps, ReactNode, useState } from 'react'
+import { ComponentPropsWithRef, ReactNode, useState } from 'react'
 import styled, { CSSObject, useTheme } from 'styled-components'
 import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
@@ -41,25 +41,25 @@ export function ChatMessage({
   ...props
 }: {
   id?: string
-  content: string
+  content?: Nullable<string>
   role: AiRole
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
   disableActions?: boolean
   contentStyles?: CSSObject
-} & Omit<ComponentProps<typeof ChatMessageSC>, '$role'>) {
+} & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   let finalContent: ReactNode
 
   if (role === AiRole.Assistant || role === AiRole.System) {
-    finalContent = <Markdown text={content} />
+    finalContent = <Markdown text={content ?? ''} />
   } else {
     finalContent = (
       <ChatMessageContent
         id={id ?? ''}
         showActions={showActions && !disableActions}
-        content={content}
+        content={content ?? ''}
         type={type}
         attributes={attributes}
       />
@@ -89,7 +89,7 @@ export function ChatMessage({
           {finalContent}
           <ChatMessageActions
             id={id ?? ''}
-            content={content}
+            content={content ?? ''}
             show={showActions && type !== ChatType.File && !disableActions}
           />
         </div>
@@ -107,7 +107,7 @@ export function ChatMessageActions({
   id: string
   content: string
   show?: boolean
-} & Omit<ComponentProps<typeof ActionsWrapperSC>, '$show'>) {
+} & Omit<ComponentPropsWithRef<typeof ActionsWrapperSC>, '$show'>) {
   const [copied, setCopied] = useState(false)
 
   const showCopied = () => {

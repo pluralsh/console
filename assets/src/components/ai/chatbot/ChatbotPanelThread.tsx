@@ -24,7 +24,7 @@ import {
   useChatMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { isEmpty, uniq } from 'lodash'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
@@ -81,6 +81,9 @@ export function ChatbotPanelThread({
   })
 
   const messages = mapExistingNodes(data?.chatThread?.chats)
+  const serverNames = uniq(
+    data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
+  )
 
   const commonChatAttributes = {
     awaitRefetchQueries: true,
@@ -139,7 +142,6 @@ export function ChatbotPanelThread({
 
   if (!data && loading)
     return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
-  if (error) return <GqlError error={error} />
 
   return (
     <>
@@ -148,7 +150,11 @@ export function ChatbotPanelThread({
         fullscreen={fullscreen}
       >
         {messageError && <GqlError error={messageError} />}
-        {isEmpty(messages) && <EmptyState message="No messages yet." />}
+        {isEmpty(messages) && error ? (
+          <GqlError error={error} />
+        ) : (
+          <EmptyState message="No messages yet." />
+        )}
         {messages.map((msg) => (
           <Fragment key={msg.id}>
             <ChatMessage {...msg} />
@@ -178,6 +184,7 @@ export function ChatbotPanelThread({
         sendMessage={sendMessage}
         fullscreen={fullscreen}
         shouldUseMCP={shouldUseMCP}
+        serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
       />

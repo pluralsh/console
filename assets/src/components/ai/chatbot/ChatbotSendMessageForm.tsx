@@ -18,6 +18,7 @@ import {
   useAddChatContextMutation,
   useThreadPrMutation,
 } from 'generated/graphql'
+import { truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
   FormEvent,
@@ -30,13 +31,13 @@ import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
 import { ChatMessage } from './ChatMessage'
 import { useCurrentPageChatContext } from './useCurrentPageChatContext'
-import { truncate, uniq } from 'lodash'
 
 export function SendMessageForm({
   currentThread,
   sendMessage,
   fullscreen,
   shouldUseMCP,
+  serverNames,
   showMcpServers,
   setShowMcpServers,
   ...props
@@ -45,6 +46,7 @@ export function SendMessageForm({
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
   shouldUseMCP: boolean
+  serverNames: string[]
   showMcpServers: boolean
   setShowMcpServers: (show: boolean) => void
 } & ComponentPropsWithoutRef<'div'>) {
@@ -106,10 +108,6 @@ export function SendMessageForm({
     setThreadPrBtnClicked(true)
     createThreadPr({ variables: { threadId: currentThread.id } })
   }, [createThreadPr, currentThread.id])
-
-  const serverNames = uniq(
-    currentThread.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
-  )
 
   return (
     <SendMessageFormSC
