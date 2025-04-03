@@ -2,7 +2,6 @@ import {
   AiInsightFragment,
   AiInsightSummaryFragment,
   ChatThreadAttributes,
-  ChatThreadFragment,
   ChatThreadTinyFragment,
   useCreateChatThreadMutation,
 } from 'generated/graphql.ts'
@@ -63,7 +62,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [currentThread, setCurrentThread] =
-    useState<Nullable<ChatThreadFragment>>()
+    useState<Nullable<ChatThreadTinyFragment>>()
   const [currentInsight, setCurrentInsight] =
     useState<Nullable<AiInsightSummaryFragment>>()
 

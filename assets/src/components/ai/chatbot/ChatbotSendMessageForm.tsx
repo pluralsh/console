@@ -1,5 +1,6 @@
 import {
   Button,
+  Chip,
   Flex,
   IconFrame,
   PlusIcon,
@@ -13,7 +14,7 @@ import { GqlError } from 'components/utils/Alert'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   AiRole,
-  ChatThreadFragment,
+  ChatThreadTinyFragment,
   useAddChatContextMutation,
   useThreadPrMutation,
 } from 'generated/graphql'
@@ -29,6 +30,7 @@ import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
 import { ChatMessage } from './ChatMessage'
 import { useCurrentPageChatContext } from './useCurrentPageChatContext'
+import { truncate, uniq } from 'lodash'
 
 export function SendMessageForm({
   currentThread,
@@ -39,7 +41,7 @@ export function SendMessageForm({
   setShowMcpServers,
   ...props
 }: {
-  currentThread: ChatThreadFragment
+  currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
   shouldUseMCP: boolean
@@ -105,6 +107,10 @@ export function SendMessageForm({
     createThreadPr({ variables: { threadId: currentThread.id } })
   }, [createThreadPr, currentThread.id])
 
+  const serverNames = uniq(
+    currentThread.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
+  )
+
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -117,7 +123,20 @@ export function SendMessageForm({
           align="center"
           gap="small"
         >
-          <span>mcp server chips placeholder</span>
+          <ChipListSC>
+            {serverNames.slice(0, 4).map((serverName) => (
+              <Chip
+                key={serverName}
+                size="small"
+                css={{ minWidth: 'fit-content' }}
+              >
+                {truncate(serverName, { length: 14 })}
+              </Chip>
+            ))}
+            {serverNames.length > 4 && (
+              <Chip size="small">+{serverNames.length - 4}</Chip>
+            )}
+          </ChipListSC>
           <Button
             small
             secondary
@@ -244,3 +263,10 @@ export function GeneratingResponseMessage() {
     />
   )
 }
+
+const ChipListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  maxWidth: 256,
+  minWidth: 0,
+}))

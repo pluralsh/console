@@ -24,8 +24,9 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { McpServerShelf } from './McpServerShelf.tsx'
+import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -110,11 +111,13 @@ function ChatbotPanelInner({
     keyPath: ['chatThreads'],
   })
 
-  // optimistically updating when a user sends a message relies on using cache-first (default) fetch policy here
+  // optimistically updating when a user sends a message relies on using cache-first fetch policy here
   const threadDetailsQuery = useChatThreadDetailsQuery({
     skip: !currentThread,
     variables: { id: currentThread?.id ?? '' },
-    pollInterval: 20000,
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-first',
+    pollInterval: POLL_INTERVAL,
   })
   const shouldUseMCP = !!currentThread?.flow
   const tools =
@@ -232,10 +235,8 @@ const RightSideSC = styled.div<{
   flexDirection: 'column',
   flex: 1,
   width: 768,
-  ...($showMcpServers && {
-    borderLeft: theme.borders['fill-three'],
-  }),
-  ...($fullscreen && {
-    gap: theme.spacing.medium,
-  }),
+  minWidth: 768,
+  ...($fullscreen
+    ? { gap: theme.spacing.medium, marginLeft: theme.spacing.medium }
+    : { borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none' }),
 }))
