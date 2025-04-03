@@ -53,7 +53,7 @@ defmodule Console.GraphQl.AI do
     field :id,           non_null(:id)
     field :type,         non_null(:chat_type)
     field :role,         non_null(:ai_role)
-    field :content,      non_null(:string)
+    field :content,      :string
     field :seq,          non_null(:integer)
     field :confirm,      :boolean, description: "whether this chat requires confirmation"
     field :confirmed_at, :datetime, description: "when the chat was confirmed"
@@ -95,6 +95,7 @@ defmodule Console.GraphQl.AI do
     field :user,     :user,       resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 
+    @desc "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
     field :tools, list_of(:mcp_server_tool) do
       resolve &AI.chat_tools/3
     end
