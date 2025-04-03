@@ -17,10 +17,9 @@ fragment Chat on Chat {
   content
   role
   seq
-  pullRequest {
-    ...PullRequest
-  }
   type
+  confirm
+  confirmedAt
   attributes {
     file {
       name
@@ -29,6 +28,13 @@ fragment Chat on Chat {
       name
       arguments
     }
+  }
+  pullRequest {
+    ...PullRequest
+  }
+  server {
+    id
+    name
   }
   insertedAt
   updatedAt
@@ -139,6 +145,12 @@ mutation Chat($messages: [ChatMessage], $threadId: ID) {
 
 mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
   hybridChat(messages: $messages, threadId: $threadId) {
+    ...Chat
+  }
+}
+
+mutation ConfirmChat($id: ID!) {
+  confirmChat(id: $id) {
     ...Chat
   }
 }

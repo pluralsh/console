@@ -32,6 +32,9 @@ export function getChatOptimisticResponse({
     type: type ?? ChatType.Text,
     attributes: null,
     pullRequest: null,
+    confirm: null,
+    confirmedAt: null,
+    server: null,
     insertedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }

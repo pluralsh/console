@@ -121,6 +121,7 @@ export function ChatbotPanelThread({
       update: (cache, { data }) =>
         updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
     })
+  console.log({ messages })
 
   const sendingMessage = regLoading || hybridLoading
   const messageError = regError || hybridError
@@ -165,7 +166,10 @@ export function ChatbotPanelThread({
           ))}
         {messages.map((msg) => (
           <Fragment key={msg.id}>
-            <ChatMessage {...msg} />
+            <ChatMessage
+              {...msg}
+              serverName={msg.server?.name}
+            />
             {!isEmpty(evidence) && // only attaches evidence to the initial insight
               msg.seq === 0 &&
               msg.role === AiRole.Assistant && (
@@ -181,8 +185,9 @@ export function ChatbotPanelThread({
                 <ChatMessage
                   key={i}
                   disableActions
-                  role={AiRole.Assistant}
+                  role={isToolCall ? AiRole.User : AiRole.Assistant}
                   type={isToolCall ? ChatType.Tool : ChatType.Text}
+                  highlightToolContent={false}
                   content={message
                     .toSorted((a, b) => a.seq - b.seq)
                     .map((delta) => delta.content)

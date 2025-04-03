@@ -36,7 +36,11 @@ export function ChatMessage({
   type = ChatType.Text,
   attributes,
   pullRequest,
+  confirm,
+  confirmedAt,
+  serverName,
   disableActions,
+  highlightToolContent,
   contentStyles,
   ...props
 }: {
@@ -46,11 +50,19 @@ export function ChatMessage({
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
+  confirm?: Nullable<boolean>
+  confirmedAt?: Nullable<string>
+  serverName?: Nullable<string>
   disableActions?: boolean
   contentStyles?: CSSObject
+  highlightToolContent?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
+  const [showActionsTimeout, setShowActionsTimeout] = useState<
+    NodeJS.Timeout | undefined
+  >(undefined)
   let finalContent: ReactNode
+  const rightAlign = role === AiRole.User
 
   if (role === AiRole.Assistant || role === AiRole.System) {
     finalContent = <Markdown text={content ?? ''} />
@@ -62,6 +74,10 @@ export function ChatMessage({
         content={content ?? ''}
         type={type}
         attributes={attributes}
+        confirm={confirm}
+        confirmedAt={confirmedAt}
+        serverName={serverName}
+        highlightToolContent={highlightToolContent}
       />
     )
   }
@@ -78,13 +94,23 @@ export function ChatMessage({
     >
       <Flex
         gap="medium"
-        justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
+        justify={rightAlign ? 'flex-end' : 'flex-start'}
       >
         {role !== AiRole.User && <PluralAssistantIcon />}
         <div
-          onMouseEnter={() => setShowActions(true)}
-          onMouseLeave={() => setShowActions(false)}
-          css={{ overflow: 'hidden', ...contentStyles }}
+          onMouseEnter={() => {
+            setShowActions(true)
+            setShowActionsTimeout(setTimeout(() => setShowActions(false), 1600))
+          }}
+          onMouseLeave={() => {
+            setShowActions(false)
+            clearTimeout(showActionsTimeout)
+          }}
+          css={{
+            overflow: 'hidden',
+            flex: rightAlign ? undefined : 1,
+            ...contentStyles,
+          }}
         >
           {finalContent}
           <ChatMessageActions
