@@ -8,7 +8,10 @@ import {
   Code,
   FileIcon,
   Flex,
+  Markdown,
 } from '@pluralsh/design-system'
+
+import isJson from 'is-json'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -20,7 +23,7 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 import { ChatMessageActions } from './ChatMessage'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { GqlError } from 'components/utils/Alert'
 
@@ -116,6 +119,19 @@ function FileMessageContent({
   )
 }
 
+enum MessageFormat {
+  Json = 'json',
+  Markdown = 'markdown',
+}
+
+const messageFormat = (message: string): MessageFormat => {
+  if (isJson(message)) {
+    return MessageFormat.Json
+  }
+
+  return MessageFormat.Markdown
+}
+
 function ToolMessageContent({
   id,
   content,
@@ -123,17 +139,12 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
-  highlightToolContent,
 }: ChatMessageContentProps) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt
   // this works for the current format of tool call responses, but might need to be updated in the future to be more general
-  const firstJsonChar = content.search(/[{\[]/)
-  const formattedJsonContent = useMemo(
-    () => JSON.stringify(JSON.parse(content.slice(firstJsonChar)), null, 2),
-    [content, firstJsonChar]
-  )
+  const format = messageFormat(content)
   const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
     useDeleteChatMutation({
       awaitRefetchQueries: true,
@@ -201,18 +212,21 @@ function ToolMessageContent({
               </Flex>
             }
           >
-            <Code
-              language={highlightToolContent ? 'json' : 'none'}
-              showHeader={false}
-              css={{
-                height: 324,
-                marginTop: spacing.small,
-                maxWidth: '100%',
-                overflow: 'auto',
-              }}
-            >
-              {formattedJsonContent}
-            </Code>
+            {format === MessageFormat.Json && (
+              <Code
+                language="json"
+                showHeader={false}
+                css={{
+                  height: 324,
+                  marginTop: spacing.small,
+                  maxWidth: '100%',
+                  overflow: 'auto',
+                }}
+              >
+                {content}
+              </Code>
+            )}
+            {format === MessageFormat.Markdown && <Markdown text={content} />}
           </AccordionItem>
         </Accordion>
         {pendingConfirmation && (

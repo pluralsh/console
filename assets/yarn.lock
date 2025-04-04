@@ -10176,6 +10176,7 @@ __metadata:
     graphql-ws: ^5.16.0
     husky: 8.0.3
     immer: 10.0.3
+    is-json: 2.0.1
     js-cookie: 3.0.5
     js-file-download: 0.4.12
     js-yaml: 4.1.0
@@ -14287,6 +14288,13 @@ __metadata:
   version: 1.0.0
   resolution: "is-interactive@npm:1.0.0"
   checksum: 824808776e2d468b2916cdd6c16acacebce060d844c35ca6d82267da692e92c3a16fdba624c50b54a63f38bdc4016055b6f443ce57d7147240de4f8cdabaf6f9
+  languageName: node
+  linkType: hard
+
+"is-json@npm:2.0.1":
+  version: 2.0.1
+  resolution: "is-json@npm:2.0.1"
+  checksum: 29efc4f82e912bf54cd7b28632dd8e52a311085ca879fe51c869a81ba1313bb689eb440ace53dd480edbc009f92a425c24059e0766f4117fe9888fe59e86186f
   languageName: node
   linkType: hard
 
