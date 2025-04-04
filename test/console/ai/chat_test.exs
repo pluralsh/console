@@ -414,7 +414,7 @@ defmodule Console.AI.ChatSyncTest do
       assert next.thread_id == thread.id
       assert next.role == :assistant
       assert next.content == "openai toolcall"
-      assert tool.content == "Result from calling MCP server everything with tool echo:\nEcho: a message"
+      assert tool.content == "Echo: a message"
       assert tool.type == :tool
       assert tool.server_id == server.id
       assert tool.attributes.tool.arguments
@@ -550,7 +550,7 @@ defmodule Console.AI.ChatSyncTest do
 
       {:ok, chat} = Chat.confirm_chat(chat.id, user)
 
-      assert chat.content =~ "Result from calling MCP server everything with tool echo:\nEcho: a message"
+      assert chat.content =~ "Echo: a message"
       assert chat.confirmed_at
       assert chat.attributes.tool.name == "echo"
       assert chat.attributes.tool.arguments == %{"message" => "a message"}

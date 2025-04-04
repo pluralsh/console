@@ -108,7 +108,7 @@ defmodule Console.AI.Chat.Engine do
         Stream.offset(1)
         {:cont, [tool_msg(content, nil, name, args) | acc]}
       else
-        _ -> {:halt, {:error, "failed to call tool: #{name}"}}
+        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
       end
     end)
     |> tool_results()
@@ -148,8 +148,7 @@ defmodule Console.AI.Chat.Engine do
     end)
     |> add_operation(:tool, fn _ ->
       case Discovery.invoke(thread, name, arguments) do
-        {:ok, result} ->
-          {:ok, "Result from calling MCP server #{sname} with tool #{tname}:\n#{result}"}
+        {:ok, result} -> {:ok, result}
         {:error, err} -> {:error, "Internal tool call failure for tool #{name}: #{inspect(err)}"}
       end
     end)
