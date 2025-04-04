@@ -3,15 +3,28 @@ defmodule Console.AI.Tools.Utils do
   alias Console.Schema.{Service}
   alias Console.Repo
 
-  def k8s_encode(%{__struct__: struct} = model) do
-    {:ok, data} = prune(model) |> struct.encode()
-    {:ok, doc} = Ymlr.document(data)
-    String.trim_leading(doc, "---\n")
+  def k8s_encode(model) do
+    data = k8s_map(model)
+    {:ok, doc} = yaml_encode(data)
+    doc
   end
 
-  defp prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
+  def k8s_map(%{__struct__: struct} = model) do
+    {:ok, data} = prune(model)
+                  |> struct.encode()
+    data
+  end
+
+  def yaml_encode(data) do
+    with {:ok, doc} = Ymlr.document(data),
+      do: {:ok, String.trim_leading(doc, "---\n")}
+  end
+
+  def prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
     do: put_in(object.metadata.managed_fields, [])
-  defp prune(obj), do: obj
+  def prune(%{"metadata" => %{"managedFields" => _}} = object),
+    do: put_in(object["metadata"]["managedFields"], [])
+  def prune(obj), do: obj
 
   def plrl_tool(tool), do: "__plrl__#{tool}"
 

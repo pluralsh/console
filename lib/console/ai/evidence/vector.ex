@@ -36,7 +36,7 @@ defmodule Console.AI.Evidence.Vector do
   defp collect_vector_data(query, filters) do
     {types, filters} = Keyword.pop(filters, :types, [:pr_file])
     Enum.reduce(types, [], fn type, res ->
-      case VectorStore.fetch(query, filters: filters, datatype: {:raw, type}) do
+      case VectorStore.fetch(query, filters: filters ++ [datatype: {:raw, type}]) do
         {:ok, [_ | _] = vdata} -> vdata ++ res
         _ -> res
       end

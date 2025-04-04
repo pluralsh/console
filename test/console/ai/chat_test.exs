@@ -531,6 +531,63 @@ defmodule Console.AI.ChatSyncTest do
       assert tool.content =~ "what is happening"
       assert tool.attributes.tool.name == "__plrl__logs"
     end
+
+    test "it can chat with a prs tool call" do
+      user = insert(:user)
+      %{id: flow_id} = flow = insert(:flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__pull_requests", arguments: %{"query" => "error"}}]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      expect(Console.AI.VectorStore, :fetch, fn "error", [filters: [flow_id: ^flow_id, datatype: {:raw, :pr_file}]] ->
+        {:ok, [
+          %Console.AI.VectorStore.Response{
+            type: :pr,
+            pr_file: %Console.Deployments.Pr.File{
+              url: "https://github.com/pr/url",
+              repo: "some/repo",
+              title: "a pr",
+              sha: "asdfsa",
+              contents: "file contents",
+              filename: "example.js",
+              patch: "some patch"
+            }
+          }
+        ]}
+      end)
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+      assert tool.role == :user
+      assert tool.content =~ "some patch"
+      assert tool.attributes.tool.name == "__plrl__pull_requests"
+      assert tool.attributes.tool.arguments == %{"query" => "error"}
+    end
   end
 
   describe "confirm_chat/2" do

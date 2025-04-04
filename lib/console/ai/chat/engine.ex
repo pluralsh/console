@@ -6,7 +6,9 @@ defmodule Console.AI.Chat.Engine do
   alias Console.AI.Tools.{
     Clusters,
     Logs,
-    Pods
+    Pods,
+    Component,
+    Prs
   }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
@@ -18,7 +20,7 @@ defmodule Console.AI.Chat.Engine do
   with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @plrl_tools [Clusters, SvcTool, Logs, Pods]
+  @plrl_tools [Clusters, SvcTool, Logs, Pods, Component, Prs]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
@@ -46,6 +48,8 @@ defmodule Console.AI.Chat.Engine do
   end
   def call_tool(_, _), do: {:error, "this chat cannot be confirmed"}
 
+  @recursive_limit 5
+
   @doc"""
   This will run a sequence of completions in a row gathering tools so users don't have to drive the RAG process manually.
 
@@ -53,7 +57,7 @@ defmodule Console.AI.Chat.Engine do
   """
   @spec completion(Provider.history, ChatThread.t, User.t, Chat.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
   def completion(messages, thread, user, completion \\ [], level \\ 0)
-  def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
+  def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, @recursive_limit) do
     completion
     |> Enum.map(&Chat.attributes/1)
     |> IO.inspect()

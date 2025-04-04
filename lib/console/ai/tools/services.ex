@@ -22,16 +22,21 @@ defmodule Console.AI.Tools.Services do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("servicedeployments")
-  def description(), do: "Searches the Plural Service Deployments (sometimes just called services) currently being deployed into this flow"
+  def description() do
+    """
+    Searches the Plural Service Deployments (sometimes just called services) currently being deployed into this flow
+    """
+  end
 
   def implement(%__MODULE__{} = query) do
     case Tool.flow() do
-      %Flow{id: flow_id} = flow ->
-        services = Service.for_flow(flow_id)
-                   |> Repo.all()
-                   |> Repo.preload([:cluster, :components])
-                   |> maybe_search(query)
-        {:ok, tool_content(:services, %{services: services, flow: flow})}
+      %Flow{id: flow_id} ->
+        Service.for_flow(flow_id)
+        |> Repo.all()
+        |> Repo.preload([:cluster, :components])
+        |> maybe_search(query)
+        |> model()
+        |> Jason.encode()
       _ -> {:error, "no flow found"}
     end
   end
@@ -49,4 +54,21 @@ defmodule Console.AI.Tools.Services do
   defp filter_cluster(%Service{cluster: %Cluster{handle: h}}, c) when is_binary(c),
     do: String.contains?(h, c)
   defp filter_cluster(_, _), do: true
+
+  defp model(services) do
+    Enum.map(services, fn service -> %{
+      plural_service_deployment: service.name,
+      cluster: service.cluster.handle,
+      url: Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components"),
+      status: service.status,
+      components: Enum.map(service.components, fn comp -> %{
+        url: Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components/#{comp.id}"),
+        api_version: Kube.Utils.api_version(comp.group, comp.version),
+        kind: comp.kind,
+        namespace: comp.namespace,
+        name: comp.name,
+        state: comp.state,
+      } end)
+    } end)
+  end
 end

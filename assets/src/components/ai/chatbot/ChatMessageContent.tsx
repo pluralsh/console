@@ -208,9 +208,9 @@ function ToolMessageContent({
                     }}
                   />
                   <CaptionP $color="text-light">
-                    {attributes?.tool?.name
-                      ? `Called tool: "${attributes?.tool?.name}"`
-                      : 'Called MCP tool'}
+                    {serverName
+                      ? `Called MCP tool for ${serverName}.${attributes?.tool?.name}`
+                      : `Called tool ${attributes?.tool?.name ? attributes?.tool?.name : ''}`}
                   </CaptionP>
                 </Flex>
                 {serverName && <Chip size="small">{serverName}</Chip>}
