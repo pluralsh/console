@@ -8,7 +8,7 @@ Status: <%= service.status %>
 
 This service also has the following components:
 
-| name | url | group | version | kind | namespace | state |
+| url | apiVersion | kind | name | namespace | state |
 | --- | --- | --- | --- | --- | --- | --- |<%= for component <- service.components do %>
-| <%= component.name %> | <%= Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components/#{component.id}") %> | <%= component.group %> | <%= component.version %> | <%= component.kind %> | <%= component.namespace %> | <%= component.state %> |<% end %>
+| <%= Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components/#{component.id}") %> | <%= Kube.Utls.api_version(component.group, component.version) %> | <%= component.kind %> | <%= component.namespace %> | <%= component.name %> | <%= component.state %> |<% end %>
 <% end %>

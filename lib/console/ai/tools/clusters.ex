@@ -25,12 +25,13 @@ defmodule Console.AI.Tools.Clusters do
 
   def implement(%__MODULE__{} = query) do
     case Tool.flow() do
-      %Flow{id: flow_id} = flow ->
-        clusters = Cluster.for_flow(flow_id)
-                   |> Repo.all()
-                   |> Repo.preload([:tags, :project])
-                   |> Enum.filter(&maybe_search(&1, query))
-        {:ok, tool_content(:clusters, %{clusters: clusters, flow: flow})}
+      %Flow{id: flow_id} ->
+        Cluster.for_flow(flow_id)
+        |> Repo.all()
+        |> Repo.preload([:tags, :project])
+        |> Enum.filter(&maybe_search(&1, query))
+        |> model()
+        |> Jason.encode()
       _ -> {:error, "no flow found"}
     end
   end
@@ -42,4 +43,14 @@ defmodule Console.AI.Tools.Clusters do
     )
   end
   defp maybe_search(_, _), do: true
+
+  defp model(clusters) do
+    Enum.map(clusters, fn cluster -> %{
+      name: cluster.name,
+      handle: cluster.handle,
+      kubernetes_distribution: cluster.distro,
+      tags: Enum.map(cluster.tags, fn tag -> %{name: tag.name, value: tag.value} end),
+      project: cluster.project.name,
+    } end)
+  end
 end
