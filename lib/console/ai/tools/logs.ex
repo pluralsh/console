@@ -8,11 +8,11 @@ defmodule Console.AI.Tools.Logs do
 
   embedded_schema do
     field :query,   :string
-    field :service, :string
+    field :service_deployment, :string
     field :cluster, :string
   end
 
-  @valid ~w(service cluster query)a
+  @valid ~w(service_deployment cluster query)a
 
   def changeset(model, attrs) do
     model
@@ -26,7 +26,7 @@ defmodule Console.AI.Tools.Logs do
   def name(), do: plrl_tool("logs")
   def description(), do: "Lists logs for a given service and cluster"
 
-  def implement(%__MODULE__{service: service, cluster: cluster, query: query}) do
+  def implement(%__MODULE__{service_deployment: service, cluster: cluster, query: query}) do
     with {:flow, %Flow{id: flow_id} = flow} <- {:flow, Console.AI.Tool.flow()},
          {:svc, %Service{} = svc} <- {:svc, get_service(flow_id, service, cluster)},
          {:ok, logs} <- Provider.query(%Query{query: query, resource: svc, limit: 20}) do

@@ -7,11 +7,11 @@ defmodule Console.AI.Tools.Pods do
   alias Kazan.Apis.Core.V1, as: CoreV1
 
   embedded_schema do
-    field :service, :string
+    field :service_deployment, :string
     field :cluster, :string
   end
 
-  @valid ~w(service cluster)a
+  @valid ~w(service_deployment cluster)a
 
   def changeset(model, attrs) do
     model
@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Pods do
   def name(), do: plrl_tool("pods")
   def description(), do: "Lists pods for a given service and cluster"
 
-  def implement(%__MODULE__{service: service, cluster: cluster}) do
+  def implement(%__MODULE__{service_deployment: service, cluster: cluster}) do
     with {:flow, %Flow{id: flow_id} = flow} <- {:flow, Console.AI.Tool.flow()},
          {:svc, %Service{cluster: cluster} = svc} <- {:svc, get_service(flow_id, service, cluster)},
          server <- Clusters.control_plane(cluster),
@@ -34,7 +34,7 @@ defmodule Console.AI.Tools.Pods do
       {:ok, tool_content(:pods, %{service: svc, pods: Enum.map(pods, &k8s_encode/1), flow: flow})}
     else
       {:flow, _} -> {:error, "no flow found"}
-      {:svc, _} -> {:error, "no service found matching service=#{service} and cluster=#{cluster}"}
+      {:svc, _} -> {:error, "no service deployment found matching service_deployment=#{service} and cluster=#{cluster}"}
       _ -> {:error, "internal error fetching pod data"}
     end
   end

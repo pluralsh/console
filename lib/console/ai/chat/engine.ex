@@ -138,7 +138,7 @@ defmodule Console.AI.Chat.Engine do
   end
 
   @spec call_tool(Tool.t, ChatThread.t, McpServer.t, User.t) :: {:ok, binary} | {:error, binary}
-  defp call_tool(%Tool{name: name, arguments: arguments}, thread, %McpServer{name: sname} = server, %User{} = user) do
+  defp call_tool(%Tool{name: name, arguments: arguments}, thread, %McpServer{} = server, %User{} = user) do
     {_, tname} = Agent.tool_name(name)
     start_transaction()
     |> add_operation(:audit, fn _ ->

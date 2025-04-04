@@ -505,7 +505,7 @@ defmodule Console.AI.ChatSyncTest do
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
         {:ok, "openai toolcall", [%Tool{name: "__plrl__logs", arguments: %{
-          "service" => service.name,
+          "service_deployment" => service.name,
           "cluster" => service.cluster.handle,
           "query" => "error"
         }}]}

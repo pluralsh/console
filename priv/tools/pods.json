@@ -1,7 +1,7 @@
 {
     "type": "object",
     "properties": {
-        "service": {
+        "service_deployment": {
             "type": "string",
             "description": "The name of the Plural service to list pods for (this should not be confused with a kubernetes service object)"
         },

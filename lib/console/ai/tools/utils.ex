@@ -5,7 +5,7 @@ defmodule Console.AI.Tools.Utils do
 
   def k8s_encode(%{__struct__: struct} = model) do
     {:ok, data} = prune(model) |> struct.encode()
-    Jason.encode(data)
+    Jason.encode!(data)
   end
 
   defp prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
