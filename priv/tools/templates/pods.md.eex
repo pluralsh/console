@@ -1,7 +1,7 @@
 Here are the pods for the service <%= @service.name %> in the cluster <%= @service.cluster.handle %> you requested:
 
 <%= for pod <- @pods do %>
-```json
+```yaml
 <%= pod %>
 ```
 <% end %>
