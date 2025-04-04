@@ -125,11 +125,17 @@ enum MessageFormat {
 }
 
 const messageFormat = (message: string): MessageFormat => {
-  if (isJson(message)) {
-    return MessageFormat.Json
-  }
-
+  if (isJson(message)) return MessageFormat.Json
   return MessageFormat.Markdown
+}
+
+const prettifyJson = (message: string): string => {
+  try {
+    const formatted = JSON.stringify(JSON.parse(message), null, 1)
+    return formatted
+  } catch (_) {
+    return message
+  }
 }
 
 function ToolMessageContent({
@@ -143,7 +149,6 @@ function ToolMessageContent({
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt
-  // this works for the current format of tool call responses, but might need to be updated in the future to be more general
   const format = messageFormat(content)
   const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
     useDeleteChatMutation({
@@ -212,21 +217,22 @@ function ToolMessageContent({
               </Flex>
             }
           >
-            {format === MessageFormat.Json && (
-              <Code
-                language="json"
-                showHeader={false}
-                css={{
-                  height: 324,
-                  marginTop: spacing.small,
-                  maxWidth: '100%',
-                  overflow: 'auto',
-                }}
-              >
-                {content}
-              </Code>
-            )}
-            {format === MessageFormat.Markdown && <Markdown text={content} />}
+            <ToolMessageContentSC>
+              {format === MessageFormat.Json && (
+                <Code
+                  language="json"
+                  showHeader={false}
+                  css={{ height: '100%', background: 'none' }}
+                >
+                  {prettifyJson(content)}
+                </Code>
+              )}
+              {format === MessageFormat.Markdown && (
+                <Card css={{ padding: spacing.medium, background: 'none' }}>
+                  <Markdown text={content} />
+                </Card>
+              )}
+            </ToolMessageContentSC>
           </AccordionItem>
         </Accordion>
         {pendingConfirmation && (
@@ -261,6 +267,14 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   background: 'none',
   border: theme.borders.input,
   padding: theme.spacing.small,
+  borderRadius: theme.borderRadiuses.large,
+}))
+const ToolMessageContentSC = styled.div(({ theme }) => ({
+  height: 324,
+  marginTop: theme.spacing.small,
+  maxWidth: '100%',
+  overflow: 'auto',
+  background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
 

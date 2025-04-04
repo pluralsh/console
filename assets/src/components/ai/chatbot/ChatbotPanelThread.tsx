@@ -157,7 +157,6 @@ export function ChatbotPanelThread({
         messageListRef={messageListRef}
         fullscreen={fullscreen}
       >
-        {messageError && <GqlError error={messageError} />}
         {isEmpty(messages) &&
           (error ? (
             <GqlError error={error} />
@@ -198,6 +197,7 @@ export function ChatbotPanelThread({
           ) : (
             <GeneratingResponseMessage />
           ))}
+        {messageError && <GqlError error={messageError} />}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
