@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Services do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("servicedeployments")
-  def description(), do: "Searches the Plural service deployments currently being deployed into this flow"
+  def description(), do: "Searches the Plural Service Deployments (sometimes just called services) currently being deployed into this flow"
 
   def implement(%__MODULE__{} = query) do
     case Tool.flow() do
