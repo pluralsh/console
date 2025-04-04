@@ -287,6 +287,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :project_id, :id
   end
 
+  @desc "Resets the current value of the observer"
+  input_object :observer_reset_attributes do
+    field :last_value, non_null(:string)
+  end
+
   @desc "A spec for a target to poll"
   input_object :observer_target_attributes do
     field :type,      :observer_target_type
@@ -689,7 +694,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :automation_id,   non_null(:id)
     field :repository,      :string
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
-    field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+    field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"
@@ -1027,6 +1032,21 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_observer/2
+    end
+
+    field :kick_observer, :observer do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.kick_observer/2
+    end
+
+    field :reset_observer, :observer do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:observer_reset_attributes)
+
+      resolve &Deployments.reset_observer/2
     end
 
     field :upsert_catalog, :catalog do

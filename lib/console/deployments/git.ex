@@ -7,6 +7,7 @@ defmodule Console.Deployments.Git do
   alias Console.Services.Users
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
+  alias Console.Deployments.Observer.Runner
   alias Console.Schema.{
     GitRepository,
     User,
@@ -488,6 +489,27 @@ defmodule Console.Deployments.Git do
     get_observer!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Resets the current value of the given observer
+  """
+  @spec reset_observer(map, binary, User.t) :: observer_resp
+  def reset_observer(attrs, id, %User{} = user) do
+    get_observer!(id)
+    |> Observer.reset_changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Forcibly retriggers an observer to run
+  """
+  @spec kick_observer(binary, User.t) :: observer_resp
+  def kick_observer(id, %User{} = user) do
+    get_observer!(id)
+    |> allow(user, :write)
+    |> when_ok(&Runner.run/1)
   end
 
   @doc """

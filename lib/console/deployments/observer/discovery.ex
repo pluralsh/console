@@ -2,7 +2,8 @@ defmodule Console.Deployments.Observer.Discovery do
   alias Console.Deployments.Observer.Supervisor
   alias Console.Schema.Observer
 
-  def runner(%Observer{} = observer), do: maybe_rpc(observer.id, Supervisor, :start_child, [observer])
+  def runner(%Observer{} = observer),
+    do: maybe_rpc(observer.id, Supervisor, :start_child, [observer])
 
   defp maybe_rpc(id, module, func, args) do
     me = node()

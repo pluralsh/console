@@ -4367,7 +4367,7 @@ export type ObserverPrAction = {
   /** a template to use for the created branch, use $value to interject the observed value */
   branchTemplate?: Maybe<Scalars['String']['output']>;
   /** the context to apply, use $value to interject the observed value */
-  context: Scalars['Json']['output'];
+  context: Scalars['Map']['output'];
   repository?: Maybe<Scalars['String']['output']>;
 };
 
@@ -4379,6 +4379,11 @@ export type ObserverPrActionAttributes = {
   /** the context to apply, use $value to interject the observed value */
   context: Scalars['Json']['input'];
   repository?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Resets the current value of the observer */
+export type ObserverResetAttributes = {
+  lastValue: Scalars['String']['input'];
 };
 
 export enum ObserverStatus {
@@ -5935,6 +5940,7 @@ export type RootMutationType = {
   impersonateServiceAccount?: Maybe<User>;
   ingestClusterCost?: Maybe<Scalars['Boolean']['output']>;
   installAddOn?: Maybe<ServiceDeployment>;
+  kickObserver?: Maybe<Observer>;
   kickService?: Maybe<ServiceDeployment>;
   /** refresh the source repo of this stack, and potentially create a fresh run */
   kickStack?: Maybe<StackRun>;
@@ -5957,6 +5963,7 @@ export type RootMutationType = {
   reconfigureRenovate?: Maybe<ServiceDeployment>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
+  resetObserver?: Maybe<Observer>;
   restartStackRun?: Maybe<StackRun>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
@@ -6598,6 +6605,11 @@ export type RootMutationTypeInstallAddOnArgs = {
 };
 
 
+export type RootMutationTypeKickObserverArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeKickServiceArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -6668,6 +6680,12 @@ export type RootMutationTypeRegisterRuntimeServicesArgs = {
   layout?: InputMaybe<OperationalLayoutAttributes>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
+};
+
+
+export type RootMutationTypeResetObserverArgs = {
+  attributes: ObserverResetAttributes;
+  id: Scalars['ID']['input'];
 };
 
 

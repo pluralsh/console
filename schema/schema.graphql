@@ -570,6 +570,10 @@ type RootMutationType {
 
   deleteObserver(id: ID!): Observer
 
+  kickObserver(id: ID!): Observer
+
+  resetObserver(id: ID!, attributes: ObserverResetAttributes!): Observer
+
   upsertCatalog(attributes: CatalogAttributes): Catalog
 
   deleteCatalog(id: ID!): Catalog
@@ -6546,6 +6550,11 @@ input ObserverAttributes {
   projectId: ID
 }
 
+"Resets the current value of the observer"
+input ObserverResetAttributes {
+  lastValue: String!
+}
+
 "A spec for a target to poll"
 input ObserverTargetAttributes {
   type: ObserverTargetType
@@ -7063,7 +7072,7 @@ type ObserverPrAction {
   branchTemplate: String
 
   "the context to apply, use $value to interject the observed value"
-  context: Json!
+  context: Map!
 }
 
 "Configuration for setting a pipeline context in an observer"

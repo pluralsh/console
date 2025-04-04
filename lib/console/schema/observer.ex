@@ -106,6 +106,12 @@ defmodule Console.Schema.Observer do
     |> validate_required(~w(name target crontab last_run_at next_run_at)a)
   end
 
+  def reset_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(last_value)a)
+    |> validate_required(~w(last_value)a)
+  end
+
   defp target_changeset(model, attrs) do
     model
     |> cast(mv_target(attrs), [:type, :format, :order])

@@ -398,7 +398,58 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
     end
   end
 
-  describe "upsertcatalog" do
+  describe "resetObserver" do
+    test "it can reset an observer" do
+      observer = insert(:observer)
+
+      {:ok, %{data: %{"resetObserver" => deleted}}} = run_query("""
+        mutation Delete($id: ID!, $attrs: ObserverResetAttributes!) {
+          resetObserver(id: $id, attributes: $attrs) {
+            id
+            lastValue
+          }
+        }
+      """, %{
+        "id" => observer.id,
+        "attrs" => %{"lastValue" => "1.0.0"}
+      }, %{current_user: admin_user()})
+
+      assert deleted["id"] == observer.id
+      assert deleted["lastValue"] == "1.0.0"
+    end
+  end
+
+  describe "kickObserver" do
+    test "admins can kick an observer" do
+      observer = insert(:observer)
+      expect(Console.Deployments.Observer.Runner, :run, fn observer -> {:ok, observer} end)
+
+      {:ok, %{data: %{"kickObserver" => kicked}}} = run_query("""
+        mutation Delete($id: ID!) {
+          kickObserver(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => observer.id}, %{current_user: admin_user()})
+
+      assert kicked["id"] == observer.id
+    end
+
+    test "nonadmins cannot kick an observer" do
+      observer = insert(:observer)
+      reject(Console.Deployments.Observer.Runner, :run, 1)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          kickObserver(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => observer.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "upsertCatalog" do
     test "admins can upsert catalogs" do
       {:ok, %{data: %{"upsertCatalog" => cat}}} = run_query("""
         mutation Upsert($attrs: CatalogAttributes!) {
