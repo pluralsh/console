@@ -31,7 +31,7 @@ defmodule Console.AI.Tools.Pods do
          server <- Clusters.control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
          {:ok, %{items: pods}} <- list_pods(svc) do
-      {:ok, tool_content(:pods, %{service: svc, pods: pods, flow: flow})}
+      {:ok, tool_content(:pods, %{service: svc, pods: Enum.map(pods, &k8s_encode/1), flow: flow})}
     else
       {:flow, _} -> {:error, "no flow found"}
       {:svc, _} -> {:error, "no service found matching service=#{service} and cluster=#{cluster}"}

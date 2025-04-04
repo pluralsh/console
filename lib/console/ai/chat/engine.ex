@@ -5,7 +5,8 @@ defmodule Console.AI.Chat.Engine do
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
     Clusters,
-    Logs
+    Logs,
+    Pods
   }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
@@ -17,7 +18,7 @@ defmodule Console.AI.Chat.Engine do
   with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @plrl_tools [Clusters, SvcTool, Logs]
+  @plrl_tools [Clusters, SvcTool, Logs, Pods]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(

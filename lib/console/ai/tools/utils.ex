@@ -1,6 +1,16 @@
 defmodule Console.AI.Tools.Utils do
+  alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
   alias Console.Schema.{Service}
   alias Console.Repo
+
+  def k8s_encode(%{__struct__: struct} = model) do
+    {:ok, data} = prune(model) |> struct.encode()
+    Jason.encode(data)
+  end
+
+  defp prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
+    do: put_in(object.metadata.managed_fields, [])
+  defp prune(obj), do: obj
 
   def plrl_tool(tool), do: "__plrl__#{tool}"
 
