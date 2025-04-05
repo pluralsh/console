@@ -72,6 +72,7 @@
     "fuse.js": "6.6.2",
     "graphql-ws": "^5.16.0",
     "immer": "10.0.3",
+    "is-json": "2.0.1",
     "js-cookie": "3.0.5",
     "js-file-download": "0.4.12",
     "js-yaml": "4.1.0",

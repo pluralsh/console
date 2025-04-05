@@ -15,7 +15,12 @@ export const aiRoutes = (
   >
     <Route
       index
-      element={<Navigate to={AI_THREADS_REL_PATH} />}
+      element={
+        <Navigate
+          replace
+          to={AI_THREADS_REL_PATH}
+        />
+      }
     />
     <Route
       path={AI_THREADS_REL_PATH}

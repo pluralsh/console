@@ -332,20 +332,22 @@ defmodule Console.AI.CronTest do
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)
-      expect(Console.AI.VectorStore, :fetch, fn "some query", [filters: [flow_id: ^flow_id], datatype: {:raw, :pr_file}] -> {:ok, [
-        %Console.AI.VectorStore.Response{
-          type: :pr,
-          pr_file: %Console.Deployments.Pr.File{
-            url: "https://github.com/pr/url",
-            repo: "some/repo",
-            title: "a pr",
-            sha: "asdfsa",
-            contents: "file contents",
-            filename: "example.js",
-            patch: "some patch"
+      expect(Console.AI.VectorStore, :fetch, fn "some query", [filters: [flow_id: ^flow_id, datatype: {:raw, :pr_file}]] ->
+        {:ok, [
+          %Console.AI.VectorStore.Response{
+            type: :pr,
+            pr_file: %Console.Deployments.Pr.File{
+              url: "https://github.com/pr/url",
+              repo: "some/repo",
+              title: "a pr",
+              sha: "asdfsa",
+              contents: "file contents",
+              filename: "example.js",
+              patch: "some patch"
+            }
           }
-        }
-      ]} end)
+        ]}
+      end)
       expect(Console.AI.VectorStore, :fetch, fn "some query", _ -> {:ok, []} end)
 
       alert = insert(:alert, state: :firing, service: svc)

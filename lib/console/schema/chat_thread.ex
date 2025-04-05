@@ -65,6 +65,10 @@ defmodule Console.Schema.ChatThread do
     from(t in query, where: t.user_id == ^user_id)
   end
 
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(t in query, where: t.flow_id == ^flow_id)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(t in query, order_by: ^order)
   end

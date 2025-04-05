@@ -9,9 +9,12 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   AiInsightFragment,
   ChatThreadFragment,
+  ChatThreadTinyFragment,
+  useChatThreadDetailsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql'
-import { ComponentPropsWithRef, useMemo } from 'react'
+import { isEmpty } from 'lodash'
+import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
@@ -21,11 +24,13 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { isEmpty } from 'lodash'
+import { McpServerShelf } from './tools/McpServerShelf.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
-  currentThread?: Nullable<ChatThreadFragment>
+  currentThread?: Nullable<ChatThreadTinyFragment>
   currentInsight?: Nullable<AiInsightFragment>
 }
 
@@ -98,11 +103,25 @@ function ChatbotPanelInner({
 }: ChatbotPanelInnerProps) {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const [showMcpServers, setShowMcpServers] = useState(false)
+
   const threadsQuery = useFetchPaginatedData({
     skip: !!currentThread || !!currentInsight,
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
   })
+
+  // optimistically updating when a user sends a message relies on using cache-first fetch policy here
+  const threadDetailsQuery = useChatThreadDetailsQuery({
+    skip: !currentThread,
+    variables: { id: currentThread?.id ?? '' },
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-first',
+    pollInterval: POLL_INTERVAL,
+  })
+  const shouldUseMCP = !!currentThread?.flow
+  const tools =
+    threadDetailsQuery.data?.chatThread?.tools?.filter(isNonNullable) ?? []
 
   const rows = useMemo(() => {
     const threads =
@@ -114,7 +133,7 @@ function ChatbotPanelInner({
     const curPageThreads: ChatThreadFragment[] = []
     const otherThreads: ChatThreadFragment[] = []
     threads.forEach((thread) => {
-      const insightUrl = getInsightPathInfo(thread.insight).url
+      const insightUrl = getInsightPathInfo(thread.insight)?.url
       if (insightUrl && pathname?.includes(insightUrl))
         curPageThreads.push(thread)
       else otherThreads.push(thread)
@@ -123,62 +142,76 @@ function ChatbotPanelInner({
   }, [threadsQuery.data, pathname])
 
   return (
-    <FillLevelProvider value={1}>
-      <ChatbotFrameSC
-        $fullscreen={fullscreen}
-        {...props}
-      >
-        <ChatbotHeader
+    <ChatbotFrameSC
+      $fullscreen={fullscreen}
+      {...props}
+    >
+      {shouldUseMCP && (
+        <McpServerShelf
+          isOpen={showMcpServers}
+          setIsOpen={setShowMcpServers}
           fullscreen={fullscreen}
-          currentThread={currentThread}
-          currentInsight={currentInsight}
+          tools={tools}
         />
-        {currentThread ? (
-          <ChatbotPanelThread
+      )}
+      <FillLevelProvider value={1}>
+        <RightSideSC
+          $showMcpServers={showMcpServers}
+          $fullscreen={fullscreen}
+        >
+          <ChatbotHeader
+            fullscreen={fullscreen}
             currentThread={currentThread}
-            fullscreen={fullscreen}
-          />
-        ) : currentInsight ? (
-          <ChatbotPanelInsight
             currentInsight={currentInsight}
-            fullscreen={fullscreen}
           />
-        ) : (
-          <ChatbotTableWrapperSC $fullscreen={fullscreen}>
-            <AITable
-              modal
-              query={threadsQuery}
-              rowData={rows}
-              borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
-              border="none"
-              fillLevel={1}
-              borderRadius={0}
+          {currentThread ? (
+            <ChatbotPanelThread
+              currentThread={currentThread}
+              threadDetailsQuery={threadDetailsQuery}
+              fullscreen={fullscreen}
+              shouldUseMCP={shouldUseMCP}
+              showMcpServers={showMcpServers}
+              setShowMcpServers={setShowMcpServers}
             />
-          </ChatbotTableWrapperSC>
-        )}
-      </ChatbotFrameSC>
-    </FillLevelProvider>
+          ) : currentInsight ? (
+            <ChatbotPanelInsight
+              currentInsight={currentInsight}
+              fullscreen={fullscreen}
+            />
+          ) : (
+            <ChatbotTableWrapperSC $fullscreen={fullscreen}>
+              <AITable
+                modal
+                query={threadsQuery}
+                rowData={rows}
+                borderBottom={
+                  isEmpty(rows) ? 'none' : theme.borders['fill-two']
+                }
+                border="none"
+                fillLevel={1}
+                borderRadius={0}
+              />
+            </ChatbotTableWrapperSC>
+          )}
+        </RightSideSC>
+      </FillLevelProvider>
+    </ChatbotFrameSC>
   )
 }
 
 const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
   ({ $fullscreen, theme }) => ({
     ...($fullscreen
-      ? {
-          '& > *': {
-            boxShadow: theme.boxShadows.modal,
-          },
-          gap: theme.spacing.medium,
-        }
+      ? { '& > *': { boxShadow: theme.boxShadows.modal } }
       : {
           border: theme.borders['fill-two'],
           borderRadius: theme.borderRadiuses.large,
         }),
     display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
+    overflow: 'auto hidden',
     height: '100%',
-    width: $fullscreen ? '75vw' : 768,
+    width: '100%',
+    maxWidth: $fullscreen ? '75vw' : 1096,
   })
 )
 
@@ -193,3 +226,17 @@ const ChatbotTableWrapperSC = styled.div<{ $fullscreen?: boolean }>(
     }),
   })
 )
+
+const RightSideSC = styled.div<{
+  $fullscreen?: boolean
+  $showMcpServers?: boolean
+}>(({ $fullscreen, theme, $showMcpServers }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  width: 768,
+  minWidth: 768,
+  ...($fullscreen
+    ? { gap: theme.spacing.medium, marginLeft: theme.spacing.medium }
+    : { borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none' }),
+}))

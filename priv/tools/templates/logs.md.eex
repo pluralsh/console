@@ -1,8 +1,5 @@
 Here's a rundown of the logs for the service <%= @service.name %> in the cluster <%= @service.cluster.handle %> you requested:
 
-<%= for log <- @logs do %>
-line: <%= log.log %>
-timestamp: <%= log.timestamp %>
-facets: <%= Jason.encode!(Map.new(log.facets, & {&1.key, &1.value})) %>
----
-<% end %>
+| line | timestamp | facets |
+| --- | --- | --- |<%= for log <- @logs do %>
+| <%= log.log %> | <%= log.timestamp %> | <%= Jason.encode!(Map.new(log.facets, & {&1.key, &1.value})) %> |<% end %>

@@ -5,7 +5,10 @@ defmodule Console.AI.Chat.Engine do
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
     Clusters,
-    Logs
+    Logs,
+    Pods,
+    Component,
+    Prs
   }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
@@ -17,7 +20,7 @@ defmodule Console.AI.Chat.Engine do
   with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @plrl_tools [Clusters, SvcTool, Logs]
+  @plrl_tools [Clusters, SvcTool, Logs, Pods, Component, Prs]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
@@ -30,7 +33,7 @@ defmodule Console.AI.Chat.Engine do
     start_transaction()
     |> add_operation(:call, fn _ ->
       call_tool(
-        %Tool{name: "#{mcp_server.name}.#{name}", arguments: args},
+        %Tool{name: Agent.tool_name(mcp_server.name, name), arguments: args},
         chat.thread,
         mcp_server,
         user
@@ -45,6 +48,8 @@ defmodule Console.AI.Chat.Engine do
   end
   def call_tool(_, _), do: {:error, "this chat cannot be confirmed"}
 
+  @recursive_limit 5
+
   @doc"""
   This will run a sequence of completions in a row gathering tools so users don't have to drive the RAG process manually.
 
@@ -52,9 +57,10 @@ defmodule Console.AI.Chat.Engine do
   """
   @spec completion(Provider.history, ChatThread.t, User.t, Chat.history, integer) :: {:ok, Chat.t} | {:ok, [Chat.t]} | Console.error
   def completion(messages, thread, user, completion \\ [], level \\ 0)
-  def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, 3) do
+  def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, @recursive_limit) do
     completion
     |> Enum.map(&Chat.attributes/1)
+    |> IO.inspect()
     |> ChatSvc.save_messages(thread_id, user)
   end
 
@@ -106,7 +112,7 @@ defmodule Console.AI.Chat.Engine do
         Stream.offset(1)
         {:cont, [tool_msg(content, nil, name, args) | acc]}
       else
-        _ -> {:halt, {:error, "failed to call tool: #{name}"}}
+        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
       end
     end)
     |> tool_results()
@@ -136,7 +142,7 @@ defmodule Console.AI.Chat.Engine do
   end
 
   @spec call_tool(Tool.t, ChatThread.t, McpServer.t, User.t) :: {:ok, binary} | {:error, binary}
-  defp call_tool(%Tool{name: name, arguments: arguments}, thread, %McpServer{name: sname} = server, %User{} = user) do
+  defp call_tool(%Tool{name: name, arguments: arguments}, thread, %McpServer{} = server, %User{} = user) do
     {_, tname} = Agent.tool_name(name)
     start_transaction()
     |> add_operation(:audit, fn _ ->
@@ -146,8 +152,7 @@ defmodule Console.AI.Chat.Engine do
     end)
     |> add_operation(:tool, fn _ ->
       case Discovery.invoke(thread, name, arguments) do
-        {:ok, result} ->
-          {:ok, "Result from calling MCP server #{sname} with tool #{tname}:\n#{result}"}
+        {:ok, result} -> {:ok, result}
         {:error, err} -> {:error, "Internal tool call failure for tool #{name}: #{inspect(err)}"}
       end
     end)
@@ -160,6 +165,7 @@ defmodule Console.AI.Chat.Engine do
       role: :user,
       content: content,
       server_id: server && server.id,
+      type: :tool,
       attributes: %{
         tool: %{
           name: name,

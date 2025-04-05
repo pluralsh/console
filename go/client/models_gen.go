@@ -713,7 +713,7 @@ type Chat struct {
 	ID      string   `json:"id"`
 	Type    ChatType `json:"type"`
 	Role    AiRole   `json:"role"`
-	Content string   `json:"content"`
+	Content *string  `json:"content,omitempty"`
 	Seq     int64    `json:"seq"`
 	// whether this chat requires confirmation
 	Confirm *bool `json:"confirm,omitempty"`
@@ -750,17 +750,18 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string           `json:"id"`
-	Summary       string           `json:"summary"`
-	Default       bool             `json:"default"`
-	LastMessageAt *string          `json:"lastMessageAt,omitempty"`
-	Flow          *Flow            `json:"flow,omitempty"`
-	User          *User            `json:"user,omitempty"`
-	Insight       *AiInsight       `json:"insight,omitempty"`
-	Tools         []*McpServerTool `json:"tools,omitempty"`
-	Chats         *ChatConnection  `json:"chats,omitempty"`
-	InsertedAt    *string          `json:"insertedAt,omitempty"`
-	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+	ID            string     `json:"id"`
+	Summary       string     `json:"summary"`
+	Default       bool       `json:"default"`
+	LastMessageAt *string    `json:"lastMessageAt,omitempty"`
+	Flow          *Flow      `json:"flow,omitempty"`
+	User          *User      `json:"user,omitempty"`
+	Insight       *AiInsight `json:"insight,omitempty"`
+	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
+	Tools      []*McpServerTool `json:"tools,omitempty"`
+	Chats      *ChatConnection  `json:"chats,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread

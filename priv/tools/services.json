@@ -3,7 +3,7 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "a string to query for services by name"
+            "description": "a string to query for plural service deployments by name"
         },
         "cluster": {
             "type": "string",

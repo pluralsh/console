@@ -1,10 +1,12 @@
 import {
   Button,
+  Chip,
   Flex,
   IconFrame,
   PlusIcon,
   PrOpenIcon,
   SendMessageIcon,
+  ServersIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
@@ -12,10 +14,11 @@ import { GqlError } from 'components/utils/Alert'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   AiRole,
-  ChatThreadFragment,
+  ChatThreadTinyFragment,
   useAddChatContextMutation,
   useThreadPrMutation,
 } from 'generated/graphql'
+import { truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
   FormEvent,
@@ -33,11 +36,19 @@ export function SendMessageForm({
   currentThread,
   sendMessage,
   fullscreen,
+  shouldUseMCP,
+  serverNames,
+  showMcpServers,
+  setShowMcpServers,
   ...props
 }: {
-  currentThread: ChatThreadFragment
+  currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
+  shouldUseMCP: boolean
+  serverNames: string[]
+  showMcpServers: boolean
+  setShowMcpServers: (show: boolean) => void
 } & ComponentPropsWithoutRef<'div'>) {
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
@@ -104,6 +115,36 @@ export function SendMessageForm({
       $fullscreen={fullscreen}
       ref={formRef}
     >
+      {shouldUseMCP && (
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="small"
+        >
+          <ChipListSC>
+            {serverNames.slice(0, 4).map((serverName) => (
+              <Chip
+                key={serverName}
+                size="small"
+                css={{ minWidth: 'fit-content' }}
+              >
+                {truncate(serverName, { length: 14 })}
+              </Chip>
+            ))}
+            {serverNames.length > 4 && (
+              <Chip size="small">+{serverNames.length - 4}</Chip>
+            )}
+          </ChipListSC>
+          <Button
+            small
+            secondary
+            startIcon={showMcpServers ? null : <ServersIcon />}
+            onClick={() => setShowMcpServers(!showMcpServers)}
+          >
+            {showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'}
+          </Button>
+        </Flex>
+      )}
       <EditableContentWrapperSC $fullscreen={fullscreen}>
         {contextError && <GqlError error={contextError} />}
         {threadPrError && <GqlError error={threadPrError} />}
@@ -167,6 +208,9 @@ export function SendMessageForm({
 
 const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
     position: 'relative',
     borderRadius: $fullscreen ? theme.borderRadiuses.large : '0px',
     backgroundColor: $fullscreen
@@ -217,3 +261,10 @@ export function GeneratingResponseMessage() {
     />
   )
 }
+
+const ChipListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  maxWidth: 256,
+  minWidth: 0,
+}))

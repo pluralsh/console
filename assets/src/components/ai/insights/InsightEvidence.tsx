@@ -18,7 +18,7 @@ import { LogsEvidencePanel } from './LogsEvidencePanel'
 import { PrEvidenceDetails } from './PrEvidenceDetails'
 import { GroupedPrEvidence, PrEvidencePanel } from './PrEvidencePanel'
 
-const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
+export const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
 
 export function InsightEvidence({
   evidence,

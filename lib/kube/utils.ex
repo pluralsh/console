@@ -23,6 +23,7 @@ defmodule Kube.Utils do
 
   def ns(%{"metadata" => meta}), do: meta["namespace"]
   def ns(%{metadata: %MetaV1.ObjectMeta{namespace: ns}}), do: ns
+  def ns(%{namespace: ns}), do: ns
 
   def identifier(%{"apiVersion" => gv, "kind" => k, "metadata" => %{"name" => n} = meta}) do
     {g, v} = group_version(gv)
@@ -31,6 +32,13 @@ defmodule Kube.Utils do
   def identifier(%{api_version: gv, kind: k, metadata: %{name: n} = meta}) do
     {g, v} = group_version(gv)
     {g, v, k, Map.get(meta, :namespace), n}
+  end
+  def identifier(%{group: g, version: v, kind: k, name: n} = blob),
+    do: {g, v, k, Map.get(blob, :namespace), n}
+
+  def fetch(spec) do
+    identifier(spec)
+    |> for_identifier()
   end
 
   def for_identifier({g, v, k, ns, n}) do
@@ -59,6 +67,9 @@ defmodule Kube.Utils do
   end
 
   def parent(_, _), do: nil
+
+  def api_version(nil, v), do: v
+  def api_version(g, v), do: "#{g}/#{v}"
 
   def group_version(api_version) do
     case String.split(api_version, "/") do

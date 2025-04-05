@@ -1,15 +1,15 @@
 {
     "type": "object",
     "properties": {
-        "service": {
+        "service_deployment": {
             "type": "string",
-            "description": "The name of the service to list pods for"
+            "description": "The name of the Plural Service Deployment to list pods for (this should not be confused with a kubernetes service resource within the plural service)"
         },
         "cluster": {
             "type": "string",
-            "description": "The cluster handle the service is deployed to"
+            "description": "The Plural cluster handle the service is deployed to"
         }
     },
-    "required": ["service", "cluster"],
+    "required": ["service_deployment", "cluster"],
     "additionalProperties": false
 }
