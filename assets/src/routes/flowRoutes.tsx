@@ -27,7 +27,12 @@ export const flowRoutes = [
   >
     <Route
       index
-      element={<Navigate to={'services'} />}
+      element={
+        <Navigate
+          replace
+          to={'services'}
+        />
+      }
     />
     <Route
       path={'services'}

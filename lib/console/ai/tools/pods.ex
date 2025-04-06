@@ -7,11 +7,11 @@ defmodule Console.AI.Tools.Pods do
   alias Kazan.Apis.Core.V1, as: CoreV1
 
   embedded_schema do
-    field :service, :string
+    field :service_deployment, :string
     field :cluster, :string
   end
 
-  @valid ~w(service cluster)a
+  @valid ~w(service_deployment cluster)a
 
   def changeset(model, attrs) do
     model
@@ -22,19 +22,25 @@ defmodule Console.AI.Tools.Pods do
   @json_schema Console.priv_file!("tools/pods.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:pods"
-  def description(), do: "Lists pods for a given service and cluster"
+  def name(), do: plrl_tool("pods")
+  def description() do
+    """
+    Lists pods for a given service and cluster. If you need to find the name of the service and cluster,
+    call the `servicedeployments` and `clusters` tools first to grab them.
+    """
+  end
 
-  def implement(%__MODULE__{service: service, cluster: cluster}) do
-    with {:flow, %Flow{id: flow_id} = flow} <- {:flow, Console.AI.Tool.flow()},
+  def implement(%__MODULE__{service_deployment: service, cluster: cluster}) do
+    with {:flow, %Flow{id: flow_id}} <- {:flow, Console.AI.Tool.flow()},
          {:svc, %Service{cluster: cluster} = svc} <- {:svc, get_service(flow_id, service, cluster)},
          server <- Clusters.control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
          {:ok, %{items: pods}} <- list_pods(svc) do
-      {:ok, tool_content(:pods, %{service: svc, pods: pods, flow: flow})}
+      Enum.map(pods, &k8s_map/1)
+      |> Jason.encode()
     else
       {:flow, _} -> {:error, "no flow found"}
-      {:svc, _} -> {:error, "no service found matching service=#{service} and cluster=#{cluster}"}
+      {:svc, _} -> {:ok, "no service deployment found matching service_deployment=#{service} and cluster=#{cluster}, you must use a valid plural service deployment name for this flow"}
       _ -> {:error, "internal error fetching pod data"}
     end
   end

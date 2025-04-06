@@ -432,7 +432,18 @@ type RootQueryType {
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
-  chatThreads(after: String, first: Int, before: String, last: Int): ChatThreadConnection
+  chatThreads(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only show threads for this flow"
+    flowId: ID
+  ): ChatThreadConnection
 
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 
@@ -7234,7 +7245,7 @@ type Chat {
 
   role: AiRole!
 
-  content: String!
+  content: String
 
   seq: Int!
 
@@ -7277,15 +7288,26 @@ type ChatTool {
 "A list of chat messages around a specific topic created on demand"
 type ChatThread {
   id: ID!
+
   summary: String!
+
   default: Boolean!
+
   lastMessageAt: DateTime
+
   flow: Flow
+
   user: User
+
   insight: AiInsight
+
+  "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
+
   chats(after: String, first: Int, before: String, last: Int): ChatConnection
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

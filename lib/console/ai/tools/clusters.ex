@@ -20,17 +20,18 @@ defmodule Console.AI.Tools.Clusters do
   @json_schema Console.priv_file!("tools/clusters.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "__plrl__:clusters"
+  def name(), do: plrl_tool("clusters")
   def description(), do: "Shows the clusters currently being deployed into this flow"
 
   def implement(%__MODULE__{} = query) do
     case Tool.flow() do
-      %Flow{id: flow_id} = flow ->
-        clusters = Cluster.for_flow(flow_id)
-                   |> Repo.all()
-                   |> Repo.preload([:tags, :project])
-                   |> Enum.filter(&maybe_search(&1, query))
-        {:ok, tool_content(:clusters, %{clusters: clusters, flow: flow})}
+      %Flow{id: flow_id} ->
+        Cluster.for_flow(flow_id)
+        |> Repo.all()
+        |> Repo.preload([:tags, :project])
+        |> Enum.filter(&maybe_search(&1, query))
+        |> model()
+        |> Jason.encode()
       _ -> {:error, "no flow found"}
     end
   end
@@ -42,4 +43,14 @@ defmodule Console.AI.Tools.Clusters do
     )
   end
   defp maybe_search(_, _), do: true
+
+  defp model(clusters) do
+    Enum.map(clusters, fn cluster -> %{
+      name: cluster.name,
+      handle: cluster.handle,
+      kubernetes_distribution: cluster.distro,
+      tags: Enum.map(cluster.tags, fn tag -> %{name: tag.name, value: tag.value} end),
+      project: cluster.project.name,
+    } end)
+  end
 end

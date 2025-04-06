@@ -145,6 +145,7 @@ defmodule Console.AI.OpenAI do
         stream: true,
         tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
       }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      |> Console.drop_nils()
       |> Jason.encode!()
 
       url(openai, "/chat/completions")

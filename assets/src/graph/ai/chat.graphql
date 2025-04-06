@@ -17,14 +17,24 @@ fragment Chat on Chat {
   content
   role
   seq
-  pullRequest {
-    ...PullRequest
-  }
   type
+  confirm
+  confirmedAt
   attributes {
     file {
       name
     }
+    tool {
+      name
+      arguments
+    }
+  }
+  pullRequest {
+    ...PullRequest
+  }
+  server {
+    id
+    name
   }
   insertedAt
   updatedAt
@@ -39,6 +49,11 @@ fragment ChatThreadTiny on ChatThread {
   lastMessageAt
   insight {
     ...AiInsightSummary
+  }
+  flow {
+    id
+    name
+    icon
   }
 }
 
@@ -58,6 +73,12 @@ fragment ChatThread on ChatThread {
   }
   insight {
     ...AiInsight
+  }
+  flow {
+    ...FlowBasic
+  }
+  tools {
+    ...McpServerTool
   }
 }
 
@@ -122,6 +143,18 @@ mutation Chat($messages: [ChatMessage], $threadId: ID) {
   }
 }
 
+mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
+  hybridChat(messages: $messages, threadId: $threadId) {
+    ...Chat
+  }
+}
+
+mutation ConfirmChat($id: ID!) {
+  confirmChat(id: $id) {
+    ...Chat
+  }
+}
+
 mutation ClearChatHistory($before: Int) {
   clearChatHistory(before: $before)
 }
@@ -152,7 +185,7 @@ mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
 
 mutation DeleteChatThread($id: ID!) {
   deleteThread(id: $id) {
-    ...ChatThread
+    ...ChatThreadTiny
   }
 }
 
@@ -175,6 +208,8 @@ mutation ThreadPr($threadId: ID!) {
 subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
   aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
     seq
+    message
+    role
     content
   }
 }

@@ -1,13 +1,9 @@
 import {
-  Accordion,
-  AccordionItem,
   AppIcon,
   ArrowTopRightIcon,
   Card,
   CheckIcon,
-  Code,
   CopyIcon,
-  FileIcon,
   Flex,
   GitHubLogoIcon,
   IconFrame,
@@ -18,7 +14,7 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentProps, ReactNode, useState } from 'react'
+import { ComponentPropsWithRef, ReactNode, useState } from 'react'
 import styled, { CSSObject, useTheme } from 'styled-components'
 import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
@@ -31,6 +27,7 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import { ChatMessageContent } from './ChatMessageContent'
 
 export function ChatMessage({
   id,
@@ -39,32 +36,48 @@ export function ChatMessage({
   type = ChatType.Text,
   attributes,
   pullRequest,
+  confirm,
+  confirmedAt,
+  serverName,
   disableActions,
+  highlightToolContent,
   contentStyles,
   ...props
 }: {
   id?: string
-  content: string
+  content?: Nullable<string>
   role: AiRole
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
+  confirm?: Nullable<boolean>
+  confirmedAt?: Nullable<string>
+  serverName?: Nullable<string>
   disableActions?: boolean
   contentStyles?: CSSObject
-} & Omit<ComponentProps<typeof ChatMessageSC>, '$role'>) {
+  highlightToolContent?: boolean
+} & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
+  const [showActionsTimeout, setShowActionsTimeout] = useState<
+    NodeJS.Timeout | undefined
+  >(undefined)
   let finalContent: ReactNode
+  const rightAlign = role === AiRole.User
 
   if (role === AiRole.Assistant || role === AiRole.System) {
-    finalContent = <Markdown text={content} />
+    finalContent = <Markdown text={content ?? ''} />
   } else {
     finalContent = (
       <ChatMessageContent
         id={id ?? ''}
         showActions={showActions && !disableActions}
-        content={content}
+        content={content ?? ''}
         type={type}
         attributes={attributes}
+        confirm={confirm}
+        confirmedAt={confirmedAt}
+        serverName={serverName}
+        highlightToolContent={highlightToolContent}
       />
     )
   }
@@ -81,18 +94,28 @@ export function ChatMessage({
     >
       <Flex
         gap="medium"
-        justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
+        justify={rightAlign ? 'flex-end' : 'flex-start'}
       >
         {role !== AiRole.User && <PluralAssistantIcon />}
         <div
-          onMouseEnter={() => setShowActions(true)}
-          onMouseLeave={() => setShowActions(false)}
-          css={{ overflow: 'hidden', ...contentStyles }}
+          onMouseEnter={() => {
+            setShowActions(true)
+            setShowActionsTimeout(setTimeout(() => setShowActions(false), 1600))
+          }}
+          onMouseLeave={() => {
+            setShowActions(false)
+            clearTimeout(showActionsTimeout)
+          }}
+          css={{
+            overflow: 'hidden',
+            flex: rightAlign ? undefined : 1,
+            ...contentStyles,
+          }}
         >
           {finalContent}
           <ChatMessageActions
             id={id ?? ''}
-            content={content}
+            content={content ?? ''}
             show={showActions && type !== ChatType.File && !disableActions}
           />
         </div>
@@ -101,72 +124,7 @@ export function ChatMessage({
   )
 }
 
-function ChatMessageContent({
-  id,
-  showActions,
-  content,
-  type,
-  attributes,
-}: {
-  id: string
-  showActions: boolean
-  content: string
-  type: ChatType
-  attributes?: Nullable<ChatTypeAttributes>
-}) {
-  const theme = useTheme()
-  const fileName = attributes?.file?.name ?? ''
-  return type === ChatType.File ? (
-    <Accordion type="single">
-      <AccordionItem
-        padding="compact"
-        caret="right"
-        trigger={
-          <Flex
-            gap="small"
-            align="center"
-            wordBreak="break-word"
-            marginRight={theme.spacing.small}
-          >
-            <FileIcon
-              size={12}
-              color="icon-light"
-            />
-            <CaptionP $color="text-light">{fileName || 'File'}</CaptionP>
-            <ChatMessageActions
-              id={id}
-              content={fileName}
-              show={showActions}
-            />
-          </Flex>
-        }
-      >
-        <Code
-          css={{ background: theme.colors['fill-three'], maxWidth: '100%' }}
-        >
-          {content}
-        </Code>
-      </AccordionItem>
-    </Accordion>
-  ) : (
-    <Card
-      css={{ padding: theme.spacing.medium }}
-      fillLevel={2}
-    >
-      {content.split('\n').map((line, i, arr) => (
-        <div
-          key={`${i}-${line}`}
-          css={{ display: 'contents' }}
-        >
-          {line}
-          {i !== arr.length - 1 ? <br /> : null}
-        </div>
-      ))}
-    </Card>
-  )
-}
-
-function ChatMessageActions({
+export function ChatMessageActions({
   id,
   content,
   show = true,
@@ -175,7 +133,7 @@ function ChatMessageActions({
   id: string
   content: string
   show?: boolean
-} & Omit<ComponentProps<typeof ActionsWrapperSC>, '$show'>) {
+} & Omit<ComponentPropsWithRef<typeof ActionsWrapperSC>, '$show'>) {
   const [copied, setCopied] = useState(false)
 
   const showCopied = () => {

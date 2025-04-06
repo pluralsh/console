@@ -1,9 +1,9 @@
 {
     "type": "object",
     "properties": {
-        "service": {
+        "service_deployment": {
             "type": "string",
-            "description": "The name of the service to list logs for"
+            "description": "The name of the Plural Service Deployment to list pods for (this should not be confused with a kubernetes service resource within the plural service)"
         },
         "cluster": {
             "type": "string",
@@ -14,6 +14,6 @@
             "description": "A search query to use to filter logs, omit to list all recent logs"
         }
     },
-    "required": ["service", "cluster"],
+    "required": ["service_deployment", "cluster"],
     "additionalProperties": false
 }

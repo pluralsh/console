@@ -1,5 +1,3 @@
-import { GITHUB_LINK } from 'utils/constants'
-
 import {
   AiSparkleOutlineIcon,
   ArrowTopRightIcon,
@@ -68,6 +66,7 @@ import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { GITHUB_LINK } from 'utils/constants.ts'
 
 type MenuItem = {
   text: string
@@ -316,18 +315,6 @@ export default function Sidebar() {
           ))}
           <Flex flex={1} />
           <SidebarExpandButton />
-          <SidebarItem
-            tooltip="GitHub"
-            className="sidebar-github"
-            clickable
-            as="a"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`${GITHUB_LINK}/plural`}
-            expandedLabel="GitHub"
-          >
-            <GitHubLogoIcon />
-          </SidebarItem>
           <HelpLauncher />
           <SidebarItem
             ref={menuItemRef}
@@ -339,9 +326,7 @@ export default function Sidebar() {
               setIsMenuOpen((x) => !x)
             }}
             expandedLabel="Menu"
-            css={{
-              paddingLeft: theme.spacing.xxsmall,
-            }}
+            css={{ paddingLeft: theme.spacing.xxsmall }}
           >
             <Avatar
               name={me.name}
@@ -354,22 +339,11 @@ export default function Sidebar() {
           )}
         </SidebarSection>
         {isMenuOpen && (
-          <Menu
-            ref={menuRef}
-            zIndex={999}
-            position="absolute"
-            bottom={8}
-            minWidth="175px"
-            left="calc(100% + 10px)"
-            border="1px solid border"
-          >
+          <ProfileMenuSC ref={menuRef}>
             <MenuItem
               as={Link}
               to="/profile"
-              className="sidebar-menu-myprofile"
-              color="inherit"
               onClick={() => setIsMenuOpen(false)}
-              textDecoration="none"
             >
               <PersonIcon marginRight="xsmall" />
               My profile
@@ -379,25 +353,32 @@ export default function Sidebar() {
               href="https://docs.plural.sh"
               target="_blank"
               rel="noopener noreferrer"
-              className="sidebar-menu-docs"
-              color="inherit"
               onClick={() => setIsMenuOpen(false)}
-              textDecoration="none"
             >
               <ScrollIcon marginRight="xsmall" />
-              Docs
-              <Flex flex={1} />
+              <span css={{ flex: 1 }}>Docs</span>
               <ArrowTopRightIcon />
             </MenuItem>
             <MenuItem
+              as="a"
+              href={`${GITHUB_LINK}/plural`}
+              target="_blank"
+              rel="noopener noreferrer"
+              expandedLabel="GitHub"
+            >
+              <GitHubLogoIcon marginRight="xsmall" />
+              <span css={{ flex: 1 }}>GitHub</span>
+              <ArrowTopRightIcon />
+            </MenuItem>
+            <MenuItem
+              as="a"
+              style={{ color: theme.colors['icon-danger'] }}
               onClick={handleLogout}
-              className="sidebar-menu-logout"
-              color="icon-error"
             >
               <LogoutIcon marginRight="xsmall" />
               Logout
             </MenuItem>
-          </Menu>
+          </ProfileMenuSC>
         )}
       </SidebarExpandWrapper>
     </SidebarSC>
@@ -424,3 +405,13 @@ const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
     letterSpacing: '-0.35px',
   })
 )
+
+const ProfileMenuSC = styled(Menu)(({ theme }) => ({
+  zIndex: 999,
+  position: 'absolute',
+  bottom: 8,
+  minWidth: '175px',
+  left: 'calc(100% + 10px)',
+  '& a': { color: theme.colors.text, textDecoration: 'none' },
+  '& *:hover': { background: theme.colors['fill-two-hover'] },
+}))
