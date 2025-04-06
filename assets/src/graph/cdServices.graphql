@@ -104,6 +104,10 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
       deletedAt
     }
   }
+  parent {
+    id
+    name
+  }
   alerts(first: 500) {
     # just to get the count
     edges {

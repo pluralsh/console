@@ -73,7 +73,7 @@ export default function GlobalService() {
     <ResponsiveLayoutPage
       css={{
         gap: theme.spacing.large,
-        maxWidth: theme.breakpoints.desktop,
+        maxWidth: theme.breakpoints.desktopLarge,
         margin: 'auto',
       }}
     >
