@@ -70,56 +70,46 @@ export default function GlobalService() {
   if (!globalService || !globalServices) return <LoadingIndicator />
 
   return (
-    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
-      <div
-        css={{
-          alignSelf: 'center',
-          height: '100%',
-          maxWidth: theme.breakpoints.desktop,
-          overflow: 'hidden',
-          width: '100%',
-
-          [`@media (min-width: 1833px)`]: {
-            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Increased by sidecar and spacing size.
-          },
-        }}
-      >
-        <PluralErrorBoundary>
-          <Flex gap={'large'}>
-            <Flex
-              direction={'column'}
-              gap={'large'}
-              flexGrow={1}
-              flexShrink={1}
-              width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
-            >
-              <GlobalServiceSelect
-                selectedGlobalService={globalService}
-                globalServices={globalServices}
-              />
-              <GlobalServiceServices
-                globalServiceID={globalServiceId}
-                seedService={globalService?.service as ServiceDeployment}
-              />
-            </Flex>
-            <Flex
-              align={'flex-end'}
-              direction={'column'}
-              gap={'large'}
-            >
-              <KickButton
-                secondary
-                startIcon={<ReloadIcon />}
-                kickMutationHook={useSyncGlobalServiceMutation}
-                message="Resync"
-                tooltipMessage="Sync this service now instead of at the next poll interval"
-                variables={{ id: globalServiceId }}
-              />
-              <GlobalServiceSidecar globalService={globalService} />
-            </Flex>
-          </Flex>
-        </PluralErrorBoundary>
-      </div>
+    <ResponsiveLayoutPage
+      css={{
+        gap: theme.spacing.large,
+        maxWidth: theme.breakpoints.desktop,
+        margin: 'auto',
+      }}
+    >
+      <PluralErrorBoundary>
+        <Flex
+          direction="column"
+          gap="large"
+          flexGrow={1}
+          flexShrink={1}
+          width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
+        >
+          <GlobalServiceSelect
+            selectedGlobalService={globalService}
+            globalServices={globalServices}
+          />
+          <GlobalServiceServices
+            globalServiceID={globalServiceId}
+            seedService={globalService?.service as ServiceDeployment}
+          />
+        </Flex>
+        <Flex
+          align="flex-end"
+          direction="column"
+          gap="large"
+        >
+          <KickButton
+            secondary
+            startIcon={<ReloadIcon />}
+            kickMutationHook={useSyncGlobalServiceMutation}
+            message="Resync"
+            tooltipMessage="Sync this service now instead of at the next poll interval"
+            variables={{ id: globalServiceId }}
+          />
+          <GlobalServiceSidecar globalService={globalService} />
+        </Flex>
+      </PluralErrorBoundary>
     </ResponsiveLayoutPage>
   )
 }

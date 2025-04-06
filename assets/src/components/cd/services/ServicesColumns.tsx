@@ -83,6 +83,7 @@ export const ColCluster = columnHelper.accessor(
 
       return (
         <ColWithIcon
+          css={{ width: 'max-content' }}
           icon={getClusterIconUrl({
             cluster: original?.node?.cluster,
             mode: theme.mode,
