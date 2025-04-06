@@ -30,7 +30,7 @@ import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import { GlobalServiceServices } from './GlobalServiceServices.tsx'
 import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
 import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
-import { crumbs } from '../GlobalService.tsx'
+import { crumbs } from '../GlobalServices.tsx'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
 
 export default function GlobalService() {

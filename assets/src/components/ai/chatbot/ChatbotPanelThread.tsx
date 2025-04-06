@@ -121,7 +121,6 @@ export function ChatbotPanelThread({
       update: (cache, { data }) =>
         updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
     })
-  console.log({ messages })
 
   const sendingMessage = regLoading || hybridLoading
   const messageError = regError || hybridError
