@@ -202,7 +202,8 @@ defmodule Console.Schema.Cluster do
   def for_flow(query \\ __MODULE__, flow_id) do
     from(c in query,
       join: s in assoc(c, :services),
-      where: s.flow_id == ^flow_id
+      where: s.flow_id == ^flow_id,
+      distinct: true
     )
   end
 
