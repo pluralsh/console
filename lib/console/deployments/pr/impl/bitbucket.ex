@@ -66,10 +66,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   def files(conn, url) do
     with {:ok, group, number} <- get_pull_id(url),
+         {:ok, groupencoding} <- URI.encode(group),
          {:ok, conn} <- connection(conn),
-         {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{conn.host}/repositories/#{URI.encode(group)}/pullrequests/#{number}", Connection.headers(conn)),
+         {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{conn.host}/repositories/#{groupencoding}/pullrequests/#{number}", Connection.headers(conn)),
          {:ok, pr} <- Jason.decode(body),
-         {:ok, %HTTPoison.Response{status_code: 200, body: diff}} <- HTTPoison.get("#{conn.host}/repositories/#{URI.encode(group)}/pullrequests/#{number}/diff", Connection.headers(conn)) do
+         {:ok, %HTTPoison.Response{status_code: 200, body: diff}} <- HTTPoison.get("#{conn.host}/repositories/#{groupencoding}/pullrequests/#{number}/diff", Connection.headers(conn)) do
       changes = parse_diff(diff)
       files = Enum.map(changes, fn change ->
         # Get the full file contents from the src endpoint
