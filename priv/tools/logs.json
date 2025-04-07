@@ -12,6 +12,32 @@
         "query": {
             "type": "string",
             "description": "A search query to use to filter logs, omit to list all recent logs"
+        },
+        "timestamp": {
+            "type": "string",
+            "description": "An ISO8601 timestamp to search for logs either before or after"
+        },
+        "direction": {
+            "type": "string",
+            "description": "The direction to search logs for, either before or after the timestamp",
+            "enum": ["gte", "lte"]
+        },
+        "facets": {
+            "type": "array",
+            "description": "A list of facet names to filter by among the logs (only use these from the facets fetched in a previous fetch as they must be exact matches)",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "description": "The name of the facet to filter by"
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "The value of the facet to filter by"
+                    }
+                }
+            }
         }
     },
     "required": ["service_deployment", "cluster"],

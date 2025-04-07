@@ -8,7 +8,8 @@ defmodule Console.AI.Chat.Engine do
     Logs,
     Pods,
     Component,
-    Prs
+    Prs,
+    Pipelines
   }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
@@ -16,11 +17,17 @@ defmodule Console.AI.Chat.Engine do
 
   @chat """
   The following is a chat history concerning a set of kubernetes or devops questions, usually encompassing topics like terraform,
-  helm, GitOps, and other technologies and best practices.  Please provide a response suitable for a junior engineer
-  with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
+  helm, GitOps, and other technologies and best practices.  The chat is occuring on the Plural Platform, which has a few concepts that
+  are worth keeping in mind:
+
+  * Clusters - kubernetes clusters registered with Plural for future management
+  * Services (also called Service Deployments) - a kubernetes application deployed via Plural's GitOps engine
+  * Stacks - an infrastructure as code stack used to provision cloud resources via Plural that can interact with Services
+
+  Please provide a response suitable for a junior engineer with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @plrl_tools [Clusters, SvcTool, Logs, Pods, Component, Prs]
+  @plrl_tools [Clusters, SvcTool, Logs, Pods, Component, Prs, Pipelines]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
