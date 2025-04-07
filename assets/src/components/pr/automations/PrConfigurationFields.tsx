@@ -1,7 +1,7 @@
 import { FormField, HelpIcon, Tooltip } from '@pluralsh/design-system'
 import upperFirst from 'lodash/upperFirst'
 
-import { type PrConfiguration } from 'generated/graphql'
+import { PrAutomationFragment } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 
 import { PrConfigurationInput } from './PrConfigurationInput'
@@ -12,7 +12,7 @@ export function PrConfigurationFields({
   configVals,
   setConfigVals,
 }: {
-  configuration?: Nullable<Nullable<Omit<PrConfiguration, '__typename'>>[]>
+  configuration?: PrAutomationFragment['configuration']
   configVals: Record<string, string>
   setConfigVals: (vals: Record<string, string>) => void
 }) {

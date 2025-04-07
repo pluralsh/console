@@ -9,9 +9,9 @@ import {
 } from './costManagementRoutesConsts'
 import { CostManagement } from 'components/cost-management/CostManagement'
 import { CostManagementDetails } from 'components/cost-management/details/CostManagementDetails'
-import { CostManagementDetailsRecommendations } from 'components/cost-management/details/CostManagementDetailsRecommendations'
 import { CostManagementDetailsNamespaces } from 'components/cost-management/details/CostManagementDetailsNamespaces'
 import { CostManagementDetailsOverview } from 'components/cost-management/details/CostManagementDetailsOverview'
+import { CostManagementDetailsRecommendations } from 'components/cost-management/details/recommendations/CostManagementDetailsRecommendations'
 
 export const costManagementRoutes = [
   <Route

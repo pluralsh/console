@@ -26,7 +26,7 @@ import {
   ColScalingPr,
   ColService,
 } from './ClusterScalingRecsTableCols'
-import { CMContextType } from './CostManagementDetails'
+import { CMContextType } from '../CostManagementDetails'
 
 import {
   COST_MANAGEMENT_ABS_PATH,
