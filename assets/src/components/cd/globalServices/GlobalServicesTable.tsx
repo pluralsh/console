@@ -19,7 +19,7 @@ import {
   useFetchPaginatedData,
 } from '../../utils/table/useFetchPaginatedData'
 
-import { columns } from './GlobalService'
+import { columns } from './GlobalServices'
 
 function GlobalServicesTableComponent({
   setRefetch,

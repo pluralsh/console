@@ -4,7 +4,7 @@ import ContinuousDeployment, {
   useDefaultCDPath,
 } from 'components/cd/ContinuousDeployment'
 
-import GlobalServices from 'components/cd/globalServices/GlobalService'
+import GlobalServices from 'components/cd/globalServices/GlobalServices.tsx'
 
 import Namespaces from 'components/cd/namespaces/Namespaces'
 

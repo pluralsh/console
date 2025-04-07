@@ -36,8 +36,9 @@ export default function GlobalServiceSidecar({
 
   return (
     <Flex
-      direction={'column'}
-      gap={'medium'}
+      direction="column"
+      gap="medium"
+      overflow="auto"
       width={220}
     >
       <Sidecar heading="Source">
