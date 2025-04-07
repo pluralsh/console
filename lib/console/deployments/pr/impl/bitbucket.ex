@@ -50,98 +50,20 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   def review(conn, %PullRequest{url: url}, body) do
     with {:ok, group, number} <- get_pull_id(url),
-         {:ok, conn} <- connection(conn),
-         {:ok, %{"id" => id}} <- post(conn, Path.join(["/repositories", "#{URI.encode(group)}", "pullrequests", number, "comments"]), %{
-           content: %{
-             raw: filter_ansi(body),
-             markup: "markdown"
-           }
-         }) do
-      {:ok, "#{id}"}
-    else
-      {:error, error} -> {:error, error}
-      _ -> {:error, "unknown bitbucket error"}
-    end
-  end
-
-  def files(conn, url) do
-    with {:ok, group, number} <- get_pull_id(url),
-         {:ok, groupencoding} <- URI.encode(group),
-         {:ok, conn} <- connection(conn),
-         {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{conn.host}/repositories/#{groupencoding}/pullrequests/#{number}", Connection.headers(conn)),
-         {:ok, pr} <- Jason.decode(body),
-         {:ok, %HTTPoison.Response{status_code: 200, body: diff}} <- HTTPoison.get("#{conn.host}/repositories/#{groupencoding}/pullrequests/#{number}/diff", Connection.headers(conn)) do
-      changes = parse_diff(diff)
-      files = Enum.map(changes, fn change ->
-        # Get the full file contents from the src endpoint
-        contents = case get_file_contents(conn, group, change["path"]) do
-          {:ok, content} -> content
-          {:error, _} -> change["patch"]  # Fallback to patch if we can't get full contents
-        end
-
-        %Console.Deployments.Pr.File{
-          url: url,
-          repo: get_repo_url(url),
-          title: pr["title"],
-          contents: contents,
-          filename: change["path"],
-          sha: change["hash"],
-          patch: change["patch"],
-          base: change["old_path"],
-          head: change["path"]
+         {:ok, conn} <- connection(conn) do
+      case post(conn, Path.join(["/repositories", "#{URI.encode(group)}", "pullrequests", number, "comments"]), %{
+        content: %{
+          raw: filter_ansi(body),
+          markup: "markdown"
         }
-      end)
-      {:ok, files}
-    else
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "bitbucket request failed with status #{code}: #{body}"}
-
-      {:error, error} ->
-        {:error, "bitbucket request failed: #{inspect(error)}"}
+      }) do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
     end
   end
 
-  defp get_file_contents(conn, group, path) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get("#{conn.host}/repositories/#{URI.encode(group)}/src/HEAD/#{path}", Connection.headers(conn)),
-         {:ok, %{"content" => content}} <- Jason.decode(body) do
-      {:ok, Base.decode64!(content)}
-    else
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "bitbucket file request failed with status #{code}: #{body}"}
-
-      {:error, error} ->
-        {:error, error}
-
-      {:ok, _} ->
-        {:error, "Unexpected response format"}
-    end
-  end
-
-  defp parse_diff(diff) do
-    # Split the diff into files
-    String.split(diff, "diff --git")
-    |> Enum.drop(1)  # Drop the first empty split
-    |> Enum.map(fn file_diff ->
-      # Extract file paths and content
-      [header | content] = String.split(file_diff, "\n", parts: 2)
-      [old_path, new_path] = Regex.run(~r/a\/(.*?)\s+b\/(.*?)$/, header, capture: :all_but_first)
-
-      %{
-        "path" => new_path,
-        "old_path" => old_path,
-        "status" => "modified",  # We'll need to determine this from the diff content
-        "patch" => content,
-        "hash" => nil  # We don't have this in the diff
-      }
-    end)
-  end
-
-  defp get_repo_url(url) do
-    url
-    |> String.replace("/api/2.0/repositories/", "")
-    |> String.replace("/pullrequests/", "/pull-requests/")
-    |> String.replace("/diff", ".git")
-  end
+  def files(_, _), do: {:ok, []}
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
