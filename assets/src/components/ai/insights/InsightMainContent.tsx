@@ -2,7 +2,7 @@ import { AiSparkleFilledIcon, Markdown } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useAIEnabled } from '../../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { AIDisabledState, AIEmptyState } from '../AI'
+import { AIDisabledState, EmptyStateCompact } from '../AIThreads'
 
 export function InsightMainContent({
   text,
@@ -20,7 +20,7 @@ export function InsightMainContent({
       {text ? (
         <Markdown text={text} />
       ) : aiEnabled ? (
-        <AIEmptyState
+        <EmptyStateCompact
           cssProps={cssProps}
           icon={
             <AiSparkleFilledIcon

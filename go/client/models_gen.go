@@ -710,11 +710,15 @@ type CertificateStatus struct {
 }
 
 type Chat struct {
-	ID          string              `json:"id"`
-	Type        ChatType            `json:"type"`
-	Role        AiRole              `json:"role"`
-	Content     string              `json:"content"`
-	Seq         int64               `json:"seq"`
+	ID      string   `json:"id"`
+	Type    ChatType `json:"type"`
+	Role    AiRole   `json:"role"`
+	Content *string  `json:"content,omitempty"`
+	Seq     int64    `json:"seq"`
+	// whether this chat requires confirmation
+	Confirm *bool `json:"confirm,omitempty"`
+	// when the chat was confirmed
+	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`
@@ -746,17 +750,18 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string           `json:"id"`
-	Summary       string           `json:"summary"`
-	Default       bool             `json:"default"`
-	LastMessageAt *string          `json:"lastMessageAt,omitempty"`
-	Flow          *Flow            `json:"flow,omitempty"`
-	User          *User            `json:"user,omitempty"`
-	Insight       *AiInsight       `json:"insight,omitempty"`
-	Tools         []*McpServerTool `json:"tools,omitempty"`
-	Chats         *ChatConnection  `json:"chats,omitempty"`
-	InsertedAt    *string          `json:"insertedAt,omitempty"`
-	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+	ID            string     `json:"id"`
+	Summary       string     `json:"summary"`
+	Default       bool       `json:"default"`
+	LastMessageAt *string    `json:"lastMessageAt,omitempty"`
+	Flow          *Flow      `json:"flow,omitempty"`
+	User          *User      `json:"user,omitempty"`
+	Insight       *AiInsight `json:"insight,omitempty"`
+	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
+	Tools      []*McpServerTool `json:"tools,omitempty"`
+	Chats      *ChatConnection  `json:"chats,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -874,6 +879,8 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// The helm values for the agent installation
+	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
 	Healthy *bool `json:"healthy,omitempty"`
 	// the url of the kas server you can access this cluster from
@@ -945,6 +952,8 @@ type Cluster struct {
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
 	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
@@ -2994,10 +3003,14 @@ type McpServer struct {
 	// authentication specs for this server
 	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
 	// whether a tool call against this server should require user confirmation
-	Confirm    *bool                     `json:"confirm,omitempty"`
-	Audits     *McpServerAuditConnection `json:"audits,omitempty"`
-	InsertedAt *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+	Confirm *bool `json:"confirm,omitempty"`
+	// read policy for this mcp server
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this mcp server
+	WriteBindings []*PolicyBinding          `json:"writeBindings,omitempty"`
+	Audits        *McpServerAuditConnection `json:"audits,omitempty"`
+	InsertedAt    *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                   `json:"updatedAt,omitempty"`
 }
 
 type McpServerAssociationAttributes struct {
@@ -3011,6 +3024,8 @@ type McpServerAttributes struct {
 	// whether tool calls against this server should require a confirmation
 	Confirm        *bool                              `json:"confirm,omitempty"`
 	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
+	ReadBindings   []*PolicyBindingAttributes         `json:"readBindings,omitempty"`
+	WriteBindings  []*PolicyBindingAttributes         `json:"writeBindings,omitempty"`
 }
 
 type McpServerAudit struct {
@@ -3583,7 +3598,7 @@ type ObserverPrAction struct {
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
-	Context string `json:"context"`
+	Context map[string]any `json:"context"`
 }
 
 // Configuration for sending a pr in response to an observer
@@ -3594,6 +3609,11 @@ type ObserverPrActionAttributes struct {
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
 	Context string `json:"context"`
+}
+
+// Resets the current value of the observer
+type ObserverResetAttributes struct {
+	LastValue string `json:"lastValue"`
 }
 
 // A spec for a target to poll
@@ -5189,6 +5209,8 @@ type ServiceDeployment struct {
 	Alerts                 *AlertConnection                `json:"alerts,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -6081,6 +6103,12 @@ type UserRoleAttributes struct {
 
 type UserRoles struct {
 	Admin *bool `json:"admin,omitempty"`
+}
+
+// A representation of the metrics to render a utilization heat map
+type UtilizationHeatMap struct {
+	CPU    []*MetricResponse `json:"cpu,omitempty"`
+	Memory []*MetricResponse `json:"memory,omitempty"`
 }
 
 type VectorStoreAttributes struct {

@@ -5,9 +5,9 @@ import { LinkTabWrap } from './Tabs'
 export type SubtabDirectory = {
   path: string
   label: string
-}
+}[]
 
-export function SubTabs({ directory }: { directory: SubtabDirectory[] }) {
+export function SubTabs({ directory }: { directory: SubtabDirectory }) {
   const route = useParams()['*']
 
   return (

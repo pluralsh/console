@@ -265,6 +265,16 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v3.6.0-eksbuild.2
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v3.5.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -1277,6 +1287,17 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v2.1.7-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
   - version: v2.1.6-eksbuild.1
     compatibilities:
     - '1.32'
@@ -2064,6 +2085,16 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.17.1-eksbuild.2
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.17.1-eksbuild.1
     compatibilities:
     - '1.32'
@@ -2430,6 +2461,24 @@
   publisher: eks
 - name: cribl_cribledge
   versions:
+  - version: v4.11.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v4.10.1-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v4.9.3-eksbuild.1
     compatibilities:
     - '1.31'
@@ -2591,6 +2640,16 @@
   publisher: dynatrace
 - name: eks-node-monitoring-agent
   versions:
+  - version: v1.2.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.1.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -2715,6 +2774,16 @@
   publisher: eks
 - name: external-dns
   versions:
+  - version: v0.16.1-eksbuild.2
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v0.15.1-eksbuild.1
     compatibilities:
     - '1.32'
@@ -3522,6 +3591,16 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.15.0-eksbuild.3
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v2.14.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -3728,6 +3807,16 @@
   publisher: nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.9.0-eksbuild.3
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.8.2-eksbuild.2
     compatibilities:
     - '1.32'
@@ -3986,6 +4075,12 @@
   publisher: Solo.io
 - name: solo-io_istio-distro
   versions:
+  - version: v1.25.1-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.25.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -4098,6 +4193,10 @@
   versions:
   - version: v0.86.0-eksbuild.1
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
     - '1.26'
@@ -4141,6 +4240,19 @@
     - '1.25'
     - '1.24'
   publisher: StormForge
+- name: suse_observability-agent
+  versions:
+  - version: v1.0.26-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+  publisher: SUSE
 - name: teleport_teleport
   versions:
   - version: v10.3.1-eksbuild.0

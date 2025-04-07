@@ -382,20 +382,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a representation of a cluster you can deploy to"
   object :cluster do
-    field :id,              non_null(:id), description: "internal id of this cluster"
-    field :self,            :boolean, description: "whether this is the management cluster itself"
-    field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
-    field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
-    field :virtual,         :boolean, description: "whether this is actually a virtual cluster"
-    field :version,         :string, description: "desired k8s version for the cluster"
-    field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
-    field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
-    field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
-    field :kubelet_version, :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
-    field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
-    field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
-    field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
-    field :upgrade_plan,    :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+    field :id,                non_null(:id), description: "internal id of this cluster"
+    field :self,              :boolean, description: "whether this is the management cluster itself"
+    field :name,              non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
+    field :protect,           :boolean, description: "if true, this cluster cannot be deleted"
+    field :virtual,           :boolean, description: "whether this is actually a virtual cluster"
+    field :version,           :string, description: "desired k8s version for the cluster"
+    field :distro,            :cluster_distro, description: "the distribution of kubernetes this cluster is running"
+    field :metadata,          :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
+    field :current_version,   :string, description: "current k8s version as told to us by the deployment operator"
+    field :kubelet_version,   :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
+    field :handle,            :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :installed,         :boolean, description: "whether the deploy operator has been registered for this cluster"
+    field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
+    field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+    field :agent_helm_values, :string, description: "The helm values for the agent installation",
+      resolve: &Deployments.agent_helm_values_for_cluster/3
+
 
     field :healthy, :boolean, description: "Whether this cluster was recently pinged", resolve: fn
       cluster, _, _ -> {:ok, Cluster.healthy?(cluster)}
@@ -514,6 +517,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :time,      :datetime
 
       resolve &Deployments.network_graph/3
+    end
+
+    @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+    field :heat_map, :utilization_heat_map do
+      resolve &Deployments.heat_map/3
     end
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
@@ -1341,9 +1349,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :apply_scaling_recommendation, :pull_request do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id, non_null(:id), description: "the id of the scaling recommendation to fix"
 
       resolve &Deployments.scaling_pr/2
+    end
+
+    field :suggest_scaling_recommendation, :string do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the scaling recommendation to fix"
+
+      resolve &Deployments.scaling_pr_suggestion/2
     end
 
     field :create_cluster_registration, :cluster_registration do

@@ -295,8 +295,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
     test "it can fetch cloud addons" do
       user = insert(:user)
-      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.29")
-      addon = insert(:cloud_addon, cluster: cluster, name: "splunk_splunk-otel-collector-chart", version: "v0.86.0-eksbuild.1")
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.30")
+      addon = insert(:cloud_addon, cluster: cluster, name: "spacelift_workerpool-controller", version: "v0.25.0-eksbuild.1")
 
       wait(Compatibilities.CloudAddOns)
 
@@ -314,7 +314,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
               versionInfo {
                 version
                 compatibilities
-                blocking(kubeVersion: "1.28")
+                blocking(kubeVersion: "1.31")
               }
             }
           }
@@ -324,10 +324,10 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["id"] == cluster.id
       [ca] = found["cloudAddons"]
       assert ca["id"] == addon.id
-      assert ca["name"] == "splunk_splunk-otel-collector-chart"
+      assert ca["name"] == "spacelift_workerpool-controller"
       assert ca["versionInfo"]["blocking"]
       assert MapSet.new(ca["versionInfo"]["compatibilities"])
-             |> MapSet.equal?(MapSet.new(~w(1.24 1.25 1.26 1.27 1.28)))
+             |> MapSet.equal?(MapSet.new(~w(1.27 1.28 1.29 1.30)))
     end
 
     test "it can fetch cluster metrics" do
@@ -355,6 +355,34 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert found["id"] == cluster.id
       refute Enum.empty?(found["clusterMetrics"]["cpu"])
+    end
+
+    test "it can fetch a cluster heat map" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 2, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [1, "1"]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            heatMap {
+              cpu { values { timestamp value } }
+              memory { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      refute Enum.empty?(found["heatMap"]["cpu"])
+      refute Enum.empty?(found["heatMap"]["memory"])
     end
 
     test "it can fetch cluster audit logs" do

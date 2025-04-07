@@ -1,11 +1,13 @@
 import {
   AiSparkleFilledIcon,
   AiSparkleOutlineIcon,
+  AppIcon,
   ArrowTopRightIcon,
   ChatFilledIcon,
   ChatOutlineIcon,
   Chip,
   Flex,
+  FlowIcon,
   IconFrame,
   PushPinFilledIcon,
   PushPinOutlineIcon,
@@ -21,13 +23,9 @@ import {
   AiPinFragment,
   ChatThreadTinyFragment,
 } from 'generated/graphql'
-import {
-  ComponentProps,
-  ComponentPropsWithRef,
-  ReactNode,
-  useCallback,
-} from 'react'
+import { ComponentProps, ComponentPropsWithRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getFlowDetailsPath } from 'routes/flowRoutesConsts.tsx'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs, fromNow, isAfter } from 'utils/datetime.ts'
 import {
@@ -84,7 +82,7 @@ export function AITableEntry({
 
   const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
   const insight = item.insight
-  const insightPathUrl = getInsightPathInfo(insight).url
+  const insightPathUrl = getInsightPathInfo(insight)?.url
 
   const timestamp = getThreadOrPinTimestamp(item)
 
@@ -173,6 +171,12 @@ export function AIEntryLabel({
   isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
+  const insightPathInfo = getInsightPathInfo(insight)
+  const flowPath = thread?.flow && {
+    path: [thread.flow.name],
+    url: getFlowDetailsPath({ flowId: thread.flow.id }),
+  }
+
   return (
     <Flex
       alignItems="center"
@@ -188,6 +192,7 @@ export function AIEntryLabel({
           <TableEntryIcon
             isInsight={isInsight}
             isStale={isStale}
+            thread={thread}
             insight={insight}
           />
         }
@@ -196,7 +201,7 @@ export function AIEntryLabel({
         first={
           isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
         }
-        second={<TableEntryResourceLink {...getInsightPathInfo(insight)} />}
+        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
         firstPartialType="body2"
         firstColor="text"
         secondPartialType="caption"
@@ -209,11 +214,13 @@ function TableEntryIcon({
   isInsight,
   isStale,
   insight,
+  thread,
 }: {
   isInsight: boolean
   isStale: boolean
   insight: Nullable<AiInsightSummaryFragment>
-}): ReactNode {
+  thread?: Nullable<ChatThreadTinyFragment>
+}) {
   const theme = useTheme()
   const ICON_SIZE = 16
   if (!!insight?.cluster)
@@ -260,25 +267,41 @@ function TableEntryIcon({
 
   // TODO: Add handler for insight?.clusterInsightComponent once we have a page for it
 
-  return isInsight ? (
-    isStale ? (
-      <ChatOutlineIcon
+  if (isInsight)
+    return isStale ? (
+      <AiSparkleOutlineIcon
         size={ICON_SIZE}
         color={theme.colors['icon-light']}
       />
     ) : (
-      <ChatFilledIcon
+      <AiSparkleFilledIcon
         size={ICON_SIZE}
         color={theme.colors['icon-info']}
       />
     )
-  ) : isStale ? (
-    <AiSparkleOutlineIcon
+
+  if (thread?.flow)
+    return (
+      <AppIcon
+        size="xxsmall"
+        url={thread.flow.icon ?? ''}
+        icon={
+          <FlowIcon
+            size={ICON_SIZE}
+            color={theme.colors[isStale ? 'icon-light' : 'icon-info']}
+          />
+        }
+      />
+    )
+
+  // fallback to chat icon
+  return isStale ? (
+    <ChatOutlineIcon
       size={ICON_SIZE}
       color={theme.colors['icon-light']}
     />
   ) : (
-    <AiSparkleFilledIcon
+    <ChatFilledIcon
       size={ICON_SIZE}
       color={theme.colors['icon-info']}
     />
@@ -286,7 +309,7 @@ function TableEntryIcon({
 }
 export function getInsightPathInfo(
   insight: Nullable<AiInsightSummaryFragment>
-): { path?: string[]; url?: string } {
+): { path?: string[]; url?: string } | null {
   if (!!insight?.cluster) {
     return {
       path: [insight.cluster.name],
@@ -339,7 +362,7 @@ export function getInsightPathInfo(
     }
   }
 
-  return {}
+  return null
 }
 
 function TableEntryResourceLink({

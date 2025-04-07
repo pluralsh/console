@@ -12,6 +12,7 @@ defmodule Console.AI.Fixer do
   alias Console.AI.{Provider, Tools.Pr}
 
   @type pr_resp :: {:ok, PullRequest.t} | Console.error
+  @type resp :: {:ok, binary} | Console.error
 
   @prompt """
   Please provide the most straightforward code or configuration change available based on the information I've already provided above to fix this issue.

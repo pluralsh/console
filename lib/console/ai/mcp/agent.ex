@@ -11,7 +11,11 @@ defmodule Console.AI.MCP.Agent do
   alias Console.AI.MCP.{State, ClientSupervisor, Tool}
   require Logger
 
+  @sep "__sep__"
+
   @poll :timer.minutes(5)
+
+  def sep(), do: @sep
 
   def registry(), do: __MODULE__
 
@@ -73,6 +77,7 @@ defmodule Console.AI.MCP.Agent do
           %{state | tools: Map.merge(tools, new_tools)}
         err ->
           Logger.warning "failed to list tools for mcp server: #{server.url}: #{inspect(err)}"
+          Process.send_after(self(), :init, 1000)
           state
       end
     end)
@@ -94,11 +99,12 @@ defmodule Console.AI.MCP.Agent do
   def servers(%ChatThread{flow: %Flow{servers: [_ | _] = servers}}), do: servers
   def servers(_), do: []
 
-  def tool_name(%McpServer{name: sn}, name), do: "#{sn}.#{name}"
+  def tool_name(pref, name) when is_binary(pref), do: "#{pref}#{@sep}#{name}"
+  def tool_name(%McpServer{name: sn}, name), do: "#{sn}#{@sep}#{name}"
 
   def tool_name(name) when is_binary(name) do
-    case String.split(name, ".") do
-      [tool | rest] -> {tool, Enum.join(rest, ".")}
+    case String.split(name, @sep) do
+      [tool | rest] -> {tool, Enum.join(rest, @sep)}
       _ -> :error
     end
   end

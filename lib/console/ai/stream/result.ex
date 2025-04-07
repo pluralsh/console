@@ -2,7 +2,7 @@ defmodule Console.AI.Stream.Result do
   defmodule Tool do
     @type t :: %__MODULE__{}
 
-    defstruct [:index, :name, :arguments]
+    defstruct [:index, :name, arguments: ""]
 
     def new(index, attrs) do
       %__MODULE__{
@@ -30,10 +30,10 @@ defmodule Console.AI.Stream.Result do
   def text(%__MODULE__{text: l} = res, txt),
     do: put_in(res.text, [txt | l])
 
-  def tool(%__MODULE__{tools: tools}, index, tool) do
+  def tool(%__MODULE__{tools: tools} = res, index, tool) do
     case Map.get(tools, index) do
-      nil -> Map.put(tools, index, Tool.new(index, tool))
-      %Tool{} = t -> Map.put(tools, index, Tool.args(t, tool["arguments"]))
+      nil -> put_in(res.tools[index], Tool.new(index, tool))
+      %Tool{} = t -> put_in(res.tools[index], Tool.args(t, tool["arguments"]))
     end
   end
 

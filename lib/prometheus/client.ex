@@ -16,6 +16,19 @@ defmodule Prometheus.Client do
 
   def host(), do: Application.get_env(:console, :prometheus)
 
+  def query(client \\ nil, query, variables) do
+    query = variable_subst(query, variables)
+
+    Path.join(host(client), "/api/v1/query")
+    |> HTTPoison.post({:form, [{"query", query}]}, @headers ++ auth(client))
+    |> case do
+      {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
+      error ->
+        IO.inspect(error)
+        {:error, "prometheus error"}
+    end
+  end
+
   def query(client \\ nil, query, start, end_t, step, variables) do
     query = variable_subst(query, variables)
     Logger.info "Issuing prometheus query: #{query}"
@@ -30,8 +43,7 @@ defmodule Prometheus.Client do
       @headers ++ auth(client)
     )
     |> case do
-      {:ok, %{body: body, status_code: 200}} ->
-        Poison.decode(body, as: %Response{data: %Data{result: [%Result{}]}})
+      {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
       error ->
         IO.inspect(error)
         {:error, "prometheus error"}

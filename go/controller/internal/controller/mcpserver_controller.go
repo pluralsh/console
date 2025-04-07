@@ -14,8 +14,10 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -79,6 +81,10 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.handleDelete(ctx, mcpServer)
 	}
 
+	if err = r.ensure(mcpServer); err != nil {
+		return handleRequeue(nil, err, mcpServer.SetCondition)
+	}
+
 	changed, sha, err := mcpServer.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate MCP server SHA")
@@ -111,6 +117,31 @@ func (r *MCPServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.MCPServerList))).
 		For(&v1alpha1.MCPServer{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *MCPServerReconciler) ensure(server *v1alpha1.MCPServer) error {
+	if server.Spec.Bindings == nil {
+		return nil
+	}
+	bindings, req, err := ensureBindings(server.Spec.Bindings.Read, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	server.Spec.Bindings.Read = bindings
+
+	bindings, req2, err := ensureBindings(server.Spec.Bindings.Write, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	server.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
+	}
+
+	return nil
 }
 
 func (r *MCPServerReconciler) handleDelete(ctx context.Context, mcpServer *v1alpha1.MCPServer) error {

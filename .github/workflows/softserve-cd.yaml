@@ -34,8 +34,8 @@ jobs:
         with:
           images: |
             ghcr.io/pluralsh/git-server
-            docker.io/pluralsh/git-server
             gcr.io/pluralsh/git-server
+            docker.io/pluralsh/git-server
           tags: |
             type=schedule
             type=ref,event=branch

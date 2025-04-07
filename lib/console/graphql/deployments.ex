@@ -102,6 +102,7 @@
       arg :project_id,  :id
       arg :catalog_id,  :id
       arg :flow_id,     :id
+      arg :server_id,   :id
 
       safe_resolve &Deployments.rbac/2
     end

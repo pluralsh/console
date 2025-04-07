@@ -63,8 +63,8 @@ jobs:
           # list of Docker images to use as base name for tags
           images: |
             dkr.plural.sh/console/console
-            gcr.io/pluralsh/console
             ghcr.io/pluralsh/console
+            gcr.io/pluralsh/console
             docker.io/pluralsh/console
           # generate Docker tags based on the following events/attributes
           tags: |

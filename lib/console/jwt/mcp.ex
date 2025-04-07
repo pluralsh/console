@@ -22,20 +22,23 @@ defmodule Console.Jwt.MCP do
   @spec mint(User.t) :: {:ok, binary} | Console.error
   def mint(%User{roles: roles} = user) do
     %{groups: groups} = Repo.preload(user, [:groups])
+    jws = get_jws()
 
     generate_and_sign(%{
       "sub" => user.email,
+      "kid" => jws["kid"],
       "admin" => !!Map.get(roles || %{}, :admin),
       "groups" => Enum.map(groups, & &1.name)
-    }, signer())
+    }, signer(jws))
   end
 
-  def exchange(jwt), do: verify_and_validate(jwt, signer())
+  def exchange(jwt), do: verify_and_validate(jwt, signer(get_jws()))
 
-  def signer() do
-    jws = JWK.limit(1)
-          |> Repo.one()
-          |> JWK.jwks()
-    Joken.Signer.create(@alg, jws)
+  def signer(jws), do: Joken.Signer.create(@alg, jws)
+
+  defp get_jws() do
+    JWK.limit(1)
+    |> Repo.one()
+    |> JWK.jwks()
   end
 end

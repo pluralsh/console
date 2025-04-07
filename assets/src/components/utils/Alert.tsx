@@ -1,12 +1,14 @@
 import { ApolloError } from '@apollo/client'
 import { Callout } from '@pluralsh/design-system'
 
+export type GqlErrorType = boolean | string | ApolloError | null | undefined
+
 export function GqlError({
   header,
   error,
 }: {
   header?: string | undefined
-  error: boolean | string | ApolloError | undefined
+  error: GqlErrorType
 }) {
   return (
     <Callout

@@ -171,10 +171,10 @@ const formatCpu = (cpu: Nullable<number>) => {
   if (isNullish(cpu)) return '--'
   if (cpu > 1) return `${Number(cpu).toFixed(1)}`
 
-  return `${round(cpu * 1000, 10)}m`
+  return `${ceil(cpu * 1000, 10)}m`
 }
 
-const round = (val: number, mult: number) => Math.round(val / mult) * mult
+const ceil = (val: number, mult: number) => Math.ceil(val / mult) * mult
 
 const formatMemory = (memory: Nullable<number>) => {
   if (isNullish(memory)) return '--'

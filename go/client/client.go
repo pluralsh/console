@@ -3118,10 +3118,10 @@ func (t *ObserverPipelineActionFragment) GetContext() map[string]any {
 }
 
 type ObserverPrActionFragment struct {
-	AutomationID   string  "json:\"automationId\" graphql:\"automationId\""
-	Repository     *string "json:\"repository,omitempty\" graphql:\"repository\""
-	BranchTemplate *string "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
-	Context        string  "json:\"context\" graphql:\"context\""
+	AutomationID   string         "json:\"automationId\" graphql:\"automationId\""
+	Repository     *string        "json:\"repository,omitempty\" graphql:\"repository\""
+	BranchTemplate *string        "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
+	Context        map[string]any "json:\"context\" graphql:\"context\""
 }
 
 func (t *ObserverPrActionFragment) GetAutomationID() string {
@@ -3142,7 +3142,7 @@ func (t *ObserverPrActionFragment) GetBranchTemplate() *string {
 	}
 	return t.BranchTemplate
 }
-func (t *ObserverPrActionFragment) GetContext() string {
+func (t *ObserverPrActionFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &ObserverPrActionFragment{}
 	}

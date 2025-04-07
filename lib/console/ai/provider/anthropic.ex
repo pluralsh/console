@@ -3,6 +3,7 @@ defmodule Console.AI.Anthropic do
   Implements our basic llm behaviour against the Anthropic api
   """
   @behaviour Console.AI.Provider
+  import Console.AI.Provider.Base
 
   alias Console.AI.Stream
 
@@ -50,8 +51,8 @@ defmodule Console.AI.Anthropic do
   Generate a anthropic completion from
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = anthropic, messages, _opts) do
-    case chat(anthropic, messages) do
+  def completion(%__MODULE__{} = anthropic, messages, opts) do
+    case chat(anthropic, messages, opts) do
       {:ok, %MessageResponse{content: content}} ->
         {:ok, format_content(content)}
       {:ok, content} when is_binary(content) -> {:ok, content}
@@ -61,7 +62,7 @@ defmodule Console.AI.Anthropic do
   end
 
   def tool_call(anthropic, messages, tools) do
-    case chat(%{anthropic | stream: nil}, messages, tools) do
+    case chat(%{anthropic | stream: nil}, messages, plural: tools, require_tools: true) do
       {:ok, %MessageResponse{content: [%Content{type: "tool_use"}] = tools}} ->
         {:ok, gen_tools(tools)}
       {:ok, %MessageResponse{content: content}} ->
@@ -75,7 +76,8 @@ defmodule Console.AI.Anthropic do
 
   def tools?(), do: true
 
-  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history) do
+  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history, opts) do
+    tools = tools(opts)
     Stream.Exec.anthropic(fn ->
       {system, history} = split(history)
       url("/messages")
@@ -84,21 +86,24 @@ defmodule Console.AI.Anthropic do
         system: system,
         messages: history,
         max_tokens: @max_tokens,
-        stream: true
+        stream: true,
+        tool_choice: (if !Enum.empty?(tools), do: %{tool_choice: :any}, else: nil),
+        tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
       }), json_headers(token), [stream_to: self(), async: :once] ++ @options)
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model}, history, tools \\ nil) do
+  defp chat(%__MODULE__{access_key: token, model: model}, history, opts) do
     {system, history} = split(history)
+    tools = tools(opts)
     url("/messages")
     |> HTTPoison.post(Jason.encode!(Console.drop_nils(%{
       model: model || @default_model,
       system: system,
       messages: history,
       max_tokens: @max_tokens,
-      tool_choice: (if is_list(tools), do: %{tool_choice: :any}, else: nil),
-      tools: (if is_list(tools), do: Enum.map(tools, &tool_args/1), else: nil)
+      tool_choice: (if !Enum.empty?(tools), do: %{tool_choice: :any}, else: nil),
+      tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
     })), json_headers(token), @options)
     |> handle_response(MessageResponse.spec())
   end
@@ -140,6 +145,14 @@ defmodule Console.AI.Anthropic do
       _ -> nil
     end)
     |> Enum.filter(& &1)
+  end
+
+  defp tool_args(%Console.AI.MCP.Tool{name: name, description: description, input_schema: schema}) do
+    %{
+      name: name,
+      description: description,
+      input_schema: schema
+    }
   end
 
   defp tool_args(tool) do

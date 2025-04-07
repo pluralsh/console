@@ -202,6 +202,17 @@ fragment ServiceTreeNode on ServiceDeployment {
   }
 }
 
+fragment ServiceDeploymentsConnection on ServiceDeploymentConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...ServiceDeploymentsRow
+    }
+  }
+}
+
 query ServiceDeployments(
   $first: Int = 100
   $after: String
@@ -220,14 +231,7 @@ query ServiceDeployments(
     status: $status
     projectId: $projectId
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ServiceDeploymentsRow
-      }
-    }
+    ...ServiceDeploymentsConnection
   }
   serviceStatuses(clusterId: $clusterId) {
     ...ServiceStatusCount
@@ -369,24 +373,6 @@ mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
   proceed(id: $id, promotion: $promotion) {
     ...ServiceDeploymentDetails
   }
-}
-
-mutation UpdateRbac(
-  $serviceId: ID
-  $clusterId: ID
-  $pipelineId: ID
-  $stackId: ID
-  $projectId: ID
-  $rbac: RbacAttributes!
-) {
-  updateRbac(
-    serviceId: $serviceId
-    clusterId: $clusterId
-    pipelineId: $pipelineId
-    stackId: $stackId
-    projectId: $projectId
-    rbac: $rbac
-  )
 }
 
 mutation SelfManage($values: String!) {

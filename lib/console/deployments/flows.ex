@@ -47,7 +47,7 @@ defmodule Console.Deployments.Flows do
   end
 
   @doc """
-  modifies rbac settings for this service
+  modifies rbac settings for this flow
   """
   @spec rbac(map, binary, User.t) :: flow_resp
   def rbac(attrs, flow_id, %User{} = user) do
@@ -55,6 +55,18 @@ defmodule Console.Deployments.Flows do
     |> Repo.preload([:write_bindings, :read_bindings])
     |> allow(user, :write)
     |> when_ok(&Flow.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
+  end
+
+  @doc """
+  modifies rbac settings for this mcp server
+  """
+  @spec server_rbac(map, binary, User.t) :: server_resp
+  def server_rbac(attrs, server_id, %User{} = user) do
+    get_mcp_server!(server_id)
+    |> Repo.preload([:write_bindings, :read_bindings])
+    |> allow(user, :write)
+    |> when_ok(&McpServer.rbac_changeset(&1, attrs))
     |> when_ok(:update)
   end
 
@@ -160,7 +172,7 @@ defmodule Console.Deployments.Flows do
     start_transaction()
     |> add_operation(:allow, fn _ -> allow(server, user, :write) end)
     |> add_operation(:update, fn %{allow: server} ->
-      server
+      Repo.preload(server, [:read_bindings, :write_bindings])
       |> McpServer.changeset(attrs)
       |> Repo.update()
     end)

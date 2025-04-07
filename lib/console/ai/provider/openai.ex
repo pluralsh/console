@@ -3,6 +3,7 @@ defmodule Console.AI.OpenAI do
   Implements our basic llm behaviour against the OpenAI api
   """
   @behaviour Console.AI.Provider
+  import Console.AI.Provider.Base
 
   alias Console.AI.Utils
   alias Console.AI.Stream
@@ -110,7 +111,7 @@ defmodule Console.AI.OpenAI do
   def tool_call(%__MODULE__{} = openai, messages, tools) do
     model = tool_model(openai)
     history = Enum.map(messages, fn {role, msg} -> %{role: tool_role(role, model), content: msg} end)
-    case chat(%{openai | stream: nil, model: model}, history, plural: tools) do
+    case chat(%{openai | stream: nil, model: model}, history, plural: tools, require_tools: true) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -137,13 +138,15 @@ defmodule Console.AI.OpenAI do
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
-      tools = Keyword.get(opts, :tools)
-      body = Jason.encode!(%{
+      all = tools(opts)
+      body = Map.merge(%{
         model: model || "gpt-4o-mini",
         messages: history,
         stream: true,
-        tools: tools && Enum.map(tools, &tool_args/1)
-      })
+        tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
+      }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      |> Console.drop_nils()
+      |> Jason.encode!()
 
       url(openai, "/chat/completions")
       |> HTTPoison.post(body, json_headers(token), [stream_to: self(), async: :once] ++ @options)
@@ -151,16 +154,13 @@ defmodule Console.AI.OpenAI do
   end
 
   defp chat(%__MODULE__{access_key: token, model: model} = openai, history, opts) do
-    plural = Keyword.get(opts, :plural)
-    tools  = Keyword.get(opts, :tools)
-    all = Enum.concat(tools || [], plural || [])
-
+    all = tools(opts)
     body = Console.drop_nils(%{
       model: model || "gpt-4o-mini",
       messages: history,
-      tools: (tools || plural) && Enum.map(all, &tool_args/1),
+      tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
     })
-    |> Map.merge((if plural, do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
     |> Jason.encode!()
 
     url(openai, "/chat/completions")

@@ -16,7 +16,8 @@ export default function CommandPalette({
   close: () => void
 }) {
   const theme = useTheme()
-  const commands = useCommands()
+  // only show hidden commands if the user has typed something
+  const commands = useCommands({ showHidden: value.length > 0 })
   const isEmpty = useCommandState((state) => state.filtered.count === 0)
   const reset = useCallback(() => setValue(''), [setValue])
 

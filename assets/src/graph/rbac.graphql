@@ -1,0 +1,21 @@
+mutation UpdateRbac(
+  $serviceId: ID
+  $clusterId: ID
+  $pipelineId: ID
+  $stackId: ID
+  $projectId: ID
+  $flowId: ID
+  $serverId: ID
+  $rbac: RbacAttributes!
+) {
+  updateRbac(
+    serviceId: $serviceId
+    clusterId: $clusterId
+    pipelineId: $pipelineId
+    stackId: $stackId
+    projectId: $projectId
+    flowId: $flowId
+    serverId: $serverId
+    rbac: $rbac
+  )
+}

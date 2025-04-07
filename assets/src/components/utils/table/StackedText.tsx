@@ -32,12 +32,14 @@ const FirstSC = styled.div<{
 const SecondSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
-  $color?: string
-}>(({ theme, $truncate, $partialType = 'caption', $color }) => ({
-  ...theme.partials.text[$partialType],
-  color: $color || theme.colors['text-xlight'],
-  ...($truncate ? TRUNCATE : {}),
-}))
+  $color?: SemanticColorKey
+}>(
+  ({ theme, $truncate, $partialType = 'caption', $color = 'text-xlight' }) => ({
+    ...theme.partials.text[$partialType],
+    color: theme.colors[$color],
+    ...($truncate ? TRUNCATE : {}),
+  })
+)
 
 export const StackedText = memo(
   ({

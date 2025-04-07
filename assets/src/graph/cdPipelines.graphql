@@ -208,17 +208,20 @@ fragment Pipeline on Pipeline {
   }
 }
 
+fragment PipelineConnection on PipelineConnection {
+  edges {
+    node {
+      ...Pipeline
+    }
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
   pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
-    edges {
-      cursor
-      node {
-        ...Pipeline
-      }
-    }
-    pageInfo {
-      ...PageInfo
-    }
+    ...PipelineConnection
   }
 }
 

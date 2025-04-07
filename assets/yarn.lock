@@ -4422,9 +4422,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.9.1":
-  version: 5.9.1
-  resolution: "@pluralsh/design-system@npm:5.9.1"
+"@pluralsh/design-system@npm:5.10.0":
+  version: 5.10.0
+  resolution: "@pluralsh/design-system@npm:5.10.0"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -4469,7 +4469,7 @@ __metadata:
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 07c22e86a64aeba6070452ec5bec740fff1b100ac7c3bc6a9073966d100c818c9a268ed1bab2a15b34ea6a7dde1cc6339819c3809dd5b05e2dc392eab7b5a025
+  checksum: 378ad58f6f04a171ae0c5b31ec3362b9fcad7c89032165f20ab4752691aa272ca63b1db07966f04c7125496fbd5fe85437ebb16f75a9f69df0e0cd9e2350a1b2
   languageName: node
   linkType: hard
 
@@ -10117,7 +10117,7 @@ __metadata:
     "@nivo/radial-bar": 0.88.0
     "@nivo/tooltip": 0.88.0
     "@nivo/treemap": 0.88.0
-    "@pluralsh/design-system": 5.9.1
+    "@pluralsh/design-system": 5.10.0
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -10176,6 +10176,7 @@ __metadata:
     graphql-ws: ^5.16.0
     husky: 8.0.3
     immer: 10.0.3
+    is-json: 2.0.1
     js-cookie: 3.0.5
     js-file-download: 0.4.12
     js-yaml: 4.1.0
@@ -14287,6 +14288,13 @@ __metadata:
   version: 1.0.0
   resolution: "is-interactive@npm:1.0.0"
   checksum: 824808776e2d468b2916cdd6c16acacebce060d844c35ca6d82267da692e92c3a16fdba624c50b54a63f38bdc4016055b6f443ce57d7147240de4f8cdabaf6f9
+  languageName: node
+  linkType: hard
+
+"is-json@npm:2.0.1":
+  version: 2.0.1
+  resolution: "is-json@npm:2.0.1"
+  checksum: 29efc4f82e912bf54cd7b28632dd8e52a311085ca879fe51c869a81ba1313bb689eb440ace53dd480edbc009f92a425c24059e0766f4117fe9888fe59e86186f
   languageName: node
   linkType: hard
 

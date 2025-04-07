@@ -2835,6 +2835,11 @@ func (in *MCPServerSpec) DeepCopyInto(out *MCPServerSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Bindings != nil {
+		in, out := &in.Bindings, &out.Bindings
+		*out = new(Bindings)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Authentication != nil {
 		in, out := &in.Authentication, &out.Authentication
 		*out = new(MCPServerAuthentication)

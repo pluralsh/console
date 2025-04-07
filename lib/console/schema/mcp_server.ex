@@ -85,4 +85,11 @@ defmodule Console.Schema.McpServer do
     |> cast(attrs, ~w(name value)a)
     |> validate_required(~w(name value)a)
   end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
+  end
 end

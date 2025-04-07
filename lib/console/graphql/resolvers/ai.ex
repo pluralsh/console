@@ -30,6 +30,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   def threads(args, %{context: %{current_user: user}}) do
     ChatThread.for_user(user.id)
     |> ChatThread.ordered()
+    |> thread_filters(args)
     |> paginate(args)
   end
 
@@ -113,6 +114,12 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatSvc.hybrid_chat(msgs, args[:thread_id], user)
   end
 
+  def confirm_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.confirm_chat(id, user)
+
+  def cancel_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.cancel_chat(id, user)
+
   def thread_pr(%{thread_id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.pr(id, user)
 
@@ -149,5 +156,13 @@ defmodule Console.GraphQl.Resolvers.AI do
     with {:ok, res} <- Kube.Client.raw(path) do
       {:ok, %{raw: res, kind: k, version: v, group: g, metadata: Kube.Utils.raw_meta(res)}}
     end
+  end
+
+  defp thread_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:flow_id, fid}, q when is_binary(fid) ->
+        ChatThread.for_flow(q, fid)
+      _, q -> q
+    end)
   end
 end
