@@ -1,7 +1,10 @@
 defmodule Console.Deployments.Pr.Impl.Gitlab do
   import Console.Deployments.Pr.Utils
+  alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   @behaviour Console.Deployments.Pr.Dispatcher
+
+   @gitlab_api_url "https://gitlab.com/api/v4"
 
   defmodule Connection do
     defstruct [:host, :token]
@@ -70,7 +73,58 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(_, url) do
+    HTTPoison.start()
+    case get_mr_info(url) do
+      {:ok, mr_info} ->
+        mr_info["changes"]
+        |> Enum.map(fn change ->
+          raw_url = get_raw_url(url, change)
+          file_contents = get_file_contents(raw_url)
+
+          %File{
+            url: url,                              # MR URL
+            repo: get_repo_url(url),               # Repository URL
+            title: mr_info["title"],               # MR title
+            contents: file_contents,               # File contents
+            filename: change["new_path"],          # File path
+            sha: change["sha"],                    # Commit SHA
+            patch: change["diff"],                 # The diff/patch
+            base: mr_info["target_branch"],        # Target branch
+            head: mr_info["source_branch"]         # Source branch
+          }
+        end)
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def get_mr_info(url) do
+    with {:ok, project_id, mr_iid} <- parse_gitlab_url(url),
+         encoded_project_id = URI.encode_www_form(project_id),
+         # First get the MR details to get the SHA
+         api_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}",
+         {:ok, response} <- HTTPoison.get(api_url, [{"Content-Type", "application/json"}]),
+         {:ok, mr_details} <- Jason.decode(response.body),
+         # Then get the diffs
+         diffs_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes",
+         {:ok, diffs_response} <- HTTPoison.get(diffs_url, [{"Content-Type", "application/json"}]),
+         {:ok, body} <- Jason.decode(diffs_response.body) do
+
+      # Add the SHA to each change in the response
+      changes = body["changes"] || []
+      changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
+      body = Map.put(body, "changes", changes_with_sha)
+      {:ok, body}
+    else
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "HTTP request failed: #{inspect(reason)}"}
+      {:error, %Jason.DecodeError{}} ->
+        {:error, "Invalid JSON response"}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
@@ -106,4 +160,38 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
 
   defp uri_encode(str), do: URI.encode(str, & &1 != ?/ and URI.char_unescaped?(&1))
+
+  defp parse_gitlab_url(url) do
+    case Regex.run(~r{gitlab\.com/(.+)/-/merge_requests/(\d+)}, url) do
+      [_, project_path, mr_iid] -> {:ok, project_path, mr_iid}
+      _ -> {:error, "Invalid GitLab merge request URL"}
+    end
+  end
+
+  # Construct the raw file URL from the base URL and change info
+  defp get_raw_url(base_url, change) do
+    # Get the SHA from the MR details that we added earlier
+    sha = change["sha"]
+
+    # Extract the project path from the base URL
+    [_, project_path] = Regex.run(~r{gitlab\.com/(.+)/-/merge}, base_url)
+
+    # Construct the raw URL using the project path and file path
+    "https://gitlab.com/#{project_path}/-/raw/#{sha}/#{change["new_path"]}"
+  end
+
+  defp get_file_contents(raw_url) do
+    case HTTPoison.get(raw_url) do
+      {:ok, response} -> response.body
+      {:error, reason} -> {:error, "Failed to fetch file contents: #{inspect(reason)}"}
+    end
+  end
+
+  # Add this helper function to get repo URL (similar to GitHub's to_repo_url)
+  defp get_repo_url(url) do
+    case String.split(url, "/-/merge_requests") do
+      [repo | _] -> "#{repo}.git"
+      _ -> url
+    end
+  end
 end

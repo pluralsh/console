@@ -11,7 +11,6 @@ defmodule Mix.Tasks.Scm.Bitbucket do
       {:ok, pr_info} ->
         # Pretty print the changes info
         IO.puts("\nPull Request Changes Information:")
-        File.write("bitbucket_pr_info.json", Jason.encode!(pr_info, pretty: true))
 
         # Get the diff URL from the PR info
         diff_url = pr_info["links"]["diff"]["href"]

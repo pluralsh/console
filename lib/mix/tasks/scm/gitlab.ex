@@ -41,14 +41,8 @@ defmodule Mix.Tasks.Scm.Gitlab do
             end
             IO.puts("#{key}: #{display_value}")
           end)
-
-          # You can still write to file if needed
-          tmp_path = Path.join([System.user_home!(), "tmp", String.replace(change["new_path"], "/", "_")])
-          File.mkdir_p!(Path.dirname(tmp_path))
-          File.write!(tmp_path, file_contents)
         end)
 
-        File.write!("gitlab_mr_info.txt", Jason.encode!(mr_info, pretty: true))
         IO.puts("\nFull MR info written to gitlab_mr_info.txt")
       {:error, reason} ->
         IO.puts("Error: #{reason}")
@@ -71,12 +65,7 @@ defmodule Mix.Tasks.Scm.Gitlab do
       changes = body["changes"] || []
       changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
       body = Map.put(body, "changes", changes_with_sha)
-
-      case diffs_response.status_code do
-        200 -> {:ok, body}
-        404 -> {:error, "Merge request not found"}
-        _ -> {:error, "Failed to fetch merge request info (status #{diffs_response.status_code})"}
-      end
+      {:ok, body}
     else
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "HTTP request failed: #{inspect(reason)}"}

@@ -1,7 +1,10 @@
 defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
+  alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest}
   @behaviour Console.Deployments.Pr.Dispatcher
+
+   @bitbucket_api_url "https://api.bitbucket.org/2.0"
 
   defmodule Connection do
     defstruct [:host, :token]
@@ -63,7 +66,38 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def files(_, _), do: {:ok, []}
+  def files(_, url) do
+    HTTPoison.start()
+    case get_pr_info(url) do
+      {:ok, pr_info} ->
+        diff_url = pr_info["links"]["diff"]["href"]
+        diff_map = get_diff_map(diff_url)
+
+        diffstat_url = pr_info["links"]["diffstat"]["href"]
+
+        case files_diff_list(diffstat_url) do
+          {:ok, diff_list} ->
+            Enum.map(diff_list["values"], fn file ->
+              filename = file["new"]["escaped_path"]
+
+              %File{
+                url: url,
+                repo: pr_info["source"]["repository"]["full_name"],
+                title: pr_info["title"],
+                contents: get_file_from_raw(file["new"]["links"]["self"]["href"]),
+                filename: filename,
+                sha: pr_info["source"]["commit"]["hash"],
+                patch: Map.get(diff_map, filename, "No diff found for #{filename}"),
+                base: pr_info["destination"]["branch"]["name"],
+                head: pr_info["source"]["branch"]["name"]
+              }
+            end)
+          {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
+        end
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
@@ -95,5 +129,78 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     else
       _ -> {:error, "could not parse bitbucket url"}
     end
+  end
+
+  defp get_pr_info(url) do
+    with {:ok, workspace, repo_slug, pr_id} <- parse_bitbucket_url(url),
+         pr_url = get_pr_url(workspace, repo_slug, pr_id),
+         {:ok, pr_response} <- HTTPoison.get(pr_url, [{"Content-Type", "application/json"}]),
+         {:ok, pr_body} <- Jason.decode(pr_response.body) do
+      {:ok, pr_body}
+    else
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "HTTP request failed: #{inspect(reason)}"}
+      {:error, %Jason.DecodeError{}} ->
+        {:error, "Invalid JSON response"}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp files_diff_list(diffstat_url) do
+    case HTTPoison.get(diffstat_url, []) do
+      {:ok, response} -> Jason.decode(response.body)
+      {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
+    end
+  end
+
+  defp parse_bitbucket_url(url) do
+    case Regex.run(~r{bitbucket\.org/([^/]+)/([^/]+)/pull-requests/(\d+)}, url) do
+      [_, workspace, repo_slug, pr_id] -> {:ok, workspace, repo_slug, pr_id}
+      _ -> {:error, "Invalid Bitbucket pull request URL"}
+    end
+  end
+
+  defp get_pr_url(workspace, repo_slug, pr_id) do
+    "#{@bitbucket_api_url}/repositories/#{workspace}/#{repo_slug}/pullrequests/#{pr_id}"
+  end
+
+  defp get_file_from_raw(url) do
+    case HTTPoison.get(url, []) do
+      {:ok, response} -> response.body
+      {:error, error} -> IO.puts("Error fetching raw file: #{inspect(error)}")
+    end
+  end
+
+  defp get_diff_map(diff_url) do
+    case HTTPoison.get(diff_url, []) do
+      {:ok, response} ->
+        # Parse the unified diff format to extract individual file diffs
+        parse_diff_to_map(response.body)
+      {:error, error} ->
+        IO.puts("Error fetching diff: #{inspect(error)}")
+        %{}
+    end
+  end
+
+  defp parse_diff_to_map(diff_content) do
+    # Split the diff content by file
+    diff_content
+    |> String.split(~r/diff --git a\//)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(fn file_diff ->
+      # Extract filename and diff content
+      case Regex.run(~r/^(.+?) b\/(.+?)(?:\n|$)/, file_diff) do
+        [_, _, filename] ->
+          {filename, "diff --git a/" <> file_diff}
+        _ ->
+          # Handle new files differently
+          case Regex.run(~r/^(.+?) b\/(.+?)(?:\n|$)/, "diff --git a/" <> file_diff) do
+            [_, _, filename] -> {filename, "diff --git a/" <> file_diff}
+            _ -> {"unknown", file_diff}
+          end
+      end
+    end)
+    |> Map.new()
   end
 end
