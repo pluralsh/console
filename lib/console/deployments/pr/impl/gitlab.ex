@@ -74,10 +74,9 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
 
   def files(_, url) do
-    HTTPoison.start()
     case get_mr_info(url) do
       {:ok, mr_info} ->
-        mr_info["changes"]
+        res_list = mr_info["changes"]
         |> Enum.map(fn change ->
           raw_url = get_raw_url(url, change)
           file_contents = get_file_contents(raw_url)
@@ -94,6 +93,9 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
             head: mr_info["source_branch"]         # Source branch
           }
         end)
+        |> Enum.filter(&File.valid?/1)
+        IO.inspect(res_list, label: "res_list")
+        res_list
       {:error, reason} ->
         {:error, reason}
     end
@@ -114,7 +116,11 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       # Add the SHA to each change in the response
       changes = body["changes"] || []
       changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
-      body = Map.put(body, "changes", changes_with_sha)
+      body = body
+      |> Map.put("changes", changes_with_sha)
+      |> Map.put("title", mr_details["title"])
+      |> Map.put("target_branch", mr_details["target_branch"])
+      |> Map.put("source_branch", mr_details["source_branch"])
       {:ok, body}
     else
       {:error, %HTTPoison.Error{reason: reason}} ->

@@ -67,7 +67,6 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   end
 
   def files(_, url) do
-    HTTPoison.start()
     case get_pr_info(url) do
       {:ok, pr_info} ->
         diff_url = pr_info["links"]["diff"]["href"]
@@ -77,7 +76,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
         case files_diff_list(diffstat_url) do
           {:ok, diff_list} ->
-            Enum.map(diff_list["values"], fn file ->
+            res_list = Enum.map(diff_list["values"], fn file ->
               filename = file["new"]["escaped_path"]
 
               %File{
@@ -92,6 +91,9 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
                 head: pr_info["source"]["branch"]["name"]
               }
             end)
+            |> Enum.filter(&File.valid?/1)
+            IO.inspect(res_list, label: "res_list")
+            res_list
           {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
         end
       {:error, reason} ->
@@ -148,7 +150,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   end
 
   defp files_diff_list(diffstat_url) do
-    case HTTPoison.get(diffstat_url, []) do
+    case HTTPoison.get(diffstat_url) do
       {:ok, response} -> Jason.decode(response.body)
       {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
     end
@@ -166,14 +168,14 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   end
 
   defp get_file_from_raw(url) do
-    case HTTPoison.get(url, []) do
+    case HTTPoison.get(url) do
       {:ok, response} -> response.body
       {:error, error} -> IO.puts("Error fetching raw file: #{inspect(error)}")
     end
   end
 
   defp get_diff_map(diff_url) do
-    case HTTPoison.get(diff_url, []) do
+    case HTTPoison.get(diff_url) do
       {:ok, response} ->
         # Parse the unified diff format to extract individual file diffs
         parse_diff_to_map(response.body)
