@@ -184,6 +184,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :instance_count, :integer, description: "the number of instances of this service we've found"
   end
 
+  input_object :deprecated_custom_resource_attributes do
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespace,    :string
+    field :name,         non_null(:string)
+    field :next_version, non_null(:string), description: "the next valid version for this resource"
+  end
+
   input_object :agent_migration_attributes do
     field :name,          :string
     field :ref,           :string
@@ -527,6 +536,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 
+    @desc "fetches the discovered custom resources with new versions to be used"
+    field :deprecated_custom_resources, list_of(:deprecated_custom_resource), resolve: dataloader(Deployments)
+
     @desc "any upgrade insights provided by your cloud provider that have been discovered by our agent"
     field :cloud_addons, list_of(:cloud_addon), resolve: &Deployments.cloud_addons/3
 
@@ -544,6 +556,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :compatibilities,   :boolean, description: "whether api compatibilities with all addons and kubernetes are satisfied"
     field :incompatibilities, :boolean, description: "whether mutual api incompatibilities with all addons and kubernetes have been satisfied"
     field :deprecations,      :boolean, description: "whether all api deprecations have been cleared for the target version"
+    field :kubelet_skew,      :boolean, description: "whether the kubelet version is in line with the current version"
   end
 
   @desc "a historical revision of a cluster, including version, cloud and node group configuration"
@@ -685,6 +698,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :operation, :string, description: "the operation for this condition, eg EQ, LT, GT"
     field :field,     :string, description: "the field this condition applies to"
     field :value,     :string, description: "the value to apply the condition with, for binary operators like LT/GT"
+  end
+
+  object :deprecated_custom_resource do
+    field :id,           non_null(:id)
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespace,    non_null(:string)
+    field :name,         :string
+    field :next_version, non_null(:string), description: "the next discovered version of this resource"
+    field :cluster,      :cluster, resolve: dataloader(Deployments), description: "the cluster this resource belongs to"
+
+    timestamps()
   end
 
   @desc "a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api"
@@ -1053,6 +1079,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware ClusterAuthenticated
       arg :services,   list_of(:runtime_service_attributes)
       arg :layout,     :operational_layout_attributes
+      arg :deprecated, list_of(:deprecated_custom_resource_attributes)
       arg :service_id, :id
 
       resolve &Deployments.create_runtime_services/2

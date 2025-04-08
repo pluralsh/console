@@ -1015,6 +1015,33 @@ defmodule Console.Deployments.ClustersTest do
       assert runtime.service_id == svc.id
     end
 
+    test "it can register deprecated custom resources too" do
+      cluster = insert(:cluster)
+
+      {:ok, 1} = Clusters.create_runtime_services(%{
+        services: [
+          %{name: "ingress-nginx", version: "1.8.1"},
+          %{name: "bogus", version: "2.0.0"}
+        ],
+        deprecated: [
+          %{group: "istio.io", version: "v1beta1", kind: "VirtualService", namespace: "default", name: "nginx", next_version: "v1"}
+        ]
+      }, nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.8.1"
+
+      %{deprecated_custom_resources: [dcr]} = Console.Repo.preload(cluster, [:deprecated_custom_resources])
+
+      assert dcr.group == "istio.io"
+      assert dcr.version == "v1beta1"
+      assert dcr.kind == "VirtualService"
+      assert dcr.namespace == "default"
+      assert dcr.name == "nginx"
+      assert dcr.next_version == "v1"
+    end
+
     test "it can prune uneeded runtime services" do
       cluster = insert(:cluster)
       prune = insert(:runtime_service, name: "pruned", cluster: cluster)

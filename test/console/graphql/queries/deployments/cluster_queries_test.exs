@@ -436,8 +436,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     test "it can filter by upgradeability" do
       user = admin_user()
       cluster = insert(:cluster)
-      upgradeable = insert(:cluster, upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
-      unupgradeable = insert(:cluster, upgrade_plan: %{compatibilities: false, incompatibilities: true, deprecations: true})
+      upgradeable = insert(:cluster, upgrade_plan: %{compatibilities: true, kubelet_skew: true, deprecations: true})
+      unupgradeable = insert(:cluster, upgrade_plan: %{compatibilities: false, kubelet_skew: true, deprecations: true})
 
       {:ok, %{data: %{"clusters" => found}}} = run_query("""
         query {
@@ -775,7 +775,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       insert_list(2, :cluster,
         current_version: Version.to_string(%{parsed | minor: min -  1}),
         pinged_at: Timex.now(),
-        upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true}
+        upgrade_plan: %{compatibilities: true, kubelet_skew: true, deprecations: true}
       )
       insert_list(3, :cluster, current_version: Version.to_string(parsed), pinged_at: Timex.now() |> Timex.shift(days: -1))
       insert_list(2, :cluster, current_version: Version.to_string(%{parsed | minor: min -  2}))

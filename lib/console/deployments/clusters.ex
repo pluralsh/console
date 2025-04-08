@@ -2,6 +2,7 @@ defmodule Console.Deployments.Clusters do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  import Console.Deployments.Ecto.Validations, only: [parse_version: 1]
   alias Console.PubSub
   alias Console.Commands.Tee
   alias Console.Deployments.{Services, Git, Providers.Configuration, Settings}
@@ -28,7 +29,8 @@ defmodule Console.Deployments.Clusters do
     ClusterRegistration,
     ClusterISOImage,
     CloudAddon,
-    DeploymentSettings
+    DeploymentSettings,
+    DeprecatedCustomResource
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -521,6 +523,19 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  Determines whether the current cluster's version displays kubelet version skew
+  """
+  @spec kubelet_skew?(Cluster.t) :: boolean
+  def kubelet_skew?(%Cluster{current_version: vsn, kubelet_version: kubelet})
+      when is_binary(vsn) and is_binary(kubelet) do
+    case {parse_version(vsn), parse_version(kubelet)} do
+      {{:ok, %{major: maj, minor: min}}, {:ok, %{major: maj, minor: min}}} -> true
+      _ -> false
+    end
+  end
+  def kubelet_skew?(_), do: true
+
+  @doc """
   Determines current status of this clusters upgrade plan given what information we currently have
   """
   @spec update_upgrade_plan(Cluster.t) :: cluster_resp
@@ -537,7 +552,8 @@ defmodule Console.Deployments.Clusters do
             Version.blocking?(vsn, cluster.current_version)
           _ -> false
         end),
-        incompatibilities: true
+        incompatibilities: true,
+        kubelet_skew: kubelet_skew?(cluster)
       }
     })
     |> Repo.update()
@@ -1034,6 +1050,7 @@ defmodule Console.Deployments.Clusters do
   defp insert_and_prune_runtime(%{services: [_ | _] = services} = args, %Cluster{id: cluster_id} = cluster, replace) do
     start_transaction()
     |> add_operation(:layout, fn _ -> maybe_persist_layout(cluster, args) end)
+    |> add_operation(:deprecated, fn _ -> insert_and_prune_deprecated(cluster, args[:deprecated]) end)
     |> add_operation(:insert, fn _ ->
       {count, created} = Repo.insert_all(
         RuntimeService,
@@ -1074,6 +1091,38 @@ defmodule Console.Deployments.Clusters do
     |> Repo.update()
   end
   defp maybe_persist_layout(cluster, _), do: {:ok, cluster}
+
+  defp insert_and_prune_deprecated(cluster, [_ | _] = deprecated) do
+    start_transaction()
+    |> add_operation(:insert, fn _ ->
+      {count, created} = Repo.insert_all(
+        DeprecatedCustomResource,
+        Enum.map(deprecated, &Map.put(timestamped(&1), :cluster_id, cluster.id)),
+        returning: true,
+        on_conflict: {:replace, [:next_version]},
+        conflict_target: [:cluster_id, :group, :version, :kind, :namespace, :name]
+      )
+      {:ok, {count, created}}
+    end)
+    |> add_operation(:prune, fn %{insert: {_, created}} ->
+      svcs = DeprecatedCustomResource.for_cluster(cluster.id)
+             |> Repo.all()
+      keep = MapSet.new(created, & &1.id)
+      filtered = Enum.filter(svcs, & !MapSet.member?(keep, &1.id))
+                 |> Enum.map(& &1.id)
+
+      case Enum.empty?(filtered) do
+        true -> {:ok, 0}
+        false ->
+          DeprecatedCustomResource.for_ids(filtered)
+          |> Repo.delete_all()
+          |> elem(0)
+          |> ok()
+      end
+    end)
+    |> execute()
+  end
+  defp insert_and_prune_deprecated(cluster, _), do: {:ok, cluster}
 
   @doc """
   Creates a new pinned custom resource, can be cluster or global scoped

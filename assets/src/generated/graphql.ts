@@ -1080,6 +1080,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** fetches the discovered custom resources with new versions to be used */
+  deprecatedCustomResources?: Maybe<Array<Maybe<DeprecatedCustomResource>>>;
   /** the distribution of kubernetes this cluster is running */
   distro?: Maybe<ClusterDistro>;
   /** whether the current user can edit this cluster */
@@ -1830,6 +1832,8 @@ export type ClusterUpgradePlan = {
   deprecations?: Maybe<Scalars['Boolean']['output']>;
   /** whether mutual api incompatibilities with all addons and kubernetes have been satisfied */
   incompatibilities?: Maybe<Scalars['Boolean']['output']>;
+  /** whether the kubelet version is in line with the current version */
+  kubeletSkew?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type ClusterUsage = {
@@ -2549,6 +2553,32 @@ export type DeploymentStrategy = {
   __typename?: 'DeploymentStrategy';
   rollingUpdate?: Maybe<RollingUpdate>;
   type?: Maybe<Scalars['String']['output']>;
+};
+
+export type DeprecatedCustomResource = {
+  __typename?: 'DeprecatedCustomResource';
+  /** the cluster this resource belongs to */
+  cluster?: Maybe<Cluster>;
+  group: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  namespace: Scalars['String']['output'];
+  /** the next discovered version of this resource */
+  nextVersion: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type DeprecatedCustomResourceAttributes = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the next valid version for this resource */
+  nextVersion: Scalars['String']['input'];
+  version: Scalars['String']['input'];
 };
 
 export type ElasticsearchConnection = {
@@ -6678,6 +6708,7 @@ export type RootMutationTypeReconfigureRenovateArgs = {
 
 
 export type RootMutationTypeRegisterRuntimeServicesArgs = {
+  deprecated?: InputMaybe<Array<InputMaybe<DeprecatedCustomResourceAttributes>>>;
   layout?: InputMaybe<OperationalLayoutAttributes>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
