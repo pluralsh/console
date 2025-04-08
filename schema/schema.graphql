@@ -753,7 +753,9 @@ type RootMutationType {
   ingestClusterCost(costs: CostIngestAttributes!): Boolean
 
   "registers a list of runtime services discovered for the current cluster"
-  registerRuntimeServices(services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, serviceId: ID): Int
+  registerRuntimeServices(
+    services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, deprecated: [DeprecatedCustomResourceAttributes], serviceId: ID
+  ): Int
 
   "agent api to persist upgrade insights for its cluster"
   saveUpgradeInsights(insights: [UpgradeInsightAttributes], addons: [CloudAddonAttributes]): [UpgradeInsight]
@@ -4914,6 +4916,21 @@ input RuntimeServiceAttributes {
   instanceCount: Int
 }
 
+input DeprecatedCustomResourceAttributes {
+  group: String!
+
+  version: String!
+
+  kind: String!
+
+  namespace: String
+
+  name: String!
+
+  "the next valid version for this resource"
+  nextVersion: String!
+}
+
 input AgentMigrationAttributes {
   name: String
   ref: String
@@ -5388,6 +5405,9 @@ type Cluster {
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
 
+  "fetches the discovered custom resources with new versions to be used"
+  deprecatedCustomResources: [DeprecatedCustomResource]
+
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   cloudAddons: [CloudAddon]
 
@@ -5411,6 +5431,9 @@ type ClusterUpgradePlan {
 
   "whether all api deprecations have been cleared for the target version"
   deprecations: Boolean
+
+  "whether the kubelet version is in line with the current version"
+  kubeletSkew: Boolean
 }
 
 "a historical revision of a cluster, including version, cloud and node group configuration"
@@ -5604,6 +5627,30 @@ type AddOnConfigCondition {
 
   "the value to apply the condition with, for binary operators like LT\/GT"
   value: String
+}
+
+type DeprecatedCustomResource {
+  id: ID!
+
+  group: String!
+
+  version: String!
+
+  kind: String!
+
+  namespace: String!
+
+  name: String
+
+  "the next discovered version of this resource"
+  nextVersion: String!
+
+  "the cluster this resource belongs to"
+  cluster: Cluster
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "a service encapsulating a controller like istio\/ingress-nginx\/etc that is meant to extend the kubernetes api"

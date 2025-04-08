@@ -956,6 +956,8 @@ type Cluster struct {
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
+	// fetches the discovered custom resources with new versions to be used
+	DeprecatedCustomResources []*DeprecatedCustomResource `json:"deprecatedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
@@ -1487,6 +1489,8 @@ type ClusterUpgradePlan struct {
 	Incompatibilities *bool `json:"incompatibilities,omitempty"`
 	// whether all api deprecations have been cleared for the target version
 	Deprecations *bool `json:"deprecations,omitempty"`
+	// whether the kubelet version is in line with the current version
+	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
 }
 
 type ClusterUsage struct {
@@ -2083,6 +2087,31 @@ type DeploymentStatus struct {
 type DeploymentStrategy struct {
 	Type          *string        `json:"type,omitempty"`
 	RollingUpdate *RollingUpdate `json:"rollingUpdate,omitempty"`
+}
+
+type DeprecatedCustomResource struct {
+	ID        string  `json:"id"`
+	Group     string  `json:"group"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace string  `json:"namespace"`
+	Name      *string `json:"name,omitempty"`
+	// the next discovered version of this resource
+	NextVersion string `json:"nextVersion"`
+	// the cluster this resource belongs to
+	Cluster    *Cluster `json:"cluster,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type DeprecatedCustomResourceAttributes struct {
+	Group     string  `json:"group"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+	// the next valid version for this resource
+	NextVersion string `json:"nextVersion"`
 }
 
 type ElasticsearchConnection struct {
