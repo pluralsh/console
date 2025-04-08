@@ -448,6 +448,10 @@ type RootQueryType {
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 
   aiPin(insightId: ID, threadId: ID): AiPin
+
+  oidcLogin(challenge: String!): OidcStepResponse
+
+  oidcConsent(challenge: String!): OidcStepResponse
 }
 
 type RootMutationType {
@@ -955,6 +959,10 @@ type RootMutationType {
   deletePin(id: ID!): AiPin
 
   aiFixPr(insightId: ID!, messages: [ChatMessage]): PullRequest
+
+  acceptLogin(challenge: String!): OauthResponse
+
+  oauthConsent(challenge: String!, scopes: [String]): OauthResponse
 }
 
 type RootSubscriptionType {
@@ -978,6 +986,25 @@ type RootSubscriptionType {
     "the id of the scaling recommendation you're streaming a cost PR suggestion for"
     recommendationId: ID
   ): AiDelta
+}
+
+type OauthResponse {
+  redirectTo: String!
+}
+
+type ConsentRequest {
+  requestedScope: [String]
+  skip: Boolean
+}
+
+type LoginRequest {
+  requestedScope: [String]
+  subject: String
+}
+
+type OidcStepResponse {
+  login: LoginRequest
+  consent: ConsentRequest
 }
 
 input PolicyBindingAttributes {
@@ -1177,6 +1204,7 @@ type McpServerAuditConnection {
 "Supported OIDC-compatible Auth Providers"
 enum OidcProviderType {
   PLURAL
+  CONSOLE
 }
 
 "Supported methods for fetching an OIDC auth token"
@@ -1192,6 +1220,9 @@ input OidcProviderAttributes {
   authMethod: OidcAuthMethod
 
   description: String
+
+  "users and groups able to utilize this provider"
+  bindings: [PolicyBindingAttributes]
 
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]

@@ -26,9 +26,9 @@ defmodule Console.Cost.Pr do
     end
   end
 
-  def create(id, %User{} = user) when is_binary(id) do
+  def suggestion(id, %User{} = user) when is_binary(id) do
     Repo.get!(ClusterScalingRecommendation, id)
-    |> create(user)
+    |> suggestion(user)
   end
 
   @doc """

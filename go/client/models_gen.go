@@ -1637,6 +1637,11 @@ type ConfigurationValidationAttributes struct {
 	UniqBy *UniqByAttributes `json:"uniqBy,omitempty"`
 }
 
+type ConsentRequest struct {
+	RequestedScope []*string `json:"requestedScope,omitempty"`
+	Skip           *bool     `json:"skip,omitempty"`
+}
+
 type ConsoleConfiguration struct {
 	GitCommit      *string `json:"gitCommit,omitempty"`
 	ConsoleVersion *string `json:"consoleVersion,omitempty"`
@@ -2893,6 +2898,11 @@ type LoginInfo struct {
 	OidcName *string `json:"oidcName,omitempty"`
 }
 
+type LoginRequest struct {
+	RequestedScope []*string `json:"requestedScope,omitempty"`
+	Subject        *string   `json:"subject,omitempty"`
+}
+
 type LogsEvidence struct {
 	ServiceID *string    `json:"serviceId,omitempty"`
 	ClusterID *string    `json:"clusterId,omitempty"`
@@ -3367,6 +3377,10 @@ type NotificationSinkEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+type OauthResponse struct {
+	RedirectTo string `json:"redirectTo"`
+}
+
 type ObjectReference struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
@@ -3664,8 +3678,15 @@ type OidcProviderAttributes struct {
 	Name        string          `json:"name"`
 	AuthMethod  *OidcAuthMethod `json:"authMethod,omitempty"`
 	Description *string         `json:"description,omitempty"`
+	// users and groups able to utilize this provider
+	Bindings []*PolicyBindingAttributes `json:"bindings,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OidcStepResponse struct {
+	Login   *LoginRequest   `json:"login,omitempty"`
+	Consent *ConsentRequest `json:"consent,omitempty"`
 }
 
 type OllamaAttributes struct {
@@ -7958,16 +7979,18 @@ func (e OidcAuthMethod) MarshalGQL(w io.Writer) {
 type OidcProviderType string
 
 const (
-	OidcProviderTypePlural OidcProviderType = "PLURAL"
+	OidcProviderTypePlural  OidcProviderType = "PLURAL"
+	OidcProviderTypeConsole OidcProviderType = "CONSOLE"
 )
 
 var AllOidcProviderType = []OidcProviderType{
 	OidcProviderTypePlural,
+	OidcProviderTypeConsole,
 }
 
 func (e OidcProviderType) IsValid() bool {
 	switch e {
-	case OidcProviderTypePlural:
+	case OidcProviderTypePlural, OidcProviderTypeConsole:
 		return true
 	}
 	return false

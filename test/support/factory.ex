@@ -896,6 +896,16 @@ defmodule Console.Factory do
     }
   end
 
+  def oidc_provider_factory do
+    %Schema.OIDCProvider{
+      name: sequence(:oidc_provider, & "oidc-#{&1}"),
+      client_id: sequence(:oidc_provider, & "oidc-client-#{&1}"),
+      client_secret: Ecto.UUID.generate(),
+      redirect_uris: ["https://example.com"],
+      bindings_id: Ecto.UUID.generate(),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

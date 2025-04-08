@@ -237,3 +237,9 @@ if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
     s3_access_key_id: get_env("BACKUP_ACCESS_KEY"),
     s3_secret_access_key: get_env("BACKUP_SECRET_ACCESS_KEY")
 end
+
+if is_set("CONSOLE_HYDRA_ADMIN") and is_set("CONSOLE_HYDRA_PUBLIC") do
+  config :console, Console.Services.OIDC.Hydra,
+    hydra_admin: get_env("CONSOLE_HYDRA_ADMIN"),
+    hydra_public: get_env("CONSOLE_HYDRA_PUBLIC")
+end
