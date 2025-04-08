@@ -246,7 +246,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
 		SyncConfig:      syncConfigAttributes,
-		Configuration:   make([]*console.ConfigAttributes, 0),
 	}
 
 	if id, ok := service.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
@@ -280,20 +279,15 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		attr.FlowID = flow.Status.ID
 	}
 
-	if service.Spec.ConfigurationRef != nil {
-		secret := &corev1.Secret{}
-		if err = r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
-			return nil, &requeue, fmt.Errorf("error while getting configuration secret: %s", err.Error())
-		}
-		for k, v := range secret.Data {
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(string(v))})
-		}
+	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
+	if err != nil {
+		return nil, &requeue, err
 	}
 
-	if len(service.Spec.Configuration) > 0 {
-		for k, v := range service.Spec.Configuration {
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
-		}
+	// we only want to explicitly set the configuration field in attr if the user specified it via
+	// the CR spec.
+	if hasConfig {
+		attr.Configuration = configuration
 	}
 
 	for _, contextName := range service.Spec.Contexts {
@@ -358,6 +352,30 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 
 	return attr, nil, nil
+}
+
+func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
+	configuration := make([]*console.ConfigAttributes, 0)
+	hasConfig := false
+	if service.Spec.ConfigurationRef != nil {
+		secret := &corev1.Secret{}
+		if err := r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
+			return nil, false, fmt.Errorf("error while getting configuration secret: %s", err.Error())
+		}
+
+		hasConfig = true
+		for k, v := range secret.Data {
+			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(string(v))})
+		}
+	}
+
+	if len(service.Spec.Configuration) > 0 {
+		hasConfig = true
+		for k, v := range service.Spec.Configuration {
+			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
+		}
+	}
+	return configuration, hasConfig, nil
 }
 
 func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
