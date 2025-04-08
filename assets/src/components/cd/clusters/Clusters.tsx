@@ -59,7 +59,6 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
-import { ClustersGettingStarted } from './ClustersGettingStarted'
 import CreateCluster from './create/CreateCluster'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
@@ -204,10 +203,8 @@ export default function Clusters() {
   const hasStatFilters = !!debouncedSearchString || !!projectId
   const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
-  const showGettingStarted =
-    isDemo || ((statusCounts.ALL ?? 0) < 2 && !hasStatFilters)
 
-  useSetPageScrollable(showGettingStarted || isDemo)
+  useSetPageScrollable(isDemo)
 
   if (error) {
     return <GqlError error={error} />
@@ -216,54 +213,47 @@ export default function Clusters() {
     return <LoadingIndicator />
   }
 
-  return (
-    <>
-      {!isDemo ? (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.small,
-            height: '100%',
-          }}
-        >
-          <ClustersFilters
-            setQueryStatusFilter={setStatusFilter}
-            setQueryString={setSearchString}
-            tabStateRef={tabStateRef}
-            statusCounts={statusCounts}
-            selectedTagKeys={selectedTagKeys}
-            setSelectedTagKeys={setSelectedTagKeys}
-            tagOp={tagOp}
-            setTagOp={
-              setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']
-            }
-            upgradeableFilter={upgradeableFilter}
-            setUpgradeableFilter={setUpgradeableFilter}
-            upgradeStats={data.upgradeStatistics}
-          />
-          <TabPanel
-            stateRef={tabStateRef}
-            css={{ height: '100%', overflow: 'hidden' }}
-          >
-            <ClustersTable
-              fullHeightWrap
-              data={tableData || []}
-              refetch={refetch}
-              virtualizeRows
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-              onVirtualSliceChange={setVirtualSlice}
-            />
-          </TabPanel>
-        </div>
-      ) : (
-        <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
-      )}
-      {showGettingStarted && <ClustersGettingStarted />}
-    </>
+  return !isDemo ? (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        height: '100%',
+      }}
+    >
+      <ClustersFilters
+        setQueryStatusFilter={setStatusFilter}
+        setQueryString={setSearchString}
+        tabStateRef={tabStateRef}
+        statusCounts={statusCounts}
+        selectedTagKeys={selectedTagKeys}
+        setSelectedTagKeys={setSelectedTagKeys}
+        tagOp={tagOp}
+        setTagOp={setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']}
+        upgradeableFilter={upgradeableFilter}
+        setUpgradeableFilter={setUpgradeableFilter}
+        upgradeStats={data.upgradeStatistics}
+      />
+      <TabPanel
+        stateRef={tabStateRef}
+        css={{ height: '100%', overflow: 'hidden' }}
+      >
+        <ClustersTable
+          fullHeightWrap
+          data={tableData || []}
+          refetch={refetch}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+      </TabPanel>
+    </div>
+  ) : (
+    <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
   )
 }
 
