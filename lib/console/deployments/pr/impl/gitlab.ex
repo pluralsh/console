@@ -94,8 +94,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
           }
         end)
         |> Enum.filter(&File.valid?/1)
-        IO.inspect(res_list, label: "res_list")
-        res_list
+        {:ok, res_list}
       {:error, reason} ->
         {:error, reason}
     end

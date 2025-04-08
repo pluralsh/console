@@ -92,8 +92,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
               }
             end)
             |> Enum.filter(&File.valid?/1)
-            IO.inspect(res_list, label: "res_list")
-            res_list
+            {:ok, res_list}
           {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
         end
       {:error, reason} ->

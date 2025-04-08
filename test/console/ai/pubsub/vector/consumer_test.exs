@@ -71,9 +71,8 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       # Mock OpenAI embeddings call
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
 
-      # Single HTTPoison mock to handle all GitLab API calls
+      # Mock the basic MR get api
       expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1", _ ->
-        IO.puts("Base MR api call")
         {:ok, %HTTPoison.Response{
           status_code: 200,
           body: Jason.encode!(%{
@@ -84,8 +83,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           })
         }}
       end)
+
+      # Mock the api to get MR changes
       expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1/changes", _ ->
-        IO.puts("Changes api call")
         {:ok, %HTTPoison.Response{
           status_code: 200,
           body: Jason.encode!(%{
@@ -97,8 +97,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           })
         }}
       end)
+
+      # Mock the api to get the raw file (the actual APIs only give the file path/commit/etc, not the full file content)
       expect(HTTPoison, :get, fn "https://gitlab.com/owner/repo/-/raw/sha/terraform/main.tf" ->
-        IO.puts("Raw file api call")
         {:ok, %HTTPoison.Response{
           status_code: 200,
           body: "terraform content"
@@ -110,7 +111,6 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       refresh(vector_index())
 
       {:ok, c} = count_index(vector_index())
-      IO.inspect(c, label: "c")
       assert c > 0
 
       settings = Console.Deployments.Settings.fetch_consistent()
@@ -136,30 +136,13 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
 
-      expect(HTTPoison, :get, fn "bitbucket.diff_url" ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: "diff --git a\nsamplediff"
-        }}
-      end)
-      expect(HTTPoison, :get, fn "bitbucket.diffstat_url" ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: Jason.encode!(%{
-            "values" => [%{
-              "new" => %{
-                "escaped_path" => "terraform/main.tf",
-                "links" => %{"self" => %{"href" => "bitbucket.raw_url"}}
-              }
-            }]
-          })
-        }}
-      end)
+      # Mock the API to get the PR info
       expect(HTTPoison, :get, fn "https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/1", _ ->
         {:ok, %HTTPoison.Response{
           status_code: 200,
           body: Jason.encode!(%{
             "links" => %{
+              # In bitbucket API, the diff and diffstat URLs are part of the PR info response
               "diff" => %{"href" => "bitbucket.diff_url"},
               "diffstat" => %{"href" => "bitbucket.diffstat_url"}
             },
@@ -175,6 +158,32 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           })
         }}
       end)
+
+      # See above mock, the basic PR info api provides an URL to get the diff
+      expect(HTTPoison, :get, fn "bitbucket.diff_url" ->
+        {:ok, %HTTPoison.Response{
+          status_code: 200,
+          body: "diff --git a\nsamplediff"
+        }}
+      end)
+
+      # See above mock, the basic PR info api provides an URL to get the diffstat
+      # The diffstat API has a list of all modified files in the PR
+      expect(HTTPoison, :get, fn "bitbucket.diffstat_url" ->
+        {:ok, %HTTPoison.Response{
+          status_code: 200,
+          body: Jason.encode!(%{
+            "values" => [%{
+              "new" => %{
+                "escaped_path" => "terraform/main.tf",
+                "links" => %{"self" => %{"href" => "bitbucket.raw_url"}}
+              }
+            }]
+          })
+        }}
+      end)
+
+      # Mock the call to get the full file contents
       expect(HTTPoison, :get, fn "bitbucket.raw_url" ->
         {:ok, %HTTPoison.Response{
           status_code: 200,
@@ -187,7 +196,6 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       refresh(vector_index())
 
       {:ok, c} = count_index(vector_index())
-      IO.inspect(c, label: "c")
       assert c > 0
 
       settings = Console.Deployments.Settings.fetch_consistent()
