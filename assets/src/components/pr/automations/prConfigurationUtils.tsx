@@ -84,10 +84,10 @@ export function usePrAutomationForm({
   prAutomation,
   onSuccess,
 }: {
-  prAutomation: PrAutomationFragment
+  prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
 }) {
-  const { configuration, confirmation } = prAutomation
+  const { configuration, confirmation } = prAutomation ?? {}
   const [curConfigVals, setCurConfigVals] = useState(
     Object.fromEntries(
       configuration?.map((cfg) => [cfg?.name, cfg?.default || '']) ?? []
@@ -98,7 +98,7 @@ export function usePrAutomationForm({
 
   const [reviewFormState, setReviewFormState] = useState<ReviewPrFormState>({
     branch: '',
-    identifier: prAutomation.identifier ?? '',
+    identifier: prAutomation?.identifier ?? '',
     checkedItems: Object.fromEntries(
       confirmation?.checklist
         ?.filter(isNonNullable)
@@ -112,7 +112,7 @@ export function usePrAutomationForm({
 
   const [mutation, { loading, error }] = useCreatePullRequestMutation({
     variables: {
-      id: prAutomation.id,
+      id: prAutomation?.id ?? '',
       branch: reviewFormState.branch,
       identifier: reviewFormState.identifier,
       context: JSON.stringify(
