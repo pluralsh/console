@@ -78,7 +78,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       {:ok, mr_info} ->
         res_list = mr_info["changes"]
         |> Enum.map(fn change ->
-          raw_url = get_raw_url(url, change)
+          sha = mr_info["sha"]
+          raw_url = get_raw_url(url, sha, change)
           file_contents = get_file_contents(raw_url)
 
           %File{
@@ -87,7 +88,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
             title: mr_info["title"],               # MR title
             contents: file_contents,               # File contents
             filename: change["new_path"],          # File path
-            sha: change["sha"],                    # Commit SHA
+            sha: sha,                              # Commit SHA
             patch: change["diff"],                 # The diff/patch
             base: mr_info["target_branch"],        # Target branch
             head: mr_info["source_branch"]         # Source branch
@@ -103,23 +104,10 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   def get_mr_info(url) do
     with {:ok, project_id, mr_iid} <- parse_gitlab_url(url),
          encoded_project_id = URI.encode_www_form(project_id),
-         # First get the MR details to get the SHA
-         api_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}",
-         {:ok, response} <- HTTPoison.get(api_url, [{"Content-Type", "application/json"}]),
-         {:ok, mr_details} <- Jason.decode(response.body),
-         # Then get the diffs
          diffs_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes",
          {:ok, diffs_response} <- HTTPoison.get(diffs_url, [{"Content-Type", "application/json"}]),
          {:ok, body} <- Jason.decode(diffs_response.body) do
 
-      # Add the SHA to each change in the response
-      changes = body["changes"] || []
-      changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
-      body = body
-      |> Map.put("changes", changes_with_sha)
-      |> Map.put("title", mr_details["title"])
-      |> Map.put("target_branch", mr_details["target_branch"])
-      |> Map.put("source_branch", mr_details["source_branch"])
       {:ok, body}
     else
       {:error, %HTTPoison.Error{reason: reason}} ->
@@ -174,10 +162,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
 
   # Construct the raw file URL from the base URL and change info
-  defp get_raw_url(base_url, change) do
-    # Get the SHA from the MR details that we added earlier
-    sha = change["sha"]
-
+  defp get_raw_url(base_url, sha, change) do
     # Extract the project path from the base URL
     [_, project_path] = Regex.run(~r{gitlab\.com/(.+)/-/merge}, base_url)
 

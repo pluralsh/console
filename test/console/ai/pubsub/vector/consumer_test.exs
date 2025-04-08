@@ -71,24 +71,15 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       # Mock OpenAI embeddings call
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
 
-      # Mock the basic MR get api
-      expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1", _ ->
+      # Mock the api to get MR changes
+      expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1/changes", _ ->
         {:ok, %HTTPoison.Response{
           status_code: 200,
           body: Jason.encode!(%{
             "sha" => "sha",
             "title" => "Test MR",
             "target_branch" => "main",
-            "source_branch" => "feature"
-          })
-        }}
-      end)
-
-      # Mock the api to get MR changes
-      expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1/changes", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: Jason.encode!(%{
+            "source_branch" => "feature",
             "changes" => [%{
               "new_path" => "terraform/main.tf",
               "old_path" => "terraform/main.tf",

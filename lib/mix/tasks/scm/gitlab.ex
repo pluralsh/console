@@ -9,10 +9,9 @@ defmodule Mix.Tasks.Scm.Gitlab do
 
     case get_mr_info(url) do
       {:ok, mr_info} ->
-        # Print raw URLs for each changed file
         mr_info["changes"]
         |> Enum.map(fn change ->
-          raw_url = get_raw_url(url, change)
+          raw_url = get_raw_url(url, mr_info["sha"], change)
           file_contents = get_file_contents(raw_url)
 
           # Create a map similar to GitHub's File struct
@@ -22,7 +21,7 @@ defmodule Mix.Tasks.Scm.Gitlab do
             title: mr_info["title"],              # MR title
             contents: file_contents,               # File contents
             filename: change["new_path"],          # File path
-            sha: change["sha"],                    # Commit SHA
+            sha: mr_info["sha"],                    # Commit SHA
             patch: change["diff"],                 # The diff/patch
             base: mr_info["target_branch"],        # Target branch
             head: mr_info["source_branch"]         # Source branch
@@ -42,8 +41,6 @@ defmodule Mix.Tasks.Scm.Gitlab do
             IO.puts("#{key}: #{display_value}")
           end)
         end)
-
-        IO.puts("\nFull MR info written to gitlab_mr_info.txt")
       {:error, reason} ->
         IO.puts("Error: #{reason}")
     end
@@ -53,18 +50,20 @@ defmodule Mix.Tasks.Scm.Gitlab do
     with {:ok, project_id, mr_iid} <- parse_gitlab_url(url),
          encoded_project_id = URI.encode_www_form(project_id),
          # First get the MR details to get the SHA
-         api_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}",
-         {:ok, response} <- HTTPoison.get(api_url, [{"Content-Type", "application/json"}]),
-         {:ok, mr_details} <- Jason.decode(response.body),
+        #  api_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}",
+        #  {:ok, response} <- HTTPoison.get(api_url, [{"Content-Type", "application/json"}]),
+        #  {:ok, mr_details} <- Jason.decode(response.body),
+        #  _ <- IO.inspect(mr_details, label: "mr_details"),
          # Then get the diffs
          diffs_url = "#{@gitlab_api_url}/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes",
          {:ok, diffs_response} <- HTTPoison.get(diffs_url, [{"Content-Type", "application/json"}]),
-         {:ok, body} <- Jason.decode(diffs_response.body) do
+         {:ok, body} <- Jason.decode(diffs_response.body),
+         _ <- IO.inspect(body, label: "body") do
 
       # Add the SHA to each change in the response
-      changes = body["changes"] || []
-      changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
-      body = Map.put(body, "changes", changes_with_sha)
+      # changes = body["changes"] || []
+      # changes_with_sha = Enum.map(changes, fn change -> Map.put(change, "sha", mr_details["sha"]) end)
+      # body = Map.put(body, "changes", changes_with_sha)
       {:ok, body}
     else
       {:error, %HTTPoison.Error{reason: reason}} ->
@@ -84,9 +83,8 @@ defmodule Mix.Tasks.Scm.Gitlab do
   end
 
   # Construct the raw file URL from the base URL and change info
-  defp get_raw_url(base_url, change) do
+  defp get_raw_url(base_url, sha, change) do
     # Get the SHA from the MR details that we added earlier
-    sha = change["sha"]
 
     # Extract the project path from the base URL
     [_, project_path] = Regex.run(~r{gitlab\.com/(.+)/-/merge}, base_url)
