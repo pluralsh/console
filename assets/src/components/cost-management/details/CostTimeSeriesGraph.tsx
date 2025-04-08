@@ -33,7 +33,7 @@ export function CostTimeSeriesGraph({
           min: 'auto',
           max: 'auto',
         }}
-        curve="natural"
+        curve="basis"
         axisBottom={{
           format: (value) => dayjs(value).format('MMM DD, YYYY'),
           tickSize: 5,
