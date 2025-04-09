@@ -89,13 +89,6 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
         }}
       end)
 
-<<<<<<< HEAD
-      # Mock the api to get the raw file (the actual APIs only give the file path/commit/etc, not the full file content)
-      expect(HTTPoison, :get, fn "https://gitlab.com/owner/repo/-/raw/sha/terraform/main.tf" ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: "terraform content"
-=======
       # Mock the api to get the file content
       expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/repository/files/terraform%2Fmain.tf?ref=sha", _ ->
         {:ok, %HTTPoison.Response{
@@ -103,7 +96,6 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           body: Jason.encode!(%{
             "content" => Base.encode64("terraform content")
           })
->>>>>>> git-providers
         }}
       end)
 
