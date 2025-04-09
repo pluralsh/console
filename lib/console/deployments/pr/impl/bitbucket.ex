@@ -2,9 +2,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
   alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest}
+  require Logger
+
   @behaviour Console.Deployments.Pr.Dispatcher
 
-   @bitbucket_api_url "https://api.bitbucket.org/2.0"
+  @bitbucket_api_url "https://api.bitbucket.org/2.0"
 
   defmodule Connection do
     defstruct [:host, :token]
@@ -52,7 +54,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   defp pr_content(pr), do: "#{pr["source"]["branch"]["name"]}\n#{pr["title"]}\n#{pr["summary"]["raw"]}"
 
   def review(conn, %PullRequest{url: url}, body) do
-    with {:ok, group, number} <- get_pull_id(url),
+    with {:ok, org, repo, number} <- get_pull_id(url),
+         group = "#{org}/#{repo}",
          {:ok, conn} <- connection(conn) do
       case post(conn, Path.join(["/repositories", "#{URI.encode(group)}", "pullrequests", number, "comments"]), %{
         content: %{
@@ -66,37 +69,35 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def files(_, url) do
-    case get_pr_info(url) do
-      {:ok, pr_info} ->
-        diff_url = pr_info["links"]["diff"]["href"]
-        diff_map = get_diff_map(diff_url)
+  def files(conn, url) do
+    with {:ok, workspace, repo, pr_id} <- get_pull_id(url),
+         {:ok, pr_info} <- get_pr_info(conn, workspace, repo, pr_id),
+         diff_url = pr_info["links"]["diff"]["href"],
+         diff_map = get_diff_map(diff_url),
+         diffstat_url = pr_info["links"]["diffstat"]["href"],
+         {:ok, diff_list} <- files_diff_list(diffstat_url) do
 
-        diffstat_url = pr_info["links"]["diffstat"]["href"]
+      files_list = Enum.map(diff_list["values"], fn file ->
+        filename = file["new"]["escaped_path"]
 
-        case files_diff_list(diffstat_url) do
-          {:ok, diff_list} ->
-            res_list = Enum.map(diff_list["values"], fn file ->
-              filename = file["new"]["escaped_path"]
-
-              %File{
-                url: url,
-                repo: pr_info["source"]["repository"]["full_name"],
-                title: pr_info["title"],
-                contents: get_file_from_raw(file["new"]["links"]["self"]["href"]),
-                filename: filename,
-                sha: pr_info["source"]["commit"]["hash"],
-                patch: Map.get(diff_map, filename, "No diff found for #{filename}"),
-                base: pr_info["destination"]["branch"]["name"],
-                head: pr_info["source"]["branch"]["name"]
-              }
-            end)
-            |> Enum.filter(&File.valid?/1)
-            {:ok, res_list}
-          {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
-        end
-      {:error, reason} ->
-        {:error, reason}
+        %File{
+          url: url,
+          repo: pr_info["source"]["repository"]["full_name"],
+          title: pr_info["title"],
+          contents: get_file_from_raw(file["new"]["links"]["self"]["href"]),
+          filename: filename,
+          sha: pr_info["source"]["commit"]["hash"],
+          patch: Map.get(diff_map, filename, "No diff found for #{filename}"),
+          base: pr_info["destination"]["branch"]["name"],
+          head: pr_info["source"]["branch"]["name"]
+        }
+      end)
+      |> Enum.filter(&File.valid?/1)
+      {:ok, files_list}
+    else
+      err ->
+        Logger.info("failed to list pr files #{inspect(err)}")
+        err
     end
   end
 
@@ -124,18 +125,29 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   end
 
   defp get_pull_id(url) do
-    with {:ok, %URI{path: "/" <> path}} <- URI.parse(url),
-         [org, repo, "pull-requests" <> number] <- String.split(path, "/") do
-      {:ok, "#{org}/#{repo}", number}
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         parts <- String.split(path, "/"),
+         [workspace, repo, "pull-requests", pr_id] <- parts do
+      {:ok, workspace, repo, pr_id}
     else
       _ -> {:error, "could not parse bitbucket url"}
     end
   end
 
-  defp get_pr_info(url) do
-    with {:ok, workspace, repo_slug, pr_id} <- parse_bitbucket_url(url),
-         pr_url = get_pr_url(workspace, repo_slug, pr_id),
-         {:ok, pr_response} <- HTTPoison.get(pr_url, [{"Content-Type", "application/json"}]),
+  defp extract_api_url(url) do
+    case is_binary(url) and String.trim(url) != "" do
+      true ->
+        url
+      false ->
+        @bitbucket_api_url
+    end
+  end
+
+  defp get_pr_info(conn, workspace, repo, pr_id) do
+    with {:ok, api_url, token} <- url_and_token(conn, @bitbucket_api_url),
+         api_url = extract_api_url(api_url),
+         pr_url = "#{api_url}/repositories/#{workspace}/#{repo}/pullrequests/#{pr_id}",
+         {:ok, pr_response} <- HTTPoison.get(pr_url, [{"Authorization", "Bearer #{token}"}, {"Content-Type", "application/json"}]),
          {:ok, pr_body} <- Jason.decode(pr_response.body) do
       {:ok, pr_body}
     else
@@ -153,17 +165,6 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
       {:ok, response} -> Jason.decode(response.body)
       {:error, error} -> IO.puts("Error fetching diffstat: #{inspect(error)}")
     end
-  end
-
-  defp parse_bitbucket_url(url) do
-    case Regex.run(~r{bitbucket\.org/([^/]+)/([^/]+)/pull-requests/(\d+)}, url) do
-      [_, workspace, repo_slug, pr_id] -> {:ok, workspace, repo_slug, pr_id}
-      _ -> {:error, "Invalid Bitbucket pull request URL"}
-    end
-  end
-
-  defp get_pr_url(workspace, repo_slug, pr_id) do
-    "#{@bitbucket_api_url}/repositories/#{workspace}/#{repo_slug}/pullrequests/#{pr_id}"
   end
 
   defp get_file_from_raw(url) do
