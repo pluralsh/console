@@ -10310,6 +10310,7 @@ export type AiChatStreamSubscriptionVariables = Exact<{
   threadId?: InputMaybe<Scalars['ID']['input']>;
   insightId?: InputMaybe<Scalars['ID']['input']>;
   scopeId?: InputMaybe<Scalars['String']['input']>;
+  recommendationId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -10480,6 +10481,7 @@ export type PrAutomationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   catalogId?: InputMaybe<Scalars['ID']['input']>;
+  role?: InputMaybe<PrRole>;
 }>;
 
 
@@ -11684,6 +11686,13 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
 
 
 export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null } | null } | null } | null> | null } | null } | null };
+
+export type SuggestScalingRecommendationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SuggestScalingRecommendationMutation = { __typename?: 'RootMutationType', suggestScalingRecommendation?: string | null };
 
 export type ApplyScalingRecommendationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17058,8 +17067,13 @@ export type ThreadPrMutationHookResult = ReturnType<typeof useThreadPrMutation>;
 export type ThreadPrMutationResult = Apollo.MutationResult<ThreadPrMutation>;
 export type ThreadPrMutationOptions = Apollo.BaseMutationOptions<ThreadPrMutation, ThreadPrMutationVariables>;
 export const AiChatStreamDocument = gql`
-    subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
-  aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
+    subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String, $recommendationId: ID) {
+  aiStream(
+    threadId: $threadId
+    insightId: $insightId
+    scopeId: $scopeId
+    recommendationId: $recommendationId
+  ) {
     seq
     message
     role
@@ -17083,6 +17097,7 @@ export const AiChatStreamDocument = gql`
  *      threadId: // value for 'threadId'
  *      insightId: // value for 'insightId'
  *      scopeId: // value for 'scopeId'
+ *      recommendationId: // value for 'recommendationId'
  *   },
  * });
  */
@@ -17704,8 +17719,8 @@ export type AuditMetricsLazyQueryHookResult = ReturnType<typeof useAuditMetricsL
 export type AuditMetricsSuspenseQueryHookResult = ReturnType<typeof useAuditMetricsSuspenseQuery>;
 export type AuditMetricsQueryResult = Apollo.QueryResult<AuditMetricsQuery, AuditMetricsQueryVariables>;
 export const PrAutomationsDocument = gql`
-    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID) {
-  prAutomations(first: $first, after: $after, catalogId: $catalogId) {
+    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID, $role: PrRole) {
+  prAutomations(first: $first, after: $after, catalogId: $catalogId, role: $role) {
     pageInfo {
       ...PageInfo
     }
@@ -17734,6 +17749,7 @@ ${PrAutomationFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      catalogId: // value for 'catalogId'
+ *      role: // value for 'role'
  *   },
  * });
  */
@@ -22931,6 +22947,37 @@ export type ClusterUsageScalingRecommendationsQueryHookResult = ReturnType<typeo
 export type ClusterUsageScalingRecommendationsLazyQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsLazyQuery>;
 export type ClusterUsageScalingRecommendationsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsSuspenseQuery>;
 export type ClusterUsageScalingRecommendationsQueryResult = Apollo.QueryResult<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>;
+export const SuggestScalingRecommendationDocument = gql`
+    mutation SuggestScalingRecommendation($id: ID!) {
+  suggestScalingRecommendation(id: $id)
+}
+    `;
+export type SuggestScalingRecommendationMutationFn = Apollo.MutationFunction<SuggestScalingRecommendationMutation, SuggestScalingRecommendationMutationVariables>;
+
+/**
+ * __useSuggestScalingRecommendationMutation__
+ *
+ * To run a mutation, you first call `useSuggestScalingRecommendationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSuggestScalingRecommendationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [suggestScalingRecommendationMutation, { data, loading, error }] = useSuggestScalingRecommendationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSuggestScalingRecommendationMutation(baseOptions?: Apollo.MutationHookOptions<SuggestScalingRecommendationMutation, SuggestScalingRecommendationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SuggestScalingRecommendationMutation, SuggestScalingRecommendationMutationVariables>(SuggestScalingRecommendationDocument, options);
+      }
+export type SuggestScalingRecommendationMutationHookResult = ReturnType<typeof useSuggestScalingRecommendationMutation>;
+export type SuggestScalingRecommendationMutationResult = Apollo.MutationResult<SuggestScalingRecommendationMutation>;
+export type SuggestScalingRecommendationMutationOptions = Apollo.BaseMutationOptions<SuggestScalingRecommendationMutation, SuggestScalingRecommendationMutationVariables>;
 export const ApplyScalingRecommendationDocument = gql`
     mutation ApplyScalingRecommendation($id: ID!) {
   applyScalingRecommendation(id: $id) {
@@ -28130,6 +28177,7 @@ export const namedOperations = {
     ProceedService: 'ProceedService',
     SelfManage: 'SelfManage',
     KickService: 'KickService',
+    SuggestScalingRecommendation: 'SuggestScalingRecommendation',
     ApplyScalingRecommendation: 'ApplyScalingRecommendation',
     CreateClusterRegistration: 'CreateClusterRegistration',
     UpdateClusterRegistration: 'UpdateClusterRegistration',

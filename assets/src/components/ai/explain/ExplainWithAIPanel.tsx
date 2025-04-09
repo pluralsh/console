@@ -10,7 +10,7 @@ import { useExplainWithAIContext } from '../AIContext.tsx'
 import { ChatWithAIButton } from '../chatbot/ChatbotButton.tsx'
 import { uniqueId } from 'lodash'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { Loading } from '../chatbot/AISuggestFix.tsx'
+import { AiStream } from '../chatbot/AISuggestFix.tsx'
 
 function explainMsg(msg: string): ChatMessage {
   return {
@@ -64,7 +64,7 @@ export default function ExplainWithAIPanel({
     >
       {data?.aiCompletion && <Markdown text={data.aiCompletion} />}
       {loading && (
-        <Loading
+        <AiStream
           setStreaming={setStreaming}
           scrollToBottom={scrollToBottom}
           scopeId={scopeId}

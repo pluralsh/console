@@ -43,23 +43,25 @@ function fixMessage(fix: string): ChatMessage {
   }
 }
 
-export function Loading({
+export function AiStream({
   insightId,
   scopeId,
+  recommendationId,
   scrollToBottom,
   setStreaming,
 }: {
   insightId?: string
   scopeId?: string
-  scrollToBottom: () => void
-  setStreaming: Dispatch<SetStateAction<boolean>>
+  recommendationId?: string
+  scrollToBottom?: () => void
+  setStreaming?: Dispatch<SetStateAction<boolean>>
 }) {
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
   useAiChatStreamSubscription({
-    variables: { insightId, scopeId },
+    variables: { insightId, scopeId, recommendationId },
     onData: ({ data: { data } }) => {
-      setStreaming(true)
-      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
+      setStreaming?.(true)
+      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom?.()
       setStreamedMessage((streamedMessage) => [
         ...streamedMessage,
         {
@@ -199,7 +201,7 @@ function AISuggestFix({ insight, buttonProps }: AISuggestFixProps) {
       >
         {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
         {loading && !data && (
-          <Loading
+          <AiStream
             insightId={insight.id}
             scrollToBottom={scrollToBottom}
             setStreaming={setStreaming}
