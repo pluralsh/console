@@ -212,14 +212,19 @@ fragment ClustersRow on Cluster {
   }
   distro
   upgradePlan {
-    compatibilities
-    deprecations
-    incompatibilities
+    ...ClusterUpgradePlan
   }
   virtual
   insight {
     ...AiInsightSummary
   }
+}
+
+fragment ClusterUpgradePlan on ClusterUpgradePlan {
+  compatibilities
+  deprecations
+  incompatibilities
+  kubeletSkew
 }
 
 fragment ClusterMetricsFragment on Cluster {
