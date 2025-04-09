@@ -23,6 +23,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   PrAutomationFragment,
+  PrRole,
   usePrAutomationsQuery,
   useSuggestScalingRecommendationMutation,
 } from 'generated/graphql'
@@ -90,10 +91,10 @@ export function SelectPrAutomationStep({
   selectFn: (prAutomation: PrAutomationFragment) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: usePrAutomationsQuery,
-      keyPath: ['prAutomations'],
-    })
+    useFetchPaginatedData(
+      { queryHook: usePrAutomationsQuery, keyPath: ['prAutomations'] },
+      { role: PrRole.Cost }
+    )
 
   const prAutomations = useMemo(
     () => mapExistingNodes(data?.prAutomations),
@@ -169,7 +170,11 @@ export function PreviewPrStep({ scalingRecId }: { scalingRecId: string }) {
   return (
     <Card
       ref={wrapperRef}
-      css={{ padding: spacing.medium, overflow: 'auto' }}
+      css={{
+        padding: spacing.medium,
+        overflow: 'auto',
+        '& code': { backgroundColor: 'transparent' },
+      }}
     >
       {previewLoading ? (
         <AiStream
