@@ -127,7 +127,7 @@ func (r *FlowReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.FlowList))).
-		For(&v1alpha1.Flow{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		For(&v1alpha1.Flow{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
 

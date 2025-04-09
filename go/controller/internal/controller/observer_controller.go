@@ -334,6 +334,6 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 func (r *ObserverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.Observer{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		For(&v1alpha1.Observer{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }

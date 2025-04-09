@@ -127,7 +127,7 @@ func (in *ObservabilityProviderReconciler) SetupWithManager(mgr ctrl.Manager) er
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                    // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.ObservabilityProviderList))). // Reconcile objects on credentials change.
-		For(&v1alpha1.ObservabilityProvider{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		For(&v1alpha1.ObservabilityProvider{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(in)
 }
 
