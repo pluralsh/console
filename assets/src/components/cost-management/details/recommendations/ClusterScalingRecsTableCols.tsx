@@ -1,23 +1,16 @@
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import {
-  ArrowTopRightIcon,
-  Button,
-  LinkoutIcon,
-  PrOpenIcon,
-  Toast,
-} from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button, PrOpenIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
 import { filesize } from 'filesize'
-import {
-  ClusterScalingRecommendationFragment,
-  useApplyScalingRecommendationMutation,
-} from 'generated/graphql'
+import { ClusterScalingRecommendationFragment } from 'generated/graphql'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { CreateRecommendationPrModal } from './CreateRecommendationPrModal'
 
 const columnHelper = createColumnHelper<ClusterScalingRecommendationFragment>()
 
@@ -119,50 +112,26 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
   header: '',
   meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
-    const rec = getValue()
-    const [mutation, { data, loading, error }] =
-      useApplyScalingRecommendationMutation({ variables: { id: rec.id } })
-
-    if (!rec.service) {
-      return null
-    }
+    const { id, service } = getValue()
+    const [isOpen, setIsOpen] = useState(false)
+    if (!service) return null
 
     return (
-      <Body2P css={{ whiteSpace: 'pre-wrap' }}>
-        {error && (
-          <Toast
-            severity="danger"
-            position="top-right"
-            margin="large"
-            heading="PR Creation Failed"
-          >
-            {error.message}
-          </Toast>
-        )}
-        {data?.applyScalingRecommendation?.id ? (
-          <Button
-            small
-            type="button"
-            endIcon={<LinkoutIcon />}
-            as="a"
-            href={data?.applyScalingRecommendation?.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View PR
-          </Button>
-        ) : (
-          <Button
-            small
-            floating
-            endIcon={<PrOpenIcon />}
-            onClick={mutation}
-            loading={loading}
-          >
-            Create PR
-          </Button>
-        )}
-      </Body2P>
+      <>
+        <Button
+          small
+          floating
+          startIcon={<PrOpenIcon />}
+          onClick={() => setIsOpen(true)}
+        >
+          Create PR
+        </Button>
+        <CreateRecommendationPrModal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          scalingRecId={id}
+        />
+      </>
     )
   },
 })

@@ -8,9 +8,12 @@ import {
   Stepper,
   StepperSteps,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { ComponentProps, useState } from 'react'
 
-import { PrAutomationFragment } from 'generated/graphql'
+import {
+  PrAutomationFragment,
+  useApplyScalingRecommendationMutation,
+} from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -22,6 +25,7 @@ import {
   CreateSuccessPrStep,
   ReviewPrStep,
 } from 'components/pr/automations/wizard/CreatePrSteps'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { isEmpty } from 'lodash'
 import {
   PreviewPrStep,
@@ -59,7 +63,7 @@ const aiGenSteps = [
   },
 ] as const satisfies StepperSteps
 
-export function CreateRecommendationPrModal({
+function CreateRecommendationPrModalBase({
   scalingRecId,
   open,
   onClose,
@@ -74,7 +78,10 @@ export function CreateRecommendationPrModal({
   const [currentStep, setCurrentStep] = useState<PrStepKey>('selectType')
 
   const steps = type === 'pra' ? praSteps : aiGenSteps
-  const stepIndex = steps.findIndex((s) => s.key === currentStep)
+  let stepIndex = -1
+  steps.forEach((step, i) =>
+    step.key === currentStep ? (stepIndex = i) : (step.collapseTitle = true)
+  )
   const nextStep = steps[stepIndex + 1]?.key
 
   const { configuration, confirmation } = selectedPrAutomation ?? {}
@@ -88,14 +95,27 @@ export function CreateRecommendationPrModal({
     reviewFormState,
     setReviewFormState,
     allowSubmit,
-    successPr,
-    createPr,
-    createPrLoading,
-    createPrError,
+    successPr: successPraPr,
+    createPr: createPraPr,
+    createPrLoading: createPraPrLoading,
+    createPrError: createPraPrError,
   } = usePrAutomationForm({
     prAutomation: selectedPrAutomation,
     onSuccess: () => setCurrentStep('success'),
   })
+
+  const [
+    createAiGenPr,
+    { data, loading: createAiPrLoading, error: createAiPrError },
+  ] = useApplyScalingRecommendationMutation({
+    variables: { id: scalingRecId },
+    onCompleted: () => setCurrentStep('success'),
+  })
+  const successAiPr = data?.applyScalingRecommendation
+
+  const successPr = successPraPr || successAiPr
+  const createPrLoading = createPraPrLoading || createAiPrLoading
+  const createPrError = createPraPrError || createAiPrError
 
   return (
     <Modal
@@ -103,22 +123,22 @@ export function CreateRecommendationPrModal({
       asForm
       onSubmit={(e) => {
         e.preventDefault()
-        if (!allowSubmit) return
         switch (currentStep) {
           case 'selectType':
             setCurrentStep(nextStep)
             return
-          case 'preview':
-            console.log('submit preview') // TODO: do what creating a pr currently does in the table
-            return
           case 'config':
             if (configIsValid) setCurrentStep('review')
             return
+          case 'preview':
+            createAiGenPr()
+            return
           case 'review':
-            createPr()
+            createPraPr()
         }
       }}
-      size="large"
+      size="auto"
+      css={{ maxWidth: 1024, minWidth: 608 }}
       open={open}
       onClose={onClose || undefined}
       header={
@@ -141,6 +161,7 @@ export function CreateRecommendationPrModal({
             onClose,
             hasConfiguration,
             configIsValid,
+            isScalingRec: true,
           }}
         />
       }
@@ -148,12 +169,17 @@ export function CreateRecommendationPrModal({
       <Flex
         direction="column"
         gap="large"
+        overflow="hidden"
+        maxHeight={400}
       >
-        {currentStep !== 'success' && hasConfiguration && (
+        {currentStep !== 'success' && (
           <Flex>
             <Stepper
               compact
-              steps={steps}
+              steps={steps.map((step) => ({
+                ...step,
+                collapseTitle: step.key !== currentStep,
+              }))}
               stepIndex={stepIndex}
             />
           </Flex>
@@ -164,7 +190,14 @@ export function CreateRecommendationPrModal({
             setType={setType}
           />
         )}
-        {currentStep === 'selectPrAutomation' && <SelectPrAutomationStep />}
+        {currentStep === 'selectPrAutomation' && (
+          <SelectPrAutomationStep
+            selectFn={(prAutomation) => {
+              setSelectedPrAutomation(prAutomation)
+              setCurrentStep('config')
+            }}
+          />
+        )}
         {currentStep === 'config' && (
           <ConfigPrStep
             configuration={configuration}
@@ -190,5 +223,15 @@ export function CreateRecommendationPrModal({
         {createPrError && <GqlError error={createPrError} />}
       </Flex>
     </Modal>
+  )
+}
+
+export function CreateRecommendationPrModal(
+  props: ComponentProps<typeof CreateRecommendationPrModalBase>
+) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <CreateRecommendationPrModalBase {...props} />
+    </ModalMountTransition>
   )
 }

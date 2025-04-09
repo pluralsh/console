@@ -27,6 +27,7 @@ export function ConfigPrStep({
     <Flex
       direction="column"
       gap="medium"
+      overflow="auto"
     >
       <Body1P>Provide some basic configuration for this PR:</Body1P>
       <PrConfigurationFields
@@ -69,6 +70,7 @@ export function ReviewPrStep({
     <Flex
       direction="column"
       gap="medium"
+      overflow="auto"
     >
       {confirmation?.text && (
         <Card

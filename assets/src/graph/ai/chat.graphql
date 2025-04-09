@@ -205,8 +205,18 @@ mutation ThreadPr($threadId: ID!) {
   }
 }
 
-subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
-  aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
+subscription AIChatStream(
+  $threadId: ID
+  $insightId: ID
+  $scopeId: String
+  $recommendationId: ID
+) {
+  aiStream(
+    threadId: $threadId
+    insightId: $insightId
+    scopeId: $scopeId
+    recommendationId: $recommendationId
+  ) {
     seq
     message
     role

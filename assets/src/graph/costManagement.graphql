@@ -194,6 +194,10 @@ query ClusterUsageScalingRecommendations(
   }
 }
 
+mutation SuggestScalingRecommendation($id: ID!) {
+  suggestScalingRecommendation(id: $id)
+}
+
 mutation ApplyScalingRecommendation($id: ID!) {
   applyScalingRecommendation(id: $id) {
     ...PullRequest

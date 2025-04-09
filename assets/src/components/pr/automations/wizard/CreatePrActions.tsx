@@ -34,6 +34,7 @@ function CreatePrActionsInner({
   onClose,
   hasConfiguration,
   configIsValid,
+  isScalingRec = false,
 }: {
   currentStep: PrStepKey
   setCurrentStep: (step: PrStepKey) => void
@@ -43,6 +44,7 @@ function CreatePrActionsInner({
   successPr: Nullable<PullRequestFragment>
   loading: boolean
   onClose: Nullable<() => void>
+  isScalingRec?: boolean
 }) {
   switch (currentStep) {
     case 'success':
@@ -116,13 +118,23 @@ function CreatePrActionsInner({
           >
             Cancel
           </Button>
-          <Button
-            loading={loading}
-            disabled={!configIsValid}
-            type="submit"
-          >
-            Next
-          </Button>
+          <Flex gap="small">
+            {isScalingRec && (
+              <Button
+                secondary
+                onClick={() => setCurrentStep('selectPrAutomation')}
+              >
+                Back
+              </Button>
+            )}
+            <Button
+              loading={loading}
+              disabled={!configIsValid}
+              type="submit"
+            >
+              Next
+            </Button>
+          </Flex>
         </>
       )
     case 'selectPrAutomation':
@@ -164,6 +176,7 @@ function CreatePrActionsInner({
             <Button
               type="submit"
               startIcon={<GitHubLogoIcon />}
+              loading={loading}
             >
               Create PR
             </Button>

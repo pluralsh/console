@@ -12,12 +12,10 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ClusterScalingRecommendationFragment,
-  ScalingRecommendationType,
-} from 'generated/graphql'
+import { ScalingRecommendationType } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { CMContextType } from '../CostManagementDetails'
 import {
   ColContainer,
   ColCpuChange,
@@ -26,12 +24,12 @@ import {
   ColScalingPr,
   ColService,
 } from './ClusterScalingRecsTableCols'
-import { CMContextType } from '../CostManagementDetails'
 
 import {
   COST_MANAGEMENT_ABS_PATH,
   COST_MANAGEMENT_REL_PATH,
 } from 'routes/costManagementRoutesConsts'
+import { mapExistingNodes } from 'utils/graphql'
 
 const getBreadcrumbs = (clusterName: string) => [
   { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
@@ -57,13 +55,8 @@ export function CostManagementDetailsRecommendations() {
     recommendationsQuery
 
   const recs = useMemo(
-    () =>
-      data?.clusterUsage?.recommendations?.edges
-        ?.map((edge) => edge?.node)
-        .filter(
-          (node): node is ClusterScalingRecommendationFragment => !!node
-        ) || [],
-    [data?.clusterUsage?.recommendations?.edges]
+    () => mapExistingNodes(data?.clusterUsage?.recommendations),
+    [data?.clusterUsage?.recommendations]
   )
 
   return (

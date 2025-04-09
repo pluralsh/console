@@ -1,11 +1,10 @@
-import { useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   Button,
-  LoopingLogo,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
@@ -21,10 +20,10 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 
-import { columns } from './PrAutomationsColumns'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
+import { columns } from './PrAutomationsColumns'
 
-const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
+export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 const crumbs = [
   ...PR_BASE_CRUMBS,
@@ -63,7 +62,7 @@ export default function AutomationPr() {
         <Button
           secondary
           as="a"
-          href={DOCS_URL}
+          href={PRA_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
           endIcon={<ArrowTopRightIcon />}
@@ -75,12 +74,7 @@ export default function AutomationPr() {
     )
   )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoopingLogo />
-  }
+  if (error) return <GqlError error={error} />
 
   return (
     <div
@@ -94,6 +88,7 @@ export default function AutomationPr() {
       <Table
         fullHeightWrap
         columns={columns}
+        loading={!data && loading}
         reactTableOptions={{ meta: { refetch } }}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={prAutomations}

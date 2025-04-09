@@ -7,7 +7,7 @@ import {
   PullRequestFragment,
   useCreatePullRequestMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 import { parseToBool } from 'utils/parseToBool'
 import { ReviewPrFormState } from './wizard/CreatePrSteps'
@@ -87,24 +87,20 @@ export function usePrAutomationForm({
   prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
 }) {
-  const { configuration, confirmation } = prAutomation ?? {}
-  const [curConfigVals, setCurConfigVals] = useState(
-    Object.fromEntries(
-      configuration?.map((cfg) => [cfg?.name, cfg?.default || '']) ?? []
-    )
+  const defaults = useMemo(() => getStateDefaults(prAutomation), [prAutomation])
+  const [curConfigVals, setCurConfigVals] = useState(defaults.curConfigVals)
+  const [reviewFormState, setReviewFormState] = useState<ReviewPrFormState>(
+    defaults.reviewFormState
   )
-  const { isValid: configIsValid, values: filteredConfig } =
-    validateAndFilterConfig(configuration ?? [], curConfigVals)
+  // reapply default states if the prAutomation changes
+  useEffect(() => {
+    setCurConfigVals(defaults.curConfigVals)
+    setReviewFormState(defaults.reviewFormState)
+  }, [defaults.curConfigVals, defaults.reviewFormState, prAutomation])
 
-  const [reviewFormState, setReviewFormState] = useState<ReviewPrFormState>({
-    branch: '',
-    identifier: prAutomation?.identifier ?? '',
-    checkedItems: Object.fromEntries(
-      confirmation?.checklist
-        ?.filter(isNonNullable)
-        .map((item) => [item.label, false]) ?? []
-    ),
-  })
+  const { isValid: configIsValid, values: filteredConfig } =
+    validateAndFilterConfig(prAutomation?.configuration ?? [], curConfigVals)
+
   const allChecked = Object.values(reviewFormState.checkedItems).every((v) => v)
   const allowSubmit = !!reviewFormState.branch && configIsValid && allChecked
 
@@ -141,5 +137,23 @@ export function usePrAutomationForm({
     },
     createPrLoading: loading,
     createPrError: error,
+  }
+}
+
+const getStateDefaults = (prAutomation: Nullable<PrAutomationFragment>) => {
+  const { configuration, confirmation } = prAutomation ?? {}
+  return {
+    curConfigVals: Object.fromEntries(
+      configuration?.map((cfg) => [cfg?.name, cfg?.default || '']) ?? []
+    ),
+    reviewFormState: {
+      branch: '',
+      identifier: prAutomation?.identifier ?? '',
+      checkedItems: Object.fromEntries(
+        confirmation?.checklist
+          ?.filter(isNonNullable)
+          .map((item) => [item.label, false]) ?? []
+      ),
+    },
   }
 }

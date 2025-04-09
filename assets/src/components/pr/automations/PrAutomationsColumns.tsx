@@ -1,6 +1,7 @@
 import { ComponentProps, ReactElement, useState } from 'react'
 import {
   AppIcon,
+  ArrowRightIcon,
   Button,
   ClusterIcon,
   DeploymentIcon,
@@ -41,9 +42,9 @@ enum MenuItemKey {
   CreatePr = 'create-pr',
 }
 
-export const columnHelper = createColumnHelper<PrAutomationFragment>()
+const columnHelper = createColumnHelper<PrAutomationFragment>()
 
-const ColName = columnHelper.accessor(() => null, {
+export const ColName = columnHelper.accessor(() => null, {
   id: 'name',
   header: 'Automation name',
   cell: function Cell({
@@ -69,7 +70,7 @@ const ColName = columnHelper.accessor(() => null, {
   },
 })
 
-const ColDocumentation = columnHelper.accessor(
+export const ColDocumentation = columnHelper.accessor(
   ({ documentation }) => documentation,
   {
     id: 'documentation',
@@ -78,7 +79,7 @@ const ColDocumentation = columnHelper.accessor(
   }
 )
 
-const ColRepo = columnHelper.accessor(({ identifier }) => identifier, {
+export const ColRepo = columnHelper.accessor(({ identifier }) => identifier, {
   id: 'repoUrl',
   header: 'Repo',
   meta: { truncate: true },
@@ -115,7 +116,7 @@ const roleToIcon = {
   '': <ClusterIcon />,
 } as const satisfies Record<PrRole | '', ReactElement<any>>
 
-export function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
+function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
   const icon = roleToIcon[role || ''] || roleToIcon['']
 
   return (
@@ -129,7 +130,7 @@ export function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
   )
 }
 
-const ColRole = columnHelper.accessor(({ cluster }) => cluster?.name, {
+export const ColRole = columnHelper.accessor(({ cluster }) => cluster?.name, {
   id: 'role',
   header: 'Role',
   cell: function Cell({ row }) {
@@ -158,7 +159,7 @@ const ColRole = columnHelper.accessor(({ cluster }) => cluster?.name, {
   },
 })
 
-export function DeletePrAutomationModal({
+function DeletePrAutomationModal({
   prAutomation,
   refetch,
   open,
@@ -201,7 +202,22 @@ export function DeletePrAutomationModal({
   )
 }
 
-export const ColActions = columnHelper.accessor((node) => node, {
+export const ColSelect = columnHelper.accessor((node) => node, {
+  id: 'select',
+  header: '',
+  cell: function Cell({ table, getValue }) {
+    return (
+      <Button
+        onClick={() => table.options.meta?.selectFn?.(getValue())}
+        endIcon={<ArrowRightIcon />}
+      >
+        Select
+      </Button>
+    )
+  },
+})
+
+const ColActions = columnHelper.accessor((node) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
@@ -271,7 +287,7 @@ export const ColActions = columnHelper.accessor((node) => node, {
   },
 })
 
-function AutomationPermissionsModal(
+export function AutomationPermissionsModal(
   props: ComponentProps<typeof PrAutomationPermissionsModal>
 ) {
   return (
