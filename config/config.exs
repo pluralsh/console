@@ -166,7 +166,7 @@ config :console, :ttls,
   helm: :timer.minutes(30),
   cluster_metrics: :timer.hours(6)
 
-config :core, Console.Services.OIDC.Hydra,
+config :console, Console.Services.OIDC.Hydra,
   hydra_admin: "http://plural-hydra-admin:4445/admin",
   hydra_public: "http://plural-hydra-public:4444"
 
