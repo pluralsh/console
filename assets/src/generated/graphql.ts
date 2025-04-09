@@ -2047,6 +2047,12 @@ export enum Conjunction {
   Or = 'OR'
 }
 
+export type ConsentRequest = {
+  __typename?: 'ConsentRequest';
+  requestedScope?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  skip?: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
   byok?: Maybe<Scalars['Boolean']['output']>;
@@ -3575,6 +3581,12 @@ export type LoginInfo = {
   oidcUri?: Maybe<Scalars['String']['output']>;
 };
 
+export type LoginRequest = {
+  __typename?: 'LoginRequest';
+  requestedScope?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  subject?: Maybe<Scalars['String']['output']>;
+};
+
 export type LogsEvidence = {
   __typename?: 'LogsEvidence';
   clusterId?: Maybe<Scalars['ID']['output']>;
@@ -4129,6 +4141,11 @@ export enum NotificationStatus {
   Resolved = 'RESOLVED'
 }
 
+export type OauthResponse = {
+  __typename?: 'OauthResponse';
+  redirectTo: Scalars['String']['output'];
+};
+
 export type ObjectReference = {
   __typename?: 'ObjectReference';
   name?: Maybe<Scalars['String']['output']>;
@@ -4491,6 +4508,8 @@ export type OidcProvider = {
 /** Configuration settings for creating a new OIDC provider client */
 export type OidcProviderAttributes = {
   authMethod?: InputMaybe<OidcAuthMethod>;
+  /** users and groups able to utilize this provider */
+  bindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   /** the redirect uris oidc is whitelisted to use */
@@ -4499,8 +4518,15 @@ export type OidcProviderAttributes = {
 
 /** Supported OIDC-compatible Auth Providers */
 export enum OidcProviderType {
+  Console = 'CONSOLE',
   Plural = 'PLURAL'
 }
+
+export type OidcStepResponse = {
+  __typename?: 'OidcStepResponse';
+  consent?: Maybe<ConsentRequest>;
+  login?: Maybe<LoginRequest>;
+};
 
 export type OllamaAttributes = {
   /** An http authorization header to use on calls to the Ollama api */
@@ -5847,6 +5873,7 @@ export type RollingUpdate = {
 
 export type RootMutationType = {
   __typename?: 'RootMutationType';
+  acceptLogin?: Maybe<OauthResponse>;
   /** it will add additional context to the given chat from a source object */
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
@@ -5983,6 +6010,7 @@ export type RootMutationType = {
   /** merges configuration for a service */
   mergeService?: Maybe<ServiceDeployment>;
   oauthCallback?: Maybe<User>;
+  oauthConsent?: Maybe<OauthResponse>;
   /** Creates a custom run, with the given command list, to execute w/in the stack's environment */
   onDemandRun?: Maybe<StackRun>;
   /** a regular status ping to be sent by the deploy operator */
@@ -6065,6 +6093,11 @@ export type RootMutationType = {
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
+};
+
+
+export type RootMutationTypeAcceptLoginArgs = {
+  challenge: Scalars['String']['input'];
 };
 
 
@@ -6681,6 +6714,12 @@ export type RootMutationTypeOauthCallbackArgs = {
 };
 
 
+export type RootMutationTypeOauthConsentArgs = {
+  challenge: Scalars['String']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
 export type RootMutationTypeOnDemandRunArgs = {
   commands?: InputMaybe<Array<InputMaybe<CommandAttributes>>>;
   context?: InputMaybe<Scalars['Json']['input']>;
@@ -7189,6 +7228,8 @@ export type RootQueryType = {
   observabilityWebhooks?: Maybe<ObservabilityWebhookConnection>;
   observer?: Maybe<Observer>;
   observers?: Maybe<ObserverConnection>;
+  oidcConsent?: Maybe<OidcStepResponse>;
+  oidcLogin?: Maybe<OidcStepResponse>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   persona?: Maybe<Persona>;
@@ -7888,6 +7929,16 @@ export type RootQueryTypeObserversArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeOidcConsentArgs = {
+  challenge: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeOidcLoginArgs = {
+  challenge: Scalars['String']['input'];
 };
 
 

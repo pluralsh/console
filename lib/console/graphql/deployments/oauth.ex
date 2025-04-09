@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.OAuth do
   @desc "Supported OIDC-compatible Auth Providers"
   enum :oidc_provider_type do
     value :plural
+    value :console
   end
 
   @desc "Supported methods for fetching an OIDC auth token"
@@ -18,6 +19,8 @@ defmodule Console.GraphQl.Deployments.OAuth do
     field :name,          non_null(:string)
     field :auth_method,   :oidc_auth_method
     field :description,   :string
+    field :bindings,      list_of(:policy_binding_attributes),
+      description: "users and groups able to utilize this provider"
     field :redirect_uris, list_of(:string), description: "the redirect uris oidc is whitelisted to use"
   end
 
