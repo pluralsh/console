@@ -142,7 +142,7 @@ func (r *PipelineContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                             // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.PipelineContextList))). // Reconcile objects on credentials change.
-		For(&deploymentsv1alpha1.PipelineContext{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		For(&deploymentsv1alpha1.PipelineContext{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
 
