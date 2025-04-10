@@ -32,7 +32,6 @@ import {
   useMatch,
   useNavigate,
   useOutletContext,
-  useParams,
 } from 'react-router-dom'
 import {
   CD_ABS_PATH,
@@ -40,13 +39,13 @@ import {
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_ALERTS_REL_PATH,
   CLUSTER_ALL_ADDONS_REL_PATH,
+  CLUSTER_DETAILS_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_METRICS_PATH,
-  CLUSTER_NODES_PATH,
+  CLUSTER_NETWORK_PATH,
   CLUSTER_PARAM_ID,
-  CLUSTER_PODS_PATH,
   CLUSTER_PRS_REL_PATH,
   CLUSTER_SERVICES_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
@@ -74,6 +73,7 @@ import { ClusterSettingsModal } from './ClusterSettings.tsx'
 import { InsightsTabLabel } from 'components/utils/AiInsights.tsx'
 import { DirLabelWithChip } from '../services/service/ServiceDetails.tsx'
 import { DirectoryEntry } from 'components/layout/SideNavEntries.tsx'
+import { CLUSTER_DETAILS_TABS } from './ClusterDetails.tsx'
 
 const getDirectory = ({
   cluster,
@@ -88,8 +88,8 @@ const getDirectory = ({
 }): DirectoryEntry[] => [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
   { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
-  { path: CLUSTER_NODES_PATH, label: 'Nodes' },
-  { path: CLUSTER_PODS_PATH, label: 'Pods' },
+  { path: CLUSTER_DETAILS_PATH, label: 'Details' },
+  { path: CLUSTER_NETWORK_PATH, label: 'Network' },
   {
     path: CLUSTER_INSIGHTS_PATH,
     label: <InsightsTabLabel insight={cluster?.insight} />,
@@ -133,11 +133,18 @@ const POLL_INTERVAL = 10 * 1000
 
 export const getClusterBreadcrumbs = ({
   cluster,
-  tab,
+  tab: tabParam,
+  detailsTab: detailsTabParam,
 }: {
   cluster?: Nullable<MakeOptional<ClusterMinimalFragment, 'name'>>
   tab?: string
+  detailsTab?: string
 }) => {
+  let [tab, detailsTab] = [tabParam, detailsTabParam]
+  if (CLUSTER_DETAILS_TABS.includes(tabParam ?? '')) {
+    tab = 'details'
+    detailsTab = tabParam
+  }
   const clustersPath = `${CD_ABS_PATH}/${CLUSTERS_REL_PATH}` as const
   const clusterPath = `${clustersPath}/${cluster?.id}` as const
   const tabPath = `${clusterPath}/${tab || ''}` as const
@@ -152,6 +159,9 @@ export const getClusterBreadcrumbs = ({
             url: clusterPath,
           },
           ...(tab ? [{ label: tab, url: tabPath }] : []),
+          ...(detailsTab
+            ? [{ label: detailsTab, url: `${tabPath}/${detailsTab}` }]
+            : []),
         ]
       : []),
   ]
@@ -161,8 +171,8 @@ export default function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
-  const { clusterId } = useParams<{ clusterId: string }>()
-  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
+  const { clusterId, tab, detailsTab } =
+    useMatch(`${CLUSTER_ABS_PATH}/:tab?/:detailsTab?/*`)?.params ?? {}
   const [refetchServices, setRefetchServices] = useState(() => () => {})
   const metricsEnabled = useMetricsEnabled()
   const logsEnabled = useLogsEnabled()
@@ -218,9 +228,10 @@ export default function Cluster() {
     () =>
       getClusterBreadcrumbs({
         cluster: cluster || { id: clusterId || '' },
-        tab: currentTab?.path,
+        tab,
+        detailsTab,
       }),
-    [cluster, clusterId, currentTab?.path]
+    [cluster, clusterId, detailsTab, tab]
   )
 
   useSetBreadcrumbs(crumbs)

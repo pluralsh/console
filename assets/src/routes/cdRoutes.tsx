@@ -110,12 +110,14 @@ import {
   CLUSTER_ALERTS_REL_PATH,
   CLUSTER_ALL_ADDONS_REL_PATH,
   CLUSTER_CLOUD_ADDONS_REL_PATH,
+  CLUSTER_DETAILS_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_INSIGHTS_SUMMARY_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_METRICS_PATH,
+  CLUSTER_NETWORK_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
   CLUSTER_PRS_REL_PATH,
@@ -146,6 +148,9 @@ import {
 import { pipelineRoutes } from './pipelineRoutes'
 import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
+import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
+import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
+import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -336,12 +341,34 @@ const clusterDetailsRoutes = [
       element={<ClusterMetrics />}
     />
     <Route
-      path={CLUSTER_NODES_PATH}
-      element={<ClusterNodes />}
-    />
+      path={CLUSTER_DETAILS_PATH}
+      element={<ClusterDetails />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={CLUSTER_METADATA_PATH}
+          />
+        }
+      />
+      <Route
+        path={CLUSTER_METADATA_PATH}
+        element={<ClusterMetadata />}
+      />
+      <Route
+        path={CLUSTER_NODES_PATH}
+        element={<ClusterNodes />}
+      />
+      <Route
+        path={CLUSTER_PODS_PATH}
+        element={<ClusterPods />}
+      />
+    </Route>
     <Route
-      path={CLUSTER_PODS_PATH}
-      element={<ClusterPods />}
+      path={CLUSTER_NETWORK_PATH}
+      element={<ClusterNetwork />}
     />
     <Route
       path={CLUSTER_INSIGHTS_PATH}
@@ -364,10 +391,6 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_ALERTS_REL_PATH}
       element={<ClusterAlerts />}
-    />
-    <Route
-      path={CLUSTER_METADATA_PATH}
-      element={<ClusterMetadata />}
     />
     <Route
       path={CLUSTER_VCLUSTERS_REL_PATH}
@@ -592,6 +615,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceMetrics />}
       path="metrics"
+    />
+    <Route
+      element={<ServiceNetwork />}
+      path="network"
     />
     <Route
       element={<ServiceInsights />}

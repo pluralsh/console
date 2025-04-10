@@ -8352,23 +8352,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xyflow/react@npm:12.4.4":
-  version: 12.4.4
-  resolution: "@xyflow/react@npm:12.4.4"
+"@xyflow/react@npm:12.5.5":
+  version: 12.5.5
+  resolution: "@xyflow/react@npm:12.5.5"
   dependencies:
-    "@xyflow/system": 0.0.52
+    "@xyflow/system": 0.0.55
     classcat: ^5.0.3
     zustand: ^4.4.0
   peerDependencies:
     react: ">=17"
     react-dom: ">=17"
-  checksum: ae92d9b6d16ea968aa82d6e9eafc65589d4f8a0e3566e0ff20f78cb1112a39765f8d6c0c539fa7cec14269b2cf6a114fef6bb44e2668d69ef86ab658d37af525
+  checksum: 2a391a87047de368f86e3b852d9000953eb6755f1056aded8a684501a54f62e8412b7401c7a550af269803d55c4879fb6603d05efa0f799771c794024150d26b
   languageName: node
   linkType: hard
 
-"@xyflow/system@npm:0.0.52":
-  version: 0.0.52
-  resolution: "@xyflow/system@npm:0.0.52"
+"@xyflow/system@npm:0.0.55":
+  version: 0.0.55
+  resolution: "@xyflow/system@npm:0.0.55"
   dependencies:
     "@types/d3-drag": ^3.0.7
     "@types/d3-selection": ^3.0.10
@@ -8377,7 +8377,7 @@ __metadata:
     d3-drag: ^3.0.0
     d3-selection: ^3.0.0
     d3-zoom: ^3.0.0
-  checksum: 35120ad39bcdcdb6133c43c2c543ce1868e86e6c2b5c58e8c4585ae77ae0019c3fb1ce02a086f895cd35359a665f36d533e1e5e4987b77b27cb05fdf6b800a3b
+  checksum: 94213976897e1b3319c3904704819f221c6bcfbe7ad2181f2c368939fb5e56ef93e1635a2e43417ad711f61ba550b83c90365975287f2dcd425e8171190c1908
   languageName: node
   linkType: hard
 
@@ -10144,7 +10144,7 @@ __metadata:
     "@vitejs/plugin-react": 4.3.4
     "@vitest/coverage-v8": 2.1.1
     "@vitest/ui": 2.1.1
-    "@xyflow/react": 12.4.4
+    "@xyflow/react": 12.5.5
     anser: 2.1.1
     apollo-absinthe-upload-link: 1.7.0
     apollo-boost: 0.4.9
