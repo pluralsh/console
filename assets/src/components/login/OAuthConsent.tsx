@@ -37,9 +37,8 @@ function Icon({
           height="48px"
         />
       }
-      width="64px"
-      height="64px"
       type="floating"
+      css={{ width: '64px', height: '64px' }}
     />
   ) : null
 }
