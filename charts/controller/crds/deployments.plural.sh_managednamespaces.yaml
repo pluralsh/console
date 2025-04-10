@@ -245,6 +245,11 @@ spec:
                         - folder
                         - ref
                         type: object
+                      ignoreCrds:
+                        description: whether you want to not include the crds in the
+                          /crds folder of the chart (useful if reinstantiating the
+                          same chart on the same cluster)
+                        type: boolean
                       ignoreHooks:
                         description: whether you want to completely ignore any helm
                           hooks when actualizing this service

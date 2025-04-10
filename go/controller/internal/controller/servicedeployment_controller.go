@@ -311,6 +311,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			Chart:       service.Spec.Helm.Chart,
 			URL:         service.Spec.Helm.URL,
 			IgnoreHooks: service.Spec.Helm.IgnoreHooks,
+			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
 		if service.Spec.Helm.Repository != nil {

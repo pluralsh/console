@@ -73,6 +73,10 @@ type ServiceHelm struct {
 	// whether you want to completely ignore any helm hooks when actualizing this service
 	// +kubebuilder:validation:Optional
 	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
+
+	// whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster)
+	// +kubebuilder:validation:Optional
+	IgnoreCrds *bool `json:"ignoreCrds,omitempty"`
 }
 
 type ServiceDependency struct {
