@@ -151,6 +151,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         release
         valuesFiles
         ignoreHooks
+        ignoreCrds
     }
     configuration {
         name

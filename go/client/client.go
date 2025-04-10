@@ -5253,6 +5253,7 @@ type ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -5272,6 +5273,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -6083,6 +6090,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -6102,6 +6110,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -10329,6 +10343,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -10348,6 +10363,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -10729,6 +10750,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -10748,6 +10770,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -20936,6 +20964,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		release
 		valuesFiles
 		ignoreHooks
+		ignoreCrds
 	}
 	configuration {
 		name
@@ -21370,6 +21399,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		release
 		valuesFiles
 		ignoreHooks
+		ignoreCrds
 	}
 	configuration {
 		name
