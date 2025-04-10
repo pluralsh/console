@@ -9,6 +9,7 @@ import { LinkLogin } from 'components/login/LinkLogin'
 import Login from 'components/login/Login'
 import { OAuthCallback } from 'components/login/OauthCallback'
 import { consoleRoutes } from './consoleRoutes'
+import { OAuthConsent } from '../components/login/OAuthConsent.tsx'
 
 const Sandbox =
   import.meta.env.MODE === 'development'
@@ -39,6 +40,10 @@ export const rootRoutes = [
       {
         path: 'oauth/callback',
         element: <OAuthCallback />,
+      },
+      {
+        path: 'oauth/consent',
+        element: <OAuthConsent />,
       },
       {
         path: 'invite/:inviteId',
