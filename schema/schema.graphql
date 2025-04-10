@@ -4156,6 +4156,8 @@ input HelmConfigAttributes {
 
   ignoreHooks: Boolean
 
+  ignoreCrds: Boolean
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -4483,6 +4485,8 @@ type HelmSpec {
   release: String
 
   ignoreHooks: Boolean
+
+  ignoreCrds: Boolean
 
   "spec of where to find the chart in git"
   git: GitRef

@@ -2539,6 +2539,7 @@ type HelmConfigAttributes struct {
 	Release     *string              `json:"release,omitempty"`
 	URL         *string              `json:"url,omitempty"`
 	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
+	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2599,6 +2600,7 @@ type HelmSpec struct {
 	Values      *string `json:"values,omitempty"`
 	Release     *string `json:"release,omitempty"`
 	IgnoreHooks *bool   `json:"ignoreHooks,omitempty"`
+	IgnoreCrds  *bool   `json:"ignoreCrds,omitempty"`
 	// spec of where to find the chart in git
 	Git *GitRef `json:"git,omitempty"`
 	// a git repository in Plural to use as a source
