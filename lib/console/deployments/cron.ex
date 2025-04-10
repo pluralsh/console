@@ -329,6 +329,16 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def add_ignore_crds(search) do
+    Service.search(search)
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn svc ->
+      Service.changeset(svc, %{helm: %{ignore_crds: true}})
+      |> Repo.update()
+    end)
+    |> Stream.run()
+  end
+
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
   defp log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
   defp log(_, _), do: :ok

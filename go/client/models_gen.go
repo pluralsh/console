@@ -3702,6 +3702,10 @@ type OidcProvider struct {
 	ClientID string `json:"clientId"`
 	// the generated client secret, used in configuring an OAuth client
 	ClientSecret string `json:"clientSecret"`
+	// bindings determining if a user can login with this oidc client
+	Bindings []*PolicyBinding `json:"bindings,omitempty"`
+	// bindings determining if a user can edit this oidc client
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 }
 
 // Configuration settings for creating a new OIDC provider client
@@ -3711,8 +3715,20 @@ type OidcProviderAttributes struct {
 	Description *string         `json:"description,omitempty"`
 	// users and groups able to utilize this provider
 	Bindings []*PolicyBindingAttributes `json:"bindings,omitempty"`
+	// users and groups able to utilize this provider
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OidcProviderConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*OidcProviderEdge `json:"edges,omitempty"`
+}
+
+type OidcProviderEdge struct {
+	Node   *OidcProvider `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 type OidcStepResponse struct {

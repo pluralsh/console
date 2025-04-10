@@ -4496,6 +4496,8 @@ export enum OidcAuthMethod {
 export type OidcProvider = {
   __typename?: 'OidcProvider';
   authMethod?: Maybe<OidcAuthMethod>;
+  /** bindings determining if a user can login with this oidc client */
+  bindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the generated client ID used in configuring OAuth clients */
   clientId: Scalars['String']['output'];
   /** the generated client secret, used in configuring an OAuth client */
@@ -4505,6 +4507,8 @@ export type OidcProvider = {
   name: Scalars['String']['output'];
   /** the redirect uris oidc is whitelisted to use */
   redirectUris?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** bindings determining if a user can edit this oidc client */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** Configuration settings for creating a new OIDC provider client */
@@ -4516,6 +4520,20 @@ export type OidcProviderAttributes = {
   name: Scalars['String']['input'];
   /** the redirect uris oidc is whitelisted to use */
   redirectUris?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** users and groups able to utilize this provider */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type OidcProviderConnection = {
+  __typename?: 'OidcProviderConnection';
+  edges?: Maybe<Array<Maybe<OidcProviderEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type OidcProviderEdge = {
+  __typename?: 'OidcProviderEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<OidcProvider>;
 };
 
 /** Supported OIDC-compatible Auth Providers */
@@ -7232,6 +7250,7 @@ export type RootQueryType = {
   observers?: Maybe<ObserverConnection>;
   oidcConsent?: Maybe<OidcStepResponse>;
   oidcLogin?: Maybe<OidcStepResponse>;
+  oidcProviders?: Maybe<OidcProviderConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   persona?: Maybe<Persona>;
@@ -7941,6 +7960,15 @@ export type RootQueryTypeOidcConsentArgs = {
 
 export type RootQueryTypeOidcLoginArgs = {
   challenge: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeOidcProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 

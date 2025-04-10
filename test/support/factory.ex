@@ -903,6 +903,7 @@ defmodule Console.Factory do
       client_secret: Ecto.UUID.generate(),
       redirect_uris: ["https://example.com"],
       bindings_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
     }
   end
 

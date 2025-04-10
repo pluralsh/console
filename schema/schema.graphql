@@ -401,6 +401,8 @@ type RootQueryType {
 
   mcpServer(id: ID!): McpServer
 
+  oidcProviders(after: String, first: Int, before: String, last: Int, q: String): OidcProviderConnection
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1226,6 +1228,9 @@ input OidcProviderAttributes {
   "users and groups able to utilize this provider"
   bindings: [PolicyBindingAttributes]
 
+  "users and groups able to utilize this provider"
+  writeBindings: [PolicyBindingAttributes]
+
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]
 }
@@ -1248,6 +1253,17 @@ type OidcProvider {
 
   "the generated client secret, used in configuring an OAuth client"
   clientSecret: String!
+
+  "bindings determining if a user can login with this oidc client"
+  bindings: [PolicyBinding]
+
+  "bindings determining if a user can edit this oidc client"
+  writeBindings: [PolicyBinding]
+}
+
+type OidcProviderConnection {
+  pageInfo: PageInfo!
+  edges: [OidcProviderEdge]
 }
 
 enum AiProvider {
@@ -9111,6 +9127,11 @@ type ObservabilityProviderEdge {
 
 type ProjectEdge {
   node: Project
+  cursor: String
+}
+
+type OidcProviderEdge {
+  node: OidcProvider
   cursor: String
 }
 

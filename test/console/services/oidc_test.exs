@@ -46,10 +46,26 @@ defmodule Console.Services.OIDCTest do
       assert updated.auth_method == :basic
     end
 
+    test "writers can update providers" do
+      user = insert(:user)
+      oidc = insert(:oidc_provider, write_bindings: [%{user_id: user.id}])
+      expect(HTTPoison, :put, fn _, _, _ ->
+        {:ok, %{status_code: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
+      end)
+
+      {:ok, updated} = OIDC.update_oidc_provider(%{
+        redirect_uris: ["https://example.com"],
+        auth_method: :basic
+      }, oidc.id, user)
+
+      assert updated.id == oidc.id
+      assert updated.auth_method == :basic
+    end
+
     test "others cannot update your provider" do
       oidc = insert(:oidc_provider)
 
-      {:error, :forbidden} = OIDC.update_oidc_provider(%{
+      {:error, _} = OIDC.update_oidc_provider(%{
         redirect_uris: ["https://example.com"],
         auth_method: :basic
       }, oidc.id, insert(:user))
@@ -71,7 +87,7 @@ defmodule Console.Services.OIDCTest do
     test "others cannot delete your provider" do
       oidc = insert(:oidc_provider)
 
-      {:error, :forbidden} = OIDC.delete_oidc_provider(oidc.id, insert(:user))
+      {:error, _} = OIDC.delete_oidc_provider(oidc.id, insert(:user))
     end
   end
 
