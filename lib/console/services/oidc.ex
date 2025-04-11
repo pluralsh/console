@@ -6,7 +6,7 @@ defmodule Console.Services.OIDC do
   use Console.Services.Base
   import Console.Policies.OIDC
   alias Console.Schema.{User, OIDCProvider}
-  alias Console.Services.OIDC.Hydra
+  alias Console.Hydra.Client, as: Hydra
   require Logger
 
   @type error :: {:error, term}
@@ -61,21 +61,23 @@ defmodule Console.Services.OIDC do
   @spec update_oidc_provider(map, binary, User.t) :: oidc_resp
   def update_oidc_provider(attrs, id, %User{} = user) do
     start_transaction()
-    |> add_operation(:oidc, fn _ ->
+    |> add_operation(:fetch, fn _ ->
       get_provider!(id)
-      |> Repo.preload([:bindings])
-      |> OIDCProvider.changeset(attrs)
-      |> allow(user, :edit)
-      |> when_ok(:update)
+      |> Repo.preload([:bindings, :write_bindings])
+      |> allow(user, :write)
+    end)
+    |> add_operation(:update, fn %{fetch: oidc} ->
+      OIDCProvider.changeset(oidc, attrs)
+      |> Repo.update()
     end)
     |> add_operation(:client, fn
-      %{oidc: %{client_id: id, auth_method: auth_method}} ->
+      %{update: %{client_id: id, auth_method: auth_method}} ->
         attrs = Map.take(attrs, [:redirect_uris])
                 |> Map.put(:scope, @oidc_scopes)
                 |> Map.put(:token_endpoint_auth_method, oidc_auth_method(auth_method))
         Hydra.update_client(id, attrs)
     end)
-    |> execute(extract: :oidc)
+    |> execute(extract: :update)
   end
 
   @doc """
@@ -86,7 +88,7 @@ defmodule Console.Services.OIDC do
     start_transaction()
     |> add_operation(:oidc, fn _ ->
       get_provider!(id)
-      |> allow(user, :edit)
+      |> allow(user, :write)
       |> when_ok(:delete)
     end)
     |> add_operation(:client, fn %{oidc: %{client_id: id}} ->

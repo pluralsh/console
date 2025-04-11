@@ -1,4 +1,4 @@
-defmodule Console.Services.OIDC.Hydra do
+defmodule Console.Hydra.Client do
   require Logger
   alias Console.Schema.{User}
 
