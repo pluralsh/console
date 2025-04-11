@@ -144,17 +144,6 @@ export function useCommands({
     () => [
       {
         commands: [
-          ...(!featureFlags.Flows
-            ? [
-                {
-                  label: 'Enable Flows',
-                  icon: FlowIcon,
-                  callback: () => setFeatureFlag('Flows', true),
-                  deps: [setFeatureFlag],
-                  hotkeys: ['shift F+L'],
-                },
-              ]
-            : []),
           ...(!featureFlags.Edge
             ? [
                 {
@@ -218,17 +207,14 @@ export function useCommands({
             deps: [navigate],
             hotkeys: ['shift A'],
           },
-          ...(featureFlags.Flows
-            ? [
-                {
-                  label: 'Flows',
-                  icon: FlowIcon,
-                  callback: () => navigate(FLOWS_ABS_PATH),
-                  deps: [navigate],
-                  hotkeys: ['shift F'],
-                },
-              ]
-            : []),
+
+          {
+            label: 'Flows',
+            icon: FlowIcon,
+            callback: () => navigate(FLOWS_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift F'],
+          },
           ...(featureFlags.Edge
             ? [
                 {
@@ -356,7 +342,6 @@ export function useCommands({
     ],
     [
       navigate,
-      featureFlags.Flows,
       featureFlags.Edge,
       cluster?.id,
       open,
