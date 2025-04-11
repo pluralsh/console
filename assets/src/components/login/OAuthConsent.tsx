@@ -1,8 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import queryString, { ParsedQuery } from 'query-string'
-import { Button, IconFrame } from '@pluralsh/design-system'
+import { Button, Flex, IconFrame } from '@pluralsh/design-system'
 import { useCallback } from 'react'
-import { A, Flex, Span } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
@@ -54,6 +53,7 @@ const getChallenge = (parsedQueryString: ParsedQuery): string => {
 }
 
 export function OAuthConsent() {
+  const theme = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const { data: userData, loading: userLoading } = useMeQuery()
@@ -106,20 +106,24 @@ export function OAuthConsent() {
           gap="xsmall"
           paddingTop="medium"
         >
-          <Span
-            title1
-            size="medium"
-            textAlign="center"
+          <span
+            css={{
+              ...theme.partials.text.title1,
+              color: theme.colors['text-light'],
+              textAlign: 'center',
+            }}
           >
             Access required
-          </Span>
-          <Span
-            body1
-            color="text-light"
-            textAlign="center"
+          </span>
+          <span
+            css={{
+              ...theme.partials.text.body1,
+              color: theme.colors['text-light'],
+              textAlign: 'center',
+            }}
           >
             Click &#34;Allow&#34; below to allow access to your profile.
-          </Span>
+          </span>
         </Flex>
         <Flex
           gap="small"
@@ -141,19 +145,21 @@ export function OAuthConsent() {
             Allow
           </Button>
 
-          <Span
-            caption
-            color="text-xlight"
-            textAlign="center"
+          <span
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+              textAlign: 'center',
+            }}
           >
             You are currently signed in as {userData?.me?.email}.&nbsp;
-            <A
-              inline
+            <a
+              css={{ ...theme.partials.text.inlineLink }}
               onClick={logout}
             >
               Wrong account?
-            </A>
-          </Span>
+            </a>
+          </span>
         </Flex>
       </Flex>
     </LoginPortal>
