@@ -12267,6 +12267,21 @@ export type ReadAppNotificationsMutationVariables = Exact<{ [key: string]: never
 
 export type ReadAppNotificationsMutation = { __typename?: 'RootMutationType', readAppNotifications?: number | null };
 
+export type OidcConsentQueryVariables = Exact<{
+  challenge: Scalars['String']['input'];
+}>;
+
+
+export type OidcConsentQuery = { __typename?: 'RootQueryType', oidcConsent?: { __typename?: 'OidcStepResponse', consent?: { __typename?: 'ConsentRequest', requestedScope?: Array<string | null> | null, skip?: boolean | null } | null } | null };
+
+export type ConsentMutationVariables = Exact<{
+  challenge: Scalars['String']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+}>;
+
+
+export type ConsentMutation = { __typename?: 'RootMutationType', oauthConsent?: { __typename?: 'OauthResponse', redirectTo: string } | null };
+
 export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null };
 
 export type PersonaFragment = { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null };
@@ -25309,6 +25324,83 @@ export function useReadAppNotificationsMutation(baseOptions?: Apollo.MutationHoo
 export type ReadAppNotificationsMutationHookResult = ReturnType<typeof useReadAppNotificationsMutation>;
 export type ReadAppNotificationsMutationResult = Apollo.MutationResult<ReadAppNotificationsMutation>;
 export type ReadAppNotificationsMutationOptions = Apollo.BaseMutationOptions<ReadAppNotificationsMutation, ReadAppNotificationsMutationVariables>;
+export const OidcConsentDocument = gql`
+    query OIDCConsent($challenge: String!) {
+  oidcConsent(challenge: $challenge) {
+    consent {
+      requestedScope
+      skip
+    }
+  }
+}
+    `;
+
+/**
+ * __useOidcConsentQuery__
+ *
+ * To run a query within a React component, call `useOidcConsentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useOidcConsentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useOidcConsentQuery({
+ *   variables: {
+ *      challenge: // value for 'challenge'
+ *   },
+ * });
+ */
+export function useOidcConsentQuery(baseOptions: Apollo.QueryHookOptions<OidcConsentQuery, OidcConsentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<OidcConsentQuery, OidcConsentQueryVariables>(OidcConsentDocument, options);
+      }
+export function useOidcConsentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<OidcConsentQuery, OidcConsentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<OidcConsentQuery, OidcConsentQueryVariables>(OidcConsentDocument, options);
+        }
+export function useOidcConsentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<OidcConsentQuery, OidcConsentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<OidcConsentQuery, OidcConsentQueryVariables>(OidcConsentDocument, options);
+        }
+export type OidcConsentQueryHookResult = ReturnType<typeof useOidcConsentQuery>;
+export type OidcConsentLazyQueryHookResult = ReturnType<typeof useOidcConsentLazyQuery>;
+export type OidcConsentSuspenseQueryHookResult = ReturnType<typeof useOidcConsentSuspenseQuery>;
+export type OidcConsentQueryResult = Apollo.QueryResult<OidcConsentQuery, OidcConsentQueryVariables>;
+export const ConsentDocument = gql`
+    mutation Consent($challenge: String!, $scopes: [String]) {
+  oauthConsent(challenge: $challenge, scopes: $scopes) {
+    redirectTo
+  }
+}
+    `;
+export type ConsentMutationFn = Apollo.MutationFunction<ConsentMutation, ConsentMutationVariables>;
+
+/**
+ * __useConsentMutation__
+ *
+ * To run a mutation, you first call `useConsentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConsentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [consentMutation, { data, loading, error }] = useConsentMutation({
+ *   variables: {
+ *      challenge: // value for 'challenge'
+ *      scopes: // value for 'scopes'
+ *   },
+ * });
+ */
+export function useConsentMutation(baseOptions?: Apollo.MutationHookOptions<ConsentMutation, ConsentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConsentMutation, ConsentMutationVariables>(ConsentDocument, options);
+      }
+export type ConsentMutationHookResult = ReturnType<typeof useConsentMutation>;
+export type ConsentMutationResult = Apollo.MutationResult<ConsentMutation>;
+export type ConsentMutationOptions = Apollo.BaseMutationOptions<ConsentMutation, ConsentMutationVariables>;
 export const PersonasDocument = gql`
     query Personas($cursor: String) {
   personas(first: 3, after: $cursor) {
@@ -28079,6 +28171,7 @@ export const namedOperations = {
     NotificationSinks: 'NotificationSinks',
     UnreadAppNotifications: 'UnreadAppNotifications',
     AppNotifications: 'AppNotifications',
+    OIDCConsent: 'OIDCConsent',
     Personas: 'Personas',
     PolicyConstraints: 'PolicyConstraints',
     PolicyConstraint: 'PolicyConstraint',
@@ -28208,6 +28301,7 @@ export const namedOperations = {
     UpsertNotificationSink: 'UpsertNotificationSink',
     DeleteNotificationSink: 'DeleteNotificationSink',
     ReadAppNotifications: 'ReadAppNotifications',
+    Consent: 'Consent',
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
