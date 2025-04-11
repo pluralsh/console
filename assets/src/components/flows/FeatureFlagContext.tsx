@@ -10,10 +10,8 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
-import { createContext, ReactNode, useCallback, useState } from 'react'
-import { FLOW_DOCS_URL } from './Flows'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
+import { createContext, ReactNode, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { EDGE_ABS_PATH } from 'routes/edgeRoutes'
 
@@ -21,12 +19,10 @@ const FEATURE_FLAG_STORAGE_KEY = 'feature-flags'
 const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
-  Flows: boolean
   Edge: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
-  Flows: false,
   Edge: false,
 }
 
@@ -75,7 +71,6 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
           }
         }}
       >
-        {curType === 'Flows' && <FlowsBodyContent />}
         {curType === 'Edge' && <EdgeBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
@@ -88,14 +83,6 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
       >
         <Flex gap="small">
           {`"${curType}" feature enabled`}
-          {curType === 'Flows' && (
-            <InlineLink
-              as={Link}
-              to={FLOWS_ABS_PATH}
-            >
-              Go to Flows
-            </InlineLink>
-          )}
           {curType === 'Edge' && (
             <InlineLink
               as={Link}
@@ -123,7 +110,7 @@ function FeatureFlagConfirmationModal({
   onConfirm: () => void
   children: ReactNode
 }) {
-  const docsUrl = type === 'Flows' ? FLOW_DOCS_URL : defaultDocsUrl
+  const docsUrl = defaultDocsUrl
   return (
     <Modal
       open={open}
@@ -158,20 +145,6 @@ function FeatureFlagConfirmationModal({
     >
       {children}
     </Modal>
-  )
-}
-
-function FlowsBodyContent() {
-  return (
-    <span>
-      <strong>Flows</strong> are an experimental feature that bundle together
-      services, pipelines, PR automations, and more into permissioned groupings
-      that help teams coordinate in a single workspace.
-      <br />
-      <br />
-      Flows also enable you to connect Plural AI functionality to MCP servers,
-      configurable in the AI tab after enabled.
-    </span>
   )
 }
 
