@@ -47,7 +47,7 @@ def scrape():
             return
 
         matrix = content.get("jobs", {}).get("test-e2e", {}).get("strategy", {}).get("matrix", {}).get("kubernetes", [])
-        kube_versions = [entry["version"] for entry in matrix]
+        kube_versions = [str(entry["version"]) for entry in matrix]
         rows.append(OrderedDict(
             [
                 ("version", tag.lstrip("v")),
@@ -58,9 +58,5 @@ def scrape():
         ))
         print_success(f"Fetched compatibility info for tag: {tag}")
 
-    print_success(rows)
-
-    update_compatibility_info(
-        f"../../static/compatibilities/{app_name}.yaml", rows
-    )
+    update_compatibility_info(f"../../static/compatibilities/{app_name}.yaml", rows)
     update_chart_versions(app_name)
