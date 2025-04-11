@@ -132,23 +132,19 @@ function getMenuItems({
       hotkeys: ['shift K'],
     },
     {
+      text: 'Flows',
+      expandedLabel: 'Flows',
+      icon: <FlowIcon />,
+      path: FLOWS_ABS_PATH,
+      hotkeys: ['shift F'],
+    },
+    {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
       path: AI_ABS_PATH,
       hotkeys: ['shift A'],
     },
-    ...(featureFlags.Flows
-      ? [
-          {
-            text: 'Flows',
-            expandedLabel: 'Flows',
-            icon: <FlowIcon />,
-            path: FLOWS_ABS_PATH,
-            hotkeys: ['shift F'],
-          },
-        ]
-      : []),
     ...(featureFlags.Edge
       ? [
           {
