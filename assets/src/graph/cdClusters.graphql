@@ -688,3 +688,38 @@ query ClusterNodeMetrics(
     ...ClusterNodeMetrics
   }
 }
+
+fragment NetworkMeshWorkload on NetworkMeshWorkload {
+  id
+  name
+  namespace
+  service
+}
+
+fragment NetworkMeshEdge on NetworkMeshEdge {
+  id
+  from {
+    ...NetworkMeshWorkload
+  }
+  to {
+    ...NetworkMeshWorkload
+  }
+  statistics {
+    bytesReceived
+    bytesSent
+    connections
+  }
+}
+
+query ClusterNetworkGraph(
+  $clusterId: ID!
+  $namespace: String
+  $time: DateTime
+) {
+  cluster(id: $clusterId) {
+    id
+    networkGraph(namespace: $namespace, time: $time) {
+      ...NetworkMeshEdge
+    }
+  }
+}
