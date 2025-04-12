@@ -5436,6 +5436,7 @@ type ServiceUpdateAttributes struct {
 	Configuration   []*ConfigAttributes            `json:"configuration,omitempty"`
 	Kustomize       *KustomizeAttributes           `json:"kustomize,omitempty"`
 	ParentID        *string                        `json:"parentId,omitempty"`
+	FlowID          *string                        `json:"flowId,omitempty"`
 	Dependencies    []*ServiceDependencyAttributes `json:"dependencies,omitempty"`
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`

@@ -4221,6 +4221,8 @@ input ServiceUpdateAttributes {
 
   parentId: ID
 
+  flowId: ID
+
   dependencies: [ServiceDependencyAttributes]
 
   readBindings: [PolicyBindingAttributes]

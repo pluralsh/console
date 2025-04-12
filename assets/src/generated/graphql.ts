@@ -9034,6 +9034,7 @@ export type ServiceUpdateAttributes = {
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
   imports?: InputMaybe<Array<InputMaybe<ServiceImportAttributes>>>;
