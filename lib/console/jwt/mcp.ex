@@ -27,6 +27,8 @@ defmodule Console.Jwt.MCP do
     generate_and_sign(%{
       "sub" => user.email,
       "kid" => jws["kid"],
+      "email" => user.email,
+      "name" => user.name,
       "admin" => !!Map.get(roles || %{}, :admin),
       "groups" => Enum.map(groups, & &1.name)
     }, signer(jws))

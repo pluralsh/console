@@ -278,6 +278,12 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.resolve_pin/2
     end
+
+    field :mcp_token, :string do
+      middleware Authenticated
+
+      resolve &AI.mcp_token/2
+    end
   end
 
   object :ai_mutations do

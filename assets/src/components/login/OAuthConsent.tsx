@@ -122,7 +122,8 @@ export function OAuthConsent() {
               textAlign: 'center',
             }}
           >
-            Click &#34;Allow&#34; below to allow access to your profile.
+            Allow access to your Plural profile information, no other data will
+            be shared.
           </span>
         </Flex>
         <Flex
@@ -142,7 +143,7 @@ export function OAuthConsent() {
             loading={loading}
             onClick={() => mutation()}
           >
-            Allow
+            Login with Plural
           </Button>
 
           <span

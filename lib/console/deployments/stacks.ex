@@ -172,6 +172,31 @@ defmodule Console.Deployments.Stacks do
     |> notify(:delete, user)
   end
 
+  @doc """
+  Reverts the deleted_at state of a stack
+  """
+  @spec restore_stack(binary, User.t) :: stack_resp
+  def restore_stack(id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:fetch, fn _ ->
+      get_stack!(id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:run, fn
+      %{fetch: %Stack{delete_run_id: id}} when is_binary(id) ->
+        get_run!(id)
+        |> StackRun.changeset(%{status: :cancelled})
+        |> Repo.update()
+      _ -> {:ok, nil}
+    end)
+    |> add_operation(:update, fn %{fetch: %Stack{} = stack} ->
+      stack
+      |> Stack.delete_changeset(%{deleted_at: nil, delete_run_id: nil})
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> execute(extract: :update)
+  end
 
   @doc """
   creates a new stack definition

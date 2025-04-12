@@ -12,3 +12,9 @@ mutation Consent($challenge: String!, $scopes: [String]) {
     redirectTo
   }
 }
+
+mutation AcceptLogin($challenge: String!) {
+  acceptLogin(challenge: $challenge) {
+    redirectTo
+  }
+}

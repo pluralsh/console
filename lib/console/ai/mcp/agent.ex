@@ -70,6 +70,7 @@ defmodule Console.AI.MCP.Agent do
   end
 
   def handle_info(:init, %State{thread: thread} = state) do
+    Logger.info "starting mcp agent for thread: #{thread.id}"
     state = Enum.reduce(servers(thread), state, fn server, %State{tools: tools} = state ->
       case Console.Retrier.retry(fn -> Hermes.Client.list_tools(name(:client, thread, server)) end) do
         {:ok, %Hermes.MCP.Response{result: %{"tools" => found}}} ->

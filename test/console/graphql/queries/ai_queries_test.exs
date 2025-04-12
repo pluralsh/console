@@ -294,4 +294,23 @@ defmodule Console.GraphQl.AiQueriesTest do
       assert found["id"] == pin.id
     end
   end
+
+  describe "mcpToken" do
+    test "it can generate a jwt that is equivalent to those used by mcp auth" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, user: user, group: group)
+
+      {:ok, %{data: %{"mcpToken" => token}}} = run_query("""
+        query { mcpToken }
+      """, %{}, %{current_user: user})
+
+      {:ok, claims} = Console.Jwt.MCP.exchange(token)
+
+      assert claims["sub"] == user.email
+      assert claims["email"] == user.email
+      assert claims["name"] == user.name
+      assert claims["groups"] == [group.name]
+    end
+  end
 end

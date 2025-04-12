@@ -28,6 +28,18 @@ defmodule Console.AI.CronTest do
     end
   end
 
+  describe "#trim_mcp_logs/0" do
+    test "it will trim mcp logs" do
+      old = insert_list(3, :mcp_server_audit, inserted_at: Timex.now() |> Timex.shift(months: -2))
+      recent = insert_list(3, :mcp_server_audit)
+
+      Cron.trim_mcp_logs()
+
+      for o <- old, do: refute refetch(o)
+      for r <- recent, do: assert refetch(r)
+    end
+  end
+
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})

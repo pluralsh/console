@@ -10,7 +10,8 @@ defmodule Console.AI.Cron do
     Service,
     Cluster,
     DeploymentSettings,
-    ChatThread
+    ChatThread,
+    McpServerAudit
   }
 
   require Logger
@@ -24,6 +25,11 @@ defmodule Console.AI.Cron do
 
   def trim_threads() do
     ChatThread.prunable()
+    |> Repo.delete_all()
+  end
+
+  def trim_mcp_logs() do
+    McpServerAudit.expired()
     |> Repo.delete_all()
   end
 

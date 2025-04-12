@@ -8,7 +8,7 @@ import { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { setRefreshToken, setToken } from '../../helpers/auth'
+import { getChallenge, setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 
 import { LoginPortal } from './LoginPortal'
@@ -16,6 +16,8 @@ import {
   OauthCallbackMutationVariables,
   useOauthCallbackMutation,
 } from 'generated/graphql'
+import { handleOauthChallenge } from './Login'
+import { useApolloClient } from '@apollo/client'
 
 function OAuthError({ error: { error, error_description: description } }: any) {
   return (
@@ -35,7 +37,9 @@ export function OAuthCallback() {
   const location = useLocation()
   const navigate = useNavigate()
   const theme = useTheme()
+  const client = useApolloClient()
   const { code, state, ...oauthError } = qs.parse(location.search)
+
   const prevCode = useRef<any>(undefined)
   const [mutation, { error, loading }] = useOauthCallbackMutation({
     variables: {
@@ -45,9 +49,15 @@ export function OAuthCallback() {
     } as OauthCallbackMutationVariables,
     onCompleted: (result) => {
       const { jwt, refreshToken } = result?.oauthCallback || {}
-
       setToken(jwt)
       setRefreshToken(refreshToken?.token)
+
+      const challenge = getChallenge()
+      if (challenge) {
+        handleOauthChallenge(client, challenge)
+        return
+      }
+
       navigate('/')
     },
   })

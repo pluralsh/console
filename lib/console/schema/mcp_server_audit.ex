@@ -5,6 +5,8 @@ defmodule Console.Schema.McpServerAudit do
     User
   }
 
+  @expiry [months: -1]
+
   schema "mcp_server_audits" do
     field :tool,      :string
     field :arguments, :map
@@ -13,6 +15,11 @@ defmodule Console.Schema.McpServerAudit do
     belongs_to :actor,  User
 
     timestamps()
+  end
+
+  def expired(query \\ __MODULE__) do
+    expiry = Timex.now() |> Timex.shift(@expiry)
+    from(m in query, where: m.inserted_at < ^expiry)
   end
 
   def for_server(query \\ __MODULE__, server_id) do

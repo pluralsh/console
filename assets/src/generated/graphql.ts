@@ -6044,6 +6044,8 @@ export type RootMutationType = {
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   resetObserver?: Maybe<Observer>;
   restartStackRun?: Maybe<StackRun>;
+  /** un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure */
+  restoreStack?: Maybe<InfrastructureStack>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
   /** saves a list of chat messages to your current chat history, can be used at any time */
@@ -6785,6 +6787,11 @@ export type RootMutationTypeRestartStackRunArgs = {
 };
 
 
+export type RootMutationTypeRestoreStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeRollbackServiceArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -7228,6 +7235,7 @@ export type RootQueryType = {
   managedNamespaces?: Maybe<ManagedNamespaceConnection>;
   mcpServer?: Maybe<McpServer>;
   mcpServers?: Maybe<McpServerConnection>;
+  mcpToken?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
   /** tells you what cluster a deploy token points to */
@@ -12309,6 +12317,13 @@ export type ConsentMutationVariables = Exact<{
 
 
 export type ConsentMutation = { __typename?: 'RootMutationType', oauthConsent?: { __typename?: 'OauthResponse', redirectTo: string } | null };
+
+export type AcceptLoginMutationVariables = Exact<{
+  challenge: Scalars['String']['input'];
+}>;
+
+
+export type AcceptLoginMutation = { __typename?: 'RootMutationType', acceptLogin?: { __typename?: 'OauthResponse', redirectTo: string } | null };
 
 export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null };
 
@@ -25429,6 +25444,39 @@ export function useConsentMutation(baseOptions?: Apollo.MutationHookOptions<Cons
 export type ConsentMutationHookResult = ReturnType<typeof useConsentMutation>;
 export type ConsentMutationResult = Apollo.MutationResult<ConsentMutation>;
 export type ConsentMutationOptions = Apollo.BaseMutationOptions<ConsentMutation, ConsentMutationVariables>;
+export const AcceptLoginDocument = gql`
+    mutation AcceptLogin($challenge: String!) {
+  acceptLogin(challenge: $challenge) {
+    redirectTo
+  }
+}
+    `;
+export type AcceptLoginMutationFn = Apollo.MutationFunction<AcceptLoginMutation, AcceptLoginMutationVariables>;
+
+/**
+ * __useAcceptLoginMutation__
+ *
+ * To run a mutation, you first call `useAcceptLoginMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAcceptLoginMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [acceptLoginMutation, { data, loading, error }] = useAcceptLoginMutation({
+ *   variables: {
+ *      challenge: // value for 'challenge'
+ *   },
+ * });
+ */
+export function useAcceptLoginMutation(baseOptions?: Apollo.MutationHookOptions<AcceptLoginMutation, AcceptLoginMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AcceptLoginMutation, AcceptLoginMutationVariables>(AcceptLoginDocument, options);
+      }
+export type AcceptLoginMutationHookResult = ReturnType<typeof useAcceptLoginMutation>;
+export type AcceptLoginMutationResult = Apollo.MutationResult<AcceptLoginMutation>;
+export type AcceptLoginMutationOptions = Apollo.BaseMutationOptions<AcceptLoginMutation, AcceptLoginMutationVariables>;
 export const PersonasDocument = gql`
     query Personas($cursor: String) {
   personas(first: 3, after: $cursor) {
@@ -28330,6 +28378,7 @@ export const namedOperations = {
     DeleteNotificationSink: 'DeleteNotificationSink',
     ReadAppNotifications: 'ReadAppNotifications',
     Consent: 'Consent',
+    AcceptLogin: 'AcceptLogin',
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
