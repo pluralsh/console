@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
-
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"strings"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -13,14 +12,17 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/yaml"
 
 	console "github.com/pluralsh/console/go/client"
@@ -34,8 +36,9 @@ import (
 )
 
 const (
-	ServiceFinalizer    = "deployments.plural.sh/service-protection"
-	InventoryAnnotation = "config.k8s.io/owning-inventory"
+	ServiceFinalizer       = "deployments.plural.sh/service-protection"
+	InventoryAnnotation    = "config.k8s.io/owning-inventory"
+	ServiceOwnerAnnotation = "deployments.plural.sh/service-owner"
 )
 
 // ServiceReconciler reconciles a Service object
@@ -465,7 +468,16 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 			if err != nil {
 				return err
 			}
-			err = utils.TryAddOwnerRef(ctx, r.Client, service, stack, r.Scheme)
+			if stack.Annotations == nil {
+				stack.Annotations = map[string]string{}
+			}
+
+			serviceNameNamespace := fmt.Sprintf("%s/%s", service.GetNamespace(), service.GetName())
+			if stack.Annotations[ServiceOwnerAnnotation] == serviceNameNamespace {
+				continue
+			}
+			stack.Annotations[ServiceOwnerAnnotation] = serviceNameNamespace
+			err = utils.TryToUpdate(ctx, r.Client, stack)
 			if err != nil {
 				return err
 			}
@@ -574,11 +586,36 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
+		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Owns(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, stack client.Object) []reconcile.Request {
+		requests := make([]reconcile.Request, 0)
+		if stack.GetAnnotations() == nil {
+			return requests
+		}
+		service, ok := stack.GetAnnotations()[ServiceOwnerAnnotation]
+		if !ok {
+			return requests
+		}
+		s := strings.Split(service, "/")
+		if len(s) != 2 {
+			return requests
+		}
+		namespace := s[0]
+		name := s[1]
+
+		if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
+		}
+
+		return requests
+	})
 }
