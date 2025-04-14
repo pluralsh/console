@@ -1,7 +1,7 @@
 defmodule Console.Schema.ObservabilityWebhook do
   use Piazza.Ecto.Schema
 
-  defenum Type, grafana: 0
+  defenum Type, grafana: 0, datadog: 1, pagerduty: 2, newrelic: 3
 
   schema "observability_webhooks" do
     field :type,        Type
