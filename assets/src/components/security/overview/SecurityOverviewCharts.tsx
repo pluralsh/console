@@ -264,7 +264,6 @@ const ChartWrapperSC = styled.div(({ theme }) => ({
 }))
 
 const TreeMapWrapperCardSC = styled(Card)(({ theme }) => ({
-  minWidth: 'fit-content',
   height: HEATMAP_SIZE,
   padding: theme.spacing.large,
 }))

@@ -9,8 +9,6 @@ import {
   ClusterUsageTinyFragment,
 } from 'generated/graphql'
 
-const MIN_COST_PERCENTAGE = 0.02
-
 export function CostManagementTreeMap({
   data,
   type,
@@ -32,9 +30,6 @@ export function CostManagementTreeMap({
 }
 
 export function cpuCostByCluster(usages: ClusterUsageTinyFragment[]) {
-  const avg =
-    usages.reduce((acc, usage) => acc + (usage.nodeCost ?? 0), 0) /
-    usages.length
   const projectMap: Record<string, TreeMapData> = {}
 
   for (const usage of usages) {
@@ -44,11 +39,10 @@ export function cpuCostByCluster(usages: ClusterUsageTinyFragment[]) {
     if (!projectMap[project])
       projectMap[project] = { name: project, children: [] }
 
-    if (usage.cpuCost / avg > MIN_COST_PERCENTAGE)
-      projectMap[project].children?.push({
-        name: usage.cluster?.name ?? usage.id,
-        amount: usage.cpuCost,
-      })
+    projectMap[project].children?.push({
+      name: usage.cluster?.name ?? usage.id,
+      amount: usage.cpuCost,
+    })
   }
 
   return {
@@ -59,10 +53,6 @@ export function cpuCostByCluster(usages: ClusterUsageTinyFragment[]) {
 
 export function memoryCostByCluster(usages: ClusterUsageTinyFragment[]) {
   const projectMap: Record<string, TreeMapData> = {}
-  const avg =
-    usages.reduce((acc, usage) => acc + (usage.memoryCost ?? 0), 0) /
-    usages.length
-
   for (const usage of usages) {
     if (!usage.memoryCost || !usage.cluster?.project) continue
 
@@ -70,11 +60,10 @@ export function memoryCostByCluster(usages: ClusterUsageTinyFragment[]) {
     if (!projectMap[project])
       projectMap[project] = { name: project, children: [] }
 
-    if (usage.memoryCost / avg > MIN_COST_PERCENTAGE)
-      projectMap[project].children?.push({
-        name: usage.cluster?.name ?? usage.id,
-        amount: usage.memoryCost,
-      })
+    projectMap[project].children?.push({
+      name: usage.cluster?.name ?? usage.id,
+      amount: usage.memoryCost,
+    })
   }
 
   return {
@@ -84,35 +73,21 @@ export function memoryCostByCluster(usages: ClusterUsageTinyFragment[]) {
 }
 
 export function cpuCostByNamespace(usages: ClusterNamespaceUsageFragment[]) {
-  const avg =
-    usages.reduce((acc, usage) => acc + (usage.cpuCost ?? 0), 0) / usages.length
   return {
     name: PARENT_NODE_NAME,
-    children: usages
-      .filter(
-        (usage) => !!usage.cpuCost && usage.cpuCost / avg > MIN_COST_PERCENTAGE
-      )
-      .map((usage) => ({
-        name: usage.namespace ?? usage.id,
-        amount: usage.cpuCost,
-      })),
+    children: usages.map((usage) => ({
+      name: usage.namespace ?? usage.id,
+      amount: usage.cpuCost,
+    })),
   }
 }
 
 export function memoryCostByNamespace(usages: ClusterNamespaceUsageFragment[]) {
-  const avg =
-    usages.reduce((acc, usage) => acc + (usage.memoryCost ?? 0), 0) /
-    usages.length
   return {
     name: PARENT_NODE_NAME,
-    children: usages
-      .filter(
-        (usage) =>
-          !!usage.memoryCost && usage.memoryCost / avg > MIN_COST_PERCENTAGE
-      )
-      .map((usage) => ({
-        name: usage.namespace ?? usage.id,
-        amount: usage.memoryCost,
-      })),
+    children: usages.map((usage) => ({
+      name: usage.namespace ?? usage.id,
+      amount: usage.memoryCost,
+    })),
   }
 }

@@ -34,11 +34,9 @@ export type TreeMapProps = {
 const commonTreeMapProps = {
   identity: 'name',
   value: 'amount',
-  innerPadding: 4,
-  outerPadding: 8,
   label: (e) => e.id,
   labelSkipSize: 16,
-  borderWidth: 0,
+  borderWidth: 1,
   nodeOpacity: 0.9,
 }
 
