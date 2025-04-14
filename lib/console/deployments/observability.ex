@@ -172,19 +172,22 @@ defmodule Console.Deployments.Observability do
   @doc """
   Gathers a heat map of pod utilization for the given cluster or service
   """
-  @spec heat_map(Cluster.t | Service.t) :: {:ok, map} | error
-  def heat_map(%Cluster{handle: cluster}) do
-    queries(:heat)
+  @spec heat_map(Cluster.t | Service.t, :pod | :namespace) :: {:ok, map} | error
+  def heat_map(resource, flavor \\ :pod)
+  def heat_map(%Cluster{handle: cluster}, flavor) do
+    queries(:heat, flavor)
     |> bulk_query(%{cluster: cluster, filter: ""})
   end
 
-  def heat_map(%Service{namespace: ns} = service) do
+  def heat_map(%Service{namespace: ns} = service, :pod) do
     %Service{cluster: %Cluster{handle: cluster}} =
       Repo.preload(service, [:cluster])
 
-    queries(:heat)
+    queries(:heat, :pod)
     |> bulk_query(%{cluster: cluster, filter: ",namespace=\"#{ns}\""})
   end
+
+  def heat_map(_, flavor), do: {:error, "cannot aggregate utilization by #{flavor} for that resource"}
 
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes

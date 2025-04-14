@@ -19,6 +19,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :stack
   end
 
+  enum :heat_map_flavor do
+    value :pod
+    value :namespace
+  end
+
   input_object :cluster_attributes do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
@@ -530,6 +535,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
     field :heat_map, :utilization_heat_map do
+      arg :flavor, :heat_map_flavor, default_value: :pod
       resolve &Deployments.heat_map/3
     end
 

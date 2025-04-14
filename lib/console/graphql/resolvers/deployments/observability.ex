@@ -54,8 +54,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def create_alert_resolution(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.set_resolution(attrs, id, user)
 
-  def heat_map(%Cluster{} = cluster, _, _), do: Observability.heat_map(cluster)
-  def heat_map(%Service{} = service, _, _), do: Observability.heat_map(service)
+  def heat_map(%Cluster{} = cluster, args, _), do: Observability.heat_map(cluster, args[:flavor])
+  def heat_map(%Service{} = service, _, _), do: Observability.heat_map(service, :pod)
 
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)

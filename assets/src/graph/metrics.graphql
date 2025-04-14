@@ -1,0 +1,16 @@
+fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
+fragment UtilizationHeatMap on UtilizationHeatMap {
+  cpu {
+    ...MetricResponse
+  }
+  memory {
+    ...MetricResponse
+  }
+}

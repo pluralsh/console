@@ -4761,6 +4761,11 @@ enum TagType {
   STACK
 }
 
+enum HeatMapFlavor {
+  POD
+  NAMESPACE
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -5458,7 +5463,7 @@ type Cluster {
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
-  heatMap: UtilizationHeatMap
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]

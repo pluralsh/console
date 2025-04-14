@@ -7392,6 +7392,47 @@ func (e GitHealth) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type HeatMapFlavor string
+
+const (
+	HeatMapFlavorPod       HeatMapFlavor = "POD"
+	HeatMapFlavorNamespace HeatMapFlavor = "NAMESPACE"
+)
+
+var AllHeatMapFlavor = []HeatMapFlavor{
+	HeatMapFlavorPod,
+	HeatMapFlavorNamespace,
+}
+
+func (e HeatMapFlavor) IsValid() bool {
+	switch e {
+	case HeatMapFlavorPod, HeatMapFlavorNamespace:
+		return true
+	}
+	return false
+}
+
+func (e HeatMapFlavor) String() string {
+	return string(e)
+}
+
+func (e *HeatMapFlavor) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HeatMapFlavor(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HeatMapFlavor", str)
+	}
+	return nil
+}
+
+func (e HeatMapFlavor) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type HelmAuthProvider string
 
 const (
