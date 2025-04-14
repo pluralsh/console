@@ -125,6 +125,10 @@ jobs:
   publish-image:
     name: Publish image
     needs: [ build-image ]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
     strategy:
       fail-fast: false
       matrix:
