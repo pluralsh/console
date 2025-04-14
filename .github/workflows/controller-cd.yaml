@@ -66,11 +66,11 @@ jobs:
         run: |
           platform=${{ matrix.platforms.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-          - name: Docker meta
-            id: meta
-            uses: docker/metadata-action@v5
-            with:
-              images: ${{ env.REGISTRY_IMAGE }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
