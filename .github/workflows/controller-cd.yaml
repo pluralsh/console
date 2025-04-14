@@ -5,6 +5,7 @@ on:
       - 'master'
     paths:
       - 'go/controller/**'
+      - '.github/workflows/controller-cd.yaml'
   push:
     tags:
       - 'v*.*.*'
