@@ -302,8 +302,11 @@ gitServer:
     repository: ghcr.io/pluralsh/git-server
     tag: ~
   
-  containerSecurityContext: ~
-  securityContext: ~
+  containerSecurityContext: 
+    runAsNonRoot: true
+  securityContext: 
+    runAsUser: 65543
+    runAsGroup: 65543
   resources: ~
   tag: ~
 
