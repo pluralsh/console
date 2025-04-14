@@ -427,6 +427,7 @@ func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *core
 }
 
 func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+	logger := log.FromContext(ctx)
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
@@ -468,6 +469,7 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 			if err != nil {
 				return err
 			}
+
 			if stack.Annotations == nil {
 				stack.Annotations = map[string]string{}
 			}
@@ -477,6 +479,11 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 				continue
 			}
 			stack.Annotations[ServiceOwnerAnnotation] = serviceNameNamespace
+
+			// ignore error. It's for the backward compatibility
+			if err := controllerutil.RemoveOwnerReference(service, stack, r.Scheme); err != nil {
+				logger.V(5).Info(err.Error())
+			}
 			err = utils.TryToUpdate(ctx, r.Client, stack)
 			if err != nil {
 				return err
@@ -586,7 +593,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
