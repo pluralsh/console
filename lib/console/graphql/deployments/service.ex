@@ -78,6 +78,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :configuration,    list_of(:config_attributes)
     field :kustomize,        :kustomize_attributes
     field :parent_id,        :id
+    field :flow_id,          :id
     field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
