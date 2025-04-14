@@ -297,3 +297,21 @@ func SyncCondition(set func(condition metav1.Condition), conditionType, status, 
 
 	set(condition)
 }
+
+func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ctrlruntimeclient.Object) error {
+	key := ctrlruntimeclient.ObjectKeyFromObject(object)
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		original := object.DeepCopyObject().(ctrlruntimeclient.Object)
+		if err := client.Get(ctx, key, object); err != nil {
+			return fmt.Errorf("could not fetch current %s/%s state, got error: %w", object.GetName(), object.GetNamespace(), err)
+		}
+
+		if reflect.DeepEqual(object, original) {
+			return nil
+		}
+
+		return client.Patch(ctx, original, ctrlruntimeclient.MergeFrom(object))
+	})
+
+}
