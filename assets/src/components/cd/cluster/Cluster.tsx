@@ -11,7 +11,10 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
-import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useLogsEnabled,
+  useMetricsEnabled,
+} from 'components/contexts/DeploymentSettingsContext'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { isFunction } from 'lodash'
@@ -40,6 +43,7 @@ import {
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
+  CLUSTER_METRICS_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PARAM_ID,
   CLUSTER_PODS_PATH,
@@ -69,31 +73,46 @@ import { ClusterPermissionsModal } from './ClusterPermissions'
 import { ClusterSettingsModal } from './ClusterSettings.tsx'
 import { InsightsTabLabel } from 'components/utils/AiInsights.tsx'
 import { DirLabelWithChip } from '../services/service/ServiceDetails.tsx'
+import { DirectoryEntry } from 'components/layout/SideNavEntries.tsx'
 
-const getDirectory = ({ cluster }: { cluster: Nullable<ClusterFragment> }) =>
-  [
-    { path: CLUSTER_SERVICES_PATH, label: 'Services' },
-    { path: CLUSTER_NODES_PATH, label: 'Nodes' },
-    { path: CLUSTER_PODS_PATH, label: 'Pods' },
-    {
-      path: CLUSTER_INSIGHTS_PATH,
-      label: <InsightsTabLabel insight={cluster?.insight} />,
-    },
-    {
-      path: CLUSTER_ALERTS_REL_PATH,
-      label: (
-        <DirLabelWithChip
-          count={cluster?.alerts?.edges?.length}
-          type="Alerts"
-        />
-      ),
-    },
-    { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
-    { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
-    { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
-    { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
-    { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
-  ] as const
+const getDirectory = ({
+  cluster,
+  logsEnabled,
+  isVCluster,
+  metricsEnabled,
+}: {
+  cluster: Nullable<ClusterFragment>
+  logsEnabled: boolean
+  isVCluster: boolean
+  metricsEnabled: boolean
+}): DirectoryEntry[] => [
+  { path: CLUSTER_SERVICES_PATH, label: 'Services' },
+  { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
+  { path: CLUSTER_NODES_PATH, label: 'Nodes' },
+  { path: CLUSTER_PODS_PATH, label: 'Pods' },
+  {
+    path: CLUSTER_INSIGHTS_PATH,
+    label: <InsightsTabLabel insight={cluster?.insight} />,
+  },
+  {
+    path: CLUSTER_ALERTS_REL_PATH,
+    label: (
+      <DirLabelWithChip
+        count={cluster?.alerts?.edges?.length}
+        type="Alerts"
+      />
+    ),
+  },
+  { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
+  {
+    path: CLUSTER_VCLUSTERS_REL_PATH,
+    label: 'VClusters',
+    enabled: !isVCluster,
+  },
+  { path: CLUSTER_LOGS_PATH, label: 'Logs', enabled: logsEnabled },
+  { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
+  { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
+]
 
 const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   {
@@ -138,18 +157,6 @@ export const getClusterBreadcrumbs = ({
   ]
 }
 
-function tabEnabled(tab, logsEnabled: boolean, isVCluster: boolean) {
-  if (tab?.logs) {
-    return logsEnabled
-  }
-
-  if (tab?.vclusters) {
-    return !isVCluster
-  }
-
-  return true
-}
-
 export default function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -157,6 +164,7 @@ export default function Cluster() {
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
+  const metricsEnabled = useMetricsEnabled()
   const logsEnabled = useLogsEnabled()
 
   const {
@@ -170,7 +178,16 @@ export default function Cluster() {
   })
 
   const cluster = data?.cluster
-  const directory = getDirectory({ cluster })
+  const directory = useMemo(
+    () =>
+      getDirectory({
+        cluster,
+        logsEnabled,
+        isVCluster: cluster?.virtual ?? false,
+        metricsEnabled,
+      }).filter((t) => t.enabled !== false),
+    [cluster, logsEnabled, metricsEnabled]
+  )
   const currentTab = directory.find(({ path }) => path === tab)
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
@@ -245,23 +262,19 @@ export default function Cluster() {
               selectedKey: currentTab?.path,
             }}
           >
-            {directory
-              .filter((t) =>
-                tabEnabled(t, logsEnabled, cluster?.virtual ?? false)
-              )
-              .map(({ label, path }) => (
-                <LinkTabWrap
-                  css={{ minWidth: 'fit-content' }}
-                  subTab
-                  key={path}
-                  to={`${CLUSTER_ABS_PATH}/${path}`.replace(
-                    `:${CLUSTER_PARAM_ID}`,
-                    clusterId ?? ''
-                  )}
-                >
-                  <SubTab key={path}>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
+            {directory.map(({ label, path }) => (
+              <LinkTabWrap
+                css={{ minWidth: 'fit-content' }}
+                subTab
+                key={path}
+                to={`${CLUSTER_ABS_PATH}/${path}`.replace(
+                  `:${CLUSTER_PARAM_ID}`,
+                  clusterId ?? ''
+                )}
+              >
+                <SubTab key={path}>{label}</SubTab>
+              </LinkTabWrap>
+            ))}
           </TabList>
           <div
             css={{

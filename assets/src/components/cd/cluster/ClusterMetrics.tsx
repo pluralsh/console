@@ -1,35 +1,35 @@
 import { Card, Flex } from '@pluralsh/design-system'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import {
-  ClusterFragment,
-  ClusterNodeFragment,
-  Maybe,
-  useClusterMetricsQuery,
-} from 'generated/graphql'
+import { useClusterMetricsQuery, useClusterNodesQuery } from 'generated/graphql'
 import { isNull } from 'lodash'
 import { useTheme } from 'styled-components'
 
 import { Prometheus } from '../../../utils/prometheus'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { ClusterGauges } from './ClusterGauges'
-import { SaturationGraphs } from './SaturationGraphs'
+import { useParams } from 'react-router-dom'
+import { isNonNullable } from 'utils/isNonNullable'
+import { ClusterGauges } from '../../cluster/nodes/ClusterGauges'
+import { SaturationGraphs } from '../../cluster/nodes/SaturationGraphs'
+import { POLL_INTERVAL } from '../ContinuousDeployment'
 
-export function ClusterMetrics({
-  nodes,
-  cluster,
-}: {
-  nodes: Maybe<ClusterNodeFragment>[]
-  cluster?: ClusterFragment
-}) {
+export function ClusterMetrics() {
   const theme = useTheme()
+  const { clusterId } = useParams()
   const { prometheusConnection } = useDeploymentSettings()
   const metricsEnabled = Prometheus.enabled(prometheusConnection)
+
+  const { data: nodesData } = useClusterNodesQuery({
+    variables: { id: clusterId || '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const nodes = nodesData?.cluster?.nodes?.filter(isNonNullable) || []
+
   const { data, loading } = useClusterMetricsQuery({
-    variables: {
-      clusterId: cluster?.id ?? '',
-    },
-    skip: !metricsEnabled || !cluster?.id,
+    variables: { clusterId: clusterId ?? '' },
+    skip: !metricsEnabled || !clusterId,
     fetchPolicy: 'cache-and-network',
     pollInterval: 60_000,
   })
@@ -41,7 +41,7 @@ export function ClusterMetrics({
     metricsEnabled &&
     !isNull(cpuTotal) &&
     !isNull(memTotal) &&
-    !!cluster?.id &&
+    !!clusterId &&
     (data?.cluster?.clusterMetrics?.cpuUsage?.length ?? 0) > 0
 
   if (loading) return <LoadingIndicator />

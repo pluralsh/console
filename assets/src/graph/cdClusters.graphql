@@ -573,6 +573,7 @@ fragment ClusterBindings on Cluster {
 
 query ClusterBindings($id: ID!) {
   cluster(id: $id) {
+    id
     ...ClusterBindings
   }
 }
@@ -680,6 +681,7 @@ query ClusterMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
+    id
     ...ClusterMetricsFragment
   }
 }
@@ -692,6 +694,7 @@ query ClusterNodeMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
+    id
     ...ClusterNodeMetricsFragment
   }
 }

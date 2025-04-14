@@ -115,6 +115,7 @@ import {
   CLUSTER_INSIGHTS_SUMMARY_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
+  CLUSTER_METRICS_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
   CLUSTER_PRS_REL_PATH,
@@ -143,6 +144,7 @@ import {
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
+import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -328,6 +330,10 @@ const clusterDetailsRoutes = [
         element={<ServicesTree />}
       />
     </Route>
+    <Route
+      path={CLUSTER_METRICS_PATH}
+      element={<ClusterMetrics />}
+    />
     <Route
       path={CLUSTER_NODES_PATH}
       element={<ClusterNodes />}
