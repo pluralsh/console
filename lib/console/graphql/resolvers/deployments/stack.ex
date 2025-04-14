@@ -109,6 +109,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def detach_stack(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.detach_stack(id, user)
 
+  def restore_stack(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.restore_stack(id, user)
+
   def kick_stack_pr(%{id: id}, %{context: %{current_user: user}}) do
     Console.Repo.get!(PullRequest, id)
     |> Stacks.kick(user)

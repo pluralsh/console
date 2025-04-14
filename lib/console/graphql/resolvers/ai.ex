@@ -63,6 +63,11 @@ defmodule Console.GraphQl.Resolvers.AI do
     {:ok, Chat.for_thread(thread.id)}
   end
 
+  def mcp_token(_, %{context: %{current_user: user}}) do
+    with {:ok, token, _} <- Console.Jwt.MCP.mint(user),
+      do: {:ok, token}
+  end
+
   def resolve_cluster_insight_component(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.insight_component(id, user)
 

@@ -451,6 +451,8 @@ type RootQueryType {
 
   aiPin(insightId: ID, threadId: ID): AiPin
 
+  mcpToken: String
+
   oidcLogin(challenge: String!): OidcStepResponse
 
   oidcConsent(challenge: String!): OidcStepResponse
@@ -846,6 +848,9 @@ type RootMutationType {
   deleteStack(id: ID!): InfrastructureStack
 
   detachStack(id: ID!): InfrastructureStack
+
+  "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"
+  restoreStack(id: ID!): InfrastructureStack
 
   "refresh the source repo of this stack, and potentially create a fresh run"
   kickStack(id: ID!): StackRun

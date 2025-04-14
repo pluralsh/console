@@ -167,6 +167,32 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
     end
   end
 
+  describe "restoreStack" do
+    test "it can restore a stack from deletion" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], deleted_at: Timex.now())
+      run = insert(:stack_run, stack: stack, status: :pending_approval)
+      {:ok, stack} = Console.Schema.Stack.delete_changeset(stack, %{delete_run_id: run.id})
+                     |> Console.Repo.update()
+
+      {:ok, %{data: %{"restoreStack" => restored}}} = run_query("""
+        mutation Restore($id: ID!) {
+          restoreStack(id: $id) {
+            id
+            deletedAt
+            deleteRun { id }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert restored["id"] == stack.id
+      refute restored["deletedAt"]
+      refute restored["deleteRun"]
+
+      assert refetch(run).status == :cancelled
+    end
+  end
+
   describe "approveStackRun" do
     test "it can approve a stack run" do
       run = insert(:stack_run)
