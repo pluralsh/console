@@ -83,8 +83,11 @@ spec:
                     type: array
                 type: object
               description:
+                description: Longform description of the service managed by this flow
                 type: string
               icon:
+                description: Optional image icon for the flow to apply branding or
+                  improve identification
                 type: string
               name:
                 description: Name of this Flow. If not provided Flow's own name from
@@ -135,6 +138,9 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               serverAssociations:
+                description: ServerAssociations contains a list of MCP services you
+                  wish to associate with this flow. Can also be managed within the
+                  Plural Console UI securely.
                 items:
                   properties:
                     mcpServerRef:
