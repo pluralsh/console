@@ -1,10 +1,10 @@
-import { NetworkGraph } from 'components/utils/NetworkGraph'
+// import { NetworkGraph } from 'components/utils/NetworkGraph'
 
 export function ServiceNetwork() {
   return (
     <div>
       Service Network
-      <NetworkGraph />
+      {/* <NetworkGraph /> */}
     </div>
   )
 }
