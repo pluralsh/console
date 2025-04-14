@@ -2898,13 +2898,15 @@ func (t *URLSinkConfigurationFragment) GetURL() string {
 }
 
 type OIDCProviderFragment struct {
-	ID           string          "json:\"id\" graphql:\"id\""
-	Name         string          "json:\"name\" graphql:\"name\""
-	Description  *string         "json:\"description,omitempty\" graphql:\"description\""
-	ClientID     string          "json:\"clientId\" graphql:\"clientId\""
-	ClientSecret string          "json:\"clientSecret\" graphql:\"clientSecret\""
-	AuthMethod   *OidcAuthMethod "json:\"authMethod,omitempty\" graphql:\"authMethod\""
-	RedirectUris []*string       "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+	ID            string                   "json:\"id\" graphql:\"id\""
+	Name          string                   "json:\"name\" graphql:\"name\""
+	Description   *string                  "json:\"description,omitempty\" graphql:\"description\""
+	ClientID      string                   "json:\"clientId\" graphql:\"clientId\""
+	ClientSecret  string                   "json:\"clientSecret\" graphql:\"clientSecret\""
+	AuthMethod    *OidcAuthMethod          "json:\"authMethod,omitempty\" graphql:\"authMethod\""
+	RedirectUris  []*string                "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+	Bindings      []*PolicyBindingFragment "json:\"bindings,omitempty\" graphql:\"bindings\""
+	WriteBindings []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
 func (t *OIDCProviderFragment) GetID() string {
@@ -2948,6 +2950,18 @@ func (t *OIDCProviderFragment) GetRedirectUris() []*string {
 		t = &OIDCProviderFragment{}
 	}
 	return t.RedirectUris
+}
+func (t *OIDCProviderFragment) GetBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.Bindings
+}
+func (t *OIDCProviderFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.WriteBindings
 }
 
 type ObservabilityProviderFragment struct {
@@ -25339,6 +25353,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -25373,6 +25412,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -25408,6 +25472,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 

@@ -6,6 +6,12 @@ fragment OIDCProviderFragment on OidcProvider {
     clientSecret
     authMethod
     redirectUris
+    bindings {
+        ...PolicyBindingFragment
+    }
+    writeBindings {
+        ...PolicyBindingFragment
+    }
 }
 
 mutation CreateOIDCProvider($type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
