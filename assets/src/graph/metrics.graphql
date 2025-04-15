@@ -14,3 +14,21 @@ fragment UtilizationHeatMap on UtilizationHeatMap {
     ...MetricResponse
   }
 }
+
+query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
+  cluster(id: $clusterId) {
+    id
+    heatMap(flavor: $flavor) {
+      ...UtilizationHeatMap
+    }
+  }
+}
+
+query ServiceHeatMap($serviceId: ID!) {
+  serviceDeployment(id: $serviceId) {
+    id
+    heatMap {
+      ...UtilizationHeatMap
+    }
+  }
+}

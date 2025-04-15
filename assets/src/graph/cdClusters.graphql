@@ -405,9 +405,6 @@ fragment ClusterWithNodes on Cluster {
 
 fragment ClusterWithMetrics on Cluster {
   ...ClusterWithNodes
-  heatMap {
-    ...UtilizationHeatMap
-  }
   clusterMetrics(start: $start, stop: $stop, step: $step) {
     cpu {
       ...MetricResponse
