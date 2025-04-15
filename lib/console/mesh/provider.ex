@@ -1,7 +1,8 @@
 defmodule Console.Mesh.Provider do
   alias Console.Schema.{Cluster, DeploymentSettings, OperationalLayout}
+  alias Console.Schema.DeploymentSettings.Connection
+  alias Console.Mesh.Provider.{Istio, Ebpf}
   alias Console.Mesh.Edge
-  alias Console.Mesh.Provider.Istio
 
   @type error :: Console.error
   @type opts :: [{:namespace, binary} | {:time, binary}]
@@ -18,7 +19,11 @@ defmodule Console.Mesh.Provider do
 
   defp client(
     %Cluster{operational_layout: %OperationalLayout{service_mesh: :istio}} = cluster,
-    %DeploymentSettings{prometheus_connection: %DeploymentSettings.Connection{host: h} = conn}
+    %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
   ) when is_binary(h), do: {:ok, Istio.new(conn, cluster)}
-  defp client(_, _), do: {:error, "no prometheus connection configured or service mesh discovered"}
+  defp client(
+    cluster,
+    %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
+  ) when is_binary(h), do: {:ok, Ebpf.new(conn, cluster)}
+  defp client(_, _), do: {:error, "no prometheus connection configured"}
 end

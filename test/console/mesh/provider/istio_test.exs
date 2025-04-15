@@ -12,7 +12,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 13324.0]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 13324.0]}
           ]}}
         }
       end)
@@ -20,7 +20,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 20000.0]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 20000.0]}
           ]}}
         }
       end)
@@ -28,7 +28,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), values: [DateTime.utc_now(), 100.0]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 100.0]}
           ]}}
         }
       end)

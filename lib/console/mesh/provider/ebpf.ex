@@ -1,4 +1,4 @@
-defmodule Console.Mesh.Provider.Istio do
+defmodule Console.Mesh.Provider.Ebpf do
   @moduledoc """
   Implementation for istio, for the most part all this data is actually accessible via the prometheus.
   Just extract it and use the graph builder module to gradually build the graph since the metrics are
@@ -14,9 +14,11 @@ defmodule Console.Mesh.Provider.Istio do
   defstruct [:prom, :cluster]
 
   @queries [
-    bytes_sent: ~s/avg(rate(istio_tcp_sent_bytes_total{cluster="$cluster"$additional}[5m]))/,
-    bytes_received: ~s/avg(rate(istio_tcp_received_bytes_total{cluster="$cluster"$additional}[5m]))/,
-    connections: ~s/avg(rate(istio_tcp_connections_opened_total{direction="inbound",cluster="$cluster"$additional}[5m]))/,
+    bytes_sent: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
+    bytes_received: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
+    packets: ~s/avg(rate(tcp.packets{cluster="$cluster"$additional}[5m]))/,
+    # http: ~s/avg(rate(http.status_code{cluster="$cluster"$additional}[[5m])) by (status_code)/,
+    connections: ~s/avg(rate(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m]))/,
   ]
 
   def new(prom, cluster) do
@@ -28,7 +30,7 @@ defmodule Console.Mesh.Provider.Istio do
     additional = namespace_filter(namespace)
 
     Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts) do
+      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts)do
         {:ok, %Response{data: %Data{result: results}}} ->
           {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
         err ->
@@ -48,21 +50,21 @@ defmodule Console.Mesh.Provider.Istio do
   defp add_result(_, _, b), do: b
 
   defp edge(metric, %Result{metric: m, value: [_ , val]}) do
-    source_id = "#{m["source_workload"]}:#{m["source_workload_namespace"]}"
-    dest_id = "#{m["destination_workload"]}:#{m["destination_workload_namespace"]}"
+    source_id = "#{m["source.workload.name"]}:#{m["source.workload.namespace"]}"
+    dest_id = "#{m["destination.workload.name"]}:#{m["destination.workload.namespace"]}"
     %Edge{
       id: "#{source_id}.#{dest_id}",
       from: %Workload{
         id: source_id,
-        name: m["source_workload"],
-        namespace: m["source_workload_namespace"],
-        service: m["source_service"]
+        name: m["source.workload.name"],
+        namespace: m["source.workload.namespace"],
+        service: m["source.container.name"]
       },
       to: %Workload{
         id: dest_id,
-        name: m["destination_workload"],
-        namespace: m["destination_workload_namespace"],
-        service: m["destination_service"]
+        name: m["destination.workload.name"],
+        namespace: m["destination.workload.namespace"],
+        service: m["destination.container.name"]
       },
       statistics: struct(Statistics, %{metric => val})
     }
@@ -72,6 +74,6 @@ defmodule Console.Mesh.Provider.Istio do
   defp format_query(query, %Cluster{handle: h}, additional),
     do: Prometheus.Client.variable_subst(query, cluster: h, additional: additional)
 
-  defp namespace_filter(ns) when is_binary(ns), do: ",source_workload_namespace=\"#{ns}\""
+  defp namespace_filter(ns) when is_binary(ns), do: ",source.workload.namespace=\"#{ns}\""
   defp namespace_filter(_), do: ""
 end
