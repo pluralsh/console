@@ -13,9 +13,11 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
+	// Longform description of the service managed by this flow
 	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty"`
 
+	// Optional image icon for the flow to apply branding or improve identification
 	// +kubebuilder:validation:Optional
 	Icon *string `json:"icon,omitempty"`
 
@@ -27,6 +29,7 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 
+	// ServerAssociations contains a list of MCP services you wish to associate with this flow. Can also be managed within the Plural Console UI securely.
 	// +kubebuilder:validation:Optional
 	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
 }

@@ -60,8 +60,9 @@ defmodule Console.GraphQl.Observability do
     field :values, list_of(:metric_result), resolve: fn
       %{values: [ts, val]}, _, _ when is_float(ts) or is_integer(ts) ->
         {:ok, [%{timestamp: ts, value: val}]}
-      %{values: vals}, _, _ ->
+      %{values: vals}, _, _ when is_list(vals) ->
         {:ok, Enum.map(vals, fn [ts, val] -> %{timestamp: ts, value: val} end)}
+      _, _, _ -> {:ok, []}
     end
   end
 

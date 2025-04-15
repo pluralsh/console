@@ -106,7 +106,7 @@ defmodule Console.Deployments.Flows do
       allow(flow, user, :write)
     end)
     |> add_operation(:update, fn %{allow: flow} ->
-      Repo.preload(flow, [:server_associations])
+      Repo.preload(flow, [:server_associations, :write_bindings, :read_bindings])
       |> Flow.changeset(attrs)
       |> Repo.update()
     end)

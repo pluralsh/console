@@ -404,7 +404,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 	switch *in.Provider {
 	case console.AiProviderOpenai:
 		if in.OpenAI == nil {
-			return nil, fmt.Errorf("must provide openai configuration to set the provider to OPENAI")
+			return nil, nil // nil if you're using internal plural cloud auth to openai
 		}
 
 		token, err := in.OpenAI.Token(ctx, c, namespace)
