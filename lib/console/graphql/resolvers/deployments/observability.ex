@@ -55,7 +55,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     do: Observability.set_resolution(attrs, id, user)
 
   def heat_map(%Cluster{} = cluster, args, _), do: Observability.heat_map(cluster, args[:flavor])
-  def heat_map(%Service{} = service, _, _), do: Observability.heat_map(service, :pod)
+  def heat_map(%Service{} = service, args, _), do: Observability.heat_map(service, arg[:flavor])
 
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
