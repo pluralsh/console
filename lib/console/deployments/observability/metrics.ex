@@ -42,7 +42,7 @@ defmodule Console.Deployments.Observability.Metrics do
 
   @heat_node post_process([
     cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (node)|,
-    memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (node)|
+    memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""$filter}) by (node)|
   ])
 
   def queries(:cluster), do: @cluster
