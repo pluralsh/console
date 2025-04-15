@@ -3048,6 +3048,7 @@ export type GroupMemberEdge = {
 
 export enum HeatMapFlavor {
   Namespace = 'NAMESPACE',
+  Node = 'NODE',
   Pod = 'POD'
 }
 
@@ -8867,6 +8868,12 @@ export type ServiceDeploymentComponentMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentHeatMapArgs = {
+  flavor?: InputMaybe<HeatMapFlavor>;
 };
 
 

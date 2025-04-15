@@ -4430,7 +4430,7 @@ type ServiceDeployment {
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
-  heatMap: UtilizationHeatMap
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
 
   "whether this service is editable"
   editable: Boolean
@@ -4764,6 +4764,7 @@ enum TagType {
 enum HeatMapFlavor {
   POD
   NAMESPACE
+  NODE
 }
 
 input ClusterAttributes {

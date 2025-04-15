@@ -7402,16 +7402,18 @@ type HeatMapFlavor string
 const (
 	HeatMapFlavorPod       HeatMapFlavor = "POD"
 	HeatMapFlavorNamespace HeatMapFlavor = "NAMESPACE"
+	HeatMapFlavorNode      HeatMapFlavor = "NODE"
 )
 
 var AllHeatMapFlavor = []HeatMapFlavor{
 	HeatMapFlavorPod,
 	HeatMapFlavorNamespace,
+	HeatMapFlavorNode,
 }
 
 func (e HeatMapFlavor) IsValid() bool {
 	switch e {
-	case HeatMapFlavorPod, HeatMapFlavorNamespace:
+	case HeatMapFlavorPod, HeatMapFlavorNamespace, HeatMapFlavorNode:
 		return true
 	}
 	return false
