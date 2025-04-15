@@ -27,6 +27,7 @@ import {
   Tooltip,
   useSidebar,
   WarningShieldIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import {
@@ -384,10 +385,15 @@ export default function Sidebar() {
 function ConsoleVersion({ version }: { version: string }) {
   const { isExpanded } = useSidebar()
   return (
-    <ConsoleVersionSC $isExpanded={isExpanded}>
-      {isExpanded ? 'Console version: v' : 'v'}
-      {version}
-    </ConsoleVersionSC>
+    <WrapWithIf
+      condition={!isExpanded}
+      wrapper={<Tooltip label={`Console version: v${version}`} />}
+    >
+      <ConsoleVersionSC $isExpanded={isExpanded}>
+        {isExpanded ? 'Console version: v' : 'v'}
+        {version}
+      </ConsoleVersionSC>
+    </WrapWithIf>
   )
 }
 const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(

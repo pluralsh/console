@@ -12263,6 +12263,7 @@ export type ClusterHeatMapQuery = { __typename?: 'RootQueryType', cluster?: { __
 
 export type ServiceHeatMapQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
+  flavor: HeatMapFlavor;
 }>;
 
 
@@ -25119,10 +25120,10 @@ export type ClusterHeatMapLazyQueryHookResult = ReturnType<typeof useClusterHeat
 export type ClusterHeatMapSuspenseQueryHookResult = ReturnType<typeof useClusterHeatMapSuspenseQuery>;
 export type ClusterHeatMapQueryResult = Apollo.QueryResult<ClusterHeatMapQuery, ClusterHeatMapQueryVariables>;
 export const ServiceHeatMapDocument = gql`
-    query ServiceHeatMap($serviceId: ID!) {
+    query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
   serviceDeployment(id: $serviceId) {
     id
-    heatMap {
+    heatMap(flavor: $flavor) {
       ...UtilizationHeatMap
     }
   }
@@ -25142,6 +25143,7 @@ export const ServiceHeatMapDocument = gql`
  * const { data, loading, error } = useServiceHeatMapQuery({
  *   variables: {
  *      serviceId: // value for 'serviceId'
+ *      flavor: // value for 'flavor'
  *   },
  * });
  */

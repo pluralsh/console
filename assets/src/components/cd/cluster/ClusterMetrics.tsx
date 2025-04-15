@@ -12,7 +12,7 @@ import {
   useClusterHeatMapQuery,
   useClusterMetricsQuery,
 } from 'generated/graphql'
-import { isNull } from 'lodash'
+import { capitalize, isNull } from 'lodash'
 import styled, { useTheme } from 'styled-components'
 
 import { Prometheus } from '../../../utils/prometheus'
@@ -30,8 +30,10 @@ import {
 } from '../../cluster/nodes/ClusterGauges'
 import { SaturationGraphs } from '../../cluster/nodes/SaturationGraphs'
 import { GqlError } from 'components/utils/Alert'
+import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 
 const { capacity, CapacityType, toValues } = Prometheus
+const HEATMAP_HEIGHT = 350
 
 export function ClusterMetrics() {
   const { spacing } = useTheme()
@@ -67,7 +69,16 @@ export function ClusterMetrics() {
     () => processClusterMetrics(metricsData?.cluster),
     [metricsData?.cluster]
   )
-  console.log(heatMapData)
+  const { cpuHeatMap, memoryHeatMap } = useMemo(
+    () => ({
+      cpuHeatMap:
+        heatMapData?.cluster?.heatMap?.cpu?.filter(isNonNullable) ?? [],
+      memoryHeatMap:
+        heatMapData?.cluster?.heatMap?.memory?.filter(isNonNullable) ?? [],
+    }),
+    [heatMapData?.cluster?.heatMap]
+  )
+
   if (!metricsEnabled) return <EmptyState message="Metrics are not enabled." />
 
   const hasMetrics =
@@ -131,14 +142,12 @@ export function ClusterMetrics() {
               selectedKey={heatMapFlavor}
               onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
             >
-              <ListBoxItem
-                key={HeatMapFlavor.Pod}
-                label="Pod"
-              />
-              <ListBoxItem
-                key={HeatMapFlavor.Namespace}
-                label="Namespace"
-              />
+              {Object.values(HeatMapFlavor).map((flavor) => (
+                <ListBoxItem
+                  key={flavor}
+                  label={capitalize(flavor)}
+                />
+              ))}
             </Select>
           </Flex>
         </Flex>
@@ -158,19 +167,40 @@ export function ClusterMetrics() {
         ) : (
           <Flex
             gap="large"
+            overflowX="auto"
             flex={1}
           >
             <Card
-              header={{ content: `memory cost by ${heatMapFlavor}` }}
-              css={{ height: '100%' }}
+              header={{
+                content: `memory utilization by ${heatMapFlavor}`,
+                outerProps: {
+                  style: { paddingBottom: spacing.large, overflow: 'visible' },
+                },
+              }}
+              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
             >
-              <div>heatmap one</div>
+              <UtilizationHeatmap
+                colorScheme="blue"
+                data={memoryHeatMap}
+                flavor={heatMapFlavor}
+                utilizationType="memory"
+              />
             </Card>
             <Card
-              header={{ content: `cpu cost by ${heatMapFlavor}` }}
-              css={{ height: '100%' }}
+              header={{
+                content: `cpu utilization by ${heatMapFlavor}`,
+                outerProps: {
+                  style: { paddingBottom: spacing.large, overflow: 'visible' },
+                },
+              }}
+              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
             >
-              <div>heatmap two</div>
+              <UtilizationHeatmap
+                colorScheme="purple"
+                data={cpuHeatMap}
+                flavor={heatMapFlavor}
+                utilizationType="cpu"
+              />
             </Card>
           </Flex>
         )}

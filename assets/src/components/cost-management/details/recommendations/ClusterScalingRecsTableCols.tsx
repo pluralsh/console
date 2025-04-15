@@ -136,7 +136,7 @@ export const ColScalingPr = columnHelper.accessor((rec) => rec, {
   },
 })
 
-const formatCpu = (cpu: Nullable<number>) => {
+export const formatCpu = (cpu: Nullable<number>) => {
   if (isNullish(cpu)) return '--'
   if (cpu > 1) return `${Number(cpu).toFixed(1)}`
 
@@ -145,7 +145,7 @@ const formatCpu = (cpu: Nullable<number>) => {
 
 const ceil = (val: number, mult: number) => Math.ceil(val / mult) * mult
 
-const formatMemory = (memory: Nullable<number>) => {
+export const formatMemory = (memory: Nullable<number>) => {
   if (isNullish(memory)) return '--'
   return filesize(memory, {
     spacer: '',

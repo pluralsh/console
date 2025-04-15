@@ -32,10 +32,10 @@ query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   }
 }
 
-query ServiceHeatMap($serviceId: ID!) {
+query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
   serviceDeployment(id: $serviceId) {
     id
-    heatMap {
+    heatMap(flavor: $flavor) {
       ...UtilizationHeatMap
     }
   }

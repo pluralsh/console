@@ -145,6 +145,7 @@ import {
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
 import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
+import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -587,6 +588,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceScalingRecs />}
       path="recommendations"
+    />
+    <Route
+      element={<ServiceMetrics />}
+      path="metrics"
     />
     <Route
       element={<ServiceInsights />}
