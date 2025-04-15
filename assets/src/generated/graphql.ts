@@ -3850,6 +3850,12 @@ export type MetadataAttributes = {
   labels?: InputMaybe<Scalars['Json']['input']>;
 };
 
+export type MetricPointResponse = {
+  __typename?: 'MetricPointResponse';
+  metric?: Maybe<Scalars['Map']['output']>;
+  value?: Maybe<MetricResult>;
+};
+
 export type MetricResponse = {
   __typename?: 'MetricResponse';
   metric?: Maybe<Scalars['Map']['output']>;
@@ -9907,8 +9913,8 @@ export type UserRoles = {
 /** A representation of the metrics to render a utilization heat map */
 export type UtilizationHeatMap = {
   __typename?: 'UtilizationHeatMap';
-  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
-  memory?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpu?: Maybe<Array<Maybe<MetricPointResponse>>>;
+  memory?: Maybe<Array<Maybe<MetricPointResponse>>>;
 };
 
 export enum ValidationUniqScope {
@@ -12236,7 +12242,9 @@ export type LogAggregationQuery = { __typename?: 'RootQueryType', logAggregation
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
-export type UtilizationHeatMapFragment = { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
+export type MetricPointResponseFragment = { __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null };
+
+export type UtilizationHeatMapFragment = { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null };
 
 export type ClusterHeatMapQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -12244,14 +12252,14 @@ export type ClusterHeatMapQueryVariables = Exact<{
 }>;
 
 
-export type ClusterHeatMapQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ClusterHeatMapQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null } | null };
 
 export type ServiceHeatMapQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
 }>;
 
 
-export type ServiceHeatMapQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ServiceHeatMapQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null } | null };
 
 export type UrlSinkConfigurationFragment = { __typename?: 'UrlSinkConfiguration', url: string };
 
@@ -15690,16 +15698,25 @@ export const UnstructuredResourceFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${EventFragmentDoc}`;
+export const MetricPointResponseFragmentDoc = gql`
+    fragment MetricPointResponse on MetricPointResponse {
+  metric
+  value {
+    timestamp
+    value
+  }
+}
+    `;
 export const UtilizationHeatMapFragmentDoc = gql`
     fragment UtilizationHeatMap on UtilizationHeatMap {
   cpu {
-    ...MetricResponse
+    ...MetricPointResponse
   }
   memory {
-    ...MetricResponse
+    ...MetricPointResponse
   }
 }
-    ${MetricResponseFragmentDoc}`;
+    ${MetricPointResponseFragmentDoc}`;
 export const UrlSinkConfigurationFragmentDoc = gql`
     fragment UrlSinkConfiguration on UrlSinkConfiguration {
   url
@@ -28692,6 +28709,7 @@ export const namedOperations = {
     UnstructuredResource: 'UnstructuredResource',
     LogLine: 'LogLine',
     MetricResponse: 'MetricResponse',
+    MetricPointResponse: 'MetricPointResponse',
     UtilizationHeatMap: 'UtilizationHeatMap',
     UrlSinkConfiguration: 'UrlSinkConfiguration',
     SinkConfiguration: 'SinkConfiguration',

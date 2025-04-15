@@ -1,5 +1,5 @@
 defmodule Prometheus.Data, do: defstruct [:resultType, :result]
-defmodule Prometheus.Result, do: defstruct [:metric, :values]
+defmodule Prometheus.Result, do: defstruct [:metric, :values, :value]
 
 defmodule Prometheus.Response do
   alias Prometheus.{Data, Result}

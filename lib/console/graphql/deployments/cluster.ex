@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   enum :heat_map_flavor do
     value :pod
     value :namespace
+    value :node
   end
 
   input_object :cluster_attributes do

@@ -6,12 +6,20 @@ fragment MetricResponse on MetricResponse {
   }
 }
 
+fragment MetricPointResponse on MetricPointResponse {
+  metric
+  value {
+    timestamp
+    value
+  }
+}
+
 fragment UtilizationHeatMap on UtilizationHeatMap {
   cpu {
-    ...MetricResponse
+    ...MetricPointResponse
   }
   memory {
-    ...MetricResponse
+    ...MetricPointResponse
   }
 }
 

@@ -232,6 +232,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
     @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
     field :heat_map, :utilization_heat_map do
+      arg :flavor, :heat_map_flavor, default_value: :pod
       resolve &Deployments.heat_map/3
     end
 
@@ -242,8 +243,8 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "A representation of the metrics to render a utilization heat map"
   object :utilization_heat_map do
-    field :cpu,    list_of(:metric_response)
-    field :memory, list_of(:metric_response)
+    field :cpu,    list_of(:metric_point_response)
+    field :memory, list_of(:metric_point_response)
   end
 
   object :service_component_metrics do

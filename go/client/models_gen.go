@@ -3144,6 +3144,11 @@ type MetadataAttributes struct {
 	Annotations *string `json:"annotations,omitempty"`
 }
 
+type MetricPointResponse struct {
+	Metric map[string]any `json:"metric,omitempty"`
+	Value  *MetricResult  `json:"value,omitempty"`
+}
+
 type MetricResponse struct {
 	Metric map[string]any  `json:"metric,omitempty"`
 	Values []*MetricResult `json:"values,omitempty"`
@@ -6176,8 +6181,8 @@ type UserRoles struct {
 
 // A representation of the metrics to render a utilization heat map
 type UtilizationHeatMap struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Memory []*MetricResponse `json:"memory,omitempty"`
+	CPU    []*MetricPointResponse `json:"cpu,omitempty"`
+	Memory []*MetricPointResponse `json:"memory,omitempty"`
 }
 
 type VectorStoreAttributes struct {

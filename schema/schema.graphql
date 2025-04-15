@@ -4442,8 +4442,8 @@ type ServiceDeployment {
 
 "A representation of the metrics to render a utilization heat map"
 type UtilizationHeatMap {
-  cpu: [MetricResponse]
-  memory: [MetricResponse]
+  cpu: [MetricPointResponse]
+  memory: [MetricPointResponse]
 }
 
 type ServiceComponentMetrics {
@@ -7677,6 +7677,11 @@ type DashboardMetric {
 type MetricResponse {
   metric: Map
   values: [MetricResult]
+}
+
+type MetricPointResponse {
+  metric: Map
+  value: MetricResult
 }
 
 type LogLine {
