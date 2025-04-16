@@ -4271,7 +4271,10 @@ export type ObservabilityWebhookEdge = {
 };
 
 export enum ObservabilityWebhookType {
-  Grafana = 'GRAFANA'
+  Datadog = 'DATADOG',
+  Grafana = 'GRAFANA',
+  Newrelic = 'NEWRELIC',
+  Pagerduty = 'PAGERDUTY'
 }
 
 export type ObservableMetric = {
