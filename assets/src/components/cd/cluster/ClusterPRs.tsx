@@ -1,7 +1,9 @@
-import { useTheme } from 'styled-components'
-import { Input, LoopingLogo, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
+import { useTheme } from 'styled-components'
 
+import { usePullRequestsQuery } from '../../../generated/graphql'
+import { useThrottle } from '../../hooks/useThrottle'
 import {
   ColActions,
   ColCreator,
@@ -16,8 +18,6 @@ import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../../utils/table/useFetchPaginatedData'
-import { usePullRequestsQuery } from '../../../generated/graphql'
-import { useThrottle } from '../../hooks/useThrottle'
 
 import { useClusterContext } from './Cluster'
 
@@ -54,10 +54,6 @@ export default function ClusterPRs() {
     meta: { refetch },
   }
 
-  if (error) return <GqlError error={error} />
-
-  if (!data) return <LoopingLogo />
-
   return (
     <div
       css={{
@@ -68,28 +64,37 @@ export default function ClusterPRs() {
         width: '100%',
       }}
     >
-      <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
-        <Input
-          placeholder="Search"
-          startIcon={<SearchIcon />}
-          showClearButton
-          value={searchString}
-          onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexGrow: 1 }}
-        />
-      </div>
-      <Table
-        fullHeightWrap
-        columns={columns}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        data={data?.pullRequests?.edges || []}
-        virtualizeRows
-        reactTableOptions={reactTableOptions}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-      />
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <>
+          <div
+            css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}
+          >
+            <Input
+              placeholder="Search"
+              startIcon={<SearchIcon />}
+              showClearButton
+              value={searchString}
+              onChange={(e) => setSearchString(e.currentTarget.value)}
+              css={{ flexGrow: 1 }}
+            />
+          </div>
+          <Table
+            fullHeightWrap
+            virtualizeRows
+            columns={columns}
+            data={data?.pullRequests?.edges || []}
+            loading={!data && loading}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+            reactTableOptions={reactTableOptions}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        </>
+      )}
     </div>
   )
 }
