@@ -75,9 +75,19 @@ defmodule ConsoleWeb.WebhookController do
   end
 
   defp verify(conn, %ObservabilityWebhook{type: :pagerduty, secret: secret}) do
-    with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
-         true <- Plug.Crypto.secure_compare(secret, password) do
-      :ok
+    with [signature] <- get_req_header(conn, "x-pagerduty-signature"),
+         mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         computed_signature = Base.encode16(mac, case: :lower) do
+
+      String.split(signature, ",")
+      |> Enum.any?(fn
+        "v1=" <> sig -> Plug.Crypto.secure_compare(sig, computed_signature)
+        _ -> false
+      end)
+      |> case do
+        true -> :ok
+        false -> :reject
+      end
     else
       _ -> :reject
     end

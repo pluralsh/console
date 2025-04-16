@@ -151,11 +151,17 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it will ignore if no associated plural resource is found (pagerduty)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :pagerduty)
+      payload = String.trim(Console.conf(:pagerduty_webhook_payload))
+
+      # Calculate the signature (see https://developer.pagerduty.com/docs/verifying-webhook-signatures)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+                  |> then(fn sig -> "v1=#{sig}" end)
 
       conn
-      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("x-pagerduty-signature", signature)
       |> put_req_header("content-type", "application/json")
-      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", String.trim(Console.conf(:pagerduty_webhook_payload)))
+      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", payload)
       |> response(200)
 
       [] = Console.Repo.all(Console.Schema.Alert)
@@ -194,10 +200,18 @@ defmodule ConsoleWeb.WebhookControllerTest do
         "plrl_project" => "test-project"
       })
 
+      # Convert to JSON string
+      payload = Jason.encode!(webhook)
+
+      # Calculate the signature (see https://developer.pagerduty.com/docs/verifying-webhook-signatures)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+                  |> then(fn sig -> "v1=#{sig}" end)
+
       conn
-      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("x-pagerduty-signature", signature)
       |> put_req_header("content-type", "application/json")
-      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", Jason.encode!(webhook))
+      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", payload)
       |> response(200)
 
       [alert] = Console.Repo.all(Console.Schema.Alert)
