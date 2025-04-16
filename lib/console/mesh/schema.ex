@@ -5,7 +5,7 @@ end
 
 defmodule Console.Mesh.Statistics do
   @type t :: %__MODULE__{}
-  defstruct [:bytes_sent, :bytes_received, :packets, :connections]
+  defstruct [:bytes, :packets, :connections, :http200, :http400, :http500, :http_client_latency]
 end
 
 defmodule Console.Mesh.Edge do

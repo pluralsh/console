@@ -3921,9 +3921,13 @@ export type NetworkMeshEdge = {
 /** The relevant statistics for traffic within a service mesh */
 export type NetworkMeshStatistics = {
   __typename?: 'NetworkMeshStatistics';
-  bytesReceived?: Maybe<Scalars['Float']['output']>;
-  bytesSent?: Maybe<Scalars['Float']['output']>;
+  bytes?: Maybe<Scalars['Float']['output']>;
   connections?: Maybe<Scalars['Float']['output']>;
+  http200?: Maybe<Scalars['Float']['output']>;
+  http400?: Maybe<Scalars['Float']['output']>;
+  http500?: Maybe<Scalars['Float']['output']>;
+  httpClientLatency?: Maybe<Scalars['Float']['output']>;
+  packets?: Maybe<Scalars['Float']['output']>;
 };
 
 /** An abstract workload discovered by querying statistics on a service mesh */
@@ -3931,7 +3935,7 @@ export type NetworkMeshWorkload = {
   __typename?: 'NetworkMeshWorkload';
   id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  namespace: Scalars['String']['output'];
+  namespace?: Maybe<Scalars['String']['output']>;
   service?: Maybe<Scalars['String']['output']>;
 };
 
@@ -11028,6 +11032,21 @@ export type ClusterNodeMetricsQueryVariables = Exact<{
 
 export type ClusterNodeMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, clusterNodeMetrics?: { __typename?: 'ClusterNodeMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
+export type NetworkMeshWorkloadFragment = { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null };
+
+export type NetworkMeshStatisticsFragment = { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null };
+
+export type NetworkMeshEdgeFragment = { __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } };
+
+export type ClusterNetworkGraphQueryVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+}>;
+
+
+export type ClusterNetworkGraphQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
+
 export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
@@ -13848,6 +13867,40 @@ export const ClusterStatusInfoFragmentDoc = gql`
   healthy
 }
     `;
+export const NetworkMeshWorkloadFragmentDoc = gql`
+    fragment NetworkMeshWorkload on NetworkMeshWorkload {
+  id
+  name
+  namespace
+  service
+}
+    `;
+export const NetworkMeshStatisticsFragmentDoc = gql`
+    fragment NetworkMeshStatistics on NetworkMeshStatistics {
+  bytes
+  packets
+  connections
+  http200
+  http400
+  http500
+  httpClientLatency
+}
+    `;
+export const NetworkMeshEdgeFragmentDoc = gql`
+    fragment NetworkMeshEdge on NetworkMeshEdge {
+  id
+  from {
+    ...NetworkMeshWorkload
+  }
+  to {
+    ...NetworkMeshWorkload
+  }
+  statistics {
+    ...NetworkMeshStatistics
+  }
+}
+    ${NetworkMeshWorkloadFragmentDoc}
+${NetworkMeshStatisticsFragmentDoc}`;
 export const ComponentMetricsFragmentFragmentDoc = gql`
     fragment ComponentMetricsFragment on ServiceDeployment {
   componentMetrics(
@@ -19909,6 +19962,51 @@ export type ClusterNodeMetricsQueryHookResult = ReturnType<typeof useClusterNode
 export type ClusterNodeMetricsLazyQueryHookResult = ReturnType<typeof useClusterNodeMetricsLazyQuery>;
 export type ClusterNodeMetricsSuspenseQueryHookResult = ReturnType<typeof useClusterNodeMetricsSuspenseQuery>;
 export type ClusterNodeMetricsQueryResult = Apollo.QueryResult<ClusterNodeMetricsQuery, ClusterNodeMetricsQueryVariables>;
+export const ClusterNetworkGraphDocument = gql`
+    query ClusterNetworkGraph($clusterId: ID!, $namespace: String, $time: DateTime) {
+  cluster(id: $clusterId) {
+    id
+    networkGraph(namespace: $namespace, time: $time) {
+      ...NetworkMeshEdge
+    }
+  }
+}
+    ${NetworkMeshEdgeFragmentDoc}`;
+
+/**
+ * __useClusterNetworkGraphQuery__
+ *
+ * To run a query within a React component, call `useClusterNetworkGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterNetworkGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterNetworkGraphQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      namespace: // value for 'namespace'
+ *      time: // value for 'time'
+ *   },
+ * });
+ */
+export function useClusterNetworkGraphQuery(baseOptions: Apollo.QueryHookOptions<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>(ClusterNetworkGraphDocument, options);
+      }
+export function useClusterNetworkGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>(ClusterNetworkGraphDocument, options);
+        }
+export function useClusterNetworkGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>(ClusterNetworkGraphDocument, options);
+        }
+export type ClusterNetworkGraphQueryHookResult = ReturnType<typeof useClusterNetworkGraphQuery>;
+export type ClusterNetworkGraphLazyQueryHookResult = ReturnType<typeof useClusterNetworkGraphLazyQuery>;
+export type ClusterNetworkGraphSuspenseQueryHookResult = ReturnType<typeof useClusterNetworkGraphSuspenseQuery>;
+export type ClusterNetworkGraphQueryResult = Apollo.QueryResult<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>;
 export const ServiceDeploymentComponentMetricsDocument = gql`
     query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
@@ -28315,6 +28413,7 @@ export const namedOperations = {
     TagPairs: 'TagPairs',
     ClusterMetrics: 'ClusterMetrics',
     ClusterNodeMetrics: 'ClusterNodeMetrics',
+    ClusterNetworkGraph: 'ClusterNetworkGraph',
     ServiceDeploymentComponentMetrics: 'ServiceDeploymentComponentMetrics',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
@@ -28621,6 +28720,9 @@ export const namedOperations = {
     PolicyBinding: 'PolicyBinding',
     ClusterBindings: 'ClusterBindings',
     ClusterStatusInfo: 'ClusterStatusInfo',
+    NetworkMeshWorkload: 'NetworkMeshWorkload',
+    NetworkMeshStatistics: 'NetworkMeshStatistics',
+    NetworkMeshEdge: 'NetworkMeshEdge',
     ComponentMetricsFragment: 'ComponentMetricsFragment',
     GitRepository: 'GitRepository',
     HelmRepository: 'HelmRepository',

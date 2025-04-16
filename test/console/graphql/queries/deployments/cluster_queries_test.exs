@@ -523,7 +523,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 13324.0]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)
@@ -531,15 +531,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 20000.0]}
-          ]}}
-        }
-      end)
-
-      expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
-        {:ok,
-          %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), 100.0]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "20000.0"]}
           ]}}
         }
       end)
@@ -551,7 +543,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
               id
               from { id name namespace service }
               to { id name namespace service }
-              statistics { bytesSent bytesReceived connections }
+              statistics { bytes }
             }
           }
         }
@@ -565,9 +557,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert edge["to"]["name"] == "nginx"
       assert edge["to"]["namespace"] == "to"
 
-      assert trunc(edge["statistics"]["bytesSent"]) == 13324
-      assert trunc(edge["statistics"]["bytesReceived"]) == 20000
-      assert trunc(edge["statistics"]["connections"]) == 100
+      assert trunc(edge["statistics"]["bytes"]) == 13324
     end
   end
 

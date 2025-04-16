@@ -2,6 +2,7 @@ import {
   Card,
   ChipList,
   Code,
+  Flex,
   IconFrame,
   SidecarItem,
 } from '@pluralsh/design-system'
@@ -132,23 +133,20 @@ function MetadataCard({
 }
 
 export default function ClusterMetadata() {
-  const theme = useTheme()
   const { cluster, refetch } = useClusterContext()
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.xlarge,
-      }}
+    <Flex
+      direction="column"
+      gap="xlarge"
+      flex={1}
     >
       <MetadataCard
         cluster={cluster}
         refetch={refetch}
       />
       <NodePoolsSection cluster={cluster} />
-    </div>
+    </Flex>
   )
 }
 

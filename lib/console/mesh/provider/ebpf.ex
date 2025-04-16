@@ -5,20 +5,23 @@ defmodule Console.Mesh.Provider.Ebpf do
   spread across separate prometheus metrics entirely.
   """
   @behaviour Console.Mesh.Provider
+  alias Console.Mesh.Provider.Utils
   alias Console.Schema.{Cluster}
-  alias Console.Mesh.{Builder, Edge, Workload, Statistics}
-  alias Prometheus.{Response, Data, Result}
+  alias Console.Mesh.{Edge, Workload, Statistics}
+  alias Prometheus.{Result}
 
   require Logger
 
   defstruct [:prom, :cluster]
 
   @queries [
-    bytes_sent: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
-    bytes_received: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
-    packets: ~s/avg(rate(tcp.packets{cluster="$cluster"$additional}[5m]))/,
-    # http: ~s/avg(rate(http.status_code{cluster="$cluster"$additional}[[5m])) by (status_code)/,
-    connections: ~s/avg(rate(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m]))/,
+    bytes: ~s/rate(tcp.bytes{cluster="$cluster"$additional}[5m])/,
+    packets: ~s/rate(tcp.packets{cluster="$cluster"$additional}[5m])/,
+    http200: ~s/rate(http.status_code{status_code="200",cluster="$cluster"$additional}[[5m])/,
+    http400: ~s/rate(http.status_code{status_code="400",cluster="$cluster"$additional}[[5m])/,
+    http500: ~s/rate(http.status_code{status_code="500",cluster="$cluster"$additional}[[5m])/,
+    http_client_latency: ~s/rate(http.client.duration_average{cluster="$cluster"$additional}[5m])/,
+    connections: ~s/avg(tcp.active{cluster="$cluster"$additional}[5m]) by (source.workload.name, source.namespace.name, dest.workload.name, dest.namespace.name)/,
   ]
 
   def new(prom, cluster) do
@@ -29,42 +32,27 @@ defmodule Console.Mesh.Provider.Ebpf do
     {namespace, opts} = Keyword.pop(opts, :namespace)
     additional = namespace_filter(namespace)
 
-    Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts)do
-        {:ok, %Response{data: %Data{result: results}}} ->
-          {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
-        err ->
-          Logger.warning "failed to fetch istio prometheus metrics: #{inspect(err)}"
-          {:halt, err}
-      end
-    end)
-    |> case do
-      %Builder{} = builder -> {:ok, Builder.render(builder)}
-      err -> {:error, "prometheus error fetching istio metrics: #{inspect(err)}"}
-    end
+    Enum.map(@queries, fn {m, q} -> {m, format_query(q, cluster, additional)} end)
+    |> Utils.build_graph(prom, &edge/2, opts)
   end
-
-  defp add_result(metric, %Result{metric: m, value: [ts, val]}, b) do
-    Builder.add(b, edge(metric, %Result{metric: m, value: [ts, val]}))
-  end
-  defp add_result(_, _, b), do: b
 
   defp edge(metric, %Result{metric: m, value: [_ , val]}) do
-    source_id = "#{m["source.workload.name"]}:#{m["source.workload.namespace"]}"
-    dest_id = "#{m["destination.workload.name"]}:#{m["destination.workload.namespace"]}"
+    source_id = "#{m["source.workload.name"]}:#{m["source.namespace.name"]}"
+    dest_id   = "#{m["dest.workload.name"]}:#{m["dest.namespace.name"]}"
+
     %Edge{
       id: "#{source_id}.#{dest_id}",
       from: %Workload{
-        id: source_id,
-        name: m["source.workload.name"],
-        namespace: m["source.workload.namespace"],
-        service: m["source.container.name"]
+        id:        source_id,
+        name:      m["source.workload.name"],
+        namespace: m["source.namespace.name"],
+        service:   m["source.container.name"]
       },
       to: %Workload{
-        id: dest_id,
-        name: m["destination.workload.name"],
-        namespace: m["destination.workload.namespace"],
-        service: m["destination.container.name"]
+        id:        dest_id,
+        name:      m["dest.workload.name"],
+        namespace: m["dest.namespace.name"],
+        service:   m["dest.container.name"]
       },
       statistics: struct(Statistics, %{metric => val})
     }

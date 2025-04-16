@@ -4,9 +4,13 @@ defmodule Console.Mesh.Prometheus do
 
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
 
+  def value(v) when is_binary(v), do: Console.Cost.Utils.to_float(v)
+  def value(v), do: v
+
   def query(conn, query, opts \\ []) do
     Path.join(conn.host, "/api/v1/query")
     |> HTTPoison.post({:form, form([{"query", query}], Map.new(opts))}, headers(conn))
+    |> IO.inspect()
     |> case do
       {:ok, %HTTPoison.Response{body: body, status_code: 200}} ->
         Poison.decode(body, as: Response.spec())

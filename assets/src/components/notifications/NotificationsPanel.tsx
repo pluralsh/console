@@ -131,6 +131,7 @@ export function NotificationsPanel({
             flush
             hideHeader
             fullHeightWrap
+            padCells={false}
             rowBg="base"
             columns={columns}
             data={notifications}

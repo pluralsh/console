@@ -1031,15 +1031,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :network_mesh_workload do
     field :id,        non_null(:string)
     field :name,      non_null(:string)
-    field :namespace, non_null(:string)
+    field :namespace, :string
     field :service,   :string
   end
 
   @desc "The relevant statistics for traffic within a service mesh"
   object :network_mesh_statistics do
-    field :bytes_sent,     :float
-    field :bytes_received, :float
-    field :connections,    :float
+    field :bytes,               :float
+    field :connections,         :float
+    field :packets,             :float
+    field :http200,             :float
+    field :http400,             :float
+    field :http500,             :float
+    field :http_client_latency, :float
   end
 
   @desc "An edge representing traffic statistics between two workloads in a service mesh"

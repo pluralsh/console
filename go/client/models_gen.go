@@ -3204,16 +3204,20 @@ type NetworkMeshEdge struct {
 
 // The relevant statistics for traffic within a service mesh
 type NetworkMeshStatistics struct {
-	BytesSent     *float64 `json:"bytesSent,omitempty"`
-	BytesReceived *float64 `json:"bytesReceived,omitempty"`
-	Connections   *float64 `json:"connections,omitempty"`
+	Bytes             *float64 `json:"bytes,omitempty"`
+	Connections       *float64 `json:"connections,omitempty"`
+	Packets           *float64 `json:"packets,omitempty"`
+	HTTP200           *float64 `json:"http200,omitempty"`
+	HTTP400           *float64 `json:"http400,omitempty"`
+	HTTP500           *float64 `json:"http500,omitempty"`
+	HTTPClientLatency *float64 `json:"httpClientLatency,omitempty"`
 }
 
 // An abstract workload discovered by querying statistics on a service mesh
 type NetworkMeshWorkload struct {
 	ID        string  `json:"id"`
 	Name      string  `json:"name"`
-	Namespace string  `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	Service   *string `json:"service,omitempty"`
 }
 
@@ -7784,16 +7788,22 @@ func (e ObservabilityProviderType) MarshalGQL(w io.Writer) {
 type ObservabilityWebhookType string
 
 const (
-	ObservabilityWebhookTypeGrafana ObservabilityWebhookType = "GRAFANA"
+	ObservabilityWebhookTypeGrafana   ObservabilityWebhookType = "GRAFANA"
+	ObservabilityWebhookTypeDatadog   ObservabilityWebhookType = "DATADOG"
+	ObservabilityWebhookTypePagerduty ObservabilityWebhookType = "PAGERDUTY"
+	ObservabilityWebhookTypeNewrelic  ObservabilityWebhookType = "NEWRELIC"
 )
 
 var AllObservabilityWebhookType = []ObservabilityWebhookType{
 	ObservabilityWebhookTypeGrafana,
+	ObservabilityWebhookTypeDatadog,
+	ObservabilityWebhookTypePagerduty,
+	ObservabilityWebhookTypeNewrelic,
 }
 
 func (e ObservabilityWebhookType) IsValid() bool {
 	switch e {
-	case ObservabilityWebhookTypeGrafana:
+	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic:
 		return true
 	}
 	return false
