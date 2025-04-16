@@ -15,8 +15,18 @@ import { isEmpty } from 'lodash'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import LoadingIndicator from './LoadingIndicator'
-import { TimestampSliderButton } from './TimestampSlider'
+import LoadingIndicator from '../LoadingIndicator'
+import { TimestampSliderButton } from '../TimestampSlider'
+import { useMemo } from 'react'
+import { Edge, Node } from '@xyflow/react'
+import { MeshStatisticsNode, MeshWorkloadNode } from './NetworkMeshNodes'
+import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
+import { ReactFlowGraph } from '../reactflow/graph'
+
+const nodeTypes = {
+  workload: MeshWorkloadNode,
+  statistics: MeshStatisticsNode,
+}
 
 export function NetworkGraph({
   networkData,
@@ -47,6 +57,11 @@ export function NetworkGraph({
     namespacesData?.namespaces
       ?.filter(isNonNullable)
       .map((ns) => ns.metadata.name) ?? []
+
+  const { nodes: baseNodes, edges: baseEdges } = useMemo(
+    () => getNetworkNodesAndEdges(networkData),
+    [networkData]
+  )
 
   return (
     <WrapperSC>
@@ -84,7 +99,12 @@ export function NetworkGraph({
         ) : isEmpty(networkData) ? (
           <EmptyState message="No network data found." />
         ) : (
-          <div>NetworkGraph</div>
+          <ReactFlowGraph
+            baseNodes={baseNodes}
+            baseEdges={baseEdges}
+            dagreOptions={options}
+            nodeTypes={nodeTypes}
+          />
         )}
       </Card>
     </WrapperSC>
@@ -98,3 +118,35 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
 }))
+
+function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
+  nodes: Node[]
+  edges: Edge[]
+} {
+  console.log(networkData)
+  return { nodes: [], edges: [] }
+  // const nodes: Node[] = []
+  // const edges: Edge[] = []
+  // state?.state?.filter(isNonNullable).forEach((ssr) => {
+  //   nodes.push({
+  //     id: ssr.identifier,
+  //     position: { x: 0, y: 0 },
+  //     type: NodeType.Stage,
+  //     data: { ...ssr },
+  //   })
+  //   edges.push(
+  //     ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
+  //       type: EdgeType.Bezier,
+  //       updatable: false,
+  //       id: `${ssr.identifier}${link}`,
+  //       source: ssr.identifier,
+  //       target: link,
+  //     }))
+  //   )
+  // })
+  // return { nodes, edges }
+}
+
+const options: DagreGraphOptions = {
+  ranksep: 50,
+}

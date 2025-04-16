@@ -1,6 +1,6 @@
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
-import { NetworkGraph } from 'components/utils/NetworkGraph'
+import { NetworkGraph } from 'components/utils/network-graph/NetworkGraph'
 import Fuse from 'fuse.js'
 import {
   NetworkMeshEdgeFragment,

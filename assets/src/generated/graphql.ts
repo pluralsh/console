@@ -11030,6 +11030,8 @@ export type ClusterNodeMetricsQuery = { __typename?: 'RootQueryType', cluster?: 
 
 export type NetworkMeshWorkloadFragment = { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null };
 
+export type NetworkMeshStatisticsFragment = { __typename?: 'NetworkMeshStatistics', bytesReceived?: number | null, bytesSent?: number | null, connections?: number | null };
+
 export type NetworkMeshEdgeFragment = { __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytesReceived?: number | null, bytesSent?: number | null, connections?: number | null } };
 
 export type ClusterNetworkGraphQueryVariables = Exact<{
@@ -13869,6 +13871,13 @@ export const NetworkMeshWorkloadFragmentDoc = gql`
   service
 }
     `;
+export const NetworkMeshStatisticsFragmentDoc = gql`
+    fragment NetworkMeshStatistics on NetworkMeshStatistics {
+  bytesReceived
+  bytesSent
+  connections
+}
+    `;
 export const NetworkMeshEdgeFragmentDoc = gql`
     fragment NetworkMeshEdge on NetworkMeshEdge {
   id
@@ -13879,12 +13888,11 @@ export const NetworkMeshEdgeFragmentDoc = gql`
     ...NetworkMeshWorkload
   }
   statistics {
-    bytesReceived
-    bytesSent
-    connections
+    ...NetworkMeshStatistics
   }
 }
-    ${NetworkMeshWorkloadFragmentDoc}`;
+    ${NetworkMeshWorkloadFragmentDoc}
+${NetworkMeshStatisticsFragmentDoc}`;
 export const ComponentMetricsFragmentFragmentDoc = gql`
     fragment ComponentMetricsFragment on ServiceDeployment {
   componentMetrics(
@@ -28705,6 +28713,7 @@ export const namedOperations = {
     ClusterBindings: 'ClusterBindings',
     ClusterStatusInfo: 'ClusterStatusInfo',
     NetworkMeshWorkload: 'NetworkMeshWorkload',
+    NetworkMeshStatistics: 'NetworkMeshStatistics',
     NetworkMeshEdge: 'NetworkMeshEdge',
     ComponentMetricsFragment: 'ComponentMetricsFragment',
     GitRepository: 'GitRepository',

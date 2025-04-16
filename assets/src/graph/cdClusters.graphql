@@ -696,6 +696,12 @@ fragment NetworkMeshWorkload on NetworkMeshWorkload {
   service
 }
 
+fragment NetworkMeshStatistics on NetworkMeshStatistics {
+  bytesReceived
+  bytesSent
+  connections
+}
+
 fragment NetworkMeshEdge on NetworkMeshEdge {
   id
   from {
@@ -705,9 +711,7 @@ fragment NetworkMeshEdge on NetworkMeshEdge {
     ...NetworkMeshWorkload
   }
   statistics {
-    bytesReceived
-    bytesSent
-    connections
+    ...NetworkMeshStatistics
   }
 }
 
