@@ -365,6 +365,10 @@ const clusterDetailsRoutes = [
         path={CLUSTER_PODS_PATH}
         element={<ClusterPods />}
       />
+      <Route
+        path={CLUSTER_PRS_REL_PATH}
+        element={<ClusterPRs />}
+      />
     </Route>
     <Route
       path={CLUSTER_NETWORK_PATH}
@@ -395,10 +399,6 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_VCLUSTERS_REL_PATH}
       element={<VClusters />}
-    />
-    <Route
-      path={CLUSTER_PRS_REL_PATH}
-      element={<ClusterPRs />}
     />
     <Route
       path={CLUSTER_LOGS_PATH}

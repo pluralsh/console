@@ -46,14 +46,8 @@ export default function ClusterPRs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: usePullRequestsQuery,
-      keyPath: ['pullRequests'],
-    },
-    {
-      q: debouncedSearchString,
-      clusterId: cluster.id,
-    }
+    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { q: debouncedSearchString, clusterId: cluster.id }
   )
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
@@ -71,6 +65,7 @@ export default function ClusterPRs() {
         flexDirection: 'column',
         gap: theme.spacing.small,
         height: '100%',
+        width: '100%',
       }}
     >
       <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
