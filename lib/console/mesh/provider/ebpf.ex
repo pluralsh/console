@@ -21,7 +21,7 @@ defmodule Console.Mesh.Provider.Ebpf do
     http400: ~s/rate(http.status_code{status_code="400",cluster="$cluster"$additional}[[5m])/,
     http500: ~s/rate(http.status_code{status_code="500",cluster="$cluster"$additional}[[5m])/,
     http_client_latency: ~s/rate(http.client.duration_average{cluster="$cluster"$additional}[5m])/,
-    connections: ~s/avg(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m]) by (source.workload.name, source.namespace.name, dest.workload.name, dest.namespace.name)/,
+    connections: ~s/avg(tcp.active{cluster="$cluster"$additional}[5m]) by (source.workload.name, source.namespace.name, dest.workload.name, dest.namespace.name)/,
   ]
 
   def new(prom, cluster) do
@@ -38,7 +38,7 @@ defmodule Console.Mesh.Provider.Ebpf do
           {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
         err ->
           Logger.warning "failed to fetch istio prometheus metrics: #{inspect(err)}"
-          {:halt, err}
+          {:cont, b}
       end
     end)
     |> case do
