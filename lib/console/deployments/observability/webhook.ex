@@ -4,7 +4,7 @@ defmodule Console.Deployments.Observability.Webhook do
   to handle provider-specific logic.
   """
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Observability.Webhook.{Grafana, Pagerduty, Raw}
+  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Raw}
   alias Console.Schema.ObservabilityWebhook
 
   @callback associations(atom, map, map) :: map
@@ -52,6 +52,32 @@ defmodule Console.Deployments.Observability.Webhook do
     |> backfill_raw()
     |> listify()
     |> ok()
+  end
+
+  def payload(%ObservabilityWebhook{type: :datadog}, payload) do
+    case Datadog.normalize_datadog_payload(payload) do
+      [] -> {:error, "invalid payload"}
+      alerts ->
+        Enum.map(alerts, fn alert ->
+          Map.merge(%{
+            type: :datadog,
+            fingerprint: Map.get(alert, "id"),
+            annotations: Map.get(alert, "meta") || %{},
+            state: Datadog.state(
+              Map.get(alert, "status") ||
+              Map.get(alert, "alert_transition") ||
+              ""
+            ),
+            severity: Datadog.severity(alert),
+            url: Map.get(alert, "link") || Map.get(alert, "url") || "",
+            title: Map.get(alert, "title") || "Datadog Alert",
+            message: Datadog.summary(alert),
+            tags: Datadog.datadog_tags(alert),
+          }, add_associations(Datadog, alert))
+          |> backfill_raw()
+        end)
+        |> ok()
+    end
   end
 
   def payload(_, _), do: {:error, "invalid payload"}

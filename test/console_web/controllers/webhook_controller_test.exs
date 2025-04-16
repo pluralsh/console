@@ -161,6 +161,18 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [] = Console.Repo.all(Console.Schema.Alert)
     end
 
+    test "it will ignore if no associated plural resource is found (datadog)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :datadog)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/datadog/#{hook.external_id}", String.trim(Console.conf(:datadog_webhook_firing_payload)))
+      |> response(200)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
     test "it can handle payloads with text in body (grafana)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :grafana)
       svc = insert(:service)
@@ -198,6 +210,55 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
       |> put_req_header("content-type", "application/json")
       |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", Jason.encode!(webhook))
+      |> response(200)
+
+      [alert] = Console.Repo.all(Console.Schema.Alert)
+
+      assert alert.service_id == svc.id
+      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+    end
+
+    test "it can handle payloads with text in body (datadog)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :datadog)
+      svc = insert(:service)
+
+      webhook = String.trim(Console.conf(:datadog_webhook_firing_payload)) |> Jason.decode!()
+
+      tags = [
+        "plrl_service:#{svc.name}",
+        "plrl_cluster:#{svc.cluster.handle}",
+        "plrl_project:test-project"
+      ]
+
+      message = """
+      Alert triggered for service: #{svc.name}
+      Cluster: #{svc.cluster.handle}
+      Project: test-project
+      """
+
+      webhook = case webhook do
+        %{"alerts" => [alert | rest]} ->
+          updated_alert = alert
+            |> Map.put("tags", tags)
+            |> Map.put("message", message)
+          %{webhook | "alerts" => [updated_alert | rest]}
+
+        %{"event" => event} ->
+          updated_event = event
+            |> Map.put("tags", tags)
+            |> Map.put("message", message)
+          %{webhook | "event" => updated_event}
+
+        _ ->
+          webhook
+          |> Map.put("tags", tags)
+          |> Map.put("message", message)
+      end
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/datadog/#{hook.external_id}", Jason.encode!(webhook))
       |> response(200)
 
       [alert] = Console.Repo.all(Console.Schema.Alert)

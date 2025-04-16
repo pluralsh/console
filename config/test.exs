@@ -202,6 +202,21 @@ config :console,
   }
 }|,
 
+  datadog_webhook_firing_payload: ~s|
+{
+  "id": "f4c62822-3bdc-4fda-ade0-410becf0de4f",
+  "event_type": "incident.priority_updated",
+  "resource_type": "incident",
+  "occurred_at": "2020-10-02T18:45:22.169Z",
+  "title": "Datadog Alert",
+  "message": "Datadog Alert Message",
+  "link": "https://example.com",
+  "url": "https://example.com",
+  "status": "firing",
+  "priority": "P1",
+  "tags": ["tag1", "tag2"]
+}|,
+
   test_kubeconfig: """
 apiVersion: v1
 clusters:
