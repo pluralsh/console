@@ -5,10 +5,10 @@ defmodule Console.Mesh.Provider.Ebpf do
   spread across separate prometheus metrics entirely.
   """
   @behaviour Console.Mesh.Provider
+  alias Console.Mesh.Provider.Utils
   alias Console.Schema.{Cluster}
-  alias Console.Mesh.{Builder, Edge, Workload, Statistics}
-  alias Prometheus.{Response, Data, Result}
-  alias Console.Mesh.Prometheus, as: Prom
+  alias Console.Mesh.{Edge, Workload, Statistics}
+  alias Prometheus.{Result}
 
   require Logger
 
@@ -32,42 +32,27 @@ defmodule Console.Mesh.Provider.Ebpf do
     {namespace, opts} = Keyword.pop(opts, :namespace)
     additional = namespace_filter(namespace)
 
-    Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Prom.query(prom, format_query(query, cluster, additional), opts) do
-        {:ok, %Response{data: %Data{result: results}}} ->
-          {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
-        err ->
-          Logger.warning "failed to fetch istio prometheus metrics: #{inspect(err)}"
-          {:cont, b}
-      end
-    end)
-    |> case do
-      %Builder{} = builder -> {:ok, Builder.render(builder)}
-      err -> {:error, "prometheus error fetching istio metrics: #{inspect(err)}"}
-    end
+    Enum.map(@queries, fn {m, q} -> {m, format_query(q, cluster, additional)} end)
+    |> Utils.build_graph(prom, &edge/2, opts)
   end
-
-  defp add_result(metric, %Result{metric: m, value: [ts, val]}, b) do
-    Builder.add(b, edge(metric, %Result{metric: m, value: [ts, Prom.value(val)]}))
-  end
-  defp add_result(_, _, b), do: b
 
   defp edge(metric, %Result{metric: m, value: [_ , val]}) do
     source_id = "#{m["source.workload.name"]}:#{m["source.namespace.name"]}"
-    dest_id = "#{m["dest.workload.name"]}:#{m["dest.namespace.name"]}"
+    dest_id   = "#{m["dest.workload.name"]}:#{m["dest.namespace.name"]}"
+
     %Edge{
       id: "#{source_id}.#{dest_id}",
       from: %Workload{
-        id: source_id,
-        name: m["source.workload.name"],
+        id:        source_id,
+        name:      m["source.workload.name"],
         namespace: m["source.namespace.name"],
-        service: m["source.container.name"]
+        service:   m["source.container.name"]
       },
       to: %Workload{
-        id: dest_id,
-        name: m["dest.workload.name"],
+        id:        dest_id,
+        name:      m["dest.workload.name"],
         namespace: m["dest.namespace.name"],
-        service: m["dest.container.name"]
+        service:   m["dest.container.name"]
       },
       statistics: struct(Statistics, %{metric => val})
     }
