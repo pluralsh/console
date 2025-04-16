@@ -6128,7 +6128,7 @@ type CloudAddonVersionInformation {
 type NetworkMeshWorkload {
   id: String!
   name: String!
-  namespace: String!
+  namespace: String
   service: String
 }
 

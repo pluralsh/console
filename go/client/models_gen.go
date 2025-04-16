@@ -3213,7 +3213,7 @@ type NetworkMeshStatistics struct {
 type NetworkMeshWorkload struct {
 	ID        string  `json:"id"`
 	Name      string  `json:"name"`
-	Namespace string  `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	Service   *string `json:"service,omitempty"`
 }
 

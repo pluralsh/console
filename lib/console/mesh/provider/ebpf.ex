@@ -14,11 +14,11 @@ defmodule Console.Mesh.Provider.Ebpf do
   defstruct [:prom, :cluster]
 
   @queries [
-    bytes_sent: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
-    bytes_received: ~s/avg(rate(tcp.bytes{cluster="$cluster"$additional}[5m]))/,
-    packets: ~s/avg(rate(tcp.packets{cluster="$cluster"$additional}[5m]))/,
-    # http: ~s/avg(rate(http.status_code{cluster="$cluster"$additional}[[5m])) by (status_code)/,
-    connections: ~s/avg(rate(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m]))/,
+    bytes_sent: ~s/rate(tcp.bytes{cluster="$cluster"$additional}[5m])/,
+    bytes_received: ~s/rate(tcp.bytes{cluster="$cluster"$additional}[5m])/,
+    packets: ~s/rate(tcp.packets{cluster="$cluster"$additional}[5m])/,
+    # http: ~s/rate(http.status_code{cluster="$cluster"$additional}[[5m]) by (status_code)/,
+    connections: ~s/rate(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m])/,
   ]
 
   def new(prom, cluster) do
@@ -30,7 +30,7 @@ defmodule Console.Mesh.Provider.Ebpf do
     additional = namespace_filter(namespace)
 
     Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts) |> IO.inspect() do
+      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts) do
         {:ok, %Response{data: %Data{result: results}}} ->
           {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
         err ->
@@ -50,21 +50,21 @@ defmodule Console.Mesh.Provider.Ebpf do
   defp add_result(_, _, b), do: b
 
   defp edge(metric, %Result{metric: m, value: [_ , val]}) do
-    source_id = "#{m["source.workload.name"]}:#{m["source.workload.namespace"]}"
-    dest_id = "#{m["destination.workload.name"]}:#{m["destination.workload.namespace"]}"
+    source_id = "#{m["source.workload.name"]}:#{m["source.namespace.name"]}"
+    dest_id = "#{m["dest.workload.name"]}:#{m["dest.namespace.name"]}"
     %Edge{
       id: "#{source_id}.#{dest_id}",
       from: %Workload{
         id: source_id,
         name: m["source.workload.name"],
-        namespace: m["source.workload.namespace"],
+        namespace: m["source.namespace.name"],
         service: m["source.container.name"]
       },
       to: %Workload{
         id: dest_id,
-        name: m["destination.workload.name"],
-        namespace: m["destination.workload.namespace"],
-        service: m["destination.container.name"]
+        name: m["dest.workload.name"],
+        namespace: m["dest.namespace.name"],
+        service: m["dest.container.name"]
       },
       statistics: struct(Statistics, %{metric => val})
     }

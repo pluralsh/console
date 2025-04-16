@@ -1031,7 +1031,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :network_mesh_workload do
     field :id,        non_null(:string)
     field :name,      non_null(:string)
-    field :namespace, non_null(:string)
+    field :namespace, :string
     field :service,   :string
   end
 

@@ -14,9 +14,9 @@ defmodule Console.Mesh.Provider.Istio do
   defstruct [:prom, :cluster]
 
   @queries [
-    bytes_sent: ~s/avg(rate(istio_tcp_sent_bytes_total{cluster="$cluster"$additional}[5m]))/,
-    bytes_received: ~s/avg(rate(istio_tcp_received_bytes_total{cluster="$cluster"$additional}[5m]))/,
-    connections: ~s/avg(rate(istio_tcp_connections_opened_total{direction="inbound",cluster="$cluster"$additional}[5m]))/,
+    bytes_sent: ~s/rate(istio_tcp_sent_bytes_total{cluster="$cluster"$additional}[5m])/,
+    bytes_received: ~s/rate(istio_tcp_received_bytes_total{cluster="$cluster"$additional}[5m])/,
+    connections: ~s/rate(istio_tcp_connections_opened_total{direction="inbound",cluster="$cluster"$additional}[5m])/,
   ]
 
   def new(prom, cluster) do
