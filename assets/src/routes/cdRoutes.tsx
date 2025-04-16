@@ -150,7 +150,7 @@ import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
-import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
+// import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -616,10 +616,10 @@ const serviceDetailsRoutes = (
       element={<ServiceMetrics />}
       path="metrics"
     />
-    <Route
+    {/* <Route
       element={<ServiceNetwork />}
       path="network"
-    />
+    /> */}
     <Route
       element={<ServiceInsights />}
       path="insights"

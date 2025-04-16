@@ -219,7 +219,7 @@ export const getDirectory = ({
       ),
       enabled: true,
     },
-    { path: 'network', label: 'Network', enabled: true },
+    // { path: 'network', label: 'Network', enabled: true },
     {
       path: 'insights',
       label: <InsightsTabLabel insight={serviceDeployment.insight} />,

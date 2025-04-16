@@ -13,9 +13,13 @@ import { Body2BoldP } from './typography/Text'
 
 type TimestampSliderProps = {
   setTimestamp: (timestamp: string | undefined) => void
+  isTimestampSet: boolean
 }
 
-export function TimestampSlider({ setTimestamp }: TimestampSliderProps) {
+export function TimestampSlider({
+  setTimestamp,
+  isTimestampSet,
+}: TimestampSliderProps) {
   // slider is a two hour window, with 1 minute increments, "now" is captured when the component mounts
   const DISPLAY_FORMAT = 'h:mm a'
   const [now] = useState(() => new Date().getTime())
@@ -41,7 +45,7 @@ export function TimestampSlider({ setTimestamp }: TimestampSliderProps) {
             Reset
           </LinkButtonSC>
           <LinkButtonSC
-            disabled={internalValue === lastAppliedValue}
+            disabled={isTimestampSet && internalValue === lastAppliedValue}
             onClick={onApply}
           >
             Apply
@@ -49,6 +53,8 @@ export function TimestampSlider({ setTimestamp }: TimestampSliderProps) {
         </Flex>
       </Flex>
       <Slider
+        colorized={false}
+        tooltip={false}
         minValue={-120}
         maxValue={0}
         tickMarks={[
@@ -63,7 +69,10 @@ export function TimestampSlider({ setTimestamp }: TimestampSliderProps) {
   )
 }
 
-export function TimestampSliderButton({ setTimestamp }: TimestampSliderProps) {
+export function TimestampSliderButton({
+  setTimestamp,
+  isTimestampSet,
+}: TimestampSliderProps) {
   const { colors } = useTheme()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -76,14 +85,21 @@ export function TimestampSliderButton({ setTimestamp }: TimestampSliderProps) {
     >
       <Button
         floating
-        css={{ borderColor: colors['border-primary'] }}
+        css={{
+          ...(isTimestampSet && {
+            '&&': { borderColor: colors['border-primary'] },
+          }),
+        }}
         startIcon={<HistoryIcon color="icon-light" />}
         onClick={() => setIsOpen(!isOpen)}
       >
         Timestamp
       </Button>
       <SliderCardSC $isOpen={isOpen}>
-        <TimestampSlider setTimestamp={setTimestamp} />
+        <TimestampSlider
+          isTimestampSet={isTimestampSet}
+          setTimestamp={setTimestamp}
+        />
       </SliderCardSC>
     </div>
   )

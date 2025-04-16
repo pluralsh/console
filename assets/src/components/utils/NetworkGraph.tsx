@@ -26,6 +26,7 @@ export function NetworkGraph({
   namespace,
   setNamespace,
   setTimestamp,
+  isTimestampSet,
 }: {
   networkData: NetworkMeshEdgeFragment[]
   loading?: boolean
@@ -34,6 +35,7 @@ export function NetworkGraph({
   namespace?: string
   setNamespace: (namespace?: string) => void
   setTimestamp: (timestamp: string | undefined) => void
+  isTimestampSet: boolean
 }) {
   const { colors } = useTheme()
   const { clusterId } = useParams()
@@ -71,7 +73,10 @@ export function NetworkGraph({
             }}
           />
         )}
-        <TimestampSliderButton setTimestamp={setTimestamp} />
+        <TimestampSliderButton
+          setTimestamp={setTimestamp}
+          isTimestampSet={isTimestampSet}
+        />
       </Flex>
       <Card flex={1}>
         {loading ? (

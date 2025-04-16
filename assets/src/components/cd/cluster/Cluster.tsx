@@ -87,8 +87,8 @@ const getDirectory = ({
   metricsEnabled: boolean
 }): DirectoryEntry[] => [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
-  { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
   { path: CLUSTER_DETAILS_PATH, label: 'Details' },
+  { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
   { path: CLUSTER_NETWORK_PATH, label: 'Network' },
   {
     path: CLUSTER_INSIGHTS_PATH,

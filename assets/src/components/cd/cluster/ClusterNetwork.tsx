@@ -55,6 +55,7 @@ export function ClusterNetwork() {
       namespace={namespace}
       setNamespace={setNamespace}
       setTimestamp={setTimestamp}
+      isTimestampSet={!!timestamp}
     />
   )
 }

@@ -63,6 +63,7 @@ export function Logs({
       },
       fetchPolicy: 'cache-and-network',
       notifyOnNetworkStatusChange: true,
+      pollInterval: POLL_INTERVAL,
       skip: !(clusterId || serviceId),
     })
 
