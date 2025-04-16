@@ -9,7 +9,6 @@ import {
   NodeMetricFragment,
   useClusterNodesQuery,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -24,7 +23,6 @@ import {
 } from '../../../utils/status.ts'
 import { POLL_INTERVAL } from '../../cluster/constants.ts'
 import { mapify } from '../../cluster/LabelsAnnotations.tsx'
-import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 import {
   numishSort,
   StatusChip,
@@ -32,13 +30,11 @@ import {
   TableText,
   UsageText,
 } from '../../cluster/TableElements'
-import { useMetricsEnabled } from '../../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { UsageBar } from '../../utils/UsageBar.tsx'
 
 export default function ClusterNodes() {
   const theme = useTheme()
-  const metricsEnabled = useMetricsEnabled()
   const { cluster } = useOutletContext() as { cluster: ClusterFragment }
 
   const { data } = useClusterNodesQuery({
@@ -74,12 +70,6 @@ export default function ClusterNodes() {
         height: '100%',
       }}
     >
-      {!isEmpty(data?.cluster?.nodes) && metricsEnabled && (
-        <ClusterMetrics
-          nodes={data?.cluster?.nodes?.filter((node): boolean => !!node) || []}
-          cluster={cluster}
-        />
-      )}
       <NodesList
         nodes={data?.cluster?.nodes || []}
         nodeMetrics={data?.cluster?.nodeMetrics || []}

@@ -364,7 +364,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       expect(HTTPoison, :post, 2, fn _, _, _ ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [1, "1"]}
+          %{value: [1, "1"]}
         ]}})}}
       end)
 
@@ -373,8 +373,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
           cluster(id: $id) {
             id
             heatMap {
-              cpu { values { timestamp value } }
-              memory { values { timestamp value } }
+              cpu { value { timestamp value } }
+              memory { value { timestamp value } }
             }
           }
         }

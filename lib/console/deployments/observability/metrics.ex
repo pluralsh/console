@@ -35,8 +35,20 @@ defmodule Console.Deployments.Observability.Metrics do
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (pod)|
   ])
 
+  @heat_ns post_process([
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (namespace)|,
+    memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (namespace)|
+  ])
+
+  @heat_node post_process([
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (node)|,
+    memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""$filter}) by (node)|
+  ])
+
   def queries(:cluster), do: @cluster
   def queries(:node), do: @node
   def queries(:component), do: @component
-  def queries(:heat), do: @heat
+  def queries(:heat, :pod), do: @heat
+  def queries(:heat, :namespace), do: @heat_ns
+  def queries(:heat, :node), do: @heat_node
 end

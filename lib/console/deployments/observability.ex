@@ -172,19 +172,22 @@ defmodule Console.Deployments.Observability do
   @doc """
   Gathers a heat map of pod utilization for the given cluster or service
   """
-  @spec heat_map(Cluster.t | Service.t) :: {:ok, map} | error
-  def heat_map(%Cluster{handle: cluster}) do
-    queries(:heat)
+  @spec heat_map(Cluster.t | Service.t, :pod | :namespace | :node) :: {:ok, map} | error
+  def heat_map(resource, flavor \\ :pod)
+  def heat_map(%Cluster{handle: cluster}, flavor) do
+    queries(:heat, flavor)
     |> bulk_query(%{cluster: cluster, filter: ""})
   end
 
-  def heat_map(%Service{namespace: ns} = service) do
+  def heat_map(%Service{namespace: ns} = service, flavor) when flavor in [:pod, :node] do
     %Service{cluster: %Cluster{handle: cluster}} =
       Repo.preload(service, [:cluster])
 
-    queries(:heat)
+    queries(:heat, flavor)
     |> bulk_query(%{cluster: cluster, filter: ",namespace=\"#{ns}\""})
   end
+
+  def heat_map(_, flavor), do: {:error, "cannot aggregate utilization by #{flavor} for that resource"}
 
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes
@@ -217,7 +220,7 @@ defmodule Console.Deployments.Observability do
   defp bulk_query(queries, ctx) do
     with {:ok, client} <- get_connection(:prometheus) do
       Task.async_stream(queries, fn {name, query} ->
-        case PrometheusClient.query(client, query, ctx) do
+        case PrometheusClient.query(client, query, ctx) |> IO.inspect() do
           {:ok, %{data: %{result: results}}} -> {name, results}
           err ->
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"

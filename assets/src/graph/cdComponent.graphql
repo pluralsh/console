@@ -1,11 +1,3 @@
-fragment MetricResponse on MetricResponse {
-  metric
-  values {
-    timestamp
-    value
-  }
-}
-
 fragment ComponentMetricsFragment on ServiceDeployment {
   componentMetrics(
     componentId: $componentId

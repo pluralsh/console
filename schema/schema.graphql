@@ -4430,7 +4430,7 @@ type ServiceDeployment {
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
-  heatMap: UtilizationHeatMap
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
 
   "whether this service is editable"
   editable: Boolean
@@ -4442,8 +4442,8 @@ type ServiceDeployment {
 
 "A representation of the metrics to render a utilization heat map"
 type UtilizationHeatMap {
-  cpu: [MetricResponse]
-  memory: [MetricResponse]
+  cpu: [MetricPointResponse]
+  memory: [MetricPointResponse]
 }
 
 type ServiceComponentMetrics {
@@ -4759,6 +4759,12 @@ enum Conjunction {
 enum TagType {
   CLUSTER
   STACK
+}
+
+enum HeatMapFlavor {
+  POD
+  NAMESPACE
+  NODE
 }
 
 input ClusterAttributes {
@@ -5458,7 +5464,7 @@ type Cluster {
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
-  heatMap: UtilizationHeatMap
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
@@ -7672,6 +7678,11 @@ type DashboardMetric {
 type MetricResponse {
   metric: Map
   values: [MetricResult]
+}
+
+type MetricPointResponse {
+  metric: Map
+  value: MetricResult
 }
 
 type LogLine {

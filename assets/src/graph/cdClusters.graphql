@@ -227,41 +227,8 @@ fragment ClusterUpgradePlan on ClusterUpgradePlan {
   kubeletSkew
 }
 
-fragment ClusterMetricsFragment on Cluster {
-  clusterMetrics(start: $start, stop: $stop, step: $step) {
-    cpu {
-      ...MetricResponse
-    }
-    cpuUsage {
-      ...MetricResponse
-    }
-    cpuRequests {
-      ...MetricResponse
-    }
-    cpuLimits {
-      ...MetricResponse
-    }
-
-    memory {
-      ...MetricResponse
-    }
-    memoryUsage {
-      ...MetricResponse
-    }
-    memoryRequests {
-      ...MetricResponse
-    }
-    memoryLimits {
-      ...MetricResponse
-    }
-
-    pods {
-      ...MetricResponse
-    }
-  }
-}
-
-fragment ClusterNodeMetricsFragment on Cluster {
+fragment ClusterNodeMetrics on Cluster {
+  id
   clusterNodeMetrics(node: $node, start: $start, stop: $stop, step: $step) {
     cpu {
       ...MetricResponse
@@ -436,6 +403,39 @@ fragment ClusterWithNodes on Cluster {
   }
 }
 
+fragment ClusterWithMetrics on Cluster {
+  ...ClusterWithNodes
+  clusterMetrics(start: $start, stop: $stop, step: $step) {
+    cpu {
+      ...MetricResponse
+    }
+    cpuUsage {
+      ...MetricResponse
+    }
+    cpuRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
+    memory {
+      ...MetricResponse
+    }
+    memoryUsage {
+      ...MetricResponse
+    }
+    memoryRequests {
+      ...MetricResponse
+    }
+    memoryLimits {
+      ...MetricResponse
+    }
+    pods {
+      ...MetricResponse
+    }
+  }
+}
+
 query ClustersTiny($projectId: ID, $first: Int) {
   clusters(first: $first, projectId: $projectId) {
     edges {
@@ -563,6 +563,7 @@ fragment PolicyBinding on PolicyBinding {
 }
 
 fragment ClusterBindings on Cluster {
+  id
   readBindings {
     ...PolicyBinding
   }
@@ -665,14 +666,6 @@ query TagPairs($first: Int = 30, $q: String, $tag: String, $type: TagType) {
   }
 }
 
-fragment LogStream on LogStream {
-  stream
-  values {
-    timestamp
-    value
-  }
-}
-
 query ClusterMetrics(
   $clusterId: ID!
   $start: DateTime
@@ -680,7 +673,7 @@ query ClusterMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
-    ...ClusterMetricsFragment
+    ...ClusterWithMetrics
   }
 }
 
@@ -692,6 +685,6 @@ query ClusterNodeMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
-    ...ClusterNodeMetricsFragment
+    ...ClusterNodeMetrics
   }
 }

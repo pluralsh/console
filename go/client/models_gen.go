@@ -3144,6 +3144,11 @@ type MetadataAttributes struct {
 	Annotations *string `json:"annotations,omitempty"`
 }
 
+type MetricPointResponse struct {
+	Metric map[string]any `json:"metric,omitempty"`
+	Value  *MetricResult  `json:"value,omitempty"`
+}
+
 type MetricResponse struct {
 	Metric map[string]any  `json:"metric,omitempty"`
 	Values []*MetricResult `json:"values,omitempty"`
@@ -6176,8 +6181,8 @@ type UserRoles struct {
 
 // A representation of the metrics to render a utilization heat map
 type UtilizationHeatMap struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Memory []*MetricResponse `json:"memory,omitempty"`
+	CPU    []*MetricPointResponse `json:"cpu,omitempty"`
+	Memory []*MetricPointResponse `json:"memory,omitempty"`
 }
 
 type VectorStoreAttributes struct {
@@ -7389,6 +7394,49 @@ func (e *GitHealth) UnmarshalGQL(v any) error {
 }
 
 func (e GitHealth) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type HeatMapFlavor string
+
+const (
+	HeatMapFlavorPod       HeatMapFlavor = "POD"
+	HeatMapFlavorNamespace HeatMapFlavor = "NAMESPACE"
+	HeatMapFlavorNode      HeatMapFlavor = "NODE"
+)
+
+var AllHeatMapFlavor = []HeatMapFlavor{
+	HeatMapFlavorPod,
+	HeatMapFlavorNamespace,
+	HeatMapFlavorNode,
+}
+
+func (e HeatMapFlavor) IsValid() bool {
+	switch e {
+	case HeatMapFlavorPod, HeatMapFlavorNamespace, HeatMapFlavorNode:
+		return true
+	}
+	return false
+}
+
+func (e HeatMapFlavor) String() string {
+	return string(e)
+}
+
+func (e *HeatMapFlavor) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HeatMapFlavor(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HeatMapFlavor", str)
+	}
+	return nil
+}
+
+func (e HeatMapFlavor) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

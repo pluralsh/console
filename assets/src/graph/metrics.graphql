@@ -1,0 +1,42 @@
+fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
+fragment MetricPointResponse on MetricPointResponse {
+  metric
+  value {
+    timestamp
+    value
+  }
+}
+
+fragment UtilizationHeatMap on UtilizationHeatMap {
+  cpu {
+    ...MetricPointResponse
+  }
+  memory {
+    ...MetricPointResponse
+  }
+}
+
+query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
+  cluster(id: $clusterId) {
+    id
+    heatMap(flavor: $flavor) {
+      ...UtilizationHeatMap
+    }
+  }
+}
+
+query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
+  serviceDeployment(id: $serviceId) {
+    id
+    heatMap(flavor: $flavor) {
+      ...UtilizationHeatMap
+    }
+  }
+}
