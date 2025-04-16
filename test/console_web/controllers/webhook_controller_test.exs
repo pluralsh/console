@@ -137,8 +137,8 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#observability/2" do
-    test "it will ignore if no associated plural resource is found", %{conn: conn} do
-      hook = insert(:observability_webhook)
+    test "it will ignore if no associated plural resource is found (grafana)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :grafana)
 
       conn
       |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
@@ -149,8 +149,20 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [] = Console.Repo.all(Console.Schema.Alert)
     end
 
-    test "it can handle payloads with text in body", %{conn: conn} do
-      hook = insert(:observability_webhook)
+    test "it will ignore if no associated plural resource is found (pagerduty)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :pagerduty)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", String.trim(Console.conf(:pagerduty_webhook_payload)))
+      |> response(200)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
+    test "it can handle payloads with text in body (grafana)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :grafana)
       svc = insert(:service)
 
       %{"alerts" => [alert | _]} = webhook = String.trim(Console.conf(:grafana_webhook_payload)) |> Jason.decode!()
@@ -161,6 +173,31 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
       |> put_req_header("content-type", "application/json")
       |> post("/ext/v1/webhooks/observability/grafana/#{hook.external_id}", Jason.encode!(webhook))
+      |> response(200)
+
+      [alert] = Console.Repo.all(Console.Schema.Alert)
+
+      assert alert.service_id == svc.id
+      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+    end
+
+    test "it can handle payloads with text in body (pagerduty)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :pagerduty)
+      svc = insert(:service)
+
+      webhook = String.trim(Console.conf(:pagerduty_webhook_payload)) |> Jason.decode!()
+
+      # Add custom details to the PagerDuty payload
+      webhook = put_in(webhook, ["event", "data", "custom_details"], %{
+        "plrl_service" => svc.name,
+        "plrl_cluster" => svc.cluster.handle,
+        "plrl_project" => "test-project"
+      })
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/pagerduty/#{hook.external_id}", Jason.encode!(webhook))
       |> response(200)
 
       [alert] = Console.Repo.all(Console.Schema.Alert)

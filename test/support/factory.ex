@@ -683,9 +683,9 @@ defmodule Console.Factory do
     }
   end
 
-  def observability_webhook_factory do
+  def observability_webhook_factory(attrs) do
     %Schema.ObservabilityWebhook{
-      type: :grafana,
+      type: Map.get(attrs, :type),
       name: sequence(:obs_hook, & "obs-wh-#{&1}"),
       external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
       secret: Ecto.UUID.generate()

@@ -1788,6 +1788,9 @@ enum ObservabilityProviderType {
 
 enum ObservabilityWebhookType {
   GRAFANA
+  DATADOG
+  PAGERDUTY
+  NEWRELIC
 }
 
 enum AlertSeverity {

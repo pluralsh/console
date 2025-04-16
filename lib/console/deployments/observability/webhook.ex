@@ -4,7 +4,7 @@ defmodule Console.Deployments.Observability.Webhook do
   to handle provider-specific logic.
   """
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Observability.Webhook.{Grafana, Raw}
+  alias Console.Deployments.Observability.Webhook.{Grafana, Pagerduty, Raw}
   alias Console.Schema.ObservabilityWebhook
 
   @callback associations(atom, map, map) :: map
@@ -34,6 +34,26 @@ defmodule Console.Deployments.Observability.Webhook do
     |> ok()
   end
 
+  def payload(%ObservabilityWebhook{type: :pagerduty}, %{"event" => event = %{"data" => data}} = payload) do
+    # Create structured alert
+    # Note that pagerduty doesn't have annotations like grafana does, so just use an empty map
+    # Also, pagerduty has a single event per payload, so unlike grafana we don't iterate over messages
+    Map.merge(%{
+      type: :pagerduty,
+      fingerprint: event["id"],
+      annotations: %{},
+      state: Pagerduty.state(payload),
+      severity: Pagerduty.severity(payload),
+      url: data["html_url"] || "[NO_URL]",
+      title: data["title"] || "[NO_TITLE]",
+      message: Pagerduty.summary(payload),
+      tags: tags(data["custom_details"] || %{}),
+    }, add_associations(Pagerduty, payload))
+    |> backfill_raw()
+    |> listify()
+    |> ok()
+  end
+
   def payload(_, _), do: {:error, "invalid payload"}
 
   defp add_associations(impl, data) do
@@ -57,4 +77,7 @@ defmodule Console.Deployments.Observability.Webhook do
     end)
     |> Enum.map(fn {k, v} -> %{name: k, value: v} end)
   end
+
+  defp listify(l) when is_list(l), do: l
+  defp listify(v), do: [v]
 end
