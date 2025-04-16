@@ -220,7 +220,7 @@ defmodule Console.Deployments.Observability do
   defp bulk_query(queries, ctx) do
     with {:ok, client} <- get_connection(:prometheus) do
       Task.async_stream(queries, fn {name, query} ->
-        case PrometheusClient.query(client, query, ctx) |> IO.inspect() do
+        case PrometheusClient.query(client, query, ctx) do
           {:ok, %{data: %{result: results}}} -> {name, results}
           err ->
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"
