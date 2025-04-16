@@ -6,22 +6,24 @@ import {
   NamespaceIcon,
   SearchIcon,
 } from '@pluralsh/design-system'
+import { Edge, Node, ReactFlowProvider } from '@xyflow/react'
+import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
 import { NamespaceFilter } from 'components/kubernetes/common/NamespaceFilter'
 import {
   NetworkMeshEdgeFragment,
+  NetworkMeshWorkloadFragment,
   useClusterNamespacesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from '../LoadingIndicator'
-import { TimestampSliderButton } from '../TimestampSlider'
-import { useMemo } from 'react'
-import { Edge, Node } from '@xyflow/react'
-import { MeshStatisticsNode, MeshWorkloadNode } from './NetworkMeshNodes'
-import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
+import { EdgeType } from '../reactflow/edges'
 import { ReactFlowGraph } from '../reactflow/graph'
+import { TimestampSliderButton } from '../TimestampSlider'
+import { MeshStatisticsNode, MeshWorkloadNode } from './NetworkGraphNodes'
 
 const nodeTypes = {
   workload: MeshWorkloadNode,
@@ -64,50 +66,54 @@ export function NetworkGraph({
   )
 
   return (
-    <WrapperSC>
-      <Flex
-        gap="medium"
-        width="100%"
-      >
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search service names"
-          startIcon={<SearchIcon color="icon-light" />}
-          flex={1}
-        />
-        {!namespacesError && (
-          <NamespaceFilter
-            namespaces={namespaces}
-            namespace={namespace ?? ''}
-            onChange={setNamespace}
-            startIcon={<NamespaceIcon color="icon-light" />}
-            inputProps={{ placeholder: 'Filter by namespace' }}
-            containerProps={{
-              style: { background: colors['fill-one'], flex: 1 },
-            }}
+    <ReactFlowProvider>
+      <WrapperSC>
+        <Flex
+          gap="medium"
+          width="100%"
+        >
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search service names"
+            startIcon={<SearchIcon color="icon-light" />}
+            flex={1}
           />
-        )}
-        <TimestampSliderButton
-          setTimestamp={setTimestamp}
-          isTimestampSet={isTimestampSet}
-        />
-      </Flex>
-      <Card flex={1}>
-        {loading ? (
-          <LoadingIndicator />
-        ) : isEmpty(networkData) ? (
-          <EmptyState message="No network data found." />
-        ) : (
-          <ReactFlowGraph
-            baseNodes={baseNodes}
-            baseEdges={baseEdges}
-            dagreOptions={options}
-            nodeTypes={nodeTypes}
+          {!namespacesError && (
+            <NamespaceFilter
+              namespaces={namespaces}
+              namespace={namespace ?? ''}
+              onChange={setNamespace}
+              startIcon={<NamespaceIcon color="icon-light" />}
+              inputProps={{ placeholder: 'Filter by namespace' }}
+              containerProps={{
+                style: { background: colors['fill-one'], flex: 1 },
+              }}
+            />
+          )}
+          <TimestampSliderButton
+            setTimestamp={setTimestamp}
+            isTimestampSet={isTimestampSet}
           />
-        )}
-      </Card>
-    </WrapperSC>
+        </Flex>
+        <Card flex={1}>
+          {loading ? (
+            <LoadingIndicator />
+          ) : isEmpty(networkData) ? (
+            <EmptyState message="No network data found." />
+          ) : (
+            <ReactFlowGraph
+              allowFullscreen
+              baseNodes={baseNodes}
+              baseEdges={baseEdges}
+              dagreOptions={options}
+              nodeTypes={nodeTypes}
+              minZoom={0.03}
+            />
+          )}
+        </Card>
+      </WrapperSC>
+    </ReactFlowProvider>
   )
 }
 
@@ -123,30 +129,41 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
   nodes: Node[]
   edges: Edge[]
 } {
-  console.log(networkData)
-  return { nodes: [], edges: [] }
-  // const nodes: Node[] = []
-  // const edges: Edge[] = []
-  // state?.state?.filter(isNonNullable).forEach((ssr) => {
-  //   nodes.push({
-  //     id: ssr.identifier,
-  //     position: { x: 0, y: 0 },
-  //     type: NodeType.Stage,
-  //     data: { ...ssr },
-  //   })
-  //   edges.push(
-  //     ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
-  //       type: EdgeType.Bezier,
-  //       updatable: false,
-  //       id: `${ssr.identifier}${link}`,
-  //       source: ssr.identifier,
-  //       target: link,
-  //     }))
-  //   )
-  // })
-  // return { nodes, edges }
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+  const workloadSet: Record<string, NetworkMeshWorkloadFragment> = {}
+  networkData.forEach((networkEdge) => {
+    const statsNodeId = `statistics-${networkEdge.id}`
+    workloadSet[networkEdge.from.id] = networkEdge.from
+    workloadSet[networkEdge.to.id] = networkEdge.to
+    nodes.push({
+      id: statsNodeId,
+      position: { x: 0, y: 0 },
+      type: 'statistics',
+      data: { ...networkEdge.statistics },
+    })
+    edges.push({
+      id: `${networkEdge.from.id}-${statsNodeId}`,
+      source: networkEdge.from.id,
+      target: statsNodeId,
+      type: EdgeType.BezierDirected,
+    })
+    edges.push({
+      id: `${statsNodeId}-${networkEdge.to.id}`,
+      source: statsNodeId,
+      target: networkEdge.to.id,
+      type: EdgeType.BezierDirected,
+    })
+  })
+  Object.values(workloadSet).forEach((workload) => {
+    nodes.push({
+      id: workload.id,
+      position: { x: 0, y: 0 },
+      type: 'workload',
+      data: { ...workload },
+    })
+  })
+  return { nodes, edges }
 }
 
-const options: DagreGraphOptions = {
-  ranksep: 50,
-}
+const options: DagreGraphOptions = {}

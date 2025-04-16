@@ -23,7 +23,7 @@ export function ClusterNetwork() {
   const [namespace, setNamespace] = useState<string | undefined>(undefined)
   const [timestamp, setTimestamp] = useState<string | undefined>(undefined)
   const { data, loading, error } = useClusterNetworkGraphQuery({
-    variables: { clusterId, namespace, time: timestamp },
+    variables: { clusterId, time: timestamp },
     fetchPolicy: 'cache-and-network',
   })
 

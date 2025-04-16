@@ -108,6 +108,7 @@ export function TimestampSliderButton({
 const SliderCardSC = styled(Card)<{ $isOpen: boolean }>(
   ({ theme, $isOpen }) => ({
     position: 'absolute',
+    zIndex: theme.zIndexes.modal,
     top: `calc(100% + ${theme.spacing.xsmall}px)`,
     right: 0,
     width: 496,

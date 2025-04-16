@@ -76,7 +76,7 @@ export function useLayoutNodes({
   const [isLayouting, setIsLayouting] = useState(false)
 
   // react flow injects this after the nodes are first rendered
-  const hasMeasurements = !!nodes[0].measured
+  const hasMeasurements = !!nodes[0]?.measured
   // we basically want to force a reset of the nodes if their parent changes
   useLayoutEffect(() => {
     setNodes(baseNodes)

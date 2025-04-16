@@ -17,6 +17,7 @@ export function CustomLegend({ data }: { data: SecurityChartData }) {
                 borderRadius: '50%',
                 height: 12,
                 width: 12,
+                flexShrink: 0,
               }}
             />
             <div
