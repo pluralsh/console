@@ -17,9 +17,9 @@ defmodule Console.Mesh.Provider.Ebpf do
   @queries [
     bytes: ~s/rate(tcp.bytes{cluster="$cluster"$additional}[5m])/,
     packets: ~s/rate(tcp.packets{cluster="$cluster"$additional}[5m])/,
-    http_200: ~s/rate(http.status_code{status_code="200",cluster="$cluster"$additional}[[5m])/,
-    http_400: ~s/rate(http.status_code{status_code="400",cluster="$cluster"$additional}[[5m])/,
-    http_500: ~s/rate(http.status_code{status_code="500",cluster="$cluster"$additional}[[5m])/,
+    http200: ~s/rate(http.status_code{status_code="200",cluster="$cluster"$additional}[[5m])/,
+    http400: ~s/rate(http.status_code{status_code="400",cluster="$cluster"$additional}[[5m])/,
+    http500: ~s/rate(http.status_code{status_code="500",cluster="$cluster"$additional}[[5m])/,
     http_client_latency: ~s/rate(http.client.duration_average{cluster="$cluster"$additional}[5m])/,
     connections: ~s/avg(tcp.active{direction="inbound",cluster="$cluster"$additional}[5m]) by (source.workload.name, source.namespace.name, dest.workload.name, dest.namespace.name)/,
   ]

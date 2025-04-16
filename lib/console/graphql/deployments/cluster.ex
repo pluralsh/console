@@ -1040,9 +1040,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :bytes,               :float
     field :connections,         :float
     field :packets,             :float
-    field :http_200,            :float
-    field :http_400,            :float
-    field :http_500,            :float
+    field :http200,             :float
+    field :http400,             :float
+    field :http500,             :float
     field :http_client_latency, :float
   end
 
