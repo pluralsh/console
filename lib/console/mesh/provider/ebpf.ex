@@ -30,7 +30,7 @@ defmodule Console.Mesh.Provider.Ebpf do
     additional = namespace_filter(namespace)
 
     Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts)do
+      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts) |> IO.inspect() do
         {:ok, %Response{data: %Data{result: results}}} ->
           {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
         err ->
