@@ -14,7 +14,7 @@ import {
   useReactFlow,
   type Node as FlowNode,
 } from '@xyflow/react'
-import { createContext, useCallback, useState } from 'react'
+import { createContext, useCallback, useMemo, useState } from 'react'
 import FocusLock from 'react-focus-lock'
 import styled, { useTheme } from 'styled-components'
 
@@ -28,9 +28,9 @@ import { MarkerDefs } from './markers'
 
 import '@xyflow/react/dist/style.css'
 
-export const GraphLayoutCtx = createContext<DagreGraphOptions | undefined>(
-  undefined
-)
+export const GraphLayoutCtx = createContext<
+  (DagreGraphOptions & { triggerLayout: () => void }) | undefined
+>(undefined)
 
 const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
   $fullscreen?: boolean
@@ -107,7 +107,7 @@ export function ReactFlowGraph({
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
   const { fitView } = useReactFlow()
-  const { nodes, edges, showGraph, onNodesChange, onEdgesChange } =
+  const { nodes, edges, showGraph, onNodesChange, onEdgesChange, layoutNodes } =
     useLayoutNodes({
       baseNodes,
       baseEdges,
@@ -125,8 +125,13 @@ export function ReactFlowGraph({
 
   useKeyDown('Escape', () => fullscreen && toggleFullscreen())
 
+  const ctx = useMemo(
+    () => ({ ...dagreOptions, triggerLayout: layoutNodes }),
+    [dagreOptions, layoutNodes]
+  )
+
   return (
-    <GraphLayoutCtx value={dagreOptions}>
+    <GraphLayoutCtx value={ctx}>
       <ReactFlowFullScreenWrapperSC
         disabled={!fullscreen} // controls focus lock
         $fullscreen={fullscreen}

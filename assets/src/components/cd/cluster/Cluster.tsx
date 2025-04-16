@@ -91,7 +91,7 @@ const getDirectory = ({
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
   { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
   { path: CLUSTER_LOGS_PATH, label: 'Logs', enabled: logsEnabled },
-  { path: CLUSTER_NETWORK_PATH, label: 'Network' },
+  { path: CLUSTER_NETWORK_PATH, label: 'Network', enabled: metricsEnabled },
   {
     path: CLUSTER_INSIGHTS_PATH,
     label: <InsightsTabLabel insight={cluster?.insight} />,

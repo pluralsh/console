@@ -1,5 +1,18 @@
-import { Card, Flex, IconFrame, MoreIcon } from '@pluralsh/design-system'
-import { Position, type Node, type NodeProps } from '@xyflow/react'
+import {
+  Card,
+  Flex,
+  IconFrame,
+  InfoOutlineIcon,
+  MoreIcon,
+  Tooltip,
+  WrapWithIf,
+} from '@pluralsh/design-system'
+import {
+  Position,
+  useReactFlow,
+  type Node,
+  type NodeProps,
+} from '@xyflow/react'
 
 import { filesize } from 'filesize'
 import {
@@ -7,9 +20,11 @@ import {
   NetworkMeshWorkloadFragment,
 } from 'generated/graphql.ts'
 import { round } from 'lodash'
+import { use } from 'react'
 import styled from 'styled-components'
 import { NodeHandleSC } from '../reactflow/nodes'
 import { CaptionP } from '../typography/Text'
+import { ExpandedNetworkInfoCtx } from './NetworkGraph'
 
 type MeshWorkloadNode = Node<NetworkMeshWorkloadFragment>
 type MeshStatisticsNode = Node<NetworkMeshStatisticsFragment>
@@ -55,47 +70,77 @@ export function MeshStatisticsNode({
   id,
   data,
 }: NodeProps<MeshStatisticsNode>) {
+  const { expandedId, setExpandedId } = use(ExpandedNetworkInfoCtx)
+  const { updateNode } = useReactFlow()
+  const isExpanded = expandedId === id
+  const toggleExpanded = () => {
+    setExpandedId(isExpanded ? undefined : id)
+    if (expandedId) updateNode(expandedId, { zIndex: 0 })
+    updateNode(id, { zIndex: isExpanded ? 0 : 1000 })
+  }
+
   return (
-    <StatisticsCardSC id={id}>
-      <NodeHandleSC
-        type="target"
-        position={Position.Left}
-      />
-      <Statistic
-        value={filesize(data.bytes ?? 0)}
-        suffix="sent"
-      />
-      <Statistic
-        value={data.packets}
-        suffix="packets"
-      />
-      <Statistic
-        value={data.connections}
-        suffix="tcp connections"
-      />
-      <Statistic
-        value={data.http200}
-        suffix="http 200s"
-      />
-      <Statistic
-        value={data.http400}
-        suffix="http 400s"
-      />
-      <Statistic
-        value={data.http500}
-        suffix="http 500s"
-      />
-      {data.httpClientLatency && (
-        <Statistic
-          value={round(data.httpClientLatency, 2)}
-          suffix="ms latency"
+    <WrapWithIf
+      condition={!isExpanded}
+      wrapper={
+        <Tooltip
+          label={'Show network data'}
+          placement="top"
         />
-      )}
-      <NodeHandleSC
-        type="source"
-        position={Position.Right}
-      />
-    </StatisticsCardSC>
+      }
+    >
+      <StatisticsCardSC
+        id={id}
+        clickable
+        onClick={toggleExpanded}
+        $isExpanded={isExpanded}
+      >
+        <NodeHandleSC
+          type="target"
+          position={Position.Left}
+        />
+        {!isExpanded ? (
+          <IconFrame icon={<InfoOutlineIcon />} />
+        ) : (
+          <>
+            <Statistic
+              value={filesize(data.bytes ?? 0)}
+              suffix="sent"
+            />
+            <Statistic
+              value={data.packets}
+              suffix="packets"
+            />
+            <Statistic
+              value={data.connections}
+              suffix="tcp connections"
+            />
+            <Statistic
+              value={data.http200}
+              suffix="http 200s"
+            />
+            <Statistic
+              value={data.http400}
+              suffix="http 400s"
+            />
+            <Statistic
+              value={data.http500}
+              suffix="http 500s"
+            />
+            {data.httpClientLatency && (
+              <Statistic
+                value={round(data.httpClientLatency, 2)}
+                suffix="ms latency"
+              />
+            )}
+          </>
+        )}
+        <NodeHandleSC
+          type="source"
+          position={Position.Right}
+        />
+      </StatisticsCardSC>
+    </WrapWithIf>
   )
 }
 
@@ -105,12 +150,16 @@ const WorkloadNameSC = styled.span(({ theme }) => ({
   background: theme.colors['fill-one'],
 }))
 
-const StatisticsCardSC = styled(Card)(({ theme }) => ({
-  position: 'relative',
-  display: 'flex',
-  flexDirection: 'column',
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-}))
+const StatisticsCardSC = styled(Card)<{ $isExpanded: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    ...($isExpanded && {
+      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    }),
+  })
+)
 
 function Statistic({
   value,

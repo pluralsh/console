@@ -1,4 +1,6 @@
 import {
+  ArrowTopRightIcon,
+  Button,
   Card,
   EmptyState,
   Flex,
@@ -18,9 +20,12 @@ import styled, { useTheme } from 'styled-components'
 import { Prometheus } from '../../../utils/prometheus'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
+import { GqlError } from 'components/utils/Alert'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
+import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
+import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   ClusterGauges,
@@ -29,8 +34,6 @@ import {
   PodsClusterMetrics,
 } from '../../cluster/nodes/ClusterGauges'
 import { SaturationGraphs } from '../../cluster/nodes/SaturationGraphs'
-import { GqlError } from 'components/utils/Alert'
-import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 
 const { capacity, CapacityType, toValues } = Prometheus
 const HEATMAP_HEIGHT = 350
@@ -79,7 +82,7 @@ export function ClusterMetrics() {
     [heatMapData?.cluster?.heatMap]
   )
 
-  if (!metricsEnabled) return <EmptyState message="Metrics are not enabled." />
+  if (!metricsEnabled) return <MetricsEmptyState />
 
   const hasMetrics =
     !isNull(cpuMetrics.total) &&
@@ -244,3 +247,15 @@ const processClusterMetrics = (
     },
   }
 }
+
+export const MetricsEmptyState = () => (
+  <EmptyState message="Metrics are not enabled.">
+    <Button
+      as={Link}
+      to={`${GLOBAL_SETTINGS_ABS_PATH}/observability`}
+      endIcon={<ArrowTopRightIcon />}
+    >
+      Go to settings
+    </Button>
+  </EmptyState>
+)
