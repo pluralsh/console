@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import {
   type Dispatch,
   type PropsWithChildren,
+  ReactNode,
   type RefObject,
   useId,
 } from 'react'
@@ -86,7 +87,7 @@ const sizeToIconSize: Record<CalloutSize, number> = {
 
 export type CalloutProps = PropsWithChildren<{
   ref?: RefObject<HTMLDivElement>
-  title?: string
+  title?: ReactNode
   severity?: CalloutSeverity
   size?: CalloutSize
   buttonProps?: ButtonProps

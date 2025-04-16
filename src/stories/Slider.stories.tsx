@@ -27,4 +27,5 @@ Default.args = {
   thumbRadius: 12,
   tooltip: true,
   size: 600,
+  colorized: true,
 }

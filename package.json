@@ -38,7 +38,7 @@
     "firebase:start": "yarn build:storybook && npx firebase emulators:start"
   },
   "engines": {
-    "node": "18.16.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@emotion/react": "11.11.1",
