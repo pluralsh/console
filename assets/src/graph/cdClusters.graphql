@@ -697,9 +697,13 @@ fragment NetworkMeshWorkload on NetworkMeshWorkload {
 }
 
 fragment NetworkMeshStatistics on NetworkMeshStatistics {
-  bytesReceived
-  bytesSent
+  bytes
+  packets
   connections
+  http200
+  http400
+  http500
+  httpClientLatency
 }
 
 fragment NetworkMeshEdge on NetworkMeshEdge {

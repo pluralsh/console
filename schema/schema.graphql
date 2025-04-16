@@ -6134,9 +6134,13 @@ type NetworkMeshWorkload {
 
 "The relevant statistics for traffic within a service mesh"
 type NetworkMeshStatistics {
-  bytesSent: Float
-  bytesReceived: Float
+  bytes: Float
   connections: Float
+  packets: Float
+  http200: Float
+  http400: Float
+  http500: Float
+  httpClientLatency: Float
 }
 
 "An edge representing traffic statistics between two workloads in a service mesh"

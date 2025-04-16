@@ -24,7 +24,7 @@ export function MeshStatisticsNode({
 }: NodeProps<MeshStatisticsNode>) {
   return (
     <StatisticsCardSC id={id}>
-      {data.bytesReceived} {data.bytesSent} {data.connections}
+      {data.bytes} {data.packets} {data.connections}
     </StatisticsCardSC>
   )
 }

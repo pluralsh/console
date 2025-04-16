@@ -3921,9 +3921,13 @@ export type NetworkMeshEdge = {
 /** The relevant statistics for traffic within a service mesh */
 export type NetworkMeshStatistics = {
   __typename?: 'NetworkMeshStatistics';
-  bytesReceived?: Maybe<Scalars['Float']['output']>;
-  bytesSent?: Maybe<Scalars['Float']['output']>;
+  bytes?: Maybe<Scalars['Float']['output']>;
   connections?: Maybe<Scalars['Float']['output']>;
+  http200?: Maybe<Scalars['Float']['output']>;
+  http400?: Maybe<Scalars['Float']['output']>;
+  http500?: Maybe<Scalars['Float']['output']>;
+  httpClientLatency?: Maybe<Scalars['Float']['output']>;
+  packets?: Maybe<Scalars['Float']['output']>;
 };
 
 /** An abstract workload discovered by querying statistics on a service mesh */
@@ -11030,9 +11034,9 @@ export type ClusterNodeMetricsQuery = { __typename?: 'RootQueryType', cluster?: 
 
 export type NetworkMeshWorkloadFragment = { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null };
 
-export type NetworkMeshStatisticsFragment = { __typename?: 'NetworkMeshStatistics', bytesReceived?: number | null, bytesSent?: number | null, connections?: number | null };
+export type NetworkMeshStatisticsFragment = { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null };
 
-export type NetworkMeshEdgeFragment = { __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytesReceived?: number | null, bytesSent?: number | null, connections?: number | null } };
+export type NetworkMeshEdgeFragment = { __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } };
 
 export type ClusterNetworkGraphQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -11041,7 +11045,7 @@ export type ClusterNetworkGraphQueryVariables = Exact<{
 }>;
 
 
-export type ClusterNetworkGraphQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytesReceived?: number | null, bytesSent?: number | null, connections?: number | null } } | null> | null } | null };
+export type ClusterNetworkGraphQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
 
 export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
@@ -13873,9 +13877,13 @@ export const NetworkMeshWorkloadFragmentDoc = gql`
     `;
 export const NetworkMeshStatisticsFragmentDoc = gql`
     fragment NetworkMeshStatistics on NetworkMeshStatistics {
-  bytesReceived
-  bytesSent
+  bytes
+  packets
   connections
+  http200
+  http400
+  http500
+  httpClientLatency
 }
     `;
 export const NetworkMeshEdgeFragmentDoc = gql`
