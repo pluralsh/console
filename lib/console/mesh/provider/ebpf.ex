@@ -8,6 +8,7 @@ defmodule Console.Mesh.Provider.Ebpf do
   alias Console.Schema.{Cluster}
   alias Console.Mesh.{Builder, Edge, Workload, Statistics}
   alias Prometheus.{Response, Data, Result}
+  alias Console.Mesh.Prometheus, as: Prom
 
   require Logger
 
@@ -30,7 +31,7 @@ defmodule Console.Mesh.Provider.Ebpf do
     additional = namespace_filter(namespace)
 
     Enum.reduce_while(@queries, Builder.new(), fn {metric, query}, b ->
-      case Console.Mesh.Prometheus.query(prom, format_query(query, cluster, additional), opts) do
+      case Prom.query(prom, format_query(query, cluster, additional), opts) do
         {:ok, %Response{data: %Data{result: results}}} ->
           {:cont, Enum.reduce(results, b, &add_result(metric, &1, &2))}
         err ->
@@ -45,7 +46,7 @@ defmodule Console.Mesh.Provider.Ebpf do
   end
 
   defp add_result(metric, %Result{metric: m, value: [ts, val]}, b) do
-    Builder.add(b, edge(metric, %Result{metric: m, value: [ts, val]}))
+    Builder.add(b, edge(metric, %Result{metric: m, value: [ts, Prom.value(val)]}))
   end
   defp add_result(_, _, b), do: b
 
