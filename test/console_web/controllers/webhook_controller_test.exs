@@ -220,40 +220,11 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it can handle payloads with text in body (datadog)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :datadog)
-      svc = insert(:service)
+      proj = insert(:project, name: "test-project")
+      cluster = insert(:cluster, handle: "test-cluster")
+      svc = insert(:service, name: "test-service", cluster: cluster)
 
       webhook = String.trim(Console.conf(:datadog_webhook_firing_payload)) |> Jason.decode!()
-
-      tags = [
-        "plrl_service:#{svc.name}",
-        "plrl_cluster:#{svc.cluster.handle}",
-        "plrl_project:test-project"
-      ]
-
-      message = """
-      Alert triggered for service: #{svc.name}
-      Cluster: #{svc.cluster.handle}
-      Project: test-project
-      """
-
-      webhook = case webhook do
-        %{"alerts" => [alert | rest]} ->
-          updated_alert = alert
-            |> Map.put("tags", tags)
-            |> Map.put("message", message)
-          %{webhook | "alerts" => [updated_alert | rest]}
-
-        %{"event" => event} ->
-          updated_event = event
-            |> Map.put("tags", tags)
-            |> Map.put("message", message)
-          %{webhook | "event" => updated_event}
-
-        _ ->
-          webhook
-          |> Map.put("tags", tags)
-          |> Map.put("message", message)
-      end
 
       conn
       |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
@@ -262,8 +233,12 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> response(200)
 
       [alert] = Console.Repo.all(Console.Schema.Alert)
+                |> Enum.map(&Console.Repo.preload(&1, :tags))
 
       assert alert.service_id == svc.id
+      assert alert.cluster_id == cluster.id
+      assert alert.project_id == proj.id
+
       assert_receive {:event, %Console.PubSub.AlertCreated{}}
     end
   end

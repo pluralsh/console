@@ -214,7 +214,14 @@ config :console,
   "url": "https://example.com",
   "status": "firing",
   "priority": "P1",
-  "tags": ["tag1", "tag2"]
+  "tags": [
+    "tag1",
+    "tag2",
+    "plrl_project:test-project",
+    "plrl_cluster:test-cluster",
+    "plrl_service:test-service",
+    "environment:production"
+  ]
 }|,
 
   test_kubeconfig: """

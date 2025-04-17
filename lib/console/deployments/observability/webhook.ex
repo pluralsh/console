@@ -55,29 +55,24 @@ defmodule Console.Deployments.Observability.Webhook do
   end
 
   def payload(%ObservabilityWebhook{type: :datadog}, payload) do
-    case Datadog.normalize_datadog_payload(payload) do
-      [] -> {:error, "invalid payload"}
-      alerts ->
-        Enum.map(alerts, fn alert ->
-          Map.merge(%{
-            type: :datadog,
-            fingerprint: Map.get(alert, "id"),
-            annotations: Map.get(alert, "meta") || %{},
-            state: Datadog.state(
-              Map.get(alert, "status") ||
-              Map.get(alert, "alert_transition") ||
-              ""
-            ),
-            severity: Datadog.severity(alert),
-            url: Map.get(alert, "link") || Map.get(alert, "url") || "",
-            title: Map.get(alert, "title") || "Datadog Alert",
-            message: Datadog.summary(alert),
-            tags: Datadog.datadog_tags(alert),
-          }, add_associations(Datadog, alert))
-          |> backfill_raw()
-        end)
-        |> ok()
-    end
+    Map.merge(%{
+      type: :datadog,
+      fingerprint: Map.get(payload, "id"),
+      annotations: Map.get(payload, "meta") || %{},
+      state: Datadog.state(
+        Map.get(payload, "status") ||
+        Map.get(payload, "alert_transition") ||
+        ""
+      ),
+      severity: Datadog.severity(payload),
+      url: Map.get(payload, "link") || Map.get(payload, "url") || "",
+      title: Map.get(payload, "title") || "Datadog Alert",
+      message: Datadog.summary(payload),
+      tags: tags(Datadog.datadog_tag_map(payload)),
+    }, add_associations(Datadog, payload))
+    |> backfill_raw()
+    |> listify()
+    |> ok()
   end
 
   def payload(_, _), do: {:error, "invalid payload"}
