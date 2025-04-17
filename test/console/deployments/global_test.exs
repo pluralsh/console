@@ -20,6 +20,26 @@ defmodule Console.Deployments.GlobalTest do
       assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
     end
 
+    test "it can create template global services" do
+      git = insert(:git_repository)
+
+      {:ok, global} = Global.create(%{
+        name: "templated",
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "k8s"},
+          sync_config: %{create_namespace: false},
+          name: "svc",
+          namespace: "prod"
+        }
+      }, admin_user())
+
+      assert global.name == "templated"
+      assert global.template.repository_id == git.id
+      assert global.template.git.ref == "main"
+      assert global.template.git.folder == "k8s"
+    end
+
     test "project writers can create project-scoped global services" do
       user = insert(:user)
       svc = insert(:service)

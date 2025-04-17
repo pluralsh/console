@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceTemplate do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{GitRepository, Service, Metadata, Revision, ServiceDependency}
+  alias Console.Schema.{GitRepository, Service, Revision, ServiceDependency}
 
   schema "service_templates" do
     field :name,          :string
@@ -11,17 +11,10 @@ defmodule Console.Schema.ServiceTemplate do
     field :configuration, {:array, :map}, virtual: true
     field :ignore_sync,   :boolean, virtual: true
 
-    embeds_one :git,  Service.Git,  on_replace: :update
-    embeds_one :helm, Service.Helm, on_replace: :update
-
-    embeds_one :kustomize, Kustomize, on_replace: :update do
-      field :path, :string
-    end
-
-    embeds_one :sync_config, SyncConfig, on_replace: :update do
-      embeds_one :namespace_metadata, Metadata
-      field :create_namespace, :boolean, default: true
-    end
+    embeds_one :git,         Service.Git,        on_replace: :update
+    embeds_one :helm,        Service.Helm,       on_replace: :update
+    embeds_one :kustomize,   Service.Kustomize,  on_replace: :update
+    embeds_one :sync_config, Service.SyncConfig, on_replace: :update
 
     has_many :dependencies, ServiceDependency,
       foreign_key: :template_id,
@@ -66,10 +59,10 @@ defmodule Console.Schema.ServiceTemplate do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> cast_assoc(:dependencies)
-    |> foreign_key_constraint(:repository_id)
     |> cast_embed(:git)
     |> cast_embed(:helm)
+    |> cast_assoc(:dependencies)
+    |> foreign_key_constraint(:repository_id)
     |> cast_embed(:kustomize, with: &Service.kustomize_changeset/2)
     |> cast_embed(:sync_config, with: &Service.sync_config_changeset/2)
   end
