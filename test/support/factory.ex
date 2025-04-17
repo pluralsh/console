@@ -683,9 +683,9 @@ defmodule Console.Factory do
     }
   end
 
-  def observability_webhook_factory do
+  def observability_webhook_factory(attrs) do
     %Schema.ObservabilityWebhook{
-      type: :grafana,
+      type: Map.get(attrs, :type),
       name: sequence(:obs_hook, & "obs-wh-#{&1}"),
       external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
       secret: Ecto.UUID.generate()
@@ -867,6 +867,43 @@ defmodule Console.Factory do
       project: Settings.default_project!(),
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
+  def mcp_server_factory do
+    %Schema.McpServer{
+      name: sequence(:mcp_server, & "flow-#{&1}"),
+      url: "http://example.com",
+      project: Settings.default_project!(),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
+  def mcp_server_association_factory do
+    %Schema.McpServerAssociation{
+      flow: build(:flow),
+      server: build(:mcp_server)
+    }
+  end
+
+  def mcp_server_audit_factory do
+    %Schema.McpServerAudit{
+      tool: "some_tool",
+      arguments: %{"my" => "arg"},
+      actor: build(:user),
+      server: build(:mcp_server)
+    }
+  end
+
+  def oidc_provider_factory do
+    %Schema.OIDCProvider{
+      name: sequence(:oidc_provider, & "oidc-#{&1}"),
+      client_id: sequence(:oidc_provider, & "oidc-client-#{&1}"),
+      client_secret: Ecto.UUID.generate(),
+      redirect_uris: ["https://example.com"],
+      bindings_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
     }
   end
 

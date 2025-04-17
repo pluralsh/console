@@ -261,6 +261,30 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
+  describe "#restore_stack" do
+    test "it can remove deletion state and cancel the destroy run" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], deleted_at: Timex.now())
+      run = insert(:stack_run, stack: stack, status: :pending_approval)
+      {:ok, stack} = Console.Schema.Stack.delete_changeset(stack, %{delete_run_id: run.id})
+                     |> Console.Repo.update()
+
+      {:ok, deleted} = Stacks.restore_stack(stack.id, user)
+
+      assert deleted.id == stack.id
+      assert deleted.deleted_at == nil
+      assert deleted.delete_run_id == nil
+
+      assert refetch(run).status == :cancelled
+    end
+
+    test "non-writers cannot restore" do
+      stack = insert(:stack, deleted_at: Timex.now())
+
+      {:error, _} = Stacks.restore_stack(stack.id, insert(:user))
+    end
+  end
+
   describe "#spawn/1" do
     test "it can create a run in response to a stack cron" do
       stack = insert(:stack,

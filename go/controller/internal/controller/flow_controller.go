@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -96,7 +97,14 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID))
+
+		serverAssociationAttributes, res, err := r.getServerAssociationAttributes(ctx, flow)
+		if res != nil || err != nil {
+			return handleRequeue(res, err, flow.SetCondition)
+		}
+
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(projectID, serverAssociationAttributes))
+
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -119,7 +127,7 @@ func (r *FlowReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.FlowList))).
-		For(&v1alpha1.Flow{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		For(&v1alpha1.Flow{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
 
@@ -167,3 +175,29 @@ func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
 
 	return nil
 }
+
+func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flow *v1alpha1.Flow) ([]*console.McpServerAssociationAttributes, *ctrl.Result, error) {
+	if flow.Spec.ServerAssociations == nil {
+		return nil, nil, nil
+	}
+
+	serverAssociationAttrs := make([]*console.McpServerAssociationAttributes, 0)
+	for _, serverAssociation := range flow.Spec.ServerAssociations {
+		ref := serverAssociation.MCPServerRef
+		mcpServer := new(v1alpha1.MCPServer)
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, mcpServer); err != nil {
+			return nil, nil, err
+		}
+
+		if !mcpServer.Status.HasID() {
+			return nil, &waitForResources, fmt.Errorf("MCP server %s is not ready", ref.Name)
+		}
+
+		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{
+			ServerID: mcpServer.Status.ID,
+		})
+	}
+
+	return serverAssociationAttrs, nil, nil
+}
+

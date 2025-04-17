@@ -19,6 +19,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :stack
   end
 
+  enum :heat_map_flavor do
+    value :pod
+    value :namespace
+    value :node
+  end
+
   input_object :cluster_attributes do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
@@ -182,6 +188,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,           non_null(:string)
     field :version,        non_null(:string)
     field :instance_count, :integer, description: "the number of instances of this service we've found"
+  end
+
+  input_object :deprecated_custom_resource_attributes do
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespace,    :string
+    field :name,         non_null(:string)
+    field :next_version, non_null(:string), description: "the next valid version for this resource"
   end
 
   input_object :agent_migration_attributes do
@@ -382,20 +397,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a representation of a cluster you can deploy to"
   object :cluster do
-    field :id,              non_null(:id), description: "internal id of this cluster"
-    field :self,            :boolean, description: "whether this is the management cluster itself"
-    field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
-    field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
-    field :virtual,         :boolean, description: "whether this is actually a virtual cluster"
-    field :version,         :string, description: "desired k8s version for the cluster"
-    field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
-    field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
-    field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
-    field :kubelet_version, :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
-    field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
-    field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
-    field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
-    field :upgrade_plan,    :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+    field :id,                non_null(:id), description: "internal id of this cluster"
+    field :self,              :boolean, description: "whether this is the management cluster itself"
+    field :name,              non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
+    field :protect,           :boolean, description: "if true, this cluster cannot be deleted"
+    field :virtual,           :boolean, description: "whether this is actually a virtual cluster"
+    field :version,           :string, description: "desired k8s version for the cluster"
+    field :distro,            :cluster_distro, description: "the distribution of kubernetes this cluster is running"
+    field :metadata,          :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
+    field :current_version,   :string, description: "current k8s version as told to us by the deployment operator"
+    field :kubelet_version,   :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
+    field :handle,            :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :installed,         :boolean, description: "whether the deploy operator has been registered for this cluster"
+    field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
+    field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+    field :agent_helm_values, :string, description: "The helm values for the agent installation",
+      resolve: &Deployments.agent_helm_values_for_cluster/3
+
 
     field :healthy, :boolean, description: "Whether this cluster was recently pinged", resolve: fn
       cluster, _, _ -> {:ok, Cluster.healthy?(cluster)}
@@ -509,8 +527,24 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.metrics/3
     end
 
+    field :network_graph, list_of(:network_mesh_edge) do
+      arg :namespace, :string
+      arg :time,      :datetime
+
+      resolve &Deployments.network_graph/3
+    end
+
+    @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+    field :heat_map, :utilization_heat_map do
+      arg :flavor, :heat_map_flavor, default_value: :pod
+      resolve &Deployments.heat_map/3
+    end
+
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
+
+    @desc "fetches the discovered custom resources with new versions to be used"
+    field :deprecated_custom_resources, list_of(:deprecated_custom_resource), resolve: dataloader(Deployments)
 
     @desc "any upgrade insights provided by your cloud provider that have been discovered by our agent"
     field :cloud_addons, list_of(:cloud_addon), resolve: &Deployments.cloud_addons/3
@@ -529,6 +563,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :compatibilities,   :boolean, description: "whether api compatibilities with all addons and kubernetes are satisfied"
     field :incompatibilities, :boolean, description: "whether mutual api incompatibilities with all addons and kubernetes have been satisfied"
     field :deprecations,      :boolean, description: "whether all api deprecations have been cleared for the target version"
+    field :kubelet_skew,      :boolean, description: "whether the kubelet version is in line with the current version"
   end
 
   @desc "a historical revision of a cluster, including version, cloud and node group configuration"
@@ -670,6 +705,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :operation, :string, description: "the operation for this condition, eg EQ, LT, GT"
     field :field,     :string, description: "the field this condition applies to"
     field :value,     :string, description: "the value to apply the condition with, for binary operators like LT/GT"
+  end
+
+  object :deprecated_custom_resource do
+    field :id,           non_null(:id)
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespace,    non_null(:string)
+    field :name,         :string
+    field :next_version, non_null(:string), description: "the next discovered version of this resource"
+    field :cluster,      :cluster, resolve: dataloader(Deployments), description: "the cluster this resource belongs to"
+
+    timestamps()
   end
 
   @desc "a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api"
@@ -979,6 +1027,33 @@ defmodule Console.GraphQl.Deployments.Cluster do
     end
   end
 
+  @desc "An abstract workload discovered by querying statistics on a service mesh"
+  object :network_mesh_workload do
+    field :id,        non_null(:string)
+    field :name,      non_null(:string)
+    field :namespace, :string
+    field :service,   :string
+  end
+
+  @desc "The relevant statistics for traffic within a service mesh"
+  object :network_mesh_statistics do
+    field :bytes,               :float
+    field :connections,         :float
+    field :packets,             :float
+    field :http200,             :float
+    field :http400,             :float
+    field :http500,             :float
+    field :http_client_latency, :float
+  end
+
+  @desc "An edge representing traffic statistics between two workloads in a service mesh"
+  object :network_mesh_edge do
+    field :id,          non_null(:string)
+    field :from,        non_null(:network_mesh_workload)
+    field :to,          non_null(:network_mesh_workload)
+    field :statistics,  non_null(:network_mesh_statistics)
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1015,6 +1090,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware ClusterAuthenticated
       arg :services,   list_of(:runtime_service_attributes)
       arg :layout,     :operational_layout_attributes
+      arg :deprecated, list_of(:deprecated_custom_resource_attributes)
       arg :service_id, :id
 
       resolve &Deployments.create_runtime_services/2
@@ -1311,9 +1387,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :apply_scaling_recommendation, :pull_request do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id, non_null(:id), description: "the id of the scaling recommendation to fix"
 
       resolve &Deployments.scaling_pr/2
+    end
+
+    field :suggest_scaling_recommendation, :string do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the scaling recommendation to fix"
+
+      resolve &Deployments.scaling_pr_suggestion/2
     end
 
     field :create_cluster_registration, :cluster_registration do

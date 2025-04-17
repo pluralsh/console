@@ -40,7 +40,10 @@ import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 
-import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useLogsEnabled,
+  useMetricsEnabled,
+} from 'components/contexts/DeploymentSettingsContext'
 
 import { LoginContext } from 'components/contexts'
 
@@ -153,10 +156,12 @@ export const DirLabelWithChip = memo(
 export const getDirectory = ({
   serviceDeployment,
   logsEnabled = false,
+  metricsEnabled = false,
   isAdmin = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   logsEnabled?: boolean | undefined
+  metricsEnabled?: boolean | undefined
   isAdmin?: boolean
 }): Directory => {
   if (!serviceDeployment) {
@@ -214,11 +219,13 @@ export const getDirectory = ({
       ),
       enabled: true,
     },
+    // { path: 'network', label: 'Network', enabled: true },
     {
       path: 'insights',
       label: <InsightsTabLabel insight={serviceDeployment.insight} />,
       enabled: !!serviceDeployment.insight,
     },
+    { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     { path: 'secrets', label: 'Secrets', enabled: true },
@@ -260,6 +267,7 @@ function ServiceDetailsBase() {
   })
   const docPageContext = useDocPageContext()
   const logsEnabled = useLogsEnabled()
+  const metricsEnabled = useMetricsEnabled()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery({
     variables: { clusterId, projectId },
@@ -293,9 +301,10 @@ function ServiceDetailsBase() {
       getDirectory({
         serviceDeployment,
         logsEnabled,
+        metricsEnabled,
         isAdmin,
       }),
-    [logsEnabled, serviceDeployment, isAdmin]
+    [logsEnabled, metricsEnabled, serviceDeployment, isAdmin]
   )
 
   return (

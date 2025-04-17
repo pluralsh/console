@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
-
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"strings"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -13,14 +12,17 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/yaml"
 
 	console "github.com/pluralsh/console/go/client"
@@ -34,8 +36,9 @@ import (
 )
 
 const (
-	ServiceFinalizer    = "deployments.plural.sh/service-protection"
-	InventoryAnnotation = "config.k8s.io/owning-inventory"
+	ServiceFinalizer       = "deployments.plural.sh/service-protection"
+	InventoryAnnotation    = "config.k8s.io/owning-inventory"
+	ServiceOwnerAnnotation = "deployments.plural.sh/service-owner"
 )
 
 // ServiceReconciler reconciles a Service object
@@ -170,6 +173,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		Dependencies:    attr.Dependencies,
 		ParentID:        attr.ParentID,
 		Imports:         attr.Imports,
+		FlowID:          attr.FlowID,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -246,7 +250,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
 		SyncConfig:      syncConfigAttributes,
-		Configuration:   make([]*console.ConfigAttributes, 0),
 	}
 
 	if id, ok := service.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
@@ -280,20 +283,15 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		attr.FlowID = flow.Status.ID
 	}
 
-	if service.Spec.ConfigurationRef != nil {
-		secret := &corev1.Secret{}
-		if err = r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
-			return nil, &requeue, fmt.Errorf("error while getting configuration secret: %s", err.Error())
-		}
-		for k, v := range secret.Data {
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(string(v))})
-		}
+	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
+	if err != nil {
+		return nil, &requeue, err
 	}
 
-	if len(service.Spec.Configuration) > 0 {
-		for k, v := range service.Spec.Configuration {
-			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
-		}
+	// we only want to explicitly set the configuration field in attr if the user specified it via
+	// the CR spec.
+	if hasConfig {
+		attr.Configuration = configuration
 	}
 
 	for _, contextName := range service.Spec.Contexts {
@@ -317,6 +315,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			Chart:       service.Spec.Helm.Chart,
 			URL:         service.Spec.Helm.URL,
 			IgnoreHooks: service.Spec.Helm.IgnoreHooks,
+			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
 		if service.Spec.Helm.Repository != nil {
@@ -358,6 +357,30 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 
 	return attr, nil, nil
+}
+
+func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
+	configuration := make([]*console.ConfigAttributes, 0)
+	hasConfig := false
+	if service.Spec.ConfigurationRef != nil {
+		secret := &corev1.Secret{}
+		if err := r.Get(ctx, types.NamespacedName{Name: service.Spec.ConfigurationRef.Name, Namespace: service.Spec.ConfigurationRef.Namespace}, secret); err != nil {
+			return nil, false, fmt.Errorf("error while getting configuration secret: %s", err.Error())
+		}
+
+		hasConfig = true
+		for k, v := range secret.Data {
+			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(string(v))})
+		}
+	}
+
+	if len(service.Spec.Configuration) > 0 {
+		hasConfig = true
+		for k, v := range service.Spec.Configuration {
+			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
+		}
+	}
+	return configuration, hasConfig, nil
 }
 
 func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
@@ -405,6 +428,7 @@ func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *core
 }
 
 func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+	logger := log.FromContext(ctx)
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
@@ -446,7 +470,22 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 			if err != nil {
 				return err
 			}
-			err = utils.TryAddOwnerRef(ctx, r.Client, service, stack, r.Scheme)
+
+			if stack.Annotations == nil {
+				stack.Annotations = map[string]string{}
+			}
+
+			serviceNameNamespace := fmt.Sprintf("%s/%s", service.GetNamespace(), service.GetName())
+			if stack.Annotations[ServiceOwnerAnnotation] == serviceNameNamespace {
+				continue
+			}
+			stack.Annotations[ServiceOwnerAnnotation] = serviceNameNamespace
+
+			// ignore error. It's for the backward compatibility
+			if err := controllerutil.RemoveOwnerReference(service, stack, r.Scheme); err != nil {
+				logger.V(5).Info(err.Error())
+			}
+			err = utils.TryToUpdate(ctx, r.Client, stack)
 			if err != nil {
 				return err
 			}
@@ -557,9 +596,34 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
+		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Owns(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, stack client.Object) []reconcile.Request {
+		requests := make([]reconcile.Request, 0)
+		if stack.GetAnnotations() == nil {
+			return requests
+		}
+		service, ok := stack.GetAnnotations()[ServiceOwnerAnnotation]
+		if !ok {
+			return requests
+		}
+		s := strings.Split(service, "/")
+		if len(s) != 2 {
+			return requests
+		}
+		namespace := s[0]
+		name := s[1]
+
+		if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
+		}
+
+		return requests
+	})
 }

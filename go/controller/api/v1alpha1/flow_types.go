@@ -13,9 +13,11 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
+	// Longform description of the service managed by this flow
 	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty"`
 
+	// Optional image icon for the flow to apply branding or improve identification
 	// +kubebuilder:validation:Optional
 	Icon *string `json:"icon,omitempty"`
 
@@ -23,9 +25,18 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Bindings contain read and write policies of this cluster
+	// Bindings contain read and write policies of this Flow
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
+
+	// ServerAssociations contains a list of MCP services you wish to associate with this flow. Can also be managed within the Plural Console UI securely.
+	// +kubebuilder:validation:Optional
+	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
+}
+
+type FlowServerAssociation struct {
+	// +kubebuilder:validation:Required
+	MCPServerRef corev1.ObjectReference `json:"mcpServerRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -67,12 +78,13 @@ func (in *Flow) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *Flow) Attributes(projectID *string) console.FlowAttributes {
+func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpServerAssociationAttributes) console.FlowAttributes {
 	attrs := console.FlowAttributes{
-		Name:        in.FlowName(),
-		Description: in.Spec.Description,
-		Icon:        in.Spec.Icon,
-		ProjectID:   projectID,
+		Name:               in.FlowName(),
+		Description:        in.Spec.Description,
+		Icon:               in.Spec.Icon,
+		ProjectID:          projectID,
+		ServerAssociations: serverAssociations,
 	}
 
 	if in.Spec.Bindings != nil {

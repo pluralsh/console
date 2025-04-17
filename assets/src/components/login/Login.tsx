@@ -1,17 +1,26 @@
-import { ApolloError, useMutation, useQuery } from '@apollo/client'
+import {
+  ApolloError,
+  useApolloClient,
+  useMutation,
+  useQuery,
+} from '@apollo/client'
 import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { useMeQuery, User } from 'generated/graphql'
+import { AcceptLoginDocument, useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
 import { RefObject, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
+import queryString from 'query-string'
 
 import { useTheme } from 'styled-components'
 
 import {
+  fetchToken,
+  saveChallenge,
   setRefreshToken,
   setToken,
+  wipeChallenge,
   wipeRefreshToken,
   wipeToken,
 } from '../../helpers/auth'
@@ -57,7 +66,7 @@ function LoginError({
       const to = setTimeout(() => {
         wipeToken()
         wipeRefreshToken()
-        window.location = '/login' as any as Location
+        ;(window as Window).location = '/login'
       }, 2000)
 
       return () => clearTimeout(to)
@@ -133,15 +142,48 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
   )
 }
 
+export function handleOauthChallenge(client, challenge) {
+  client
+    .mutate({
+      mutation: AcceptLoginDocument,
+      variables: { challenge },
+    })
+    .then(
+      ({
+        data: {
+          acceptLogin: { redirectTo },
+        },
+      }) => {
+        window.location = redirectTo
+      }
+    )
+    .catch((err) => {
+      console.error(err)
+      wipeChallenge()
+    })
+}
+
 export default function Login() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const emailRef = useRef<any>(undefined)
+  const location = useLocation()
+  const client = useApolloClient()
+  const jwt = fetchToken()
+  const { login_challenge: challenge } = queryString.parse(location.search)
 
   useEffect(() => {
+    wipeChallenge()
+    if (challenge) saveChallenge(challenge)
     setInputFocus(emailRef)
-  }, [])
+  }, [challenge])
+
+  useEffect(() => {
+    if (jwt && challenge) {
+      handleOauthChallenge(client, challenge)
+    }
+  }, [jwt, challenge, client])
 
   const { data } = useQuery(ME_Q)
   const { data: loginData, loading } = useQuery(LOGIN_INFO, {
@@ -160,7 +202,7 @@ export default function Login() {
     })
 
   if (!loginMError && data?.me) {
-    window.location = '/' as any as Location
+    ;(window as Window).location = '/'
   }
 
   if (loading)

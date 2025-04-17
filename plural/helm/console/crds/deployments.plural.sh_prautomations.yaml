@@ -464,6 +464,7 @@ spec:
                 - PIPELINE
                 - UPDATE
                 - UPGRADE
+                - COST
                 type: string
               scmConnectionRef:
                 description: ScmConnectionRef the SCM connection to use for generating

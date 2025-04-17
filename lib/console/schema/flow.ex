@@ -1,6 +1,6 @@
 defmodule Console.Schema.Flow do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Project, PolicyBinding, User}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServerAssociation}
   alias Console.Deployments.Policies.Rbac
 
   schema "flows" do
@@ -21,6 +21,8 @@ defmodule Console.Schema.Flow do
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :write_policy_id
+    has_many :server_associations, McpServerAssociation, on_replace: :delete
+    has_many :servers, through: [:server_associations, :server]
 
     timestamps()
   end
@@ -53,10 +55,20 @@ defmodule Console.Schema.Flow do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name description icon project_id)a)
+    |> cast_assoc(:server_associations)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :project_id])
+  end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
   end
 end

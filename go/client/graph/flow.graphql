@@ -1,22 +1,3 @@
-query GetFlow($id: ID!) {
-    flow(id: $id) {
-        ... FlowFragment
-    }
-}
-
-mutation DeleteFlow($id: ID!) {
-    deleteFlow(id: $id) {
-        id
-    }
-}
-
-mutation UpsertFlow($attributes: FlowAttributes!) {
-    upsertFlow(attributes: $attributes){
-        ...FlowFragment
-    }
-}
-
-
 fragment FlowFragment on Flow {
     id
     name
@@ -29,5 +10,23 @@ fragment FlowFragment on Flow {
     }
     project {
         ...ProjectFragment
+    }
+}
+
+query GetFlow($id: ID!) {
+    flow(id: $id) {
+        ...FlowFragment
+    }
+}
+
+mutation UpsertFlow($attributes: FlowAttributes!) {
+    upsertFlow(attributes: $attributes){
+        ...FlowFragment
+    }
+}
+
+mutation DeleteFlow($id: ID!) {
+    deleteFlow(id: $id) {
+        id
     }
 }

@@ -48,6 +48,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_pr_automations(args, _) do
     PrAutomation.ordered()
+    |> maybe_search(PrAutomation, args)
     |> pra_filters(args)
     |> paginate(args)
   end
@@ -152,6 +153,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def upsert_observer(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.upsert_observer(attrs, user)
 
+  def reset_observer(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.reset_observer(attrs, id, user)
+
+  def kick_observer(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.kick_observer(id, user)
+
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)
 
@@ -166,7 +173,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
       {:service_id, sid}, q -> PullRequest.for_service(q, sid)
       {:open, true}, q -> PullRequest.open(q)
-      {:q, search}, q -> PullRequest.search(q, search)
       _, q -> q
     end)
   end
@@ -175,7 +181,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     Enum.reduce(args, query, fn
       {:catalog_id, cid}, q -> PrAutomation.for_catalog(q, cid)
       {:project_id, cid}, q -> PrAutomation.for_project(q, cid)
-      {:q, search}, q -> PrAutomation.search(q, search)
+      {:role, role}, q  when not is_nil(role) -> PrAutomation.for_role(q, role)
       _, q -> q
     end)
   end

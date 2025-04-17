@@ -1,0 +1,25 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "Stack <%= @stack_run.stack.name %> is pending approval",
+    "sections": [{
+        "activityTitle": "Stack <%= @stack_run.stack.name %> is pending approval",
+        "activitySubtitle": "Go to the stack run page to see progress or approve its plan",
+        "facts": [
+            {
+                "name": "Url",
+                "value": "<%= Console.url("/stacks/#{@stack_run.stack_id}/runs/#{@stack_run.id}") %>"
+            }
+        ],
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/stacks/#{@stack_run.stack_id}/runs/#{@stack_run.id}") %>"
+        }]
+    }]
+}

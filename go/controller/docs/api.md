@@ -16,11 +16,13 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
+- [Flow](#flow)
 - [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
 - [HelmRepository](#helmrepository)
 - [InfrastructureStack](#infrastructurestack)
+- [MCPServer](#mcpserver)
 - [ManagedNamespace](#managednamespace)
 - [NamespaceCredentials](#namespacecredentials)
 - [NotificationRouter](#notificationrouter)
@@ -166,6 +168,7 @@ to this resource for users/groups in the system.
 
 _Appears in:_
 - [ClusterSpec](#clusterspec)
+- [FlowSpec](#flowspec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PipelineSpec](#pipelinespec)
 - [ProjectSpec](#projectspec)
@@ -871,6 +874,61 @@ _Appears in:_
 
 
 
+#### Flow
+
+
+
+Flow is the Schema for the flows API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Flow` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[FlowSpec](#flowspec)_ |  |  |  |
+
+
+#### FlowServerAssociation
+
+
+
+
+
+
+
+_Appears in:_
+- [FlowSpec](#flowspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `mcpServerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+
+
+#### FlowSpec
+
+
+
+FlowSpec defines the desired state of Flow
+
+
+
+_Appears in:_
+- [Flow](#flow)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this Flow. If not provided Flow's own name from Flow.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `description` _string_ |  |  | Optional: {} <br /> |
+| `icon` _string_ |  |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to span a specific project only |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
+| `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ |  |  | Optional: {} <br /> |
+
+
 #### GateSpec
 
 
@@ -1326,6 +1384,60 @@ _Appears in:_
 | `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Configures a connection to elasticsearch |  | Optional: {} <br /> |
 
 
+#### MCPServer
+
+
+
+
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `MCPServer` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[MCPServerSpec](#mcpserverspec)_ |  |  |  |
+
+
+#### MCPServerAuthentication
+
+
+
+MCPServerAuthentication contains specs for MCP server.
+
+
+
+_Appears in:_
+- [MCPServerSpec](#mcpserverspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `plural` _boolean_ | Plural turns on built-in Plural JWT authentication. |  | Optional: {} <br /> |
+| `headers` _object (keys:string, values:string)_ | Headers contain any custom HTTP headers needed for authentication. |  | Optional: {} <br /> |
+
+
+#### MCPServerSpec
+
+
+
+MCPServerSpec defines the desired state of the resource.
+
+
+
+_Appears in:_
+- [MCPServer](#mcpserver)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: {} <br /> |
+| `url` _string_ | URL is the HTTP URL the server is hosted on. |  | Required: {} <br /> |
+| `authentication` _[MCPServerAuthentication](#mcpserverauthentication)_ | Authentication specs for this server. |  | Optional: {} <br /> |
+| `confirm` _boolean_ | Confirm whether a tool call against this server should require user confirmation. |  | Optional: {} <br /> |
+
+
 #### ManagedNamespace
 
 
@@ -1535,7 +1647,7 @@ _Appears in:_
 | `name` _string_ | Name of this OIDCProvider. If not provided OIDCProvider's own name<br />from OIDCProvider.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `description` _string_ | Description can be used to describe this OIDCProvider. |  | Optional: {} <br /> |
 | `redirectUris` _string array_ | RedirectUris is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
-| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
+| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br /><br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
 
 
 #### ObservabilityProvider
@@ -1643,6 +1755,23 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `type` _[ObserverActionType](#observeractiontype)_ |  |  | Enum: [PIPELINE PR] <br />Type: string <br /> |
 | `configuration` _[ObserverConfiguration](#observerconfiguration)_ | The configuration for the given action, relative to its current Type |  |  |
+
+
+#### ObserverAddOn
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | The name of the add-on you want to poll |  |  |
+| `kubernetesVersion` _string_ | The Kubernetes Version you want to ensure this add-on is compatible with |  | Optional: {} <br /> |
 
 
 #### ObserverConfiguration
@@ -1767,6 +1896,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | the name of this observer, if not provided Observer's own name from Observer.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `crontab` _string_ | The crontab you will poll the given Target with |  |  |
+| `initial` _string_ | The initial polled value of this observer, useful when you don't want to cause duplicate actions on initialization |  | Optional: {} <br /> |
 | `target` _[ObserverTarget](#observertarget)_ | The target object to poll, triggering the list of Actions w/ the discovered value |  |  |
 | `actions` _[ObserverAction](#observeraction) array_ | A list of predefined actions to take if a new Target is discovered in the last poll loop |  |  |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this observer belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
@@ -1785,12 +1915,14 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[ObserverTargetType](#observertargettype)_ |  |  | Enum: [OCI HELM GIT] <br />Type: string <br /> |
-| `format` _string_ |  |  | Optional: {} <br /> |
+| `type` _[ObserverTargetType](#observertargettype)_ |  |  | Enum: [OCI HELM GIT ADDON EKS_ADDON] <br />Type: string <br /> |
+| `format` _string_ | Format is a regex with a capture group matching a well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)` |  | Optional: {} <br /> |
 | `order` _[ObserverTargetOrder](#observertargetorder)_ |  |  | Enum: [SEMVER LATEST] <br />Type: string <br /> |
-| `helm` _[ObserverHelm](#observerhelm)_ |  |  | Optional: {} <br /> |
-| `oci` _[ObserverOci](#observeroci)_ |  |  | Optional: {} <br /> |
-| `git` _[ObserverGit](#observergit)_ |  |  | Optional: {} <br /> |
+| `helm` _[ObserverHelm](#observerhelm)_ | Configuration for helm scraping |  | Optional: {} <br /> |
+| `oci` _[ObserverOci](#observeroci)_ | Configuration for OCI repository scraping |  | Optional: {} <br /> |
+| `git` _[ObserverGit](#observergit)_ | Configuration for Git tags scaping |  | Optional: {} <br /> |
+| `addon` _[ObserverAddOn](#observeraddon)_ | Configuration for Plural AddOn table scraping |  | Optional: {} <br /> |
+| `eksAddon` _[ObserverAddOn](#observeraddon)_ | Configuration for EKS AddOn scraping |  | Optional: {} <br /> |
 
 
 #### OllamaSettings
@@ -1919,6 +2051,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `stages` _[PipelineStage](#pipelinestage) array_ | Stages of a pipeline. |  |  |
 | `edges` _[PipelineEdge](#pipelineedge) array_ | Edges of a pipeline. |  |  |
+| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a Flow this pipeline belongs within |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this pipeline |  | Optional: {} <br /> |
 
@@ -2657,6 +2790,7 @@ _Appears in:_
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
+| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a Flow this service belongs within |  | Optional: {} <br /> |
 | `configuration` _object (keys:string, values:string)_ | Configuration is a set of non-secret configuration to apply for lightweight templating of manifests in this service |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `dependencies` _[ServiceDependency](#servicedependency) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |

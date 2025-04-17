@@ -10,6 +10,16 @@ defmodule Console.Deployments.Settings do
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
+
+  @doc """
+  Need to force this module to recompile whenever the associated text files change
+  """
+  def __mix_recompile__?() do
+    agent = File.read!("AGENT_VERSION") |> String.trim()
+    kube = File.read!("KUBE_VERSION") |> String.trim()
+    agent != @agent_vsn or kube != @kube_vsn
+  end
+
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 

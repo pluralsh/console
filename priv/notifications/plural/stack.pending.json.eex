@@ -1,0 +1,3 @@
+🚀 Stack <%= @stack_run.stack.name %> is pending approval
+
+View details: <%= Console.url("/stacks/#{@stack_run.stack_id}/runs/#{@stack_run.id}") %>

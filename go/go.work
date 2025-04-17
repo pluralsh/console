@@ -6,5 +6,7 @@ use (
 	./controller // github.com/pluralsh/console/go/controller
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
 	./tools // github.com/pluralsh/console/go/tools
-	./demo/flaky-service // github.com/pluralsh/console/go/test/failing-service
+	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
+	./helm-test // github.com/pluralsh/console/go/helm-test
+	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 )

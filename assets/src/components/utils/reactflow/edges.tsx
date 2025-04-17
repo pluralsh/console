@@ -17,6 +17,7 @@ export enum EdgeType {
   Bezier = 'plural-bezier-edge',
   Smooth = 'plural-smooth-edge',
   Directed = 'plural-directed-edge',
+  BezierDirected = 'plural-bezier-directed-edge',
   Pipeline = 'plural-pipeline-edge',
 }
 
@@ -25,6 +26,7 @@ export const edgeTypes = {
   [EdgeType.Bezier]: Bezier,
   [EdgeType.Smooth]: Smooth,
   [EdgeType.Directed]: Directed,
+  [EdgeType.BezierDirected]: BezierDirected,
   [EdgeType.Pipeline]: Pipeline,
 } as const
 
@@ -66,6 +68,21 @@ function Smooth({ style, ...props }: EdgeProps) {
         ...style,
         stroke: theme.colors.border,
       }}
+    />
+  )
+}
+
+function BezierDirected({ style, ...props }: EdgeProps) {
+  const theme = useTheme()
+
+  return (
+    <BezierEdge
+      {...props}
+      style={{
+        ...style,
+        stroke: theme.colors['border-input'],
+      }}
+      markerEnd={`url(#${MarkerType.ArrowStrong})`}
     />
   )
 }

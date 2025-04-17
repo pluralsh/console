@@ -61,10 +61,6 @@ type RootQueryType {
 
   secret(serviceId: ID, namespace: String!, name: String!): Secret
 
-  configMaps(namespace: String!): [ConfigMap]
-
-  secrets(namespace: String!): [Secret]
-
   pluralCluster(namespace: String!, name: String!, serviceId: ID): PluralCluster
 
   pluralServiceDeployment(namespace: String!, name: String!, serviceId: ID): PluralServiceDeployment
@@ -84,8 +80,6 @@ type RootQueryType {
   daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
 
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
-
-  nodes: [Node]
 
   node(name: String!, clusterId: ID): Node
 
@@ -135,7 +129,9 @@ type RootQueryType {
 
   scmConnection(id: ID, name: String): ScmConnection
 
-  prAutomations(after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String): PrAutomationConnection
+  prAutomations(
+    after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String, role: PrRole
+  ): PrAutomationConnection
 
   prAutomation(id: ID, name: String): PrAutomation
 
@@ -401,6 +397,12 @@ type RootQueryType {
 
   flow(id: ID!): Flow
 
+  mcpServers(after: String, first: Int, before: String, last: Int, q: String): McpServerConnection
+
+  mcpServer(id: ID!): McpServer
+
+  oidcProviders(after: String, first: Int, before: String, last: Int, q: String): OidcProviderConnection
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -432,11 +434,28 @@ type RootQueryType {
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
-  chatThreads(after: String, first: Int, before: String, last: Int): ChatThreadConnection
+  chatThreads(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only show threads for this flow"
+    flowId: ID
+  ): ChatThreadConnection
 
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 
   aiPin(insightId: ID, threadId: ID): AiPin
+
+  mcpToken: String
+
+  oidcLogin(challenge: String!): OidcStepResponse
+
+  oidcConsent(challenge: String!): OidcStepResponse
 }
 
 type RootMutationType {
@@ -502,13 +521,9 @@ type RootMutationType {
 
   deletePersona(id: ID!): Persona
 
-  deleteCertificate(name: String!, namespace: String!): Boolean
-
   deletePod(namespace: String!, name: String!, serviceId: ID): Pod
 
   deleteJob(namespace: String!, name: String!, serviceId: ID): Job
-
-  deleteNode(name: String!): Node
 
   createGitRepository(attributes: GitAttributes!): GitRepository
 
@@ -574,6 +589,10 @@ type RootMutationType {
 
   deleteObserver(id: ID!): Observer
 
+  kickObserver(id: ID!): Observer
+
+  resetObserver(id: ID!, attributes: ObserverResetAttributes!): Observer
+
   upsertCatalog(attributes: CatalogAttributes): Catalog
 
   deleteCatalog(id: ID!): Catalog
@@ -607,7 +626,15 @@ type RootMutationType {
 
   addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
 
-  applyScalingRecommendation(id: ID!): PullRequest
+  applyScalingRecommendation(
+    "the id of the scaling recommendation to fix"
+    id: ID!
+  ): PullRequest
+
+  suggestScalingRecommendation(
+    "the id of the scaling recommendation to fix"
+    id: ID!
+  ): String
 
   createClusterRegistration(attributes: ClusterRegistrationCreateAttributes!): ClusterRegistration
 
@@ -734,7 +761,9 @@ type RootMutationType {
   ingestClusterCost(costs: CostIngestAttributes!): Boolean
 
   "registers a list of runtime services discovered for the current cluster"
-  registerRuntimeServices(services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, serviceId: ID): Int
+  registerRuntimeServices(
+    services: [RuntimeServiceAttributes], layout: OperationalLayoutAttributes, deprecated: [DeprecatedCustomResourceAttributes], serviceId: ID
+  ): Int
 
   "agent api to persist upgrade insights for its cluster"
   saveUpgradeInsights(insights: [UpgradeInsightAttributes], addons: [CloudAddonAttributes]): [UpgradeInsight]
@@ -820,6 +849,9 @@ type RootMutationType {
 
   detachStack(id: ID!): InfrastructureStack
 
+  "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"
+  restoreStack(id: ID!): InfrastructureStack
+
   "refresh the source repo of this stack, and potentially create a fresh run"
   kickStack(id: ID!): StackRun
 
@@ -878,9 +910,13 @@ type RootMutationType {
 
   deleteFlow(id: ID!): Flow
 
+  upsertMcpServer(attributes: McpServerAttributes!): McpServer
+
+  deleteMcpServer(id: ID!): McpServer
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
-    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
+    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
@@ -888,6 +924,21 @@ type RootMutationType {
 
   "saves a set of messages and generates a new one transactionally"
   chat(threadId: ID, messages: [ChatMessage]): Chat
+
+  "Chat mutation that can also execute MCP servers in line with the overall completion"
+  hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
+
+  "Confirms a chat message and calls its MCP server, if the user has access to the thread"
+  confirmChat(
+    "the id of the chat message to confirm"
+    id: ID!
+  ): Chat
+
+  "Cancels a chat message, if the user has access to the thread, by just deleting the chat record"
+  cancelChat(
+    "the id of the chat message to cancel"
+    id: ID!
+  ): Chat
 
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
@@ -917,6 +968,10 @@ type RootMutationType {
   deletePin(id: ID!): AiPin
 
   aiFixPr(insightId: ID!, messages: [ChatMessage]): PullRequest
+
+  acceptLogin(challenge: String!): OauthResponse
+
+  oauthConsent(challenge: String!, scopes: [String]): OauthResponse
 }
 
 type RootSubscriptionType {
@@ -936,7 +991,29 @@ type RootSubscriptionType {
 
     "an arbitrary scope id to use for explain w\/ ai"
     scopeId: String
+
+    "the id of the scaling recommendation you're streaming a cost PR suggestion for"
+    recommendationId: ID
   ): AiDelta
+}
+
+type OauthResponse {
+  redirectTo: String!
+}
+
+type ConsentRequest {
+  requestedScope: [String]
+  skip: Boolean
+}
+
+type LoginRequest {
+  requestedScope: [String]
+  subject: String
+}
+
+type OidcStepResponse {
+  login: LoginRequest
+  consent: ConsentRequest
 }
 
 input PolicyBindingAttributes {
@@ -985,6 +1062,39 @@ input FlowAttributes {
   projectId: ID
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+  serverAssociations: [McpServerAssociationAttributes]
+}
+
+"Input attributes for creating an mcp server"
+input McpServerAttributes {
+  name: String!
+
+  url: String!
+
+  "whether tool calls against this server should require a confirmation"
+  confirm: Boolean
+
+  authentication: McpServerAuthenticationAttributes
+
+  readBindings: [PolicyBindingAttributes]
+
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input McpServerAssociationAttributes {
+  serverId: ID
+}
+
+input McpServerAuthenticationAttributes {
+  "whether to use Plural's built-in JWT authentication"
+  plural: Boolean
+
+  headers: [McpHeaderAttributes]
+}
+
+input McpHeaderAttributes {
+  name: String!
+  value: String!
 }
 
 type Flow {
@@ -995,6 +1105,9 @@ type Flow {
   description: String
 
   icon: String
+
+  "servers that are bound to this flow"
+  servers: [McpServer]
 
   "read policy for this flow"
   readBindings: [PolicyBinding]
@@ -1011,9 +1124,75 @@ type Flow {
 
   pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
 
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type McpServer {
+  id: ID!
+
+  "the name for this server"
+  name: String!
+
+  "the HTTP url the server is hosted on"
+  url: String!
+
+  "authentication specs for this server"
+  authentication: McpServerAuthentication
+
+  "whether a tool call against this server should require user confirmation"
+  confirm: Boolean
+
+  "read policy for this mcp server"
+  readBindings: [PolicyBinding]
+
+  "write policy for this mcp server"
+  writeBindings: [PolicyBinding]
+
+  audits(after: String, first: Int, before: String, last: Int): McpServerAuditConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type McpServerAuthentication {
+  "built-in Plural JWT authentication"
+  plural: Boolean
+
+  "any custom HTTP headers needed for authentication"
+  headers: [McpServerHeader]
+}
+
+type McpServerHeader {
+  name: String!
+  value: String!
+}
+
+type McpServerAudit {
+  id: ID!
+  tool: String!
+  arguments: Map
+  server: McpServer
+  actor: User
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"The description of a tool extracted from its MCP server"
+type McpTool {
+  name: String!
+  description: String
+  inputSchema: Map
+}
+
+"A tool related to an mcp server"
+type McpServerTool {
+  server: McpServer
+  tool: McpTool
 }
 
 type FlowConnection {
@@ -1021,9 +1200,20 @@ type FlowConnection {
   edges: [FlowEdge]
 }
 
+type McpServerConnection {
+  pageInfo: PageInfo!
+  edges: [McpServerEdge]
+}
+
+type McpServerAuditConnection {
+  pageInfo: PageInfo!
+  edges: [McpServerAuditEdge]
+}
+
 "Supported OIDC-compatible Auth Providers"
 enum OidcProviderType {
   PLURAL
+  CONSOLE
 }
 
 "Supported methods for fetching an OIDC auth token"
@@ -1039,6 +1229,12 @@ input OidcProviderAttributes {
   authMethod: OidcAuthMethod
 
   description: String
+
+  "users and groups able to utilize this provider"
+  bindings: [PolicyBindingAttributes]
+
+  "users and groups able to utilize this provider"
+  writeBindings: [PolicyBindingAttributes]
 
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]
@@ -1062,6 +1258,17 @@ type OidcProvider {
 
   "the generated client secret, used in configuring an OAuth client"
   clientSecret: String!
+
+  "bindings determining if a user can login with this oidc client"
+  bindings: [PolicyBinding]
+
+  "bindings determining if a user can edit this oidc client"
+  writeBindings: [PolicyBinding]
+}
+
+type OidcProviderConnection {
+  pageInfo: PageInfo!
+  edges: [OidcProviderEdge]
 }
 
 enum AiProvider {
@@ -1581,6 +1788,9 @@ enum ObservabilityProviderType {
 
 enum ObservabilityWebhookType {
   GRAFANA
+  DATADOG
+  PAGERDUTY
+  NEWRELIC
 }
 
 enum AlertSeverity {
@@ -3970,6 +4180,8 @@ input HelmConfigAttributes {
 
   ignoreHooks: Boolean
 
+  ignoreCrds: Boolean
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -4016,6 +4228,8 @@ input ServiceUpdateAttributes {
   kustomize: KustomizeAttributes
 
   parentId: ID
+
+  flowId: ID
 
   dependencies: [ServiceDependencyAttributes]
 
@@ -4218,12 +4432,21 @@ type ServiceDeployment {
 
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
+  "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
+
   "whether this service is editable"
   editable: Boolean
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A representation of the metrics to render a utilization heat map"
+type UtilizationHeatMap {
+  cpu: [MetricPointResponse]
+  memory: [MetricPointResponse]
 }
 
 type ServiceComponentMetrics {
@@ -4288,6 +4511,8 @@ type HelmSpec {
   release: String
 
   ignoreHooks: Boolean
+
+  ignoreCrds: Boolean
 
   "spec of where to find the chart in git"
   git: GitRef
@@ -4539,6 +4764,12 @@ enum TagType {
   STACK
 }
 
+enum HeatMapFlavor {
+  POD
+  NAMESPACE
+  NODE
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -4750,6 +4981,21 @@ input RuntimeServiceAttributes {
 
   "the number of instances of this service we've found"
   instanceCount: Int
+}
+
+input DeprecatedCustomResourceAttributes {
+  group: String!
+
+  version: String!
+
+  kind: String!
+
+  namespace: String
+
+  name: String!
+
+  "the next valid version for this resource"
+  nextVersion: String!
 }
 
 input AgentMigrationAttributes {
@@ -5089,6 +5335,9 @@ type Cluster {
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
 
+  "The helm values for the agent installation"
+  agentHelmValues: String
+
   "Whether this cluster was recently pinged"
   healthy: Boolean
 
@@ -5215,8 +5464,16 @@ type Cluster {
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
+  networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
+
+  "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+  heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
+
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
+
+  "fetches the discovered custom resources with new versions to be used"
+  deprecatedCustomResources: [DeprecatedCustomResource]
 
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   cloudAddons: [CloudAddon]
@@ -5241,6 +5498,9 @@ type ClusterUpgradePlan {
 
   "whether all api deprecations have been cleared for the target version"
   deprecations: Boolean
+
+  "whether the kubelet version is in line with the current version"
+  kubeletSkew: Boolean
 }
 
 "a historical revision of a cluster, including version, cloud and node group configuration"
@@ -5434,6 +5694,30 @@ type AddOnConfigCondition {
 
   "the value to apply the condition with, for binary operators like LT\/GT"
   value: String
+}
+
+type DeprecatedCustomResource {
+  id: ID!
+
+  group: String!
+
+  version: String!
+
+  kind: String!
+
+  namespace: String!
+
+  name: String
+
+  "the next discovered version of this resource"
+  nextVersion: String!
+
+  "the cluster this resource belongs to"
+  cluster: Cluster
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "a service encapsulating a controller like istio\/ingress-nginx\/etc that is meant to extend the kubernetes api"
@@ -5840,6 +6124,33 @@ type CloudAddonVersionInformation {
   blocking(kubeVersion: String!): Boolean
 }
 
+"An abstract workload discovered by querying statistics on a service mesh"
+type NetworkMeshWorkload {
+  id: String!
+  name: String!
+  namespace: String
+  service: String
+}
+
+"The relevant statistics for traffic within a service mesh"
+type NetworkMeshStatistics {
+  bytes: Float
+  connections: Float
+  packets: Float
+  http200: Float
+  http400: Float
+  http500: Float
+  httpClientLatency: Float
+}
+
+"An edge representing traffic statistics between two workloads in a service mesh"
+type NetworkMeshEdge {
+  id: String!
+  from: NetworkMeshWorkload!
+  to: NetworkMeshWorkload!
+  statistics: NetworkMeshStatistics!
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -5936,6 +6247,7 @@ enum PrRole {
   PIPELINE
   UPDATE
   UPGRADE
+  COST
 }
 
 enum PrStatus {
@@ -5983,6 +6295,8 @@ enum ObserverTargetType {
   OCI
   HELM
   GIT
+  EKS_ADDON
+  ADDON
 }
 
 enum ObserverGitTargetType {
@@ -6365,6 +6679,11 @@ input ObserverAttributes {
   projectId: ID
 }
 
+"Resets the current value of the observer"
+input ObserverResetAttributes {
+  lastValue: String!
+}
+
 "A spec for a target to poll"
 input ObserverTargetAttributes {
   type: ObserverTargetType
@@ -6381,6 +6700,10 @@ input ObserverTargetAttributes {
   oci: ObserverOciAttributes
 
   git: ObserverGitAttributes
+
+  addon: ObserverAddonAttributes
+
+  eksAddon: ObserverAddonAttributes
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -6434,6 +6757,13 @@ input ObserverPipelineActionAttributes {
 
   "the context to apply, use $value to interject the observed value"
   context: Json!
+}
+
+"The settings for configuring add-on scraping"
+input ObserverAddonAttributes {
+  name: String!
+  kubernetesVersion: String
+  kubernetesVersions: [String!]
 }
 
 "a git repository available for deployments"
@@ -6871,7 +7201,7 @@ type ObserverPrAction {
   branchTemplate: String
 
   "the context to apply, use $value to interject the observed value"
-  context: Json!
+  context: Map!
 }
 
 "Configuration for setting a pipeline context in an observer"
@@ -6967,6 +7297,7 @@ type CatalogConnection {
 enum ChatType {
   TEXT
   FILE
+  TOOL
 }
 
 enum EvidenceType {
@@ -7020,24 +7351,45 @@ input ChatThreadAttributes {
 
   "an ai insight this thread was created from"
   insightId: ID
+
+  "the flow this thread was created in"
+  flowId: ID
 }
 
 type Chat {
   id: ID!
+
   type: ChatType!
+
   role: AiRole!
-  content: String!
+
+  content: String
+
   seq: Int!
+
+  "whether this chat requires confirmation"
+  confirm: Boolean
+
+  "when the chat was confirmed"
+  confirmedAt: DateTime
+
   attributes: ChatTypeAttributes
+
   pullRequest: PullRequest
+
   thread: ChatThread
+
+  server: McpServer
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
 "Additional attributes of this chat message, used for formatting it in the display"
 type ChatTypeAttributes {
   file: ChatFile
+  tool: ChatTool
 }
 
 "Additional attributes for describing a file type chat"
@@ -7045,16 +7397,35 @@ type ChatFile {
   name: String
 }
 
+"Additional attributes for describing a tool call that derived this chat message"
+type ChatTool {
+  name: String
+  arguments: Map
+}
+
 "A list of chat messages around a specific topic created on demand"
 type ChatThread {
   id: ID!
+
   summary: String!
+
   default: Boolean!
+
   lastMessageAt: DateTime
+
+  flow: Flow
+
   user: User
+
   insight: AiInsight
+
+  "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
+  tools: [McpServerTool]
+
   chats(after: String, first: Int, before: String, last: Int): ChatConnection
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -7167,6 +7538,8 @@ type ClusterInsightComponent {
 type AiDelta {
   seq: Int!
   content: String!
+  message: Int
+  role: AiRole
 }
 
 type ChatConnection {
@@ -7312,6 +7685,11 @@ type DashboardMetric {
 type MetricResponse {
   metric: Map
   values: [MetricResult]
+}
+
+type MetricPointResponse {
+  metric: Map
+  value: MetricResult
 }
 
 type LogLine {
@@ -8774,6 +9152,21 @@ type ObservabilityProviderEdge {
 
 type ProjectEdge {
   node: Project
+  cursor: String
+}
+
+type OidcProviderEdge {
+  node: OidcProvider
+  cursor: String
+}
+
+type McpServerAuditEdge {
+  node: McpServerAudit
+  cursor: String
+}
+
+type McpServerEdge {
+  node: McpServer
   cursor: String
 }
 

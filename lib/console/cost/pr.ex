@@ -8,10 +8,28 @@ defmodule Console.Cost.Pr do
   alias Console.Schema.{ClusterScalingRecommendation, Service, User}
 
   @pr """
-  The following is the description of how a Kubernetes service is configured using Plural as a CD engine.  I want to reconfigure one
+  The following is the description of how a Kubernetes service is configured using Plural as a GitOps engine.  I want to reconfigure one
   of its containers resource requests to match an optimal setup determined by our cost management solution.  First, the manifests for
   the service are listed below:
   """
+
+  @spec suggestion(binary | ClusterScalingRecommendation.t, User.t) :: Fixer.resp
+  def suggestion(%ClusterScalingRecommendation{} = rec, %User{} = user) do
+    Console.AI.Tool.context(%{user: user})
+    with %{service: %Service{} = svc} = rec <- Repo.preload(rec, [:service]),
+         {:ok, svc} <- allow(svc, user, :write),
+         {:ok, [_ | prompt]} <- Fixer.Service.prompt(svc, "") do
+      prompt
+      |> append({:user, cost_prompt(rec)})
+      |> append({:user, "Be sure to explicitly state the Git repository and full file names that are needed to change, alongside the content of the files that need to be modified with enough surrounding context to understand what changed.  Also provide a git-style diff comparison for each changed file where possible."})
+      |> Provider.completion(preface: @pr)
+    end
+  end
+
+  def suggestion(id, %User{} = user) when is_binary(id) do
+    Repo.get!(ClusterScalingRecommendation, id)
+    |> suggestion(user)
+  end
 
   @doc """
   Generates a prompt to apply a scaling recommendation and then executes a PR tool call.  Cannot be done w/o write access
@@ -19,7 +37,7 @@ defmodule Console.Cost.Pr do
   """
   @spec create(binary | ClusterScalingRecommendation.t, User.t) :: Fixer.pr_resp
   def create(%ClusterScalingRecommendation{} = rec, %User{} = user) do
-    Console.AI.Tool.set_actor(user)
+    Console.AI.Tool.context(%{user: user})
     with %{service: %Service{} = svc} = rec <- Repo.preload(rec, [:service]),
          {:ok, svc} <- allow(svc, user, :write),
          {:ok, [_ | prompt]} <- Fixer.Service.prompt(svc, "") do

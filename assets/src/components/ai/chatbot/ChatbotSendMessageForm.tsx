@@ -1,25 +1,27 @@
 import {
   Button,
+  Chip,
   Flex,
   IconFrame,
   PlusIcon,
   PrOpenIcon,
   SendMessageIcon,
+  ServersIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 import { GqlError } from 'components/utils/Alert'
+import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   AiRole,
-  ChatThreadFragment,
+  ChatThreadTinyFragment,
   useAddChatContextMutation,
   useThreadPrMutation,
 } from 'generated/graphql'
+import { truncate } from 'lodash'
 import {
-  ClipboardEvent,
   ComponentPropsWithoutRef,
   FormEvent,
-  KeyboardEvent,
   useCallback,
   useLayoutEffect,
   useRef,
@@ -34,11 +36,19 @@ export function SendMessageForm({
   currentThread,
   sendMessage,
   fullscreen,
+  shouldUseMCP,
+  serverNames,
+  showMcpServers,
+  setShowMcpServers,
   ...props
 }: {
-  currentThread: ChatThreadFragment
+  currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
+  shouldUseMCP: boolean
+  serverNames: string[]
+  showMcpServers: boolean
+  setShowMcpServers: (show: boolean) => void
 } & ComponentPropsWithoutRef<'div'>) {
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
@@ -72,42 +82,6 @@ export function SendMessageForm({
     contentEditableRef.current?.focus()
   }, [])
 
-  const onInput = useCallback(
-    (e: FormEvent<HTMLDivElement>) => {
-      const content = e.currentTarget.innerText || ''
-      setNewMessage(content)
-      // clears so placeholder is shown if input is only a newline
-      if (content === '\n') e.currentTarget.innerHTML = ''
-    },
-    [setNewMessage]
-  )
-
-  const onKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    // for handling enter key
-    // if any modifier key is pressed, allow default behavior (which is adding a new line usually)
-    // otherwise, submit the form
-    if (e.key === 'Enter') {
-      if (e.shiftKey || e.ctrlKey || e.altKey) return
-      e.preventDefault()
-      formRef.current?.requestSubmit()
-    }
-  }, [])
-
-  const onPaste = useCallback(
-    (e: ClipboardEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      const text = e.clipboardData?.getData('text/plain')
-      // take the current selection, remove whatever's there if anything, and insert the pasted text
-      const selection = document.getSelection()
-      if (!selection?.rangeCount || !text) return
-      selection.deleteFromDocument()
-      selection.getRangeAt(0).insertNode(document.createTextNode(text))
-      selection.collapseToEnd()
-      setNewMessage(text)
-    },
-    [setNewMessage]
-  )
-
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
@@ -115,9 +89,8 @@ export function SendMessageForm({
       if (content) {
         sendMessage(content)
         setNewMessage('')
-        if (contentEditableRef.current) {
+        if (contentEditableRef.current)
           contentEditableRef.current.innerText = ''
-        }
       }
     },
     [newMessage, sendMessage, setNewMessage]
@@ -142,15 +115,45 @@ export function SendMessageForm({
       $fullscreen={fullscreen}
       ref={formRef}
     >
+      {shouldUseMCP && (
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="small"
+        >
+          <ChipListSC>
+            {serverNames.slice(0, 4).map((serverName) => (
+              <Chip
+                key={serverName}
+                size="small"
+                css={{ minWidth: 'fit-content' }}
+              >
+                {truncate(serverName, { length: 14 })}
+              </Chip>
+            ))}
+            {serverNames.length > 4 && (
+              <Chip size="small">+{serverNames.length - 4}</Chip>
+            )}
+          </ChipListSC>
+          <Button
+            small
+            secondary
+            startIcon={showMcpServers ? null : <ServersIcon />}
+            onClick={() => setShowMcpServers(!showMcpServers)}
+          >
+            {showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'}
+          </Button>
+        </Flex>
+      )}
       <EditableContentWrapperSC $fullscreen={fullscreen}>
         {contextError && <GqlError error={contextError} />}
         {threadPrError && <GqlError error={threadPrError} />}
-        <EditableContentSC
-          contentEditable
-          data-placeholder="Start typing..."
-          onInput={onInput}
-          onPaste={onPaste}
-          onKeyDown={onKeyDown}
+        <EditableDiv
+          placeholder="Start typing..."
+          setValue={setNewMessage}
+          initialValue={newMessage}
+          onEnter={() => formRef.current?.requestSubmit()}
+          css={{ maxHeight: 176 }}
           {...props}
           ref={contentEditableRef}
         />
@@ -205,6 +208,9 @@ export function SendMessageForm({
 
 const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
     position: 'relative',
     borderRadius: $fullscreen ? theme.borderRadiuses.large : '0px',
     backgroundColor: $fullscreen
@@ -234,22 +240,6 @@ const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
   })
 )
 
-const EditableContentSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  flex: 1,
-
-  border: 'none',
-  outline: 'none',
-  overflowY: 'auto',
-  maxHeight: '176px',
-  whiteSpace: 'pre-wrap',
-  '&:empty:before': {
-    content: 'attr(data-placeholder)',
-    color: theme.colors['text-light'],
-    pointerEvents: 'none',
-  },
-}))
-
 export function GeneratingResponseMessage() {
   const theme = useTheme()
   const [dots, setDots] = useState('.')
@@ -271,3 +261,10 @@ export function GeneratingResponseMessage() {
     />
   )
 }
+
+const ChipListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  maxWidth: 256,
+  minWidth: 0,
+}))

@@ -129,6 +129,12 @@ spec:
                 description: Attributes for configuring a service in something like
                   a managed namespace
                 properties:
+                  configuration:
+                    additionalProperties:
+                      type: string
+                    description: Configuration is a set of non-secret service specific
+                      configuration useful for templating
+                    type: object
                   configurationRef:
                     description: ConfigurationRef is a secret reference which should
                       contain service configuration.
@@ -239,6 +245,11 @@ spec:
                         - folder
                         - ref
                         type: object
+                      ignoreCrds:
+                        description: whether you want to not include the crds in the
+                          /crds folder of the chart (useful if reinstantiating the
+                          same chart on the same cluster)
+                        type: boolean
                       ignoreHooks:
                         description: whether you want to completely ignore any helm
                           hooks when actualizing this service

@@ -16,7 +16,7 @@ import {
   ColMemoryChange,
   ColName,
   ColScalingPr,
-} from 'components/cost-management/details/ClusterScalingRecsTableCols'
+} from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 export function ServiceScalingRecs() {
   const { service } = useServiceContext()
   const { serviceId, clusterId } = useParams()

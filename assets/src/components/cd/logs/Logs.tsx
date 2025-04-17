@@ -63,6 +63,7 @@ export function Logs({
       },
       fetchPolicy: 'cache-and-network',
       notifyOnNetworkStatusChange: true,
+      pollInterval: POLL_INTERVAL,
       skip: !(clusterId || serviceId),
     })
 
@@ -72,10 +73,10 @@ export function Logs({
   )
 
   const setLive = useCallback(
-    (live: boolean) => {
-      if (live) stopPolling()
+    (newVal: boolean) => {
+      if (!newVal) stopPolling()
       else startPolling(POLL_INTERVAL)
-      setLiveState(live)
+      setLiveState(newVal)
     },
     [startPolling, stopPolling]
   )

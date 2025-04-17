@@ -1,6 +1,7 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
 import {
+  Fragment,
   ReactNode,
   RefObject,
   useCallback,
@@ -16,32 +17,41 @@ import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
   AiDelta,
   AiRole,
-  ChatFragment,
-  ChatThreadDetailsDocument,
-  ChatThreadDetailsQuery,
-  ChatThreadFragment,
+  ChatThreadDetailsQueryResult,
+  ChatThreadTinyFragment,
   ChatType,
+  EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
-  useChatThreadDetailsQuery,
+  useHybridChatMutation,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { mergeRefs } from 'react-merge-refs'
-import { appendConnectionToEnd, updateCache } from 'utils/graphql.ts'
+import { isEmpty, uniq } from 'lodash'
+import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
+import { mapExistingNodes } from 'utils/graphql.ts'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import {
   GeneratingResponseMessage,
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
+import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { produce } from 'immer'
 
 export function ChatbotPanelThread({
   currentThread,
   fullscreen,
+  threadDetailsQuery: { data, loading, error },
+  shouldUseMCP,
+  showMcpServers,
+  setShowMcpServers,
 }: {
-  currentThread: ChatThreadFragment
+  currentThread: ChatThreadTinyFragment
   fullscreen: boolean
+  threadDetailsQuery: ChatThreadDetailsQueryResult
+  shouldUseMCP: boolean
+  showMcpServers: boolean
+  setShowMcpServers: (show: boolean) => void
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -52,124 +62,150 @@ export function ChatbotPanelThread({
       behavior: 'smooth',
     })
   }, [messageListRef])
-  const evidence = currentThread.insight?.evidence?.filter(isNonNullable)
+  const evidence = currentThread.insight?.evidence
+    ?.filter(isNonNullable)
+    .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
-  const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
+  const [streamedMessages, setStreamedMessages] = useState<AiDelta[][]>([])
   useAiChatStreamSubscription({
     variables: { threadId: currentThread.id },
     onData: ({ data: { data } }) => {
       setStreaming(true)
-      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
-      setStreamedMessage((streamedMessage) => [
-        ...streamedMessage,
-        {
-          seq: data?.aiStream?.seq ?? 0,
-          content: data?.aiStream?.content ?? '',
-        },
-      ])
+      const newDelta = data?.aiStream
+      if ((newDelta?.seq ?? 1) % 120 === 0) scrollToBottom()
+      setStreamedMessages((streamedMessages) =>
+        produce(streamedMessages, (draft) => {
+          const msgNum = newDelta?.message ?? 0
+          if (!draft[msgNum]) draft[msgNum] = []
+          draft[msgNum].push({
+            seq: newDelta?.seq ?? 0,
+            content: newDelta?.content ?? '',
+            role: newDelta?.role ?? AiRole.Assistant,
+          })
+        })
+      )
     },
   })
 
-  const { data } = useChatThreadDetailsQuery({
-    variables: { id: currentThread.id },
-  })
+  const messages = mapExistingNodes(data?.chatThread?.chats)
+  const serverNames = uniq(
+    data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
+  )
 
-  const [mutate, { loading: sendingMessage, error: messageError }] =
+  const commonChatAttributes = {
+    awaitRefetchQueries: true,
+    refetchQueries: ['ChatThreadDetails'],
+    onCompleted: () => streaming && scrollToBottom(),
+  }
+  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
+  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
+  const [mutateRegChat, { loading: regLoading, error: regError }] =
     useChatMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
-      optimisticResponse: ({ messages }) => ({
-        chat: {
-          __typename: 'Chat',
-          id: crypto.randomUUID(),
-          content: messages?.[0]?.content ?? '',
-          role: AiRole.User,
-          seq: 0,
-          type: ChatType.Text,
-          attributes: null,
-          pullRequest: null,
-          insertedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      }),
-      onCompleted: () => streaming && scrollToBottom(),
-      update: (cache, { data }) => {
-        updateCache(cache, {
-          query: ChatThreadDetailsDocument,
-          variables: { id: currentThread.id },
-          update: (prev: ChatThreadDetailsQuery) => ({
-            chatThread: appendConnectionToEnd(
-              prev.chatThread,
-              data?.chat,
-              'chats'
-            ),
-          }),
-        })
-      },
+      ...commonChatAttributes,
+      optimisticResponse: ({ messages }) =>
+        getChatOptimisticResponse({
+          mutation: 'chat',
+          content: messages?.[0]?.content,
+        }),
+      update: (cache, { data }) =>
+        updateChatCache(currentThread.id, cache, [data?.chat]),
+    })
+  const [mutateHybridChat, { loading: hybridLoading, error: hybridError }] =
+    useHybridChatMutation({
+      ...commonChatAttributes,
+      optimisticResponse: ({ messages }) =>
+        getChatOptimisticResponse({
+          mutation: 'hybridChat',
+          content: messages?.[0]?.content,
+        }),
+      update: (cache, { data }) =>
+        updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
     })
 
+  const sendingMessage = regLoading || hybridLoading
+  const messageError = regError || hybridError
+
   // scroll to the bottom when number of messages increases
-  const length = data?.chatThread?.chats?.edges?.length ?? 0
+  const length = messages.length
   const prevLength = usePrevious(length) ?? 0
   useEffect(() => {
     if (length > prevLength) {
       scrollToBottom()
-      setStreamedMessage([])
+      setStreamedMessages([])
     }
   }, [length, prevLength, scrollToBottom])
 
   const sendMessage = useCallback(
     (newMessage: string) => {
-      mutate({
-        variables: {
-          messages: [{ role: AiRole.User, content: newMessage }],
-          threadId: currentThread.id,
-        },
-      })
+      const variables = {
+        messages: [{ role: AiRole.User, content: newMessage }],
+        threadId: currentThread.id,
+      }
+      if (shouldUseMCP) mutateHybridChat({ variables })
+      else mutateRegChat({ variables })
     },
-    [mutate, currentThread]
+    [currentThread.id, shouldUseMCP, mutateHybridChat, mutateRegChat]
   )
 
-  if (!data?.chatThread?.chats?.edges)
+  if (!data && loading)
     return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
-  const messages = data.chatThread.chats.edges
-    .map((edge) => edge?.node)
-    .filter((msg): msg is ChatFragment => Boolean(msg))
+
   return (
     <>
-      {messageError && <GqlError error={messageError} />}
       <ChatbotMessagesWrapper
         messageListRef={messageListRef}
         fullscreen={fullscreen}
       >
-        {isEmpty(messages) && <EmptyState message="No messages yet." />}
+        {isEmpty(messages) &&
+          (error ? (
+            <GqlError error={error} />
+          ) : (
+            <EmptyState message="No messages yet." />
+          ))}
         {messages.map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            {...msg}
-          />
+          <Fragment key={msg.id}>
+            <ChatMessage
+              {...msg}
+              serverName={msg.server?.name}
+            />
+            {!isEmpty(evidence) && // only attaches evidence to the initial insight
+              msg.seq === 0 &&
+              msg.role === AiRole.Assistant && (
+                <ChatbotPanelEvidence evidence={evidence ?? []} />
+              )}
+          </Fragment>
         ))}
         {sendingMessage &&
-          (streamedMessage.length ? (
-            <ChatMessage
-              disableActions
-              role={AiRole.Assistant}
-              content={streamedMessage
-                .sort((a, b) => a.seq - b.seq)
-                .map((delta) => delta.content)
-                .join('')}
-            />
+          (!isEmpty(streamedMessages) ? (
+            streamedMessages.map((message, i) => {
+              const isToolCall = message[0]?.role === AiRole.User
+              return (
+                <ChatMessage
+                  key={i}
+                  disableActions
+                  role={isToolCall ? AiRole.User : AiRole.Assistant}
+                  type={isToolCall ? ChatType.Tool : ChatType.Text}
+                  highlightToolContent={false}
+                  content={message
+                    .toSorted((a, b) => a.seq - b.seq)
+                    .map((delta) => delta.content)
+                    .join('')}
+                />
+              )
+            })
           ) : (
             <GeneratingResponseMessage />
           ))}
-        {evidence && !sendingMessage && (
-          <ChatbotPanelEvidence evidence={evidence} />
-        )}
+        {messageError && <GqlError error={messageError} />}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
         sendMessage={sendMessage}
         fullscreen={fullscreen}
+        shouldUseMCP={shouldUseMCP}
+        serverNames={serverNames}
+        showMcpServers={showMcpServers}
+        setShowMcpServers={setShowMcpServers}
       />
     </>
   )
@@ -185,7 +221,6 @@ export const ChatbotMessagesWrapper = ({
   children: ReactNode
 }) => {
   const internalRef = useRef<HTMLDivElement>(null)
-  const combinedRef = mergeRefs([messageListRef, internalRef])
 
   const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
 
@@ -200,7 +235,7 @@ export const ChatbotMessagesWrapper = ({
         $position="bottom"
       />
       <ChatbotMessagesListSC
-        ref={combinedRef as (instance: HTMLDivElement | null) => void}
+        ref={(node) => applyNodeToRefs([messageListRef, internalRef], node)}
       >
         {children}
       </ChatbotMessagesListSC>

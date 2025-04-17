@@ -1,8 +1,11 @@
 import {
   AppIcon,
+  ArrowTopRightIcon,
+  Button,
   Chip,
   DryRunIcon,
   ErrorIcon,
+  Flex,
   GitHubLogoIcon,
   Sidecar,
   SidecarItem,
@@ -20,7 +23,11 @@ import {
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
+import {
+  CD_REL_PATH,
+  CLUSTERS_REL_PATH,
+  getServiceDetailsPath,
+} from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 import StackStatusIcon from '../../../stacks/common/StackStatusIcon.tsx'
@@ -57,6 +64,7 @@ export function ServiceDetailsSidecar({
     namespace,
     repository,
     helmRepository,
+    parent,
   } = serviceDeployment
 
   return (
@@ -89,6 +97,23 @@ export function ServiceDetailsSidecar({
           width="100%"
         />
       </div>
+      {parent && (
+        <Sidecar>
+          <SidecarItem heading="Parent service">{parent.name}</SidecarItem>
+          <Button
+            marginTop={theme.spacing.large}
+            secondary
+            as={Link}
+            to={getServiceDetailsPath({
+              clusterId: cluster?.id,
+              serviceId: parent.id,
+            })}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Go to parent
+          </Button>
+        </Sidecar>
+      )}
       <Sidecar>
         {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}
         {namespace && (
@@ -155,7 +180,17 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
         {repository && (
-          <SidecarItem heading="Git repository">
+          <SidecarItem
+            heading={
+              <Flex
+                align="center"
+                gap="xsmall"
+              >
+                Git repository
+                <GitHubLogoIcon size={12} />
+              </Flex>
+            }
+          >
             <div
               css={{
                 display: 'flex',
@@ -163,11 +198,6 @@ export function ServiceDetailsSidecar({
                 gap: theme.spacing.xsmall,
               }}
             >
-              <AppIcon
-                spacing="padding"
-                size="xxsmall"
-                icon={<GitHubLogoIcon />}
-              />
               {repository.url}
             </div>
           </SidecarItem>

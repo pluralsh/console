@@ -12,7 +12,7 @@ import ComponentCard from './ComponentCard'
 import { compareComponents } from './Components.tsx'
 
 const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentFragment> = {
-  keys: ['name', 'kind', 'group'],
+  keys: ['name', 'kind', 'namespace'],
   threshold: 0.25,
   ignoreLocation: true,
 }

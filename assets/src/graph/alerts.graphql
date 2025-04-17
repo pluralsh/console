@@ -16,7 +16,25 @@ fragment Alert on Alert {
   insight {
     ...AiInsight
   }
+  resolution {
+    ...AlertResolution
+  }
   updatedAt
+}
+
+fragment AlertResolution on AlertResolution {
+  resolution
+}
+
+fragment AlertConnection on AlertConnection {
+  edges {
+    node {
+      ...Alert
+    }
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 query ClusterAlerts(
@@ -29,14 +47,7 @@ query ClusterAlerts(
   cluster(id: $clusterId) {
     id
     alerts(after: $after, first: $first, before: $before, last: $last) {
-      edges {
-        node {
-          ...Alert
-        }
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...AlertConnection
     }
   }
 }
@@ -51,14 +62,17 @@ query ServiceAlerts(
   serviceDeployment(id: $serviceId) {
     id
     alerts(after: $after, first: $first, before: $before, last: $last) {
-      edges {
-        node {
-          ...Alert
-        }
-      }
-      pageInfo {
-        ...PageInfo
-      }
+      ...AlertConnection
     }
+  }
+}
+
+mutation UpsertAlertResolution(
+  $id: ID!
+  $attributes: AlertResolutionAttributes!
+) {
+  # createAlertResolution upserts on the server
+  createAlertResolution(id: $id, attributes: $attributes) {
+    ...AlertResolution
   }
 }

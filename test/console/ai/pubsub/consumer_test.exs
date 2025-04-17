@@ -125,7 +125,7 @@ defmodule Console.AI.PubSub.ConsumerSyncTest do
       stack = insert(:stack, repository: git)
       run   = insert(:stack_run, status: :pending_approval, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       state = insert(:stack_state, run: run, plan: "some large plan")
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       event = %PubSub.StackRunUpdated{item: run}
       {:ok, res} = Consumer.handle_event(event)
@@ -145,7 +145,7 @@ defmodule Console.AI.PubSub.ConsumerSyncTest do
         pull_request: insert(:pull_request)
       )
       state = insert(:stack_state, run: run, plan: "some large plan")
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       event = %PubSub.StackRunUpdated{item: run}
       {:ok, res} = Consumer.handle_event(event)

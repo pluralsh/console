@@ -287,15 +287,22 @@ defmodule Console.GraphQl.Deployments.Git do
     field :project_id, :id
   end
 
+  @desc "Resets the current value of the observer"
+  input_object :observer_reset_attributes do
+    field :last_value, non_null(:string)
+  end
+
   @desc "A spec for a target to poll"
   input_object :observer_target_attributes do
-    field :type,   :observer_target_type
-    field :target, :observer_target_type, description: "present for backwards compat"
-    field :format, :string
-    field :order,  non_null(:observer_target_order)
-    field :helm,   :observer_helm_attributes
-    field :oci,    :observer_oci_attributes
-    field :git,    :observer_git_attributes
+    field :type,      :observer_target_type
+    field :target,    :observer_target_type, description: "present for backwards compat"
+    field :format,    :string
+    field :order,     non_null(:observer_target_order)
+    field :helm,      :observer_helm_attributes
+    field :oci,       :observer_oci_attributes
+    field :git,       :observer_git_attributes
+    field :addon,     :observer_addon_attributes
+    field :eks_addon, :observer_addon_attributes
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -342,6 +349,13 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_pipeline_action_attributes do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "The settings for configuring add-on scraping"
+  input_object :observer_addon_attributes do
+    field :name,                non_null(:string)
+    field :kubernetes_version,  :string
+    field :kubernetes_versions, list_of(non_null(:string))
   end
 
   @desc "a git repository available for deployments"
@@ -680,7 +694,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :automation_id,   non_null(:id)
     field :repository,      :string
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
-    field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+    field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"
@@ -789,6 +803,7 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :catalog_id, :id
       arg :project_id, :id
       arg :q,          :string
+      arg :role,       :pr_role
 
       resolve &Deployments.list_pr_automations/2
     end
@@ -1017,6 +1032,21 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_observer/2
+    end
+
+    field :kick_observer, :observer do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.kick_observer/2
+    end
+
+    field :reset_observer, :observer do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:observer_reset_attributes)
+
+      resolve &Deployments.reset_observer/2
     end
 
     field :upsert_catalog, :catalog do

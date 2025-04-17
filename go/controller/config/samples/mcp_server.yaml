@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mcpserver
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MCPServer
+metadata:
+  labels:
+    app.kubernetes.io/name: mcpserver
+    app.kubernetes.io/instance: mcpserver-minimal
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: mcpserver-minimal
+  namespace: mcpserver
+spec:
+  name: minimal
+  url: mcpserver.minimal.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MCPServer
+metadata:
+  labels:
+    app.kubernetes.io/name: mcpserver
+    app.kubernetes.io/instance: mcpserver-full
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: mcpserver-full
+  namespace: mcpserver
+spec:
+  name: full
+  url: mcpserver.full.com
+  authentication:
+    plural: true
+    headers:
+      USER: "admin"
+      TEST: "true"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Flow
+metadata:
+  labels:
+    app.kubernetes.io/name: flow
+    app.kubernetes.io/instance: flow-server-associations
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: flow-server-associations
+  namespace: mcpserver
+spec:
+  name: server-associations
+  description: "test flow with server associations"
+  serverAssociations:
+    - mcpServerRef:
+        name: mcpserver-minimal
+        namespace: mcpserver
+    - mcpServerRef:
+        name: mcpserver-full
+        namespace: mcpserver

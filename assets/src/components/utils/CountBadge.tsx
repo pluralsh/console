@@ -17,7 +17,7 @@ const CountBadgeSC = styled.div<{
   return {
     ...theme.partials.text.badgeLabel,
     color: theme.colors.grey[25],
-    letterSpacing: 0,
+    letterSpacing: 1,
     fontSize,
     width,
     height: width,

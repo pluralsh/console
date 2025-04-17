@@ -131,12 +131,13 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		return nil, err
 	}
 	serviceTemplate := &console.ServiceTemplateAttributes{
-		Name:         srv.Name,
-		Namespace:    srv.Namespace,
-		Templated:    lo.ToPtr(true),
-		RepositoryID: repositoryID,
-		Protect:      srv.Protect,
-		SyncConfig:   syncConf,
+		Name:          srv.Name,
+		Namespace:     srv.Namespace,
+		Templated:     lo.ToPtr(true),
+		RepositoryID:  repositoryID,
+		Protect:       srv.Protect,
+		SyncConfig:    syncConf,
+		Configuration: make([]*console.ConfigAttributes, 0),
 	}
 	if len(srv.Dependencies) > 0 {
 		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
@@ -167,6 +168,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			Version:     srv.Helm.Version,
 			URL:         srv.Helm.URL,
 			IgnoreHooks: srv.Helm.IgnoreHooks,
+			IgnoreCrds:  srv.Helm.IgnoreCrds,
 			Git:         srv.Helm.Git.Attributes(),
 		}
 		if srv.Helm.Repository != nil {
@@ -201,7 +203,6 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		}
 	}
 	if srv.ConfigurationRef != nil {
-		serviceTemplate.Configuration = make([]*console.ConfigAttributes, 0)
 		secret := &corev1.Secret{}
 		name := types.NamespacedName{Name: srv.ConfigurationRef.Name, Namespace: srv.ConfigurationRef.Namespace}
 		err := c.Get(ctx, name, secret)
@@ -209,13 +210,22 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			return nil, err
 		}
 		for k, v := range secret.Data {
-			value := string(v)
 			serviceTemplate.Configuration = append(serviceTemplate.Configuration, &console.ConfigAttributes{
 				Name:  k,
-				Value: &value,
+				Value: lo.ToPtr(string(v)),
 			})
 		}
 	}
+
+	if len(srv.Configuration) > 0 {
+		for k, v := range srv.Configuration {
+			serviceTemplate.Configuration = append(serviceTemplate.Configuration, &console.ConfigAttributes{
+				Name:  k,
+				Value: lo.ToPtr(v),
+			})
+		}
+	}
+
 	return serviceTemplate, nil
 }
 

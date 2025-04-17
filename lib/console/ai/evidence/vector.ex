@@ -22,7 +22,7 @@ defmodule Console.AI.Evidence.Vector do
     ctx = Context.new(history)
     with true <- VectorStore.enabled?(),
          {:ok, %Vector{query: query}} <- use_vector(ctx.history),
-         {:ok, [_ | _] = vdata} <- VectorStore.fetch(query, filters: filters) do
+         [_ | _] = vdata <- collect_vector_data(query, filters) do
       Context.prompt(ctx, {:user, "I've also found some relevent data that could add additional context to what caused the issue in rough order of relevance:"})
       |> Context.reduce(vdata, &Context.prompt(&2, {:user, vector_prompt(&1)}))
       |> Context.evidence(vector_evidence(vdata))
@@ -31,6 +31,16 @@ defmodule Console.AI.Evidence.Vector do
         Logger.debug "skipping vector store extraction"
         Context.new(history)
     end
+  end
+
+  defp collect_vector_data(query, filters) do
+    {types, filters} = Keyword.pop(filters, :types, [:pr_file])
+    Enum.reduce(types, [], fn type, res ->
+      case VectorStore.fetch(query, filters: filters ++ [datatype: {:raw, type}]) do
+        {:ok, [_ | _] = vdata} -> vdata ++ res
+        _ -> res
+      end
+    end)
   end
 
   defp vector_prompt(%VectorStore.Response{type: :alert, alert_resolution: res}), do: Storable.prompt(res)

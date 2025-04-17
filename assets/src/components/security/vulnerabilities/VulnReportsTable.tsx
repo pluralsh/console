@@ -8,7 +8,7 @@ import {
   useVulnerabilityReportsQuery,
   VulnReportGrade,
 } from 'generated/graphql'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
 import {
@@ -18,6 +18,7 @@ import {
   ColNamespaces,
   ColSummary,
 } from './VulnReportsTableCols'
+import { mapExistingNodes } from 'utils/graphql'
 
 export const VulneratbilityReportsTable = memo(
   function VulneratbilityReportsTable({
@@ -46,6 +47,10 @@ export const VulneratbilityReportsTable = memo(
           q: reportsQ || undefined,
         }
       )
+    const reports = useMemo(
+      () => mapExistingNodes(data?.vulnerabilityReports),
+      [data?.vulnerabilityReports]
+    )
 
     if (error) return <GqlError error={error} />
 
@@ -53,7 +58,7 @@ export const VulneratbilityReportsTable = memo(
       <Table
         fullHeightWrap
         virtualizeRows
-        data={data?.vulnerabilityReports?.edges || []}
+        data={reports}
         columns={columns}
         loading={!data && loading}
         css={{ maxHeight: '100%' }}
@@ -61,7 +66,7 @@ export const VulneratbilityReportsTable = memo(
           navigate(
             getVulnerabilityReportDetailsPath({
               clusterId,
-              vulnerabilityReportId: row.original.node?.id,
+              vulnerabilityReportId: row.original.id,
             })
           )
         }}

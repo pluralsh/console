@@ -9,57 +9,102 @@ global:
 
 cloud: 
   enabled: false
+  # If set to a truthy value, mounts a volume for the certs
+  pgRootCert: ~
 
+# disableAdditionalVolumes is the flag for global.additionalVolumes
 disableAdditionalVolumes: false
 
+# replicaCount is the replica count for console deployment
 replicaCount: 2
 
+# homeDir is the prefix for the mount path for console-conf volume in console container. The actual config will go in {homDir}/.plural
 homeDir: /home/console
 
+# podLabels is the set of pod labels to apply to spec.template.metadata.labels
 podLabels: {}
+# podAnnotations is the set of pod annotations to apply to spec.template.metadata.annotations
 podAnnotations: {}
 
+# migrator is used to configure the console migration Job defined in migration.yaml, specifically the migrator container
 migrator:
   command: ["/opt/app/bin/migrate"]
+  nodeSelector: ~
+  securityContext: ~
+  containerSecurityContext: ~
+  tolerations: ~
 
+# console is used to configure any additional containers to add to the console. Standard kubernetes container configuration
 console:
   additionalContainers: ~
+  containerSecurityContext: ~
+  securityContext: ~
 
+# secrets is used to configure environment variables for the console, in secrets.yaml
 secrets:
+  # cluster_name is used to set CLUSTER_NAME
   cluster_name: test
+  # jwt is used to set JWT_SECRET if not null
   jwt: REPLACEME
+  # erlang is used to set ERLANG_COOKIE if not null
   erlang: REPLACEME
+  # admin_name is used to set ADMIN_NAME
   admin_name: test
+  # admin_email is used to set ADMIN_EMAIL
   admin_email: admin@example.com
+  # admin_password is used to set ADMIN_PASSWORD if not null
   admin_password: REPLACEME
+  # aes_key is used to set AES_KEY if not null
+  aes_key: ~
+  # identity is used to set data.identity and is one of the flags that can be used to determine if console-conf secret is created and if console-conf volume is mounted in console container
+  identity: ~
+  # key is used to set key in console-migration-env and is one of the flags that can be used to determine if console-migration-env secret is created
+  key: ~
+  # plural_client_id is used to set PLURAL_CLIENT_ID if not null
+  plural_client_id: ~
+  # plural_client_secret is used to set PLURAL_CLIENT_SECRET if not null
+  plural_client_secret: ~
+  # webhook_secret is used to set WEBHOOK_SECRET if not null
+  webhook_secret: ~
 
+# image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
   repository: console
   tag: ~
   imagePullPolicy: IfNotPresent
+  pullPolicy: ~
 
+# ociAuth is used to configure the image for the oci-auth container as follows: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
 ociAuth:
   repository: oci-auth
   tag: v0.10.23
   imagePullPolicy: IfNotPresent
 
+# initContainer currently isn't used in the helm chart
 initContainer:
   image:
     repository: gcr.io/pluralsh/library/busybox
     tag: 1.35.0
 
+# cliContainer is used to create a container for the plural cli
 cliContainer:
+  # enabled is used to determine if the container should be created
   enabled: false
   image:
     repository: ghcr.io/pluralsh/plural-cli
     tag: latest
 
+# serviceAccount is used to determine if a service account should be created. If create is set to true, a service account will be created with the name of console
 serviceAccount:
   create: true
   annotations: {}
 
+# extraEnv is used to add environment variables to the console container
+extraEnv: ~
+# extraSecretEnv is used to add secret key-value pairs to the console container
 extraSecretEnv: []
 
+# livenessProbe configures the liveness probe for the console container. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
   httpGet:
     path: /health
@@ -70,6 +115,7 @@ livenessProbe:
   failureThreshold: 3
   successThreshold: 1
 
+# readinessProbe configures the readiness probe for the console container. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 readinessProbe:
   httpGet:
     path: /health
@@ -80,32 +126,46 @@ readinessProbe:
   failureThreshold: 3
   successThreshold: 1
 
+# imagePullSecrets is used to configure Kubernetes image pull secrets. See https://kubernetes.io/docs/concepts/containers/images/
 imagePullSecrets: []
+
+# nameOverride is used to expand chart name (see templates/_helpers.tpl) if set (otherwise uses Chart.Name). Truncated after 63 characters and also any trailing - characters (hyphens) are removed
 nameOverride: ""
+
+# fullnameOverride is used to expand chart fullname (see templates/_helpers.tpl) if set. Truncated after 63 characters and also any trailing - characters (hyphens) are removed
 fullnameOverride: ""
 
+# service is used to configure Kubernetes service type and port for console
 service:
   type: ClusterIP
   port: 4000
 
+# dbPasswordSecret is not used in any of the templates
 dbPasswordSecret: console.plural-console.credentials.postgresql.acid.zalan.do
-
+# shutdownDelay is used to configure console deployment terminationGracePeriodSeconds, see https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
 shutdownDelay: 30
 
+# ingress is used to configure console ingress controller (see templates/ingress.yaml)
 ingress:
   enabled: true
   ingressClass: nginx
 
+  # tls is used to determine if tls should be enabled. If enabled, then tls.host is set to ingress.console_dns and tls.secretName is set to console-tls
   tls:
     enabled: true
+  console-dns: ~
 
+  # rewrite is used to configure console-kas-rewrite ingress controller
   rewrite:
+    # enabled determines if console-kas-rewrite ingress controller is created
     enabled: false
+    # annotations is used to set the annotations for console-kas-rewrite ingress controller, under metadata.annotations
     annotations:
       konghq.com/rewrite: /$2
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/rewrite-target: /$2
 
+  # annotations is used to set metadata.annotations for console and console-kas-rewrite ingress controllers
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -114,18 +174,27 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
+  # kas-dns is used in secrets.yaml to set data.KAS_HOST
+  kas-dns: ~
 
+# externalIngress is used to configure console-external ingress controller in ingress.yaml
 externalIngress:
+  # tls is used to determine if tls should be enabled. If enabled, then tls.host is set to ingress.console_dns and tls.secretName is set to console-tls
   tls:
     enabled: true
+  # ingressClass is used to set spec.ingressClass for console-external ingress controller
   ingressClass: nginx
+  # hostname acts as the flag to determine if console-external ingress controller is created
+  hostname: ~
   
+  # rewrite is not used in any of the templates
   rewrite:
     annotations:
       konghq.com/rewrite: /
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/rewrite-target: /
 
+  # annotations is used to set metadata.annotations for console-external ingress controller
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -136,6 +205,7 @@ externalIngress:
     nginx.ingress.kubernetes.io/session-cookie-path: /ext/socket
 
 postgres:
+  # dsnSecret is used to set POSTGRES_URL environment variable
   dsnSecret: postgres-dsn
   dsnKey: dsn
   host: CHANGEME
@@ -143,6 +213,7 @@ postgres:
   passwordSecret: postgres-password
 
 
+# resources is used to set CPU and memory for the console container
 resources:
   requests:
     cpu: 100m
@@ -158,10 +229,13 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
 
+# nodeSelector for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
 nodeSelector: {}
 
+# tolerations for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 tolerations: []
 
+# affinity for console and git-server deployments. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
@@ -176,22 +250,289 @@ affinity:
         topologyKey: "kubernetes.io/hostname"
 
 monitoring:
+  # enabled determines if the monitor.yaml and prometheusrule.yaml templates should be used
   enabled: false
+  # prometheus is used to set the value of metadata.labels.prometheus in prometheusrule.yaml
   prometheus: k8s
 
-dashboard:
+# provider is used to set PROVIDER in secrets.yaml
+provider: custom
+
+# controller is used in Chart.yaml to determine if controller dependency should be installed
+controller:
   enabled: true
+
+# flux2 is used to override some values in flux2 default chart (packaged in charts/flux2-2.14.0.tgz). See https://github.com/fluxcd-community/helm-charts/blob/main/charts/flux2/values.yaml
+flux2:
+  # enabled is used in Chart.yaml to determine if flux2 dependency should be installed
+  enabled: false
+  helmController:
+    create: false
+  imageAutomationController:
+    create: false
+  imageReflectionController:
+    create: false
+  kustomizeController:
+    create: false
+  notificationController:
+    create: false
+  sourceController:
+    create: true
+  policies:
+    create: false
+
+# gitserver is used to set the configuration for a git server that uses softserve (https://github.com/charmbracelet/soft-serve)
+# The git-server container comes with 2 repositories imported into it:
+# - pluralsh/deployment-operator: https://github.com/pluralsh/deployment-operator
+# - pluralsh/scaffolds: https://github.com/pluralsh/scaffolds
+# Disabled by default, useful for cases where there could be some egress restriction preventing github access
+gitServer:
+  enabled: false
+
+  # sshPort is used to access the git server for ssh based git operations. Ex: git clone ssh://localhost:23231/pluralsh/deployment-operator.git
+  sshPort: 23231
+  # httpPort is used to access the git server for http based git operations. Ex: git clone http://localhost:23232/pluralsh/deployment-operator.git
+  httpPort: 23232
+  # metricsPort is used to access the git server to collect metrics
+  metricsPort: 23233
+  # gitPort is used to access the git server for ssh based git operations.
+  gitPort: 9418
+
+  image: 
+    repository: ghcr.io/pluralsh/git-server
+    tag: ~
+  
+  containerSecurityContext: 
+    runAsNonRoot: true
+  securityContext: 
+    runAsUser: 65543
+    runAsGroup: 65543
+  resources: ~
+  tag: ~
+
+# kas is used to potentially override values in the kas subchart (charts/console/charts/kas-0.3.0.tgz)
+# The values here match the default values in the kas subchart but are here for documentation and ease-of-access in case user wants to override any values
+kas:
+  global:
+    additionalVolumes: ~
+    additionalVolumeMounts: ~
+
+  image:
+    # repository to pull kas image from. See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kas.
+    repository: ghcr.io/pluralsh/kas
+    pullPolicy: IfNotPresent
+    # tag overrides the image tag whose default is the chart appVersion.
+    tag: ""
+    # pullSecrets to access registry in case it requires authentication. See https://www.devspace.sh/component-chart/docs/configuration/pull-secrets
+    pullSecrets: []
+
+  # consoleUrl is used to set the plural console url which is accessed through the GQL endpoint
+  consoleUrl: ""
+
+  # nameOverride is used to expand chart name if set (otherwise uses Chart.Name). Truncated after 63 characters and also any trailing - characters (hyphens) are removed
+  nameOverride: ""
+
+  # fullnameOverride is used to expand chart fullname if set. Truncated after 63 characters and also any trailing - characters (hyphens) are removed
+  fullnameOverride: ""
+
+  # podAnnotations is the set of pod annotations to apply to the kas deployment
+  podAnnotations: {}
+  # podLabels is the set of pod labels to apply to the kas deployment
+  podLabels: {}
+
+  # podSecurityContext is the set of pod security context to apply to the kas container as well as the nginx container
+  podSecurityContext:
+    runAsUser: 65532
+
+  # securityContext is used to set the security context for the kas deployment
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+
+  # priorityClassName is used to set the priority class for the kas deployment. See https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+  priorityClassName: ""
+
+  # extraEnv is used to set any extra environment variables for the kas container
+  extraEnv: []
+
+  # extraArgs is used to set any extra arguments for the kas container
+  extraArgs: []
+
+  # nodeSelector for kas deployment. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  # affinity for kas deployment. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  # tolerations for kas deployment. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+
+  # resources is used to set the resource requests and limits for the kas container
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  service:
+    # externalPort is the port for the kas external API
+    externalPort: 8150
+    # internalPort is the targetPort for the kas external API
+    internalPort: 8150
+    # apiInternalPort is the port and targetPort for the kas internal API
+    apiInternalPort: 8153
+    # kubernetesApiPort is the port and targetPort for the kas kubernetes API
+    kubernetesApiPort: 8154
+    # privateApiPort is used to set OWN_PRIVATE_API_URL for the kas container
+    privateApiPort: 8155
+    # observabilityPort is the port and targetPort for the kas service's http metrics API
+    observabilityPort: 8151
+    # type is used to set the service type for the kas service
+    type: ClusterIP
+
+  serviceAccount:
+    # Specifies whether a service account should be created.
+    create: true
+    # Annotations to add to the service account.
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template.
+    name: ""
+
+  metrics:
+    # enabled is the flag for if the metrics service should be enabled
+    enabled: false
+    # path is the api path for the metrics service
+    path: /metrics
+    serviceMonitor:
+      # enabled is the flag for if the metrics service monitor should be enabled
+      enabled: false
+      # additionalLablels is the set of any additional labels to apply to the metrics service monitor
+      additionalLabels: {}
+      # endpointConfig is the set of any additional config to apply to the metrics service monitor endpoint
+      endpointConfig: {}
+
+  replicCount: 1
+
+  autoscaling:
+    # enabled is the flag for if the autoscaler (HorizontalPodAutoscaler) should be enabled
+    enabled: false
+    # minReplicas is the minimum number of replicas for the autoscaler config
+    minReplicas: 2
+    # maxReplicas is the maximum number of replicas for the autoscaler config
+    maxReplicas: 10
+    # targetCPUAverageValue is the target average CPU usage for the autoscaler config
+    targetCPUAverageValue: 100m
+    # targetCPUUtilizationPercentage: 75
+    # targetMemoryUtilizationPercentage: 75
+
+  secrets:
+    # create is the flag for if the secrets should be created
+    create: true
+    # api is currently unused in the kas helm chart
+    api: ""
+    # privateapi is currently unused in the kas helm chart
+    privateapi: ""
+    # redis is currently unused in the kas helm chart
+    redis: ""
+
+  agent:
+    # path is one of the paths under the kas DNS, used for the agent
+    path: /ext/kas
+    # backend is used to set the upstream websocket server and the server location proxy_pass
+    backend: localhost:8150
+    proxy:
+      image:
+        # repository to pull the nginx image from
+        repository: ghcr.io/pluralsh/registry/nginx
+        # tag for the nginx image
+        tag: stable-alpine3.20-slim
+        # pullPolicy for the nginx image
+        pullPolicy: IfNotPresent
+      # port for the agent path
+      port: 8180
+
+      # podSecurityContext is used to set security context for the nginx container
+      podSecurityContext:
+        runAsUser: 65532
+
+  ingress:
+    # enabled flag is currently not used in the helm chart
+    enabled: true
+    # ingressClass is used to set ingressClassName for the kas ingress controller
+    ingressClass: nginx
+    # kubernetesApiPath is used to set the API path for the kubernetes API
+    kubernetesApiPath: /k8s-proxy
+    # tlsSecretName is used to set the secret name for tls if tls.enabled is true
+    tlsSecretName: kas-tls
+
+    tls:
+      # enabled flag is used to determine if tls should be enabled
+      enabled: true
+
+    # annotations is used to set the kas ingress controller annotations
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  redis:
+    # enabled flag is used to print out if redis should be enabled
+    enabled: true
+    # architecture is not currently used in the kas helm chart
+    architecture: standalone
+    # global is not currently used in the kas helm chart
+    global:
+      security:
+        allowInsecureImages: true
+    # image is not currently used in the kas helm chart    
+    image:
+      registry: ghcr.io
+      repository: pluralsh/registry/bitnami/redis
+      tag: 7.4.2-debian-12-r5
+    # auth is not currently used in the kas helm chart
+    auth:
+      enabled: true
+      sentinel: false
+    # sentinel is not currently used in the kas helm chart
+    sentinel:
+      enabled: false
+    # master is used to set the value of the redis server address
+    master:
+      # count is not currently used in the kas helm chart
+      count: 1
+    # commonConfiguration is not currently used in the kas helm chart
+    commonConfiguration: |-
+      # Enable AOF https://redis.io/topics/persistence#append-only-file
+      appendonly yes
+      # Disable RDB persistence, AOF persistence already enabled.
+      save ""
+      # Enable idle client connection timeout (5 minutes)
+      timeout 300
+      
+# dashboard is used to override some values in kubernetes dashboard default chart (packaged in charts/kubernetes-dashboard-7.11.1.tgz). See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
+dashboard:
+  # enabled is used in Chart.yaml to determine if dashboard dependency should be installed
+  enabled: true
+  # cert-manager is used to override the default cert-manager configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L403
   cert-manager:
     enabled: false
     installCrds: false
+  # metrics-server is used to override the default metrics-server configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L375
   metrics-server:
     enabled: false
+  # nginx is used to override the default nginx configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L409
   nginx:
     enabled: false
+  # app is used to override the default app configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L16
   app:
     mode: 'api'
+  # kong is used to override the default kong configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L383
   kong:
     enabled: false
+  # api is used to override the default api configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L186
   api:
     containers:
       resources:
@@ -220,36 +561,202 @@ dashboard:
             name: console-env
             key: CONSOLE_HOST
 
-provider: custom
+  # All items below are the default values in the dashboard chart (i.e. no override unless user changes the values). Potentially useful for documentation
 
-controller:
-  enabled: true
+  # auth can be used to override the default auth configuration in the dashboard chart. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L144
+  auth:
+    role: auth
+    image:
+      repository: docker.io/kubernetesui/dashboard-auth
+      tag: 1.2.4
+    scaling:
+      replicas: 1
+      revisionHistoryLimit: 10
+    service:
+      type: ClusterIP
+      extraSpec: ~
+    containers:
+      ports:
+        - name: auth
+          containerPort: 8000
+          protocol: TCP
+      args: []
+      env: []
+      volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+    automountServiceAccountToken: true
+    volumes:
+      # Create on-disk volume to store exec logs (required)
+      - name: tmp-volume
+        emptyDir: {}
+    nodeSelector: {}
+    # Labels & annotations for Auth related resources
+    labels: {}
+    annotations: {}
+    serviceLabels: {}
+    serviceAnnotations: {}
 
-flux2:
-  enabled: false
-  helmController:
-    create: false
-  imageAutomationController:
-    create: false
-  imageReflectionController:
-    create: false
-  kustomizeController:
-    create: false
-  notificationController:
-    create: false
-  sourceController:
-    create: true
-  policies:
-    create: false
+  # web is used to configure the web UI deployment configuration. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L246
+  web:
+    role: web
+    image:
+      repository: docker.io/kubernetesui/dashboard-web
+      tag: 1.6.2
+    scaling:
+      replicas: 1
+      revisionHistoryLimit: 10
+    service:
+      type: ClusterIP
+      extraSpec: ~
+    containers:
+      ports:
+        - name: web
+          containerPort: 8000
+          protocol: TCP
+      # Additional container arguments
+      # Full list of arguments: https://github.com/kubernetes/dashboard/blob/master/docs/common/arguments.md
+      # args:
+      # - --system-banner="Welcome to the Kubernetes Dashboard"
+      args: []
+      # Additional container environment variables
+      # env:
+      # - name: SOME_VAR
+      #   value: 'some value'
+      env: []
+      # Additional volume mounts
+      # - mountPath: /kubeconfig
+      #   name: dashboard-kubeconfig
+      #   readOnly: true
+      volumeMounts:
+        # Create volume mount to store logs (required)
+        - mountPath: /tmp
+          name: tmp-volume
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+    automountServiceAccountToken: true
+    # Additional volumes
+    # - name: dashboard-kubeconfig
+    #   secret:
+    #     defaultMode: 420
+    #     secretName: dashboard-kubeconfig
+    volumes:
+      # Create on-disk volume to store exec logs (required)
+      - name: tmp-volume
+        emptyDir: {}
+    nodeSelector: {}
+    # Labels & annotations for WEB UI related resources
+    labels: {}
+    annotations: {}
+    serviceLabels: {}
+    serviceAnnotations: {}
 
-gitServer:
-  enabled: false
+  # metricsScraper is used to configure the metrics scraper deployment configuration. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L308
+  # Container to scrape, store, and retrieve a window of time from the Metrics Server.
+  # refs: https://github.com/kubernetes/dashboard/tree/master/modules/metrics-scraper
+  metricsScraper:
+    enabled: true
+    role: metrics-scraper
+    image:
+      repository: docker.io/kubernetesui/dashboard-metrics-scraper
+      tag: 1.2.2
+    scaling:
+      replicas: 1
+      revisionHistoryLimit: 10
+    service:
+      type: ClusterIP
+      extraSpec: ~
+    containers:
+      ports:
+        - containerPort: 8000
+          protocol: TCP
+      args: []
+      # Additional container environment variables
+      # env:
+      # - name: SOME_VAR
+      #   value: 'some value'
+      env: []
+      # Additional volume mounts
+      # - mountPath: /kubeconfig
+      #   name: dashboard-kubeconfig
+      #   readOnly: true
+      volumeMounts:
+        # Create volume mount to store logs (required)
+        - mountPath: /tmp
+          name: tmp-volume
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+      livenessProbe:
+        httpGet:
+          scheme: HTTP
+          path: /
+          port: 8000
+        initialDelaySeconds: 30
+        timeoutSeconds: 30
+    automountServiceAccountToken: true
+    # Additional volumes
+    # - name: dashboard-kubeconfig
+    #   secret:
+    #     defaultMode: 420
+    #     secretName: dashboard-kubeconfig
+    volumes:
+      - name: tmp-volume
+        emptyDir: {}
+    nodeSelector: {}
+    # Labels & annotations for Metrics Scraper related resources
+    labels: {}
+    annotations: {}
+    serviceLabels: {}
+    serviceAnnotations: {}
 
-  sshPort: 23231
-  httpPort: 23232
-  metricsPort: 23233
-  gitPort: 9418
 
-  image: 
-    repository: ghcr.io/pluralsh/git-server
-    tag: ~
+  # extras is used to configure any additional resources to be deployed. See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml#L425
+  # Extra configurations:
+  # - manifests
+  # - predefined roles
+  # - prometheus
+  # - etc...
+  extras:
+    # Extra Kubernetes manifests to be deployed
+    # manifests:
+    # - apiVersion: v1
+    #   kind: ConfigMap
+    #   metadata:
+    #     name: additional-configmap
+    #   data:
+    #     mykey: myvalue
+    manifests: []
+    serviceMonitor:
+      # Whether to create a Prometheus Operator service monitor.
+      enabled: false
+      # Here labels can be added to the serviceMonitor
+      labels: {}
+      # Here annotations can be added to the serviceMonitor
+      annotations: {}
+      # metrics.serviceMonitor.metricRelabelings Specify Metric Relabelings to add to the scrape endpoint
+      # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+      metricRelabelings: []
+      # metrics.serviceMonitor.relabelings [array] Prometheus relabeling rules
+      relabelings: []
+      # ServiceMonitor connection scheme. Defaults to HTTPS.
+      scheme: https
+      # ServiceMonitor connection tlsConfig. Defaults to {insecureSkipVerify:true}.
+      tlsConfig:
+        insecureSkipVerify: true

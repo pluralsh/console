@@ -86,8 +86,8 @@ type ConsoleClient interface {
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
 	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
-	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
 	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
+	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
 	GetClusterGates(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetClusterGates, error)
 	PagedClusterGates(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGates, error)
 	PagedClusterGateIDs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterGateIDs, error)
@@ -119,6 +119,10 @@ type ConsoleClient interface {
 	GetHelmRepository(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepository, error)
 	UpsertHelmRepository(ctx context.Context, url string, attributes *HelmRepositoryAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertHelmRepository, error)
 	IngestClusterCost(ctx context.Context, costs CostIngestAttributes, interceptors ...clientv2.RequestInterceptor) (*IngestClusterCost, error)
+	GetMCPServers(ctx context.Context, q *string, first *int64, after *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetMCPServers, error)
+	GetMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetMCPServer, error)
+	UpsertMCPServer(ctx context.Context, attributes McpServerAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertMCPServer, error)
+	DeleteMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteMCPServer, error)
 	ListNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListNamespaces, error)
 	ListClusterNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterNamespaces, error)
 	GetNamespace(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNamespace, error)
@@ -1354,6 +1358,45 @@ func (t *HelmRepositoryFragment) GetHealth() *GitHealth {
 		t = &HelmRepositoryFragment{}
 	}
 	return t.Health
+}
+
+type MCPServerFragment struct {
+	ID             string                            "json:\"id\" graphql:\"id\""
+	Name           string                            "json:\"name\" graphql:\"name\""
+	URL            string                            "json:\"url\" graphql:\"url\""
+	Authentication *MCPServerFragment_Authentication "json:\"authentication,omitempty\" graphql:\"authentication\""
+	Confirm        *bool                             "json:\"confirm,omitempty\" graphql:\"confirm\""
+}
+
+func (t *MCPServerFragment) GetID() string {
+	if t == nil {
+		t = &MCPServerFragment{}
+	}
+	return t.ID
+}
+func (t *MCPServerFragment) GetName() string {
+	if t == nil {
+		t = &MCPServerFragment{}
+	}
+	return t.Name
+}
+func (t *MCPServerFragment) GetURL() string {
+	if t == nil {
+		t = &MCPServerFragment{}
+	}
+	return t.URL
+}
+func (t *MCPServerFragment) GetAuthentication() *MCPServerFragment_Authentication {
+	if t == nil {
+		t = &MCPServerFragment{}
+	}
+	return t.Authentication
+}
+func (t *MCPServerFragment) GetConfirm() *bool {
+	if t == nil {
+		t = &MCPServerFragment{}
+	}
+	return t.Confirm
 }
 
 type KustomizeFragment struct {
@@ -2855,13 +2898,15 @@ func (t *URLSinkConfigurationFragment) GetURL() string {
 }
 
 type OIDCProviderFragment struct {
-	ID           string          "json:\"id\" graphql:\"id\""
-	Name         string          "json:\"name\" graphql:\"name\""
-	Description  *string         "json:\"description,omitempty\" graphql:\"description\""
-	ClientID     string          "json:\"clientId\" graphql:\"clientId\""
-	ClientSecret string          "json:\"clientSecret\" graphql:\"clientSecret\""
-	AuthMethod   *OidcAuthMethod "json:\"authMethod,omitempty\" graphql:\"authMethod\""
-	RedirectUris []*string       "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+	ID            string                   "json:\"id\" graphql:\"id\""
+	Name          string                   "json:\"name\" graphql:\"name\""
+	Description   *string                  "json:\"description,omitempty\" graphql:\"description\""
+	ClientID      string                   "json:\"clientId\" graphql:\"clientId\""
+	ClientSecret  string                   "json:\"clientSecret\" graphql:\"clientSecret\""
+	AuthMethod    *OidcAuthMethod          "json:\"authMethod,omitempty\" graphql:\"authMethod\""
+	RedirectUris  []*string                "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+	Bindings      []*PolicyBindingFragment "json:\"bindings,omitempty\" graphql:\"bindings\""
+	WriteBindings []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
 func (t *OIDCProviderFragment) GetID() string {
@@ -2905,6 +2950,18 @@ func (t *OIDCProviderFragment) GetRedirectUris() []*string {
 		t = &OIDCProviderFragment{}
 	}
 	return t.RedirectUris
+}
+func (t *OIDCProviderFragment) GetBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.Bindings
+}
+func (t *OIDCProviderFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.WriteBindings
 }
 
 type ObservabilityProviderFragment struct {
@@ -3075,10 +3132,10 @@ func (t *ObserverPipelineActionFragment) GetContext() map[string]any {
 }
 
 type ObserverPrActionFragment struct {
-	AutomationID   string  "json:\"automationId\" graphql:\"automationId\""
-	Repository     *string "json:\"repository,omitempty\" graphql:\"repository\""
-	BranchTemplate *string "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
-	Context        string  "json:\"context\" graphql:\"context\""
+	AutomationID   string         "json:\"automationId\" graphql:\"automationId\""
+	Repository     *string        "json:\"repository,omitempty\" graphql:\"repository\""
+	BranchTemplate *string        "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
+	Context        map[string]any "json:\"context\" graphql:\"context\""
 }
 
 func (t *ObserverPrActionFragment) GetAutomationID() string {
@@ -3099,7 +3156,7 @@ func (t *ObserverPrActionFragment) GetBranchTemplate() *string {
 	}
 	return t.BranchTemplate
 }
-func (t *ObserverPrActionFragment) GetContext() string {
+func (t *ObserverPrActionFragment) GetContext() map[string]any {
 	if t == nil {
 		t = &ObserverPrActionFragment{}
 	}
@@ -5210,6 +5267,7 @@ type ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -5229,6 +5287,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -5578,6 +5642,42 @@ func (t *ContainerSpecFragment_EnvFrom) GetSecret() string {
 		t = &ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type MCPServerFragment_Authentication struct {
+	Plural  *bool                                       "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+}
+
+func (t *MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &MCPServerFragment_Authentication{}
+	}
+	return t.Plural
+}
+func (t *MCPServerFragment_Authentication) GetHeaders() []*MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &MCPServerFragment_Authentication{}
+	}
+	return t.Headers
 }
 
 type ServiceDeploymentFragment_Components struct {
@@ -6004,6 +6104,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -6023,6 +6124,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -10250,6 +10357,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -10269,6 +10377,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -10650,6 +10764,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -10669,6 +10784,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.IgnoreCrds
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -11475,6 +11596,154 @@ func (t *ListHelmRepositories_HelmRepositories) GetEdges() []*ListHelmRepositori
 		t = &ListHelmRepositories_HelmRepositories{}
 	}
 	return t.Edges
+}
+
+type GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication struct {
+	Plural  *bool                                                                           "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+}
+
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
+}
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+
+type GetMCPServers_McpServers_Edges struct {
+	Node *MCPServerFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *GetMCPServers_McpServers_Edges) GetNode() *MCPServerFragment {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges{}
+	}
+	return t.Node
+}
+
+type GetMCPServers_McpServers struct {
+	PageInfo PageInfoFragment                  "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*GetMCPServers_McpServers_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *GetMCPServers_McpServers) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &GetMCPServers_McpServers{}
+	}
+	return &t.PageInfo
+}
+func (t *GetMCPServers_McpServers) GetEdges() []*GetMCPServers_McpServers_Edges {
+	if t == nil {
+		t = &GetMCPServers_McpServers{}
+	}
+	return t.Edges
+}
+
+type GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type GetMCPServer_McpServer_MCPServerFragment_Authentication struct {
+	Plural  *bool                                                              "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+}
+
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
+}
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+
+type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication struct {
+	Plural  *bool                                                                       "json:\"plural,omitempty\" graphql:\"plural\""
+	Headers []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+}
+
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
+}
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetHeaders() []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+
+type DeleteMCPServer_DeleteMcpServer struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteMCPServer_DeleteMcpServer) GetID() string {
+	if t == nil {
+		t = &DeleteMCPServer_DeleteMcpServer{}
+	}
+	return t.ID
 }
 
 type ListNamespaces_ManagedNamespaces struct {
@@ -14520,17 +14789,6 @@ func (t *GetFlow) GetFlow() *FlowFragment {
 	return t.Flow
 }
 
-type DeleteFlow struct {
-	DeleteFlow *DeleteFlow_DeleteFlow "json:\"deleteFlow,omitempty\" graphql:\"deleteFlow\""
-}
-
-func (t *DeleteFlow) GetDeleteFlow() *DeleteFlow_DeleteFlow {
-	if t == nil {
-		t = &DeleteFlow{}
-	}
-	return t.DeleteFlow
-}
-
 type UpsertFlow struct {
 	UpsertFlow *FlowFragment "json:\"upsertFlow,omitempty\" graphql:\"upsertFlow\""
 }
@@ -14540,6 +14798,17 @@ func (t *UpsertFlow) GetUpsertFlow() *FlowFragment {
 		t = &UpsertFlow{}
 	}
 	return t.UpsertFlow
+}
+
+type DeleteFlow struct {
+	DeleteFlow *DeleteFlow_DeleteFlow "json:\"deleteFlow,omitempty\" graphql:\"deleteFlow\""
+}
+
+func (t *DeleteFlow) GetDeleteFlow() *DeleteFlow_DeleteFlow {
+	if t == nil {
+		t = &DeleteFlow{}
+	}
+	return t.DeleteFlow
 }
 
 type GetClusterGates struct {
@@ -14881,6 +15150,50 @@ func (t *IngestClusterCost) GetIngestClusterCost() *bool {
 		t = &IngestClusterCost{}
 	}
 	return t.IngestClusterCost
+}
+
+type GetMCPServers struct {
+	McpServers *GetMCPServers_McpServers "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
+}
+
+func (t *GetMCPServers) GetMcpServers() *GetMCPServers_McpServers {
+	if t == nil {
+		t = &GetMCPServers{}
+	}
+	return t.McpServers
+}
+
+type GetMCPServer struct {
+	McpServer *MCPServerFragment "json:\"mcpServer,omitempty\" graphql:\"mcpServer\""
+}
+
+func (t *GetMCPServer) GetMcpServer() *MCPServerFragment {
+	if t == nil {
+		t = &GetMCPServer{}
+	}
+	return t.McpServer
+}
+
+type UpsertMCPServer struct {
+	UpsertMcpServer *MCPServerFragment "json:\"upsertMcpServer,omitempty\" graphql:\"upsertMcpServer\""
+}
+
+func (t *UpsertMCPServer) GetUpsertMcpServer() *MCPServerFragment {
+	if t == nil {
+		t = &UpsertMCPServer{}
+	}
+	return t.UpsertMcpServer
+}
+
+type DeleteMCPServer struct {
+	DeleteMcpServer *DeleteMCPServer_DeleteMcpServer "json:\"deleteMcpServer,omitempty\" graphql:\"deleteMcpServer\""
+}
+
+func (t *DeleteMCPServer) GetDeleteMcpServer() *DeleteMCPServer_DeleteMcpServer {
+	if t == nil {
+		t = &DeleteMCPServer{}
+	}
+	return t.DeleteMcpServer
 }
 
 type ListNamespaces struct {
@@ -20665,6 +20978,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		release
 		valuesFiles
 		ignoreHooks
+		ignoreCrds
 	}
 	configuration {
 		name
@@ -21099,6 +21413,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		release
 		valuesFiles
 		ignoreHooks
+		ignoreCrds
 	}
 	configuration {
 		name
@@ -22398,30 +22713,6 @@ func (c *Client) GetFlow(ctx context.Context, id string, interceptors ...clientv
 	return &res, nil
 }
 
-const DeleteFlowDocument = `mutation DeleteFlow ($id: ID!) {
-	deleteFlow(id: $id) {
-		id
-	}
-}
-`
-
-func (c *Client) DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error) {
-	vars := map[string]any{
-		"id": id,
-	}
-
-	var res DeleteFlow
-	if err := c.Client.Post(ctx, "DeleteFlow", DeleteFlowDocument, &res, vars, interceptors...); err != nil {
-		if c.Client.ParseDataWhenErrors {
-			return &res, err
-		}
-
-		return nil, err
-	}
-
-	return &res, nil
-}
-
 const UpsertFlowDocument = `mutation UpsertFlow ($attributes: FlowAttributes!) {
 	upsertFlow(attributes: $attributes) {
 		... FlowFragment
@@ -22483,6 +22774,30 @@ func (c *Client) UpsertFlow(ctx context.Context, attributes FlowAttributes, inte
 
 	var res UpsertFlow
 	if err := c.Client.Post(ctx, "UpsertFlow", UpsertFlowDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteFlowDocument = `mutation DeleteFlow ($id: ID!) {
+	deleteFlow(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteFlow
+	if err := c.Client.Post(ctx, "DeleteFlow", DeleteFlowDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -23784,6 +24099,156 @@ func (c *Client) IngestClusterCost(ctx context.Context, costs CostIngestAttribut
 	return &res, nil
 }
 
+const GetMCPServersDocument = `query GetMCPServers ($q: String, $first: Int, $after: String, $before: String, $last: Int) {
+	mcpServers(q: $q, first: $first, after: $after, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... MCPServerFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+`
+
+func (c *Client) GetMCPServers(ctx context.Context, q *string, first *int64, after *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetMCPServers, error) {
+	vars := map[string]any{
+		"q":      q,
+		"first":  first,
+		"after":  after,
+		"before": before,
+		"last":   last,
+	}
+
+	var res GetMCPServers
+	if err := c.Client.Post(ctx, "GetMCPServers", GetMCPServersDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetMCPServerDocument = `query GetMCPServer ($id: ID!) {
+	mcpServer(id: $id) {
+		... MCPServerFragment
+	}
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+`
+
+func (c *Client) GetMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetMCPServer, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetMCPServer
+	if err := c.Client.Post(ctx, "GetMCPServer", GetMCPServerDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertMCPServerDocument = `mutation UpsertMCPServer ($attributes: McpServerAttributes!) {
+	upsertMcpServer(attributes: $attributes) {
+		... MCPServerFragment
+	}
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+`
+
+func (c *Client) UpsertMCPServer(ctx context.Context, attributes McpServerAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertMCPServer, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertMCPServer
+	if err := c.Client.Post(ctx, "UpsertMCPServer", UpsertMCPServerDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteMCPServerDocument = `mutation DeleteMCPServer ($id: ID!) {
+	deleteMcpServer(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteMCPServer, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteMCPServer
+	if err := c.Client.Post(ctx, "DeleteMCPServer", DeleteMCPServerDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListNamespacesDocument = `query ListNamespaces ($after: String, $first: Int, $before: String, $last: Int) {
 	managedNamespaces(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -24888,6 +25353,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -24922,6 +25412,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -24957,6 +25472,31 @@ fragment OIDCProviderFragment on OidcProvider {
 	clientSecret
 	authMethod
 	redirectUris
+	bindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -30700,8 +31240,8 @@ var DocumentOperationNames = map[string]string{
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
 	GetFlowDocument:                                   "GetFlow",
-	DeleteFlowDocument:                                "DeleteFlow",
 	UpsertFlowDocument:                                "UpsertFlow",
+	DeleteFlowDocument:                                "DeleteFlow",
 	GetClusterGatesDocument:                           "GetClusterGates",
 	PagedClusterGatesDocument:                         "PagedClusterGates",
 	PagedClusterGateIDsDocument:                       "PagedClusterGateIDs",
@@ -30733,6 +31273,10 @@ var DocumentOperationNames = map[string]string{
 	GetHelmRepositoryDocument:                         "GetHelmRepository",
 	UpsertHelmRepositoryDocument:                      "UpsertHelmRepository",
 	IngestClusterCostDocument:                         "IngestClusterCost",
+	GetMCPServersDocument:                             "GetMCPServers",
+	GetMCPServerDocument:                              "GetMCPServer",
+	UpsertMCPServerDocument:                           "UpsertMCPServer",
+	DeleteMCPServerDocument:                           "DeleteMCPServer",
 	ListNamespacesDocument:                            "ListNamespaces",
 	ListClusterNamespacesDocument:                     "ListClusterNamespaces",
 	GetNamespaceDocument:                              "GetNamespace",

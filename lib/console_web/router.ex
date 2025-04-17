@@ -19,6 +19,10 @@ defmodule ConsoleWeb.Router do
     get "/dashboard/cluster", WebhookController, :cluster
   end
 
+  scope "/mcp", ConsoleWeb do
+    get "/.well-known/jwks.json", JWKController, :mcp
+  end
+
   scope "/ext" do
     ## unauthenticated routes
     scope "/" do

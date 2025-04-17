@@ -1,5 +1,3 @@
-import { GITHUB_LINK } from 'utils/constants'
-
 import {
   AiSparkleOutlineIcon,
   ArrowTopRightIcon,
@@ -9,6 +7,7 @@ import {
   Sidebar as DSSidebar,
   EdgeComputeIcon,
   Flex,
+  FlowIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -28,9 +27,17 @@ import {
   Tooltip,
   useSidebar,
   WarningShieldIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  ReactElement,
+  use,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -42,7 +49,7 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { SECURITY_ABS_PATH } from 'routes/securityRoutesConsts'
 
 import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutesConsts.tsx'
 
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
@@ -50,11 +57,17 @@ import { useLogin } from '../contexts'
 
 import HelpLauncher from '../help/HelpLauncher'
 
+import {
+  FeatureFlagContext,
+  FeatureFlags,
+} from 'components/flows/FeatureFlagContext.tsx'
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { GITHUB_LINK } from 'utils/constants.ts'
 
 type MenuItem = {
   text: string
@@ -70,11 +83,13 @@ type MenuItem = {
 // Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
 function getMenuItems({
   isCDEnabled,
+  featureFlags,
   cdPath,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
+  featureFlags: FeatureFlags
   cdPath: string
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
@@ -84,7 +99,7 @@ function getMenuItems({
       expandedLabel: 'Home',
       icon: <HomeIcon />,
       path: '/',
-      hotkeys: ['shift H', '1'],
+      hotkeys: ['shift H'],
     },
     {
       text: 'Continuous deployment',
@@ -93,21 +108,21 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
-      hotkeys: ['shift C', '2'],
+      hotkeys: ['shift C'],
     },
     {
       text: 'Stacks',
       expandedLabel: 'Stacks',
       icon: <StackIcon />,
       path: getStacksAbsPath(''),
-      hotkeys: ['shift S', '3'],
+      hotkeys: ['shift S'],
     },
     {
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
       path: CATALOGS_ABS_PATH,
-      hotkeys: ['4'],
+      hotkeys: ['shift S+C'],
     },
     {
       text: 'Kubernetes',
@@ -115,22 +130,33 @@ function getMenuItems({
       icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['shift K', '5'],
+      hotkeys: ['shift K'],
+    },
+    {
+      text: 'Flows',
+      expandedLabel: 'Flows',
+      icon: <FlowIcon />,
+      path: FLOWS_ABS_PATH,
+      hotkeys: ['shift F'],
     },
     {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
-      path: `${AI_ABS_PATH}`,
-      hotkeys: ['shift A', '6'],
+      path: AI_ABS_PATH,
+      hotkeys: ['shift A'],
     },
-    {
-      text: 'Edge',
-      expandedLabel: 'Edge',
-      icon: <EdgeComputeIcon />,
-      path: EDGE_ABS_PATH,
-      hotkeys: ['shift E', '7'],
-    },
+    ...(featureFlags.Edge
+      ? [
+          {
+            text: 'Edge',
+            expandedLabel: 'Edge',
+            icon: <EdgeComputeIcon />,
+            path: EDGE_ABS_PATH,
+            hotkeys: ['shift E'],
+          },
+        ]
+      : []),
     {
       text: 'PRs',
       expandedLabel: 'Pull requests',
@@ -140,7 +166,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P', '8'],
+      hotkeys: ['shift P'],
     },
     {
       text: 'Security',
@@ -148,14 +174,13 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['9'],
     },
     {
       text: 'Cost Management',
       expandedLabel: 'Cost Management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
-      hotkeys: ['shift C+M', '0'],
+      hotkeys: ['shift C+M'],
     },
     // {
     //   text: 'Backups',
@@ -209,6 +234,7 @@ export default function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const { me, configuration, personaConfiguration } = useLogin()
+  const { featureFlags } = use(FeatureFlagContext)
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -223,10 +249,17 @@ export default function Sidebar() {
       getMenuItems({
         isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
+        featureFlags,
         cdPath: defaultCDPath,
         personaConfig: personaConfiguration,
       }),
-    [personaConfiguration, configuration?.isSandbox, isCDEnabled, defaultCDPath]
+    [
+      configuration?.isSandbox,
+      isCDEnabled,
+      featureFlags,
+      defaultCDPath,
+      personaConfiguration,
+    ]
   )
 
   const { logout } = useLogin()
@@ -279,18 +312,6 @@ export default function Sidebar() {
           ))}
           <Flex flex={1} />
           <SidebarExpandButton />
-          <SidebarItem
-            tooltip="GitHub"
-            className="sidebar-github"
-            clickable
-            as="a"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`${GITHUB_LINK}/plural`}
-            expandedLabel="GitHub"
-          >
-            <GitHubLogoIcon />
-          </SidebarItem>
           <HelpLauncher />
           <SidebarItem
             ref={menuItemRef}
@@ -302,9 +323,7 @@ export default function Sidebar() {
               setIsMenuOpen((x) => !x)
             }}
             expandedLabel="Menu"
-            css={{
-              paddingLeft: theme.spacing.xxsmall,
-            }}
+            css={{ paddingLeft: theme.spacing.xxsmall }}
           >
             <Avatar
               name={me.name}
@@ -317,22 +336,11 @@ export default function Sidebar() {
           )}
         </SidebarSection>
         {isMenuOpen && (
-          <Menu
-            ref={menuRef}
-            zIndex={999}
-            position="absolute"
-            bottom={8}
-            minWidth="175px"
-            left="calc(100% + 10px)"
-            border="1px solid border"
-          >
+          <ProfileMenuSC ref={menuRef}>
             <MenuItem
               as={Link}
               to="/profile"
-              className="sidebar-menu-myprofile"
-              color="inherit"
               onClick={() => setIsMenuOpen(false)}
-              textDecoration="none"
             >
               <PersonIcon marginRight="xsmall" />
               My profile
@@ -342,25 +350,32 @@ export default function Sidebar() {
               href="https://docs.plural.sh"
               target="_blank"
               rel="noopener noreferrer"
-              className="sidebar-menu-docs"
-              color="inherit"
               onClick={() => setIsMenuOpen(false)}
-              textDecoration="none"
             >
               <ScrollIcon marginRight="xsmall" />
-              Docs
-              <Flex flex={1} />
+              <span css={{ flex: 1 }}>Docs</span>
               <ArrowTopRightIcon />
             </MenuItem>
             <MenuItem
+              as="a"
+              href={`${GITHUB_LINK}/plural`}
+              target="_blank"
+              rel="noopener noreferrer"
+              expandedLabel="GitHub"
+            >
+              <GitHubLogoIcon marginRight="xsmall" />
+              <span css={{ flex: 1 }}>GitHub</span>
+              <ArrowTopRightIcon />
+            </MenuItem>
+            <MenuItem
+              as="a"
+              style={{ color: theme.colors['icon-danger'] }}
               onClick={handleLogout}
-              className="sidebar-menu-logout"
-              color="icon-error"
             >
               <LogoutIcon marginRight="xsmall" />
               Logout
             </MenuItem>
-          </Menu>
+          </ProfileMenuSC>
         )}
       </SidebarExpandWrapper>
     </SidebarSC>
@@ -370,10 +385,15 @@ export default function Sidebar() {
 function ConsoleVersion({ version }: { version: string }) {
   const { isExpanded } = useSidebar()
   return (
-    <ConsoleVersionSC $isExpanded={isExpanded}>
-      {isExpanded ? 'Console version: v' : 'v'}
-      {version}
-    </ConsoleVersionSC>
+    <WrapWithIf
+      condition={!isExpanded}
+      wrapper={<Tooltip label={`Console version: v${version}`} />}
+    >
+      <ConsoleVersionSC $isExpanded={isExpanded}>
+        {isExpanded ? 'Console version: v' : 'v'}
+        {version}
+      </ConsoleVersionSC>
+    </WrapWithIf>
   )
 }
 const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
@@ -387,3 +407,13 @@ const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
     letterSpacing: '-0.35px',
   })
 )
+
+const ProfileMenuSC = styled(Menu)(({ theme }) => ({
+  zIndex: 999,
+  position: 'absolute',
+  bottom: 8,
+  minWidth: '175px',
+  left: 'calc(100% + 10px)',
+  '& a': { color: theme.colors.text, textDecoration: 'none' },
+  '& *:hover': { background: theme.colors['fill-two-hover'] },
+}))

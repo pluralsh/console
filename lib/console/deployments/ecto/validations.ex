@@ -22,6 +22,8 @@ defmodule Console.Deployments.Ecto.Validations do
     end
   end
 
+  def parse_version(vsn), do: Version.parse(clean_version(vsn))
+
   def clean_version(vsn) do
     vsn = String.trim_leading(vsn, "v")
     case Regex.match?(@semver, vsn) do

@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   ChatOutlineIcon,
   IconFrame,
@@ -8,6 +9,9 @@ import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
 import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
 import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../explain/ExplainWithAIButton.tsx'
+import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { Link } from 'react-router-dom'
+import { AI_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
@@ -47,22 +51,28 @@ export function insightMessage(
 export function ChatWithAIButton({
   messages,
   insightId,
-  bodyText = 'Chat with AI',
+  flowId,
+  summaryText = 'Further questions about an insight from Plural AI',
+  bodyText: bodyTextProp = 'Chat with AI',
   iconOnly = false,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
   insightId?: Nullable<string>
+  flowId?: Nullable<string>
+  summaryText?: string
   bodyText?: string
   iconOnly?: boolean
 } & ComponentPropsWithRef<typeof Button>) {
-  const { createNewThread, loading } = useChatbot()
+  const { createNewThread, loading, closeChatbot } = useChatbot()
+  const aiEnabled = useAIEnabled()
+  const bodyText = aiEnabled ? bodyTextProp : 'Enable AI to chat'
 
   const handleClick = () => {
     createNewThread({
       insightId,
-      // TODO: update this
-      summary: 'Further questions about an insight from Plural AI',
+      flowId,
+      summary: summaryText,
       summarized: false,
       messages: messages || [],
     })
@@ -70,18 +80,34 @@ export function ChatWithAIButton({
   return iconOnly ? (
     <IconFrame
       clickable
-      onClick={handleClick}
+      {...(aiEnabled
+        ? {
+            onClick: handleClick,
+            icon: loading ? <Spinner /> : <ChatOutlineIcon />,
+            to: '',
+          }
+        : {
+            as: Link,
+            to: AI_ABS_PATH,
+            onClick: closeChatbot,
+            icon: <ArrowTopRightIcon />,
+          })}
       tooltip
       textValue={bodyText}
-      icon={loading ? <Spinner /> : <ChatOutlineIcon />}
       type="secondary"
       {...props}
     />
   ) : (
     <Button
       loading={loading}
-      onClick={handleClick}
-      startIcon={<ChatOutlineIcon />}
+      {...(aiEnabled
+        ? { onClick: handleClick, startIcon: <ChatOutlineIcon /> }
+        : {
+            as: Link,
+            to: AI_ABS_PATH,
+            onClick: closeChatbot,
+            endIcon: <ArrowTopRightIcon />,
+          })}
       {...props}
     >
       {bodyText}

@@ -44,8 +44,8 @@ defmodule Console.AI.Ollama do
   @doc """
   Generate a anthropic completion from
   """
-  @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = ollama, messages) do
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{} = ollama, messages, _) do
     history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
     case chat(ollama, history) do
       {:ok, %ChatResponse{message: %Message{content: content}}} ->

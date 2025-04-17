@@ -1,8 +1,10 @@
 defmodule Console.Deployments.OAuth do
   use Console.Services.Base
   alias Console.Plural.Accounts
+  alias Console.Schema.User
+  alias Console.Services.{OIDC, Users}
 
-  @type oauth_type :: :plural
+  @type oauth_type :: :plural | :console
   @type auth_method :: :post | :basic
   @type error :: {:error, term}
   @type provider :: %{
@@ -23,6 +25,7 @@ defmodule Console.Deployments.OAuth do
     |> Accounts.create_oidc_provider()
     |> rewire()
   end
+  def create(:console, attrs), do: OIDC.create_oidc_provider(attrs, bot())
 
   @doc """
   Updates an upstream oidc provider in the configured auth service, at the moment, just supports Plural
@@ -32,6 +35,7 @@ defmodule Console.Deployments.OAuth do
     Accounts.update_oidc_provider(id, rewire_attrs(attrs))
     |> rewire()
   end
+  def update(:console, id, attrs), do: OIDC.update_oidc_provider(attrs, id, bot())
 
   @doc """
   Deletes an upstream oidc provider in the configured auth service, at the moment, just supports Plural
@@ -41,6 +45,7 @@ defmodule Console.Deployments.OAuth do
     Accounts.delete_oidc_provider(id)
     |> rewire()
   end
+  def delete(:console, id), do: OIDC.delete_oidc_provider(id, bot())
 
   defp rewire({:ok, resp}) do
     Map.from_struct(resp)
@@ -57,6 +62,13 @@ defmodule Console.Deployments.OAuth do
   end
 
   defp rewire(pass), do: pass
+
+  defp bot() do
+    Users.get_bot!("console")
+    |> tmp_admin()
+  end
+
+  defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}, bootstrap: nil}
 
   defp rewire_attrs(attrs) do
     attrs

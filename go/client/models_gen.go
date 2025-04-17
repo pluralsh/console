@@ -123,8 +123,10 @@ type AgentMigrationAttributes struct {
 }
 
 type AiDelta struct {
-	Seq     int64  `json:"seq"`
-	Content string `json:"content"`
+	Seq     int64   `json:"seq"`
+	Content string  `json:"content"`
+	Message *int64  `json:"message,omitempty"`
+	Role    *AiRole `json:"role,omitempty"`
 }
 
 // A representation of a LLM-derived insight
@@ -708,14 +710,19 @@ type CertificateStatus struct {
 }
 
 type Chat struct {
-	ID          string              `json:"id"`
-	Type        ChatType            `json:"type"`
-	Role        AiRole              `json:"role"`
-	Content     string              `json:"content"`
-	Seq         int64               `json:"seq"`
+	ID      string   `json:"id"`
+	Type    ChatType `json:"type"`
+	Role    AiRole   `json:"role"`
+	Content *string  `json:"content,omitempty"`
+	Seq     int64    `json:"seq"`
+	// whether this chat requires confirmation
+	Confirm *bool `json:"confirm,omitempty"`
+	// when the chat was confirmed
+	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
 	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
 	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
 	Thread      *ChatThread         `json:"thread,omitempty"`
+	Server      *McpServer          `json:"server,omitempty"`
 	InsertedAt  *string             `json:"insertedAt,omitempty"`
 	UpdatedAt   *string             `json:"updatedAt,omitempty"`
 }
@@ -743,15 +750,18 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string          `json:"id"`
-	Summary       string          `json:"summary"`
-	Default       bool            `json:"default"`
-	LastMessageAt *string         `json:"lastMessageAt,omitempty"`
-	User          *User           `json:"user,omitempty"`
-	Insight       *AiInsight      `json:"insight,omitempty"`
-	Chats         *ChatConnection `json:"chats,omitempty"`
-	InsertedAt    *string         `json:"insertedAt,omitempty"`
-	UpdatedAt     *string         `json:"updatedAt,omitempty"`
+	ID            string     `json:"id"`
+	Summary       string     `json:"summary"`
+	Default       bool       `json:"default"`
+	LastMessageAt *string    `json:"lastMessageAt,omitempty"`
+	Flow          *Flow      `json:"flow,omitempty"`
+	User          *User      `json:"user,omitempty"`
+	Insight       *AiInsight `json:"insight,omitempty"`
+	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
+	Tools      []*McpServerTool `json:"tools,omitempty"`
+	Chats      *ChatConnection  `json:"chats,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -763,6 +773,8 @@ type ChatThreadAttributes struct {
 	Messages []*ChatMessage `json:"messages,omitempty"`
 	// an ai insight this thread was created from
 	InsightID *string `json:"insightId,omitempty"`
+	// the flow this thread was created in
+	FlowID *string `json:"flowId,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -775,9 +787,16 @@ type ChatThreadEdge struct {
 	Cursor *string     `json:"cursor,omitempty"`
 }
 
+// Additional attributes for describing a tool call that derived this chat message
+type ChatTool struct {
+	Name      *string        `json:"name,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
 	File *ChatFile `json:"file,omitempty"`
+	Tool *ChatTool `json:"tool,omitempty"`
 }
 
 type CloudAddon struct {
@@ -860,6 +879,8 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// The helm values for the agent installation
+	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
 	Healthy *bool `json:"healthy,omitempty"`
 	// the url of the kas server you can access this cluster from
@@ -930,8 +951,13 @@ type Cluster struct {
 	Logs               []*LogStream        `json:"logs,omitempty"`
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
+	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
+	// fetches the discovered custom resources with new versions to be used
+	DeprecatedCustomResources []*DeprecatedCustomResource `json:"deprecatedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
@@ -1463,6 +1489,8 @@ type ClusterUpgradePlan struct {
 	Incompatibilities *bool `json:"incompatibilities,omitempty"`
 	// whether all api deprecations have been cleared for the target version
 	Deprecations *bool `json:"deprecations,omitempty"`
+	// whether the kubelet version is in line with the current version
+	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
 }
 
 type ClusterUsage struct {
@@ -1611,6 +1639,11 @@ type ConfigurationValidationAttributes struct {
 	JSON *bool `json:"json,omitempty"`
 	// configuration for name uniqueness
 	UniqBy *UniqByAttributes `json:"uniqBy,omitempty"`
+}
+
+type ConsentRequest struct {
+	RequestedScope []*string `json:"requestedScope,omitempty"`
+	Skip           *bool     `json:"skip,omitempty"`
 }
 
 type ConsoleConfiguration struct {
@@ -2061,6 +2094,31 @@ type DeploymentStrategy struct {
 	RollingUpdate *RollingUpdate `json:"rollingUpdate,omitempty"`
 }
 
+type DeprecatedCustomResource struct {
+	ID        string  `json:"id"`
+	Group     string  `json:"group"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace string  `json:"namespace"`
+	Name      *string `json:"name,omitempty"`
+	// the next discovered version of this resource
+	NextVersion string `json:"nextVersion"`
+	// the cluster this resource belongs to
+	Cluster    *Cluster `json:"cluster,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type DeprecatedCustomResourceAttributes struct {
+	Group     string  `json:"group"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+	// the next valid version for this resource
+	NextVersion string `json:"nextVersion"`
+}
+
 type ElasticsearchConnection struct {
 	Host string `json:"host"`
 	// the index to query for log data
@@ -2110,6 +2168,8 @@ type Flow struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Icon        *string `json:"icon,omitempty"`
+	// servers that are bound to this flow
+	Servers []*McpServer `json:"servers,omitempty"`
 	// read policy for this flow
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy for this flow
@@ -2119,17 +2179,19 @@ type Flow struct {
 	Services     *ServiceDeploymentConnection `json:"services,omitempty"`
 	Pipelines    *PipelineConnection          `json:"pipelines,omitempty"`
 	PullRequests *PullRequestConnection       `json:"pullRequests,omitempty"`
+	Alerts       *AlertConnection             `json:"alerts,omitempty"`
 	InsertedAt   *string                      `json:"insertedAt,omitempty"`
 	UpdatedAt    *string                      `json:"updatedAt,omitempty"`
 }
 
 type FlowAttributes struct {
-	Name          string                     `json:"name"`
-	Description   *string                    `json:"description,omitempty"`
-	Icon          *string                    `json:"icon,omitempty"`
-	ProjectID     *string                    `json:"projectId,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name               string                            `json:"name"`
+	Description        *string                           `json:"description,omitempty"`
+	Icon               *string                           `json:"icon,omitempty"`
+	ProjectID          *string                           `json:"projectId,omitempty"`
+	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
+	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
 }
 
 type FlowConnection struct {
@@ -2477,6 +2539,7 @@ type HelmConfigAttributes struct {
 	Release     *string              `json:"release,omitempty"`
 	URL         *string              `json:"url,omitempty"`
 	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
+	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2537,6 +2600,7 @@ type HelmSpec struct {
 	Values      *string `json:"values,omitempty"`
 	Release     *string `json:"release,omitempty"`
 	IgnoreHooks *bool   `json:"ignoreHooks,omitempty"`
+	IgnoreCrds  *bool   `json:"ignoreCrds,omitempty"`
 	// spec of where to find the chart in git
 	Git *GitRef `json:"git,omitempty"`
 	// a git repository in Plural to use as a source
@@ -2865,6 +2929,11 @@ type LoginInfo struct {
 	OidcName *string `json:"oidcName,omitempty"`
 }
 
+type LoginRequest struct {
+	RequestedScope []*string `json:"requestedScope,omitempty"`
+	Subject        *string   `json:"subject,omitempty"`
+}
+
 type LogsEvidence struct {
 	ServiceID *string    `json:"serviceId,omitempty"`
 	ClusterID *string    `json:"clusterId,omitempty"`
@@ -2961,6 +3030,106 @@ type ManifestNetwork struct {
 	Subdomain *string `json:"subdomain,omitempty"`
 }
 
+type McpHeaderAttributes struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type McpServer struct {
+	ID string `json:"id"`
+	// the name for this server
+	Name string `json:"name"`
+	// the HTTP url the server is hosted on
+	URL string `json:"url"`
+	// authentication specs for this server
+	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
+	// whether a tool call against this server should require user confirmation
+	Confirm *bool `json:"confirm,omitempty"`
+	// read policy for this mcp server
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this mcp server
+	WriteBindings []*PolicyBinding          `json:"writeBindings,omitempty"`
+	Audits        *McpServerAuditConnection `json:"audits,omitempty"`
+	InsertedAt    *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                   `json:"updatedAt,omitempty"`
+}
+
+type McpServerAssociationAttributes struct {
+	ServerID *string `json:"serverId,omitempty"`
+}
+
+// Input attributes for creating an mcp server
+type McpServerAttributes struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	// whether tool calls against this server should require a confirmation
+	Confirm        *bool                              `json:"confirm,omitempty"`
+	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
+	ReadBindings   []*PolicyBindingAttributes         `json:"readBindings,omitempty"`
+	WriteBindings  []*PolicyBindingAttributes         `json:"writeBindings,omitempty"`
+}
+
+type McpServerAudit struct {
+	ID         string         `json:"id"`
+	Tool       string         `json:"tool"`
+	Arguments  map[string]any `json:"arguments,omitempty"`
+	Server     *McpServer     `json:"server,omitempty"`
+	Actor      *User          `json:"actor,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+type McpServerAuditConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*McpServerAuditEdge `json:"edges,omitempty"`
+}
+
+type McpServerAuditEdge struct {
+	Node   *McpServerAudit `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+type McpServerAuthentication struct {
+	// built-in Plural JWT authentication
+	Plural *bool `json:"plural,omitempty"`
+	// any custom HTTP headers needed for authentication
+	Headers []*McpServerHeader `json:"headers,omitempty"`
+}
+
+type McpServerAuthenticationAttributes struct {
+	// whether to use Plural's built-in JWT authentication
+	Plural  *bool                  `json:"plural,omitempty"`
+	Headers []*McpHeaderAttributes `json:"headers,omitempty"`
+}
+
+type McpServerConnection struct {
+	PageInfo PageInfo         `json:"pageInfo"`
+	Edges    []*McpServerEdge `json:"edges,omitempty"`
+}
+
+type McpServerEdge struct {
+	Node   *McpServer `json:"node,omitempty"`
+	Cursor *string    `json:"cursor,omitempty"`
+}
+
+type McpServerHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// A tool related to an mcp server
+type McpServerTool struct {
+	Server *McpServer `json:"server,omitempty"`
+	Tool   *McpTool   `json:"tool,omitempty"`
+}
+
+// The description of a tool extracted from its MCP server
+type McpTool struct {
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
+}
+
 type Metadata struct {
 	Labels            []*LabelPair `json:"labels,omitempty"`
 	Annotations       []*LabelPair `json:"annotations,omitempty"`
@@ -2973,6 +3142,11 @@ type Metadata struct {
 type MetadataAttributes struct {
 	Labels      *string `json:"labels,omitempty"`
 	Annotations *string `json:"annotations,omitempty"`
+}
+
+type MetricPointResponse struct {
+	Metric map[string]any `json:"metric,omitempty"`
+	Value  *MetricResult  `json:"value,omitempty"`
 }
 
 type MetricResponse struct {
@@ -3018,6 +3192,33 @@ type NamespaceVulnAttributes struct {
 type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+// An edge representing traffic statistics between two workloads in a service mesh
+type NetworkMeshEdge struct {
+	ID         string                `json:"id"`
+	From       NetworkMeshWorkload   `json:"from"`
+	To         NetworkMeshWorkload   `json:"to"`
+	Statistics NetworkMeshStatistics `json:"statistics"`
+}
+
+// The relevant statistics for traffic within a service mesh
+type NetworkMeshStatistics struct {
+	Bytes             *float64 `json:"bytes,omitempty"`
+	Connections       *float64 `json:"connections,omitempty"`
+	Packets           *float64 `json:"packets,omitempty"`
+	HTTP200           *float64 `json:"http200,omitempty"`
+	HTTP400           *float64 `json:"http400,omitempty"`
+	HTTP500           *float64 `json:"http500,omitempty"`
+	HTTPClientLatency *float64 `json:"httpClientLatency,omitempty"`
+}
+
+// An abstract workload discovered by querying statistics on a service mesh
+type NetworkMeshWorkload struct {
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Namespace *string `json:"namespace,omitempty"`
+	Service   *string `json:"service,omitempty"`
 }
 
 type NewRelicCredentialsAttributes struct {
@@ -3216,6 +3417,10 @@ type NotificationSinkEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+type OauthResponse struct {
+	RedirectTo string `json:"redirectTo"`
+}
+
 type ObjectReference struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
@@ -3359,6 +3564,13 @@ type ObserverActionConfigurationAttributes struct {
 	Pipeline *ObserverPipelineActionAttributes `json:"pipeline,omitempty"`
 }
 
+// The settings for configuring add-on scraping
+type ObserverAddonAttributes struct {
+	Name               string   `json:"name"`
+	KubernetesVersion  *string  `json:"kubernetesVersion,omitempty"`
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
+}
+
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response
 type ObserverAttributes struct {
 	Name      string                      `json:"name"`
@@ -3440,7 +3652,7 @@ type ObserverPrAction struct {
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
-	Context string `json:"context"`
+	Context map[string]any `json:"context"`
 }
 
 // Configuration for sending a pr in response to an observer
@@ -3451,6 +3663,11 @@ type ObserverPrActionAttributes struct {
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
 	Context string `json:"context"`
+}
+
+// Resets the current value of the observer
+type ObserverResetAttributes struct {
+	LastValue string `json:"lastValue"`
 }
 
 // A spec for a target to poll
@@ -3472,12 +3689,14 @@ type ObserverTarget struct {
 type ObserverTargetAttributes struct {
 	Type *ObserverTargetType `json:"type,omitempty"`
 	// present for backwards compat
-	Target *ObserverTargetType     `json:"target,omitempty"`
-	Format *string                 `json:"format,omitempty"`
-	Order  ObserverTargetOrder     `json:"order"`
-	Helm   *ObserverHelmAttributes `json:"helm,omitempty"`
-	Oci    *ObserverOciAttributes  `json:"oci,omitempty"`
-	Git    *ObserverGitAttributes  `json:"git,omitempty"`
+	Target   *ObserverTargetType      `json:"target,omitempty"`
+	Format   *string                  `json:"format,omitempty"`
+	Order    ObserverTargetOrder      `json:"order"`
+	Helm     *ObserverHelmAttributes  `json:"helm,omitempty"`
+	Oci      *ObserverOciAttributes   `json:"oci,omitempty"`
+	Git      *ObserverGitAttributes   `json:"git,omitempty"`
+	Addon    *ObserverAddonAttributes `json:"addon,omitempty"`
+	EksAddon *ObserverAddonAttributes `json:"eksAddon,omitempty"`
 }
 
 // A representation of a created OIDC provider client
@@ -3492,6 +3711,10 @@ type OidcProvider struct {
 	ClientID string `json:"clientId"`
 	// the generated client secret, used in configuring an OAuth client
 	ClientSecret string `json:"clientSecret"`
+	// bindings determining if a user can login with this oidc client
+	Bindings []*PolicyBinding `json:"bindings,omitempty"`
+	// bindings determining if a user can edit this oidc client
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 }
 
 // Configuration settings for creating a new OIDC provider client
@@ -3499,8 +3722,27 @@ type OidcProviderAttributes struct {
 	Name        string          `json:"name"`
 	AuthMethod  *OidcAuthMethod `json:"authMethod,omitempty"`
 	Description *string         `json:"description,omitempty"`
+	// users and groups able to utilize this provider
+	Bindings []*PolicyBindingAttributes `json:"bindings,omitempty"`
+	// users and groups able to utilize this provider
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OidcProviderConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*OidcProviderEdge `json:"edges,omitempty"`
+}
+
+type OidcProviderEdge struct {
+	Node   *OidcProvider `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type OidcStepResponse struct {
+	Login   *LoginRequest   `json:"login,omitempty"`
+	Consent *ConsentRequest `json:"consent,omitempty"`
 }
 
 type OllamaAttributes struct {
@@ -5044,6 +5286,8 @@ type ServiceDeployment struct {
 	Alerts                 *AlertConnection                `json:"alerts,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
+	// A pod-level set of utilization metrics for this cluster for rendering a heat map
+	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -5201,6 +5445,7 @@ type ServiceUpdateAttributes struct {
 	Configuration   []*ConfigAttributes            `json:"configuration,omitempty"`
 	Kustomize       *KustomizeAttributes           `json:"kustomize,omitempty"`
 	ParentID        *string                        `json:"parentId,omitempty"`
+	FlowID          *string                        `json:"flowId,omitempty"`
 	Dependencies    []*ServiceDependencyAttributes `json:"dependencies,omitempty"`
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
@@ -5938,6 +6183,12 @@ type UserRoles struct {
 	Admin *bool `json:"admin,omitempty"`
 }
 
+// A representation of the metrics to render a utilization heat map
+type UtilizationHeatMap struct {
+	CPU    []*MetricPointResponse `json:"cpu,omitempty"`
+	Memory []*MetricPointResponse `json:"memory,omitempty"`
+}
+
 type VectorStoreAttributes struct {
 	Enabled *bool                              `json:"enabled,omitempty"`
 	Store   *VectorStore                       `json:"store,omitempty"`
@@ -6577,16 +6828,18 @@ type ChatType string
 const (
 	ChatTypeText ChatType = "TEXT"
 	ChatTypeFile ChatType = "FILE"
+	ChatTypeTool ChatType = "TOOL"
 )
 
 var AllChatType = []ChatType{
 	ChatTypeText,
 	ChatTypeFile,
+	ChatTypeTool,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool:
 		return true
 	}
 	return false
@@ -7148,6 +7401,49 @@ func (e GitHealth) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type HeatMapFlavor string
+
+const (
+	HeatMapFlavorPod       HeatMapFlavor = "POD"
+	HeatMapFlavorNamespace HeatMapFlavor = "NAMESPACE"
+	HeatMapFlavorNode      HeatMapFlavor = "NODE"
+)
+
+var AllHeatMapFlavor = []HeatMapFlavor{
+	HeatMapFlavorPod,
+	HeatMapFlavorNamespace,
+	HeatMapFlavorNode,
+}
+
+func (e HeatMapFlavor) IsValid() bool {
+	switch e {
+	case HeatMapFlavorPod, HeatMapFlavorNamespace, HeatMapFlavorNode:
+		return true
+	}
+	return false
+}
+
+func (e HeatMapFlavor) String() string {
+	return string(e)
+}
+
+func (e *HeatMapFlavor) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HeatMapFlavor(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HeatMapFlavor", str)
+	}
+	return nil
+}
+
+func (e HeatMapFlavor) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type HelmAuthProvider string
 
 const (
@@ -7492,16 +7788,22 @@ func (e ObservabilityProviderType) MarshalGQL(w io.Writer) {
 type ObservabilityWebhookType string
 
 const (
-	ObservabilityWebhookTypeGrafana ObservabilityWebhookType = "GRAFANA"
+	ObservabilityWebhookTypeGrafana   ObservabilityWebhookType = "GRAFANA"
+	ObservabilityWebhookTypeDatadog   ObservabilityWebhookType = "DATADOG"
+	ObservabilityWebhookTypePagerduty ObservabilityWebhookType = "PAGERDUTY"
+	ObservabilityWebhookTypeNewrelic  ObservabilityWebhookType = "NEWRELIC"
 )
 
 var AllObservabilityWebhookType = []ObservabilityWebhookType{
 	ObservabilityWebhookTypeGrafana,
+	ObservabilityWebhookTypeDatadog,
+	ObservabilityWebhookTypePagerduty,
+	ObservabilityWebhookTypeNewrelic,
 }
 
 func (e ObservabilityWebhookType) IsValid() bool {
 	switch e {
-	case ObservabilityWebhookTypeGrafana:
+	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic:
 		return true
 	}
 	return false
@@ -7693,20 +7995,24 @@ func (e ObserverTargetOrder) MarshalGQL(w io.Writer) {
 type ObserverTargetType string
 
 const (
-	ObserverTargetTypeOci  ObserverTargetType = "OCI"
-	ObserverTargetTypeHelm ObserverTargetType = "HELM"
-	ObserverTargetTypeGit  ObserverTargetType = "GIT"
+	ObserverTargetTypeOci      ObserverTargetType = "OCI"
+	ObserverTargetTypeHelm     ObserverTargetType = "HELM"
+	ObserverTargetTypeGit      ObserverTargetType = "GIT"
+	ObserverTargetTypeEksAddon ObserverTargetType = "EKS_ADDON"
+	ObserverTargetTypeAddon    ObserverTargetType = "ADDON"
 )
 
 var AllObserverTargetType = []ObserverTargetType{
 	ObserverTargetTypeOci,
 	ObserverTargetTypeHelm,
 	ObserverTargetTypeGit,
+	ObserverTargetTypeEksAddon,
+	ObserverTargetTypeAddon,
 }
 
 func (e ObserverTargetType) IsValid() bool {
 	switch e {
-	case ObserverTargetTypeOci, ObserverTargetTypeHelm, ObserverTargetTypeGit:
+	case ObserverTargetTypeOci, ObserverTargetTypeHelm, ObserverTargetTypeGit, ObserverTargetTypeEksAddon, ObserverTargetTypeAddon:
 		return true
 	}
 	return false
@@ -7779,16 +8085,18 @@ func (e OidcAuthMethod) MarshalGQL(w io.Writer) {
 type OidcProviderType string
 
 const (
-	OidcProviderTypePlural OidcProviderType = "PLURAL"
+	OidcProviderTypePlural  OidcProviderType = "PLURAL"
+	OidcProviderTypeConsole OidcProviderType = "CONSOLE"
 )
 
 var AllOidcProviderType = []OidcProviderType{
 	OidcProviderTypePlural,
+	OidcProviderTypeConsole,
 }
 
 func (e OidcProviderType) IsValid() bool {
 	switch e {
-	case OidcProviderTypePlural:
+	case OidcProviderTypePlural, OidcProviderTypeConsole:
 		return true
 	}
 	return false
@@ -8003,6 +8311,7 @@ const (
 	PrRolePipeline PrRole = "PIPELINE"
 	PrRoleUpdate   PrRole = "UPDATE"
 	PrRoleUpgrade  PrRole = "UPGRADE"
+	PrRoleCost     PrRole = "COST"
 )
 
 var AllPrRole = []PrRole{
@@ -8011,11 +8320,12 @@ var AllPrRole = []PrRole{
 	PrRolePipeline,
 	PrRoleUpdate,
 	PrRoleUpgrade,
+	PrRoleCost,
 }
 
 func (e PrRole) IsValid() bool {
 	switch e {
-	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade:
+	case PrRoleCluster, PrRoleService, PrRolePipeline, PrRoleUpdate, PrRoleUpgrade, PrRoleCost:
 		return true
 	}
 	return false

@@ -60,9 +60,9 @@ export function VulnerabilityReportDetails() {
             icon={<ClusterIcon color="icon-light" />}
           />
           <StackedText
-            first={cluster?.name}
+            first={data?.vulnerabilityReport?.artifactUrl}
             firstPartialType="body2Bold"
-            second={`handle: ${cluster?.handle}`}
+            second={`cluster: ${cluster?.name} (${cluster?.handle})`}
           />
         </Flex>
       </HeaderWrapperSC>

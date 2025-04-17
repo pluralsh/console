@@ -20,7 +20,8 @@ defmodule Console.Schema.Cluster do
     AiInsight,
     ClusterInsightComponent,
     CloudAddon,
-    OperationalLayout
+    OperationalLayout,
+    DeprecatedCustomResource
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -109,7 +110,7 @@ defmodule Console.Schema.Cluster do
     field :token_readable,  :boolean, default: false, virtual: true
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
-      boolean_fields [:deprecations, :compatibilities, :incompatibilities]
+      boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
     end
 
     embeds_one :resource,       NamespacedName
@@ -135,6 +136,7 @@ defmodule Console.Schema.Cluster do
     has_many :tags, Tag, on_replace: :delete
     has_many :api_deprecations, through: [:services, :api_deprecations]
     has_many :insight_components, ClusterInsightComponent, on_replace: :delete
+    has_many :deprecated_custom_resources, DeprecatedCustomResource, on_replace: :delete
 
     has_many :pr_automations, PrAutomation, on_replace: :delete
     has_many :read_bindings, PolicyBinding,
@@ -197,6 +199,14 @@ defmodule Console.Schema.Cluster do
 
   def for_name(query \\ __MODULE__, name) do
     from(c in query, where: c.name == ^name)
+  end
+
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(c in query,
+      join: s in assoc(c, :services),
+      where: s.flow_id == ^flow_id,
+      distinct: true
+    )
   end
 
   def target(query \\ __MODULE__, %{} = resource) do
@@ -277,14 +287,14 @@ defmodule Console.Schema.Cluster do
   def upgradeable(query \\ __MODULE__) do
     from(c in query,
       where: not is_nil(c.upgrade_plan) and fragment("? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb",
-        c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])
+        c.upgrade_plan["compatibilities"], c.upgrade_plan["kubelet_skew"], c.upgrade_plan["deprecations"])
     )
   end
 
   def not_upgradeable(query \\ __MODULE__) do
     from(c in query,
       where: is_nil(c.upgrade_plan) or not fragment("? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb",
-        c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])
+        c.upgrade_plan["compatibilities"], c.upgrade_plan["kubelet_skew"], c.upgrade_plan["deprecations"])
     )
   end
 
@@ -293,7 +303,7 @@ defmodule Console.Schema.Cluster do
       select: %{
         count: count(c.id),
         upgradeable: sum(fragment("CASE WHEN ? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb THEN 1 ELSE 0 END",
-          c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])),
+          c.upgrade_plan["compatibilities"], c.upgrade_plan["kubelet_skew"], c.upgrade_plan["deprecations"])),
         latest: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.kube_vsn())),
         compliant: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.compliant_vsn())),
       }

@@ -50,4 +50,9 @@ RUN apk add git
 COPY --from=builder /usr/bin/soft /usr/bin/
 COPY --from=builder /go/data /go/data
 
+RUN addgroup -g 65543 softserve
+RUN adduser -u 65543 -G softserve -D softserve
+RUN chown -R softserve:softserve /go/data
+USER softserve
+
 ENTRYPOINT [ "soft", "serve" ]

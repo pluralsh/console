@@ -49,6 +49,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :release,       :string
     field :url,           :string
     field :ignore_hooks,  :boolean
+    field :ignore_crds,   :boolean
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -77,6 +78,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :configuration,    list_of(:config_attributes)
     field :kustomize,        :kustomize_attributes
     field :parent_id,        :id
+    field :flow_id,          :id
     field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
@@ -228,9 +230,21 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.metrics/3
     end
 
+    @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
+    field :heat_map, :utilization_heat_map do
+      arg :flavor, :heat_map_flavor, default_value: :pod
+      resolve &Deployments.heat_map/3
+    end
+
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether this service is editable"
 
     timestamps()
+  end
+
+  @desc "A representation of the metrics to render a utilization heat map"
+  object :utilization_heat_map do
+    field :cpu,    list_of(:metric_point_response)
+    field :memory, list_of(:metric_point_response)
   end
 
   object :service_component_metrics do
@@ -272,6 +286,7 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve: &Deployments.helm_values/3
     field :release,       :string
     field :ignore_hooks,  :boolean
+    field :ignore_crds,   :boolean
     field :git,           :git_ref, description: "spec of where to find the chart in git"
     field :repository_id, :id, description: "a git repository in Plural to use as a source"
     field :repository,    :object_reference, description: "pointer to the flux helm repository resource used for this chart"

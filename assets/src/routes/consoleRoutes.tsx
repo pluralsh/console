@@ -18,6 +18,7 @@ import { securityRoutes } from './securityRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { edgeRoutes } from './edgeRoutes.tsx'
+import { flowRoutes } from './flowRoutes.tsx'
 
 const profileRoutes = [
   <Route
@@ -69,6 +70,7 @@ export const consoleComponentRoutes = [
   settingsRoutes,
   kubernetesRoutes,
   aiRoutes,
+  ...flowRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [

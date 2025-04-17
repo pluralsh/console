@@ -55,6 +55,13 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.project_id == ^id)
   end
 
+  def for_flow(query \\ __MODULE__, id) do
+    from(a in query,
+      join: s in assoc(a, :service),
+      where: s.flow_id == ^id
+    )
+  end
+
   def expired(query \\ __MODULE__) do
     at = Timex.now() |> Timex.shift(@expiry)
     from(a in query, where: coalesce(a.updated_at, a.inserted_at) < ^at)

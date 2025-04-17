@@ -11,6 +11,8 @@ defmodule KubernetesScaffolds do
 
   def stateful_set(namespace, name) do
     %Apps.StatefulSet{
+      api_version: "apps/v1",
+      kind: "StatefulSet",
       metadata: %{name: name, namespace: namespace},
       status: %Apps.StatefulSetStatus{
         current_replicas: 3,
@@ -26,6 +28,8 @@ defmodule KubernetesScaffolds do
 
   def deployment(namespace, name) do
     %Apps.Deployment{
+      api_version: "apps/v1",
+      kind: "Deployment",
       metadata: %{name: name, namespace: namespace},
       status: %Apps.DeploymentStatus{
         available_replicas: 3,
@@ -41,6 +45,8 @@ defmodule KubernetesScaffolds do
 
   def service(namespace, name) do
     %Core.Service{
+      api_version: "v1",
+      kind: "Service",
       metadata: %{name: name, namespace: namespace},
       status: %Core.ServiceStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Core.ServiceSpec{
@@ -55,6 +61,8 @@ defmodule KubernetesScaffolds do
 
   def ingress(namespace, name) do
     %Networking.Ingress{
+      api_version: "networking.k8s.io/v1",
+      kind: "Ingress",
       metadata: %{name: name, namespace: namespace},
       status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Networking.IngressSpec{
@@ -78,6 +86,8 @@ defmodule KubernetesScaffolds do
 
   def pod(name) do
     %Core.Pod{
+      api_version: "v1",
+      kind: "Pod",
       metadata: %{name: name, namespace: name},
       status: %Core.PodStatus{pod_ip: "1.2.3.4"},
       spec: %Core.PodSpec{node_name: "some-node"}
@@ -86,6 +96,8 @@ defmodule KubernetesScaffolds do
 
   def kube_node(name \\ "some-node") do
     %Core.Node{
+      api_version: "v1",
+      kind: "Node",
       metadata: %{name: name},
       status: %Core.NodeStatus{
         allocatable: %{"cpu" => "2", "memory" => "6Gi"},
@@ -100,6 +112,8 @@ defmodule KubernetesScaffolds do
 
   def cron(name) do
     %Batch.CronJob{
+      api_version: "batch/v1",
+      kind: "CronJob",
       metadata: %{name: name, namespace: name},
       status: %Batch.CronJobStatus{last_schedule_time: "time"},
       spec: %Batch.CronJobSpec{
@@ -112,6 +126,8 @@ defmodule KubernetesScaffolds do
 
   def job(name) do
     %BatchV1.Job{
+      api_version: "batch/v1",
+      kind: "Job",
       metadata: %{name: name, namespace: name},
       status: %BatchV1.JobStatus{active: 1},
       spec: %BatchV1.JobSpec{
@@ -142,6 +158,8 @@ defmodule KubernetesScaffolds do
 
   def certificate(name) do
     %Kube.Certificate{
+      api_version: "cert-manager.io/v1",
+      kind: "Certificate",
       metadata: %ObjectMeta{uid: Ecto.UUID.generate(), name: name, namespace: name},
       status: %Kube.Certificate.Status{
         renewal_time: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -155,6 +173,8 @@ defmodule KubernetesScaffolds do
 
   def node_metrics(name) do
     %Kube.NodeMetric{
+      api_version: "metrics.k8s.io/v1beta1",
+      kind: "NodeMetrics",
       metadata: %ObjectMeta{name: name},
       usage: %Kube.NodeMetric.Usage{cpu: "1", memory: "2M"},
       timestamp: "13242"
@@ -239,6 +259,8 @@ defmodule KubernetesScaffolds do
 
   def namespace_scaffold(name) do
     %Core.Namespace{
+      api_version: "v1",
+      kind: "Namespace",
       metadata: %{name: name},
       spec: %Core.NamespaceSpec{finalizers: ["finalizer"]},
       status: %Core.NamespaceStatus{phase: "Created"}
@@ -247,6 +269,8 @@ defmodule KubernetesScaffolds do
 
   def config_map(name) do
     %Core.ConfigMap{
+      api_version: "v1",
+      kind: "ConfigMap",
       metadata: %{namespace: name, name: name},
       data: %{"some" => "config"}
     }
@@ -254,6 +278,8 @@ defmodule KubernetesScaffolds do
 
   def secret(name) do
     %Core.Secret{
+      api_version: "v1",
+      kind: "Secret",
       metadata: %{namespace: name, name: name},
       data: %{"some" => "secret"},
       type: "Opaque"
@@ -301,6 +327,8 @@ defmodule KubernetesScaffolds do
 
   def plural_cluster(name, id) do
     %Kube.PluralCluster{
+      api_version: "deployments.plural.sh/v1alpha1",
+      kind: "Cluster",
       metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.PluralCluster.Status{id: id}
     }
@@ -308,6 +336,8 @@ defmodule KubernetesScaffolds do
 
   def service_deployment(name, id) do
     %Kube.ServiceDeployment{
+      api_version: "deployments.plural.sh/v1alpha1",
+      kind: "ServiceDeployment",
       metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.ServiceDeployment.Status{id: id}
     }
@@ -315,6 +345,8 @@ defmodule KubernetesScaffolds do
 
   def git_repository(name, id) do
     %Kube.GitRepository{
+      api_version: "deployments.plural.sh/v1alpha1",
+      kind: "GitRepository",
       metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.GitRepository.Status{id: id}
     }

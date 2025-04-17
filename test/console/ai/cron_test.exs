@@ -28,6 +28,18 @@ defmodule Console.AI.CronTest do
     end
   end
 
+  describe "#trim_mcp_logs/0" do
+    test "it will trim mcp logs" do
+      old = insert_list(3, :mcp_server_audit, inserted_at: Timex.now() |> Timex.shift(months: -2))
+      recent = insert_list(3, :mcp_server_audit)
+
+      Cron.trim_mcp_logs()
+
+      for o <- old, do: refute refetch(o)
+      for r <- recent, do: assert refetch(r)
+    end
+  end
+
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
@@ -45,7 +57,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -83,7 +95,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: true}}]}
       end)
@@ -167,7 +179,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -194,7 +206,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.clusters()
 
@@ -231,7 +243,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
       end)
@@ -268,7 +280,7 @@ defmodule Console.AI.CronTest do
       run   = insert(:stack_run, status: :failed, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
       insert(:run_log, step: step, logs: "blah blah blah")
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.stacks()
 
@@ -290,7 +302,7 @@ defmodule Console.AI.CronTest do
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
       )
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
       svc = insert(:service)
       alert = insert(:alert, state: :firing, service: svc)
 
@@ -328,24 +340,27 @@ defmodule Console.AI.CronTest do
       %{id: flow_id} = flow = insert(:flow)
       svc = insert(:service, flow: flow)
 
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)
-      expect(Console.AI.VectorStore, :fetch, fn "some query", filters: [flow_id: ^flow_id] -> {:ok, [
-        %Console.AI.VectorStore.Response{
-          type: :pr,
-          pr_file: %Console.Deployments.Pr.File{
-            url: "https://github.com/pr/url",
-            repo: "some/repo",
-            title: "a pr",
-            sha: "asdfsa",
-            contents: "file contents",
-            filename: "example.js",
-            patch: "some patch"
+      expect(Console.AI.VectorStore, :fetch, fn "some query", [filters: [flow_id: ^flow_id, datatype: {:raw, :pr_file}]] ->
+        {:ok, [
+          %Console.AI.VectorStore.Response{
+            type: :pr,
+            pr_file: %Console.Deployments.Pr.File{
+              url: "https://github.com/pr/url",
+              repo: "some/repo",
+              title: "a pr",
+              sha: "asdfsa",
+              contents: "file contents",
+              filename: "example.js",
+              patch: "some patch"
+            }
           }
-        }
-      ]} end)
+        ]}
+      end)
+      expect(Console.AI.VectorStore, :fetch, fn "some query", _ -> {:ok, []} end)
 
       alert = insert(:alert, state: :firing, service: svc)
 

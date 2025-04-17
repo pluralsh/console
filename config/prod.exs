@@ -67,6 +67,7 @@ config :console, Console.Cron.Scheduler,
     {"0 2 * * *",      {Console.Deployments.Cron, :prune_alerts, []}},
     {"15 2 * * *",     {Console.AI.Cron, :trim, []}},
     {"30 2 * * *",     {Console.AI.Cron, :trim_threads, []}},
+    {"45 2 * * *",     {Console.AI.Cron, :trim_mcp_logs, []}},
     {"45 2 * * *",     {Console.Cost.Cron, :history, []}},
     {"0 3 * * *",      {Console.Cost.Cron, :prune, []}},
     {"0 0 * * 0",      {Console.AI.Cron, :chats, []}}

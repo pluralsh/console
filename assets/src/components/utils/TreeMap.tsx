@@ -1,10 +1,11 @@
 import { ResponsiveTreeMapCanvas, ResponsiveTreeMapHtml } from '@nivo/treemap'
 
 import { ComponentPropsWithoutRef } from 'react'
-import { styled } from 'styled-components'
+import { styled, useTheme } from 'styled-components'
 import { useGraphTheme } from './Graph'
 import { isEmpty } from 'lodash'
 import { EmptyState } from '@pluralsh/design-system'
+import chroma from 'chroma-js'
 
 export type TreeMapData = {
   name: string
@@ -34,11 +35,8 @@ export type TreeMapProps = {
 const commonTreeMapProps = {
   identity: 'name',
   value: 'amount',
-  innerPadding: 4,
-  outerPadding: 8,
   label: (e) => e.id,
   labelSkipSize: 16,
-  borderWidth: 0,
   nodeOpacity: 0.9,
 }
 
@@ -55,6 +53,8 @@ export function TreeMap({
   ...props
 }: TreeMapProps) {
   const graphTheme = useGraphTheme()
+  const { colors } = useTheme()
+  const borderColor = chroma(colors['fill-one']).alpha(0.25).hex()
   if (isEmpty(data.children))
     return loading ? (
       <TreeMapSkeletonSC />
@@ -66,7 +66,10 @@ export function TreeMap({
     !dataSize || dataSize > 35 || type === 'canvas' ? 'canvas' : 'html'
 
   return (
-    <WrapperSC $hasParentLabel={enableParentLabel}>
+    <WrapperSC
+      $hasParentLabel={enableParentLabel}
+      $outlineColor={borderColor}
+    >
       {derivedType === 'canvas' ? (
         <ResponsiveTreeMapCanvas
           data={data}
@@ -77,10 +80,8 @@ export function TreeMap({
             from: 'color',
             modifiers: [['darker', 4]],
           }}
-          borderColor={{
-            from: 'color',
-            modifiers: [['darker', 1.2]],
-          }}
+          borderWidth={1}
+          borderColor={borderColor}
           {...commonTreeMapProps}
           {...(props as TreeMapCanvasProps)}
         />
@@ -97,10 +98,7 @@ export function TreeMap({
             from: 'color',
             modifiers: [['darker', 4]],
           }}
-          borderColor={{
-            from: 'color',
-            modifiers: [['darker', 1.2]],
-          }}
+          borderWidth={0} // borders are handled by the wrapper below
           enableParentLabel={enableParentLabel}
           {...commonTreeMapProps}
           {...(props as TreeMapHtmlProps)}
@@ -113,8 +111,15 @@ export function TreeMap({
 // just used to override nivo styles when rendered in html
 const WrapperSC = styled.div<{
   $hasParentLabel: boolean
-}>(({ $hasParentLabel }) => ({
+  $outlineColor: string
+}>(({ $hasParentLabel, $outlineColor }) => ({
   display: 'contents',
+  // this targets all nodes, using outline instead of border so the border doesn't affect layout
+  // if we used nivo's native border, it'll cause really small values to disappear and look like a gap
+  [`& div[id^="${PARENT_NODE_NAME}"]`]: {
+    outline: `1px solid ${$outlineColor}`,
+  },
+
   // in cases where we want to show parent nodes (like separating clusters by project)
   // nivo doesn't seem to provide a way to hide the overarching wrapper label (or it's respective background)
   // this is a hacky solution to hide it and also maintain the chart's dimensions
@@ -125,6 +130,7 @@ const WrapperSC = styled.div<{
         ? 'scale(1.02, 1.13) translateY(-12px)'
         : 'none',
     },
+    // this targets only the top-level parent node
     [`& div[id="${PARENT_NODE_NAME}"]`]: { display: 'none' },
   },
 }))

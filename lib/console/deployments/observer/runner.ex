@@ -13,7 +13,7 @@ defmodule Console.Deployments.Observer.Runner do
       finish(observer, val)
     else
       {:poll, {:error, err}} -> add_error(observer, "poll", err)
-      {:poll, :ignore} -> {:ok, observer}
+      {:poll, :ignore} -> safe(observer)
       {:act, {:error, err}} -> add_error(observer, "action", err)
       err ->
         Logger.error "unknown observer error: #{inspect(err)}"
@@ -37,6 +37,11 @@ defmodule Console.Deployments.Observer.Runner do
 
   defp finish(%Observer{} = observer, val) do
     Observer.changeset(observer, %{errors: [], last_value: val})
+    |> Repo.update()
+  end
+
+  def safe(%Observer{} = observer) do
+    Observer.changeset(observer, %{errors: []})
     |> Repo.update()
   end
 

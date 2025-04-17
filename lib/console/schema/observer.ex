@@ -4,7 +4,7 @@ defmodule Console.Schema.Observer do
 
   defenum Action,        pipeline: 0, pr: 1
   defenum Status,        healthy: 0, failed: 1
-  defenum TargetType,    oci: 0, helm: 1, git: 2
+  defenum TargetType,    oci: 0, helm: 1, git: 2, eks_addon: 3, addon: 4
   defenum GitTargetType, tags: 0
   defenum TargetOrder,   semver: 0, latest: 1
 
@@ -39,6 +39,18 @@ defmodule Console.Schema.Observer do
         field :chart,     :string
         field :provider,  HelmRepository.Provider
         embeds_one :auth, OCIAuth, on_replace: :update
+      end
+
+      embeds_one :eks_addon, Addon, on_replace: :update do
+        field :name,                :string
+        field :kubernetes_version,  :string
+        field :kubernetes_versions, {:array, :string}
+      end
+
+      embeds_one :addon, EksAddon, on_replace: :update do
+        field :name,                :string
+        field :kubernetes_version,  :string
+        field :kubernetes_versions, {:array, :string}
       end
     end
 
@@ -94,12 +106,20 @@ defmodule Console.Schema.Observer do
     |> validate_required(~w(name target crontab last_run_at next_run_at)a)
   end
 
+  def reset_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(last_value)a)
+    |> validate_required(~w(last_value)a)
+  end
+
   defp target_changeset(model, attrs) do
     model
     |> cast(mv_target(attrs), [:type, :format, :order])
     |> cast_embed(:oci, with: &oci_changeset/2)
     |> cast_embed(:helm, with: &helm_changeset/2)
     |> cast_embed(:git, with: &git_changeset/2)
+    |> cast_embed(:addon, with: &addon_changeset/2)
+    |> cast_embed(:eks_addon, with: &addon_changeset/2)
     |> validate_required([:type, :order])
   end
 
@@ -133,6 +153,12 @@ defmodule Console.Schema.Observer do
     model
     |> cast(attrs, ~w(type repository_id)a)
     |> validate_required(~w(type repository_id)a)
+  end
+
+  defp addon_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name kubernetes_version kubernetes_versions)a)
+    |> validate_required(~w(name)a)
   end
 
   defp config_changeset(model, attrs) do

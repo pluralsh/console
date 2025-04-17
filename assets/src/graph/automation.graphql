@@ -59,8 +59,18 @@ fragment PrConfirmation on PrConfirmation {
   text
 }
 
-query PrAutomations($first: Int = 100, $after: String, $catalogId: ID) {
-  prAutomations(first: $first, after: $after, catalogId: $catalogId) {
+query PrAutomations(
+  $first: Int = 100
+  $after: String
+  $catalogId: ID
+  $role: PrRole
+) {
+  prAutomations(
+    first: $first
+    after: $after
+    catalogId: $catalogId
+    role: $role
+  ) {
     pageInfo {
       ...PageInfo
     }

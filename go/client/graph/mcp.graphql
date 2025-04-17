@@ -1,0 +1,44 @@
+fragment MCPServerFragment on McpServer {
+    id
+    name
+    url
+    authentication {
+        plural
+        headers {
+            name
+            value
+        }
+    }
+    confirm
+}
+
+query GetMCPServers($q: String, $first: Int, $after: String, $before: String, $last: Int) {
+    mcpServers(q: $q, first: $first, after: $after, before: $before, last: $last) {
+        pageInfo {
+            ...PageInfoFragment
+        }
+        edges {
+            node {
+                ...MCPServerFragment
+            }
+        }
+    }
+}
+
+query GetMCPServer($id: ID!) {
+    mcpServer(id: $id) {
+        ...MCPServerFragment
+    }
+}
+
+mutation UpsertMCPServer($attributes: McpServerAttributes!) {
+    upsertMcpServer(attributes: $attributes) {
+        ...MCPServerFragment
+    }
+}
+
+mutation DeleteMCPServer($id: ID!) {
+    deleteMcpServer(id: $id) {
+        id
+    }
+}

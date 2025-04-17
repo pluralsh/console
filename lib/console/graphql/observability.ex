@@ -57,8 +57,21 @@ defmodule Console.GraphQl.Observability do
 
   object :metric_response do
     field :metric, :map
-    field :values, list_of(:metric_result), resolve: fn %{values: vals}, _, _ ->
-      {:ok, Enum.map(vals, fn [ts, val] -> %{timestamp: ts, value: val} end)}
+    field :values, list_of(:metric_result), resolve: fn
+      %{values: [ts, val]}, _, _ when is_float(ts) or is_integer(ts) ->
+        {:ok, [%{timestamp: ts, value: val}]}
+      %{values: vals}, _, _ when is_list(vals) ->
+        {:ok, Enum.map(vals, fn [ts, val] -> %{timestamp: ts, value: val} end)}
+      _, _, _ -> {:ok, []}
+    end
+  end
+
+  object :metric_point_response do
+    field :metric, :map
+    field :value, :metric_result, resolve: fn
+      %{value: [ts, val]}, _, _ when is_float(ts) or is_integer(ts) ->
+        {:ok, %{timestamp: ts, value: val}}
+      _, _, _ -> {:ok, nil}
     end
   end
 

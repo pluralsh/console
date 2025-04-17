@@ -68,6 +68,7 @@
     import_fields :observability_provider_queries
     import_fields :settings_queries
     import_fields :flow_queries
+    import_fields :oauth_queries
   end
 
   object :deployment_mutations do
@@ -101,6 +102,8 @@
       arg :stack_id,    :id
       arg :project_id,  :id
       arg :catalog_id,  :id
+      arg :flow_id,     :id
+      arg :server_id,   :id
 
       safe_resolve &Deployments.rbac/2
     end

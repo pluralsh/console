@@ -302,4 +302,19 @@ defmodule Console.Deployments.CronTest do
       for a <- keep, do: assert refetch(a)
     end
   end
+
+  describe "#add_ignore_crds/0" do
+    test "it will add ignore crds to all matching services" do
+      valid = for i <- 1..3 do
+        insert(:service, name: "search-#{i}", helm: %{ignore_crds: false})
+      end
+
+      ignore = insert(:service, helm: %{ignore_crds: false})
+
+      Cron.add_ignore_crds("search")
+
+      for svc <- valid, do: assert refetch(svc).helm.ignore_crds
+      refute refetch(ignore).helm.ignore_crds
+    end
+  end
 end

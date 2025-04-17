@@ -23,7 +23,7 @@ import {
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { ComponentType, useRef, useState } from 'react'
+import { ComponentType, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Row } from '@tanstack/react-table'
 
@@ -33,13 +33,18 @@ import { deprecationsColumns } from './deprecationsColumns'
 import RuntimeServices, {
   getClusterKubeVersion,
 } from './runtime/RuntimeServices'
-import { clusterUpgradeColumns } from './clusterUpgradeColumns'
+import {
+  clusterPreFlightCols,
+  clusterUpgradeColumns,
+  initialClusterPreFlightItems,
+} from './clusterUpgradeColumns'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from './UpgradeInsights'
 import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
 import CloudAddons from './runtime/CloudAddons.tsx'
+import { produce } from 'immer'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -73,7 +78,13 @@ const statesWithIssues = [
   UpgradeInsightStatus.Failed,
 ]
 
-function FlyoverContent({ open, cluster, refetch }) {
+function FlyoverContent({
+  cluster,
+  refetch,
+}: {
+  cluster: Nullable<ClustersRowFragment>
+  refetch: Nullable<() => void>
+}) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const [addonType, setAddonType] = useState(AddonType.All)
@@ -89,7 +100,6 @@ function FlyoverContent({ open, cluster, refetch }) {
     },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
-    skip: !open,
   })
 
   const runtimeServices = data?.cluster?.runtimeServices
@@ -101,7 +111,17 @@ function FlyoverContent({ open, cluster, refetch }) {
     (i) => i?.status && statesWithIssues.includes(i.status)
   )
 
-  const supportsCloudAddons = cluster.distro === ClusterDistro.Eks
+  const supportsCloudAddons = cluster?.distro === ClusterDistro.Eks
+
+  const preFlightChecklist = useMemo(
+    () =>
+      initialClusterPreFlightItems.map((item) =>
+        produce(item, (d) => {
+          d.value = !!cluster?.upgradePlan?.[d.key]
+        })
+      ),
+    [cluster?.upgradePlan]
+  )
 
   return (
     <div
@@ -128,6 +148,31 @@ function FlyoverContent({ open, cluster, refetch }) {
           meta: { refetch, setError, data },
         }}
       />
+      <Accordion
+        type="single"
+        fillLevel={1}
+      >
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={preFlightChecklist.every((i) => i.value)}
+              icon={ChecklistIcon}
+              title="Pre-flight checklist"
+              subtitle="Ensure your K8s infrastructure is upgrade-ready"
+            />
+          }
+        >
+          <Table
+            flush
+            fillLevel={1}
+            borderTop={theme.borders['fill-two']}
+            rowBg="base"
+            data={preFlightChecklist}
+            columns={clusterPreFlightCols}
+          />
+        </AccordionItem>
+      </Accordion>
       <Accordion
         type="single"
         fillLevel={1}
@@ -284,7 +329,7 @@ function FlyoverContent({ open, cluster, refetch }) {
                   }}
                   css={{ display: 'flex', flexGrow: 1 }}
                 >
-                  {ClusterDistroShortNames[cluster.distro]} add-ons
+                  {ClusterDistroShortNames[cluster?.distro ?? '']} add-ons
                 </Tab>
               </TabList>
             )}
@@ -315,24 +360,6 @@ function FlyoverContent({ open, cluster, refetch }) {
           )}
         </AccordionItem>
       </Accordion>
-      <Accordion
-        type="single"
-        fillLevel={1}
-      >
-        <AccordionItem
-          paddingArea="trigger-only"
-          trigger={
-            <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.incompatibilities || false}
-              icon={ChecklistIcon}
-              title="Check add-on mutual incompatibilities"
-              subtitle="Use suggested version for each add-on to resolve mutual incompatibilities"
-            />
-          }
-        >
-          <EmptyState description="No mutually incompatible add-ons detected!" />
-        </AccordionItem>
-      </Accordion>
     </div>
   )
 }
@@ -345,7 +372,7 @@ export function ClusterUpgradeFlyover({
 }: {
   open: boolean
   onClose: () => void
-  cluster: ClustersRowFragment | null | undefined
+  cluster: Nullable<ClustersRowFragment>
   refetch: Nullable<() => void>
 }) {
   return (
@@ -356,7 +383,6 @@ export function ClusterUpgradeFlyover({
       minWidth={920}
     >
       <FlyoverContent
-        open={open}
         cluster={cluster}
         refetch={refetch}
       />

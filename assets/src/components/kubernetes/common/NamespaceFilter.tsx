@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { ComponentProps, useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
@@ -9,13 +9,14 @@ export function NamespaceFilter({
   namespaces,
   namespace,
   onChange,
+  ...props
 }: {
   namespaces: string[]
-  namespace: string
+  namespace?: string
   onChange: (arg: any) => any
-}) {
+} & Partial<ComponentProps<typeof ComboBox>>) {
   const theme = useTheme()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState<string | undefined>(namespace)
 
   useEffect(() => setValue(namespace), [namespace])
 
@@ -53,6 +54,7 @@ export function NamespaceFilter({
         />
       }
       aria-label="namespace"
+      {...props}
     >
       {filteredNamespaces.map((namespace) => (
         <ListBoxItem

@@ -26,6 +26,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Plural
   import_types Console.GraphQl.AI
   import_types Console.GraphQl.Deployments
+  import_types Console.GraphQl.OIDC
 
   @sources [
     AI,
@@ -67,6 +68,7 @@ defmodule Console.GraphQl do
     import_fields :plural_queries
     import_fields :deployment_queries
     import_fields :ai_queries
+    import_fields :oidc_queries
   end
 
   mutation do
@@ -74,6 +76,7 @@ defmodule Console.GraphQl do
     import_fields :kubernetes_mutations
     import_fields :deployment_mutations
     import_fields :ai_mutations
+    import_fields :oidc_mutations
   end
 
   subscription do

@@ -94,6 +94,12 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-3
       - run: mix deps.get
       - run: mix test
+      - name: Verify Changed files
+        run: |
+          git diff --exit-code -- priv || {
+            echo "::error Agent chart not downloaded, run `mix test` to compile it locally."
+            exit 1
+          }
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -127,13 +133,8 @@ jobs:
       - name: update schema
         run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v17
-        id: verify-changed-files
-        with:
-          files: |
-            schema/schema.graphql
-      - name: Schema changed
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
-          echo "::error Schema has changed changed. Please run 'make update-schema' and commit the changes."
-          exit 1
+          git diff --exit-code -- schema/schema.graphql || {
+            echo "::error Schema has changed changed. Please run 'make update-schema' and commit the changes."
+            exit 1
+          }

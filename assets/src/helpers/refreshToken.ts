@@ -91,5 +91,5 @@ export const onErrorHandler: ErrorHandler = ({
 export function logout() {
   wipeToken()
   wipeRefreshToken()
-  window.location = '/login' as any as Location
+  ;(window as Window).location = '/login'
 }

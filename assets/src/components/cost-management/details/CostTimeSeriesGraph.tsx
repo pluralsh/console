@@ -33,7 +33,7 @@ export function CostTimeSeriesGraph({
           min: 'auto',
           max: 'auto',
         }}
-        curve="natural"
+        curve="basis"
         axisBottom={{
           format: (value) => dayjs(value).format('MMM DD, YYYY'),
           tickSize: 5,
@@ -113,19 +113,24 @@ const getGraphData = (history: ClusterUsageHistoryFragment[]) => {
     data: [],
   }
 
+  const timestamps = new Set()
   history.forEach((point) => {
-    cpuData.data.push({
-      x: point.timestamp,
-      y: point.cpuCost ?? null,
-    })
-    memoryData.data.push({
-      x: point.timestamp,
-      y: point.memoryCost ?? null,
-    })
-    storageData.data.push({
-      x: point.timestamp,
-      y: point.storageCost ? point.storageCost : null,
-    })
+    if (!timestamps.has(point.timestamp)) {
+      cpuData.data.push({
+        x: point.timestamp,
+        y: point.cpuCost ?? null,
+      })
+      memoryData.data.push({
+        x: point.timestamp,
+        y: point.memoryCost ?? null,
+      })
+      storageData.data.push({
+        x: point.timestamp,
+        y: point.storageCost ? point.storageCost : null,
+      })
+
+      timestamps.add(point.timestamp)
+    }
   })
 
   const data = [cpuData, memoryData, storageData]

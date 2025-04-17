@@ -1,7 +1,8 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.Clusters
+  alias Console.Deployments.{Clusters, Settings}
   alias Console.Cost.Pr
+  alias Console.AI.Stream
   alias Console.Schema.{
     User,
     Cluster,
@@ -14,7 +15,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterScalingRecommendation,
     ClusterAuditLog,
     ClusterRegistration,
-    ClusterISOImage
+    ClusterISOImage,
+    DeploymentSettings
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -163,6 +165,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
+  def agent_helm_values_for_cluster(_, _, _) do
+    case Settings.cached() do
+      %DeploymentSettings{agent_helm_values: vals} when is_binary(vals) ->
+        {:ok, vals}
+      _ -> {:ok, nil}
+    end
+  end
+
   def list_cluster_registrations(args, _) do
     ClusterRegistration.ordered()
     |> paginate(args)
@@ -184,6 +194,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       error -> error
     end
   end
+
+  def network_graph(cluster, args, _),
+    do: Console.Mesh.Provider.graph(cluster, Map.to_list(args))
 
   def metrics_summary(cluster, _args, _) do
     case Clusters.cached_cluster_metrics(cluster) do
@@ -299,6 +312,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def scaling_pr(%{id: id}, %{context: %{current_user: user}}),
     do: Pr.create(id, user)
+
+  def scaling_pr_suggestion(%{id: id}, %{context: %{current_user: user}}) do
+    Stream.topic(:cost, id, user)
+    |> Stream.enable()
+
+    Pr.suggestion(id, user)
+  end
 
   def add_cluster_audit(_, %{context: %{current_user: %User{email: "console@plural.sh"}}}), do: {:ok, false}
   def add_cluster_audit(%{audit: audit}, %{context: %{current_user: user}}) do

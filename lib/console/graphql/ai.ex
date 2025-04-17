@@ -46,18 +46,22 @@ defmodule Console.GraphQl.AI do
     field :summarized, :boolean, description: "controls whether this thread is autosummarized, set true when users explicitly set summary"
     field :messages,   list_of(:chat_message), description: "a list of messages to add initially when creating this thread"
     field :insight_id, :id, description: "an ai insight this thread was created from"
+    field :flow_id,    :id, description: "the flow this thread was created in"
   end
 
   object :chat do
-    field :id,         non_null(:id)
-    field :type,       non_null(:chat_type)
-    field :role,       non_null(:ai_role)
-    field :content,    non_null(:string)
-    field :seq,        non_null(:integer)
-    field :attributes, :chat_type_attributes
+    field :id,           non_null(:id)
+    field :type,         non_null(:chat_type)
+    field :role,         non_null(:ai_role)
+    field :content,      :string
+    field :seq,          non_null(:integer)
+    field :confirm,      :boolean, description: "whether this chat requires confirmation"
+    field :confirmed_at, :datetime, description: "when the chat was confirmed"
+    field :attributes,   :chat_type_attributes
 
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
     field :thread,       :chat_thread,  resolve: dataloader(AI)
+    field :server,       :mcp_server,   resolve: dataloader(Deployments)
 
     timestamps()
   end
@@ -65,11 +69,18 @@ defmodule Console.GraphQl.AI do
   @desc "Additional attributes of this chat message, used for formatting it in the display"
   object :chat_type_attributes do
     field :file, :chat_file
+    field :tool, :chat_tool
   end
 
   @desc "Additional attributes for describing a file type chat"
   object :chat_file do
     field :name, :string
+  end
+
+  @desc "Additional attributes for describing a tool call that derived this chat message"
+  object :chat_tool do
+    field :name,      :string
+    field :arguments, :map
   end
 
   @desc "A list of chat messages around a specific topic created on demand"
@@ -80,8 +91,14 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :user,     :user, resolve: dataloader(User)
+    field :flow,     :flow,       resolve: dataloader(Deployments)
+    field :user,     :user,       resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
+
+    @desc "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
+    field :tools, list_of(:mcp_server_tool) do
+      resolve &AI.chat_tools/3
+    end
 
     connection field :chats, node_type: :chat do
       resolve &AI.list_chats/3
@@ -183,6 +200,8 @@ defmodule Console.GraphQl.AI do
   object :ai_delta do
     field :seq,     non_null(:integer)
     field :content, non_null(:string)
+    field :message, :integer
+    field :role,    :ai_role
   end
 
   connection node_type: :chat
@@ -241,6 +260,7 @@ defmodule Console.GraphQl.AI do
 
     connection field :chat_threads, node_type: :chat_thread do
       middleware Authenticated
+      arg :flow_id, :id, description: "only show threads for this flow"
 
       resolve &AI.threads/2
     end
@@ -257,6 +277,12 @@ defmodule Console.GraphQl.AI do
       arg :thread_id,  :id
 
       resolve &AI.resolve_pin/2
+    end
+
+    field :mcp_token, :string do
+      middleware Authenticated
+
+      resolve &AI.mcp_token/2
     end
   end
 
@@ -277,6 +303,31 @@ defmodule Console.GraphQl.AI do
       arg :messages,  list_of(:chat_message)
 
       resolve &AI.chat/2
+    end
+
+    @desc "Chat mutation that can also execute MCP servers in line with the overall completion"
+    field :hybrid_chat, list_of(:chat) do
+      middleware Authenticated
+      arg :thread_id, :id
+      arg :messages,  list_of(:chat_message)
+
+      resolve &AI.hybrid_chat/2
+    end
+
+    @desc "Confirms a chat message and calls its MCP server, if the user has access to the thread"
+    field :confirm_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to confirm"
+
+      resolve &AI.confirm_chat/2
+    end
+
+    @desc "Cancels a chat message, if the user has access to the thread, by just deleting the chat record"
+    field :cancel_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the chat message to cancel"
+
+      resolve &AI.cancel_chat/2
     end
 
     @desc "Creates a pull request given the thread message history"
@@ -362,15 +413,18 @@ defmodule Console.GraphQl.AI do
   object :ai_subscriptions do
     @desc "streams chunks of ai text for a given parent scope"
     field :ai_stream, :ai_delta do
-      arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
-      arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
-      arg :scope_id,   :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :insight_id,        :id, description: "the insight id to use when streaming a fix suggestion"
+      arg :thread_id,         :id, description: "the thread id for streaming a chat suggestion"
+      arg :scope_id,          :string, description: "an arbitrary scope id to use for explain w/ ai"
+      arg :recommendation_id, :id, description: "the id of the scaling recommendation you're streaming a cost PR suggestion for"
 
       config fn
         %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:insight, id, user)}
         %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:thread, id, user)}
+        %{recommendation_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:cost, id, user)}
         %{scope_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:freeform, id, user)}
         _, _ -> {:error, "no id provided for this subscription"}

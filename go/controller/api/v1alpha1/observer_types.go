@@ -69,7 +69,7 @@ type ObserverPipelineAction struct {
 
 type ObserverTarget struct {
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=OCI;HELM;GIT
+	// +kubebuilder:validation:Enum:=OCI;HELM;GIT;ADDON;EKS_ADDON
 	Type console.ObserverTargetType `json:"type"`
 
 	// Format is a regex with a capture group matching a well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)`
@@ -80,12 +80,25 @@ type ObserverTarget struct {
 	// +kubebuilder:validation:Enum:=SEMVER;LATEST
 	Order console.ObserverTargetOrder `json:"order"`
 
+	// Configuration for helm scraping
 	// +kubebuilder:validation:Optional
 	Helm *ObserverHelm `json:"helm,omitempty"`
+
+	// Configuration for OCI repository scraping
 	// +kubebuilder:validation:Optional
 	OCI *ObserverOci `json:"oci,omitempty"`
+
+	// Configuration for Git tags scaping
 	// +kubebuilder:validation:Optional
 	Git *ObserverGit `json:"git,omitempty"`
+
+	// Configuration for Plural AddOn table scraping
+	// +kubebuilder:validation:Optional
+	AddOn *ObserverAddOn `json:"addon,omitempty"`
+
+	// Configuration for EKS AddOn scraping
+	// +kubebuilder:validation:Optional
+	EksAddOn *ObserverAddOn `json:"eksAddon,omitempty"`
 }
 
 type ObserverGit struct {
@@ -133,6 +146,19 @@ type ObserverOci struct {
 	// Auth contains authentication credentials for the Helm repository.
 	// +kubebuilder:validation:Optional
 	Auth *HelmRepositoryAuth `json:"auth,omitempty"`
+}
+
+type ObserverAddOn struct {
+	// The name of the add-on you want to poll
+	Name string `json:"name"`
+
+	// The Kubernetes version you want to ensure this add-on is compatible with
+	// +kubebuilder:validation:Optional
+	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+
+	// The Kubernetes versions you want to ensure this add-on is compatible with, useful if working with a kubernetes version boundary during upgrade
+	// +kubebuilder:validation:Optional
+	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
 }
 
 //+kubebuilder:object:root=true

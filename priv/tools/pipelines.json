@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "boolean",
+            "description": "Whether to filter results by pipelines with a name matching this string"
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

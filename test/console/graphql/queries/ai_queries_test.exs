@@ -68,12 +68,35 @@ defmodule Console.GraphQl.AiQueriesTest do
         }
       """, %{"id" => thread.id}, %{current_user: user})
     end
+
+    test "it can fetch tools for a thread" do
+      user = insert(:user)
+      flow = insert(:flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+
+      {:ok, %{data: %{"chatThread" => %{"tools" => tools}}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            tools {
+              server { name }
+              tool { name }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert Enum.any?(tools, & &1["server"]["name"] == "everything")
+      assert Enum.any?(tools, & &1["tool"]["name"] == "echo")
+    end
   end
 
   describe "aiCompletion" do
     test "it can generate an ai summary for the given input" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      expect(Console.AI.OpenAI, :completion, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       {:ok, %{data: %{"aiCompletion" => summary}}} = run_query("""
         query Summary($input: String!, $system: String!) {
@@ -103,7 +126,7 @@ defmodule Console.GraphQl.AiQueriesTest do
       insight = insert(:ai_insight, service: svc)
 
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      expect(Console.AI.OpenAI, :completion, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       {:ok, %{data: %{"aiSuggestedFix" => result}}} = run_query("""
         query Suggestion($insightId: ID!) {
@@ -269,6 +292,25 @@ defmodule Console.GraphQl.AiQueriesTest do
       """, %{"id" => thread.id}, %{current_user: user})
 
       assert found["id"] == pin.id
+    end
+  end
+
+  describe "mcpToken" do
+    test "it can generate a jwt that is equivalent to those used by mcp auth" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, user: user, group: group)
+
+      {:ok, %{data: %{"mcpToken" => token}}} = run_query("""
+        query { mcpToken }
+      """, %{}, %{current_user: user})
+
+      {:ok, claims} = Console.Jwt.MCP.exchange(token)
+
+      assert claims["sub"] == user.email
+      assert claims["email"] == user.email
+      assert claims["name"] == user.name
+      assert claims["groups"] == [group.name]
     end
   end
 end

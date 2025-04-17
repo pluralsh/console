@@ -1,0 +1,20 @@
+query OIDCConsent($challenge: String!) {
+  oidcConsent(challenge: $challenge) {
+    consent {
+      requestedScope
+      skip
+    }
+  }
+}
+
+mutation Consent($challenge: String!, $scopes: [String]) {
+  oauthConsent(challenge: $challenge, scopes: $scopes) {
+    redirectTo
+  }
+}
+
+mutation AcceptLogin($challenge: String!) {
+  acceptLogin(challenge: $challenge) {
+    redirectTo
+  }
+}

@@ -5,17 +5,17 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import styled from 'styled-components'
+import isNil from 'lodash/isNil'
 import {
   Dispatch,
-  MutableRefObject,
+  RefObject,
   SetStateAction,
   useCallback,
   useDeferredValue,
   useEffect,
   useState,
 } from 'react'
-import isNil from 'lodash/isNil'
+import styled from 'styled-components'
 
 import { ServiceDeploymentStatus } from 'generated/graphql'
 
@@ -69,9 +69,9 @@ export function ServicesFilters({
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
   setQueryString?: (string) => void
-  clusterId?: string
-  setClusterId?: Dispatch<SetStateAction<string>>
-  tabStateRef: MutableRefObject<any>
+  clusterId?: Nullable<string>
+  setClusterId?: (clusterId: string) => void
+  tabStateRef: RefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
 }) {
   const [searchString, setSearchString] = useState('')

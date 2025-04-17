@@ -134,7 +134,7 @@ delete-tag:  ## deletes a tag from git locally and upstream
 	git tag -d $$tag; \
 	git push origin :$$tag
 
-latest-version:
+latest-version: # finds latest release version
 	@python3 utils/versions/main.py
 
 install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir

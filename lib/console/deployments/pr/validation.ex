@@ -34,7 +34,7 @@ defmodule Console.Deployments.Pr.Validation do
   defp do_validate(%Configuration{type: :int}, val) when is_integer(val), do: :ok
   defp do_validate(%Configuration{type: :bool}, val) when is_boolean(val), do: :ok
 
-  defp do_validate(%Configuration{type: :enum, name: n, values: vals}, val) do
+  defp do_validate(%Configuration{type: :enum, name: n, values: vals}, val) when is_list(vals) do
     case val in vals do
       true -> :ok
       false -> {:error, ~s(field "#{n}" with value "#{inspect(val)}" is not a member of {#{Enum.join(vals, ",")}})}

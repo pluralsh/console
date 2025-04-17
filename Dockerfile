@@ -1,6 +1,6 @@
-ARG ELIXIR_VERSION=1.16.3
-ARG OTP_VERSION=26.2.5.5
-ARG ALPINE_VERSION=3.20.3
+ARG ELIXIR_VERSION=1.18.3
+ARG OTP_VERSION=27.3.2
+ARG ALPINE_VERSION=3.21.3
 ARG TOOLS_IMAGE=alpine:${ALPINE_VERSION}
 ARG RUNNER_IMAGE=alpine:${ALPINE_VERSION}
 
@@ -69,7 +69,7 @@ ARG TARGETARCH=amd64
 # ENV TERRAFORM_VERSION=v1.9.8
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.12.2
+ENV CLI_VERSION=v0.12.3
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 # ENV KUBECTL_VERSION=v1.31.3

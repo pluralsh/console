@@ -212,9 +212,7 @@ fragment ClustersRow on Cluster {
   }
   distro
   upgradePlan {
-    compatibilities
-    deprecations
-    incompatibilities
+    ...ClusterUpgradePlan
   }
   virtual
   insight {
@@ -222,41 +220,15 @@ fragment ClustersRow on Cluster {
   }
 }
 
-fragment ClusterMetricsFragment on Cluster {
-  clusterMetrics(start: $start, stop: $stop, step: $step) {
-    cpu {
-      ...MetricResponse
-    }
-    cpuUsage {
-      ...MetricResponse
-    }
-    cpuRequests {
-      ...MetricResponse
-    }
-    cpuLimits {
-      ...MetricResponse
-    }
-
-    memory {
-      ...MetricResponse
-    }
-    memoryUsage {
-      ...MetricResponse
-    }
-    memoryRequests {
-      ...MetricResponse
-    }
-    memoryLimits {
-      ...MetricResponse
-    }
-
-    pods {
-      ...MetricResponse
-    }
-  }
+fragment ClusterUpgradePlan on ClusterUpgradePlan {
+  compatibilities
+  deprecations
+  incompatibilities
+  kubeletSkew
 }
 
-fragment ClusterNodeMetricsFragment on Cluster {
+fragment ClusterNodeMetrics on Cluster {
+  id
   clusterNodeMetrics(node: $node, start: $start, stop: $stop, step: $step) {
     cpu {
       ...MetricResponse
@@ -431,6 +403,39 @@ fragment ClusterWithNodes on Cluster {
   }
 }
 
+fragment ClusterWithMetrics on Cluster {
+  ...ClusterWithNodes
+  clusterMetrics(start: $start, stop: $stop, step: $step) {
+    cpu {
+      ...MetricResponse
+    }
+    cpuUsage {
+      ...MetricResponse
+    }
+    cpuRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
+    memory {
+      ...MetricResponse
+    }
+    memoryUsage {
+      ...MetricResponse
+    }
+    memoryRequests {
+      ...MetricResponse
+    }
+    memoryLimits {
+      ...MetricResponse
+    }
+    pods {
+      ...MetricResponse
+    }
+  }
+}
+
 query ClustersTiny($projectId: ID, $first: Int) {
   clusters(first: $first, projectId: $projectId) {
     edges {
@@ -558,6 +563,7 @@ fragment PolicyBinding on PolicyBinding {
 }
 
 fragment ClusterBindings on Cluster {
+  id
   readBindings {
     ...PolicyBinding
   }
@@ -660,14 +666,6 @@ query TagPairs($first: Int = 30, $q: String, $tag: String, $type: TagType) {
   }
 }
 
-fragment LogStream on LogStream {
-  stream
-  values {
-    timestamp
-    value
-  }
-}
-
 query ClusterMetrics(
   $clusterId: ID!
   $start: DateTime
@@ -675,7 +673,7 @@ query ClusterMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
-    ...ClusterMetricsFragment
+    ...ClusterWithMetrics
   }
 }
 
@@ -687,6 +685,49 @@ query ClusterNodeMetrics(
   $step: String
 ) {
   cluster(id: $clusterId) {
-    ...ClusterNodeMetricsFragment
+    ...ClusterNodeMetrics
+  }
+}
+
+fragment NetworkMeshWorkload on NetworkMeshWorkload {
+  id
+  name
+  namespace
+  service
+}
+
+fragment NetworkMeshStatistics on NetworkMeshStatistics {
+  bytes
+  packets
+  connections
+  http200
+  http400
+  http500
+  httpClientLatency
+}
+
+fragment NetworkMeshEdge on NetworkMeshEdge {
+  id
+  from {
+    ...NetworkMeshWorkload
+  }
+  to {
+    ...NetworkMeshWorkload
+  }
+  statistics {
+    ...NetworkMeshStatistics
+  }
+}
+
+query ClusterNetworkGraph(
+  $clusterId: ID!
+  $namespace: String
+  $time: DateTime
+) {
+  cluster(id: $clusterId) {
+    id
+    networkGraph(namespace: $namespace, time: $time) {
+      ...NetworkMeshEdge
+    }
   }
 }

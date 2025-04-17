@@ -1,0 +1,5 @@
+Ok I've found the following Plural-registered kubernetes clusters linked to the Plural flow <%= @flow.name %>
+
+| name | handle | kubernetes distribution | tags | project |
+| --- | --- | --- | --- | --- |<%= for cluster <- @clusters do %>
+| <%=  cluster.name %> | <%= cluster.handle %> | <%= cluster.distro %> | <%= Enum.map(cluster.tags, & "#{&1.name}=#{&1.value}") |> Enum.join(", ") %> | <%= cluster.project.name %> |<% end %>

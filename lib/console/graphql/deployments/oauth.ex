@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.OAuth do
   @desc "Supported OIDC-compatible Auth Providers"
   enum :oidc_provider_type do
     value :plural
+    value :console
   end
 
   @desc "Supported methods for fetching an OIDC auth token"
@@ -15,10 +16,14 @@ defmodule Console.GraphQl.Deployments.OAuth do
 
   @desc "Configuration settings for creating a new OIDC provider client"
   input_object :oidc_provider_attributes do
-    field :name,          non_null(:string)
-    field :auth_method,   :oidc_auth_method
-    field :description,   :string
-    field :redirect_uris, list_of(:string), description: "the redirect uris oidc is whitelisted to use"
+    field :name,           non_null(:string)
+    field :auth_method,    :oidc_auth_method
+    field :description,    :string
+    field :bindings,       list_of(:policy_binding_attributes),
+      description: "users and groups able to utilize this provider"
+    field :write_bindings, list_of(:policy_binding_attributes),
+      description: "users and groups able to utilize this provider"
+    field :redirect_uris,  list_of(:string), description: "the redirect uris oidc is whitelisted to use"
   end
 
   @desc "A representation of a created OIDC provider client"
@@ -30,6 +35,23 @@ defmodule Console.GraphQl.Deployments.OAuth do
     field :redirect_uris, list_of(:string), description: "the redirect uris oidc is whitelisted to use"
     field :client_id,     non_null(:string), description: "the generated client ID used in configuring OAuth clients"
     field :client_secret, non_null(:string), description: "the generated client secret, used in configuring an OAuth client"
+    field :bindings,      list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "bindings determining if a user can login with this oidc client"
+    field :write_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "bindings determining if a user can edit this oidc client"
+  end
+
+  connection node_type: :oidc_provider
+
+  object :oauth_queries do
+    connection field :oidc_providers, node_type: :oidc_provider do
+      middleware Authenticated
+      arg :q, :string
+
+      resolve &Deployments.list_oidc_providers/2
+    end
   end
 
   object :oauth_mutations do

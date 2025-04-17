@@ -74,17 +74,17 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_namespaces(query, _), do: query
 
   defp add_range(q, %Query{time: %Time{after: aft, before: bef}}) when not is_nil(aft) and not is_nil(bef),
-    do: add_filter(q, %{range: %{"@timestamp": %{gt: aft, lt: bef}}})
+    do: add_filter(q, %{range: %{"@timestamp": %{gte: aft, lte: bef}}})
   defp add_range(q, %Query{time: %Time{after: aft, before: nil, duration: dur}}) when not is_nil(aft),
-    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gt, aft, dur)}})
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gte, aft, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
-    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lt, bef, dur)}})
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lte, bef, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: nil, duration: dur}}),
-    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lt, Timex.now(), dur)}})
+    do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:lte, Timex.now(), dur)}})
   defp add_range(q, %Query{time: %Time{before: bef}}) when not is_nil(bef),
-    do: add_filter(q, %{range: %{"@timestamp": %{lt: bef}}})
+    do: add_filter(q, %{range: %{"@timestamp": %{lte: bef}}})
   defp add_range(q, %Query{time: %Time{after: aft}}) when not is_nil(aft),
-    do: add_filter(q, %{range: %{"@timestamp": %{gt: aft}}})
+    do: add_filter(q, %{range: %{"@timestamp": %{gte: aft}}})
   defp add_range(q,  _), do: q
 
   defp add_facets(q, %Query{facets: [_ | _] = facets}) do

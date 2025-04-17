@@ -1,0 +1,14 @@
+Here are the Plural services within the Plural flow <%= @flow.name %> matching your search criteria:
+
+<%= for service <- @services do %>
+Plural Service Deployment: <%=  service.name %>
+Cluster: <%= service.cluster.handle %>
+Url: <%= Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components") %>
+Status: <%= service.status %>
+
+This service also has the following components:
+
+| url | apiVersion | kind | name | namespace | state |
+| --- | --- | --- | --- | --- | --- | --- |<%= for component <- service.components do %>
+| <%= Console.url("/cd/clusters/#{service.cluster_id}/services/#{service.id}/components/#{component.id}") %> | <%= Kube.Utls.api_version(component.group, component.version) %> | <%= component.kind %> | <%= component.namespace %> | <%= component.name %> | <%= component.state %> |<% end %>
+<% end %>

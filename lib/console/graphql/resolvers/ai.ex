@@ -30,6 +30,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   def threads(args, %{context: %{current_user: user}}) do
     ChatThread.for_user(user.id)
     |> ChatThread.ordered()
+    |> thread_filters(args)
     |> paginate(args)
   end
 
@@ -42,6 +43,9 @@ defmodule Console.GraphQl.Resolvers.AI do
       |> paginate(args)
     end
   end
+
+  def chat_tools(%{id: id}, _, %{context: %{current_user: user}}),
+    do: ChatSvc.tools(id, user)
 
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
@@ -57,6 +61,11 @@ defmodule Console.GraphQl.Resolvers.AI do
   defp maybe_thread(_, user) do
     thread = ChatSvc.default_thread!(user)
     {:ok, Chat.for_thread(thread.id)}
+  end
+
+  def mcp_token(_, %{context: %{current_user: user}}) do
+    with {:ok, token, _} <- Console.Jwt.MCP.mint(user),
+      do: {:ok, token}
   end
 
   def resolve_cluster_insight_component(%{id: id}, %{context: %{current_user: user}}),
@@ -103,6 +112,19 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatSvc.chat(msgs, args[:thread_id], user)
   end
 
+  def hybrid_chat(%{messages: msgs} = args, %{context: %{current_user: user}}) do
+    Stream.topic(:thread, args[:thread_id], user)
+    |> Stream.enable()
+
+    ChatSvc.hybrid_chat(msgs, args[:thread_id], user)
+  end
+
+  def confirm_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.confirm_chat(id, user)
+
+  def cancel_chat(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.cancel_chat(id, user)
+
   def thread_pr(%{thread_id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.pr(id, user)
 
@@ -139,5 +161,13 @@ defmodule Console.GraphQl.Resolvers.AI do
     with {:ok, res} <- Kube.Client.raw(path) do
       {:ok, %{raw: res, kind: k, version: v, group: g, metadata: Kube.Utils.raw_meta(res)}}
     end
+  end
+
+  defp thread_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:flow_id, fid}, q when is_binary(fid) ->
+        ChatThread.for_flow(q, fid)
+      _, q -> q
+    end)
   end
 end

@@ -27,10 +27,7 @@ import { ComponentIcon } from '../../cd/services/service/component/misc.tsx'
 
 type ComponentNode = Node<TreeNodeMeta>
 
-export function ComponentTreeNode({
-  id,
-  data,
-}: NodeProps<ComponentNode> & ComponentProps<typeof NodeBaseCardSC>) {
+export function ComponentTreeNode({ id, data }: NodeProps<ComponentNode>) {
   const theme = useTheme()
   const clusterId = useParams()[CLUSTER_PARAM_ID]
   const [open, setOpen] = useState(false)

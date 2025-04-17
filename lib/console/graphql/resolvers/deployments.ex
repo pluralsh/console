@@ -2,7 +2,16 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
   import Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Clusters, Services, Pipelines, AddOns, Stacks, Settings, Git}
+  alias Console.Deployments.{
+    Clusters,
+    Services,
+    Pipelines,
+    AddOns,
+    Stacks,
+    Settings,
+    Git,
+    Flows
+  }
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -76,7 +85,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackViolationCause,
     Alert,
     AlertResolution,
-    Flow
+    Flow,
+    McpServer,
+    DeprecatedCustomResource
   }
 
   def query(Project, _), do: Project
@@ -151,6 +162,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
   def query(Flow, _), do: Flow
+  def query(McpServer, _), do: McpServer
+  def query(DeprecatedCustomResource, _), do: DeprecatedCustomResource
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -226,4 +239,6 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{stack_id: id}) when is_binary(id), do: {&Stacks.rbac/3, id}
   defp rbac_args(%{catalog_id: id}) when is_binary(id), do: {&Git.catalog_rbac/3, id}
   defp rbac_args(%{project_id: id}) when is_binary(id), do: {&Settings.project_rbac/3, id}
+  defp rbac_args(%{flow_id: id}) when is_binary(id), do: {&Flows.rbac/3, id}
+  defp rbac_args(%{server_id: id}) when is_binary(id), do: {&Flows.server_rbac/3, id}
 end

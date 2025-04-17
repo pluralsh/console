@@ -33,7 +33,9 @@ defmodule Console.Deployments.Policies.Rbac do
     VulnerabilityReport,
     ClusterRegistration,
     ClusterISOImage,
-    Flow
+    Flow,
+    McpServer,
+    OIDCProvider
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -59,6 +61,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(ctx, user, action, & &1.pipeline)
   def evaluate(%PipelineGate{} = gate, %User{} = user, action),
     do: recurse(gate, user, action, & &1.edge.pipeline)
+  def evaluate(%OIDCProvider{} = oidc, %User{} = user, action),
+    do: recurse(oidc, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Project{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
@@ -93,6 +97,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(reg, user, action, & &1.project)
   def evaluate(%Flow{} = flow, user, action),
     do: recurse(flow, user, action, & &1.project)
+  def evaluate(%McpServer{} = mcp, user, action),
+    do: recurse(mcp, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -141,12 +147,14 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(service, [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads])
   def preload(%Cluster{} = cluster),
     do: Repo.preload(cluster, @top_preloads)
-  def preload(%Project{} = cluster),
-    do: Repo.preload(cluster, @bindings)
-  def preload(%RuntimeService{} = cluster),
-    do: Repo.preload(cluster, [cluster: @top_preloads])
-  def preload(%ClusterProvider{} = cluster),
-    do: Repo.preload(cluster, @bindings)
+  def preload(%Project{} = project),
+    do: Repo.preload(project, @bindings)
+  def preload(%OIDCProvider{} = oidc),
+    do: Repo.preload(oidc, [:write_bindings])
+  def preload(%RuntimeService{} = rs),
+    do: Repo.preload(rs, [cluster: @top_preloads])
+  def preload(%ClusterProvider{} = provider),
+    do: Repo.preload(provider, @bindings)
   def preload(%ProviderCredential{} = cred),
     do: Repo.preload(cred, [provider: @bindings])
   def preload(%DeploymentSettings{} = settings),
@@ -159,6 +167,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(obs, [project: @bindings])
   def preload(%Flow{} = flow),
     do: Repo.preload(flow, @top_preloads)
+  def preload(%McpServer{} = mcp),
+    do: Repo.preload(mcp, @top_preloads)
   def preload(%PolicyConstraint{} = pr),
     do: Repo.preload(pr, [cluster: @top_preloads])
   def preload(%PinnedCustomResource{} = pcr),
