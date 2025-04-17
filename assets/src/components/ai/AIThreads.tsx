@@ -67,7 +67,6 @@ export function AIThreads() {
     <Flex
       direction="column"
       gap="medium"
-      paddingBottom="48px"
       height="100%"
       overflow="hidden"
     >
@@ -101,6 +100,7 @@ function PinnedSection({
       direction="column"
       gap="small"
       maxHeight="40%"
+      css={{ overflow: 'hidden' }}
     >
       <StackedText
         first="Pins"
@@ -116,6 +116,7 @@ function PinnedSection({
           }
           message="No pinned threads or insights"
           description="Click on the pin icon of any thread or insight to access it here."
+          cssProps={{ overflow: 'auto' }}
         />
       ) : (
         <AITable
@@ -156,6 +157,7 @@ function ThreadsSection({
           }
           message="No threads or insights"
           description="Insights will be automatically created and appear here when potential fixes are found."
+          cssProps={{ overflow: 'auto' }}
         />
       ) : (
         <AITable
