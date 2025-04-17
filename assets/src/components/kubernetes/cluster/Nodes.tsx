@@ -53,6 +53,15 @@ const colReady = columnHelper.accessor((node) => node?.ready, {
   cell: ({ getValue }) => <ResourceReadyChip ready={getValue()} />,
 })
 
+const colKubelet = columnHelper.accessor(
+  (node) => node?.nodeInfo.kubeletVersion,
+  {
+    id: 'kubelet',
+    header: 'kubelet',
+    cell: ({ getValue }) => getValue(),
+  }
+)
+
 const colCpu = columnHelper.accessor((node) => node?.allocatedResources, {
   id: 'cpu',
   header: 'CPU',
@@ -182,6 +191,7 @@ export default function Nodes() {
     () => [
       colName,
       colReady,
+      colKubelet,
       colCpu,
       colMemory,
       colPods,

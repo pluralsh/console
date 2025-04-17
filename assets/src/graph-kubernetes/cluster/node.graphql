@@ -29,6 +29,9 @@ query Nodes(
         ...NodeAllocatedResources
       }
       ready
+      nodeInfo {
+        kubeletVersion
+      }
     }
   }
 }
