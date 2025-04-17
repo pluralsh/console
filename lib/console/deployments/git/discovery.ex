@@ -78,6 +78,7 @@ defmodule Console.Deployments.Git.Discovery do
       err -> err
     end
   end
+  def find(_), do: {:error, "no git repository located"}
 
   def start(%GitRepository{} = repo) do
     me = node()
