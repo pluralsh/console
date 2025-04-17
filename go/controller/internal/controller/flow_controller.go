@@ -97,13 +97,12 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-
 		serverAssociationAttributes, res, err := r.getServerAssociationAttributes(ctx, flow)
 		if res != nil || err != nil {
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(projectID, serverAssociationAttributes))
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID, serverAssociationAttributes))
 
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
@@ -200,4 +199,3 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 
 	return serverAssociationAttrs, nil, nil
 }
-
