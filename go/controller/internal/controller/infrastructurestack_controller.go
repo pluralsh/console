@@ -114,7 +114,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		return handleRequeue(result, err, stack.SetCondition)
 	}
 
-	projectID, result, err := r.handleProjectRef(ctx, stack)
+	project, result, err := GetProject(ctx, r.Client, r.Scheme, stack)
 	if result != nil || err != nil {
 		return handleRequeue(result, err, stack.SetCondition)
 	}
@@ -132,7 +132,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	attributes := dynamicAttributes{
 		clusterID:         clusterID,
 		repositoryID:      repositoryID,
-		projectID:         projectID,
+		projectID:         project.Status.ID,
 		definitionID:      stackDefinitionID,
 		observableMetrics: metrics,
 	}
@@ -479,30 +479,6 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	return *repository.Status.ID, nil, nil
-}
-
-// handleProjectRef checks if stack has a project reference configured and waits for it to be ready before allowing
-// main reconcile loop to continue. In case project reference is not configured, it will return early and allow the
-// reconcile process to continue.
-func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
-	if !stack.HasProjectRef() {
-		return nil, nil, nil
-	}
-
-	project := &v1alpha1.Project{}
-	if err := r.Get(ctx, client.ObjectKey{Name: stack.ProjectName()}, project); err != nil {
-		return nil, nil, err
-	}
-
-	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
-	}
-
-	if err := controllerutil.SetOwnerReference(project, stack, r.Scheme); err != nil {
-		return nil, nil, fmt.Errorf("could not set stack owner reference, got error: %+v", err)
-	}
-
-	return project.Status.ID, nil, nil
 }
 
 // handleStackDefinitionRef checks if stack has a stack definition reference configured and waits for it

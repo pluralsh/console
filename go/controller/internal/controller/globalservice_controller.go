@@ -108,7 +108,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return handleRequeue(result, err, globalService.SetCondition)
 	}
 
-	project, result, err := r.getProject(ctx, globalService)
+	project, result, err := GetProject(ctx, r.Client, r.Scheme, globalService)
 	if result != nil || err != nil {
 		return handleRequeue(result, err, globalService.SetCondition)
 	}
@@ -220,25 +220,6 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 	}
 
 	return provider, nil, nil
-}
-
-func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Project, *ctrl.Result, error) {
-	project := &v1alpha1.Project{}
-	if globalService.Spec.ProjectRef != nil {
-		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
-			return nil, nil, err
-		}
-
-		if !project.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("project is not ready")
-		}
-
-		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
-			return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-		}
-	}
-
-	return project, nil, nil
 }
 
 func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.GlobalService, svc *v1alpha1.ServiceDeployment, attrs console.GlobalServiceAttributes) error {

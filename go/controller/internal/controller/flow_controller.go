@@ -6,8 +6,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
-
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -94,7 +92,7 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 		return ctrl.Result{}, err
 	}
 	if changed {
-		projectID, res, err := r.getProjectIdAndSetOwnerRef(ctx, flow)
+		project, res, err := GetProject(ctx, r.Client, r.Scheme, flow)
 		if res != nil || err != nil {
 			return handleRequeue(res, err, flow.SetCondition)
 		}
@@ -104,7 +102,8 @@ func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctr
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(projectID, serverAssociationAttributes))
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID, serverAssociationAttributes))
+
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -174,27 +173,6 @@ func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
 	}
 
 	return nil
-}
-
-func (r *FlowReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, flow *v1alpha1.Flow) (*string, *ctrl.Result, error) {
-	if !flow.Spec.HasProjectRef() {
-		return nil, nil, nil
-	}
-
-	project := &v1alpha1.Project{}
-	if err := r.Get(ctx, types.NamespacedName{Name: flow.Spec.ProjectRef.Name}, project); err != nil {
-		return nil, nil, err
-	}
-
-	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
-	}
-
-	if err := controllerutil.SetOwnerReference(project, flow, r.Scheme); err != nil {
-		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
-	}
-
-	return project.Status.ID, nil, nil
 }
 
 func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flow *v1alpha1.Flow) ([]*console.McpServerAssociationAttributes, *ctrl.Result, error) {

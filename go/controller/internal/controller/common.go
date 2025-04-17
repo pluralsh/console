@@ -3,7 +3,11 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -344,4 +348,37 @@ func getGitRepoID(ctx context.Context, c runtimeclient.Client, namespacedName v1
 		return nil, err
 	}
 	return gitRepo.Status.ID, nil
+}
+
+func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Scheme, obj interface{}) (*v1alpha1.Project, *ctrl.Result, error) {
+	project := &v1alpha1.Project{}
+
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, nil, err
+	}
+	var objMeta metav1.Object = &unstructured.Unstructured{Object: unstructuredObj}
+
+	projectRefData, found, _ := unstructured.NestedMap(unstructuredObj, "spec", "projectRef")
+	if !found {
+		return project, nil, nil
+	}
+	projectRef := &corev1.ObjectReference{}
+	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(projectRefData, projectRef); err != nil {
+		return nil, nil, err
+	}
+
+	if err := c.Get(ctx, runtimeclient.ObjectKey{Name: projectRef.Name}, project); err != nil {
+		return nil, nil, err
+	}
+
+	if !project.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("project is not ready")
+	}
+
+	if err := controllerutil.SetOwnerReference(project, objMeta, scheme); err != nil {
+		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
+	}
+
+	return project, nil, nil
 }
