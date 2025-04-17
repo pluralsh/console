@@ -509,7 +509,7 @@ kas:
       # Enable idle client connection timeout (5 minutes)
       timeout 300
       
-# dashboard is used to override some values in kubernetes dashboard default chart (packaged in charts/kubernetes-dashboard-7.11.1.tgz). See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
+# dashboard is used to override some values in kubernetes dashboard default chart (packaged in charts/kubernetes-dashboard-*.tgz). See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
 dashboard:
   # enabled is used in Chart.yaml to determine if dashboard dependency should be installed
   enabled: true
