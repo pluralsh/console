@@ -46,7 +46,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
-} from './ServiceDetails'
+} from '../ServiceDetails'
 
 function DeleteSecret({
   serviceDeploymentId,
@@ -351,7 +351,7 @@ const ColActions = ({
     ),
   })
 
-export default function ServiceSecrets() {
+export function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]

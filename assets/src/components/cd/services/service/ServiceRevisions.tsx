@@ -39,7 +39,7 @@ import {
   useServiceContext,
 } from './ServiceDetails'
 
-export default function ServiceRevisions() {
+export function ServiceRevisions() {
   const theme = useTheme()
   const { serviceId, clusterId } = useParams<{
     [SERVICE_PARAM_ID]: string

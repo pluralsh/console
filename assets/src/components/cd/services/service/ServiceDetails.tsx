@@ -226,12 +226,9 @@ export const getDirectory = ({
       enabled: !!serviceDeployment.insight,
     },
     { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
-    { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
-    { path: 'secrets', label: 'Secrets', enabled: true },
     { path: 'helm', label: 'Helm values', enabled: isAdmin },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
-    { path: 'revisions', label: 'Revisions', enabled: true },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
     // {
     //   path: 'docs',
@@ -249,6 +246,7 @@ export const getDirectory = ({
       ),
       enabled: !isEmpty(serviceDeployment.dependencies),
     },
+    { path: 'settings', label: 'Settings', enabled: true },
   ]
 }
 

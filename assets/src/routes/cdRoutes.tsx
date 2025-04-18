@@ -22,9 +22,9 @@ import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
-import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
-import ServiceSettings from 'components/cd/services/service/ServiceSettings'
+import { ServiceRevisions } from 'components/cd/services/service/ServiceRevisions'
+import { ServiceSecrets } from 'components/cd/services/service/settings/ServiceSecrets.tsx'
+import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings'
 import Services from 'components/cd/services/Services'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -150,6 +150,7 @@ import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
+import { ServiceSettings } from 'components/cd/services/service/settings/ServiceSettings.tsx'
 // import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -577,14 +578,6 @@ const serviceDetailsRoutes = (
       path={SERVICE_PRS_PATH}
     />
     <Route
-      element={<ServiceSecrets />}
-      path="secrets"
-    />
-    <Route
-      element={<ServiceRevisions />}
-      path="revisions"
-    />
-    <Route
       element={<ServiceHelm />}
       path="helm"
     />
@@ -627,7 +620,29 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceSettings />}
       path="settings"
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="helm"
+          />
+        }
+      />
+      <Route
+        element={<ServiceHelmSettings />}
+        path="helm"
+      />
+      <Route
+        element={<ServiceSecrets />}
+        path="secrets"
+      />
+      <Route
+        element={<ServiceRevisions />}
+        path="revisions"
+      />
+    </Route>
     {/* <Route
       element={<ServiceDocs />}
       path="docs"

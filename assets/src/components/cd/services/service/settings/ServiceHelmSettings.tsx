@@ -20,18 +20,18 @@ import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 
 import { useParams } from 'react-router-dom'
 
-import { ChartUpdate } from '../ServiceSettings'
+import { ChartUpdate } from '../../ServiceSettings'
 import {
   ServiceGitFolderField,
   ServiceGitRefField,
-} from '../deployModal/DeployServiceSettingsGit'
+} from '../../deployModal/DeployServiceSettingsGit'
 
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
-} from './ServiceDetails'
+} from '../ServiceDetails'
 
-export default function ServiceSettings() {
+export function ServiceHelmSettings() {
   const theme = useTheme()
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
