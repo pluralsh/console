@@ -353,6 +353,8 @@ type RootQueryType {
 
   clusterVulnerabilityAggregate(grade: VulnReportGrade!): [ClusterVulnAggregate]
 
+  complianceReports(after: String, first: Int, before: String, last: Int): ComplianceReportsConnection
+
   managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
   globalService(id: ID!): GlobalService
@@ -3271,6 +3273,14 @@ type ClusterVulnAggregate {
   count: Int!
 }
 
+type ComplianceReports {
+  id: ID!
+  name: String!
+  sha256: String
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type PolicyConstraintConnection {
   pageInfo: PageInfo!
   edges: [PolicyConstraintEdge]
@@ -3279,6 +3289,11 @@ type PolicyConstraintConnection {
 type VulnerabilityReportConnection {
   pageInfo: PageInfo!
   edges: [VulnerabilityReportEdge]
+}
+
+type ComplianceReportsConnection {
+  pageInfo: PageInfo!
+  edges: [ComplianceReportsEdge]
 }
 
 enum SinkType {
@@ -4268,6 +4283,18 @@ input ComponentAttributes {
   namespace: String!
   name: String!
   content: ComponentContentAttributes
+  children: [ComponentChildAttributes]
+}
+
+input ComponentChildAttributes {
+  uid: String!
+  state: ComponentState
+  parentUid: String
+  name: String!
+  namespace: String
+  group: String
+  version: String!
+  kind: String!
 }
 
 "the content of a component when visualized in dry run state"
@@ -4587,6 +4614,28 @@ type ServiceComponent {
 
   "any api deprecations discovered from this component"
   apiDeprecations: [ApiDeprecation]
+
+  "any kubernetes objects created as a descendent of this component"
+  children: [ServiceComponentChild]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"a kubernetes object that was created as a descendent of this service component"
+type ServiceComponentChild {
+  id: ID!
+  uid: String!
+  state: ComponentState
+  parentUid: String
+  name: String!
+  namespace: String
+  group: String
+  version: String!
+  kind: String!
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 "dry run content of a service component"
@@ -4752,6 +4801,7 @@ enum ServiceMesh {
   LINKERD
   ISTIO
   CILIUM
+  EBPF
 }
 
 enum Conjunction {
@@ -9092,6 +9142,11 @@ type NotificationRouterEdge {
 
 type NotificationSinkEdge {
   node: NotificationSink
+  cursor: String
+}
+
+type ComplianceReportsEdge {
+  node: ComplianceReports
   cursor: String
 }
 

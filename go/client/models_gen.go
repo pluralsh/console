@@ -1569,6 +1569,24 @@ type CommandAttributes struct {
 	Dir  *string   `json:"dir,omitempty"`
 }
 
+type ComplianceReports struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Sha256     *string `json:"sha256,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type ComplianceReportsConnection struct {
+	PageInfo PageInfo                 `json:"pageInfo"`
+	Edges    []*ComplianceReportsEdge `json:"edges,omitempty"`
+}
+
+type ComplianceReportsEdge struct {
+	Node   *ComplianceReports `json:"node,omitempty"`
+	Cursor *string            `json:"cursor,omitempty"`
+}
+
 type ComponentAttributes struct {
 	State     *ComponentState             `json:"state,omitempty"`
 	Synced    bool                        `json:"synced"`
@@ -1578,6 +1596,18 @@ type ComponentAttributes struct {
 	Namespace string                      `json:"namespace"`
 	Name      string                      `json:"name"`
 	Content   *ComponentContentAttributes `json:"content,omitempty"`
+	Children  []*ComponentChildAttributes `json:"children,omitempty"`
+}
+
+type ComponentChildAttributes struct {
+	UID       string          `json:"uid"`
+	State     *ComponentState `json:"state,omitempty"`
+	ParentUID *string         `json:"parentUid,omitempty"`
+	Name      string          `json:"name"`
+	Namespace *string         `json:"namespace,omitempty"`
+	Group     *string         `json:"group,omitempty"`
+	Version   string          `json:"version"`
+	Kind      string          `json:"kind"`
 }
 
 // dry run content of a service component
@@ -5156,6 +5186,25 @@ type ServiceComponent struct {
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// any api deprecations discovered from this component
 	APIDeprecations []*APIDeprecation `json:"apiDeprecations,omitempty"`
+	// any kubernetes objects created as a descendent of this component
+	Children   []*ServiceComponentChild `json:"children,omitempty"`
+	InsertedAt *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
+}
+
+// a kubernetes object that was created as a descendent of this service component
+type ServiceComponentChild struct {
+	ID         string          `json:"id"`
+	UID        string          `json:"uid"`
+	State      *ComponentState `json:"state,omitempty"`
+	ParentUID  *string         `json:"parentUid,omitempty"`
+	Name       string          `json:"name"`
+	Namespace  *string         `json:"namespace,omitempty"`
+	Group      *string         `json:"group,omitempty"`
+	Version    string          `json:"version"`
+	Kind       string          `json:"kind"`
+	InsertedAt *string         `json:"insertedAt,omitempty"`
+	UpdatedAt  *string         `json:"updatedAt,omitempty"`
 }
 
 type ServiceComponentMetrics struct {
@@ -8622,17 +8671,19 @@ const (
 	ServiceMeshLinkerd ServiceMesh = "LINKERD"
 	ServiceMeshIstio   ServiceMesh = "ISTIO"
 	ServiceMeshCilium  ServiceMesh = "CILIUM"
+	ServiceMeshEbpf    ServiceMesh = "EBPF"
 )
 
 var AllServiceMesh = []ServiceMesh{
 	ServiceMeshLinkerd,
 	ServiceMeshIstio,
 	ServiceMeshCilium,
+	ServiceMeshEbpf,
 }
 
 func (e ServiceMesh) IsValid() bool {
 	switch e {
-	case ServiceMeshLinkerd, ServiceMeshIstio, ServiceMeshCilium:
+	case ServiceMeshLinkerd, ServiceMeshIstio, ServiceMeshCilium, ServiceMeshEbpf:
 		return true
 	}
 	return false

@@ -286,8 +286,17 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :count,   non_null(:integer)
   end
 
+  object :compliance_reports do
+    field :id,   non_null(:id)
+    field :name, non_null(:string)
+    field :sha256, :string
+
+    timestamps()
+  end
+
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report
+  connection node_type: :compliance_reports
 
   object :policy_queries do
     connection field :policy_constraints, node_type: :policy_constraint do
@@ -361,6 +370,12 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :grade, non_null(:vuln_report_grade)
 
       resolve &Deployments.cluster_vuln_aggregate/2
+    end
+
+    connection field :compliance_reports, node_type: :compliance_reports do
+      middleware Authenticated
+
+      resolve &Deployments.list_compliance_reports/2
     end
   end
 

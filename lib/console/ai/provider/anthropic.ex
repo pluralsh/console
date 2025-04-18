@@ -23,7 +23,7 @@ defmodule Console.AI.Anthropic do
   defmodule Content do
     @type t :: %__MODULE__{}
 
-    defstruct [:text, :type, :name, :input]
+    defstruct [:text, :type, :name, :input, :id]
 
     def spec(), do: %__MODULE__{}
   end
@@ -72,6 +72,8 @@ defmodule Console.AI.Anthropic do
     end
   end
 
+  def context_window(_), do: 128_000 * 4
+
   def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
 
   def tools?(), do: true
@@ -111,7 +113,12 @@ defmodule Console.AI.Anthropic do
   defp split([{:system, msg} | rest]), do: {msg, fmt_msgs(rest)}
   defp split(hist), do: {nil, fmt_msgs(hist)}
 
-  defp fmt_msgs(msgs), do: Enum.map(msgs, fn {role, msg} -> %{role: anth_role(role), content: msg} end)
+  defp fmt_msgs(msgs) do
+    Enum.map(msgs, fn
+      {:tool, msg, id} -> %{role: :user, content: msg, tool_use_id: id}
+      {role, msg} -> %{role: anth_role(role), content: msg}
+    end)
+  end
 
   defp format_content(content) do
     Enum.map(content, fn
@@ -140,8 +147,8 @@ defmodule Console.AI.Anthropic do
 
   defp gen_tools(calls) do
     Enum.map(calls, fn
-      %Content{type: "tool_use", name: n, input: args} ->
-        %Console.AI.Tool{name: n, arguments: args}
+      %Content{type: "tool_use", id: id, name: n, input: args} ->
+        %Console.AI.Tool{id: id, name: n, arguments: args}
       _ -> nil
     end)
     |> Enum.filter(& &1)

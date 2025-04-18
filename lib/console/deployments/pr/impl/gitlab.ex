@@ -164,6 +164,10 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp get_file_contents_from_commit(conn, group, repo, file_path, sha) do
     encoded_project_id = URI.encode_www_form("#{group}/#{repo}")
     encoded_file_path = URI.encode_www_form(file_path)
-    get(conn, "/projects/#{encoded_project_id}/repository/files/#{encoded_file_path}?ref=#{sha}")
+    case get(conn, "/projects/#{encoded_project_id}/repository/files/#{encoded_file_path}?ref=#{sha}") do
+      {:ok, %{"content" => content}} ->
+        content
+      _err -> nil
+    end
   end
 end

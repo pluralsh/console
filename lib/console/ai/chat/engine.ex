@@ -67,7 +67,6 @@ defmodule Console.AI.Chat.Engine do
   def completion(_, %ChatThread{id: thread_id}, %User{} = user, completion, @recursive_limit) do
     completion
     |> Enum.map(&Chat.attributes/1)
-    |> IO.inspect()
     |> ChatSvc.save_messages(thread_id, user)
   end
 
@@ -111,13 +110,13 @@ defmodule Console.AI.Chat.Engine do
   defp call_plrl_tools(tools, impls) do
     by_name = Map.new(impls, & {&1.name(), &1})
     stream = Stream.stream(:user)
-    Enum.reduce_while(tools, [], fn %Tool{name: name, arguments: args}, acc ->
+    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
         Stream.publish(stream, content, 1)
         Stream.offset(1)
-        {:cont, [tool_msg(content, nil, name, args) | acc]}
+        {:cont, [tool_msg(content, id, nil, name, args) | acc]}
       else
         err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
       end
@@ -129,16 +128,16 @@ defmodule Console.AI.Chat.Engine do
   defp call_mcp_tools(tools, %ChatThread{} = thread, %User{} = user) do
     servers_by_name = Map.new(ChatSvc.servers(thread), & {&1.name, &1})
     stream = Stream.stream(:user)
-    Enum.reduce_while(tools, [], fn %Tool{name: name, arguments: args} = tool, acc ->
+    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args} = tool, acc ->
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
         Stream.publish(stream, content, 1)
         Stream.offset(1)
-        {:cont, [tool_msg(content, server, tname, args) | acc]}
+        {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
         {tname, %McpServer{confirm: true} = server} ->
-          msg = tool_msg(nil, server, tname, args)
+          msg = tool_msg(nil, id, server, tname, args)
                 |> Map.put(:confirm, true)
           {:cont, [msg | acc]}
         {:error, err} -> {:halt, {:error, err}}
@@ -166,8 +165,8 @@ defmodule Console.AI.Chat.Engine do
     |> execute(extract: :tool)
   end
 
-  @spec tool_msg(binary, McpServer.t | nil, binary, map) :: map
-  defp tool_msg(content, server, name, args) do
+  @spec tool_msg(binary, binary | nil, McpServer.t | nil, binary, map) :: map
+  defp tool_msg(content, call_id, server, name, args) do
     %{
       role: :user,
       content: content,
@@ -175,6 +174,7 @@ defmodule Console.AI.Chat.Engine do
       type: :tool,
       attributes: %{
         tool: %{
+          call_id: call_id,
           name: name,
           arguments: args
         }

@@ -29,8 +29,6 @@ defmodule Console.AI.Chat do
   @type chat_resp :: {:ok, Chat.t} | Console.error
   @type chats_resp :: {:ok, [Chat.t]} | Console.error
 
-  @context_window 128_000 * 4
-
   @rollup """
   The following is a chat history concerning a set of kubernetes or devops questions, usually encompassing topics like terraform,
   helm, GitOps, and other technologies and best practices.  Please summarize it in at most two paragraphs as an expert platform engineer
@@ -496,14 +494,14 @@ defmodule Console.AI.Chat do
 
   defp fit_context_window(msgs, preface \\ @chat) do
     Enum.reduce(msgs, byte_size(preface), &byte_size(&1.content) + &2)
-    |> trim_messages(msgs)
+    |> trim_messages(msgs, Provider.context_window())
   end
 
-  defp trim_messages(total, msgs) when total < @context_window, do: msgs
-  defp trim_messages(_, [%Chat{}] = msgs), do: msgs
-  defp trim_messages(_, [] = msgs), do: msgs
-  defp trim_messages(total, [%Chat{content: content} | rest]),
-    do: trim_messages(total - byte_size(content), rest)
+  defp trim_messages(total, msgs, window) when total < window, do: msgs
+  defp trim_messages(_, [%Chat{}] = msgs, _), do: msgs
+  defp trim_messages(_, [] = msgs, _), do: msgs
+  defp trim_messages(total, [%Chat{content: content} | rest], window),
+    do: trim_messages(total - byte_size(content), rest, window)
 
   defp msg(text), do: %{role: :assistant, content: text}
 end

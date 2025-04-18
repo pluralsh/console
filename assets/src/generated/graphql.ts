@@ -1952,7 +1952,29 @@ export type CommandAttributes = {
   dir?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ComplianceReports = {
+  __typename?: 'ComplianceReports';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  sha256?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ComplianceReportsConnection = {
+  __typename?: 'ComplianceReportsConnection';
+  edges?: Maybe<Array<Maybe<ComplianceReportsEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ComplianceReportsEdge = {
+  __typename?: 'ComplianceReportsEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ComplianceReports>;
+};
+
 export type ComponentAttributes = {
+  children?: InputMaybe<Array<InputMaybe<ComponentChildAttributes>>>;
   content?: InputMaybe<ComponentContentAttributes>;
   group: Scalars['String']['input'];
   kind: Scalars['String']['input'];
@@ -1960,6 +1982,17 @@ export type ComponentAttributes = {
   namespace: Scalars['String']['input'];
   state?: InputMaybe<ComponentState>;
   synced: Scalars['Boolean']['input'];
+  version: Scalars['String']['input'];
+};
+
+export type ComponentChildAttributes = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  parentUid?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<ComponentState>;
+  uid: Scalars['String']['input'];
   version: Scalars['String']['input'];
 };
 
@@ -7221,6 +7254,7 @@ export type RootQueryType = {
   clusterVulnerabilityAggregate?: Maybe<Array<Maybe<ClusterVulnAggregate>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
+  complianceReports?: Maybe<ComplianceReportsConnection>;
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
   componentTree?: Maybe<ComponentTree>;
   configMap?: Maybe<ConfigMap>;
@@ -7625,6 +7659,14 @@ export type RootQueryTypeClustersArgs = {
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
   upgradeable?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type RootQueryTypeComplianceReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8694,12 +8736,15 @@ export type ServiceComponent = {
   __typename?: 'ServiceComponent';
   /** any api deprecations discovered from this component */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** any kubernetes objects created as a descendent of this component */
+  children?: Maybe<Array<Maybe<ServiceComponentChild>>>;
   /** the live and desired states of this service component */
   content?: Maybe<ComponentContent>;
   /** api group of this resource */
   group?: Maybe<Scalars['String']['output']>;
   /** internal id */
   id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this component */
   insight?: Maybe<AiInsight>;
   /** api kind of this resource */
@@ -8714,8 +8759,25 @@ export type ServiceComponent = {
   state?: Maybe<ComponentState>;
   /** whether this component has been applied to the k8s api */
   synced: Scalars['Boolean']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** api version of this resource */
   version?: Maybe<Scalars['String']['output']>;
+};
+
+/** a kubernetes object that was created as a descendent of this service component */
+export type ServiceComponentChild = {
+  __typename?: 'ServiceComponentChild';
+  group?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace?: Maybe<Scalars['String']['output']>;
+  parentUid?: Maybe<Scalars['String']['output']>;
+  state?: Maybe<ComponentState>;
+  uid: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
 };
 
 export type ServiceComponentMetrics = {
@@ -8976,6 +9038,7 @@ export type ServiceImportAttributes = {
 
 export enum ServiceMesh {
   Cilium = 'CILIUM',
+  Ebpf = 'EBPF',
   Istio = 'ISTIO',
   Linkerd = 'LINKERD'
 }

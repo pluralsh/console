@@ -16,3 +16,5 @@
 - [ ] If required, I have updated the Plural documentation accordingly.
 - [ ] I have added tests to cover my changes.
 - [ ] I have added a meaningful title and summary to convey the impact of this PR to a user.
+
+Plural Flow: console

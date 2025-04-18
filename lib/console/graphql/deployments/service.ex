@@ -112,6 +112,18 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,  non_null(:string)
     field :name,       non_null(:string)
     field :content,    :component_content_attributes
+    field :children,   list_of(:component_child_attributes)
+  end
+
+  input_object :component_child_attributes do
+    field :uid,        non_null(:string)
+    field :state,      :component_state
+    field :parent_uid, :string
+    field :name,       non_null(:string)
+    field :namespace,  :string
+    field :group,      :string
+    field :version,    non_null(:string)
+    field :kind,       non_null(:string)
   end
 
   @desc "the content of a component when visualized in dry run state"
@@ -323,10 +335,28 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,  :string, description: "kubernetes namespace of this resource"
     field :name,       non_null(:string), description: "kubernetes name of this resource"
 
-    field :insight, :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this component"
-    field :content, :component_content, resolve: dataloader(Deployments), description: "the live and desired states of this service component"
-    field :service, :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
+    field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this component"
+    field :content,          :component_content, resolve: dataloader(Deployments), description: "the live and desired states of this service component"
+    field :service,          :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "any api deprecations discovered from this component"
+    field :children,         list_of(:service_component_child), resolve: dataloader(Deployments), description: "any kubernetes objects created as a descendent of this component"
+
+    timestamps()
+  end
+
+  @desc "a kubernetes object that was created as a descendent of this service component"
+  object :service_component_child do
+    field :id,         non_null(:id)
+    field :uid,        non_null(:string)
+    field :state,      :component_state
+    field :parent_uid, :string
+    field :name,       non_null(:string)
+    field :namespace,  :string
+    field :group,      :string
+    field :version,    non_null(:string)
+    field :kind,       non_null(:string)
+
+    timestamps()
   end
 
   @desc "dry run content of a service component"
