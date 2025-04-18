@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   CLUSTER_ABS_PATH,
-  SERVICE_SETTINGS_HELM_REL_PATH,
+  SERVICE_SETTINGS_REPO_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
 } from 'routes/cdRoutesConsts'
@@ -14,7 +14,7 @@ import {
 } from '../ServiceDetails'
 
 const DIRECTORY: SubtabDirectory = [
-  { path: SERVICE_SETTINGS_HELM_REL_PATH, label: 'Helm settings' },
+  { path: SERVICE_SETTINGS_REPO_REL_PATH, label: 'Repository' },
   { path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' },
   { path: SERVICE_SETTINGS_REVISIONS_REL_PATH, label: 'Revisions' },
 ]
