@@ -102,7 +102,7 @@ export function ServiceMetrics() {
           <Card
             header={{
               content: `memory utilization by ${heatMapFlavor}`,
-              outerProps: { style: { overflow: 'visible' } },
+              outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
             }}
             css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
           >
@@ -116,7 +116,7 @@ export function ServiceMetrics() {
           <Card
             header={{
               content: `cpu utilization by ${heatMapFlavor}`,
-              outerProps: { style: { overflow: 'visible' } },
+              outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
             }}
             css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
           >
