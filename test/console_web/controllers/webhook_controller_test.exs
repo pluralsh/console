@@ -167,6 +167,18 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [] = Console.Repo.all(Console.Schema.Alert)
     end
 
+    test "it will ignore if no associated plural resource is found (datadog)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :datadog)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/datadog/#{hook.external_id}", String.trim(Console.conf(:datadog_webhook_firing_payload)))
+      |> response(200)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
     test "it can handle payloads with text in body (grafana)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :grafana)
       svc = insert(:service)
@@ -217,6 +229,30 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [alert] = Console.Repo.all(Console.Schema.Alert)
 
       assert alert.service_id == svc.id
+      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+    end
+
+    test "it can handle payloads with text in body (datadog)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :datadog)
+      proj = insert(:project, name: "test-project")
+      cluster = insert(:cluster, handle: "test-cluster")
+      svc = insert(:service, name: "test-service", cluster: cluster)
+
+      webhook = String.trim(Console.conf(:datadog_webhook_firing_payload)) |> Jason.decode!()
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/datadog/#{hook.external_id}", Jason.encode!(webhook))
+      |> response(200)
+
+      [alert] = Console.Repo.all(Console.Schema.Alert)
+                |> Enum.map(&Console.Repo.preload(&1, :tags))
+
+      assert alert.service_id == svc.id
+      assert alert.cluster_id == cluster.id
+      assert alert.project_id == proj.id
+
       assert_receive {:event, %Console.PubSub.AlertCreated{}}
     end
   end
