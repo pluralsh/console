@@ -1,50 +1,21 @@
-import {
-  Breadcrumb,
-  Card,
-  EmptyState,
-  Flex,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Card, EmptyState, Flex, Table } from '@pluralsh/design-system'
+import { CaptionText } from 'components/cluster/TableElements'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 import {
   ServiceDeploymentRevisionFragment,
   useServiceDeploymentRevisionsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
-
-import {
-  CD_REL_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
-} from 'routes/cdRoutesConsts'
-import { mapExistingNodes } from 'utils/graphql'
-
-import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
-
 import { useTheme } from 'styled-components'
-
 import { formatDateTime } from 'utils/datetime'
-
-import { CaptionText } from 'components/cluster/TableElements'
-
+import { mapExistingNodes } from 'utils/graphql'
 import { columns } from '../ServiceRevisionColumns'
-
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
+import { useServiceContext } from './ServiceDetails'
 
 export function ServiceRevisions() {
   const theme = useTheme()
-  const { serviceId, clusterId } = useParams<{
-    [SERVICE_PARAM_ID]: string
-    [SERVICE_PARAM_CLUSTER_ID]: string
-  }>()
   const { service } = useServiceContext()
 
   const { data, error, refetch } = useServiceDeploymentRevisionsQuery({
@@ -53,28 +24,8 @@ export function ServiceRevisions() {
   })
   const revisions = mapExistingNodes(data?.serviceDeployment?.revisions)
 
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({
-        cluster: service?.cluster || { id: clusterId || '' },
-        service: service || { id: serviceId || '' },
-      }),
-      {
-        label: 'revisions',
-        url: `${CD_REL_PATH}/services/${serviceId}/revisions`,
-      },
-    ],
-    [clusterId, service, serviceId]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
-
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data?.serviceDeployment?.revisions) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data?.serviceDeployment?.revisions) return <LoadingIndicator />
 
   const currentRevision = data.serviceDeployment.revision
 

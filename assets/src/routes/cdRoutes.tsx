@@ -142,6 +142,9 @@ import {
   SERVICE_POD_REL_PATH,
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
+  SERVICE_SETTINGS_HELM_REL_PATH,
+  SERVICE_SETTINGS_SECRETS_REL_PATH,
+  SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
@@ -626,21 +629,21 @@ const serviceDetailsRoutes = (
         element={
           <Navigate
             replace
-            to="helm"
+            to={SERVICE_SETTINGS_HELM_REL_PATH}
           />
         }
       />
       <Route
         element={<ServiceHelmSettings />}
-        path="helm"
+        path={SERVICE_SETTINGS_HELM_REL_PATH}
       />
       <Route
         element={<ServiceSecrets />}
-        path="secrets"
+        path={SERVICE_SETTINGS_SECRETS_REL_PATH}
       />
       <Route
         element={<ServiceRevisions />}
-        path="revisions"
+        path={SERVICE_SETTINGS_REVISIONS_REL_PATH}
       />
     </Route>
     {/* <Route
