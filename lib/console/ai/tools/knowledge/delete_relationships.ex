@@ -2,14 +2,12 @@ defmodule Console.AI.Tools.Knowledge.DeleteRelationships do
   use Ecto.Schema
   import Ecto.Changeset
   import Console.AI.Tools.Utils
-  alias Console.AI.Tool
   alias Console.AI.Chat.Knowledge
-  alias Console.Schema.{Flow}
 
   embedded_schema do
     embeds_many :relationships, Relationship do
       field :from, :string
-      field :to, :string
+      field :to,   :string
       field :type, :string
     end
   end
@@ -36,12 +34,10 @@ defmodule Console.AI.Tools.Knowledge.DeleteRelationships do
   def description(), do: "Deletes relationships between entities in the knowledge graph"
 
   def implement(%__MODULE__{relationships: relationships}) do
-    case Tool.flow() do
-      %Flow{} = flow ->
-        Knowledge.delete_relationships(flow, relationships)
-        |> when_ok(& "Deleted #{&1} relationships")
-        |> error()
-      _ -> {:error, "no flow found"}
-    end
+    for_parent(fn parent ->
+      Knowledge.delete_relationships(parent, relationships)
+      |> when_ok(& "Deleted #{&1} relationships")
+      |> error()
+    end)
   end
 end

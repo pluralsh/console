@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "required": {
+            "type": "boolean",
+            "description": "Whether a seasoned kubernetes expert would think that searching an external knowledge base is needed to diagnose the given issue"
+        },
+        "query": {
+            "type": "string",
+            "description": "The query to search the knowledge base with"
+        }
+    },
+    "required": ["required", "query"],
+    "additionalProperties": false
+}

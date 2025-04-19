@@ -47,6 +47,12 @@ defmodule Console.GraphQl.AI do
     field :messages,   list_of(:chat_message), description: "a list of messages to add initially when creating this thread"
     field :insight_id, :id, description: "an ai insight this thread was created from"
     field :flow_id,    :id, description: "the flow this thread was created in"
+    field :settings,   :chat_thread_settings_attributes, description: "the settings for this thread"
+  end
+
+  @desc "the settings for an AI chat thread"
+  input_object :chat_thread_settings_attributes do
+    field :memory, :boolean, description: "controls whether this thread uses knowledge graph-basedmemory"
   end
 
   object :chat do
@@ -88,6 +94,7 @@ defmodule Console.GraphQl.AI do
     field :id,       non_null(:id)
     field :summary,  non_null(:string)
     field :default,  non_null(:boolean)
+    field :settings, :chat_thread_settings
 
     field :last_message_at, :datetime
 
@@ -105,6 +112,11 @@ defmodule Console.GraphQl.AI do
     end
 
     timestamps()
+  end
+
+  @desc "the settings for an AI chat thread"
+  object :chat_thread_settings do
+    field :memory, :boolean, description: "controls whether this thread uses knowledge graph-basedmemory"
   end
 
   @desc "A saved item for future ai-based investigation"
@@ -377,6 +389,13 @@ defmodule Console.GraphQl.AI do
       arg :id, non_null(:id)
 
       resolve &AI.delete_thread/2
+    end
+
+    field :clone_thread, :chat_thread do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.clone_thread/2
     end
 
     @desc "deletes a chat from a users history"

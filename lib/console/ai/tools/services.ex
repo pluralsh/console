@@ -3,7 +3,6 @@ defmodule Console.AI.Tools.Services do
   import Ecto.Changeset
   import Console.AI.Tools.Utils
   alias Console.Repo
-  alias Console.AI.Tool
   alias Console.Schema.{Flow, Service, Cluster}
 
   embedded_schema do
@@ -29,16 +28,14 @@ defmodule Console.AI.Tools.Services do
   end
 
   def implement(%__MODULE__{} = query) do
-    case Tool.flow() do
-      %Flow{id: flow_id} ->
-        Service.for_flow(flow_id)
-        |> Repo.all()
-        |> Repo.preload([:cluster, :components])
-        |> maybe_search(query)
-        |> model()
-        |> Jason.encode()
-      _ -> {:error, "no flow found"}
-    end
+    for_flow(fn %Flow{id: flow_id} ->
+      Service.for_flow(flow_id)
+      |> Repo.all()
+      |> Repo.preload([:cluster, :components])
+      |> maybe_search(query)
+      |> model()
+      |> Jason.encode()
+    end)
   end
 
   defp maybe_search(services, %__MODULE__{query: q, cluster: c}) do

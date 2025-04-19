@@ -215,6 +215,27 @@ defmodule Console.AI.Chat do
   end
 
   @doc """
+  Copies all the messages from `thread_id` into a new thread, if the user has access
+  """
+  @spec clone_thread(binary, User.t) :: thread_resp
+  def clone_thread(thread_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
+    |> add_operation(:clone, fn %{thread: thread} ->
+      %ChatThread{user_id: user.id}
+      |> ChatThread.changeset(Map.merge(Console.mapify(thread), %{summary: "Clone of #{thread.summary}"}))
+      |> Repo.insert()
+    end)
+    |> add_operation(:chats, fn %{thread: thread} ->
+      Chat.for_thread(thread_id)
+      |> Repo.all()
+      |> Enum.map(&Console.mapify/1)
+      |> save_messages(thread.id, user)
+    end)
+    |> execute(extract: :clone)
+  end
+
+  @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
   @spec chat([map], binary | nil, User.t) :: chat_resp
@@ -275,8 +296,8 @@ defmodule Console.AI.Chat do
   def hybrid_chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
     thread = get_thread!(thread_id)
-             |> Repo.preload(user: :groups, flow: :servers)
-    Console.AI.Tool.context(%{user: user, flow: thread.flow})
+             |> Repo.preload(user: :groups, flow: :servers, insight: [:cluster, :service, :stack])
+    Console.AI.Tool.context(%{user: user, flow: thread.flow, insight: thread.insight})
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)

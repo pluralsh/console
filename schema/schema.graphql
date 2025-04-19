@@ -962,6 +962,8 @@ type RootMutationType {
 
   deleteThread(id: ID!): ChatThread
 
+  cloneThread(id: ID!): ChatThread
+
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
 
@@ -7404,6 +7406,15 @@ input ChatThreadAttributes {
 
   "the flow this thread was created in"
   flowId: ID
+
+  "the settings for this thread"
+  settings: ChatThreadSettingsAttributes
+}
+
+"the settings for an AI chat thread"
+input ChatThreadSettingsAttributes {
+  "controls whether this thread uses knowledge graph-basedmemory"
+  memory: Boolean
 }
 
 type Chat {
@@ -7461,6 +7472,8 @@ type ChatThread {
 
   default: Boolean!
 
+  settings: ChatThreadSettings
+
   lastMessageAt: DateTime
 
   flow: Flow
@@ -7477,6 +7490,12 @@ type ChatThread {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"the settings for an AI chat thread"
+type ChatThreadSettings {
+  "controls whether this thread uses knowledge graph-basedmemory"
+  memory: Boolean
 }
 
 "A saved item for future ai-based investigation"

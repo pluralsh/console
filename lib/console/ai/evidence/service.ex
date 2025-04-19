@@ -34,7 +34,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
 
   def insight(%Service{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, insight: :evidence])
+  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, :flow, insight: :evidence])
 
   defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster} = c} = svc) do
     [

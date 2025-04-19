@@ -38,5 +38,9 @@ defmodule Console.Repo.Migrations.AddKnowledgeGraph do
     create index(:knowledge_relationships, [:from_id])
     create index(:knowledge_relationships, [:to_id])
     create unique_index(:knowledge_relationships, [:from_id, :to_id, :type])
+
+    alter table(:chat_threads) do
+      add :settings, :map
+    end
   end
 end

@@ -2,9 +2,8 @@ defmodule Console.AI.Tools.Knowledge.Graph do
   use Ecto.Schema
   import Ecto.Changeset
   import Console.AI.Tools.Utils
-  alias Console.AI.Tool
   alias Console.AI.Chat.Knowledge
-  alias Console.Schema.{Flow, KnowledgeEntity}
+  alias Console.Schema.KnowledgeEntity
 
   embedded_schema do
     field :query, :string
@@ -15,7 +14,6 @@ defmodule Console.AI.Tools.Knowledge.Graph do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(~w(query)a)
   end
 
   @json_schema Console.priv_file!("tools/knowledge/graph.json") |> Jason.decode!()
@@ -25,14 +23,12 @@ defmodule Console.AI.Tools.Knowledge.Graph do
   def description(), do: "Searches the knowledge graph, try to use the query parameter where possible since the graph can be large, but leave empty if you want to fetch it entirely"
 
   def implement(%__MODULE__{query: query}) do
-    case Tool.flow() do
-      %Flow{} = flow ->
-        KnowledgeEntity.for_parent(flow)
-        |> maybe_search(query)
-        |> Knowledge.compile()
-        |> format_graph()
-      _ -> {:error, "no flow found"}
-    end
+    for_parent(fn parent ->
+      KnowledgeEntity.for_parent(parent)
+      |> maybe_search(query)
+      |> Knowledge.compile()
+      |> format_graph()
+    end)
   end
 
   defp maybe_search(query, q) when is_binary(q) and byte_size(q) > 0, do: KnowledgeEntity.search(query, q)

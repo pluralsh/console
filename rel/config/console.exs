@@ -3,7 +3,7 @@ import System, only: [get_env: 1, get_env: 2]
 import Console, only: [is_set: 1]
 
 config :ra,
-  data_dir: '/data/ra'
+  data_dir: ~c"/data/ra"
 
 config :piazza_core,
   repos: [Console.Repo]

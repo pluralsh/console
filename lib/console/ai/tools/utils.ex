@@ -1,8 +1,27 @@
 defmodule Console.AI.Tools.Utils do
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
   alias Console.GraphQl.Helpers
-  alias Console.Schema.{Service}
+  alias Console.Schema.{Service, Flow}
   alias Console.Repo
+
+  def for_flow(fun) when is_function(fun, 1) do
+    case Console.AI.Tool.flow() do
+      %Flow{} = flow -> fun.(flow)
+      _ -> {:error, "no flow found"}
+    end
+  end
+
+  def for_parent(fun) when is_function(fun, 1) do
+    case Console.AI.Tool.parent() do
+      %{} = parent -> fun.(parent)
+      _ -> {:error, "no valid parent resource found for this chat"}
+    end
+  end
+
+  def jsonify!(v) do
+    Console.mapify(v)
+    |> Jason.encode!()
+  end
 
   def jsonify(v) do
     Console.mapify(v)

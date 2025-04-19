@@ -18,6 +18,12 @@ defmodule Console.TestHelpers do
 
   def update_service(attrs, %Service{id: id}, user), do: Services.update_service(attrs, id, user)
 
+  def unordered_equal?(found, expected) do
+    found    = MapSet.new(found)
+    expected = MapSet.new(expected)
+    MapSet.equal?(found, expected)
+  end
+
   def ids_equal(found, expected) do
     found = MapSet.new(ids(found))
     expected = MapSet.new(ids(expected))

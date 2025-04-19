@@ -77,7 +77,7 @@ end
 config :elixir, :ansi_enabled, true
 
 config :ra,
-  data_dir: '/data/ra'
+  data_dir: ~c"/data/ra"
 
 config :piazza_core,
   repos: [Console.Repo]

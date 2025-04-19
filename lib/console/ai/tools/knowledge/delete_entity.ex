@@ -2,9 +2,7 @@ defmodule Console.AI.Tools.Knowledge.DeleteEntity do
   use Ecto.Schema
   import Ecto.Changeset
   import Console.AI.Tools.Utils
-  alias Console.AI.Tool
   alias Console.AI.Chat.Knowledge
-  alias Console.Schema.{Flow}
 
   embedded_schema do
     field :name, :string
@@ -25,12 +23,10 @@ defmodule Console.AI.Tools.Knowledge.DeleteEntity do
   def description(), do: "Deletes an entity from the knowledge graph"
 
   def implement(%__MODULE__{name: name}) do
-    case Tool.flow() do
-      %Flow{} = flow ->
-        Knowledge.delete_entity(flow, name)
-        |> when_ok(& "Successfully deleted entity #{&1.name}")
-        |> error()
-      _ -> {:error, "no flow found"}
-    end
+    for_parent(fn parent ->
+      Knowledge.delete_entity(parent, name)
+      |> when_ok(& "Successfully deleted entity #{&1.name}")
+      |> error()
+    end)
   end
 end
