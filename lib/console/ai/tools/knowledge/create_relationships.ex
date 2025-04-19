@@ -32,8 +32,8 @@ defmodule Console.AI.Tools.Knowledge.CreateRelationships do
   @json_schema Console.priv_file!("tools/knowledge/create_relationships.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: plrl_tool("create_relationships")
-  def description(), do: "Creates relationships between entities in the knowledge graph.  Relationships should be an active voice predicate"
+  def name(), do: plrl_tool("add_relationships")
+  def description(), do: "Creates relationships between existing entities in the knowledge graph.  Relationships should be an active voice predicate and reference known entities in the graph"
 
   def implement(%__MODULE__{relationships: relationships}) do
     case Tool.flow() do

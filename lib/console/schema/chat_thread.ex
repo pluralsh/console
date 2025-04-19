@@ -13,12 +13,19 @@ defmodule Console.Schema.ChatThread do
 
     field :last_message_at, :utc_datetime_usec
 
+    embeds_one :settings, Settings, on_replace: :update do
+      field :memory, :boolean, default: true
+    end
+
     belongs_to :user, User
     belongs_to :insight, AiInsight
     belongs_to :flow, Flow
 
     timestamps()
   end
+
+  def settings(%__MODULE__{settings: %{memory: m}}, :memory) when is_boolean(m), do: m
+  def settings(_, :memory), do: true
 
   def with_expired_chats(query \\ __MODULE__) do
     from(t in query,
@@ -78,10 +85,17 @@ defmodule Console.Schema.ChatThread do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:settings, with: &settings_changeset/2)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:insight_id)
     |> foreign_key_constraint(:flow_id)
     |> unique_constraint(:user_id, name: :chat_threads_user_id_uniq_index)
     |> validate_required([:user_id])
+  end
+
+  defp settings_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:memory])
+    |> validate_required([:memory])
   end
 end

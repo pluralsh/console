@@ -4,6 +4,11 @@ defmodule Console.AI.Tools.Utils do
   alias Console.Schema.{Service}
   alias Console.Repo
 
+  def jsonify!(v) do
+    Console.mapify(v)
+    |> Jason.encode!()
+  end
+
   def jsonify(v) do
     Console.mapify(v)
     |> Jason.encode()

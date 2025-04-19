@@ -12,6 +12,20 @@
         "description": {
             "type": "string",
             "description": "a description for this entity in the knowledge graph"
+        },
+        "observations": {
+            "type": "array",
+            "description": "A list of observations to record with this entity",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "observation": {
+                        "type": "string",
+                        "description": "The contents of the observation to record"
+                    }
+                },
+                "required": ["observation"]
+            }
         }
     },
     "required": ["name", "type"],

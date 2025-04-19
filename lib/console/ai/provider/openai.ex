@@ -91,7 +91,7 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
-    case chat(openai, msg_history(model(openai), messages), opts) do
+    case chat(%{openai | stream: nil}, msg_history(model(openai), messages), opts) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, content, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->

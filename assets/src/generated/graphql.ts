@@ -936,6 +936,7 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  settings?: Maybe<ChatThreadSettings>;
   summary: Scalars['String']['output'];
   /** the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists */
   tools?: Maybe<Array<Maybe<McpServerTool>>>;
@@ -960,6 +961,8 @@ export type ChatThreadAttributes = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  /** the settings for this thread */
+  settings?: InputMaybe<ChatThreadSettingsAttributes>;
   /** controls whether this thread is autosummarized, set true when users explicitly set summary */
   summarized?: InputMaybe<Scalars['Boolean']['input']>;
   summary: Scalars['String']['input'];
@@ -975,6 +978,19 @@ export type ChatThreadEdge = {
   __typename?: 'ChatThreadEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ChatThread>;
+};
+
+/** the settings for an AI chat thread */
+export type ChatThreadSettings = {
+  __typename?: 'ChatThreadSettings';
+  /** controls whether this thread uses knowledge graph-basedmemory */
+  memory?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** the settings for an AI chat thread */
+export type ChatThreadSettingsAttributes = {
+  /** controls whether this thread uses knowledge graph-basedmemory */
+  memory?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Additional attributes for describing a tool call that derived this chat message */
@@ -5969,6 +5985,7 @@ export type RootMutationType = {
   clearChatHistory?: Maybe<Scalars['Int']['output']>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
+  cloneThread?: Maybe<ChatThread>;
   completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
   /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
@@ -6243,6 +6260,11 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCloneThreadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

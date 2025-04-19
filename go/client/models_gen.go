@@ -750,13 +750,14 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string     `json:"id"`
-	Summary       string     `json:"summary"`
-	Default       bool       `json:"default"`
-	LastMessageAt *string    `json:"lastMessageAt,omitempty"`
-	Flow          *Flow      `json:"flow,omitempty"`
-	User          *User      `json:"user,omitempty"`
-	Insight       *AiInsight `json:"insight,omitempty"`
+	ID            string              `json:"id"`
+	Summary       string              `json:"summary"`
+	Default       bool                `json:"default"`
+	Settings      *ChatThreadSettings `json:"settings,omitempty"`
+	LastMessageAt *string             `json:"lastMessageAt,omitempty"`
+	Flow          *Flow               `json:"flow,omitempty"`
+	User          *User               `json:"user,omitempty"`
+	Insight       *AiInsight          `json:"insight,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -775,6 +776,8 @@ type ChatThreadAttributes struct {
 	InsightID *string `json:"insightId,omitempty"`
 	// the flow this thread was created in
 	FlowID *string `json:"flowId,omitempty"`
+	// the settings for this thread
+	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -785,6 +788,18 @@ type ChatThreadConnection struct {
 type ChatThreadEdge struct {
 	Node   *ChatThread `json:"node,omitempty"`
 	Cursor *string     `json:"cursor,omitempty"`
+}
+
+// the settings for an AI chat thread
+type ChatThreadSettings struct {
+	// controls whether this thread uses knowledge graph-basedmemory
+	Memory *bool `json:"memory,omitempty"`
+}
+
+// the settings for an AI chat thread
+type ChatThreadSettingsAttributes struct {
+	// controls whether this thread uses knowledge graph-basedmemory
+	Memory *bool `json:"memory,omitempty"`
 }
 
 // Additional attributes for describing a tool call that derived this chat message

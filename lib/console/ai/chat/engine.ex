@@ -43,7 +43,10 @@ defmodule Console.AI.Chat.Engine do
     Pods,
     Component,
     Prs,
-    Pipelines,
+    Pipelines
+  ]
+
+  @memory_tools [
     CreateEntity,
     CreateObservations,
     CreateRelationships,
@@ -106,7 +109,7 @@ defmodule Console.AI.Chat.Engine do
         |> ChatSvc.save_messages(thread_id, user)
       {:ok, content, tools} ->
         {plural, mcp} = Enum.split_with(tools, &String.starts_with?(&1.name, "__plrl__"))
-        with {:ok, plrl_res} <- call_plrl_tools(plural, @plrl_tools),
+        with {:ok, plrl_res} <- call_plrl_tools(plural, internal_tools(thread)),
              {:ok, mcp_res} <- call_mcp_tools(mcp, thread, user) do
           completion = completion ++ tool_msgs(content, mcp_res ++ plrl_res)
           Enum.any?(completion, fn
@@ -137,11 +140,12 @@ defmodule Console.AI.Chat.Engine do
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
-           {:ok, content} <- impl.implement(parsed) do
+           {:ok, content} <- impl.implement(parsed) |> IO.inspect(label: "calling plrl tool #{name}") do
         Stream.publish(stream, content, 1)
         Stream.offset(1)
         {:cont, [tool_msg(content, id, nil, name, args) | acc]}
       else
+        :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found"}}
         err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
       end
     end)
@@ -211,9 +215,16 @@ defmodule Console.AI.Chat.Engine do
 
   defp include_tools(opts, thread) do
     case {thread, ChatSvc.find_tools(thread)} do
-      {_, {:ok, [_ | _] = tools}} -> [{:tools, tools}, {:plural, @plrl_tools} | opts]
-      {%ChatThread{flow: %Flow{}}, _} -> [{:plural, @plrl_tools} | opts]
+      {_, {:ok, [_ | _] = tools}} -> [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
+      {%ChatThread{flow: %Flow{}}, _} -> [{:plural, internal_tools(thread)} | opts]
       _ -> opts
+    end
+  end
+
+  defp internal_tools(%ChatThread{} = t) do
+    case ChatThread.settings(t, :memory) do
+      true -> @plrl_tools ++ @memory_tools
+      false -> @plrl_tools
     end
   end
 end
