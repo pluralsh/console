@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "a name for this entity in the knowledge graph"
+        },
+        "type": {
+            "type": "string",
+            "description": "a type for this entity in the knowledge graph"
+        },
+        "description": {
+            "type": "string",
+            "description": "a description for this entity in the knowledge graph"
+        }
+    },
+    "required": ["name", "type"],
+    "additionalProperties": false
+}

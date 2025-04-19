@@ -1,7 +1,24 @@
 defmodule Console.AI.Tools.Utils do
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
+  alias Console.GraphQl.Helpers
   alias Console.Schema.{Service}
   alias Console.Repo
+
+  def jsonify(v) do
+    Console.mapify(v)
+    |> Jason.encode()
+  end
+
+  def when_ok({:ok, v}, fun) when is_function(fun, 1), do: {:ok, fun.(v)}
+  def when_ok(v, _), do: v
+
+  def error({:error, %Ecto.Changeset{} = changeset}) do
+    errors = Helpers.resolve_changeset(changeset)
+    {:ok, "Encountered errors:\n #{Enum.join(errors, "\n")}"}
+  end
+  def error({:error, error}) when is_binary(error), do: {:ok, "Encountered error: #{error}"}
+  def error({:error, error}), do: {:ok, "internal error: #{inspect(error)}"}
+  def error(v), do: v
 
   def k8s_encode(model) do
     data = k8s_map(model)

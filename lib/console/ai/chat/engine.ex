@@ -11,6 +11,15 @@ defmodule Console.AI.Chat.Engine do
     Prs,
     Pipelines
   }
+  alias Console.AI.Tools.Knowledge.{
+    CreateEntity,
+    CreateObservations,
+    CreateRelationships,
+    DeleteEntity,
+    DeleteObservations,
+    DeleteRelationships,
+    Graph
+  }
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
@@ -27,7 +36,22 @@ defmodule Console.AI.Chat.Engine do
   Please provide a response suitable for a junior engineer with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @plrl_tools [Clusters, SvcTool, Logs, Pods, Component, Prs, Pipelines]
+  @plrl_tools [
+    Clusters,
+    SvcTool,
+    Logs,
+    Pods,
+    Component,
+    Prs,
+    Pipelines,
+    CreateEntity,
+    CreateObservations,
+    CreateRelationships,
+    DeleteEntity,
+    DeleteObservations,
+    DeleteRelationships,
+    Graph
+  ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(

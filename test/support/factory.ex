@@ -914,6 +914,29 @@ defmodule Console.Factory do
     }
   end
 
+  def knowledge_entity_factory do
+    %Schema.KnowledgeEntity{
+      name: sequence(:knowledge_entity, & "knowledge-entity-#{&1}"),
+      type: "entity type",
+      description: "entity description"
+    }
+  end
+
+  def knowledge_observation_factory do
+    %Schema.KnowledgeObservation{
+      entity: build(:knowledge_entity),
+      observation: "some observation",
+    }
+  end
+
+  def knowledge_relationship_factory do
+    %Schema.KnowledgeRelationship{
+      from: build(:knowledge_entity),
+      to: build(:knowledge_entity),
+      type: "relationship type"
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
