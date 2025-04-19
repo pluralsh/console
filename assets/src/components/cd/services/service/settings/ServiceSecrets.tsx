@@ -1,5 +1,6 @@
 import {
   Button,
+  Card,
   EmptyState,
   EyeClosedIcon,
   EyeIcon,
@@ -27,13 +28,13 @@ import { SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
 
 import ModalAlt from 'components/cd/ModalAlt'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import CopyButton from 'components/utils/CopyButton'
 import { DeleteIconButton } from 'components/utils/IconButtons'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
@@ -364,10 +365,7 @@ export function ServiceSecrets() {
   if (!data?.serviceDeployment?.configuration) return <LoadingIndicator />
 
   return (
-    <ScrollablePage
-      heading="Secrets"
-      scrollable={false}
-    >
+    <WrapperCardSC>
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
           open={createOpen}
@@ -376,50 +374,51 @@ export function ServiceSecrets() {
           onClose={() => setCreateOpen(false)}
         />
       </ModalMountTransition>
+      <Overline>secrets</Overline>
       <div
         css={{
           display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-          height: '100%',
+          gap: theme.spacing.medium,
+          flexShrink: 0,
         }}
       >
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.medium,
-            flexShrink: 0,
+        <Input
+          placeholder="Search"
+          startIcon={<SearchIcon />}
+          value={filterString}
+          onChange={(e) => {
+            setFilterString(e.currentTarget.value)
           }}
+          css={{ flexShrink: 0, flexGrow: 1 }}
+        />
+        <Button
+          primary
+          onClick={() => setCreateOpen(true)}
         >
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => {
-              setFilterString(e.currentTarget.value)
-            }}
-            css={{ flexShrink: 0, flexGrow: 1 }}
-          />
-          <Button
-            primary
-            onClick={() => setCreateOpen(true)}
-          >
-            Add secret
-          </Button>
-        </div>
-        {isEmpty(data?.serviceDeployment?.configuration) ? (
-          <EmptyState message="No secrets" />
-        ) : (
-          <Table
-            fullHeightWrap
-            data={data.serviceDeployment?.configuration || []}
-            columns={secretsColumns}
-            reactTableOptions={{
-              state: { globalFilter: debouncedFilterString },
-            }}
-          />
-        )}
+          Add secret
+        </Button>
       </div>
-    </ScrollablePage>
+      {!isEmpty(data?.serviceDeployment?.configuration) ? (
+        <EmptyState message="No secrets" />
+      ) : (
+        <Table
+          fullHeightWrap
+          fillLevel={1}
+          data={data.serviceDeployment?.configuration || []}
+          columns={secretsColumns}
+          reactTableOptions={{
+            state: { globalFilter: debouncedFilterString },
+          }}
+        />
+      )}
+    </WrapperCardSC>
   )
 }
+
+const WrapperCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  overflow: 'hidden',
+}))

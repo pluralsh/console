@@ -93,10 +93,13 @@ export function ServiceRepoSettings() {
         helmChart: helm?.chart,
         helmVersion: helm?.version,
         helmValues: helm?.values,
-        helmValuesFiles: helm?.valuesFiles?.filter(isNonNullable) ?? [''],
+        helmValuesFiles: !isEmpty(filteredValuesFiles)
+          ? filteredValuesFiles
+          : [''],
       })
     },
   })
+
   const hasGitRepo = !!service.repository
   const hasHelmRepo = !!service.helm?.chart
 

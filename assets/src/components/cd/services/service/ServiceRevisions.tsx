@@ -1,14 +1,14 @@
 import { Card, EmptyState, Flex, Table } from '@pluralsh/design-system'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 import { CaptionText } from 'components/cluster/TableElements'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 import {
   ServiceDeploymentRevisionFragment,
   useServiceDeploymentRevisionsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from '../ServiceRevisionColumns'
@@ -30,13 +30,8 @@ export function ServiceRevisions() {
   const currentRevision = data.serviceDeployment.revision
 
   return (
-    <Flex
-      flexDirection="column"
-      overflow="hidden"
-      gap="small"
-      marginBottom={theme.spacing.large}
-    >
-      <ConsolePageTitle heading="Revisions" />
+    <WrapperCardSC>
+      <Overline>revisions</Overline>
       {currentRevision && <CurrentRevision revision={currentRevision} />}
       <h3 css={theme.partials.text.subtitle2}>All revisions</h3>
       {isEmpty(revisions) ? (
@@ -44,6 +39,7 @@ export function ServiceRevisions() {
       ) : (
         <Table
           fullHeightWrap
+          fillLevel={1}
           data={revisions}
           columns={columns}
           reactTableOptions={{
@@ -54,9 +50,17 @@ export function ServiceRevisions() {
           }}
         />
       )}
-    </Flex>
+    </WrapperCardSC>
   )
 }
+const WrapperCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  overflow: 'hidden',
+  marginBottom: theme.spacing.large,
+}))
 
 function CurrentRevision({
   revision,

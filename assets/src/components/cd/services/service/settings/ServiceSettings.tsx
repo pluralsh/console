@@ -56,6 +56,8 @@ export function ServiceSettings() {
     <Flex
       direction="column"
       gap="large"
+      height="100%"
+      width="100%"
     >
       <SubTabs directory={DIRECTORY} />
       <Outlet context={ctx} />
