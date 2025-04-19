@@ -168,17 +168,11 @@ export function ClusterMetrics() {
             )}
           </Card>
         ) : (
-          <Flex
-            gap="large"
-            overflowX="auto"
-            flex={1}
-          >
+          <Flex gap="large">
             <Card
               header={{
                 content: `memory utilization by ${heatMapFlavor}`,
-                outerProps: {
-                  style: { paddingBottom: spacing.large, overflow: 'visible' },
-                },
+                outerProps: { style: { paddingBottom: spacing.large } },
               }}
               css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
             >
@@ -192,9 +186,7 @@ export function ClusterMetrics() {
             <Card
               header={{
                 content: `cpu utilization by ${heatMapFlavor}`,
-                outerProps: {
-                  style: { paddingBottom: spacing.large, overflow: 'visible' },
-                },
+                outerProps: { style: { paddingBottom: spacing.large } },
               }}
               css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
             >

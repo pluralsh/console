@@ -1,6 +1,6 @@
 import {
-  Breadcrumb,
   Button,
+  Card,
   EmptyState,
   EyeClosedIcon,
   EyeIcon,
@@ -10,14 +10,13 @@ import {
   Input,
   SearchIcon,
   Table,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
+import { createColumnHelper } from '@tanstack/react-table'
+import isEmpty from 'lodash/isEmpty'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
 import styled, { useTheme } from 'styled-components'
-import { createColumnHelper } from '@tanstack/react-table'
-import { useDebounce } from '@react-hooks-library/core'
 
 import {
   ConfigAttributes,
@@ -25,28 +24,19 @@ import {
   useServiceDeploymentSecretsQuery,
 } from 'generated/graphql'
 
-import {
-  CD_REL_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
-} from 'routes/cdRoutesConsts'
+import { SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
 
-import { GqlError } from 'components/utils/Alert'
-import { DeleteIconButton } from 'components/utils/IconButtons'
-import { Confirm } from 'components/utils/Confirm'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import ModalAlt from 'components/cd/ModalAlt'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { useUpdateState } from 'components/hooks/useUpdateState'
-import CopyButton from 'components/utils/CopyButton'
-import { ObscuredToken } from 'components/profile/ObscuredToken'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
+import { Overline } from 'components/cd/utils/PermissionsModal'
+import { useUpdateState } from 'components/hooks/useUpdateState'
+import { ObscuredToken } from 'components/profile/ObscuredToken'
+import { GqlError } from 'components/utils/Alert'
+import { Confirm } from 'components/utils/Confirm'
+import CopyButton from 'components/utils/CopyButton'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 function DeleteSecret({
   serviceDeploymentId,
@@ -351,31 +341,15 @@ const ColActions = ({
     ),
   })
 
-export default function ServiceSecrets() {
+export function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
-  const outletContext = useServiceContext()
 
   const [createOpen, setCreateOpen] = useState(false)
   const { data, error, refetch } = useServiceDeploymentSecretsQuery({
     variables: { id: serviceId || '' },
   })
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({
-        cluster: outletContext.service?.cluster || { id: clusterId || '' },
-        service: outletContext.service || { id: serviceId || '' },
-      }),
-      {
-        label: 'secrets',
-        url: `${CD_REL_PATH}/services/${serviceId}/secrets`,
-      },
-    ],
-    [clusterId, outletContext.service, serviceId]
-  )
 
-  useSetBreadcrumbs(breadcrumbs)
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
   const secretsColumns = useMemo(
@@ -387,18 +361,11 @@ export default function ServiceSecrets() {
     [refetch, serviceId]
   )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data?.serviceDeployment?.configuration) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data?.serviceDeployment?.configuration) return <LoadingIndicator />
 
   return (
-    <ScrollablePage
-      heading="Secrets"
-      scrollable={false}
-    >
+    <WrapperCardSC>
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
           open={createOpen}
@@ -407,50 +374,51 @@ export default function ServiceSecrets() {
           onClose={() => setCreateOpen(false)}
         />
       </ModalMountTransition>
+      <Overline>secrets</Overline>
       <div
         css={{
           display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-          height: '100%',
+          gap: theme.spacing.medium,
+          flexShrink: 0,
         }}
       >
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.medium,
-            flexShrink: 0,
+        <Input
+          placeholder="Search"
+          startIcon={<SearchIcon />}
+          value={filterString}
+          onChange={(e) => {
+            setFilterString(e.currentTarget.value)
           }}
+          css={{ flexShrink: 0, flexGrow: 1 }}
+        />
+        <Button
+          primary
+          onClick={() => setCreateOpen(true)}
         >
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => {
-              setFilterString(e.currentTarget.value)
-            }}
-            css={{ flexShrink: 0, flexGrow: 1 }}
-          />
-          <Button
-            primary
-            onClick={() => setCreateOpen(true)}
-          >
-            Add secret
-          </Button>
-        </div>
-        {isEmpty(data?.serviceDeployment?.configuration) ? (
-          <EmptyState message="No secrets" />
-        ) : (
-          <Table
-            fullHeightWrap
-            data={data.serviceDeployment?.configuration || []}
-            columns={secretsColumns}
-            reactTableOptions={{
-              state: { globalFilter: debouncedFilterString },
-            }}
-          />
-        )}
+          Add secret
+        </Button>
       </div>
-    </ScrollablePage>
+      {!isEmpty(data?.serviceDeployment?.configuration) ? (
+        <EmptyState message="No secrets" />
+      ) : (
+        <Table
+          fullHeightWrap
+          fillLevel={1}
+          data={data.serviceDeployment?.configuration || []}
+          columns={secretsColumns}
+          reactTableOptions={{
+            state: { globalFilter: debouncedFilterString },
+          }}
+        />
+      )}
+    </WrapperCardSC>
   )
 }
+
+const WrapperCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  overflow: 'hidden',
+}))

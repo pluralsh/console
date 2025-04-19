@@ -1,6 +1,6 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
-import { memo, useContext, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
@@ -44,8 +44,6 @@ import {
   useLogsEnabled,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
-
-import { LoginContext } from 'components/contexts'
 
 import FractionalChip from 'components/utils/FractionalChip'
 
@@ -157,12 +155,10 @@ export const getDirectory = ({
   serviceDeployment,
   logsEnabled = false,
   metricsEnabled = false,
-  isAdmin = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   logsEnabled?: boolean | undefined
   metricsEnabled?: boolean | undefined
-  isAdmin?: boolean
 }): Directory => {
   if (!serviceDeployment) {
     return []
@@ -226,12 +222,8 @@ export const getDirectory = ({
       enabled: !!serviceDeployment.insight,
     },
     { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
-    { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
-    { path: 'secrets', label: 'Secrets', enabled: true },
-    { path: 'helm', label: 'Helm values', enabled: isAdmin },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
-    { path: 'revisions', label: 'Revisions', enabled: true },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
     // {
     //   path: 'docs',
@@ -249,14 +241,13 @@ export const getDirectory = ({
       ),
       enabled: !isEmpty(serviceDeployment.dependencies),
     },
+    { path: 'settings', label: 'Settings', enabled: true },
   ]
 }
 
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const { me } = useContext<any>(LoginContext)
-  const isAdmin = !!me.roles?.admin
   const params = useParams()
   const projectId = useProjectId()
   const serviceId = params[SERVICE_PARAM_ID] as string
@@ -302,9 +293,8 @@ function ServiceDetailsBase() {
         serviceDeployment,
         logsEnabled,
         metricsEnabled,
-        isAdmin,
       }),
-    [logsEnabled, metricsEnabled, serviceDeployment, isAdmin]
+    [logsEnabled, metricsEnabled, serviceDeployment]
   )
 
   return (

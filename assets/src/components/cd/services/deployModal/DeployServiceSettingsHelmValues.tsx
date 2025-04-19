@@ -65,7 +65,7 @@ export function ServiceSettingsHelmValues({
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.medium,
       }}
     >
       <HelmValuesFilesInput
@@ -239,50 +239,53 @@ const HelmValuesFilesInput = memo(
                 </th>
               </tr>
             </thead>
-
-            <tr className="header displayContents" />
-            {fileItems?.map(({ valuesFile, errors }, i) => (
-              <tr
-                key={i}
-                className="displayContents"
-              >
-                <th>
-                  <FormField
-                    error={errors.duplicate}
-                    hint={errors.duplicate ? 'Duplicate file path' : undefined}
-                  >
-                    <Input
+            <tbody>
+              <tr className="header displayContents" />
+              {fileItems?.map(({ valuesFile, errors }, i) => (
+                <tr
+                  key={i}
+                  className="displayContents"
+                >
+                  <th>
+                    <FormField
                       error={errors.duplicate}
-                      value={valuesFile}
-                      inputProps={{ 'aria-label': 'Name' }}
-                      onChange={(e) => {
+                      hint={
+                        errors.duplicate ? 'Duplicate file path' : undefined
+                      }
+                    >
+                      <Input
+                        error={errors.duplicate}
+                        value={valuesFile}
+                        inputProps={{ 'aria-label': 'Name' }}
+                        onChange={(e) => {
+                          setHelmValuesFiles((helmValues) =>
+                            produce(helmValues, (draft) => {
+                              draft[i] = e.target.value
+                            })
+                          )
+                        }}
+                      />
+                    </FormField>
+                  </th>
+                  <th>
+                    <DeleteIconButton
+                      disabled={i === 0 && !valuesFile}
+                      css={{ marginTop: 4 }}
+                      onClick={() => {
                         setHelmValuesFiles((helmValues) =>
                           produce(helmValues, (draft) => {
-                            draft[i] = e.target.value
+                            draft.splice(i, 1)
+                            if (draft.length === 0) {
+                              draft.push('')
+                            }
                           })
                         )
                       }}
                     />
-                  </FormField>
-                </th>
-                <th>
-                  <DeleteIconButton
-                    disabled={i === 0 && !valuesFile}
-                    css={{ marginTop: 4 }}
-                    onClick={() => {
-                      setHelmValuesFiles((helmValues) =>
-                        produce(helmValues, (draft) => {
-                          draft.splice(i, 1)
-                          if (draft.length === 0) {
-                            draft.push('')
-                          }
-                        })
-                      )
-                    }}
-                  />
-                </th>
-              </tr>
-            ))}
+                  </th>
+                </tr>
+              ))}
+            </tbody>
           </HelmValuesFilesTableSC>
         )}
         <div css={{ display: 'flex' }}>

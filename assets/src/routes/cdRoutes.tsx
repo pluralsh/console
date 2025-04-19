@@ -18,13 +18,12 @@ import ServiceDependencies from 'components/cd/services/service/ServiceDependenc
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
 import ServiceErrors from 'components/cd/services/service/ServiceErrors'
-import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
-import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
-import ServiceSettings from 'components/cd/services/service/ServiceSettings'
+import { ServiceRevisions } from 'components/cd/services/service/ServiceRevisions'
+import { ServiceRepoSettings } from 'components/cd/services/service/settings/ServiceRepoSettings'
+import { ServiceSecrets } from 'components/cd/services/service/settings/ServiceSecrets'
 import Services from 'components/cd/services/Services'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -91,8 +90,13 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 
+import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
+import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
+import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
+import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
+import { ServiceSettings } from 'components/cd/services/service/settings/ServiceSettings.tsx'
 import {
   AlertInsight,
   FullPageAlertInsight,
@@ -142,14 +146,13 @@ import {
   SERVICE_POD_REL_PATH,
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
+  SERVICE_SETTINGS_REPO_REL_PATH,
+  SERVICE_SETTINGS_REVISIONS_REL_PATH,
+  SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
-import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
-import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
-import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
-import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 // import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -577,18 +580,6 @@ const serviceDetailsRoutes = (
       path={SERVICE_PRS_PATH}
     />
     <Route
-      element={<ServiceSecrets />}
-      path="secrets"
-    />
-    <Route
-      element={<ServiceRevisions />}
-      path="revisions"
-    />
-    <Route
-      element={<ServiceHelm />}
-      path="helm"
-    />
-    <Route
       element={<ServiceDependencies />}
       path="dependencies"
     />
@@ -627,7 +618,29 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceSettings />}
       path="settings"
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={SERVICE_SETTINGS_REPO_REL_PATH}
+          />
+        }
+      />
+      <Route
+        element={<ServiceRepoSettings />}
+        path={SERVICE_SETTINGS_REPO_REL_PATH}
+      />
+      <Route
+        element={<ServiceSecrets />}
+        path={SERVICE_SETTINGS_SECRETS_REL_PATH}
+      />
+      <Route
+        element={<ServiceRevisions />}
+        path={SERVICE_SETTINGS_REVISIONS_REL_PATH}
+      />
+    </Route>
     {/* <Route
       element={<ServiceDocs />}
       path="docs"
