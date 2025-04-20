@@ -1,4 +1,5 @@
 defmodule Console.AI.Provider do
+  use Nebulex.Caching
   import Console.Services.Base, only: [ok: 1]
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
@@ -6,10 +7,13 @@ defmodule Console.AI.Provider do
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
-  @type message :: {sender, binary}
+  @type message :: {sender, binary} | {:tool, binary, binary}
   @type history :: [message]
   @type tool_result :: [Tool.t]
   @type completion_result :: {:ok, binary} | {:ok, binary, [Tool.t]} | Console.error
+
+  @default_context_window 128_000 * 4
+  @local_cache Console.conf(:local_cache)
 
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
@@ -31,12 +35,23 @@ defmodule Console.AI.Provider do
 
   @callback tools?() :: boolean
 
+  @callback context_window(struct) :: integer
+
   def tools?() do
     Console.Deployments.Settings.cached()
     |> tool_client()
     |> case do
       {:ok, %mod{}} -> mod.tools?()
       _ -> false
+    end
+  end
+
+  @decorate cacheable(cache: @local_cache, key: :context_window, ttl: :timer.minutes(30))
+  def context_window() do
+    settings = Console.Deployments.Settings.cached()
+    case client(settings) do
+      {:ok, %mod{} = client} -> mod.context_window(client)
+      _ -> @default_context_window
     end
   end
 

@@ -291,4 +291,21 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert by_id[cluster3.id]["count"] == 0
     end
   end
+
+  describe "complianceReports" do
+    test "it can fetch compliance reports" do
+      reports = insert_list(3, :compliance_report)
+
+      {:ok, %{data: %{"complianceReports" => found}}} = run_query("""
+        query {
+          complianceReports(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(reports)
+    end
+  end
 end

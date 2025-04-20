@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "the name of the entity in the knowledge graph to create observations for"
+        },
+        "observations": {
+            "type": "array",
+            "description": "an array of observations to create for the entity",
+            "items": {
+                "type": "string",
+                "description": "an observation to create for the entity"
+            }
+        }
+    },
+    "required": ["name", "observations"],
+    "additionalProperties": false
+}

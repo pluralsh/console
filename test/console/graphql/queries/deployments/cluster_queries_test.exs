@@ -531,7 +531,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "20000.0"]}
+            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)

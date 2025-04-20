@@ -57,5 +57,7 @@ defmodule Console.AI.Azure do
     |> OpenAI.embeddings(text)
   end
 
+  def context_window(azure), do: OpenAI.context_window(OpenAI.new(azure))
+
   def tools?(), do: true
 end

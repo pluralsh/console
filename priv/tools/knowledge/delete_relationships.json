@@ -1,0 +1,31 @@
+{
+    "type": "object",
+    "properties": {
+        "relationships": {
+            "type": "array",
+            "description": "an array of relationships to delete",
+            "items": {
+                "type": "object",
+                "description": "a relationship to delete",
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "description": "the name of the entity in the knowledge graph to delete the relationship from"
+                    },
+                    "to": { 
+                        "type": "string",
+                        "description": "the name of the entity in the knowledge graph to delete the relationship to"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "the type of the relationship to delete"
+                    }
+                },
+                "required": ["from", "to", "type"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["relationships"],
+    "additionalProperties": false
+}

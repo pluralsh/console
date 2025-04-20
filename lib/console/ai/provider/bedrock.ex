@@ -37,6 +37,8 @@ defmodule Console.AI.Bedrock do
     |> handle_response()
   end
 
+  def context_window(_), do: 128_000 * 4
+
   def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
 
   def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
@@ -51,7 +53,12 @@ defmodule Console.AI.Bedrock do
   end
   defp build_req(msgs), do: %{messages: msgs(msgs)}
 
-  defp msgs(msgs), do: Enum.map(msgs, fn {role, msg} -> %{role: role(role), content: [%{text: msg}]} end)
+  defp msgs(msgs) do
+    Enum.map(msgs, fn
+      {:tool, msg, _} -> %{role: :user, content: [%{text: msg}]}
+      {role, msg} -> %{role: role(role), content: [%{text: msg}]}
+    end)
+  end
 
   defp role(:assistant), do: :assistant
   defp role(_), do: :user

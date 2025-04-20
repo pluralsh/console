@@ -79,8 +79,8 @@ defmodule ConsoleWeb.Router do
     pipe_through [:auth]
 
     scope "/v1", ConsoleWeb do
-      get "/logs/:repo/download", LogController, :download
       get "/digests", GitController, :digest
+      get "/compliance/report", ComplianceController, :report
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
     end

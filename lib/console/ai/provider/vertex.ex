@@ -73,6 +73,8 @@ defmodule Console.AI.Vertex do
     end
   end
 
+  def context_window(_), do: 128_000 * 4
+
   def tools?(), do: true
 
   defp openai_url(%__MODULE__{project: p, location: l} = c),

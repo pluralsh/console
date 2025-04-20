@@ -23,6 +23,7 @@ defmodule Console.Schema.Chat do
       end
 
       embeds_one :tool, ToolAttributes, on_replace: :update do
+        field :call_id,   :string
         field :name,      :string
         field :arguments, :map
       end
@@ -36,10 +37,12 @@ defmodule Console.Schema.Chat do
     timestamps()
   end
 
-  @spec message(msg) :: {Provider.sender, binary}
+  @spec message(msg) :: Provider.message
   def message(%__MODULE__{confirm: true, confirmed_at: nil}), do: nil
   def message(%__MODULE__{type: :file, role: r, content: c, attributes: %{file: %{name: n}}}),
     do: {r, Jason.encode!(%{name: n, content: c})}
+  def message(%{type: :tool, content: c, attributes: %{tool: %{call_id: id}}}) when is_binary(id),
+    do: {:tool, c, id}
   def message(%{role: r, content: c}), do: {r, c}
   def message({r, c}), do: {r, c}
 
@@ -108,7 +111,7 @@ defmodule Console.Schema.Chat do
 
   defp tool_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(name arguments)a)
+    |> cast(attrs, ~w(name arguments call_id)a)
     |> validate_required(~w(name arguments)a)
   end
 end

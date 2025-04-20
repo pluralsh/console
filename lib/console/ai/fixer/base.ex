@@ -3,6 +3,7 @@ defmodule Console.AI.Fixer.Base do
   alias Console.Deployments.Tar
   alias Console.Deployments.Pr.File
   alias Console.AI.Vector.Storable
+  alias Console.AI.Provider
   alias Console.Schema.{
     Service,
     AiInsightEvidence,
@@ -14,9 +15,6 @@ defmodule Console.AI.Fixer.Base do
 
   @format ~s({"file": string, "content": string})
   @preface "I'll list the relevant source code for you in JSON format, with the structure #{@format}"
-
-  @too_large 100_000
-
   @encode_key {__MODULE__, :noencode}
 
   def raw(), do: Process.put(@encode_key, true)
@@ -30,13 +28,14 @@ defmodule Console.AI.Fixer.Base do
 
   def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc) do
     subfolder = folder(svc)
+    too_large = Provider.context_window()
     with {:ok, contents} <- Tar.tar_stream(f) do
       prompt = Enum.filter(contents, & !blacklist(elem(&1, 0)))
-              |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
-              |> prepend({:user, @preface})
+               |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
+               |> prepend({:user, @preface})
 
       case prompt_size(prompt) do
-        v when v < @too_large -> {:ok, prompt}
+        v when v < too_large -> {:ok, prompt}
         _ -> {:ok, values_files(contents, svc)}
       end
     end

@@ -87,7 +87,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     AlertResolution,
     Flow,
     McpServer,
-    DeprecatedCustomResource
+    DeprecatedCustomResource,
+    ServiceComponentChild
   }
 
   def query(Project, _), do: Project
@@ -164,6 +165,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Flow, _), do: Flow
   def query(McpServer, _), do: McpServer
   def query(DeprecatedCustomResource, _), do: DeprecatedCustomResource
+  def query(ServiceComponentChild, _), do: ServiceComponentChild
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

@@ -305,6 +305,10 @@ defmodule Console.Schema.Service do
     |> distinct(true)
   end
 
+  def preloaded(query \\ __MODULE__, preloads \\ []) do
+    from(s in query, preload: ^preloads)
+  end
+
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 

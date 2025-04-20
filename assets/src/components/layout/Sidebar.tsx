@@ -118,6 +118,13 @@ function getMenuItems({
       hotkeys: ['shift S'],
     },
     {
+      text: 'Flows',
+      expandedLabel: 'Flows',
+      icon: <FlowIcon />,
+      path: FLOWS_ABS_PATH,
+      hotkeys: ['shift F'],
+    },
+    {
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
@@ -131,13 +138,6 @@ function getMenuItems({
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
       hotkeys: ['shift K'],
-    },
-    {
-      text: 'Flows',
-      expandedLabel: 'Flows',
-      icon: <FlowIcon />,
-      path: FLOWS_ABS_PATH,
-      hotkeys: ['shift F'],
     },
     {
       text: 'Plural AI',

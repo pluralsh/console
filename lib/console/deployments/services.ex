@@ -23,7 +23,9 @@ defmodule Console.Deployments.Services do
     ApiDeprecation,
     GitRepository,
     ServiceContext,
-    ServiceDependency
+    ServiceDependency,
+    ServiceComponent,
+    ServiceComponentChild
   }
   alias Console.Deployments.Helm
   require Logger
@@ -637,7 +639,7 @@ defmodule Console.Deployments.Services do
     Logger.info "updating components for #{service.id}"
     start_transaction()
     |> add_operation(:service, fn _ ->
-      svc = Console.Repo.preload(service, [:errors, components: :content])
+      svc = Console.Repo.preload(service, [:errors, components: [:content, :children]])
 
       svc
       |> Service.changeset(stabilize(attrs, svc))
@@ -688,11 +690,26 @@ defmodule Console.Deployments.Services do
   def stabilize_deps(attrs, _), do: attrs
 
   def stabilize(%{components: new_components} = attrs, %{components: components}) do
-    components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)
-    new_components = Enum.map(new_components, &Map.put(&1, :id, components[component_key(&1)]))
+    components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
+    new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
   end
   def stabilize(attrs, _), do: attrs
+
+  defp stabilize_component(new_component, components) do
+    case components[component_key(new_component)] do
+      %ServiceComponent{id: id, children: children} ->
+        Map.put(new_component, :id, id)
+        |> maybe_stabilize_children(children)
+      _ -> new_component
+    end
+  end
+
+  defp maybe_stabilize_children(%{children: [_ | _] = children} = component, old_children) when is_list(old_children) do
+    old_children = Map.new(old_children, fn %ServiceComponentChild{id: id, uid: uid} -> {uid, id} end)
+    Map.put(component, :children, Enum.map(children, &Map.put(&1, :id, old_children[&1.uid])))
+  end
+  defp maybe_stabilize_children(component, _), do: component
 
   defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {nilify(g), v, k, nilify(ns), n}
   defp component_key(_), do: nil

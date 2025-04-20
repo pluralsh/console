@@ -130,6 +130,8 @@ defmodule Console.MixProject do
       {:timex, "~> 3.7"},
       {:quantum, "~> 3.0"},
       {:swarm, "~> 3.0"},
+      {:zstream, "~> 0.6"},
+      {:csv, "~> 3.2"},
       {:yaml_elixir, "~> 2.9"},
       {:google_api_ai_platform, "~> 0.22.0"},
       {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup", commit: "4958159d1e9acec2154590ecacc732ecd58f8312"},

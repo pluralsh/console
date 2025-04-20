@@ -18,6 +18,10 @@ defmodule Console.Mesh.Provider do
   end
 
   defp client(
+    %Cluster{operational_layout: %OperationalLayout{service_mesh: :ebpf}} = cluster,
+    %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
+  ) when is_binary(h), do: {:ok, Ebpf.new(conn, cluster)}
+  defp client(
     %Cluster{operational_layout: %OperationalLayout{service_mesh: :istio}} = cluster,
     %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
   ) when is_binary(h), do: {:ok, Istio.new(conn, cluster)}

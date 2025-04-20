@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "a query to search the knowledge graph"
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

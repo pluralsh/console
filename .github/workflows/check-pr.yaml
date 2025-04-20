@@ -1,0 +1,26 @@
+name: Check PR Body
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - terraform/**/*
+
+jobs:
+  check-pr-body:
+    name: Ensure PR Body Format
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      pull-requests: read
+    steps:
+    - uses: actions/checkout@v2
+      name: checkout repo
+
+    - name: "check pr body has Plural Flow: console to link with Plural"
+      uses: './.github/actions/check-pr'
+      with:
+        pr-number: ${{ github.event.number }}
+        regex: 'Plural Flow: console'
+        github-token: ${{ secrets.GITHUB_TOKEN }}

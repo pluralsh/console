@@ -46,7 +46,10 @@ defmodule Console.AI.Ollama do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = ollama, messages, _) do
-    history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
+    history = Enum.map(messages, fn
+      {:tool, msg, _} -> %{role: :user, content: msg}
+      {role, msg} -> %{role: role, content: msg}
+    end)
     case chat(ollama, history) do
       {:ok, %ChatResponse{message: %Message{content: content}}} ->
         {:ok, content}
@@ -54,6 +57,8 @@ defmodule Console.AI.Ollama do
       error -> error
     end
   end
+
+  def context_window(_), do: 128_000 * 4
 
   def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
 
