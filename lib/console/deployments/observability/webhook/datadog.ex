@@ -2,10 +2,10 @@ defmodule Console.Deployments.Observability.Webhook.Datadog do
   @behaviour Console.Deployments.Observability.Webhook
   import Console.Deployments.Observability.Webhook.Base
 
-  def associations(:project, %{"meta" => %{"project" => val}}, acc),
-    do: Map.put(acc, :project_id, project(val))
-  def associations(:project, %{"project" => val}, acc),
-    do: Map.put(acc, :project_id, project(val))
+  def associations(:project, %{"meta" => %{"project" => name}}, acc),
+    do: Map.put(acc, :project_id, project(name))
+  def associations(:project, %{"project" => name}, acc),
+    do: Map.put(acc, :project_id, project(name))
   def associations(:project, %{"tags" => tags}, acc) when is_list(tags) do
     tag_map = tags_to_map(tags)
     case Map.get(tag_map, "plrl_project") || Map.get(tag_map, "project") || Map.get(tag_map, "plural_project") do
@@ -15,28 +15,28 @@ defmodule Console.Deployments.Observability.Webhook.Datadog do
   end
   def associations(:project, _, acc), do: acc
 
-  def associations(:cluster, %{"meta" => %{"cluster" => val}}, acc),
-    do: Map.put(acc, :cluster_id, cluster(val))
-  def associations(:cluster, %{"cluster" => val}, acc),
-    do: Map.put(acc, :cluster_id, cluster(val))
+  def associations(:cluster, %{"meta" => %{"cluster" => name}}, acc),
+    do: Map.put(acc, :cluster_id, cluster(name))
+  def associations(:cluster, %{"cluster" => name}, acc),
+    do: Map.put(acc, :cluster_id, cluster(name))
   def associations(:cluster, %{"tags" => tags}, acc) when is_list(tags) do
     tag_map = tags_to_map(tags)
     case Map.get(tag_map, "plrl_cluster") || Map.get(tag_map, "cluster") || Map.get(tag_map, "plural_cluster") do
       nil -> acc
-      val -> Map.put(acc, :cluster_id, cluster(val))
+      name -> Map.put(acc, :cluster_id, cluster(name))
     end
   end
   def associations(:cluster, _, acc), do: acc
 
-  def associations(:service, %{"meta" => %{"service" => val}}, acc),
-    do: Map.put(acc, :service_id, service(val))
-  def associations(:service, %{"service" => val}, acc),
-    do: Map.put(acc, :service_id, service(val))
+  def associations(:service, %{"meta" => %{"service" => name}}, acc),
+    do: Map.put(acc, :service_id, service(name))
+  def associations(:service, %{"service" => name}, acc),
+    do: Map.put(acc, :service_id, service(name))
   def associations(:service, %{"tags" => tags}, %{cluster_id: id} = acc) when is_list(tags) and is_binary(id) do
     tag_map = tags_to_map(tags)
     case Map.get(tag_map, "plrl_service") || Map.get(tag_map, "service") || Map.get(tag_map, "plural_service") do
       nil -> acc
-      val -> Map.put(acc, :service_id, service(id, val))
+      name -> Map.put(acc, :service_id, service(id, name))
     end
   end
   def associations(:service, _, acc), do: acc
