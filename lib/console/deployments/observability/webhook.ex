@@ -4,7 +4,7 @@ defmodule Console.Deployments.Observability.Webhook do
   to handle provider-specific logic.
   """
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Observability.Webhook.{Grafana, Pagerduty, Raw}
+  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Raw}
   alias Console.Schema.ObservabilityWebhook
 
   @callback associations(atom, map, map) :: map
@@ -49,6 +49,27 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Pagerduty.summary(payload),
       tags: tags(data["custom_details"] || %{}),
     }, add_associations(Pagerduty, payload))
+    |> backfill_raw()
+    |> listify()
+    |> ok()
+  end
+
+  def payload(%ObservabilityWebhook{type: :datadog}, payload) do
+    Map.merge(%{
+      type: :datadog,
+      fingerprint: Map.get(payload, "id"),
+      annotations: Map.get(payload, "meta") || %{},
+      state: Datadog.state(
+        Map.get(payload, "status") ||
+        Map.get(payload, "alert_transition") ||
+        ""
+      ),
+      severity: Datadog.severity(payload),
+      url: Map.get(payload, "link") || Map.get(payload, "url") || "",
+      title: Map.get(payload, "title") || "Datadog Alert",
+      message: Datadog.summary(payload),
+      tags: tags(Datadog.datadog_tag_map(payload)),
+    }, add_associations(Datadog, payload))
     |> backfill_raw()
     |> listify()
     |> ok()
