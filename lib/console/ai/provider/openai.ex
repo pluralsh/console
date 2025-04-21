@@ -10,7 +10,7 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  @model "gpt-4o-mini"
+  @model "gpt-4.1-mini"
   @embedding_model "text-embedding-3-large"
 
   def default_model(), do: @model
@@ -25,7 +25,7 @@ defmodule Console.AI.OpenAI do
   defmodule ToolCall do
     @type t :: %__MODULE__{}
 
-    defstruct [:id, :type, :function]
+    defstruct [:id, :type, :function, :call_id]
   end
 
   defmodule Message do
@@ -91,8 +91,7 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
-    history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
-    case chat(openai, history, opts) do
+    case chat(openai, msg_history(model(openai), messages), opts) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, content, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -110,8 +109,7 @@ defmodule Console.AI.OpenAI do
   @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools) do
     model = tool_model(openai)
-    history = Enum.map(messages, fn {role, msg} -> %{role: tool_role(role, model), content: msg} end)
-    case chat(%{openai | stream: nil, model: model}, history, plural: tools, require_tools: true) do
+    case chat(%{openai | stream: nil, model: model}, msg_history(model, messages), plural: tools, require_tools: true) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -134,13 +132,22 @@ defmodule Console.AI.OpenAI do
     |> Utils.maybe_ok()
   end
 
+  def context_window(%__MODULE__{model: model}), do: window(model)
+
   def tools?(), do: true
 
-  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history, opts) do
+  defp msg_history(model, messages) do
+    Enum.map(messages, fn
+      {:tool, msg, id} -> %{role: :tool, content: msg, tool_call_id: id}
+      {role, msg} -> %{role: tool_role(role, model), content: msg}
+    end)
+  end
+
+  defp chat(%__MODULE__{access_key: token, stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
       all = tools(opts)
       body = Map.merge(%{
-        model: model || "gpt-4o-mini",
+        model: model(openai),
         messages: history,
         stream: true,
         tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
@@ -153,10 +160,10 @@ defmodule Console.AI.OpenAI do
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model} = openai, history, opts) do
+  defp chat(%__MODULE__{access_key: token} = openai, history, opts) do
     all = tools(opts)
     body = Console.drop_nils(%{
-      model: model || "gpt-4o-mini",
+      model: model(openai),
       messages: history,
       tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
     })
@@ -203,17 +210,25 @@ defmodule Console.AI.OpenAI do
 
   defp gen_tools(calls) do
     Enum.map(calls, fn
-      %ToolCall{function: %{"name" => n, "arguments" => args}} ->
-        %Console.AI.Tool{name: n, arguments: Jason.decode!(args)}
+      %ToolCall{call_id: id, function: %{"name" => n, "arguments" => args}} ->
+        %Console.AI.Tool{id: id, name: n, arguments: Jason.decode!(args)}
       _ -> nil
     end)
     |> Enum.filter(& &1)
   end
 
-  defp tool_role(:system, "o1-" <> _), do: :user
+  defp model(%__MODULE__{model: m}) when is_binary(m), do: m
+  defp model(_), do: @model
+
+  defp window("gpt-4.1" <> _), do: 1_000_000 * 4
+  defp window("o" <> _), do: 1_000_000 * 4
+  defp window(_), do: 128_000 * 4
+
+  defp tool_role(:system, "gpt-4.1" <> _), do: :developer
+  defp tool_role(:system, "o" <> _), do: :developer
   defp tool_role(r, _), do: r
 
-  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o-mini"
+  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || @model
 
   defp tool_args(%Console.AI.MCP.Tool{name: name, description: description, input_schema: schema}) do
     %{

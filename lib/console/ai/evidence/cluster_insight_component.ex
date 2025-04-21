@@ -1,6 +1,6 @@
 defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
   use Console.AI.Evidence.Base
-  alias Console.AI.Evidence.{Logs, Context}
+  alias Console.AI.Evidence.{Logs, Context, Knowledge}
   alias Console.AI.Evidence.Component.Resource
   alias Console.Schema.{ClusterInsightComponent, ServiceComponent}
 
@@ -29,6 +29,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
         ++ tpl_hydration(hydration)
       )
       |> Logs.with_logging(comp)
+      |> Knowledge.with_knowledge()
       |> Context.claims(claims)
       |> Context.result()
     end

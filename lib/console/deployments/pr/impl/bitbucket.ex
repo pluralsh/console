@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
+  import Console.Services.Base, only: [ok: 1]
   alias Console.Deployments.Pr.File
   alias Console.Schema.{PrAutomation, PullRequest}
   require Logger
@@ -72,10 +73,9 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     with {:ok, workspace, repo, pr_id} <- get_pull_id(url),
          {:ok, conn} <- connection(scm_conn),
          {:ok, pr_body, diff_url, diffstat_url} <- get_pr_info(conn, workspace, repo, pr_id),
-         diff_map = get_diff_map(conn, diff_url),
+         {:ok, diff_map} <- get_diff_map(conn, diff_url),
          {:ok, diff_list} <- files_diff_list(conn, diffstat_url) do
-
-      files_list = Enum.map(diff_list["values"], fn file ->
+      Enum.map(diff_list["values"], fn file ->
         filename = file["new"]["escaped_path"]
 
         %File{
@@ -85,13 +85,13 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
           contents: get_file_from_raw(conn, file["new"]["links"]["self"]["href"]),
           filename: filename,
           sha: pr_body["source"]["commit"]["hash"],
-          patch: Map.get(diff_map, filename, "No diff found for #{filename}"),
+          patch: Map.get(diff_map, filename),
           base: pr_body["destination"]["branch"]["name"],
           head: pr_body["source"]["branch"]["name"]
         }
       end)
       |> Enum.filter(&File.valid?/1)
-      {:ok, files_list}
+      |> ok()
     else
       err ->
         Logger.info("failed to list pr files #{inspect(err)}")
@@ -125,7 +125,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   defp handle_response(_), do: {:error, "unknown bitbucket error"}
 
   defp handle_response_raw({:ok, %HTTPoison.Response{status_code: code, body: body}})
-    when code >= 200 and code < 300, do: body
+    when code >= 200 and code < 300, do: {:ok, body}
   defp handle_response_raw({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
   defp handle_response_raw(_), do: {:error, "unknown bitbucket error"}
 
@@ -175,7 +175,10 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   end
 
   defp get_file_from_raw(conn, url) do
-    get_raw(url, Connection.headers(conn))
+    case get_raw(url, Connection.headers(conn)) do
+      {:ok, content} -> content
+      _err -> nil
+    end
   end
 
   defp get_diff_map(conn, diff_url) do
@@ -183,11 +186,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     |> parse_diff_to_map()
   end
 
-  defp parse_diff_to_map(diff_content) do
+  defp parse_diff_to_map({:ok, diff_content}) do
     # Split the diff content by file
     diff_content
     |> String.split(~r/diff --git a\//)
-    |> Enum.reject(&(&1 == ""))
+    |> Enum.reject(& &1 == "")
     |> Enum.map(fn file_diff ->
       # Extract filename and diff content
       case Regex.run(~r/^(.+?) b\/(.+?)(?:\n|$)/, file_diff) do
@@ -202,5 +205,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
       end
     end)
     |> Map.new()
+    |> ok()
   end
+  defp parse_diff_to_map(err), do: err
 end

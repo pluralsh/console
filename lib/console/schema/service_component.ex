@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceComponent do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ApiDeprecation, ComponentContent, AiInsight}
+  alias Console.Schema.{Service, ApiDeprecation, ComponentContent, AiInsight, ServiceComponentChild}
 
   defenum State, running: 0, pending: 1, failed: 2, paused: 3
 
@@ -17,6 +17,7 @@ defmodule Console.Schema.ServiceComponent do
     belongs_to :insight, AiInsight, on_replace: :update
     has_many :api_deprecations, ApiDeprecation, foreign_key: :component_id, on_replace: :delete
     has_one :content, ComponentContent, foreign_key: :component_id, on_replace: :delete
+    has_many :children, ServiceComponentChild, foreign_key: :component_id, on_replace: :delete
 
     timestamps()
   end
@@ -60,6 +61,7 @@ defmodule Console.Schema.ServiceComponent do
     |> cast(attrs, @valid)
     |> cast_assoc(:content)
     |> cast_assoc(:insight)
+    |> cast_assoc(:children)
     |> foreign_key_constraint(:service)
     |> validate_required([:kind, :name])
   end

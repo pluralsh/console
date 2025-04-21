@@ -3,7 +3,6 @@ defmodule Console.AI.Tools.Pipelines do
   import Ecto.Changeset
   import Console.AI.Tools.Utils
   alias Console.Repo
-  alias Console.AI.Tool
   alias Console.Schema.{Flow, Pipeline, StageService}
 
   embedded_schema do
@@ -24,16 +23,14 @@ defmodule Console.AI.Tools.Pipelines do
   def description(), do: "Shows the pipelines currently associated with this flow. This can be a source of truth for the stage of the Plural service deployments in the flow as well."
 
   def implement(%__MODULE__{} = query) do
-    case Tool.flow() do
-      %Flow{id: flow_id} ->
-        Pipeline.for_flow(flow_id)
-        |> Repo.all()
-        |> Repo.preload([:project, stages: [services: [service: :cluster]], edges: [:from, :to, :gates]])
-        |> Enum.filter(&maybe_search(&1, query))
-        |> model()
-        |> Jason.encode()
-      _ -> {:error, "no flow found"}
-    end
+    for_flow(fn %Flow{id: flow_id} ->
+      Pipeline.for_flow(flow_id)
+      |> Repo.all()
+      |> Repo.preload([:project, stages: [services: [service: :cluster]], edges: [:from, :to, :gates]])
+      |> Enum.filter(&maybe_search(&1, query))
+      |> model()
+      |> Jason.encode()
+    end)
   end
 
   defp maybe_search(%Pipeline{name: n}, %__MODULE__{query: q}) when is_binary(q),

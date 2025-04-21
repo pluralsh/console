@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "the name of the entity in the knowledge graph to delete observations from"
+        },
+        "observations": {
+            "type": "array",
+            "description": "an array of observations to delete from the entity",
+            "items": {
+                "type": "string",
+                "description": "an observation to delete from the entity"
+            }
+        }
+    },
+    "required": ["name", "observations"],
+    "additionalProperties": false
+}

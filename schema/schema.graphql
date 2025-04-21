@@ -353,6 +353,8 @@ type RootQueryType {
 
   clusterVulnerabilityAggregate(grade: VulnReportGrade!): [ClusterVulnAggregate]
 
+  complianceReports(after: String, first: Int, before: String, last: Int): ComplianceReportsConnection
+
   managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
   globalService(id: ID!): GlobalService
@@ -959,6 +961,8 @@ type RootMutationType {
   updateThread(id: ID!, attributes: ChatThreadAttributes!): ChatThread
 
   deleteThread(id: ID!): ChatThread
+
+  cloneThread(id: ID!): ChatThread
 
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
@@ -3271,6 +3275,14 @@ type ClusterVulnAggregate {
   count: Int!
 }
 
+type ComplianceReports {
+  id: ID!
+  name: String!
+  sha256: String
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type PolicyConstraintConnection {
   pageInfo: PageInfo!
   edges: [PolicyConstraintEdge]
@@ -3279,6 +3291,11 @@ type PolicyConstraintConnection {
 type VulnerabilityReportConnection {
   pageInfo: PageInfo!
   edges: [VulnerabilityReportEdge]
+}
+
+type ComplianceReportsConnection {
+  pageInfo: PageInfo!
+  edges: [ComplianceReportsEdge]
 }
 
 enum SinkType {
@@ -4268,6 +4285,18 @@ input ComponentAttributes {
   namespace: String!
   name: String!
   content: ComponentContentAttributes
+  children: [ComponentChildAttributes]
+}
+
+input ComponentChildAttributes {
+  uid: String!
+  state: ComponentState
+  parentUid: String
+  name: String!
+  namespace: String
+  group: String
+  version: String!
+  kind: String!
 }
 
 "the content of a component when visualized in dry run state"
@@ -4587,6 +4616,28 @@ type ServiceComponent {
 
   "any api deprecations discovered from this component"
   apiDeprecations: [ApiDeprecation]
+
+  "any kubernetes objects created as a descendent of this component"
+  children: [ServiceComponentChild]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"a kubernetes object that was created as a descendent of this service component"
+type ServiceComponentChild {
+  id: ID!
+  uid: String!
+  state: ComponentState
+  parentUid: String
+  name: String!
+  namespace: String
+  group: String
+  version: String!
+  kind: String!
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 "dry run content of a service component"
@@ -4752,6 +4803,7 @@ enum ServiceMesh {
   LINKERD
   ISTIO
   CILIUM
+  EBPF
 }
 
 enum Conjunction {
@@ -7304,6 +7356,7 @@ enum EvidenceType {
   LOG
   PR
   ALERT
+  KNOWLEDGE
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -7354,6 +7407,15 @@ input ChatThreadAttributes {
 
   "the flow this thread was created in"
   flowId: ID
+
+  "the settings for this thread"
+  settings: ChatThreadSettingsAttributes
+}
+
+"the settings for an AI chat thread"
+input ChatThreadSettingsAttributes {
+  "controls whether this thread uses knowledge graph-basedmemory"
+  memory: Boolean
 }
 
 type Chat {
@@ -7411,6 +7473,8 @@ type ChatThread {
 
   default: Boolean!
 
+  settings: ChatThreadSettings
+
   lastMessageAt: DateTime
 
   flow: Flow
@@ -7427,6 +7491,12 @@ type ChatThread {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"the settings for an AI chat thread"
+type ChatThreadSettings {
+  "controls whether this thread uses knowledge graph-basedmemory"
+  memory: Boolean
 }
 
 "A saved item for future ai-based investigation"
@@ -7486,6 +7556,7 @@ type AiInsightEvidence {
   logs: LogsEvidence
   alert: AlertEvidence
   pullRequest: PullRequestEvidence
+  knowledge: KnowledgeEvidence
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -7511,6 +7582,12 @@ type PullRequestEvidence {
   filename: String
   contents: String
   patch: String
+}
+
+type KnowledgeEvidence {
+  name: String
+  type: String
+  observations: [String]
 }
 
 "A kubernetes object used in the course of generating a cluster insight"
@@ -9092,6 +9169,11 @@ type NotificationRouterEdge {
 
 type NotificationSinkEdge {
   node: NotificationSink
+  cursor: String
+}
+
+type ComplianceReportsEdge {
+  node: ComplianceReports
   cursor: String
 }
 

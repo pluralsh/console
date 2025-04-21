@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters}
-  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, }
+  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, ComplianceReport}
 
   def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_vulnerability(id)
@@ -37,6 +37,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> maybe_search(PolicyConstraint, args)
     |> apply_filters(args)
     |> PolicyConstraint.distinct()
+    |> paginate(args)
+  end
+
+  def list_compliance_reports(args, %{context: %{current_user: _user}}) do
+    ComplianceReport.ordered()
     |> paginate(args)
   end
 

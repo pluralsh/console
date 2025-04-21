@@ -2,11 +2,12 @@ defmodule Console.AI.Stream.Result do
   defmodule Tool do
     @type t :: %__MODULE__{}
 
-    defstruct [:index, :name, arguments: ""]
+    defstruct [:index, :id, :name, arguments: ""]
 
     def new(index, attrs) do
       %__MODULE__{
         index: index,
+        id: attrs["call_id"] || attrs["id"],
         name: attrs["name"],
         arguments: attrs["arguments"]
       }
@@ -15,9 +16,9 @@ defmodule Console.AI.Stream.Result do
     def args(%__MODULE__{arguments: args} = t, next),
       do: put_in(t.arguments, args <> next)
 
-    def format(%__MODULE__{name: n, arguments: args}) do
+    def format(%__MODULE__{id: id, name: n, arguments: args}) do
       with {:ok, args} <- Jason.decode(args),
-        do: {:ok, %Console.AI.Tool{name: n, arguments: args}}
+        do: {:ok, %Console.AI.Tool{id: id, name: n, arguments: args}}
     end
   end
 

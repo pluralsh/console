@@ -2,7 +2,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   use Console.AI.Evidence.Base
   alias Console.Repo
   alias Console.AI.Worker
-  alias Console.AI.Evidence.{Logs, Context}
+  alias Console.AI.Evidence.{Logs, Context, Knowledge}
   alias Console.Schema.{AiInsight, Service, ServiceComponent, ServiceError, Cluster}
 
   require Logger
@@ -29,12 +29,13 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
       component_statuses(components)
     )
     |> Logs.with_logging(service)
+    |> Knowledge.with_knowledge()
     |> Context.result()
   end
 
   def insight(%Service{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, insight: :evidence])
+  def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, :flow, insight: :evidence])
 
   defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster} = c} = svc) do
     [

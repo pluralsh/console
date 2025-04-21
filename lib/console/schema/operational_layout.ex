@@ -2,7 +2,7 @@ defmodule Console.Schema.OperationalLayout do
   use Piazza.Ecto.Schema
   alias Console.Schema.Cluster
 
-  defenum ServiceMesh, linkerd: 0, istio: 1, cilium: 2
+  defenum ServiceMesh, linkerd: 0, istio: 1, cilium: 2, ebpf: 3
 
   schema "operational_layouts" do
     field :service_mesh, ServiceMesh

@@ -223,4 +223,28 @@ defmodule Console.GraphQl.AIMutationsTest do
       refute refetch(pin)
     end
   end
+
+  describe "cloneThread" do
+    test "it can clone a thread" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user, flow: insert(:flow))
+      insert(:chat, user: user, thread: thread)
+
+      {:ok, %{data: %{"cloneThread" => clone}}} = run_query("""
+        mutation Clone($id: ID!) {
+          cloneThread(id: $id) {
+            id
+            summary
+            user { id }
+            flow { id }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert clone["id"]
+      assert clone["summary"] == "Clone of #{thread.summary}"
+      assert clone["user"]["id"] == user.id
+      assert clone["flow"]["id"] == thread.flow_id
+    end
+  end
 end

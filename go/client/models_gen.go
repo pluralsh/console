@@ -160,6 +160,7 @@ type AiInsightEvidence struct {
 	Logs        *LogsEvidence        `json:"logs,omitempty"`
 	Alert       *AlertEvidence       `json:"alert,omitempty"`
 	PullRequest *PullRequestEvidence `json:"pullRequest,omitempty"`
+	Knowledge   *KnowledgeEvidence   `json:"knowledge,omitempty"`
 	InsertedAt  *string              `json:"insertedAt,omitempty"`
 	UpdatedAt   *string              `json:"updatedAt,omitempty"`
 }
@@ -750,13 +751,14 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID            string     `json:"id"`
-	Summary       string     `json:"summary"`
-	Default       bool       `json:"default"`
-	LastMessageAt *string    `json:"lastMessageAt,omitempty"`
-	Flow          *Flow      `json:"flow,omitempty"`
-	User          *User      `json:"user,omitempty"`
-	Insight       *AiInsight `json:"insight,omitempty"`
+	ID            string              `json:"id"`
+	Summary       string              `json:"summary"`
+	Default       bool                `json:"default"`
+	Settings      *ChatThreadSettings `json:"settings,omitempty"`
+	LastMessageAt *string             `json:"lastMessageAt,omitempty"`
+	Flow          *Flow               `json:"flow,omitempty"`
+	User          *User               `json:"user,omitempty"`
+	Insight       *AiInsight          `json:"insight,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -775,6 +777,8 @@ type ChatThreadAttributes struct {
 	InsightID *string `json:"insightId,omitempty"`
 	// the flow this thread was created in
 	FlowID *string `json:"flowId,omitempty"`
+	// the settings for this thread
+	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -785,6 +789,18 @@ type ChatThreadConnection struct {
 type ChatThreadEdge struct {
 	Node   *ChatThread `json:"node,omitempty"`
 	Cursor *string     `json:"cursor,omitempty"`
+}
+
+// the settings for an AI chat thread
+type ChatThreadSettings struct {
+	// controls whether this thread uses knowledge graph-basedmemory
+	Memory *bool `json:"memory,omitempty"`
+}
+
+// the settings for an AI chat thread
+type ChatThreadSettingsAttributes struct {
+	// controls whether this thread uses knowledge graph-basedmemory
+	Memory *bool `json:"memory,omitempty"`
 }
 
 // Additional attributes for describing a tool call that derived this chat message
@@ -1569,6 +1585,24 @@ type CommandAttributes struct {
 	Dir  *string   `json:"dir,omitempty"`
 }
 
+type ComplianceReports struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Sha256     *string `json:"sha256,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type ComplianceReportsConnection struct {
+	PageInfo PageInfo                 `json:"pageInfo"`
+	Edges    []*ComplianceReportsEdge `json:"edges,omitempty"`
+}
+
+type ComplianceReportsEdge struct {
+	Node   *ComplianceReports `json:"node,omitempty"`
+	Cursor *string            `json:"cursor,omitempty"`
+}
+
 type ComponentAttributes struct {
 	State     *ComponentState             `json:"state,omitempty"`
 	Synced    bool                        `json:"synced"`
@@ -1578,6 +1612,18 @@ type ComponentAttributes struct {
 	Namespace string                      `json:"namespace"`
 	Name      string                      `json:"name"`
 	Content   *ComponentContentAttributes `json:"content,omitempty"`
+	Children  []*ComponentChildAttributes `json:"children,omitempty"`
+}
+
+type ComponentChildAttributes struct {
+	UID       string          `json:"uid"`
+	State     *ComponentState `json:"state,omitempty"`
+	ParentUID *string         `json:"parentUid,omitempty"`
+	Name      string          `json:"name"`
+	Namespace *string         `json:"namespace,omitempty"`
+	Group     *string         `json:"group,omitempty"`
+	Version   string          `json:"version"`
+	Kind      string          `json:"kind"`
 }
 
 // dry run content of a service component
@@ -2833,6 +2879,12 @@ type JobStatus struct {
 	StartTime      *string `json:"startTime,omitempty"`
 	Succeeded      *int64  `json:"succeeded,omitempty"`
 	Failed         *int64  `json:"failed,omitempty"`
+}
+
+type KnowledgeEvidence struct {
+	Name         *string   `json:"name,omitempty"`
+	Type         *string   `json:"type,omitempty"`
+	Observations []*string `json:"observations,omitempty"`
 }
 
 type KubeconfigAttributes struct {
@@ -5156,6 +5208,25 @@ type ServiceComponent struct {
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// any api deprecations discovered from this component
 	APIDeprecations []*APIDeprecation `json:"apiDeprecations,omitempty"`
+	// any kubernetes objects created as a descendent of this component
+	Children   []*ServiceComponentChild `json:"children,omitempty"`
+	InsertedAt *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
+}
+
+// a kubernetes object that was created as a descendent of this service component
+type ServiceComponentChild struct {
+	ID         string          `json:"id"`
+	UID        string          `json:"uid"`
+	State      *ComponentState `json:"state,omitempty"`
+	ParentUID  *string         `json:"parentUid,omitempty"`
+	Name       string          `json:"name"`
+	Namespace  *string         `json:"namespace,omitempty"`
+	Group      *string         `json:"group,omitempty"`
+	Version    string          `json:"version"`
+	Kind       string          `json:"kind"`
+	InsertedAt *string         `json:"insertedAt,omitempty"`
+	UpdatedAt  *string         `json:"updatedAt,omitempty"`
 }
 
 type ServiceComponentMetrics struct {
@@ -7232,20 +7303,22 @@ func (e Delta) MarshalGQL(w io.Writer) {
 type EvidenceType string
 
 const (
-	EvidenceTypeLog   EvidenceType = "LOG"
-	EvidenceTypePr    EvidenceType = "PR"
-	EvidenceTypeAlert EvidenceType = "ALERT"
+	EvidenceTypeLog       EvidenceType = "LOG"
+	EvidenceTypePr        EvidenceType = "PR"
+	EvidenceTypeAlert     EvidenceType = "ALERT"
+	EvidenceTypeKnowledge EvidenceType = "KNOWLEDGE"
 )
 
 var AllEvidenceType = []EvidenceType{
 	EvidenceTypeLog,
 	EvidenceTypePr,
 	EvidenceTypeAlert,
+	EvidenceTypeKnowledge,
 }
 
 func (e EvidenceType) IsValid() bool {
 	switch e {
-	case EvidenceTypeLog, EvidenceTypePr, EvidenceTypeAlert:
+	case EvidenceTypeLog, EvidenceTypePr, EvidenceTypeAlert, EvidenceTypeKnowledge:
 		return true
 	}
 	return false
@@ -8622,17 +8695,19 @@ const (
 	ServiceMeshLinkerd ServiceMesh = "LINKERD"
 	ServiceMeshIstio   ServiceMesh = "ISTIO"
 	ServiceMeshCilium  ServiceMesh = "CILIUM"
+	ServiceMeshEbpf    ServiceMesh = "EBPF"
 )
 
 var AllServiceMesh = []ServiceMesh{
 	ServiceMeshLinkerd,
 	ServiceMeshIstio,
 	ServiceMeshCilium,
+	ServiceMeshEbpf,
 }
 
 func (e ServiceMesh) IsValid() bool {
 	switch e {
-	case ServiceMeshLinkerd, ServiceMeshIstio, ServiceMeshCilium:
+	case ServiceMeshLinkerd, ServiceMeshIstio, ServiceMeshCilium, ServiceMeshEbpf:
 		return true
 	}
 	return false

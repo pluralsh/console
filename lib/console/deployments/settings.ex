@@ -213,6 +213,17 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  Sets the vector store to uninitialized
+  """
+  @spec vector_store_uninitialized() :: settings_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
+  def vector_store_uninitialized() do
+    fetch_consistent()
+    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: false}}})
+    |> Repo.update()
+  end
+
+  @doc """
   Updates global deployment settings and busts cache
   """
   @spec update(map, User.t) :: settings_resp
