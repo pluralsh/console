@@ -7356,6 +7356,7 @@ enum EvidenceType {
   LOG
   PR
   ALERT
+  KNOWLEDGE
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -7555,6 +7556,7 @@ type AiInsightEvidence {
   logs: LogsEvidence
   alert: AlertEvidence
   pullRequest: PullRequestEvidence
+  knowledge: KnowledgeEvidence
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -7580,6 +7582,12 @@ type PullRequestEvidence {
   filename: String
   contents: String
   patch: String
+}
+
+type KnowledgeEvidence {
+  name: String
+  type: String
+  observations: [String]
 }
 
 "A kubernetes object used in the course of generating a cluster insight"

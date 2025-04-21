@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Knowledge do
   def implement(%__MODULE__{required: false}),
     do: {:error, :ignore}
   def implement(%__MODULE__{} = knowledge) do
-    %Graph{query: knowledge.query}
+    %Graph{query: knowledge.query, raw: true}
     |> Graph.implement()
   end
 end

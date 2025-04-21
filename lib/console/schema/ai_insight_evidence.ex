@@ -2,7 +2,7 @@ defmodule Console.Schema.AiInsightEvidence do
   use Piazza.Ecto.Schema
   alias Console.Schema.AiInsight
 
-  defenum Type, log: 0, pr: 1, alert: 2
+  defenum Type, log: 0, pr: 1, alert: 2, knowledge: 3
 
   schema "ai_insight_evidence" do
     field :type, Type
@@ -35,7 +35,13 @@ defmodule Console.Schema.AiInsightEvidence do
       field :patch,    :string
     end
 
-    belongs_to :insight,      AiInsight
+    embeds_one :knowledge, Knowledge, on_replace: :update do
+      field :name, :string
+      field :type, :string
+      field :observations, {:array, :string}
+    end
+
+    belongs_to :insight, AiInsight
 
     timestamps()
   end
@@ -49,6 +55,7 @@ defmodule Console.Schema.AiInsightEvidence do
     |> cast_embed(:logs, with: &logs_changeset/2)
     |> cast_embed(:alert, with: &alert_changeset/2)
     |> cast_embed(:pull_request, with: &pr_changeset/2)
+    |> cast_embed(:knowledge, with: &knowledge_changeset/2)
   end
 
   defp logs_changeset(model, attrs) do
@@ -70,5 +77,10 @@ defmodule Console.Schema.AiInsightEvidence do
   defp pr_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url title repo sha filename contents patch)a)
+  end
+
+  defp knowledge_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name type observations)a)
   end
 end

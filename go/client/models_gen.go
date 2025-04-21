@@ -160,6 +160,7 @@ type AiInsightEvidence struct {
 	Logs        *LogsEvidence        `json:"logs,omitempty"`
 	Alert       *AlertEvidence       `json:"alert,omitempty"`
 	PullRequest *PullRequestEvidence `json:"pullRequest,omitempty"`
+	Knowledge   *KnowledgeEvidence   `json:"knowledge,omitempty"`
 	InsertedAt  *string              `json:"insertedAt,omitempty"`
 	UpdatedAt   *string              `json:"updatedAt,omitempty"`
 }
@@ -2878,6 +2879,12 @@ type JobStatus struct {
 	StartTime      *string `json:"startTime,omitempty"`
 	Succeeded      *int64  `json:"succeeded,omitempty"`
 	Failed         *int64  `json:"failed,omitempty"`
+}
+
+type KnowledgeEvidence struct {
+	Name         *string   `json:"name,omitempty"`
+	Type         *string   `json:"type,omitempty"`
+	Observations []*string `json:"observations,omitempty"`
 }
 
 type KubeconfigAttributes struct {
@@ -7296,20 +7303,22 @@ func (e Delta) MarshalGQL(w io.Writer) {
 type EvidenceType string
 
 const (
-	EvidenceTypeLog   EvidenceType = "LOG"
-	EvidenceTypePr    EvidenceType = "PR"
-	EvidenceTypeAlert EvidenceType = "ALERT"
+	EvidenceTypeLog       EvidenceType = "LOG"
+	EvidenceTypePr        EvidenceType = "PR"
+	EvidenceTypeAlert     EvidenceType = "ALERT"
+	EvidenceTypeKnowledge EvidenceType = "KNOWLEDGE"
 )
 
 var AllEvidenceType = []EvidenceType{
 	EvidenceTypeLog,
 	EvidenceTypePr,
 	EvidenceTypeAlert,
+	EvidenceTypeKnowledge,
 }
 
 func (e EvidenceType) IsValid() bool {
 	switch e {
-	case EvidenceTypeLog, EvidenceTypePr, EvidenceTypeAlert:
+	case EvidenceTypeLog, EvidenceTypePr, EvidenceTypeAlert, EvidenceTypeKnowledge:
 		return true
 	}
 	return false

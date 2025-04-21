@@ -214,6 +214,7 @@ export type AiInsightEvidence = {
   alert?: Maybe<AlertEvidence>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  knowledge?: Maybe<KnowledgeEvidence>;
   logs?: Maybe<LogsEvidence>;
   pullRequest?: Maybe<PullRequestEvidence>;
   type: EvidenceType;
@@ -2691,6 +2692,7 @@ export type Event = {
 
 export enum EvidenceType {
   Alert = 'ALERT',
+  Knowledge = 'KNOWLEDGE',
   Log = 'LOG',
   Pr = 'PR'
 }
@@ -3528,6 +3530,13 @@ export type JobStatus = {
   failed?: Maybe<Scalars['Int']['output']>;
   startTime?: Maybe<Scalars['String']['output']>;
   succeeded?: Maybe<Scalars['Int']['output']>;
+};
+
+export type KnowledgeEvidence = {
+  __typename?: 'KnowledgeEvidence';
+  name?: Maybe<Scalars['String']['output']>;
+  observations?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  type?: Maybe<Scalars['String']['output']>;
 };
 
 export type KubeconfigAttributes = {

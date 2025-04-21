@@ -163,6 +163,7 @@ defmodule Console.GraphQl.AI do
     field :logs,         :logs_evidence
     field :alert,        :alert_evidence
     field :pull_request, :pull_request_evidence
+    field :knowledge,    :knowledge_evidence
 
     timestamps()
   end
@@ -188,6 +189,12 @@ defmodule Console.GraphQl.AI do
     field :filename, :string
     field :contents, :string
     field :patch,    :string
+  end
+
+  object :knowledge_evidence do
+    field :name, :string
+    field :type, :string
+    field :observations, list_of(:string)
   end
 
   @desc "A kubernetes object used in the course of generating a cluster insight"

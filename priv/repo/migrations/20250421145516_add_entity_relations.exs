@@ -8,6 +8,10 @@ defmodule Console.Repo.Migrations.AddEntityRelations do
       add :cluster_id, references(:clusters, type: :uuid, on_delete: :delete_all)
     end
 
+    alter table(:ai_insight_evidence) do
+      add :knowledge, :map
+    end
+
     create index(:knowledge_entities, [:service_id])
     create index(:knowledge_entities, [:stack_id])
     create index(:knowledge_entities, [:cluster_id])

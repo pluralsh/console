@@ -2,6 +2,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
   use Console.AI.Evidence.Base
   alias Console.AI.Worker
   alias Console.Schema.{AiInsight, Stack, StackRun}
+  alias Console.AI.Evidence.{Knowledge, Context}
 
   def custom(_), do: false
 
@@ -16,7 +17,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
     |> Worker.await()
     |> run_insight()
     |> prepend(stack_description(stack))
-    |> history()
+    |> Knowledge.with_knowledge()
+    |> Context.result()
   end
 
   def insight(%Stack{insight: insight}), do: insight

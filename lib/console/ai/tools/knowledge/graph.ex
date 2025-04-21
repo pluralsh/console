@@ -7,6 +7,7 @@ defmodule Console.AI.Tools.Knowledge.Graph do
 
   embedded_schema do
     field :query, :string
+    field :raw,   :boolean, default: false
   end
 
   @valid ~w(query)a
@@ -22,23 +23,27 @@ defmodule Console.AI.Tools.Knowledge.Graph do
   def name(), do: plrl_tool("knowledge_graph")
   def description(), do: "Searches the knowledge graph, try to use the query parameter where possible since the graph can be large, but leave empty if you want to fetch it entirely"
 
-  def implement(%__MODULE__{query: query}) do
+  def implement(%__MODULE__{query: query} = model) do
     for_parent(fn parent ->
       KnowledgeEntity.for_parent(parent)
       |> maybe_search(query)
       |> Knowledge.compile()
-      |> format_graph()
+      |> format_graph(model.raw)
     end)
   end
 
   defp maybe_search(query, q) when is_binary(q) and byte_size(q) > 0, do: KnowledgeEntity.search(query, q)
   defp maybe_search(query, _), do: query
 
-  defp format_graph({entities, relationships}) do
-    Jason.encode(%{
+  defp format_graph({entities, relationships}, true) do
+    %{
       entities: Enum.map(entities, &format_entities/1),
       relationships: Enum.map(relationships, &format_relations/1)
-    })
+    }
+  end
+  defp format_graph(result, _false) do
+    format_graph(result, true)
+    |> Jason.encode()
   end
 
   defp format_entities(entity) do

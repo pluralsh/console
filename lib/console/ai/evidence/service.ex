@@ -2,7 +2,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   use Console.AI.Evidence.Base
   alias Console.Repo
   alias Console.AI.Worker
-  alias Console.AI.Evidence.{Logs, Context}
+  alias Console.AI.Evidence.{Logs, Context, Knowledge}
   alias Console.Schema.{AiInsight, Service, ServiceComponent, ServiceError, Cluster}
 
   require Logger
@@ -29,6 +29,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
       component_statuses(components)
     )
     |> Logs.with_logging(service)
+    |> Knowledge.with_knowledge()
     |> Context.result()
   end
 
