@@ -2,68 +2,44 @@ defmodule Console.Deployments.Observability.Webhook.Datadog do
   @behaviour Console.Deployments.Observability.Webhook
   import Console.Deployments.Observability.Webhook.Base
 
-  def associations(scope, payload, acc) do
-    handle_associations(scope, payload, acc)
-  end
-
-  defp handle_associations(:project, payload, acc) do
-    cond do
-      val = get_in(payload, ["meta", "project"]) ->
-        Map.put(acc, :project_id, project(val))
-
-      val = Map.get(payload, "project") ->
-        Map.put(acc, :project_id, project(val))
-
-      is_list(payload["tags"]) ->
-        tag_map = tags_to_map(payload["tags"])
-        case Map.get(tag_map, "plrl_project") || Map.get(tag_map, "project") || Map.get(tag_map, "plural_project") do
-          nil -> acc
-          val -> Map.put(acc, :project_id, project(val))
-        end
-
-      true -> acc
+  def associations(:project, %{"meta" => %{"project" => val}}, acc),
+    do: Map.put(acc, :project_id, project(val))
+  def associations(:project, %{"project" => val}, acc),
+    do: Map.put(acc, :project_id, project(val))
+  def associations(:project, %{"tags" => tags}, acc) when is_list(tags) do
+    tag_map = tags_to_map(tags)
+    case Map.get(tag_map, "plrl_project") || Map.get(tag_map, "project") || Map.get(tag_map, "plural_project") do
+      nil -> acc
+      val -> Map.put(acc, :project_id, project(val))
     end
   end
+  def associations(:project, _, acc), do: acc
 
-  defp handle_associations(:cluster, payload, acc) do
-    cond do
-      val = get_in(payload, ["meta", "cluster"]) ->
-        Map.put(acc, :cluster_id, cluster(val))
-
-      val = Map.get(payload, "cluster") ->
-        Map.put(acc, :cluster_id, cluster(val))
-
-      is_list(payload["tags"]) ->
-        tag_map = tags_to_map(payload["tags"])
-        case Map.get(tag_map, "plrl_cluster") || Map.get(tag_map, "cluster") || Map.get(tag_map, "plural_cluster") do
-          nil -> acc
-          val -> Map.put(acc, :cluster_id, cluster(val))
-        end
-
-      true -> acc
+  def associations(:cluster, %{"meta" => %{"cluster" => val}}, acc),
+    do: Map.put(acc, :cluster_id, cluster(val))
+  def associations(:cluster, %{"cluster" => val}, acc),
+    do: Map.put(acc, :cluster_id, cluster(val))
+  def associations(:cluster, %{"tags" => tags}, acc) when is_list(tags) do
+    tag_map = tags_to_map(tags)
+    case Map.get(tag_map, "plrl_cluster") || Map.get(tag_map, "cluster") || Map.get(tag_map, "plural_cluster") do
+      nil -> acc
+      val -> Map.put(acc, :cluster_id, cluster(val))
     end
   end
+  def associations(:cluster, _, acc), do: acc
 
-  defp handle_associations(:service, payload, %{cluster_id: id} = acc) when is_binary(id) do
-    cond do
-      val = get_in(payload, ["meta", "service"]) ->
-        Map.put(acc, :service_id, service(id, val))
-
-      val = Map.get(payload, "service") ->
-        Map.put(acc, :service_id, service(id, val))
-
-      is_list(payload["tags"]) ->
-        tag_map = tags_to_map(payload["tags"])
-        case Map.get(tag_map, "plrl_service") || Map.get(tag_map, "service") || Map.get(tag_map, "plural_service") do
-          nil -> acc
-          val -> Map.put(acc, :service_id, service(id, val))
-        end
-
-      true -> acc
+  def associations(:service, %{"meta" => %{"service" => val}}, acc),
+    do: Map.put(acc, :service_id, service(val))
+  def associations(:service, %{"service" => val}, acc),
+    do: Map.put(acc, :service_id, service(val))
+  def associations(:service, %{"tags" => tags}, %{cluster_id: id} = acc) when is_list(tags) and is_binary(id) do
+    tag_map = tags_to_map(tags)
+    case Map.get(tag_map, "plrl_service") || Map.get(tag_map, "service") || Map.get(tag_map, "plural_service") do
+      nil -> acc
+      val -> Map.put(acc, :service_id, service(id, val))
     end
   end
-
-  defp handle_associations(:service, _payload, acc), do: acc
+  def associations(:service, _, acc), do: acc
 
   defp tags_to_map(tags) do
     Enum.reduce(tags, %{}, fn tag, acc ->
