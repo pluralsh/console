@@ -22,7 +22,7 @@ const fetchPolicyReport = async (format: ReportFormat, token: string) => {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch products pdf - ${response.statusText}`) // TODO
+    throw new Error(`Failed to fetch report: ${response.statusText}`)
   }
 
   const blob: Blob = await response.blob()
