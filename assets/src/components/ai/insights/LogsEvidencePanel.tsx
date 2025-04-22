@@ -49,6 +49,7 @@ export function LogsEvidencePanel({
             <LogLine
               key={i}
               line={line}
+              highlighted={line.log === selectedLog.line}
             />
           ))}
         </WrapWithIf>

@@ -266,6 +266,7 @@ defmodule Console.AI.CronTest do
       [evidence] = component.insight.evidence
 
       assert evidence.type == :log
+      assert is_binary(evidence.logs.line)
 
       assert_receive {:event, %PubSub.ClusterInsight{item: {%{id: ^id}, _}}}
     end

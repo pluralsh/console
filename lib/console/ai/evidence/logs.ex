@@ -35,7 +35,7 @@ defmodule Console.AI.Evidence.Logs do
         lines = before ++ [line] ++ aft
         Context.prompt(acc, {:user, "Here's the next batch of log data:"})
         |> Context.reduce(lines, &Context.prompt(&2, {:user, encode!(&1)}))
-        |> Context.evidence(%{type: :log, line: line.log, logs: log_attrs(query, lines)})
+        |> Context.evidence(%{type: :log, logs: log_attrs(query, line, lines)})
       end)
     else
       _ ->
@@ -54,8 +54,9 @@ defmodule Console.AI.Evidence.Logs do
 
   defp build_query(resource, args), do: {:ok, %{Query.new(args) | resource: resource}}
 
-  defp log_attrs(%Query{} = q, lines) do
+  defp log_attrs(%Query{} = q, %Line{log: log}, lines) do
     Map.take(q, ~w(service_id cluster_id)a)
+    |> Map.put(:line, log)
     |> Map.put(:lines, Enum.map(lines, &Map.take(&1, ~w(timestamp log)a)))
   end
 

@@ -962,7 +962,12 @@ type RootMutationType {
 
   deleteThread(id: ID!): ChatThread
 
-  cloneThread(id: ID!): ChatThread
+  cloneThread(
+    id: ID!
+
+    "The largest allowed sequence number to include in the cloned chat. Leave nil to clone the whole chat"
+    seq: Int
+  ): ChatThread
 
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
@@ -4450,6 +4455,8 @@ type ServiceDeployment {
 
   "the flow this service belongs to"
   flow: Flow
+
+  networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection

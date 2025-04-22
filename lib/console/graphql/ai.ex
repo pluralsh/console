@@ -402,6 +402,7 @@ defmodule Console.GraphQl.AI do
     field :clone_thread, :chat_thread do
       middleware Authenticated
       arg :id, non_null(:id)
+      arg :seq, :integer, description: "The largest allowed sequence number to include in the cloned chat. Leave nil to clone the whole chat"
 
       resolve &AI.clone_thread/2
     end

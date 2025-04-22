@@ -6275,6 +6275,7 @@ export type RootMutationTypeCloneServiceArgs = {
 
 export type RootMutationTypeCloneThreadArgs = {
   id: Scalars['ID']['input'];
+  seq?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8917,6 +8918,7 @@ export type ServiceDeployment = {
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */
   namespace: Scalars['String']['output'];
+  networkGraph?: Maybe<Array<Maybe<NetworkMeshEdge>>>;
   /** whether this service is controlled by a global service */
   owner?: Maybe<GlobalService>;
   /** the service that owns this service in a service-of-services setup */
@@ -8984,6 +8986,13 @@ export type ServiceDeploymentLogsArgs = {
   limit: Scalars['Int']['input'];
   query: LokiQuery;
   start?: InputMaybe<Scalars['Long']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentNetworkGraphArgs = {
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
