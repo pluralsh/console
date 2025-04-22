@@ -1,6 +1,7 @@
 import {
   ArrowScroll,
   Button,
+  Flex,
   IconFrame,
   ListIcon,
   SearchIcon,
@@ -103,13 +104,18 @@ export function Policies() {
               placeholder="Search policies"
             />
           </IconExpander>
-          <IconFrame
-            type={'floating'}
-            size={'large'}
-            icon={<ListIcon />}
-            css={{ height: 42, width: 42 }}
-          />
-          <Button>Create report</Button>
+          <Flex
+            gap={'small'}
+            width={250}
+          >
+            <IconFrame
+              type={'floating'}
+              size={'large'}
+              icon={<ListIcon />}
+              css={{ height: 42, width: 42 }}
+            />
+            <Button flexGrow={1}>Create report</Button>
+          </Flex>
         </FiltersWrapperSC>
       </ArrowScroll>
     ),
@@ -153,7 +159,7 @@ export function Policies() {
 
 const FiltersWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   overflow: 'auto',
 }))
 
