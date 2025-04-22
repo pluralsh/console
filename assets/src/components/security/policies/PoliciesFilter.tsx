@@ -4,17 +4,12 @@ import {
   Checkbox,
   Flex,
   Input,
+  Radio,
+  RadioGroup,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { useClustersQuery, ViolationStatisticsQuery } from 'generated/graphql'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { mapExistingNodes } from '../../../utils/graphql'
@@ -49,23 +44,8 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
-  const [passing, setPassing] = useState(
-    violationsFilter === ViolationFilter.Passing ||
-      violationsFilter === ViolationFilter.All
-  )
-  const [violations, setViolations] = useState(
-    violationsFilter === ViolationFilter.Violated ||
-      violationsFilter === ViolationFilter.All
-  )
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
-
-  useEffect(() => {
-    if (passing && violations) setViolationsFilter(ViolationFilter.All)
-    else if (passing) setViolationsFilter(ViolationFilter.Passing)
-    else if (violations) setViolationsFilter(ViolationFilter.Violated)
-    else setViolationsFilter(ViolationFilter.None)
-  }, [passing, violations, setViolationsFilter])
 
   const {
     data: clustersData,
@@ -152,30 +132,21 @@ function PoliciesFilter({
       <AccordionItem
         trigger={statusLabel}
         value={statusLabel}
-        css={{ overflow: 'hidden' }}
       >
-        <CheckboxWrapperSC>
-          <Checkbox
-            small
-            name="status"
-            value={passing}
-            checked={passing}
-            onChange={({ target: { checked } }: any) => setPassing(checked)}
-          >
-            passing
-          </Checkbox>
-        </CheckboxWrapperSC>
-        <CheckboxWrapperSC>
-          <Checkbox
-            small
-            name="status"
-            value={violations}
-            checked={violations}
-            onChange={({ target: { checked } }: any) => setViolations(checked)}
-          >
-            violations
-          </Checkbox>
-        </CheckboxWrapperSC>
+        <RadioGroup
+          value={violationsFilter}
+          onChange={(v) => setViolationsFilter(v as ViolationFilter)}
+        >
+          {Object.values(ViolationFilter)?.map((label) => (
+            <Radio
+              small
+              key={label}
+              value={label}
+            >
+              {label}
+            </Radio>
+          ))}
+        </RadioGroup>
       </AccordionItem>
       <AccordionItem
         trigger={clusterLabel}

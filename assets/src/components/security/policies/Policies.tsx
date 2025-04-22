@@ -31,10 +31,9 @@ const breadcrumbs = [
 ]
 
 export enum ViolationFilter {
-  None,
-  All,
-  Passing,
-  Violated,
+  All = 'all',
+  Passing = 'passing',
+  Violated = 'violations',
 }
 
 const violatedParam = (filter: ViolationFilter) => {
@@ -43,7 +42,6 @@ const violatedParam = (filter: ViolationFilter) => {
       return true
     case ViolationFilter.Passing:
       return false
-    case ViolationFilter.None: // TODO: Not supported.
     case ViolationFilter.All:
     default:
       return undefined
@@ -81,6 +79,7 @@ export function Policies() {
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: { field: ConstraintViolationField.Kind },
   })
+
   const { data: namespacesData } = useViolationStatisticsQuery({
     variables: { field: ConstraintViolationField.Namespace },
   })
