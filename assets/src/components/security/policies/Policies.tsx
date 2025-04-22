@@ -1,9 +1,6 @@
 import {
   ArrowScroll,
-  FillLevelProvider,
-  Flex,
   SearchIcon,
-  SubTab,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
@@ -34,9 +31,10 @@ const breadcrumbs = [
 ]
 
 export enum ViolationFilter {
-  All = 'All',
-  Passing = 'Passing',
-  Violated = 'Violated',
+  None,
+  All,
+  Passing,
+  Violated,
 }
 
 const violatedParam = (filter: ViolationFilter) => {
@@ -45,6 +43,7 @@ const violatedParam = (filter: ViolationFilter) => {
       return true
     case ViolationFilter.Passing:
       return false
+    case ViolationFilter.None: // TODO: Not supported.
     case ViolationFilter.All:
     default:
       return undefined
@@ -102,30 +101,6 @@ export function Policies() {
               placeholder="Search policies"
             />
           </IconExpander>
-          <FillLevelProvider value={1}>
-            <Flex>
-              {Object.values(ViolationFilter)?.map((label) => (
-                <SubTab
-                  key={label}
-                  textValue={label}
-                  active={violationFilter === label}
-                  onClick={() => {
-                    setViolationFilter(label as ViolationFilter)
-                  }}
-                >
-                  <Flex gap="small">
-                    {label}
-                    {/* TODO: add back when back end supports */}
-                    {/* <AggregatedPolicyStatsChip
-                    violationFilter={label as ViolationFilter}
-                    kindsData={kindsData}
-                    namespacesData={namespacesData}
-                  /> */}
-                  </Flex>
-                </SubTab>
-              ))}
-            </Flex>
-          </FillLevelProvider>
         </FiltersWrapperSC>
       </ArrowScroll>
     ),
@@ -152,6 +127,8 @@ export function Policies() {
         }}
       />
       <PoliciesFilter
+        violationsFilter={violationFilter}
+        setViolationsFilter={setViolationFilter}
         selectedNamespaces={selectedNamespaces}
         setSelectedNamespaces={setSelectedNamespaces}
         selectedKinds={selectedKinds}

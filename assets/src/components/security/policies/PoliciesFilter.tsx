@@ -7,16 +7,26 @@ import {
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { useClustersQuery, ViolationStatisticsQuery } from 'generated/graphql'
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { mapExistingNodes } from '../../../utils/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import { ViolationFilter } from './Policies.tsx'
 
 const FETCH_MARGIN = 30
 
 function PoliciesFilter({
+  violationsFilter,
+  setViolationsFilter,
   selectedKinds,
   setSelectedKinds,
   selectedNamespaces,
@@ -26,6 +36,8 @@ function PoliciesFilter({
   kindsData,
   namespacesData,
 }: {
+  violationsFilter: ViolationFilter
+  setViolationsFilter: Dispatch<SetStateAction<ViolationFilter>>
   selectedKinds: (string | null)[]
   setSelectedKinds: Dispatch<SetStateAction<(string | null)[]>>
   selectedNamespaces: (string | null)[]
@@ -37,8 +49,23 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
+  const [passing, setPassing] = useState(
+    violationsFilter === ViolationFilter.Passing ||
+      violationsFilter === ViolationFilter.All
+  )
+  const [violations, setViolations] = useState(
+    violationsFilter === ViolationFilter.Violated ||
+      violationsFilter === ViolationFilter.All
+  )
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
+
+  useEffect(() => {
+    if (passing && violations) setViolationsFilter(ViolationFilter.All)
+    else if (passing) setViolationsFilter(ViolationFilter.Passing)
+    else if (violations) setViolationsFilter(ViolationFilter.Violated)
+    else setViolationsFilter(ViolationFilter.None)
+  }, [passing, violations, setViolationsFilter])
 
   const {
     data: clustersData,
@@ -75,6 +102,7 @@ function PoliciesFilter({
     [clustersData?.clusters]
   )
 
+  const statusLabel = 'Status'
   const clusterLabel = 'Cluster'
   const kindLabel = 'Kind'
   const namespaceLabel = 'Namespace'
@@ -121,6 +149,34 @@ function PoliciesFilter({
         maxHeight: 'fit-content',
       }}
     >
+      <AccordionItem
+        trigger={statusLabel}
+        value={statusLabel}
+        css={{ overflow: 'hidden' }}
+      >
+        <CheckboxWrapperSC>
+          <Checkbox
+            small
+            name="status"
+            value={passing}
+            checked={passing}
+            onChange={({ target: { checked } }: any) => setPassing(checked)}
+          >
+            passing
+          </Checkbox>
+        </CheckboxWrapperSC>
+        <CheckboxWrapperSC>
+          <Checkbox
+            small
+            name="status"
+            value={violations}
+            checked={violations}
+            onChange={({ target: { checked } }: any) => setViolations(checked)}
+          >
+            violations
+          </Checkbox>
+        </CheckboxWrapperSC>
+      </AccordionItem>
       <AccordionItem
         trigger={clusterLabel}
         value={clusterLabel}
