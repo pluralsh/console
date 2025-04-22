@@ -1,5 +1,8 @@
 import {
   ArrowScroll,
+  Button,
+  IconFrame,
+  ListIcon,
   SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -100,10 +103,17 @@ export function Policies() {
               placeholder="Search policies"
             />
           </IconExpander>
+          <IconFrame
+            type={'floating'}
+            size={'large'}
+            icon={<ListIcon />}
+            css={{ height: 42, width: 42 }}
+          />
+          <Button>Create report</Button>
         </FiltersWrapperSC>
       </ArrowScroll>
     ),
-    [searchString, violationFilter]
+    [searchString]
   )
 
   useSetPageHeaderContent(header)
