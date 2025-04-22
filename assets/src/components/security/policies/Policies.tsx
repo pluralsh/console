@@ -1,6 +1,5 @@
 import {
   ArrowScroll,
-  Button,
   Flex,
   IconFrame,
   ListIcon,
@@ -28,6 +27,7 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
+import { CreatePolicyReportButton } from './CreatePolicyReportModal.tsx'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -114,7 +114,7 @@ export function Policies() {
               icon={<ListIcon />}
               css={{ height: 42, width: 42 }}
             />
-            <Button flexGrow={1}>Create report</Button>
+            <CreatePolicyReportButton />
           </Flex>
         </FiltersWrapperSC>
       </ArrowScroll>
