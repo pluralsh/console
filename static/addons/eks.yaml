@@ -2938,6 +2938,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.32.3-eksbuild.2
+    compatibilities:
+    - '1.32'
   - version: v1.32.0-eksbuild.2
     compatibilities:
     - '1.32'
