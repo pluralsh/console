@@ -171,7 +171,8 @@ defmodule Console.GraphQl.AI do
   object :logs_evidence do
     field :service_id, :id
     field :cluster_id, :id
-    field :lines, list_of(:log_line)
+    field :line,       :string
+    field :lines,      list_of(:log_line)
   end
 
   object :alert_evidence do

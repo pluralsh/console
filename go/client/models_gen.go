@@ -2989,6 +2989,7 @@ type LoginRequest struct {
 type LogsEvidence struct {
 	ServiceID *string    `json:"serviceId,omitempty"`
 	ClusterID *string    `json:"clusterId,omitempty"`
+	Line      *string    `json:"line,omitempty"`
 	Lines     []*LogLine `json:"lines,omitempty"`
 }
 

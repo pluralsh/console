@@ -52,9 +52,7 @@ defmodule Console.GraphQl.Configuration do
       _, _, _ ->
         case Console.Plural.Manifest.get() do
           {:ok, _} = res -> res
-          error ->
-            Logger.info "could not fetch manifest: #{inspect(error)}"
-            {:ok, %{}}
+          _error -> {:ok, %{}}
         end
     end
 

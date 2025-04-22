@@ -7564,6 +7564,7 @@ type AiInsightEvidence {
 type LogsEvidence {
   serviceId: ID
   clusterId: ID
+  line: String
   lines: [LogLine]
 }
 

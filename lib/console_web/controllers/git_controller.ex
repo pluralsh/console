@@ -39,9 +39,7 @@ defmodule ConsoleWeb.GitController do
       {{:error, err}, run} ->
         Stacks.add_errors(run, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
-      err ->
-        Logger.info "could not fetch manifests, err: #{inspect(err)}"
-        send_resp(conn, 403, "Forbidden")
+      _err -> send_resp(conn, 403, "Forbidden")
     end
   end
 
@@ -56,9 +54,7 @@ defmodule ConsoleWeb.GitController do
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
-      err ->
-        Logger.info "could not fetch manifests, err: #{inspect(err)}"
-        send_resp(conn, 403, "Forbidden")
+      _err -> send_resp(conn, 403, "Forbidden")
     end
   end
 
@@ -74,9 +70,7 @@ defmodule ConsoleWeb.GitController do
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
-      err ->
-        Logger.info "could not fetch manifests, err: #{inspect(err)}"
-        send_resp(conn, 403, "Forbidden")
+      _err -> send_resp(conn, 403, "Forbidden")
     end
   end
 
