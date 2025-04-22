@@ -10,6 +10,7 @@ defmodule Console.Schema.AiInsightEvidence do
     embeds_one :logs, Logs, on_replace: :update do
       field :service_id, :binary_id
       field :cluster_id, :binary_id
+      field :line, :string
 
       embeds_many :lines, LogLine, on_replace: :delete do
         field :timestamp, :utc_datetime_usec
@@ -60,7 +61,7 @@ defmodule Console.Schema.AiInsightEvidence do
 
   defp logs_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(service_id cluster_id)a)
+    |> cast(attrs, ~w(service_id cluster_id line)a)
     |> cast_embed(:lines, with: &line_changeset/2)
   end
 

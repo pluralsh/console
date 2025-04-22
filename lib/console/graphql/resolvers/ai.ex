@@ -146,8 +146,8 @@ defmodule Console.GraphQl.Resolvers.AI do
   def delete_thread(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.delete_thread(id, user)
 
-  def clone_thread(%{id: id}, %{context: %{current_user: user}}),
-    do: ChatSvc.clone_thread(id, user)
+  def clone_thread(%{id: id} = args, %{context: %{current_user: user}}),
+    do: ChatSvc.clone_thread(args[:seq], id, user)
 
   def create_pin(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: ChatSvc.create_pin(attrs, user)

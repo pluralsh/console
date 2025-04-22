@@ -171,7 +171,8 @@ defmodule Console.GraphQl.AI do
   object :logs_evidence do
     field :service_id, :id
     field :cluster_id, :id
-    field :lines, list_of(:log_line)
+    field :line,       :string
+    field :lines,      list_of(:log_line)
   end
 
   object :alert_evidence do
@@ -401,6 +402,7 @@ defmodule Console.GraphQl.AI do
     field :clone_thread, :chat_thread do
       middleware Authenticated
       arg :id, non_null(:id)
+      arg :seq, :integer, description: "The largest allowed sequence number to include in the cloned chat. Leave nil to clone the whole chat"
 
       resolve &AI.clone_thread/2
     end

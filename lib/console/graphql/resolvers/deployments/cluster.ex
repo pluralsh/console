@@ -195,8 +195,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     end
   end
 
-  def network_graph(cluster, args, _),
-    do: Console.Mesh.Provider.graph(cluster, Map.to_list(args))
+  def network_graph(parent, args, _),
+    do: Console.Mesh.Provider.graph(parent, Map.to_list(args))
 
   def metrics_summary(cluster, _args, _) do
     case Clusters.cached_cluster_metrics(cluster) do

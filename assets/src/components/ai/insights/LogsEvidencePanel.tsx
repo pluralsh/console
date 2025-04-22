@@ -49,6 +49,7 @@ export function LogsEvidencePanel({
             <LogLine
               key={i}
               line={line}
+              highlighted={line.log === selectedLog.line}
             />
           ))}
         </WrapWithIf>
@@ -69,7 +70,9 @@ export function LogsEvidencePanel({
                 css={{ flexShrink: 0 }}
                 type="floating"
               />
-              <span css={{ ...TRUNCATE, flex: 1 }}>{log.lines?.[0]?.log}</span>
+              <span css={{ ...TRUNCATE, flex: 1 }}>
+                {log.line ?? log.lines?.[0]?.log}
+              </span>
               <IconFrame
                 clickable
                 icon={<CaretRightIcon />}

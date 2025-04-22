@@ -2989,6 +2989,7 @@ type LoginRequest struct {
 type LogsEvidence struct {
 	ServiceID *string    `json:"serviceId,omitempty"`
 	ClusterID *string    `json:"clusterId,omitempty"`
+	Line      *string    `json:"line,omitempty"`
 	Lines     []*LogLine `json:"lines,omitempty"`
 }
 
@@ -5350,7 +5351,8 @@ type ServiceDeployment struct {
 	// sideload detected vulnerabilities for this service
 	Vulns *ServiceVuln `json:"vulns,omitempty"`
 	// the flow this service belongs to
-	Flow *Flow `json:"flow,omitempty"`
+	Flow         *Flow              `json:"flow,omitempty"`
+	NetworkGraph []*NetworkMeshEdge `json:"networkGraph,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service

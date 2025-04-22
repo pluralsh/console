@@ -93,6 +93,7 @@ fragment AiInsightEvidence on AiInsightEvidence {
 fragment LogsEvidence on LogsEvidence {
   clusterId
   serviceId
+  line
   lines {
     ...LogLine
   }
