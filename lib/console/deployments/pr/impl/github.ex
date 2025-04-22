@@ -44,18 +44,24 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
-  def pr(%{"pull_request" => %{"html_url" => url} = pr}) do
+  def pr(%{"pull_request" => %{"html_url" => url} = pr} = event) do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["head"]["ref"],
       title: pr["title"],
-      body: pr["body"]
+      body: pr["body"],
+      commit_sha: pr["head"]["sha"]
     }, pr_associations(pr_content(pr)))
+    |> add_approver(event)
     |> Console.drop_nils()
 
     {:ok, url, attrs}
   end
   def pr(_), do: :ignore
+
+  defp add_approver(attrs, %{"review" => %{"state" => "approved", "user" => u}}),
+    do: Map.put(attrs, :approver, u["email"] || u["login"])
+  defp add_approver(attrs, _), do: attrs
 
   def review(conn, %PullRequest{url: url}, body) do
     with {:ok, owner, repo, number} <- get_pull_id(url),

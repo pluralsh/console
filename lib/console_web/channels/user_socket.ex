@@ -18,7 +18,7 @@ defmodule ConsoleWeb.UserSocket do
 
   def build_context(params) do
     with {:ok, token} <- fetch_token(params),
-         {:ok, current_user, _claims} = Console.Guardian.resource_from_token(token) do
+         {:ok, current_user, _claims} <- Console.Guardian.resource_from_token(token) do
       {:ok, %{current_user: current_user}}
     end
   end
