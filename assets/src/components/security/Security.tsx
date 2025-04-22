@@ -53,7 +53,6 @@ const HeaderWrapperSC = styled.div(({ theme }) => ({
   minHeight: 'fit-content',
   alignItems: 'center',
   gap: theme.spacing.medium,
-  overflow: 'auto',
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({
