@@ -25,12 +25,6 @@ export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
   const { updateEdge } = useReactFlow()
   const path = generateElkEdgePath(data?.elkPathData)
 
-  // TODO: get label position from elk
-  const start = data?.elkPathData?.[0].startPoint ?? { x: 0, y: 0 }
-  const end = data?.elkPathData?.[0].endPoint ?? { x: 0, y: 0 }
-  const labelX = start.x + (end.x - start.x) / 4
-  const labelY = start.y + (end.y - start.y) / 4
-
   const { expandedId, setExpandedId } = use(ExpandedNetworkInfoCtx)
   const isExpanded = expandedId === id
   const toggleExpanded = () => {
@@ -38,6 +32,12 @@ export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
     if (expandedId) updateEdge(expandedId, { zIndex: 0 })
     updateEdge(id, { zIndex: isExpanded ? 0 : 1 })
   }
+
+  // TODO: get label position from elk
+  const start = data?.elkPathData?.[0].startPoint ?? { x: 0, y: 0 }
+  const end = data?.elkPathData?.[0].endPoint ?? { x: 0, y: 0 }
+  const labelX = start.x + (end.x - start.x) / (isExpanded ? 2 : 3)
+  const labelY = start.y + (end.y - start.y) / (isExpanded ? 2 : 3)
 
   return (
     <>
@@ -98,6 +98,7 @@ export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
           ) : (
             <IconFrame
               clickable
+              type="floating"
               icon={<InfoIcon />}
               onClick={toggleExpanded}
             />
@@ -108,27 +109,22 @@ export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
   )
 }
 
-const EdgeLabelSC = styled.div<{ $isExpanded: boolean }>(
-  ({ theme, $isExpanded }) => ({
-    position: 'absolute',
-    background: theme.colors['fill-one'],
-    padding: theme.spacing.xsmall,
-    borderRadius: theme.borderRadiuses.medium,
-    fontWeight: 700,
-    cursor: 'pointer',
-    boxShadow: theme.boxShadows.slight,
-    transition: 'all 0.2s ease',
-    zIndex: $isExpanded ? 1000 : 1,
-    '&:hover': {
-      boxShadow: theme.boxShadows.moderate,
-    },
-  })
-)
+const EdgeLabelSC = styled.div<{ $isExpanded: boolean }>(({ $isExpanded }) => ({
+  position: 'absolute',
+  cursor: 'pointer',
+  zIndex: $isExpanded ? 1000 : 1,
+}))
 
 const ExpandedContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
+  background: theme.colors['fill-one'],
+  padding: theme.spacing.xsmall,
+  boxShadow: theme.boxShadows.slight,
+  borderRadius: theme.borderRadiuses.medium,
+  transition: 'all 0.2s ease',
+  fontWeight: 700,
 }))
 
 function Statistic({

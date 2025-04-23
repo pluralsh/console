@@ -17,23 +17,19 @@ const nodeTypes = {
 function getNodesAndEdges(state: StackState) {
   const nodes: Node[] = []
   const edges: Edge[] = []
-  const existingIdentifiers = new Set(
-    state?.state?.map((ssr) => ssr?.identifier)
-  )
+  const existingIds = new Set(state?.state?.map((ssr) => ssr?.identifier))
+
   state?.state?.filter(isNonNullable).forEach((ssr) => {
     nodes.push({
       id: ssr.identifier,
       position: { x: 0, y: 0 },
       type: NodeType.Stage,
       data: { ...ssr },
-      style: { opacity: 0 },
     })
 
     edges.push(
       ...(ssr.links ?? [])
-        .filter(
-          (link): link is string => !!link && existingIdentifiers.has(link)
-        )
+        .filter((link): link is string => !!link && existingIds.has(link))
         .map((link) => ({
           type: EdgeType.Bezier,
           updatable: false,
@@ -67,4 +63,5 @@ export function StackStateGraph({ state }: { state: StackState }) {
 
 const options: LayoutOptions = {
   'elk.algorithm': 'layered',
+  'elk.edgeRouting': 'POLYLINE',
 }

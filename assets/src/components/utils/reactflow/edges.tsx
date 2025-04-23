@@ -72,7 +72,7 @@ function Smooth({ style, ...props }: EdgeProps) {
       pathOptions={{ borderRadius: theme.borderRadiuses.medium }}
       style={{
         ...style,
-        stroke: theme.colors.border,
+        stroke: theme.colors['border-input'],
       }}
     />
   )

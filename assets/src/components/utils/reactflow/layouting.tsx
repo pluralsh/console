@@ -35,7 +35,10 @@ async function getLayoutedElements(
       id: node.id,
       width: node.measured?.width ?? 0,
       height: node.measured?.height ?? 0,
-      properties: node.data.elkProperties,
+      properties: {
+        ...defaultNodeProperties,
+        ...(node.data.elkProperties ?? {}),
+      },
     })),
     edges: edges.map((edge) => ({
       id: edge.id,
@@ -46,6 +49,7 @@ async function getLayoutedElements(
 
   // this mutates the graph object
   await elk.layout(elkGraph)
+
   const nodeIdToElkNode = new Map<string, ElkNode>()
   const edgeIdToElkEdge = new Map<string, ElkExtendedEdge>()
   for (const node of elkGraph.children ?? []) nodeIdToElkNode.set(node.id, node)
@@ -107,4 +111,8 @@ export function useAutoLayout({
     setError,
     setIsLayouting,
   ])
+}
+
+const defaultNodeProperties = {
+  'elk.portAlignment.default': 'CENTER',
 }

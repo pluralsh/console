@@ -28,7 +28,10 @@ function getNodesAndEdges(
 ) {
   const nodes: Node[] = []
   const edges: Edge[] = []
-
+  const existingIds = new Set([
+    ...services.map(({ id }) => id),
+    ...globalServices.map(({ id }) => id),
+  ])
   services.filter(isNotDeploymentOperatorService).forEach((service) => {
     nodes.push({
       id: service.id,
@@ -37,7 +40,11 @@ function getNodesAndEdges(
       data: { ...service },
     })
 
-    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+    if (
+      service.parent?.id &&
+      isNotDeploymentOperatorService(service.parent) &&
+      existingIds.has(service.parent.id)
+    ) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -47,7 +54,7 @@ function getNodesAndEdges(
       })
     }
 
-    if (service.owner?.id) {
+    if (service.owner?.id && existingIds.has(service.owner.id)) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -66,7 +73,11 @@ function getNodesAndEdges(
       data: { ...service },
     })
 
-    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+    if (
+      service.parent?.id &&
+      isNotDeploymentOperatorService(service.parent) &&
+      existingIds.has(service.parent.id)
+    ) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -130,5 +141,7 @@ export function ServicesTreeDiagram({
 }
 
 const options: LayoutOptions = {
-  'elk.algorithm': 'layered',
+  'elk.algorithm': 'mrtree',
+  'elk.direction': 'RIGHT',
+  'elk.spacing.nodeNode': '60',
 }

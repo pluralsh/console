@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LayoutOptions } from 'elkjs'
+import { pipelineElkOptions } from 'components/cd/pipelines/PipelineGraph'
 import {
   ComponentTreeFragment,
   ServiceDeploymentComponentFragment,
@@ -29,12 +29,8 @@ export function ComponentTreeGraph({
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      elkOptions={options}
+      elkOptions={pipelineElkOptions}
       nodeTypes={nodeTypes}
     />
   )
-}
-
-const options: LayoutOptions = {
-  'elk.algorithm': 'layered',
 }

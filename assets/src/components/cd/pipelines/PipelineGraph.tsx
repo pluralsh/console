@@ -27,13 +27,13 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      elkOptions={options}
+      elkOptions={pipelineElkOptions}
       nodeTypes={nodeTypes}
     />
   )
 }
 
-const options: LayoutOptions = {
+export const pipelineElkOptions: LayoutOptions = {
   'elk.algorithm': 'layered',
   'elk.layered.nodePlacement.strategy': 'SIMPLE',
   'elk.layered.spacing.nodeNodeBetweenLayers': '55',
