@@ -222,7 +222,6 @@ defmodule Console.GraphQl.Deployments.Service do
     field :flow,           :flow, resolve: dataloader(Deployments), description: "the flow this service belongs to"
 
     field :network_graph, list_of(:network_mesh_edge) do
-      arg :namespace, :string
       arg :time,      :datetime
 
       resolve &Deployments.network_graph/3

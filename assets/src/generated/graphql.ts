@@ -8991,7 +8991,6 @@ export type ServiceDeploymentLogsArgs = {
 
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeploymentNetworkGraphArgs = {
-  namespace?: InputMaybe<Scalars['String']['input']>;
   time?: InputMaybe<Scalars['DateTime']['input']>;
 };
 

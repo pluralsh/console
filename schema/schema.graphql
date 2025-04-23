@@ -4456,7 +4456,7 @@ type ServiceDeployment {
   "the flow this service belongs to"
   flow: Flow
 
-  networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
+  networkGraph(time: DateTime): [NetworkMeshEdge]
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection

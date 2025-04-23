@@ -1,5 +1,8 @@
 name: CI / Console
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
 on:
   push:
     branches: [master]
