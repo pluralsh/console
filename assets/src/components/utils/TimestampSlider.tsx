@@ -1,12 +1,7 @@
-import {
-  Button,
-  Card,
-  Flex,
-  HistoryIcon,
-  Slider,
-} from '@pluralsh/design-system'
+import { Button, Card, HistoryIcon, Slider } from '@pluralsh/design-system'
 import { useClickOutside } from '@react-hooks-library/core'
-import { useCallback, useRef, useState } from 'react'
+import { useThrottle } from 'components/hooks/useThrottle'
+import { useEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime, toISOStringOrUndef } from 'utils/datetime'
 import { Body2BoldP } from './typography/Text'
@@ -16,42 +11,22 @@ type TimestampSliderProps = {
   isTimestampSet: boolean
 }
 
-export function TimestampSlider({
-  setTimestamp,
-  isTimestampSet,
-}: TimestampSliderProps) {
+export function TimestampSlider({ setTimestamp }: TimestampSliderProps) {
   // slider is a two hour window, with 1 minute increments, "now" is captured when the component mounts
   const DISPLAY_FORMAT = 'h:mm a'
   const [now] = useState(() => new Date().getTime())
   const [internalValue, setInternalValue] = useState<number>(0)
-  const [lastAppliedValue, setLastAppliedValue] = useState<number>(0)
+  const throttledInternalValue = useThrottle(internalValue, 100)
+  const newDateUnix = now + throttledInternalValue * 60 * 1000
 
-  const newDateUnix = now + internalValue * 60 * 1000
-
-  const onApply = useCallback(() => {
+  // using an effect so we can track the throttled value
+  useEffect(() => {
     setTimestamp(toISOStringOrUndef(newDateUnix))
-    setLastAppliedValue(internalValue)
-  }, [newDateUnix, internalValue, setTimestamp])
+  }, [newDateUnix, setTimestamp])
 
   return (
     <div>
-      <Flex justify="space-between">
-        <Body2BoldP>{formatDateTime(newDateUnix, DISPLAY_FORMAT)}</Body2BoldP>
-        <Flex gap="xsmall">
-          <LinkButtonSC
-            disabled={internalValue === lastAppliedValue}
-            onClick={() => setInternalValue(lastAppliedValue)}
-          >
-            Reset
-          </LinkButtonSC>
-          <LinkButtonSC
-            disabled={isTimestampSet && internalValue === lastAppliedValue}
-            onClick={onApply}
-          >
-            Apply
-          </LinkButtonSC>
-        </Flex>
-      </Flex>
+      <Body2BoldP>{formatDateTime(newDateUnix, DISPLAY_FORMAT)}</Body2BoldP>
       <Slider
         colorized={false}
         tooltip={false}
@@ -117,12 +92,3 @@ const SliderCardSC = styled(Card)<{ $isOpen: boolean }>(
     ...(!$isOpen && { display: 'none' }),
   })
 )
-
-const LinkButtonSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  color: theme.colors['text-disabled'],
-  cursor: 'not-allowed',
-  '&:not(:disabled)': {
-    ...theme.partials.text.inlineLink,
-  },
-}))

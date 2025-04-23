@@ -156,10 +156,12 @@ export function NetworkGraph({
             />
           </Flex>
           <Card flex={1}>
-            {loading ? (
-              <LoadingIndicator />
-            ) : isEmpty(networkData) ? (
-              <EmptyState message="No network data found." />
+            {isEmpty(networkData) ? (
+              loading ? (
+                <LoadingIndicator />
+              ) : (
+                <EmptyState message="No network data found." />
+              )
             ) : (
               <ReactFlowGraph
                 allowFullscreen
@@ -170,6 +172,7 @@ export function NetworkGraph({
                 edgeTypes={edgeTypes}
                 minZoom={0.03}
                 nodeDragThreshold={5}
+                showLayoutingIndicator={false}
               />
             )}
           </Card>

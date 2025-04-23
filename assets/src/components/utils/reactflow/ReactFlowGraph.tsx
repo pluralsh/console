@@ -94,6 +94,7 @@ export function ReactFlowGraph({
   elkOptions,
   resetView,
   allowFullscreen = false,
+  showLayoutingIndicator = true,
   ...props
 }: {
   baseNodes: Node[]
@@ -101,6 +102,7 @@ export function ReactFlowGraph({
   elkOptions: LayoutOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
   resetView?: () => void
   allowFullscreen?: boolean
+  showLayoutingIndicator?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
@@ -147,7 +149,7 @@ export function ReactFlowGraph({
       $fullscreen={fullscreen}
     >
       <ReactFlowAreaSC $fullscreen={fullscreen}>
-        {isLayouting && <LoadingIndicator />}
+        {showLayoutingIndicator && isLayouting && <LoadingIndicator />}
         <ReactFlowWrapperSC $hide={isLayouting}>
           <ReactFlow
             fitView

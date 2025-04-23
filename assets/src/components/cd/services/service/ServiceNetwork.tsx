@@ -11,10 +11,15 @@ export function ServiceNetwork() {
   const metricsEnabled = useMetricsEnabled()
   const [timestamp, setTimestamp] = useState<string | undefined>(undefined)
 
-  const { data, loading, error } = useServiceNetworkGraphQuery({
+  const {
+    data: newData,
+    previousData,
+    loading,
+    error,
+  } = useServiceNetworkGraphQuery({
     variables: { serviceId, time: timestamp },
-    fetchPolicy: 'cache-and-network',
   })
+  const data = newData || previousData
 
   if (!metricsEnabled) return <MetricsEmptyState />
   if (error) return <GqlError error={error} />
