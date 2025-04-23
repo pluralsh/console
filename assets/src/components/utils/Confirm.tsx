@@ -1,13 +1,13 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { ApolloError } from '@apollo/client'
-import { Button, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { GraphQLError } from 'graphql'
 import { GraphQLErrors } from '@apollo/client/errors'
 
 import { GqlError } from './Alert'
 
-type ConfirmProps = {
+export type ConfirmProps = {
   open: boolean
   close: Nullable<(...args: any[]) => unknown>
   title?: ReactNode
@@ -20,6 +20,8 @@ type ConfirmProps = {
   loading?: boolean
   destructive?: boolean
   extraContent?: ReactNode
+  confirmationEnabled?: boolean
+  confirmationText?: Nullable<string>
 }
 
 export function Confirm({
@@ -35,7 +37,12 @@ export function Confirm({
   loading = false,
   destructive = false,
   extraContent,
+  confirmationEnabled = false,
+  confirmationText = 'delete',
 }: ConfirmProps) {
+  const [confirmationInput, setConfirmationInput] = useState('')
+  const isConfirmationValid =
+    !confirmationEnabled || confirmationInput === confirmationText
   const theme = useTheme()
 
   return (
@@ -57,6 +64,7 @@ export function Confirm({
             destructive={destructive}
             onClick={submit}
             loading={loading}
+            disabled={!isConfirmationValid}
             marginLeft="medium"
           >
             {label || 'Confirm'}
@@ -88,6 +96,34 @@ export function Confirm({
         {text}
       </div>
       {extraContent}
+      {confirmationEnabled && (
+        <div css={{ marginTop: theme.spacing.medium }}>
+          <FormField
+            label={<span>Type &quot;{confirmationText}&quot; to confirm</span>}
+            css={{
+              ' label': {
+                width: '100%',
+              },
+              ':focus-within': {
+                borderColor: theme.colors['text-danger-light'],
+              },
+            }}
+          >
+            <Input
+              value={confirmationInput}
+              onChange={(e) => setConfirmationInput(e.target.value)}
+              placeholder={confirmationText}
+              css={{
+                color: theme.colors.text,
+                borderColor: theme.colors['text-danger-light'],
+                '::placeholder': {
+                  color: theme.colors['text-danger-light'],
+                },
+              }}
+            />
+          </FormField>
+        </div>
+      )}
     </Modal>
   )
 }

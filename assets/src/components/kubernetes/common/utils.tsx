@@ -100,6 +100,7 @@ export function useDefaultColumns<
           <DeleteResourceButton
             resource={getValue()}
             refetch={table?.options?.meta?.refetch}
+            customResource={table?.options?.meta?.customResource}
           />
         ),
       }),

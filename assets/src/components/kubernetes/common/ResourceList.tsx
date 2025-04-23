@@ -125,7 +125,7 @@ export function ResourceList<
         isFetchingNextPage={loading}
         reactTableOptions={{
           ...reactTableOptions,
-          ...{ meta: { ...reactTableOptions.meta, refetch } },
+          ...{ meta: { ...reactTableOptions.meta, refetch, customResource } },
         }}
         virtualizeRows
         onRowClick={
