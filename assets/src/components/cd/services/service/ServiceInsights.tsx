@@ -1,10 +1,6 @@
-import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
 import { fromNow } from 'utils/datetime'
-import { useMemo } from 'react'
 
-import { useParams } from 'react-router-dom'
-
-import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { AiInsight } from '../../../../generated/graphql.ts'
 import AIPinButton from '../../../ai/AIPinButton.tsx'
@@ -13,34 +9,14 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
-import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { useServiceContext } from './ServiceDetails'
 
 export function ServiceInsights() {
   const theme = useTheme()
   const { service, refetch, loading } = useServiceContext()
-  const { serviceId, clusterId } = useParams()
-
-  const breadcrumbs = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({
-        cluster: service?.cluster || { id: clusterId || '' },
-        service: service || { id: serviceId || '' },
-      }),
-      {
-        label: 'insights',
-        url: `${CD_REL_PATH}/services/${serviceId}/insights`,
-      },
-    ],
-    [clusterId, service, serviceId]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <Flex

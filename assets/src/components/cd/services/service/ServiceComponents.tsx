@@ -1,12 +1,10 @@
 import {
   ArrowScroll,
-  type Breadcrumb,
   Callout,
   ComponentsIcon,
   Flex,
   SearchIcon,
   UpdatesIcon,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { type Key } from '@react-types/shared'
 import {
@@ -22,7 +20,6 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
-  getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -32,6 +29,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { useThrottle } from 'components/hooks/useThrottle.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
 import {
@@ -40,31 +38,11 @@ import {
 } from './component/Components.tsx'
 import { countDeprecations } from './deprecationUtils'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
-import { GqlError } from 'components/utils/Alert.tsx'
-
-export const getServiceComponentsBreadcrumbs = ({
-  service,
-  cluster,
-}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
-  ...getServiceDetailsBreadcrumbs({ cluster, service }),
-  {
-    label: 'components',
-    url: `${getServiceDetailsPath({
-      clusterId: cluster?.id,
-      serviceId: service?.id,
-    })}/components`,
-  },
-]
 
 export default function ServiceComponents() {
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
-  const outletContext = useServiceContext()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const throttledSearchQuery = useThrottle(searchQuery, 250)
@@ -72,16 +50,6 @@ export default function ServiceComponents() {
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
   })
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () =>
-      getServiceComponentsBreadcrumbs({
-        cluster: outletContext?.service?.cluster,
-        service: outletContext?.service,
-      }),
-    [outletContext.service]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
   const { kindSelector, selectedKinds, setSelectedKinds, allKinds } =
     useComponentKindSelect(data?.serviceDeployment?.components, {
       width: 320,

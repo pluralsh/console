@@ -1,50 +1,14 @@
-import {
-  Breadcrumb,
-  EmptyState,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
-
-import {
-  CD_REL_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
-} from 'routes/cdRoutesConsts'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { columns } from '../ServiceDependenciesColumns'
 
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
+import { useServiceContext } from './ServiceDetails'
 
 export default function ServiceDependencies() {
-  const { serviceId, clusterId } = useParams<{
-    [SERVICE_PARAM_ID]: string
-    [SERVICE_PARAM_CLUSTER_ID]: string
-  }>()
   const { service } = useServiceContext()
-
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({
-        cluster: service?.cluster || { id: clusterId || '' },
-        service: service || { id: serviceId || '' },
-      }),
-      {
-        label: 'dependencies',
-        url: `${CD_REL_PATH}/services/${serviceId}/dependencies`,
-      },
-    ],
-    [clusterId, service, serviceId]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage

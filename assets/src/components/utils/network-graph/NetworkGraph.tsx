@@ -57,11 +57,13 @@ export function NetworkGraph({
   loading,
   setTimestamp,
   isTimestampSet,
+  enableNamespaceFilter = true,
 }: {
   networkData: Nullable<NetworkMeshEdgeFragment>[]
   loading?: boolean
   setTimestamp: (timestamp: string | undefined) => void
   isTimestampSet: boolean
+  enableNamespaceFilter?: boolean
 }) {
   const { colors } = useTheme()
   const { clusterId } = useParams()
@@ -76,6 +78,7 @@ export function NetworkGraph({
   const { data: namespacesData, error: namespacesError } =
     useClusterNamespacesQuery({
       variables: { clusterId },
+      skip: !enableNamespaceFilter,
     })
   const namespaces =
     namespacesData?.namespaces
@@ -121,7 +124,7 @@ export function NetworkGraph({
               startIcon={<SearchIcon color="icon-light" />}
               flex={1}
             />
-            {!namespacesError && (
+            {enableNamespaceFilter && !namespacesError && (
               <NamespaceFilter
                 namespaces={namespaces}
                 namespace={namespace ?? ''}

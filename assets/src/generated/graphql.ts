@@ -11143,7 +11143,6 @@ export type NetworkMeshEdgeFragment = { __typename?: 'NetworkMeshEdge', id: stri
 
 export type ClusterNetworkGraphQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
-  namespace?: InputMaybe<Scalars['String']['input']>;
   time?: InputMaybe<Scalars['DateTime']['input']>;
 }>;
 
@@ -11806,6 +11805,14 @@ export type ServiceStatusesQueryVariables = Exact<{
 
 
 export type ServiceStatusesQuery = { __typename?: 'RootQueryType', serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+
+export type ServiceNetworkGraphQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+}>;
+
+
+export type ServiceNetworkGraphQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
 
 export type ComponentTreeFragment = { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
 
@@ -20067,10 +20074,10 @@ export type ClusterNodeMetricsLazyQueryHookResult = ReturnType<typeof useCluster
 export type ClusterNodeMetricsSuspenseQueryHookResult = ReturnType<typeof useClusterNodeMetricsSuspenseQuery>;
 export type ClusterNodeMetricsQueryResult = Apollo.QueryResult<ClusterNodeMetricsQuery, ClusterNodeMetricsQueryVariables>;
 export const ClusterNetworkGraphDocument = gql`
-    query ClusterNetworkGraph($clusterId: ID!, $namespace: String, $time: DateTime) {
+    query ClusterNetworkGraph($clusterId: ID!, $time: DateTime) {
   cluster(id: $clusterId) {
     id
-    networkGraph(namespace: $namespace, time: $time) {
+    networkGraph(time: $time) {
       ...NetworkMeshEdge
     }
   }
@@ -20090,7 +20097,6 @@ export const ClusterNetworkGraphDocument = gql`
  * const { data, loading, error } = useClusterNetworkGraphQuery({
  *   variables: {
  *      clusterId: // value for 'clusterId'
- *      namespace: // value for 'namespace'
  *      time: // value for 'time'
  *   },
  * });
@@ -22990,6 +22996,50 @@ export type ServiceStatusesQueryHookResult = ReturnType<typeof useServiceStatuse
 export type ServiceStatusesLazyQueryHookResult = ReturnType<typeof useServiceStatusesLazyQuery>;
 export type ServiceStatusesSuspenseQueryHookResult = ReturnType<typeof useServiceStatusesSuspenseQuery>;
 export type ServiceStatusesQueryResult = Apollo.QueryResult<ServiceStatusesQuery, ServiceStatusesQueryVariables>;
+export const ServiceNetworkGraphDocument = gql`
+    query ServiceNetworkGraph($serviceId: ID!, $time: DateTime) {
+  serviceDeployment(id: $serviceId) {
+    id
+    networkGraph(time: $time) {
+      ...NetworkMeshEdge
+    }
+  }
+}
+    ${NetworkMeshEdgeFragmentDoc}`;
+
+/**
+ * __useServiceNetworkGraphQuery__
+ *
+ * To run a query within a React component, call `useServiceNetworkGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceNetworkGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceNetworkGraphQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      time: // value for 'time'
+ *   },
+ * });
+ */
+export function useServiceNetworkGraphQuery(baseOptions: Apollo.QueryHookOptions<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>(ServiceNetworkGraphDocument, options);
+      }
+export function useServiceNetworkGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>(ServiceNetworkGraphDocument, options);
+        }
+export function useServiceNetworkGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>(ServiceNetworkGraphDocument, options);
+        }
+export type ServiceNetworkGraphQueryHookResult = ReturnType<typeof useServiceNetworkGraphQuery>;
+export type ServiceNetworkGraphLazyQueryHookResult = ReturnType<typeof useServiceNetworkGraphLazyQuery>;
+export type ServiceNetworkGraphSuspenseQueryHookResult = ReturnType<typeof useServiceNetworkGraphSuspenseQuery>;
+export type ServiceNetworkGraphQueryResult = Apollo.QueryResult<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>;
 export const ComponentTreeDocument = gql`
     query ComponentTree($id: ID!) {
   componentTree(id: $id) {
@@ -28556,6 +28606,7 @@ export const namedOperations = {
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
     ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     ServiceStatuses: 'ServiceStatuses',
+    ServiceNetworkGraph: 'ServiceNetworkGraph',
     ComponentTree: 'ComponentTree',
     ClusterUsages: 'ClusterUsages',
     ClusterUsageHistory: 'ClusterUsageHistory',

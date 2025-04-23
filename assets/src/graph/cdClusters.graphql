@@ -719,14 +719,10 @@ fragment NetworkMeshEdge on NetworkMeshEdge {
   }
 }
 
-query ClusterNetworkGraph(
-  $clusterId: ID!
-  $namespace: String
-  $time: DateTime
-) {
+query ClusterNetworkGraph($clusterId: ID!, $time: DateTime) {
   cluster(id: $clusterId) {
     id
-    networkGraph(namespace: $namespace, time: $time) {
+    networkGraph(time: $time) {
       ...NetworkMeshEdge
     }
   }
