@@ -19,7 +19,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
-import { Resource } from './types'
+import { Kind, Resource } from './types'
 
 interface DeleteResourceProps {
   resource: Resource
@@ -53,7 +53,7 @@ export default function DeleteResourceButton({
           refetch={refetch}
           confirmationEnabled={
             customResource ||
-            resource.typeMeta.kind === 'customresourcedefinition'
+            resource.typeMeta.kind === Kind.CustomResourceDefinition
           }
           confirmationText={resource.objectMeta.name}
         />
