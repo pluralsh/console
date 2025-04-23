@@ -17,6 +17,7 @@ enum ReportFormat {
 }
 
 const fetchPolicyReport = (format: ReportFormat, token: string) => {
+  streamSaver.mitm = '/mitm.html'
   fetch(`/v1/compliance/report?format=${format}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
