@@ -14,7 +14,7 @@ import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 
 import { useDebounce } from 'usehooks-ts'
 
-import { useCluster, useNamespaces } from '../Cluster'
+import { useNamespaces } from '../Cluster'
 
 import { NamespaceFilter } from './NamespaceFilter'
 
@@ -40,7 +40,7 @@ export const DataSelect = createContext<DataSelectContextT | undefined>(
 
 export function useDataSelect(defaults?: DataSelectT) {
   const context = useContext(DataSelect)
-  const [namespaced, setNamespaced] = useState<boolean>(false)
+  const [namespaced, setNamespaced] = useState<boolean>(true)
   const [namespace, setNamespace] = useState(defaults?.namespace ?? '')
   const [filter, setFilter] = useState(defaults?.filter ?? '')
   const [enabled, setEnabled] = useState<boolean>(true)
@@ -76,7 +76,6 @@ export function DataSelectInputs({
 }: {
   dataSelect: DataSelectContextT
 }) {
-  const cluster = useCluster()
   const namespaces = useNamespaces()
   const {
     namespaced,
@@ -93,8 +92,6 @@ export function DataSelectInputs({
     () => setContextFilter(debouncedFilter),
     [debouncedFilter, setContextFilter]
   )
-
-  useEffect(() => setNamespace(''), [cluster, setNamespace])
 
   return (
     <Flex gap="medium">

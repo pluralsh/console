@@ -98,9 +98,10 @@ export default function Navigation() {
           <ClusterSelect
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={(id) =>
+            onSelectionChange={(id) => {
+              dataSelect.setNamespace('')
               navigate(pathname.replace(clusterId, id as string) + search)
-            }
+            }}
             withoutTitleContent
           />
           <SideNavEntries
