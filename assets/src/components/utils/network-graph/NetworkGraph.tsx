@@ -216,5 +216,5 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
 const elkOptions = {
   'elk.algorithm': 'org.eclipse.elk.force',
   'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-  'elk.spacing.nodeNode': '20',
+  // 'elk.spacing.nodeNode': '60',
 }

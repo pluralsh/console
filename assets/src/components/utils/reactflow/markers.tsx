@@ -3,6 +3,7 @@ import { useTheme } from 'styled-components'
 export enum MarkerType {
   Arrow = 'plural-marker-arrow',
   ArrowActive = 'plural-marker-arrow-active',
+  ArrowPrimary = 'plural-marker-arrow-primary',
   ArrowStrong = 'plural-marker-arrow-strong',
 }
 
@@ -46,6 +47,10 @@ export function MarkerDefs() {
         <Marker
           id={MarkerType.ArrowStrong}
           color={theme.colors['border-input']}
+        />
+        <Marker
+          id={MarkerType.ArrowPrimary}
+          color={theme.colors['border-primary']}
         />
       </defs>
     </svg>

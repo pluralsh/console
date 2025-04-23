@@ -1,5 +1,5 @@
 import { IconFrame, InfoIcon } from '@pluralsh/design-system'
-import { BaseEdge, Edge, EdgeLabelRenderer } from '@xyflow/react'
+import { BaseEdge, Edge, EdgeLabelRenderer, useReactFlow } from '@xyflow/react'
 import { filesize } from 'filesize'
 import { NetworkMeshStatisticsFragment } from 'generated/graphql'
 import { round } from 'lodash'
@@ -22,20 +22,23 @@ type NetworkEdgeProps = EdgeProps<Edge<NetworkEdgeData>> & {
 
 export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
   const theme = useTheme()
-
+  const { updateEdge } = useReactFlow()
   const path = generateElkEdgePath(data?.elkPathData)
 
   // TODO: get label position from elk
   const start = data?.elkPathData?.[0].startPoint ?? { x: 0, y: 0 }
   const end = data?.elkPathData?.[0].endPoint ?? { x: 0, y: 0 }
-  const labelX = (start.x + end.x) / 2
-  const labelY = (start.y + end.y) / 2
+  const labelX = start.x + (end.x - start.x) / 4
+  const labelY = start.y + (end.y - start.y) / 4
 
   const { expandedId, setExpandedId } = use(ExpandedNetworkInfoCtx)
   const isExpanded = expandedId === id
   const toggleExpanded = () => {
     setExpandedId(isExpanded ? undefined : id)
+    if (expandedId) updateEdge(expandedId, { zIndex: 0 })
+    updateEdge(id, { zIndex: isExpanded ? 0 : 1 })
   }
+
   return (
     <>
       <BaseEdge
@@ -47,7 +50,7 @@ export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
             ? theme.colors['border-primary']
             : theme.colors['fill-three'],
         }}
-        markerEnd={`url(#${isExpanded ? MarkerType.ArrowActive : MarkerType.ArrowStrong})`}
+        markerEnd={`url(#${isExpanded ? MarkerType.ArrowPrimary : MarkerType.ArrowStrong})`}
         onClick={toggleExpanded}
       />
       <EdgeLabelRenderer>
