@@ -11,7 +11,7 @@ import { chunk } from 'lodash'
 import { LayoutOptions } from 'elkjs'
 import { pairwise } from '../../../utils/array'
 import { EdgeType } from '../../utils/reactflow/edges'
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 import {
   GlobalServiceNodeKey,
   ServiceNodeKey,

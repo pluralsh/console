@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { isNonNullable } from '../../../utils/isNonNullable'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { EdgeType } from '../../utils/reactflow/edges'
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
 import { LayoutOptions } from 'elkjs'
 import { StackStateGraphNode } from './StackStateGraphNode'

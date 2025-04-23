@@ -22,7 +22,7 @@ async function getElkInstance() {
   return elkInstance
 }
 
-export async function getLayoutedElements(
+async function getLayoutedElements(
   nodes: Node[],
   edges: Edge[],
   layoutOptions?: LayoutOptions

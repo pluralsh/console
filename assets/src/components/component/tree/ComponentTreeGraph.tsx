@@ -5,7 +5,7 @@ import {
   ComponentTreeFragment,
   ServiceDeploymentComponentFragment,
 } from 'generated/graphql'
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 import { ComponentTreeNode } from './ComponentTreeNode'
 import { getTreeNodesAndEdges } from './getTreeNodesAndEdges'
 

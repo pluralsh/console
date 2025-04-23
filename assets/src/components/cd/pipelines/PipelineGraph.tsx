@@ -1,7 +1,7 @@
 import { PipelineFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
 import { LayoutOptions } from 'elkjs'
 import { ApprovalNode } from './nodes/ApprovalNode'

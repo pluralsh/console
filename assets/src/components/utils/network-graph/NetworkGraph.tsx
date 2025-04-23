@@ -23,9 +23,9 @@ import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from '../LoadingIndicator'
-import { ReactFlowGraph } from '../reactflow/graph'
+import { ReactFlowGraph } from '../reactflow/ReactFlowGraph'
 import { TimestampSliderButton } from '../TimestampSlider'
-import { NetworkEdge } from './NetworkGraphEdges'
+import { NetworkEdge } from './NetworkGraphEdge'
 import { MeshWorkloadNode } from './NetworkGraphNodes'
 
 const nodeTypes = {

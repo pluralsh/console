@@ -24,11 +24,11 @@ import { edgeTypes } from './edges'
 import { MarkerDefs } from './markers'
 
 import '@xyflow/react/dist/style.css'
-import { useAutoLayout } from 'components/cd/pipelines/utils/nodeLayouter'
 import { LayoutOptions } from 'elkjs'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
 import { GqlError } from '../Alert'
 import LoadingIndicator from '../LoadingIndicator'
+import { useAutoLayout } from './layouting'
 
 const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
   $fullscreen?: boolean
