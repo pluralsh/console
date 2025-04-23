@@ -138,11 +138,13 @@ function DeleteResourceModal({
     },
     onError: () => setDeleting(false),
     onCompleted: () =>
-      refetch?.({
-        fetchPolicy: 'no-cache',
-      })
-        .then(() => setOpen(false))
-        .finally(() => setDeleting(false)),
+      refetch
+        ? refetch({
+            fetchPolicy: 'no-cache',
+          })!
+            .then(() => setOpen(false))
+            .finally(() => setDeleting(false))
+        : undefined,
   })
 
   return (
