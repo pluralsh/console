@@ -3,12 +3,12 @@ import { useMemo } from 'react'
 
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
+import { LayoutOptions } from 'elkjs'
 import { ApprovalNode } from './nodes/ApprovalNode'
 import { JobNode } from './nodes/JobNode'
 import { StageNode } from './nodes/StageNode'
 import { TestsNode } from './nodes/TestsNode'
 import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
-import { DagreGraphOptions } from './utils/nodeLayouter'
 
 const nodeTypes = {
   [NodeType.Stage]: StageNode,
@@ -27,12 +27,16 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      dagreOptions={options}
+      elkOptions={options}
       nodeTypes={nodeTypes}
     />
   )
 }
 
-const options: DagreGraphOptions = {
-  ranksep: 50,
+const options: LayoutOptions = {
+  'elk.algorithm': 'layered',
+  'elk.layered.nodePlacement.strategy': 'SIMPLE',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '55',
+  'elk.layered.spacing.edgeNodeBetweenLayers': '50',
+  'elk.spacing.portPort': '1',
 }

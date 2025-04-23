@@ -156,7 +156,7 @@ function getGroupedGateNodeAndEdges(
       id: nodeId,
       type,
       position: { x: 0, y: 0 },
-      data: { ...edge, gates, meta: { state } },
+      data: { ...edge, gates, meta: { state }, elkProperties: elkNodeProps },
     },
   }
 }
@@ -186,6 +186,7 @@ function getFlatGateNodesAndEdges(
         meta: {
           state: (gate.state || undefined) as GateState | undefined,
         },
+        elkProperties: elkNodeProps,
       },
     }
   })
@@ -210,7 +211,12 @@ function getStageNodes(pipeStages: PipelineStageFragment[]) {
               ? GateState.Open
               : GateState.Pending,
         },
+        elkProperties: elkNodeProps,
       },
     }
   })
+}
+
+const elkNodeProps = {
+  'elk.portAlignment.default': 'CENTER',
 }

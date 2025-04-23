@@ -1,0 +1,159 @@
+import { IconFrame, InfoIcon } from '@pluralsh/design-system'
+import { BaseEdge, Edge, EdgeLabelRenderer } from '@xyflow/react'
+import { filesize } from 'filesize'
+import { NetworkMeshStatisticsFragment } from 'generated/graphql'
+import { round } from 'lodash'
+import { use } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { EdgeProps, generateElkEdgePath } from '../reactflow/edges'
+import { MarkerType } from '../reactflow/markers'
+import { CaptionP } from '../typography/Text'
+import { ExpandedNetworkInfoCtx } from './NetworkGraph'
+
+type NetworkEdgeData = {
+  statistics: NetworkMeshStatisticsFragment
+  label: string
+}
+
+type NetworkEdgeProps = EdgeProps<Edge<NetworkEdgeData>> & {
+  style?: React.CSSProperties
+  markerEnd?: string
+}
+
+export function NetworkEdge({ id, style = {}, data }: NetworkEdgeProps) {
+  const theme = useTheme()
+
+  const path = generateElkEdgePath(data?.elkPathData)
+
+  // TODO: get label position from elk
+  const start = data?.elkPathData?.[0].startPoint ?? { x: 0, y: 0 }
+  const end = data?.elkPathData?.[0].endPoint ?? { x: 0, y: 0 }
+  const labelX = (start.x + end.x) / 2
+  const labelY = (start.y + end.y) / 2
+
+  const { expandedId, setExpandedId } = use(ExpandedNetworkInfoCtx)
+  const isExpanded = expandedId === id
+  const toggleExpanded = () => {
+    setExpandedId(isExpanded ? undefined : id)
+  }
+  return (
+    <>
+      <BaseEdge
+        path={path}
+        style={{
+          ...style,
+          cursor: 'pointer',
+          stroke: isExpanded
+            ? theme.colors['border-primary']
+            : theme.colors['fill-three'],
+        }}
+        markerEnd={`url(#${isExpanded ? MarkerType.ArrowActive : MarkerType.ArrowStrong})`}
+        onClick={toggleExpanded}
+      />
+      <EdgeLabelRenderer>
+        <EdgeLabelSC
+          $isExpanded={isExpanded}
+          style={{
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'all',
+          }}
+          onClick={toggleExpanded}
+        >
+          {isExpanded && data ? (
+            <ExpandedContentSC>
+              <Statistic
+                value={filesize(data.statistics.bytes ?? 0)}
+                suffix="sent"
+              />
+              <Statistic
+                value={data.statistics.packets}
+                suffix="packets"
+              />
+              <Statistic
+                value={data.statistics.connections}
+                suffix="tcp connections"
+              />
+              <Statistic
+                value={data.statistics.http200}
+                suffix="http 200s"
+              />
+              <Statistic
+                value={data.statistics.http400}
+                suffix="http 400s"
+              />
+              <Statistic
+                value={data.statistics.http500}
+                suffix="http 500s"
+              />
+              {data.statistics.httpClientLatency && (
+                <Statistic
+                  value={round(data.statistics.httpClientLatency, 2)}
+                  suffix="ms latency"
+                />
+              )}
+            </ExpandedContentSC>
+          ) : (
+            <IconFrame
+              clickable
+              icon={<InfoIcon />}
+              onClick={toggleExpanded}
+            />
+          )}
+        </EdgeLabelSC>
+      </EdgeLabelRenderer>
+    </>
+  )
+}
+
+const EdgeLabelSC = styled.div<{ $isExpanded: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    position: 'absolute',
+    background: theme.colors['fill-one'],
+    padding: theme.spacing.xsmall,
+    borderRadius: theme.borderRadiuses.medium,
+    fontWeight: 700,
+    cursor: 'pointer',
+    boxShadow: theme.boxShadows.slight,
+    transition: 'all 0.2s ease',
+    zIndex: $isExpanded ? 1000 : 1,
+    '&:hover': {
+      boxShadow: theme.boxShadows.moderate,
+    },
+  })
+)
+
+const ExpandedContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+}))
+
+function Statistic({
+  value,
+  suffix,
+  precision = 2,
+}: {
+  value: Nullable<number | string>
+  suffix: string
+  precision?: number
+}) {
+  const displayValue =
+    typeof value === 'string' ? value : round(value ?? 0, precision)
+
+  return (
+    <div>
+      <CaptionP
+        as="span"
+        $color="text"
+      >
+        {displayValue}
+      </CaptionP>{' '}
+      <CaptionP
+        as="span"
+        $color="text-xlight"
+      >
+        {suffix}
+      </CaptionP>
+    </div>
+  )
+}

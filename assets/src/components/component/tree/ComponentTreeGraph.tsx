@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
+import { LayoutOptions } from 'elkjs'
 import {
   ComponentTreeFragment,
   ServiceDeploymentComponentFragment,
@@ -29,12 +29,12 @@ export function ComponentTreeGraph({
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      dagreOptions={options}
+      elkOptions={options}
       nodeTypes={nodeTypes}
     />
   )
 }
 
-const options: DagreGraphOptions = {
-  ranksep: 50,
+const options: LayoutOptions = {
+  'elk.algorithm': 'layered',
 }

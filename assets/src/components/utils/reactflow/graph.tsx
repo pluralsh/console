@@ -11,26 +11,24 @@ import {
   Edge,
   ReactFlow,
   ReactFlowProps,
+  useEdgesState,
+  useNodesState,
   useReactFlow,
-  type Node as FlowNode,
+  type Node,
 } from '@xyflow/react'
-import { createContext, useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import FocusLock from 'react-focus-lock'
 import styled, { useTheme } from 'styled-components'
 
-import {
-  DagreGraphOptions,
-  runAfterBrowserLayout,
-  useLayoutNodes,
-} from 'components/cd/pipelines/utils/nodeLayouter'
 import { edgeTypes } from './edges'
 import { MarkerDefs } from './markers'
 
 import '@xyflow/react/dist/style.css'
-
-export const GraphLayoutCtx = createContext<
-  (DagreGraphOptions & { triggerLayout: () => void }) | undefined
->(undefined)
+import { useAutoLayout } from 'components/cd/pipelines/utils/nodeLayouter'
+import { LayoutOptions } from 'elkjs'
+import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
+import { GqlError } from '../Alert'
+import LoadingIndicator from '../LoadingIndicator'
 
 const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
   $fullscreen?: boolean
@@ -93,100 +91,117 @@ const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
 export function ReactFlowGraph({
   baseNodes,
   baseEdges,
-  dagreOptions,
+  elkOptions,
   resetView,
   allowFullscreen = false,
   ...props
 }: {
-  baseNodes: FlowNode[]
+  baseNodes: Node[]
   baseEdges: Edge[]
-  dagreOptions?: DagreGraphOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
+  elkOptions: LayoutOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
   resetView?: () => void
   allowFullscreen?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
+  const [isLayouting, setIsLayouting] = useState(false)
+  const [hasLayoutError, setHasLayoutError] = useState(false)
+
   const { fitView } = useReactFlow()
-  const { nodes, edges, showGraph, onNodesChange, onEdgesChange, layoutNodes } =
-    useLayoutNodes({
-      baseNodes,
-      baseEdges,
-      options: dagreOptions,
-    })
+  const [nodes, setNodes, onNodesChange] = useNodesState(baseNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(baseEdges)
 
-  const defaultResetView = useCallback(() => {
-    fitView({ duration: 500 })
-  }, [fitView])
+  useAutoLayout({
+    options: elkOptions,
+    setIsLayouting,
+    setError: setHasLayoutError,
+  })
 
+  // forces the graph to recreate if parent data changes
+  useEffect(() => {
+    setNodes(baseNodes)
+    setEdges(baseEdges)
+  }, [baseNodes, baseEdges, setNodes, setEdges])
+
+  const defaultResetView = useCallback(
+    () => fitView({ duration: 500 }),
+    [fitView]
+  )
   const toggleFullscreen = useCallback(() => {
     setFullscreen(!fullscreen)
-    runAfterBrowserLayout(() => fitView({ duration: 500 }))
-  }, [fitView, fullscreen])
+    runAfterBrowserLayout(defaultResetView)
+  }, [defaultResetView, fullscreen])
 
   useKeyDown('Escape', () => fullscreen && toggleFullscreen())
 
-  const ctx = useMemo(
-    () => ({ ...dagreOptions, triggerLayout: layoutNodes }),
-    [dagreOptions, layoutNodes]
-  )
+  if (hasLayoutError)
+    return (
+      <ErrorWrapperSC>
+        <GqlError error="Error generating graph, check logs for details." />
+      </ErrorWrapperSC>
+    )
 
   return (
-    <GraphLayoutCtx value={ctx}>
-      <ReactFlowFullScreenWrapperSC
-        disabled={!fullscreen} // controls focus lock
-        $fullscreen={fullscreen}
-      >
-        <ReactFlowAreaSC $fullscreen={fullscreen}>
-          <ReactFlowWrapperSC style={{ opacity: showGraph ? 1 : 0 }}>
-            <ReactFlow
-              fitView
-              draggable
-              minZoom={0.08}
-              edgeTypes={edgeTypes}
-              edgesFocusable={false}
-              edgesReconnectable={false}
-              nodesDraggable={false}
-              nodesConnectable={false}
-              {...props}
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              proOptions={{ hideAttribution: true }}
-            >
-              <Background
-                variant={BackgroundVariant.Dots}
-                gap={theme.spacing.large}
-                size={1}
-                color={theme.colors['border-fill-three']}
-              />
-              <MarkerDefs />
-            </ReactFlow>
-            <ReactFlowActionWrapperSC>
-              {allowFullscreen && (
-                <IconFrame
-                  clickable
-                  type="floating"
-                  icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
-                  tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                  onClick={toggleFullscreen}
-                >
-                  Fullscreen
-                </IconFrame>
-              )}
+    <ReactFlowFullScreenWrapperSC
+      disabled={!fullscreen} // controls focus lock
+      $fullscreen={fullscreen}
+    >
+      <ReactFlowAreaSC $fullscreen={fullscreen}>
+        {isLayouting && <LoadingIndicator />}
+        <ReactFlowWrapperSC $hide={isLayouting}>
+          <ReactFlow
+            fitView
+            draggable
+            minZoom={0.08}
+            edgeTypes={edgeTypes}
+            edgesFocusable={false}
+            edgesReconnectable={false}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            {...props}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={theme.spacing.large}
+              size={1}
+              color={theme.colors['border-fill-three']}
+            />
+            <MarkerDefs />
+          </ReactFlow>
+          <ReactFlowActionWrapperSC>
+            {allowFullscreen && (
               <IconFrame
                 clickable
                 type="floating"
-                icon={<ReloadIcon />}
-                tooltip="Reset view"
-                onClick={resetView || defaultResetView}
+                icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
+                tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                onClick={toggleFullscreen}
               >
-                Reset view
+                Fullscreen
               </IconFrame>
-            </ReactFlowActionWrapperSC>
-          </ReactFlowWrapperSC>
-        </ReactFlowAreaSC>
-      </ReactFlowFullScreenWrapperSC>
-    </GraphLayoutCtx>
+            )}
+            <IconFrame
+              clickable
+              type="floating"
+              icon={<ReloadIcon />}
+              tooltip="Reset view"
+              onClick={resetView || defaultResetView}
+            >
+              Reset view
+            </IconFrame>
+          </ReactFlowActionWrapperSC>
+        </ReactFlowWrapperSC>
+      </ReactFlowAreaSC>
+    </ReactFlowFullScreenWrapperSC>
   )
 }
+
+const ErrorWrapperSC = styled.div({
+  height: '100%',
+  width: '100%',
+})

@@ -21,7 +21,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { DateParam, formatDateTime, isValidDateTime } from 'utils/datetime'
-import { runAfterBrowserLayout } from '../pipelines/utils/nodeLayouter'
+import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
 
 const EMPTY_DATE_STR = '//'
 const EMPTY_TIME_STR = '::'

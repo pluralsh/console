@@ -1,136 +1,110 @@
-import Dagre, { GraphLabel } from '@dagrejs/dagre'
 import {
   Edge,
-  useEdgesState,
-  useNodesState,
+  useNodesInitialized,
   useReactFlow,
-  type Node as FlowNode,
+  type Node,
 } from '@xyflow/react'
-import { useCallback, useLayoutEffect, useState } from 'react'
+import type {
+  ElkExtendedEdge,
+  ElkNode,
+  ELK as ElkType,
+  LayoutOptions,
+} from 'elkjs'
+import { produce } from 'immer'
+import { useEffect } from 'react'
 
-export type DagreDirection = 'LR' | 'RL' | 'TB' | 'BT'
-export type DagreGraphOptions = GraphLabel & {
-  rankdir?: DagreDirection
+let elkInstance: ElkType | null = null
+
+async function getElkInstance() {
+  if (elkInstance) return elkInstance
+  const ELKConstructor = (await import('elkjs/lib/elk.bundled.js')).default
+  elkInstance = new ELKConstructor()
+  return elkInstance
 }
 
-const DEFAULT_DAGRE_OPTIONS: DagreGraphOptions = {
-  rankdir: 'LR',
-  nodesep: 25,
-  ranksep: 25,
-  edgesep: 10,
-  ranker: 'tight-tree',
-}
-
-export const getLayoutedElements = (
-  nodes: FlowNode[],
+export async function getLayoutedElements(
+  nodes: Node[],
   edges: Edge[],
-  options: DagreGraphOptions = {}
-) => {
-  const dagreGraph = new Dagre.graphlib.Graph()
-  dagreGraph.setDefaultEdgeLabel(() => ({}))
-
-  dagreGraph.setGraph({
-    ...DEFAULT_DAGRE_OPTIONS,
-    ...options,
-  })
-
-  // add nodes and edges to dagre
-  edges.forEach((edge) => dagreGraph.setEdge(edge.source, edge.target))
-  nodes.forEach((node) =>
-    dagreGraph.setNode(node.id, {
-      ...node,
+  layoutOptions?: LayoutOptions
+): Promise<{ nodes: Node[]; edges: Edge[] }> {
+  const elk = await getElkInstance()
+  const elkGraph = {
+    id: 'root',
+    layoutOptions,
+    children: nodes.map((node) => ({
+      id: node.id,
       width: node.measured?.width ?? 0,
       height: node.measured?.height ?? 0,
-    })
-  )
+      properties: node.data.elkProperties,
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      sources: [edge.source],
+      targets: [edge.target],
+    })),
+  }
 
-  Dagre.layout(dagreGraph)
+  // this mutates the graph object
+  await elk.layout(elkGraph)
+  const nodeIdToElkNode = new Map<string, ElkNode>()
+  const edgeIdToElkEdge = new Map<string, ElkExtendedEdge>()
+  for (const node of elkGraph.children ?? []) nodeIdToElkNode.set(node.id, node)
+  for (const edge of elkGraph.edges ?? []) edgeIdToElkEdge.set(edge.id, edge)
 
-  const positionedNodes = nodes.map((node) => {
-    const { x, y } = dagreGraph.node(node.id)
-    return {
-      ...node,
-      position: {
-        x: x - (node.measured?.width ?? 0) / 2,
-        y: y - (node.measured?.height ?? 0) / 2,
-      },
+  const layoutedNodes = produce(nodes, (draftNodes) => {
+    for (const node of draftNodes) {
+      const elkNode = nodeIdToElkNode.get(node.id)
+      node.position = { x: elkNode?.x ?? 0, y: elkNode?.y ?? 0 }
     }
   })
+  const layoutedEdges = produce(edges, (draftEdges) => {
+    for (const edge of draftEdges)
+      edge.data = {
+        ...edge.data,
+        elkPathData: edgeIdToElkEdge.get(edge.id)?.sections,
+      }
+  })
 
-  return { nodes: positionedNodes, edges }
+  return { nodes: layoutedNodes, edges: layoutedEdges }
 }
 
-export function useLayoutNodes({
-  baseNodes,
-  baseEdges,
+// automatically layout nodes whenever they change (and they have measurements)
+export function useAutoLayout({
   options,
+  setIsLayouting,
+  setError,
 }: {
-  baseNodes: FlowNode[]
-  baseEdges: Edge[]
-  options?: DagreGraphOptions
+  options?: LayoutOptions
+  setIsLayouting?: (isLayouting: boolean) => void
+  setError?: (error: boolean) => void
 }) {
-  const { fitView } = useReactFlow()
-  const [nodes, setNodes, onNodesChange] = useNodesState(baseNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(baseEdges)
-  const [shouldLayout, setShouldLayout] = useState(false)
-  const [isLayouting, setIsLayouting] = useState(false)
+  const { getNodes, getEdges, setNodes, setEdges, fitView } = useReactFlow()
+  const hasMeasurements = useNodesInitialized()
 
-  // react flow injects this after the nodes are first rendered
-  const hasMeasurements = !!nodes[0]?.measured
-  // we basically want to force a reset of the nodes if their parent changes
-  useLayoutEffect(() => {
-    setNodes(baseNodes)
-    setEdges(baseEdges)
-    setShouldLayout(true)
-  }, [baseNodes, baseEdges, setNodes, setEdges])
-
-  useLayoutEffect(() => {
-    if (shouldLayout) {
-      if (!hasMeasurements) return
-      setIsLayouting(true)
-      const layouted = getLayoutedElements(nodes, edges, options)
-      setNodes(layouted.nodes)
-      setEdges(layouted.edges)
-      setShouldLayout(false)
-      runAfterBrowserLayout(() => {
+  useEffect(() => {
+    if (!hasMeasurements) return
+    setError?.(false)
+    setIsLayouting?.(true)
+    getLayoutedElements(getNodes(), getEdges(), options)
+      .then(({ nodes, edges }) => {
+        setNodes(nodes)
+        setEdges(edges)
         fitView()
-        setIsLayouting(false)
       })
-    }
+      .catch((error) => {
+        console.error('Error laying out nodes', error)
+        setError?.(true)
+      })
+      .finally(() => setIsLayouting?.(false))
   }, [
-    baseNodes,
-    baseEdges,
-    options,
-    shouldLayout,
-    nodes,
-    edges,
     setNodes,
     setEdges,
-    fitView,
     hasMeasurements,
+    options,
+    getNodes,
+    getEdges,
+    fitView,
+    setError,
+    setIsLayouting,
   ])
-
-  const layoutNodes = useCallback(() => {
-    setShouldLayout(true)
-  }, [])
-
-  return {
-    nodes,
-    edges,
-    showGraph: hasMeasurements && !isLayouting,
-    layoutNodes,
-    onNodesChange,
-    onEdgesChange,
-  }
-}
-
-// useful for initially fitting the view after layouts
-// default fitView on React Flow seems to fire too early in some cases
-export function runAfterBrowserLayout(fn: () => void) {
-  // double requestAnimationFrame ensures all browser layout calculations are completed before executing
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      fn()
-    })
-  })
 }

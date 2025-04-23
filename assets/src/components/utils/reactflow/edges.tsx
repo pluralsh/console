@@ -1,7 +1,8 @@
 import {
+  BaseEdge,
   BezierEdge,
   type Edge,
-  EdgeProps,
+  EdgeProps as FlowEdgeProps,
   SmoothStepEdge,
   StepEdge,
 } from '@xyflow/react'
@@ -10,7 +11,12 @@ import { useTheme } from 'styled-components'
 import { GateState } from '../../../generated/graphql'
 import { useEdgeNodes } from '../../hooks/reactFlowHooks'
 
+import { ElkEdgeSection } from 'elkjs'
 import { MarkerType } from './markers'
+
+export type EdgeProps<T extends Edge = Edge> = FlowEdgeProps<T> & {
+  data?: { elkPathData: Nullable<ElkEdgeSection[]> }
+}
 
 export enum EdgeType {
   Invisible = 'plural-invisible-edge',
@@ -111,9 +117,11 @@ function Pipeline({ style, ...props }: EdgeProps) {
   const active = (source?.data as any)?.meta?.state === GateState.Open
   const color = active ? theme.colors['border-secondary'] : theme.colors.border
 
+  const path = generateElkEdgePath(props.data?.elkPathData)
+
   return (
-    <StepEdge
-      {...props}
+    <BaseEdge
+      path={path}
       style={{
         ...style,
         stroke: color,
@@ -121,4 +129,17 @@ function Pipeline({ style, ...props }: EdgeProps) {
       markerEnd={`url(#${active ? MarkerType.ArrowActive : MarkerType.Arrow})`}
     />
   )
+}
+
+export const generateElkEdgePath = (sections: Nullable<ElkEdgeSection[]>) => {
+  if (!sections || sections.length === 0) return ''
+
+  let d = ''
+  sections.forEach(({ startPoint, endPoint, bendPoints }) => {
+    d += `M ${startPoint.x} ${startPoint.y}`
+    bendPoints?.forEach((bend) => (d += ` L ${bend.x} ${bend.y}`))
+    d += ` L ${endPoint.x} ${endPoint.y}`
+  })
+
+  return d
 }

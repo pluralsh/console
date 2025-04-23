@@ -9,8 +9,9 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import { Edge, Node, ReactFlowProvider } from '@xyflow/react'
-import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { NamespaceFilter } from 'components/kubernetes/common/NamespaceFilter'
+import Fuse from 'fuse.js'
 import {
   NetworkMeshEdgeFragment,
   NetworkMeshWorkloadFragment,
@@ -22,16 +23,17 @@ import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from '../LoadingIndicator'
-import { EdgeType } from '../reactflow/edges'
 import { ReactFlowGraph } from '../reactflow/graph'
 import { TimestampSliderButton } from '../TimestampSlider'
-import { MeshStatisticsNode, MeshWorkloadNode } from './NetworkGraphNodes'
-import { useThrottle } from 'components/hooks/useThrottle'
-import Fuse from 'fuse.js'
+import { NetworkEdge } from './NetworkGraphEdges'
+import { MeshWorkloadNode } from './NetworkGraphNodes'
 
 const nodeTypes = {
   workload: MeshWorkloadNode,
-  statistics: MeshStatisticsNode,
+}
+
+const edgeTypes = {
+  statistics: NetworkEdge,
 }
 
 const searchOptions: Fuse.IFuseOptions<NetworkMeshEdgeFragment> = {
@@ -160,10 +162,10 @@ export function NetworkGraph({
                 allowFullscreen
                 baseNodes={baseNodes}
                 baseEdges={baseEdges}
-                dagreOptions={options}
+                elkOptions={elkOptions}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
                 minZoom={0.03}
-                nodesDraggable
                 nodeDragThreshold={5}
               />
             )}
@@ -190,26 +192,14 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
   const edges: Edge[] = []
   const workloadSet: Record<string, NetworkMeshWorkloadFragment> = {}
   networkData.forEach((networkEdge) => {
-    const statsNodeId = `statistics-from-${networkEdge.from.id}-to-${networkEdge.to.id}`
     workloadSet[networkEdge.from.id] = networkEdge.from
     workloadSet[networkEdge.to.id] = networkEdge.to
-    nodes.push({
-      id: statsNodeId,
-      position: { x: 0, y: 0 },
-      type: 'statistics',
-      data: { ...networkEdge.statistics },
-    })
     edges.push({
-      id: `into-${statsNodeId}`,
+      id: networkEdge.id,
       source: networkEdge.from.id,
-      target: statsNodeId,
-      type: EdgeType.BezierDirected,
-    })
-    edges.push({
-      id: `out-of-${statsNodeId}`,
-      source: statsNodeId,
       target: networkEdge.to.id,
-      type: EdgeType.BezierDirected,
+      type: 'statistics',
+      data: { statistics: networkEdge.statistics },
     })
   })
   Object.values(workloadSet).forEach((workload) => {
@@ -223,8 +213,8 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
   return { nodes, edges }
 }
 
-const options: DagreGraphOptions = {
-  nodesep: 16,
-  ranksep: 16,
-  edgesep: 5,
+const elkOptions = {
+  'elk.algorithm': 'org.eclipse.elk.force',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+  'elk.spacing.nodeNode': '20',
 }

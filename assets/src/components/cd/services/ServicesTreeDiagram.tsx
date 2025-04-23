@@ -1,22 +1,22 @@
+import { type Edge, type Node } from '@xyflow/react'
 import {
+  GlobalServiceFragment,
   ServiceDeployment,
   ServiceTreeNodeFragment,
-  GlobalServiceFragment,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { type Node, type Edge } from '@xyflow/react'
 
 import { chunk } from 'lodash'
 
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
-import { EdgeType } from '../../utils/reactflow/edges'
+import { LayoutOptions } from 'elkjs'
 import { pairwise } from '../../../utils/array'
+import { EdgeType } from '../../utils/reactflow/edges'
+import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import {
   GlobalServiceNodeKey,
   ServiceNodeKey,
   nodeTypes,
 } from './ServicesTreeDiagramNodes'
-import { DagreGraphOptions } from '../pipelines/utils/nodeLayouter'
 
 const isNotDeploymentOperatorService = (
   service: Pick<ServiceDeployment, 'name'>
@@ -122,13 +122,13 @@ export function ServicesTreeDiagram({
       allowFullscreen
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      dagreOptions={options}
+      elkOptions={options}
       minZoom={0.01}
       nodeTypes={nodeTypes}
     />
   )
 }
 
-const options: DagreGraphOptions = {
-  // rankdir: 'TB',
+const options: LayoutOptions = {
+  'elk.algorithm': 'layered',
 }
