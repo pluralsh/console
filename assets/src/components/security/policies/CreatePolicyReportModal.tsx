@@ -10,28 +10,20 @@ import { useTheme } from 'styled-components'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { fetchToken } from '../../../helpers/auth.ts'
+import streamSaver from 'streamsaver'
 
 enum ReportFormat {
   CSV = 'csv',
 }
 
-const fetchPolicyReport = async (format: ReportFormat, token: string) => {
-  const response = await fetch(`/v1/compliance/report?format=${format}`, {
+const fetchPolicyReport = (format: ReportFormat, token: string) => {
+  fetch(`/v1/compliance/report?format=${format}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
+  }).then((res) => {
+    const writeStream = streamSaver.createWriteStream('report.zip')
+    return res.body?.pipeTo(writeStream)
   })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch report: ${response.statusText}`)
-  }
-
-  const blob: Blob = await response.blob()
-  const objectUrl = URL.createObjectURL(blob)
-  const link: HTMLAnchorElement = document.createElement('a')
-  link.href = objectUrl
-  link.download = `report.zip`
-  link.click()
-  URL.revokeObjectURL(objectUrl)
 }
 
 export function CreatePolicyReportModal({
