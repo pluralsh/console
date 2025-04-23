@@ -1,8 +1,6 @@
 import {
   ArrowScroll,
   Flex,
-  IconFrame,
-  ListIcon,
   SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -28,6 +26,7 @@ import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
 import { CreatePolicyReportButton } from './CreatePolicyReportModal.tsx'
+import { PastReportsButton } from './PastReportsModal.tsx'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -108,12 +107,7 @@ export function Policies() {
             gap={'small'}
             width={250}
           >
-            <IconFrame
-              type={'floating'}
-              size={'large'}
-              icon={<ListIcon />}
-              css={{ height: 42, width: 42 }}
-            />
+            <PastReportsButton />
             <CreatePolicyReportButton />
           </Flex>
         </FiltersWrapperSC>
