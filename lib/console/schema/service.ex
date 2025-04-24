@@ -333,6 +333,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:dependencies)
     |> cast_assoc(:imports)
     |> cast_assoc(:insight)
+    |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

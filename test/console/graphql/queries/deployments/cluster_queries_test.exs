@@ -523,7 +523,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
+            %Result{metric: metric("from", "default"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)
@@ -531,7 +531,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
+            %Result{metric: metric("from", "default"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)
@@ -555,7 +555,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert edge["from"]["namespace"] == "from"
       assert edge["to"]["id"]
       assert edge["to"]["name"] == "nginx"
-      assert edge["to"]["namespace"] == "to"
+      assert edge["to"]["namespace"] == "default"
 
       assert trunc(edge["statistics"]["bytes"]) == 13324
     end
