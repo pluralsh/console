@@ -120,7 +120,7 @@ export const useSetPageHeaderAction = (action?: ReactNode) => {
 
   if (!ctx) {
     console.warn(
-      'useSetPageHeaderContent() must be used within a PageHeaderContext'
+      'useSetPageHeaderAction() must be used within a PageHeaderContext'
     )
   }
   const { setHeaderAction } = ctx || {}
