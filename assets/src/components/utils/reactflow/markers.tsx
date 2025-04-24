@@ -3,8 +3,8 @@ import { useTheme } from 'styled-components'
 export enum MarkerType {
   Arrow = 'plural-marker-arrow',
   ArrowActive = 'plural-marker-arrow-active',
+  ArrowHovered = 'plural-marker-arrow-hovered',
   ArrowPrimary = 'plural-marker-arrow-primary',
-  ArrowStrong = 'plural-marker-arrow-strong',
 }
 
 function Marker({ id, color }: { id: string; color: string }) {
@@ -45,8 +45,8 @@ export function MarkerDefs() {
           color={theme.colors['border-secondary']}
         />
         <Marker
-          id={MarkerType.ArrowStrong}
-          color={theme.colors['border-input']}
+          id={MarkerType.ArrowHovered}
+          color={theme.colors['text-light']}
         />
         <Marker
           id={MarkerType.ArrowPrimary}

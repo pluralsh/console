@@ -8,7 +8,7 @@ import {
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
-import { Edge, Node, ReactFlowProvider } from '@xyflow/react'
+import { Edge, Node, ReactFlowProvider, useReactFlow } from '@xyflow/react'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { NamespaceFilter } from 'components/kubernetes/common/NamespaceFilter'
 import Fuse from 'fuse.js'
@@ -18,23 +18,18 @@ import {
   useClusterNamespacesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { createContext, useMemo, useState } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from '../LoadingIndicator'
+import { EdgeType } from '../reactflow/edges'
 import { ReactFlowGraph } from '../reactflow/ReactFlowGraph'
 import { TimestampSliderButton } from '../TimestampSlider'
-import { NetworkEdge } from './NetworkGraphEdge'
 import { MeshWorkloadNode } from './NetworkGraphNodes'
+import { NetworkGraphStatistics } from './NetworkGraphStatistics'
 
-const nodeTypes = {
-  workload: MeshWorkloadNode,
-}
-
-const edgeTypes = {
-  statistics: NetworkEdge,
-}
+const nodeTypes = { workload: MeshWorkloadNode }
 
 const searchOptions: Fuse.IFuseOptions<NetworkMeshEdgeFragment> = {
   keys: ['from.name', 'from.service', 'to.name', 'to.service'],
@@ -44,15 +39,17 @@ const searchOptions: Fuse.IFuseOptions<NetworkMeshEdgeFragment> = {
 
 type TrafficType = 'internal-only' | 'all'
 
-export const ExpandedNetworkInfoCtx = createContext<{
-  expandedId: string | undefined
-  setExpandedId: (expandedId: string | undefined) => void
-}>({
-  expandedId: undefined,
-  setExpandedId: () => {},
-})
+export function NetworkGraph(
+  props: ComponentProps<typeof NetworkGraphInternal>
+) {
+  return (
+    <ReactFlowProvider>
+      <NetworkGraphInternal {...props} />
+    </ReactFlowProvider>
+  )
+}
 
-export function NetworkGraph({
+function NetworkGraphInternal({
   networkData,
   loading,
   setTimestamp,
@@ -71,9 +68,9 @@ export function NetworkGraph({
   const throttledQ = useThrottle(q, 500)
   const [namespace, setNamespace] = useState<string | undefined>(undefined)
   const [traffic, setTraffic] = useState<TrafficType>('internal-only')
+  const [selectedEdge, setSelectedEdge] = useState<Nullable<string>>()
 
-  const [expandedId, setExpandedId] = useState<string | undefined>(undefined)
-  const ctx = useMemo(() => ({ expandedId, setExpandedId }), [expandedId])
+  const { updateEdge } = useReactFlow()
 
   const { data: namespacesData, error: namespacesError } =
     useClusterNamespacesQuery({
@@ -110,75 +107,88 @@ export function NetworkGraph({
   }, [namespace, networkData, throttledQ, traffic])
 
   return (
-    <ExpandedNetworkInfoCtx value={ctx}>
-      <ReactFlowProvider>
-        <WrapperSC>
-          <Flex
-            gap="medium"
-            width="100%"
-          >
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search service names"
-              startIcon={<SearchIcon color="icon-light" />}
-              flex={1}
-            />
-            {enableNamespaceFilter && !namespacesError && (
-              <NamespaceFilter
-                namespaces={namespaces}
-                namespace={namespace ?? ''}
-                onChange={setNamespace}
-                startIcon={<NamespaceIcon color="icon-light" />}
-                inputProps={{ placeholder: 'Filter by namespace' }}
-                containerProps={{
-                  style: { background: colors['fill-one'], flex: 1 },
-                }}
-              />
-            )}
-            <Select
-              width={200}
-              selectedKey={traffic}
-              onSelectionChange={(key) => setTraffic(key as TrafficType)}
-            >
-              <ListBoxItem
-                key="internal-only"
-                label="Internal traffic only"
-              />
-              <ListBoxItem
-                key="all"
-                label="All traffic"
-              />
-            </Select>
-            <TimestampSliderButton
-              setTimestamp={setTimestamp}
-              isTimestampSet={isTimestampSet}
-            />
-          </Flex>
-          <Card flex={1}>
-            {isEmpty(networkData) ? (
-              loading ? (
-                <LoadingIndicator />
-              ) : (
-                <EmptyState message="No network data found." />
+    <WrapperSC>
+      <Flex
+        gap="medium"
+        width="100%"
+      >
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search service names"
+          startIcon={<SearchIcon color="icon-light" />}
+          flex={1}
+        />
+        {enableNamespaceFilter && !namespacesError && (
+          <NamespaceFilter
+            namespaces={namespaces}
+            namespace={namespace ?? ''}
+            onChange={setNamespace}
+            startIcon={<NamespaceIcon color="icon-light" />}
+            inputProps={{ placeholder: 'Filter by namespace' }}
+            containerProps={{
+              style: { background: colors['fill-one'], flex: 1 },
+            }}
+          />
+        )}
+        <Select
+          width={200}
+          selectedKey={traffic}
+          onSelectionChange={(key) => setTraffic(key as TrafficType)}
+        >
+          <ListBoxItem
+            key="internal-only"
+            label="Internal traffic only"
+          />
+          <ListBoxItem
+            key="all"
+            label="All traffic"
+          />
+        </Select>
+        <TimestampSliderButton
+          setTimestamp={setTimestamp}
+          isTimestampSet={isTimestampSet}
+        />
+      </Flex>
+      <Card flex={1}>
+        {isEmpty(networkData) ? (
+          loading ? (
+            <LoadingIndicator />
+          ) : (
+            <EmptyState message="No network data found." />
+          )
+        ) : (
+          <ReactFlowGraph
+            allowFullscreen
+            baseNodes={baseNodes}
+            baseEdges={baseEdges}
+            elkOptions={elkOptions}
+            nodeTypes={nodeTypes}
+            minZoom={0.03}
+            nodeDragThreshold={5}
+            showLayoutingIndicator={false}
+            onEdgeMouseEnter={(_, { id }) =>
+              updateEdge(id, {
+                style: { stroke: colors['text-light'], strokeWidth: 2 },
+              })
+            }
+            onEdgeMouseLeave={(_, { id }) =>
+              updateEdge(id, {
+                style: { stroke: colors.border, strokeWidth: 1 },
+              })
+            }
+            onSelectionChange={({ edges }) => setSelectedEdge(edges[0]?.id)}
+            edgesSelectable
+            edgesFocusable
+            additionalOverlays={
+              selectedEdge && (
+                <NetworkGraphStatistics selectedEdgeId={selectedEdge} />
               )
-            ) : (
-              <ReactFlowGraph
-                allowFullscreen
-                baseNodes={baseNodes}
-                baseEdges={baseEdges}
-                elkOptions={elkOptions}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                minZoom={0.03}
-                nodeDragThreshold={5}
-                showLayoutingIndicator={false}
-              />
-            )}
-          </Card>
-        </WrapperSC>
-      </ReactFlowProvider>
-    </ExpandedNetworkInfoCtx>
+            }
+          />
+        )}
+      </Card>
+    </WrapperSC>
   )
 }
 
@@ -204,7 +214,7 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
       id: networkEdge.id,
       source: networkEdge.from.id,
       target: networkEdge.to.id,
-      type: 'statistics',
+      type: EdgeType.Network,
       data: { statistics: networkEdge.statistics },
     })
   })
@@ -213,14 +223,13 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
       id: workload.id,
       position: { x: 0, y: 0 },
       type: 'workload',
-      data: { ...workload },
+      data: workload,
     })
   })
   return { nodes, edges }
 }
 
 const elkOptions = {
-  'elk.algorithm': 'org.eclipse.elk.force',
-  'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-  // 'elk.spacing.nodeNode': '60',
+  'elk.algorithm': 'force',
+  'elk.spacing.nodeNode': '5',
 }

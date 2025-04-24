@@ -11,11 +11,14 @@ import { useTheme } from 'styled-components'
 import { GateState } from '../../../generated/graphql'
 import { useEdgeNodes } from '../../hooks/reactFlowHooks'
 
-import { ElkEdgeSection } from 'elkjs'
+import { ElkEdgeSection, ElkLabel } from 'elkjs'
 import { MarkerType } from './markers'
 
 export type EdgeProps<T extends Edge = Edge> = FlowEdgeProps<T> & {
-  data?: { elkPathData: Nullable<ElkEdgeSection[]> }
+  data?: {
+    elkPathData: Nullable<ElkEdgeSection[]>
+    elkLabels?: Nullable<ElkLabel[]>
+  }
 }
 
 export enum EdgeType {
@@ -23,8 +26,8 @@ export enum EdgeType {
   Bezier = 'plural-bezier-edge',
   Smooth = 'plural-smooth-edge',
   Directed = 'plural-directed-edge',
-  BezierDirected = 'plural-bezier-directed-edge',
   Pipeline = 'plural-pipeline-edge',
+  Network = 'plural-network-edge',
 }
 
 export const edgeTypes = {
@@ -32,8 +35,8 @@ export const edgeTypes = {
   [EdgeType.Bezier]: Bezier,
   [EdgeType.Smooth]: Smooth,
   [EdgeType.Directed]: Directed,
-  [EdgeType.BezierDirected]: BezierDirected,
   [EdgeType.Pipeline]: Pipeline,
+  [EdgeType.Network]: Network,
 } as const
 
 export function isVisible(edge: Edge): boolean {
@@ -78,21 +81,6 @@ function Smooth({ style, ...props }: EdgeProps) {
   )
 }
 
-function BezierDirected({ style, ...props }: EdgeProps) {
-  const theme = useTheme()
-
-  return (
-    <BezierEdge
-      {...props}
-      style={{
-        ...style,
-        stroke: theme.colors['border-input'],
-      }}
-      markerEnd={`url(#${MarkerType.ArrowStrong})`}
-    />
-  )
-}
-
 function Directed({ style, ...props }: EdgeProps) {
   const theme = useTheme()
 
@@ -108,7 +96,7 @@ function Directed({ style, ...props }: EdgeProps) {
   )
 }
 
-function Pipeline({ style, ...props }: EdgeProps) {
+function Pipeline({ style, data, ...props }: EdgeProps) {
   const theme = useTheme()
   const { source } = useEdgeNodes({
     source: props.source,
@@ -117,7 +105,7 @@ function Pipeline({ style, ...props }: EdgeProps) {
   const active = (source?.data as any)?.meta?.state === GateState.Open
   const color = active ? theme.colors['border-secondary'] : theme.colors.border
 
-  const path = generateElkEdgePath(props.data?.elkPathData)
+  const path = generateElkEdgePath(data?.elkPathData)
 
   return (
     <BaseEdge
@@ -127,6 +115,34 @@ function Pipeline({ style, ...props }: EdgeProps) {
         stroke: color,
       }}
       markerEnd={`url(#${active ? MarkerType.ArrowActive : MarkerType.Arrow})`}
+    />
+  )
+}
+
+function Network({ style, selected, data }: EdgeProps) {
+  const { colors } = useTheme()
+  const path = generateElkEdgePath(data?.elkPathData)
+
+  let color: string = colors.border
+  let markerType = MarkerType.Arrow
+  if (selected) {
+    markerType = MarkerType.ArrowPrimary
+    color = colors['border-primary']
+  } else if (style?.stroke === colors['text-light']) {
+    markerType = MarkerType.ArrowHovered
+    color = colors['text-light']
+  }
+
+  return (
+    <BaseEdge
+      path={path}
+      style={{
+        ...style,
+        strokeWidth: selected ? 1 : style?.strokeWidth || 1,
+        stroke: color,
+        transition: 'stroke 0.1s ease-out, stroke-width 0.1s ease-out',
+      }}
+      markerEnd={`url(#${markerType})`}
     />
   )
 }

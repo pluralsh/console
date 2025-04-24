@@ -16,7 +16,7 @@ import {
   useReactFlow,
   type Node,
 } from '@xyflow/react'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import FocusLock from 'react-focus-lock'
 import styled, { useTheme } from 'styled-components'
 
@@ -45,21 +45,20 @@ const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
     : { display: 'contents' }),
 }))
 
-const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
+const ReactFlowWrapperSC = styled.div<{
+  $hide?: boolean
+  $edgesSelectable?: boolean
+}>(({ $hide, $edgesSelectable }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
+  '.react-flow__renderer': { opacity: $hide ? 0 : 1 },
 
-  '.react-flow__renderer': {
-    opacity: $hide ? 0 : 1,
-  },
-
-  '.react-flow__edge': {
-    pointerEvents: 'none',
-    cursor: 'unset',
-  },
+  ...(!$edgesSelectable && {
+    '.react-flow__edge': { pointerEvents: 'none', cursor: 'unset' },
+  }),
 }))
 
 const ReactFlowAreaSC = styled.div<{ $fullscreen?: boolean }>(
@@ -95,6 +94,8 @@ export function ReactFlowGraph({
   resetView,
   allowFullscreen = false,
   showLayoutingIndicator = true,
+  additionalOverlays,
+  edgesSelectable = false,
   ...props
 }: {
   baseNodes: Node[]
@@ -103,6 +104,8 @@ export function ReactFlowGraph({
   resetView?: () => void
   allowFullscreen?: boolean
   showLayoutingIndicator?: boolean
+  additionalOverlays?: ReactNode
+  edgesSelectable?: boolean
 } & ReactFlowProps) {
   const theme = useTheme()
   const [fullscreen, setFullscreen] = useState(false)
@@ -150,10 +153,12 @@ export function ReactFlowGraph({
     >
       <ReactFlowAreaSC $fullscreen={fullscreen}>
         {showLayoutingIndicator && isLayouting && <LoadingIndicator />}
-        <ReactFlowWrapperSC $hide={isLayouting}>
+        <ReactFlowWrapperSC
+          $hide={isLayouting}
+          $edgesSelectable={edgesSelectable}
+        >
           <ReactFlow
             fitView
-            draggable
             minZoom={0.08}
             edgeTypes={edgeTypes}
             edgesFocusable={false}
@@ -197,6 +202,7 @@ export function ReactFlowGraph({
               Reset view
             </IconFrame>
           </ReactFlowActionWrapperSC>
+          {additionalOverlays}
         </ReactFlowWrapperSC>
       </ReactFlowAreaSC>
     </ReactFlowFullScreenWrapperSC>

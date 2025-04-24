@@ -6,7 +6,9 @@ import {
 } from '@xyflow/react'
 import type {
   ElkExtendedEdge,
+  ElkLabel,
   ElkNode,
+  ElkPort,
   ELK as ElkType,
   LayoutOptions,
 } from 'elkjs'
@@ -39,11 +41,17 @@ async function getLayoutedElements(
         ...defaultNodeProperties,
         ...(node.data.elkProperties ?? {}),
       },
+      ports: node.data.elkPorts as ElkPort[] | undefined,
     })),
     edges: edges.map((edge) => ({
       id: edge.id,
       sources: [edge.source],
       targets: [edge.target],
+      properties: {
+        ...defaultEdgeProperties,
+        ...(edge.data?.elkProperties ?? {}),
+      },
+      labels: edge.data?.elkLabels as ElkLabel[] | undefined,
     })),
   }
 
@@ -66,6 +74,7 @@ async function getLayoutedElements(
       edge.data = {
         ...edge.data,
         elkPathData: edgeIdToElkEdge.get(edge.id)?.sections,
+        elkLabels: edgeIdToElkEdge.get(edge.id)?.labels,
       }
   })
 
@@ -116,3 +125,5 @@ export function useAutoLayout({
 const defaultNodeProperties = {
   'elk.portAlignment.default': 'CENTER',
 }
+
+const defaultEdgeProperties = {}
