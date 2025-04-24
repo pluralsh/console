@@ -417,3 +417,12 @@ query ServiceStatuses($clusterId: ID) {
     ...ServiceStatusCount
   }
 }
+
+query ServiceNetworkGraph($serviceId: ID!, $time: DateTime) {
+  serviceDeployment(id: $serviceId) {
+    id
+    networkGraph(time: $time) {
+      ...NetworkMeshEdge
+    }
+  }
+}

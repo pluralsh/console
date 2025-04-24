@@ -4,21 +4,15 @@ import {
   LoopingLogo,
   SearchIcon,
   Table,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
-import {
-  CD_REL_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
-  SERVICE_PRS_PATH,
-} from 'routes/cdRoutesConsts'
-import { usePullRequestsQuery } from 'generated/graphql'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { usePullRequestsQuery } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { ComponentProps, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
+import { useThrottle } from '../../../hooks/useThrottle'
 import {
   ColActions,
   ColCreator,
@@ -28,16 +22,10 @@ import {
   ColTitle,
 } from '../../../pr/queue/PrQueueColumns'
 import { GqlError } from '../../../utils/Alert'
-import { useThrottle } from '../../../hooks/useThrottle'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../../../utils/table/useFetchPaginatedData'
-
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from './ServiceDetails'
 
 export const columns = [
   ColTitle,
@@ -50,27 +38,7 @@ export const columns = [
 
 export default function ServicePRs() {
   const theme = useTheme()
-  const { serviceId, clusterId } = useParams<{
-    [SERVICE_PARAM_ID]: string
-    [SERVICE_PARAM_CLUSTER_ID]: string
-  }>()
-  const { service } = useServiceContext()
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...getServiceDetailsBreadcrumbs({
-          cluster: service?.cluster || { id: clusterId || '' },
-          service: service || { id: serviceId || '' },
-        }),
-        {
-          label: 'pull requests',
-          url: `${CD_REL_PATH}/services/${serviceId}/${SERVICE_PRS_PATH}`,
-        },
-      ],
-      [clusterId, service, serviceId]
-    )
-  )
+  const { serviceId } = useParams()
 
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
@@ -84,14 +52,8 @@ export default function ServicePRs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: usePullRequestsQuery,
-      keyPath: ['pullRequests'],
-    },
-    {
-      q: debouncedSearchString,
-      serviceId,
-    }
+    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { q: debouncedSearchString, serviceId }
   )
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
@@ -99,7 +61,6 @@ export default function ServicePRs() {
   }
 
   if (error) return <GqlError error={error} />
-
   if (!data) return <LoopingLogo />
 
   return (

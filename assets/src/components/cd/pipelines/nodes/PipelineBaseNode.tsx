@@ -6,7 +6,7 @@ import {
   StatusOkIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { type Node, type NodeProps } from '@xyflow/react'
+import { type Node, type NodeProps, Position } from '@xyflow/react'
 import {
   GateState,
   PipelineStageEdgeFragment,
@@ -20,19 +20,12 @@ import {
   ComponentPropsWithRef,
   ReactElement,
   ReactNode,
-  use,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
-import { GraphLayoutCtx } from 'components/utils/reactflow/graph'
-import {
-  directionToSourcePosition,
-  directionToTargetPosition,
-  NodeBaseCardSC,
-  NodeHandleSC,
-} from '../../../utils/reactflow/nodes'
+import { NodeBaseCardSC, NodeHandleSC } from '../../../utils/reactflow/nodes'
 import { StageStatus } from './StageNode'
 
 type PipelineGateNodeMeta = { meta: { state: GateState } }
@@ -104,7 +97,6 @@ export function PipelineBaseNode({
 }: Pick<PipelineStageNodeProps | PipelineGateNodeProps, 'id'> &
   ComponentPropsWithRef<typeof BaseNodeSC>) {
   const { incomers, outgoers } = useNodeEdges(id)
-  const { rankdir = 'LR' } = use(GraphLayoutCtx) ?? {}
 
   return (
     <BaseNodeSC {...props}>
@@ -112,14 +104,14 @@ export function PipelineBaseNode({
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
-        position={directionToTargetPosition[rankdir]}
+        position={Position.Left}
       />
       {children}
       <NodeHandleSC
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
-        position={directionToSourcePosition[rankdir]}
+        position={Position.Right}
       />
     </BaseNodeSC>
   )

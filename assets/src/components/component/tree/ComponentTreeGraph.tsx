@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 
-import { DagreGraphOptions } from 'components/cd/pipelines/utils/nodeLayouter'
+import { pipelineElkOptions } from 'components/cd/pipelines/PipelineGraph'
 import {
   ComponentTreeFragment,
   ServiceDeploymentComponentFragment,
 } from 'generated/graphql'
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 import { ComponentTreeNode } from './ComponentTreeNode'
 import { getTreeNodesAndEdges } from './getTreeNodesAndEdges'
 
@@ -29,12 +29,8 @@ export function ComponentTreeGraph({
     <ReactFlowGraph
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      dagreOptions={options}
+      elkOptions={pipelineElkOptions}
       nodeTypes={nodeTypes}
     />
   )
-}
-
-const options: DagreGraphOptions = {
-  ranksep: 50,
 }

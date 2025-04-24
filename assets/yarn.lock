@@ -8352,23 +8352,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xyflow/react@npm:12.5.5":
-  version: 12.5.5
-  resolution: "@xyflow/react@npm:12.5.5"
+"@xyflow/react@npm:12.6.0":
+  version: 12.6.0
+  resolution: "@xyflow/react@npm:12.6.0"
   dependencies:
-    "@xyflow/system": 0.0.55
+    "@xyflow/system": 0.0.57
     classcat: ^5.0.3
     zustand: ^4.4.0
   peerDependencies:
     react: ">=17"
     react-dom: ">=17"
-  checksum: 2a391a87047de368f86e3b852d9000953eb6755f1056aded8a684501a54f62e8412b7401c7a550af269803d55c4879fb6603d05efa0f799771c794024150d26b
+  checksum: 3b4fd58db26ded58d30d8c99b323a766b9a894efaa2f4f952360ecda171d836e005a52e007ad671e90f4ed441c5ffd0b04ec232d7d21198240a76a098baacc20
   languageName: node
   linkType: hard
 
-"@xyflow/system@npm:0.0.55":
-  version: 0.0.55
-  resolution: "@xyflow/system@npm:0.0.55"
+"@xyflow/system@npm:0.0.57":
+  version: 0.0.57
+  resolution: "@xyflow/system@npm:0.0.57"
   dependencies:
     "@types/d3-drag": ^3.0.7
     "@types/d3-selection": ^3.0.10
@@ -8377,7 +8377,7 @@ __metadata:
     d3-drag: ^3.0.0
     d3-selection: ^3.0.0
     d3-zoom: ^3.0.0
-  checksum: 94213976897e1b3319c3904704819f221c6bcfbe7ad2181f2c368939fb5e56ef93e1635a2e43417ad711f61ba550b83c90365975287f2dcd425e8171190c1908
+  checksum: 670d2ce71d814467edabd67f12849dfe11b085cf5881b801685f78fa2e9088a1f54aa3b70fd129a9e134101ee14a3dc02d3746787ef9c5d164fb6fad0ef396d4
   languageName: node
   linkType: hard
 
@@ -10144,7 +10144,7 @@ __metadata:
     "@vitejs/plugin-react": 4.3.4
     "@vitest/coverage-v8": 2.1.1
     "@vitest/ui": 2.1.1
-    "@xyflow/react": 12.5.5
+    "@xyflow/react": 12.6.0
     anser: 2.1.1
     apollo-absinthe-upload-link: 1.7.0
     apollo-boost: 0.4.9
@@ -10162,6 +10162,7 @@ __metadata:
     cypress: 12.14.0
     dayjs: 1.11.13
     diff: 7.0.0
+    elkjs: 0.10.0
     encrypt-storage: 2.13.2
     escape-carriage: 1.3.1
     eslint: 9.20.0
@@ -11376,6 +11377,13 @@ __metadata:
   version: 1.5.115
   resolution: "electron-to-chromium@npm:1.5.115"
   checksum: 2f9f0519758d90b9bee29bf2c3dc5ac78990794ba2ad7e0680433b6298320e6bd50e673ef481819f3ef00bb24a6ec53fd3ab603d6f3511e59de627405016e84f
+  languageName: node
+  linkType: hard
+
+"elkjs@npm:0.10.0":
+  version: 0.10.0
+  resolution: "elkjs@npm:0.10.0"
+  checksum: 325603c2d1b9a26d976d10b57b8f1d1fa6303bebd1d1622b75a8643cbd0527e3004a5d26d29a173f1d0a8855ea58b92dc4e60871f7bcd7889f7c81d33009c64a
   languageName: node
   linkType: hard
 

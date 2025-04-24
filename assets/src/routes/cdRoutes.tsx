@@ -153,7 +153,7 @@ import {
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
-// import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
+import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -607,10 +607,10 @@ const serviceDetailsRoutes = (
       element={<ServiceMetrics />}
       path="metrics"
     />
-    {/* <Route
+    <Route
       element={<ServiceNetwork />}
       path="network"
-    /> */}
+    />
     <Route
       element={<ServiceInsights />}
       path="insights"

@@ -1,22 +1,22 @@
+import { type Edge, type Node } from '@xyflow/react'
 import {
+  GlobalServiceFragment,
   ServiceDeployment,
   ServiceTreeNodeFragment,
-  GlobalServiceFragment,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { type Node, type Edge } from '@xyflow/react'
 
 import { chunk } from 'lodash'
 
-import { ReactFlowGraph } from '../../utils/reactflow/graph'
-import { EdgeType } from '../../utils/reactflow/edges'
+import { LayoutOptions } from 'elkjs'
 import { pairwise } from '../../../utils/array'
+import { EdgeType } from '../../utils/reactflow/edges'
+import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 import {
   GlobalServiceNodeKey,
   ServiceNodeKey,
   nodeTypes,
 } from './ServicesTreeDiagramNodes'
-import { DagreGraphOptions } from '../pipelines/utils/nodeLayouter'
 
 const isNotDeploymentOperatorService = (
   service: Pick<ServiceDeployment, 'name'>
@@ -28,7 +28,10 @@ function getNodesAndEdges(
 ) {
   const nodes: Node[] = []
   const edges: Edge[] = []
-
+  const existingIds = new Set([
+    ...services.map(({ id }) => id),
+    ...globalServices.map(({ id }) => id),
+  ])
   services.filter(isNotDeploymentOperatorService).forEach((service) => {
     nodes.push({
       id: service.id,
@@ -37,7 +40,11 @@ function getNodesAndEdges(
       data: { ...service },
     })
 
-    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+    if (
+      service.parent?.id &&
+      isNotDeploymentOperatorService(service.parent) &&
+      existingIds.has(service.parent.id)
+    ) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -47,7 +54,7 @@ function getNodesAndEdges(
       })
     }
 
-    if (service.owner?.id) {
+    if (service.owner?.id && existingIds.has(service.owner.id)) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -66,7 +73,11 @@ function getNodesAndEdges(
       data: { ...service },
     })
 
-    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+    if (
+      service.parent?.id &&
+      isNotDeploymentOperatorService(service.parent) &&
+      existingIds.has(service.parent.id)
+    ) {
       edges.push({
         type: EdgeType.Smooth,
         reconnectable: false,
@@ -122,13 +133,15 @@ export function ServicesTreeDiagram({
       allowFullscreen
       baseNodes={baseNodes}
       baseEdges={baseEdges}
-      dagreOptions={options}
+      elkOptions={options}
       minZoom={0.01}
       nodeTypes={nodeTypes}
     />
   )
 }
 
-const options: DagreGraphOptions = {
-  // rankdir: 'TB',
+const options: LayoutOptions = {
+  'elk.algorithm': 'mrtree',
+  'elk.direction': 'RIGHT',
+  'elk.spacing.nodeNode': '60',
 }
