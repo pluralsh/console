@@ -74,7 +74,7 @@ export interface MoreMenuItem {
 
 export interface HeaderContext {
   setHeaderContent: Dispatch<SetStateAction<ReactNode>>
-  setHeaderAction: Dispatch<SetStateAction<ReactNode>>
+  setHeaderAction?: Dispatch<SetStateAction<ReactNode>>
   setMoreMenuItems?: Dispatch<Array<MoreMenuItem>>
   menuKey?: string
   setMenuKey?: Dispatch<string>
