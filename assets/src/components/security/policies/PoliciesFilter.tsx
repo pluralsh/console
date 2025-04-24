@@ -4,6 +4,8 @@ import {
   Checkbox,
   Flex,
   Input,
+  Radio,
+  RadioGroup,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { useClustersQuery, ViolationStatisticsQuery } from 'generated/graphql'
@@ -13,10 +15,13 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from '../../../utils/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import { ViolationFilter } from './Policies.tsx'
 
 const FETCH_MARGIN = 30
 
 function PoliciesFilter({
+  violationsFilter,
+  setViolationsFilter,
   selectedKinds,
   setSelectedKinds,
   selectedNamespaces,
@@ -26,6 +31,8 @@ function PoliciesFilter({
   kindsData,
   namespacesData,
 }: {
+  violationsFilter: ViolationFilter
+  setViolationsFilter: Dispatch<SetStateAction<ViolationFilter>>
   selectedKinds: (string | null)[]
   setSelectedKinds: Dispatch<SetStateAction<(string | null)[]>>
   selectedNamespaces: (string | null)[]
@@ -75,6 +82,7 @@ function PoliciesFilter({
     [clustersData?.clusters]
   )
 
+  const statusLabel = 'Status'
   const clusterLabel = 'Cluster'
   const kindLabel = 'Kind'
   const namespaceLabel = 'Namespace'
@@ -121,6 +129,25 @@ function PoliciesFilter({
         maxHeight: 'fit-content',
       }}
     >
+      <AccordionItem
+        trigger={statusLabel}
+        value={statusLabel}
+      >
+        <RadioGroup
+          value={violationsFilter}
+          onChange={(v) => setViolationsFilter(v as ViolationFilter)}
+        >
+          {Object.values(ViolationFilter)?.map((label) => (
+            <Radio
+              small
+              key={label}
+              value={label}
+            >
+              {label}
+            </Radio>
+          ))}
+        </RadioGroup>
+      </AccordionItem>
       <AccordionItem
         trigger={clusterLabel}
         value={clusterLabel}

@@ -15,6 +15,13 @@ fragment PolicyConstraint on PolicyConstraint {
   violationCount
 }
 
+fragment ComplianceReport on ComplianceReports {
+  insertedAt
+  id
+  name
+  sha256
+}
+
 query PolicyConstraints(
   $after: String
   $before: String
@@ -103,5 +110,28 @@ query PolicyStatistics(
   ) {
     count
     aggregate
+  }
+}
+
+query ComplianceReports(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+) {
+  complianceReports(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ComplianceReport
+      }
+    }
   }
 }

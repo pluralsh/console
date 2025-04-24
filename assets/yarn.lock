@@ -10214,6 +10214,7 @@ __metadata:
     react-window-reversed: 1.4.1
     regenerator-runtime: 0.13.11
     semver: 7.5.4
+    streamsaver: ^2.0.6
     styled-components: 6.1.15
     stylelint: 15.11.0
     type-fest: 4.8.3
@@ -19541,6 +19542,13 @@ __metadata:
   version: 3.8.1
   resolution: "std-env@npm:3.8.1"
   checksum: 20114a5270aa2a3fc50d897461c6ab73329cf2d3c6bff1c124bb969577493aeebda8ee1916588b2657afcee9881bc652437cfdec6360e3f30be36c8675ea0cbb
+  languageName: node
+  linkType: hard
+
+"streamsaver@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "streamsaver@npm:2.0.6"
+  checksum: 7b4b06d8da3864b74f1887e5e9d142de380abb48864ca1d6ba38ba3b7b9b964213c5976820f5f09b3b7164fe05d824b4d6296e23b142e7d1c42f87f998f63a2a
   languageName: node
   linkType: hard
 
