@@ -1,7 +1,7 @@
 import {
   BaseEdge,
   BezierEdge,
-  type Edge,
+  type Edge as FlowEdge,
   EdgeProps as FlowEdgeProps,
   SmoothStepEdge,
   StepEdge,
@@ -13,13 +13,15 @@ import { useEdgeNodes } from '../../hooks/reactFlowHooks'
 
 import { ElkEdgeSection, ElkLabel } from 'elkjs'
 import { MarkerType } from './markers'
+import { NetworkEdgeData } from '../network-graph/NetworkGraph'
 
-export type EdgeProps<T extends Edge = Edge> = FlowEdgeProps<T> & {
-  data?: {
-    elkPathData: Nullable<ElkEdgeSection[]>
+export type Edge<T = Record<string, unknown>> = FlowEdge<
+  T & {
+    elkPathData?: Nullable<ElkEdgeSection[]>
     elkLabels?: Nullable<ElkLabel[]>
   }
-}
+>
+type EdgeProps<T = Record<string, unknown>> = FlowEdgeProps<Edge<T>>
 
 export enum EdgeType {
   Invisible = 'plural-invisible-edge',
@@ -119,9 +121,10 @@ function Pipeline({ style, data, ...props }: EdgeProps) {
   )
 }
 
-function Network({ style, selected, data }: EdgeProps) {
+function Network({ style, selected, data }: EdgeProps<NetworkEdgeData>) {
   const { colors } = useTheme()
   const path = generateElkEdgePath(data?.elkPathData)
+  const isBidirectional = data?.statsArr?.length === 2
 
   let color: string = colors.border
   let markerType = MarkerType.Arrow
@@ -132,17 +135,18 @@ function Network({ style, selected, data }: EdgeProps) {
     markerType = MarkerType.ArrowHovered
     color = colors['text-light']
   }
+  const markerUrl = `url(#${markerType})`
 
   return (
     <BaseEdge
       path={path}
       style={{
         ...style,
-        strokeWidth: selected ? 1 : style?.strokeWidth || 1,
         stroke: color,
-        transition: 'stroke 0.1s ease-out, stroke-width 0.1s ease-out',
+        transition: 'stroke 0.1s ease-out',
       }}
-      markerEnd={`url(#${markerType})`}
+      markerStart={isBidirectional ? markerUrl : undefined}
+      markerEnd={markerUrl}
     />
   )
 }

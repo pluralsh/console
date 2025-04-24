@@ -8,12 +8,14 @@ import {
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
-import { Edge, Node, ReactFlowProvider, useReactFlow } from '@xyflow/react'
+import { Node, ReactFlowProvider, useReactFlow } from '@xyflow/react'
+import { DELIMITER } from 'components/ai/insights/InsightEvidence'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { NamespaceFilter } from 'components/kubernetes/common/NamespaceFilter'
 import Fuse from 'fuse.js'
 import {
   NetworkMeshEdgeFragment,
+  NetworkMeshStatisticsFragment,
   NetworkMeshWorkloadFragment,
   useClusterNamespacesQuery,
 } from 'generated/graphql'
@@ -23,13 +25,20 @@ import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from '../LoadingIndicator'
-import { EdgeType } from '../reactflow/edges'
+import { Edge, EdgeType } from '../reactflow/edges'
 import { ReactFlowGraph } from '../reactflow/ReactFlowGraph'
 import { TimestampSliderButton } from '../TimestampSlider'
 import { MeshWorkloadNode } from './NetworkGraphNodes'
 import { NetworkGraphStatistics } from './NetworkGraphStatistics'
 
 const nodeTypes = { workload: MeshWorkloadNode }
+export type NetworkEdgeData = {
+  statsArr: {
+    from: NetworkMeshWorkloadFragment
+    to: NetworkMeshWorkloadFragment
+    stats: NetworkMeshStatisticsFragment
+  }[]
+}
 
 const searchOptions: Fuse.IFuseOptions<NetworkMeshEdgeFragment> = {
   keys: ['from.name', 'from.service', 'to.name', 'to.service'],
@@ -68,7 +77,8 @@ function NetworkGraphInternal({
   const throttledQ = useThrottle(q, 500)
   const [namespace, setNamespace] = useState<string | undefined>(undefined)
   const [traffic, setTraffic] = useState<TrafficType>('internal-only')
-  const [selectedEdge, setSelectedEdge] = useState<Nullable<string>>()
+  const [selectedEdge, setSelectedEdge] =
+    useState<Nullable<Edge<NetworkEdgeData>>>()
 
   const { updateEdge } = useReactFlow()
 
@@ -168,21 +178,19 @@ function NetworkGraphInternal({
             nodeDragThreshold={5}
             showLayoutingIndicator={false}
             onEdgeMouseEnter={(_, { id }) =>
-              updateEdge(id, {
-                style: { stroke: colors['text-light'], strokeWidth: 2 },
-              })
+              updateEdge(id, { style: { stroke: colors['text-light'] } })
             }
             onEdgeMouseLeave={(_, { id }) =>
-              updateEdge(id, {
-                style: { stroke: colors.border, strokeWidth: 1 },
-              })
+              updateEdge(id, { style: { stroke: colors.border } })
             }
-            onSelectionChange={({ edges }) => setSelectedEdge(edges[0]?.id)}
+            onSelectionChange={({ edges }) =>
+              setSelectedEdge(edges[0] as Nullable<Edge<NetworkEdgeData>>)
+            }
             edgesSelectable
             edgesFocusable
             additionalOverlays={
               selectedEdge && (
-                <NetworkGraphStatistics selectedEdgeId={selectedEdge} />
+                <NetworkGraphStatistics selectedEdge={selectedEdge} />
               )
             }
           />
@@ -202,23 +210,31 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
   nodes: Node[]
-  edges: Edge[]
+  edges: Edge<NetworkEdgeData>[]
 } {
   const nodes: Node[] = []
-  const edges: Edge[] = []
-  const workloadSet: Record<string, NetworkMeshWorkloadFragment> = {}
+  const edges: Edge<NetworkEdgeData>[] = []
+  const workloadMap: Record<string, NetworkMeshWorkloadFragment> = {}
+  const edgeDataMap: Record<string, NetworkEdgeData> = {}
+
   networkData.forEach((networkEdge) => {
-    workloadSet[networkEdge.from.id] = networkEdge.from
-    workloadSet[networkEdge.to.id] = networkEdge.to
-    edges.push({
-      id: networkEdge.id,
-      source: networkEdge.from.id,
-      target: networkEdge.to.id,
-      type: EdgeType.Network,
-      data: { statistics: networkEdge.statistics },
+    const sourceId = networkEdge.from.id
+    const targetId = networkEdge.to.id
+
+    const edgeKey = [sourceId, targetId].sort().join(DELIMITER)
+    if (!edgeDataMap[edgeKey]?.statsArr) edgeDataMap[edgeKey] = { statsArr: [] }
+
+    workloadMap[sourceId] = networkEdge.from
+    workloadMap[targetId] = networkEdge.to
+
+    edgeDataMap[edgeKey]?.statsArr?.push({
+      from: networkEdge.from,
+      to: networkEdge.to,
+      stats: networkEdge.statistics,
     })
   })
-  Object.values(workloadSet).forEach((workload) => {
+
+  Object.values(workloadMap).forEach((workload) => {
     nodes.push({
       id: workload.id,
       position: { x: 0, y: 0 },
@@ -226,6 +242,21 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
       data: workload,
     })
   })
+
+  // only need the source and target id for the first object in statsArr
+  // if it's bidirectional then the UI will handle that automatically
+  Object.values(edgeDataMap).forEach(({ statsArr }) => {
+    const edgeData = statsArr[0]
+    if (!edgeData) return
+    edges.push({
+      id: `${edgeData.from.id}-${edgeData.to.id}`,
+      source: edgeData.from.id,
+      target: edgeData.to.id,
+      type: EdgeType.Network,
+      data: { statsArr },
+    })
+  })
+
   return { nodes, edges }
 }
 

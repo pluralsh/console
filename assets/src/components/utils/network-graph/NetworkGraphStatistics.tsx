@@ -1,25 +1,45 @@
-import { Edge, useReactFlow, type Node } from '@xyflow/react'
 import { filesize } from 'filesize'
 import { NetworkMeshStatisticsFragment } from 'generated/graphql'
 import { round } from 'lodash'
 import styled from 'styled-components'
 import { CaptionP } from '../typography/Text'
 import { Card } from '@pluralsh/design-system'
+import { Edge } from '../reactflow/edges'
+import { NetworkEdgeData } from './NetworkGraph'
 
 export function NetworkGraphStatistics({
-  selectedEdgeId,
+  selectedEdge,
 }: {
-  selectedEdgeId: string
+  selectedEdge: Edge<NetworkEdgeData>
 }) {
-  const { getEdge } = useReactFlow<
-    Node,
-    Edge<{ statistics: NetworkMeshStatisticsFragment }>
-  >()
-  const statistics = getEdge(selectedEdgeId)?.data?.statistics
-  if (!statistics) return null
+  return (
+    <CardContainerSC>
+      {selectedEdge?.data?.statsArr?.map(({ from, to, stats }, i) => (
+        <NetworkGraphStatisticsCard
+          key={`${selectedEdge.id}-${i}`}
+          from={from.name}
+          to={to.name}
+          statistics={stats}
+        />
+      ))}
+    </CardContainerSC>
+  )
+}
 
+function NetworkGraphStatisticsCard({
+  from,
+  to,
+  statistics,
+}: {
+  from: string
+  to: string
+  statistics: NetworkMeshStatisticsFragment
+}) {
   return (
     <WrapperSC>
+      <CaptionP>
+        <strong>{from}</strong> {'\u2192'} <strong>{to}</strong>
+      </CaptionP>
       <Statistic
         value={filesize(statistics.bytes ?? 0)}
         suffix="sent"
@@ -67,7 +87,7 @@ function Statistic({
     typeof value === 'string' ? value : round(value ?? 0, precision)
 
   return (
-    <div>
+    <span>
       <CaptionP
         as="span"
         $color="text"
@@ -80,16 +100,22 @@ function Statistic({
       >
         {suffix}
       </CaptionP>
-    </div>
+    </span>
   )
 }
 
 const WrapperSC = styled(Card)(({ theme }) => ({
-  position: 'absolute',
-  top: theme.spacing.xsmall,
-  left: theme.spacing.xsmall,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
   padding: theme.spacing.xsmall,
+  maxWidth: 160,
+}))
+
+const CardContainerSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  top: theme.spacing.xsmall,
+  left: theme.spacing.xsmall,
 }))

@@ -160,6 +160,7 @@ export function ReactFlowGraph({
           <ReactFlow
             fitView
             minZoom={0.08}
+            maxZoom={3}
             edgeTypes={edgeTypes}
             edgesFocusable={false}
             edgesReconnectable={false}
