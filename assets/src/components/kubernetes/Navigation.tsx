@@ -10,15 +10,15 @@ import { ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
+  AUDIT_REL_PATH,
   CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
+  getKubernetesAbsPath,
   NETWORK_REL_PATH,
   RBAC_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
-  getKubernetesAbsPath,
-  AUDIT_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
@@ -56,6 +56,7 @@ export default function Navigation() {
   const clusters = useClusters()
   const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [headerAction, setHeaderAction] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
   const dataSelect = useDataSelect({
@@ -63,7 +64,10 @@ export default function Navigation() {
     filter: params.get(FILTER_PARAM) ?? '',
   })
 
-  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
+  const pageHeaderContext = useMemo(
+    () => ({ setHeaderContent, setHeaderAction }),
+    []
+  )
 
   useLayoutEffect(() => {
     dataSelect.setEnabled(true)
@@ -130,6 +134,7 @@ export default function Navigation() {
           }}
         >
           <div css={{ flex: 1, overflow: 'hidden' }}>{headerContent}</div>
+          <div>{headerAction}</div>
           {dataSelect.enabled && <DataSelectInputs dataSelect={dataSelect} />}
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>

@@ -5184,6 +5184,13 @@ export type ResourceUpdateMutationVariables = Exact<{
 
 export type ResourceUpdateMutation = { __typename?: 'Mutation', handlePutResource?: any | null };
 
+export type DeployFromInputMutationVariables = Exact<{
+  input: Deployment_AppDeploymentFromFileSpec_Input;
+}>;
+
+
+export type DeployFromInputMutation = { __typename?: 'Mutation', handleDeployFromFile?: { __typename?: 'deployment_AppDeploymentFromFileResponse', name: string, error: string } | null };
+
 export type ResourceScaleMutationVariables = Exact<{
   kind: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -8344,6 +8351,40 @@ export function useResourceUpdateMutation(baseOptions?: Apollo.MutationHookOptio
 export type ResourceUpdateMutationHookResult = ReturnType<typeof useResourceUpdateMutation>;
 export type ResourceUpdateMutationResult = Apollo.MutationResult<ResourceUpdateMutation>;
 export type ResourceUpdateMutationOptions = Apollo.BaseMutationOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
+export const DeployFromInputDocument = gql`
+    mutation DeployFromInput($input: deployment_AppDeploymentFromFileSpec_Input!) {
+  handleDeployFromFile(input: $input) @rest(type: "Void ", path: "appdeploymentfromfile", method: "POST", bodyKey: "input") {
+    name
+    error
+  }
+}
+    `;
+export type DeployFromInputMutationFn = Apollo.MutationFunction<DeployFromInputMutation, DeployFromInputMutationVariables>;
+
+/**
+ * __useDeployFromInputMutation__
+ *
+ * To run a mutation, you first call `useDeployFromInputMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeployFromInputMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deployFromInputMutation, { data, loading, error }] = useDeployFromInputMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeployFromInputMutation(baseOptions?: Apollo.MutationHookOptions<DeployFromInputMutation, DeployFromInputMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeployFromInputMutation, DeployFromInputMutationVariables>(DeployFromInputDocument, options);
+      }
+export type DeployFromInputMutationHookResult = ReturnType<typeof useDeployFromInputMutation>;
+export type DeployFromInputMutationResult = Apollo.MutationResult<DeployFromInputMutation>;
+export type DeployFromInputMutationOptions = Apollo.BaseMutationOptions<DeployFromInputMutation, DeployFromInputMutationVariables>;
 export const ResourceScaleDocument = gql`
     mutation ResourceScale($kind: String!, $namespace: String!, $name: String!, $scaleBy: String!) {
   handleScaleResource(

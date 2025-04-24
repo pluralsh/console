@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { Dispatch, DispatchWithoutAction, useMemo, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
@@ -7,20 +7,22 @@ import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import {
   Maybe,
-  Secret_SecretList as SecretListT,
   Secret_Secret as SecretT,
+  Secret_SecretList as SecretListT,
   SecretsQuery,
   SecretsQueryVariables,
   useSecretsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  SECRETS_REL_PATH,
   getConfigurationAbsPath,
+  SECRETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
+import { useSetPageHeaderAction } from '../../cd/ContinuousDeployment.tsx'
+import { CreateSecretButton } from '../common/create/secret/SecretButton.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getConfigurationBreadcrumbs(cluster),
@@ -40,8 +42,15 @@ const colType = columnHelper.accessor((secret) => secret.type, {
 
 export default function Secrets() {
   const cluster = useCluster()
+  const [refetch, setRefetch] = useState<Dispatch<DispatchWithoutAction>>()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+  useSetPageHeaderAction(
+    <CreateSecretButton
+      text="Create secret"
+      refetch={refetch}
+    />
+  )
 
   const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -64,6 +73,7 @@ export default function Secrets() {
       query={useSecretsQuery}
       queryName="handleGetSecretList"
       itemsKey="secrets"
+      setRefetch={setRefetch}
     />
   )
 }
