@@ -20,11 +20,11 @@ import { FetchResult } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 import { GraphQLError } from 'graphql'
-import { SSH } from './type/SSH'
-import { Opaque } from './type/Opaque'
-import { ServiceAccount } from './type/ServiceAccount'
+import { SecretSSHForm } from './type/SSH'
+import { SecretOpaqueForm } from './type/Opaque'
+import { SecretServiceAccountForm } from './type/ServiceAccount'
 import { OperationVariables } from '@apollo/client/core'
-import { BasicAuth } from './type/BasicAuth.tsx'
+import { SecretBasicAuthForm } from './type/BasicAuth.tsx'
 
 const FormContainer = styled.div`
   display: flex;
@@ -284,7 +284,7 @@ function DataFormFieldUnstyled({
           label="Service Account"
           required
         >
-          <ServiceAccount
+          <SecretServiceAccountForm
             serviceAccount={serviceAccount}
             setServiceAccount={setServiceAccount}
             setValid={setValid}
@@ -298,7 +298,7 @@ function DataFormFieldUnstyled({
           required
         >
           <div {...props}>
-            <BasicAuth
+            <SecretBasicAuthForm
               data={data}
               setData={setData}
               setValid={setValid}
@@ -313,7 +313,7 @@ function DataFormFieldUnstyled({
           required
         >
           <div {...props}>
-            <SSH
+            <SecretSSHForm
               data={data}
               setData={setData}
               setValid={setValid}
@@ -329,7 +329,7 @@ function DataFormFieldUnstyled({
           required
         >
           <div {...props}>
-            <Opaque
+            <SecretOpaqueForm
               data={data}
               setData={setData}
               setValid={setValid}

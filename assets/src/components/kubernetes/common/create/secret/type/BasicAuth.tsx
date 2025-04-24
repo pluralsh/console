@@ -1,13 +1,16 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Input } from '@pluralsh/design-system'
 
-interface BasicAuthProps {
+interface SecretBasicAuthFormProps {
   data: { key: string; value: string }[]
   setData: Dispatch<SetStateAction<{ key: string; value: string }[]>>
   setValid: Dispatch<SetStateAction<boolean>>
 }
 
-function BasicAuth({ setData, setValid }: BasicAuthProps): ReactNode {
+function SecretBasicAuthForm({
+  setData,
+  setValid,
+}: SecretBasicAuthFormProps): ReactNode {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -40,4 +43,4 @@ function BasicAuth({ setData, setValid }: BasicAuthProps): ReactNode {
   )
 }
 
-export { BasicAuth }
+export { SecretBasicAuthForm }

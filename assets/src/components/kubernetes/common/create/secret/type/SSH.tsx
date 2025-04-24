@@ -2,13 +2,13 @@ import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { EditableDiv } from '../../../../../utils/EditableDiv.tsx'
 
-interface SSHProps {
+interface SecretSSHFormProps {
   data: { key: string; value: string }[]
   setData: Dispatch<SetStateAction<{ key: string; value: string }[]>>
   setValid: Dispatch<SetStateAction<boolean>>
 }
 
-function SSH({ setData, setValid }: SSHProps): ReactNode {
+function SecretSSHForm({ setData, setValid }: SecretSSHFormProps): ReactNode {
   const theme = useTheme()
   const [value, setValue] = useState('')
 
@@ -39,4 +39,4 @@ function SSH({ setData, setValid }: SSHProps): ReactNode {
   )
 }
 
-export { SSH }
+export { SecretSSHForm }

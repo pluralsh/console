@@ -4,13 +4,17 @@ import { Input } from '@pluralsh/design-system'
 import { DeleteIconButton } from '../../../../../utils/IconButtons.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 
-interface OpaqueProps {
+interface SecretOpaqueFormProps {
   data: { key: string; value: string }[]
   setData: Dispatch<SetStateAction<{ key: string; value: string }[]>>
   setValid: Dispatch<SetStateAction<boolean>>
 }
 
-function Opaque({ data, setData, setValid }: OpaqueProps): ReactNode {
+function SecretOpaqueForm({
+  data,
+  setData,
+  setValid,
+}: SecretOpaqueFormProps): ReactNode {
   useEffect(() => {
     setValid(data.every((entry) => !!entry.key && !!entry.value))
   }, [data, setValid])
@@ -98,4 +102,4 @@ function DataEntryUnstyled({
   )
 }
 
-export { Opaque }
+export { SecretOpaqueForm }

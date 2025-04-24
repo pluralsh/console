@@ -1,17 +1,17 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Input } from '@pluralsh/design-system'
 
-interface ServiceAccountProps {
+interface SecretServiceAccountFormProps {
   serviceAccount: string
   setServiceAccount: Dispatch<SetStateAction<string>>
   setValid: Dispatch<SetStateAction<boolean>>
 }
 
-function ServiceAccount({
+function SecretServiceAccountForm({
   serviceAccount,
   setServiceAccount,
   setValid,
-}: ServiceAccountProps): ReactNode {
+}: SecretServiceAccountFormProps): ReactNode {
   useEffect(() => {
     setValid(!!serviceAccount)
   }, [serviceAccount, setValid])
@@ -27,4 +27,4 @@ function ServiceAccount({
   )
 }
 
-export { ServiceAccount }
+export { SecretServiceAccountForm }
