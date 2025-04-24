@@ -23,6 +23,7 @@ import { GqlError } from '../../../utils/Alert.tsx'
 import { GraphQLError } from 'graphql'
 import { GraphQLErrors } from '@apollo/client/errors'
 import { OperationVariables } from '@apollo/client/core'
+import { Partial } from 'react-spring'
 
 const FormContainer = styled.div`
   display: flex;
@@ -36,12 +37,14 @@ interface CreateSecretModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   refetch?: (variables?: Partial<OperationVariables>) => Promise<unknown>
+  onCreate?: (name: string, namespace: string) => void
 }
 
 export function CreateSecretModal({
   open,
   setOpen,
   refetch,
+  onCreate,
 }: CreateSecretModalProps) {
   const { clusterId } = useParams()
   const namespaces = useNamespaces()
@@ -85,11 +88,15 @@ export function CreateSecretModal({
     if (!refetch) {
       setCreating(false)
       setOpen(false)
+      onCreate?.(name, namespace)
       return
     }
 
     refetch({ fetchPolicy: 'no-cache' })
-      .then(() => setOpen(false))
+      .then(() => {
+        onCreate?.(name, namespace)
+        setOpen(false)
+      })
       .finally(() => setCreating(false))
   }
 
@@ -260,10 +267,10 @@ function DataFormFieldUnstyled({
       <div {...props}>
         {data.map((entry, index) => (
           <DataEntry
+            index={index}
             data={data}
             setData={setData}
             entry={entry}
-            index={index}
           />
         ))}
       </div>
@@ -287,7 +294,7 @@ const DataEntry = styled(DataEntryUnstyled)(({ theme }) => ({
   },
 
   '.textArea': {
-    padding: theme.spacing.medium,
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
     backgroundColor: theme.colors['fill-two'],
