@@ -8,22 +8,23 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
+import { SecretType, ToSecretYaml } from './common'
 import {
   DeployFromInputMutation,
   useDeployFromInputMutation,
-} from '../../../../generated/graphql-kubernetes.ts'
-import { KubernetesClient } from '../../../../helpers/kubernetes.client.ts'
+} from 'generated/graphql-kubernetes'
 import { useParams } from 'react-router-dom'
-import { useNamespaces } from '../../Cluster.tsx'
-import { DeleteIconButton } from '../../../utils/IconButtons.tsx'
-import { EditableDiv } from '../../../utils/EditableDiv.tsx'
-import { SecretType, ToSecretYaml } from './common.ts'
-import { ApolloError, FetchResult } from '@apollo/client'
-import { GqlError } from '../../../utils/Alert.tsx'
+import { useNamespaces } from 'components/kubernetes/Cluster'
+import { KubernetesClient } from 'helpers/kubernetes.client'
+import { FetchResult } from '@apollo/client'
+import { GqlError } from 'components/utils/Alert'
+import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 import { GraphQLError } from 'graphql'
-import { GraphQLErrors } from '@apollo/client/errors'
+import { SSH } from './type/SSH'
+import { Opaque } from './type/Opaque'
+import { ServiceAccount } from './type/ServiceAccount'
 import { OperationVariables } from '@apollo/client/core'
-import { Partial } from 'react-spring'
+import { BasicAuth } from './type/BasicAuth.tsx'
 
 const FormContainer = styled.div`
   display: flex;
@@ -57,9 +58,9 @@ export function CreateSecretModal({
   const [type, setType] = useState<SecretType>(SecretType.Opaque)
   const [data, setData] = useState([{ key: '', value: '' }])
   const [error, setError] = useState<string>()
+  const [serviceAccount, setServiceAccount] = useState('')
 
-  // TODO: add support for more secret types
-  const secretTypes = [SecretType.Opaque]
+  const secretTypes = Object.values(SecretType)
 
   const [deploy] = useDeployFromInputMutation({
     client: KubernetesClient(clusterId ?? ''),
@@ -101,9 +102,17 @@ export function CreateSecretModal({
   }
 
   useEffect(() => {
-    setYaml(ToSecretYaml(name, namespace, type, data))
-    setValid(!!name && !!namespace && data.some((d) => d.key))
-  }, [name, namespace, type, data])
+    setYaml(
+      ToSecretYaml({
+        name,
+        namespace,
+        type,
+        serviceAccount,
+        data,
+      })
+    )
+    setValid((valid) => valid && !!name && !!namespace)
+  }, [name, namespace, type, data, serviceAccount])
 
   return (
     <Modal
@@ -120,7 +129,9 @@ export function CreateSecretModal({
           setCreating={setCreating}
           setOpen={setOpen}
           valid={valid}
-          submit={() => deploy().then(onComplete)}
+          submit={() => {
+            deploy().then(onComplete)
+          }}
         />
       }
     >
@@ -172,7 +183,10 @@ export function CreateSecretModal({
             label="Select type"
             selectedKey={type}
             onSelectionChange={(key) => {
-              setType(key as SecretType)
+              if ((key as SecretType) !== type) {
+                setType(key as SecretType)
+                setData([{ key: '', value: '' }])
+              }
             }}
           >
             {secretTypes.map((type) => (
@@ -187,15 +201,11 @@ export function CreateSecretModal({
         <DataFormField
           data={data}
           setData={setData}
+          serviceAccount={serviceAccount}
+          setServiceAccount={setServiceAccount}
+          setValid={setValid}
+          type={type}
         />
-        <Button
-          width="fit-content"
-          small
-          secondary
-          onClick={() => setData([...data, { key: '', value: '' }])}
-        >
-          Add entry
-        </Button>
       </FormContainer>
     </Modal>
   )
@@ -250,6 +260,10 @@ const DataFormField = styled(DataFormFieldUnstyled)(({ theme }) => ({
 interface DataFormFieldProps {
   data: { key: string; value: string }[]
   setData: Dispatch<SetStateAction<{ key: string; value: string }[]>>
+  serviceAccount: string
+  setServiceAccount: Dispatch<SetStateAction<string>>
+  setValid: Dispatch<SetStateAction<boolean>>
+  type: SecretType
 
   [key: string]: any
 }
@@ -257,100 +271,81 @@ interface DataFormFieldProps {
 function DataFormFieldUnstyled({
   data,
   setData,
+  serviceAccount,
+  setServiceAccount,
+  setValid,
+  type,
   ...props
 }: DataFormFieldProps) {
-  return (
-    <FormField
-      label="Data"
-      required
-    >
-      <div {...props}>
-        {data.map((entry, index) => (
-          <DataEntry
-            index={index}
-            data={data}
-            setData={setData}
-            entry={entry}
+  switch (type) {
+    case SecretType.ServiceAccountToken:
+      return (
+        <FormField
+          label="Service Account"
+          required
+        >
+          <ServiceAccount
+            serviceAccount={serviceAccount}
+            setServiceAccount={setServiceAccount}
+            setValid={setValid}
           />
-        ))}
-      </div>
-    </FormField>
-  )
-}
-
-const DataEntry = styled(DataEntryUnstyled)(({ theme }) => ({
-  display: 'flex',
-  gap: '16px',
-  flexDirection: 'column',
-
-  '.inputContainer': {
-    display: 'flex',
-    gap: theme.spacing.medium,
-    flexDirection: 'row',
-
-    '> div': {
-      width: '100%',
-    },
-  },
-
-  '.textArea': {
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-    border: theme.borders.input,
-    borderRadius: theme.borderRadiuses.medium,
-    backgroundColor: theme.colors['fill-two'],
-    '&:focus': {
-      border: theme.borders['outline-focused'],
-    },
-    maxHeight: '176px',
-  },
-}))
-
-function DataEntryUnstyled({
-  index,
-  entry,
-  data,
-  setData,
-  ...props
-}): ReactNode {
-  return (
-    <div
-      key={index}
-      {...props}
-    >
-      <div className="inputContainer">
-        <Input
-          placeholder="Key"
-          value={entry.key}
-          onChange={(e) => {
-            const newData = [...data]
-            newData[index].key = e.target.value
-            setData(newData)
-          }}
-        />
-        <DeleteIconButton
-          size="large"
-          onClick={() => {
-            const newData = [...data]
-            newData.splice(index, 1)
-            setData(newData)
-          }}
-        />
-      </div>
-
-      <div>
-        <EditableDiv
-          className="textArea"
-          placeholder="Value"
-          setValue={(val) => {
-            const newData = [...data]
-            newData[index].value = val
-            setData(newData)
-          }}
-          initialValue={entry.value}
-        />
-      </div>
-    </div>
-  )
+        </FormField>
+      )
+    case SecretType.BasicAuth:
+      return (
+        <FormField
+          label="Basic auth"
+          required
+        >
+          <div {...props}>
+            <BasicAuth
+              data={data}
+              setData={setData}
+              setValid={setValid}
+            />
+          </div>
+        </FormField>
+      )
+    case SecretType.SSH:
+      return (
+        <FormField
+          label="SSH Private Key"
+          required
+        >
+          <div {...props}>
+            <SSH
+              data={data}
+              setData={setData}
+              setValid={setValid}
+            />
+          </div>
+        </FormField>
+      )
+    case SecretType.Opaque:
+    default:
+      return (
+        <FormField
+          label="Data"
+          required
+        >
+          <div {...props}>
+            <Opaque
+              data={data}
+              setData={setData}
+              setValid={setValid}
+            />
+            <Button
+              width="fit-content"
+              small
+              secondary
+              onClick={() => setData([...data, { key: '', value: '' }])}
+            >
+              Add entry
+            </Button>
+          </div>
+        </FormField>
+      )
+  }
 }
 
 function ErrorContainer({

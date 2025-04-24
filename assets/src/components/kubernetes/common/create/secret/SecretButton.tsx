@@ -5,7 +5,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition.tsx'
 import { useTheme } from 'styled-components'
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { Link, useParams } from 'react-router-dom'
-import { Kind } from '../types.ts'
+import { Kind } from '../../types.ts'
 
 export function CreateSecretButton({ text, refetch }) {
   const theme = useTheme()

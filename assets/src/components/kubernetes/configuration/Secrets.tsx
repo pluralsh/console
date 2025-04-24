@@ -22,7 +22,7 @@ import { useCluster } from '../Cluster'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
 import { useSetPageHeaderAction } from '../../cd/ContinuousDeployment.tsx'
-import { CreateSecretButton } from '../common/create/SecretButton.tsx'
+import { CreateSecretButton } from '../common/create/secret/SecretButton.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getConfigurationBreadcrumbs(cluster),
