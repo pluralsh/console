@@ -668,6 +668,11 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.0.0-eksbuild.6
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.0-eksbuild.5
     compatibilities:
     - '1.32'
@@ -694,6 +699,16 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.42.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.41.0-eksbuild.1
     compatibilities:
     - '1.32'
@@ -1650,6 +1665,34 @@
   publisher: eks
 - name: aws-guardduty-agent
   versions:
+  - version: v1.10.0-eksbuild.2
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+  - version: v1.10.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
   - version: v1.9.0-eksbuild.2
     compatibilities:
     - '1.32'
@@ -4474,6 +4517,16 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.19.4-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.19.3-eksbuild.1
     compatibilities:
     - '1.32'
