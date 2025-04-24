@@ -398,7 +398,7 @@ export function ServiceSecrets() {
           Add secret
         </Button>
       </div>
-      {!isEmpty(data?.serviceDeployment?.configuration) ? (
+      {isEmpty(data?.serviceDeployment?.configuration) ? (
         <EmptyState message="No secrets" />
       ) : (
         <Table
