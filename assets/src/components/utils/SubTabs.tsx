@@ -5,6 +5,7 @@ import { LinkTabWrap } from './Tabs'
 export type SubtabDirectory = {
   path: string
   label: string
+  enabled?: boolean
 }[]
 
 export function SubTabs({ directory }: { directory: SubtabDirectory }) {
@@ -12,16 +13,18 @@ export function SubTabs({ directory }: { directory: SubtabDirectory }) {
 
   return (
     <Flex>
-      {directory.map(({ path, label }) => (
-        <LinkTabWrap
-          active={route?.includes(path)}
-          key={path}
-          textValue={label}
-          to={path}
-        >
-          <SubTab>{label}</SubTab>
-        </LinkTabWrap>
-      ))}
+      {directory
+        .filter(({ enabled }) => (enabled === undefined ? true : enabled))
+        .map(({ path, label }) => (
+          <LinkTabWrap
+            active={route?.includes(path)}
+            key={path}
+            textValue={label}
+            to={path}
+          >
+            <SubTab>{label}</SubTab>
+          </LinkTabWrap>
+        ))}
     </Flex>
   )
 }

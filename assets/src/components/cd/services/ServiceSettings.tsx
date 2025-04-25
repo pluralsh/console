@@ -45,12 +45,13 @@ export function ServiceSettings({
 }
 
 export function ChartUpdate({ repo, state, updateState }) {
-  const { data } = useFluxHelmRepositoryQuery({
+  const useFluxHelmData = !!repo?.name && !!repo?.namespace
+  const { data, loading } = useFluxHelmRepositoryQuery({
     variables: {
       name: repo?.name || '',
       namespace: repo?.namespace || '',
     },
-    skip: !repo?.name || !repo?.namespace,
+    skip: !useFluxHelmData,
   })
 
   return (
@@ -60,6 +61,8 @@ export function ChartUpdate({ repo, state, updateState }) {
       setChart={(chart) => updateState({ helmChart: chart })}
       version={state.helmVersion}
       setVersion={(vsn) => updateState({ helmVersion: vsn })}
+      loading={loading}
+      dropdownEnabled={useFluxHelmData}
     />
   )
 }

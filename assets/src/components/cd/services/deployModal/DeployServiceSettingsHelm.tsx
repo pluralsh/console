@@ -1,4 +1,10 @@
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  FormField,
+  Input,
+  ListBoxItem,
+  Select,
+  Spinner,
+} from '@pluralsh/design-system'
 import { HelmHealthChip } from 'components/cd/repos/HelmHealthChip'
 import useOnUnMount from 'components/hooks/useOnUnMount'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -43,6 +49,7 @@ function ChartFormValuesDropdown({
   version,
   setVersion,
   selectedChart,
+  loading,
 }) {
   return (
     <>
@@ -52,6 +59,7 @@ function ChartFormValuesDropdown({
       >
         <Select
           label="Select chart"
+          isDisabled={loading}
           selectedKey={chart || ''}
           onSelectionChange={(key) => {
             setChart(key)
@@ -59,6 +67,7 @@ function ChartFormValuesDropdown({
               setVersion('')
             }
           }}
+          rightContent={loading ? <Spinner /> : null}
         >
           {(charts || []).map((chart) => (
             <ListBoxItem
@@ -76,7 +85,8 @@ function ChartFormValuesDropdown({
           label={!chart ? 'Must select a chart first' : 'Select version'}
           selectedKey={version || ''}
           onSelectionChange={(key) => setVersion(key)}
-          isDisabled={!chart}
+          isDisabled={!chart || loading}
+          rightContent={loading ? <Spinner /> : null}
         >
           {(selectedChart?.versions || []).map((vsn) => (
             <ListBoxItem
@@ -90,7 +100,15 @@ function ChartFormValuesDropdown({
   )
 }
 
-export function ChartForm({ charts, chart, version, setChart, setVersion }) {
+export function ChartForm({
+  charts,
+  chart,
+  version,
+  setChart,
+  setVersion,
+  loading,
+  dropdownEnabled,
+}) {
   const selectedChart = charts?.find((c) => c.name === chart)
 
   useLayoutEffect(() => {
@@ -104,23 +122,24 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
     }
   }, [chart, charts, selectedChart?.versions, setChart, setVersion, version])
 
-  if (isEmpty(charts)) {
+  if (dropdownEnabled && (loading || !isEmpty(charts))) {
     return (
-      <ChartFormValuesRaw
+      <ChartFormValuesDropdown
         chart={chart}
+        charts={charts}
         setChart={setChart}
+        selectedChart={selectedChart}
         version={version}
         setVersion={setVersion}
+        loading={loading}
       />
     )
   }
 
   return (
-    <ChartFormValuesDropdown
+    <ChartFormValuesRaw
       chart={chart}
-      charts={charts}
       setChart={setChart}
-      selectedChart={selectedChart}
       version={version}
       setVersion={setVersion}
     />
@@ -161,13 +180,15 @@ export default function DeployServiceSettingsHelm({
   })
   const [selectIsOpen, setSelectIsOpen] = useState(false)
 
-  const { data: charts } = useFluxHelmRepositoryQuery({
-    variables: {
-      name: repository?.name || '',
-      namespace: repository?.namespace || '',
-    },
-    skip: !repository?.name || !repository?.namespace,
-  })
+  const useFluxHelmData = !!repository?.name && !!repository?.namespace
+  const { data: charts, loading: loadingFluxHelmRepository } =
+    useFluxHelmRepositoryQuery({
+      variables: {
+        name: repository?.name || '',
+        namespace: repository?.namespace || '',
+      },
+      skip: !useFluxHelmData,
+    })
 
   useOnUnMount(() => {
     if (!(repository && chart && version)) {
@@ -257,6 +278,8 @@ export default function DeployServiceSettingsHelm({
           setChart={setChart}
           version={version}
           setVersion={setVersion}
+          loading={loadingFluxHelmRepository}
+          dropdownEnabled={useFluxHelmData}
         />
       )}
     </>
