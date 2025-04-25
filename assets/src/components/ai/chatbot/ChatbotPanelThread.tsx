@@ -212,7 +212,13 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
-        {showPrompts && <ChatbotPanelExamplePrompts prompts={prompts} />}
+        {showPrompts && !isEmpty(prompts) && (
+          <ChatbotPanelExamplePrompts
+            prompts={prompts}
+            setShowPrompts={setShowPrompts}
+            sendMessage={sendMessage}
+          />
+        )}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}

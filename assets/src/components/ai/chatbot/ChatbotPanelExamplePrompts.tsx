@@ -18,11 +18,11 @@ function Prompt({ children, ...props }: ChipProps) {
   return (
     <Chip
       clickable
-      props={props}
       css={{
         borderRadius: 16,
         height: 32,
       }}
+      {...props}
     >
       <MagicWandIcon size={12} />
       <span
@@ -84,7 +84,15 @@ function PromptsControl({
   )
 }
 
-export function ChatbotPanelExamplePrompts({ prompts }: { prompts: string[] }) {
+export function ChatbotPanelExamplePrompts({
+  prompts,
+  setShowPrompts,
+  sendMessage,
+}: {
+  prompts: string[]
+  setShowPrompts: Dispatch<SetStateAction<boolean>>
+  sendMessage: (newMessage: string) => void
+}) {
   const theme = useTheme()
   const hasMorePrompts = prompts.length > PROMPTS_LIMIT
   const [showAll, setShowAll] = useState(!hasMorePrompts)
@@ -117,7 +125,15 @@ export function ChatbotPanelExamplePrompts({ prompts }: { prompts: string[] }) {
         }}
       >
         {(showAll ? prompts : prompts.slice(0, PROMPTS_LIMIT)).map((p, i) => (
-          <Prompt key={i}>{p}</Prompt>
+          <Prompt
+            key={i}
+            onClick={() => {
+              sendMessage(p)
+              setShowPrompts(false)
+            }}
+          >
+            {p}
+          </Prompt>
         ))}
         {hasMorePrompts && (
           <PromptsControl
