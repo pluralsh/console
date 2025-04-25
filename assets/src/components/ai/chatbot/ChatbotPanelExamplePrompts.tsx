@@ -106,10 +106,10 @@ export function ChatbotPanelExamplePrompts({
         bottom: 0,
         left: 0,
         right: 0,
-        top: 0,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
+        maxHeight: '100%',
         overflowY: 'auto',
         zIndex: 1,
       }}
