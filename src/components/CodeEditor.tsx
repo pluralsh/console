@@ -1,4 +1,4 @@
-import { type Dispatch, useEffect, useState } from 'react'
+import { type Dispatch, useCallback, useEffect, useState } from 'react'
 import { Button, Div, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -58,14 +58,19 @@ export default function CodeEditor({
   const [copied, setCopied] = useState<boolean>(false)
   const changed = current !== value
 
-  const onEditorMount = (editor: any) => {
-    editor.addAction({
-      id: 'remeasure-fonts',
-      label: 'Remeasure Fonts',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB],
-      run: () => monaco?.editor?.remeasureFonts(),
-    })
-  }
+  const onEditorMount = useCallback(
+    (editor: any) => {
+      if (!monaco) return
+
+      editor.addAction({
+        id: 'remeasure-fonts',
+        label: 'Remeasure Fonts',
+        keybindings: [monaco?.KeyMod?.CtrlCmd | monaco?.KeyCode?.KeyB],
+        run: () => monaco?.editor?.remeasureFonts(),
+      })
+    },
+    [monaco]
+  )
 
   useEffect(() => {
     if (copied) {
