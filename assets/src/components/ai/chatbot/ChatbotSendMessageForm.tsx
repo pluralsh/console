@@ -135,14 +135,6 @@ export function SendMessageForm({
               <Chip size="small">+{serverNames.length - 4}</Chip>
             )}
           </ChipListSC>
-          <Button
-            small
-            secondary
-            startIcon={showMcpServers ? null : <ServersIcon />}
-            onClick={() => setShowMcpServers(!showMcpServers)}
-          >
-            {showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'}
-          </Button>
         </Flex>
       )}
       <EditableContentWrapperSC $fullscreen={fullscreen}>
@@ -162,6 +154,15 @@ export function SendMessageForm({
             gap="small"
             height="100%"
           >
+            <IconFrame
+              icon={<ServersIcon />}
+              type="secondary"
+              clickable
+              tooltip={
+                showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'
+              }
+              onClick={() => setShowMcpServers(!showMcpServers)}
+            />
             {showContextBtn && (
               <Tooltip
                 label={`Appends prompts and files related to the ${source.toLowerCase()} currently being viewed`}
