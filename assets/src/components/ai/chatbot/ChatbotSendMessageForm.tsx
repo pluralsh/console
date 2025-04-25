@@ -3,6 +3,7 @@ import {
   Chip,
   Flex,
   IconFrame,
+  MagicWandIcon,
   PlusIcon,
   PrOpenIcon,
   SendMessageIcon,
@@ -21,7 +22,9 @@ import {
 import { truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
+  Dispatch,
   FormEvent,
+  SetStateAction,
   useCallback,
   useLayoutEffect,
   useRef,
@@ -40,6 +43,8 @@ export function SendMessageForm({
   serverNames,
   showMcpServers,
   setShowMcpServers,
+  showPrompts,
+  setShowPrompts,
   ...props
 }: {
   currentThread: ChatThreadTinyFragment
@@ -48,8 +53,11 @@ export function SendMessageForm({
   shouldUseMCP: boolean
   serverNames: string[]
   showMcpServers: boolean
-  setShowMcpServers: (show: boolean) => void
+  setShowMcpServers: Dispatch<SetStateAction<boolean>>
+  showPrompts: boolean
+  setShowPrompts: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
+  const theme = useTheme()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -154,6 +162,20 @@ export function SendMessageForm({
             gap="small"
             height="100%"
           >
+            <IconFrame
+              icon={<MagicWandIcon />}
+              type="secondary"
+              clickable
+              tooltip={
+                showPrompts ? 'Hide example prompts' : 'Show example prompts'
+              }
+              onClick={() => setShowPrompts(!showPrompts)}
+              css={{
+                borderColor: showPrompts
+                  ? theme.colors['border-primary']
+                  : undefined,
+              }}
+            />
             <IconFrame
               icon={<ServersIcon />}
               type="secondary"

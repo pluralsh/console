@@ -1,9 +1,11 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
 import {
+  Dispatch,
   Fragment,
   ReactNode,
   RefObject,
+  SetStateAction,
   useCallback,
   useEffect,
   useRef,
@@ -52,7 +54,7 @@ export function ChatbotPanelThread({
   threadDetailsQuery: ChatThreadDetailsQueryResult
   shouldUseMCP: boolean
   showMcpServers: boolean
-  setShowMcpServers: (show: boolean) => void
+  setShowMcpServers: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -89,6 +91,18 @@ export function ChatbotPanelThread({
   })
 
   const messages = mapExistingNodes(data?.chatThread?.chats)
+
+  const [showPrompts, setShowPrompts] = useState<boolean>(isEmpty(messages))
+
+  const prompts = [
+    'Give me the details of the deployment resource.',
+    'Query the error logs on the prod cluster.',
+    'What are all the components of the prod clusters service?',
+    'Give me the details of the deployment resource.',
+    'Query the error logs on the prod cluster.',
+    'What are all the components of the prod clusters service?',
+  ] // TODO: Replace with real data.
+
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
@@ -198,7 +212,7 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
-        <ChatbotPanelExamplePrompts />
+        {showPrompts && <ChatbotPanelExamplePrompts prompts={prompts} />}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
@@ -208,6 +222,8 @@ export function ChatbotPanelThread({
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
+        showPrompts={showPrompts}
+        setShowPrompts={setShowPrompts}
       />
     </>
   )

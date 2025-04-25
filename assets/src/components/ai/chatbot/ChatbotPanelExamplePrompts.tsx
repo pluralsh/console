@@ -84,16 +84,7 @@ function PromptsControl({
   )
 }
 
-export function ChatbotPanelExamplePrompts() {
-  const prompts = [
-    'Give me the details of the deployment resource.',
-    'Query the error logs on the prod cluster.',
-    'What are all the components of the prod clusters service?',
-    'Give me the details of the deployment resource.',
-    'Query the error logs on the prod cluster.',
-    'What are all the components of the prod clusters service?',
-  ] // TODO: Replace with real data.
-
+export function ChatbotPanelExamplePrompts({ prompts }: { prompts: string[] }) {
   const theme = useTheme()
   const hasMorePrompts = prompts.length > PROMPTS_LIMIT
   const [showAll, setShowAll] = useState(!hasMorePrompts)
