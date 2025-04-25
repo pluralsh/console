@@ -118,6 +118,7 @@ export function ChatbotPanelExamplePrompts() {
       <div
         css={{
           backdropFilter: 'blur(12px)',
+          borderTop: `1px solid ${chroma(theme.colors['border-fill-two']).alpha(0.1).hex()}`,
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.xsmall,
