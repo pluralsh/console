@@ -223,6 +223,7 @@ defmodule Console.Schema.Stack do
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:actor_id)
     |> unique_constraint(:name)
+    |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> change_markers(actor_id: :actor_changed)

@@ -12,7 +12,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
+            %Result{metric: metric("from", "default"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)
@@ -20,7 +20,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       expect(Console.Mesh.Prometheus, :query, fn _, _, _ ->
         {:ok,
           %Response{data: %Data{result: [
-            %Result{metric: metric("from", "to"), value: [DateTime.utc_now(), "13324.0"]}
+            %Result{metric: metric("from", "default"), value: [DateTime.utc_now(), "13324.0"]}
           ]}}
         }
       end)
@@ -31,7 +31,7 @@ defmodule Console.Mesh.Provider.IstioTest do
       assert edge.from.name == "nginx"
       assert edge.from.namespace == "from"
       assert edge.to.name == "nginx"
-      assert edge.to.namespace == "to"
+      assert edge.to.namespace == "default"
 
       assert trunc(s.bytes) == 13324
     end
