@@ -4,7 +4,8 @@ import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   CLUSTER_ABS_PATH,
-  SERVICE_SETTINGS_REPO_REL_PATH,
+  SERVICE_SETTINGS_GIT_REL_PATH,
+  SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
 } from 'routes/cdRoutesConsts'
@@ -13,11 +14,24 @@ import {
   useServiceContext,
 } from '../ServiceDetails'
 
-const DIRECTORY: SubtabDirectory = [
-  { path: SERVICE_SETTINGS_REPO_REL_PATH, label: 'Repository' },
-  { path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' },
-  { path: SERVICE_SETTINGS_REVISIONS_REL_PATH, label: 'Revisions' },
-]
+const getDirectory = ({
+  gitEnabled,
+  helmEnabled,
+}: {
+  gitEnabled: boolean
+  helmEnabled: boolean
+}): SubtabDirectory => {
+  return [
+    { path: SERVICE_SETTINGS_GIT_REL_PATH, label: 'Git', enabled: gitEnabled },
+    {
+      path: SERVICE_SETTINGS_HELM_REL_PATH,
+      label: 'Helm',
+      enabled: helmEnabled,
+    },
+    { path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' },
+    { path: SERVICE_SETTINGS_REVISIONS_REL_PATH, label: 'Revisions' },
+  ]
+}
 
 const getServiceSettingsBreadcrumbs = ({
   cluster,
@@ -41,6 +55,13 @@ export function ServiceSettings() {
     useMatch(`${CLUSTER_ABS_PATH}/services/:serviceId/settings/:tab/*`)
       ?.params ?? {}
 
+  const directory = useMemo(() => {
+    const hasGitRepo = !!ctx.service.repository
+    const hasHelmRepo = !!ctx.service.helm?.chart
+
+    return getDirectory({ gitEnabled: hasGitRepo, helmEnabled: hasHelmRepo })
+  }, [ctx.service.helm?.chart, ctx.service.repository])
+
   const breadcrumbs = useMemo(
     () =>
       getServiceSettingsBreadcrumbs({
@@ -59,7 +80,7 @@ export function ServiceSettings() {
       height="100%"
       width="100%"
     >
-      <SubTabs directory={DIRECTORY} />
+      <SubTabs directory={directory} />
       <Outlet context={ctx} />
     </Flex>
   )

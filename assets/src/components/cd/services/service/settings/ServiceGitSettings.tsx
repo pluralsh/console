@@ -10,33 +10,25 @@ import {
   ServiceUpdateAttributes,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
-
+import { useEffect, useMemo } from 'react'
 import { useUpdateState } from 'components/hooks/useUpdateState'
-
 import styled from 'styled-components'
-
-import { ChartUpdate } from '../../ServiceSettings'
 import {
   ServiceGitFolderField,
   ServiceGitRefField,
 } from '../../deployModal/DeployServiceSettingsGit'
-
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import isEmpty from 'lodash/isEmpty'
-import { isNonNullable } from 'utils/isNonNullable'
-import { ServiceSettingsHelmValues } from '../../deployModal/DeployServiceSettingsHelmValues'
 import { useServiceContext } from '../ServiceDetails'
-import { useLogin } from 'components/contexts'
+import { useNavigate } from 'react-router-dom'
+import {
+  getServiceSettingsPath,
+  SERVICE_SETTINGS_HELM_REL_PATH,
+} from '../../../../../routes/cdRoutesConsts.tsx'
 
-export function ServiceRepoSettings() {
-  const { me } = useLogin()
-  const isAdmin = !!me?.roles?.admin
+export function ServiceGitSettings() {
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
-  const [helmValueErrors, setHelmValueErrors] = useState(false)
-  const filteredValuesFiles =
-    service?.helm?.valuesFiles?.filter(isNonNullable) ?? []
+  const navigate = useNavigate()
 
   const {
     state,
@@ -47,10 +39,6 @@ export function ServiceRepoSettings() {
     protect: !!service.protect,
     gitRef: service.git?.ref,
     gitFolder: service.git?.folder,
-    helmChart: service.helm?.chart,
-    helmVersion: service.helm?.version,
-    helmValues: service?.helm?.values,
-    helmValuesFiles: !isEmpty(filteredValuesFiles) ? filteredValuesFiles : [''],
   })
 
   useEffect(() => {
@@ -62,19 +50,9 @@ export function ServiceRepoSettings() {
       state.gitRef && state.gitFolder
         ? { folder: state.gitFolder, ref: state.gitRef }
         : null
-    const helm =
-      state.helmChart && state.helmVersion
-        ? {
-            chart: state.helmChart,
-            version: state.helmVersion,
-            values: state.helmValues ?? '',
-            valuesFiles: state.helmValuesFiles?.filter(isNonNullable) ?? [],
-          }
-        : null
     let attributes: ServiceUpdateAttributes = { protect: state.protect }
 
     if (git) attributes = { git, ...attributes }
-    if (helm) attributes = { helm, ...attributes }
 
     return attributes
   }, [state])
@@ -85,28 +63,32 @@ export function ServiceRepoSettings() {
       attributes,
     },
     onCompleted: ({ updateServiceDeployment }) => {
-      const { git, helm, protect } = updateServiceDeployment ?? {}
+      const { git, protect } = updateServiceDeployment ?? {}
       updateState({
         protect: !!protect,
         gitRef: git?.ref,
         gitFolder: git?.folder,
-        helmChart: helm?.chart,
-        helmVersion: helm?.version,
-        helmValues: helm?.values,
-        helmValuesFiles: !isEmpty(filteredValuesFiles)
-          ? filteredValuesFiles
-          : [''],
       })
     },
   })
 
   const hasGitRepo = !!service.repository
-  const hasHelmRepo = !!service.helm?.chart
+  const formIsValid = !hasGitRepo || !!(state.gitRef && state.gitFolder)
 
-  const formIsValid =
-    (!hasGitRepo || !!(state.gitRef && state.gitFolder)) &&
-    (!hasHelmRepo ||
-      !!(state.helmChart && state.helmVersion && !helmValueErrors))
+  useEffect(() => {
+    if (hasGitRepo) {
+      return
+    }
+
+    navigate(
+      getServiceSettingsPath({
+        clusterId: service?.cluster?.id,
+        serviceId: service?.id,
+        isRelative: false,
+        subTab: SERVICE_SETTINGS_HELM_REL_PATH,
+      })
+    )
+  }, [hasGitRepo, navigate, service])
 
   return (
     <form
@@ -130,7 +112,7 @@ export function ServiceRepoSettings() {
             justify="space-between"
             align="center"
           >
-            <Overline>{hasGitRepo ? 'git' : 'helm'} settings</Overline>
+            <Overline>git settings</Overline>
             <Switch
               checked={state.protect}
               onChange={(checked) => updateState({ protect: checked })}
@@ -154,39 +136,6 @@ export function ServiceRepoSettings() {
               />
             </>
           )}
-          {hasHelmRepo && (
-            <>
-              <ChartUpdate
-                repo={service.helm?.repository}
-                state={state}
-                updateState={updateState}
-              />
-              {isAdmin && (
-                <ServiceSettingsHelmValues
-                  helmValues={state.helmValues ?? ''}
-                  setHelmValues={(next) =>
-                    updateState({
-                      helmValues:
-                        typeof next === 'function'
-                          ? next(state.helmValues ?? '')
-                          : next,
-                    })
-                  }
-                  helmValuesFiles={state.helmValuesFiles}
-                  setHelmValuesFiles={(next) =>
-                    updateState({
-                      helmValuesFiles:
-                        typeof next === 'function'
-                          ? next(state.helmValuesFiles)
-                          : next,
-                    })
-                  }
-                  setHelmValuesErrors={setHelmValueErrors}
-                  options={{ variant: 'large' }}
-                />
-              )}
-            </>
-          )}
         </Flex>
         <Flex
           gap="medium"
@@ -207,7 +156,7 @@ export function ServiceRepoSettings() {
             primary
             type="submit"
             loading={loading}
-            disabled={!hasUpdates || !formIsValid || helmValueErrors}
+            disabled={!hasUpdates || !formIsValid}
           >
             Save
           </Button>
