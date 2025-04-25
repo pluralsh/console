@@ -117,5 +117,5 @@ func Address() string {
 }
 
 func OpenAICompatible() bool {
-	return Provider() == api.ProviderOpenAI || Provider() == api.ProviderBedrock
+	return Provider() == api.ProviderOpenAI || Provider() == api.ProviderBedrock || Provider() == api.ProviderOllama
 }

@@ -31,8 +31,8 @@ build: fmt vet ## build manager binary
 .PHONY: run
 run: fmt vet ## run a proxy locally
 	go run ./ \
-		--provider=${PROVIDER} \
-		--provider-host=${PROVIDER_API_HOST} \
+		--provider=ollama \
+		--provider-host=http://localhost:11434 \
 		--provider-token=${PROVIDER_TOKEN} \
 		--v=4
 
