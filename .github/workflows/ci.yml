@@ -104,7 +104,7 @@ jobs:
           projectId: pluralsh-design
   trivy-scan:
     name: Trivy fs scan
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results

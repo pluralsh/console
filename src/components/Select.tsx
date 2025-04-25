@@ -51,6 +51,7 @@ type SelectButtonProps = {
   isOpen?: boolean
   size?: Size
   transparent?: boolean
+  isDisabled?: boolean
 }
 
 export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
@@ -128,6 +129,7 @@ const SelectButtonInner = styled.div<{
   $size: Size
   $parentFillLevel: FillLevel
   $transparent?: boolean
+  $isDisabled?: boolean
 }>(
   ({
     theme,
@@ -135,6 +137,7 @@ const SelectButtonInner = styled.div<{
     $size: size,
     $parentFillLevel: parentFillLevel,
     $transparent: transparent = false,
+    $isDisabled: isDisabled = false,
   }) => ({
     ...theme.partials.reset.button,
     ...theme.partials.text.body2,
@@ -185,6 +188,16 @@ const SelectButtonInner = styled.div<{
       color: theme.colors.text,
       cursor: 'pointer',
     },
+    ...(isDisabled && {
+      borderColor: theme.colors['border-disabled'],
+      color: theme.colors['text-input-disabled'],
+      cursor: 'not-allowed',
+
+      '&:hover': {
+        borderColor: theme.colors['border-disabled'],
+        color: theme.colors['text-input-disabled'],
+      },
+    }),
   })
 )
 
@@ -198,6 +211,7 @@ function SelectButton({
   isOpen,
   size = 'medium',
   transparent = false,
+  isDisabled,
   ...props
 }: SelectButtonProps & ComponentProps<'div'>) {
   const parentFillLevel = useFillLevel()
@@ -209,6 +223,7 @@ function SelectButton({
       $size={size}
       $parentFillLevel={parentFillLevel}
       $transparent={transparent}
+      $isDisabled={isDisabled}
       {...props}
     >
       {titleContent && (
@@ -329,9 +344,9 @@ function Select({
       leftContent={leftContent}
       rightContent={rightContent}
       isOpen={state.isOpen}
-      showArrow={!props.isDisabled}
       size={size}
       transparent={transparent}
+      isDisabled={props.isDisabled}
     >
       {(props.selectionMode === 'multiple' &&
         state.selectedItems.length > 0 &&
