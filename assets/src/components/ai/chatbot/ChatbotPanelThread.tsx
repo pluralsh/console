@@ -37,6 +37,7 @@ import {
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 import { produce } from 'immer'
+import ChatbotPanelExamplePrompts from './ChatbotPanelExamplePrompts.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -197,6 +198,7 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
+        <ChatbotPanelExamplePrompts />
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
