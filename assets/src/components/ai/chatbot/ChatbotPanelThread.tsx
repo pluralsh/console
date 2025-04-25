@@ -37,7 +37,7 @@ import {
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 import { produce } from 'immer'
-import ChatbotPanelExamplePrompts from './ChatbotPanelExamplePrompts.tsx'
+import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
