@@ -104,14 +104,12 @@ func (o *OllamaEmbeddingsProxy) handleEmbeddingOllama(
 		}
 	}
 
-	// Convert to OpenAI response format
 	openaiResp := openai.EmbeddingList{
 		Object: "list",
 		Data:   data,
 		Model:  ollamaResp.Model,
 	}
 
-	// Write the response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(openaiResp)
