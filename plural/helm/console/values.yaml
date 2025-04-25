@@ -227,6 +227,7 @@ dashboard:
       - --metrics-provider=none
       - --cluster-context-enabled=true
       - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
+      - --disable-csrf-protection
       env:
       - name: KAS_HOST
         valueFrom:
