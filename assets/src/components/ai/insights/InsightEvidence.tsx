@@ -1,24 +1,55 @@
 import {
+  BookIcon,
   LogsIcon,
   Modal,
   PrOpenIcon,
+  SirenIcon,
   Tab,
   TabList,
 } from '@pluralsh/design-system'
 import {
   AiInsightEvidenceFragment,
+  AlertEvidenceFragment,
   EvidenceType,
+  KnowledgeEvidenceFragment,
   LogsEvidenceFragment,
   PullRequestEvidenceFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty } from 'lodash'
-import { useMemo, useRef, useState } from 'react'
+import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { LogsEvidencePanel } from './LogsEvidencePanel'
 import { PrEvidenceDetails } from './PrEvidenceDetails'
 import { GroupedPrEvidence, PrEvidencePanel } from './PrEvidencePanel'
+import { AlertsEvidencePanel } from './AlertEvidencePanel'
+import { KnowledgeEvidencePanel } from './KnowledgeEvidencePanel'
 
 export const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
+
+type EvidenceTypeMap = {
+  [EvidenceType.Log]: LogsEvidenceFragment[]
+  [EvidenceType.Pr]: GroupedPrEvidence[]
+  [EvidenceType.Alert]: AlertEvidenceFragment[]
+  [EvidenceType.Knowledge]: KnowledgeEvidenceFragment[]
+}
+// this should error if an evidence type is added to "EvidenceType" that is not in "EvidenceTypeMap"
+export type AggregatedInsightEvidence = {
+  [Key in EvidenceType]: EvidenceTypeMap[Key]
+}
+export type EvidenceEntryItem = {
+  [K in EvidenceType]: { type: K; data: AggregatedInsightEvidence[K] }
+}[EvidenceType]
+
+export const evidenceDirectory: Record<
+  EvidenceType,
+  { icon: ReactNode; label: string }
+> = {
+  [EvidenceType.Log]: { icon: <LogsIcon />, label: 'Logs' },
+  [EvidenceType.Pr]: { icon: <PrOpenIcon />, label: 'PRs' },
+  [EvidenceType.Alert]: { icon: <SirenIcon />, label: 'Alerts' },
+  // TODO: change to knowledge icon when in DS
+  [EvidenceType.Knowledge]: { icon: <BookIcon />, label: 'Knowledge' },
+}
 
 export function InsightEvidence({
   evidence,
@@ -27,14 +58,17 @@ export function InsightEvidence({
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const [selectedPr, setSelectedPr] = useState<GroupedPrEvidence | null>(null)
 
-  const { logEvidence, prEvidence } = useMemo(() => {
-    return aggregateInsightEvidence(evidence)
-  }, [evidence])
+  const aggregatedEvidence = useMemo(
+    () => aggregateInsightEvidence(evidence),
+    [evidence]
+  )
 
-  const [evidenceType, setEvidenceType] = useState(
-    !isEmpty(logEvidence) ? EvidenceType.Log : EvidenceType.Pr
+  const [evidenceType, setEvidenceType] = useState<EvidenceType | undefined>(
+    () =>
+      Object.entries(aggregatedEvidence).find(
+        ([_, evidence]) => !isEmpty(evidence)
+      )?.[0] as EvidenceType
   )
 
   return (
@@ -51,56 +85,92 @@ export function InsightEvidence({
           onSelectionChange: setEvidenceType as any,
         }}
       >
-        {!isEmpty(logEvidence) ? (
-          <Tab
-            startIcon={<LogsIcon />}
-            key={EvidenceType.Log}
-          >
-            Logs
-          </Tab>
-        ) : null}
-        {!isEmpty(prEvidence) ? (
-          <Tab
-            startIcon={<PrOpenIcon />}
-            key={EvidenceType.Pr}
-          >
-            Pull Requests
-          </Tab>
-        ) : null}
+        {Object.entries(aggregatedEvidence).map(([evidenceType, evidence]) =>
+          !isEmpty(evidence) ? (
+            <Tab
+              key={evidenceType}
+              startIcon={evidenceDirectory[evidenceType].icon}
+              minWidth="fit-content"
+            >
+              {evidenceDirectory[evidenceType].label}
+            </Tab>
+          ) : null
+        )}
       </TabList>
-      {evidenceType === EvidenceType.Log ? (
-        <LogsEvidencePanel logs={logEvidence} />
-      ) : (
-        <PrEvidencePanel
-          prs={prEvidence}
-          setSelectedPr={setSelectedPr}
+      {evidenceType && (
+        <EvidencePanel
+          evidence={
+            {
+              type: evidenceType,
+              data: aggregatedEvidence[evidenceType],
+            } as EvidenceEntryItem
+          }
         />
       )}
-      <Modal
-        open={!!selectedPr}
-        onClose={() => setSelectedPr(null)}
-        size="custom"
-      >
-        {selectedPr && (
-          <PrEvidenceDetails
-            pr={selectedPr}
-            onGoBack={() => setSelectedPr(null)}
-          />
-        )}
-      </Modal>
     </WrapperSC>
   )
 }
 
+function EvidencePanel({
+  evidence,
+}: {
+  evidence: EvidenceEntryItem
+  // should error if any EvidenceTypes aren't handled explicitly
+}): ReactElement {
+  const [selectedPr, setSelectedPr] = useState<GroupedPrEvidence | null>(null)
+
+  switch (evidence.type) {
+    case EvidenceType.Log:
+      return <LogsEvidencePanel logs={evidence.data} />
+    case EvidenceType.Pr:
+      return (
+        <>
+          <PrEvidencePanel
+            prs={evidence.data}
+            setSelectedPr={setSelectedPr}
+          />
+          <Modal
+            open={!!selectedPr}
+            onClose={() => setSelectedPr(null)}
+            size="custom"
+          >
+            {selectedPr && (
+              <PrEvidenceDetails
+                pr={selectedPr}
+                onGoBack={() => setSelectedPr(null)}
+              />
+            )}
+          </Modal>
+        </>
+      )
+    case EvidenceType.Alert:
+      return <AlertsEvidencePanel alerts={evidence.data} />
+    case EvidenceType.Knowledge:
+      return <KnowledgeEvidencePanel knowledge={evidence.data} />
+  }
+}
+
+const WrapperSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  height: '100%',
+})
+
 export const aggregateInsightEvidence = (
   evidence: AiInsightEvidenceFragment[]
-) => {
+): AggregatedInsightEvidence => {
   const logEvidence: LogsEvidenceFragment[] = []
   const prEvidence: PullRequestEvidenceFragment[] = []
+  const alertEvidence: AlertEvidenceFragment[] = []
+  const knowledgeEvidence: KnowledgeEvidenceFragment[] = []
 
-  evidence?.forEach(({ type, logs, pullRequest: pr }) => {
+  evidence?.forEach(({ type, logs, pullRequest: pr, alert, knowledge }) => {
     if (type === EvidenceType.Log && logs) logEvidence.push(logs)
     else if (type === EvidenceType.Pr && pr) prEvidence.push(pr)
+    else if (type === EvidenceType.Alert && alert) alertEvidence.push(alert)
+    else if (type === EvidenceType.Knowledge && knowledge)
+      knowledgeEvidence.push(knowledge)
   })
 
   const groupedPrEvidence: GroupedPrEvidence[] = Object.entries(
@@ -111,12 +181,10 @@ export const aggregateInsightEvidence = (
     files,
   }))
 
-  return { logEvidence, prEvidence: groupedPrEvidence }
+  return {
+    [EvidenceType.Log]: logEvidence,
+    [EvidenceType.Pr]: groupedPrEvidence,
+    [EvidenceType.Alert]: alertEvidence,
+    [EvidenceType.Knowledge]: knowledgeEvidence,
+  }
 }
-
-const WrapperSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  height: '100%',
-})

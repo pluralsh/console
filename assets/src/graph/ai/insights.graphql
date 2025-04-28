@@ -86,6 +86,12 @@ fragment AiInsightEvidence on AiInsightEvidence {
   pullRequest {
     ...PullRequestEvidence
   }
+  alert {
+    ...AlertEvidence
+  }
+  knowledge {
+    ...KnowledgeEvidence
+  }
   insertedAt
   updatedAt
 }
@@ -107,6 +113,18 @@ fragment PullRequestEvidence on PullRequestEvidence {
   sha
   title
   url
+}
+
+fragment AlertEvidence on AlertEvidence {
+  alertId
+  title
+  resolution
+}
+
+fragment KnowledgeEvidence on KnowledgeEvidence {
+  name
+  observations
+  type
 }
 
 fragment ClusterInsightComponent on ClusterInsightComponent {

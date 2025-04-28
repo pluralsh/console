@@ -176,15 +176,17 @@ export function SendMessageForm({
                   : undefined,
               }}
             />
-            <IconFrame
-              icon={<ServersIcon />}
-              type="secondary"
-              clickable
-              tooltip={
-                showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'
-              }
-              onClick={() => setShowMcpServers(!showMcpServers)}
-            />
+            {shouldUseMCP && (
+              <IconFrame
+                icon={<ServersIcon />}
+                type="secondary"
+                clickable
+                tooltip={
+                  showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'
+                }
+                onClick={() => setShowMcpServers(!showMcpServers)}
+              />
+            )}
             {showContextBtn && (
               <Tooltip
                 label={`Appends prompts and files related to the ${source.toLowerCase()} currently being viewed`}
