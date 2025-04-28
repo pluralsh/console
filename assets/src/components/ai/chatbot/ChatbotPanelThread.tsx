@@ -1,9 +1,11 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
 import {
+  Dispatch,
   Fragment,
   ReactNode,
   RefObject,
+  SetStateAction,
   useCallback,
   useEffect,
   useRef,
@@ -37,6 +39,7 @@ import {
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 import { produce } from 'immer'
+import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -51,7 +54,7 @@ export function ChatbotPanelThread({
   threadDetailsQuery: ChatThreadDetailsQueryResult
   shouldUseMCP: boolean
   showMcpServers: boolean
-  setShowMcpServers: (show: boolean) => void
+  setShowMcpServers: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -88,6 +91,9 @@ export function ChatbotPanelThread({
   })
 
   const messages = mapExistingNodes(data?.chatThread?.chats)
+
+  const [showPrompts, setShowPrompts] = useState<boolean>(isEmpty(messages))
+
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
@@ -197,6 +203,12 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
+        {showPrompts && (
+          <ChatbotPanelExamplePrompts
+            setShowPrompts={setShowPrompts}
+            sendMessage={sendMessage}
+          />
+        )}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         currentThread={currentThread}
@@ -206,6 +218,8 @@ export function ChatbotPanelThread({
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
+        showPrompts={showPrompts}
+        setShowPrompts={setShowPrompts}
       />
     </>
   )
