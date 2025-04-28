@@ -148,4 +148,89 @@ defmodule Console.Deployments.FlowsTest do
       {:error, _} = Flows.delete_mcp_server(mcp_server.id, user)
     end
   end
+
+  describe "upsert_preview_environment_template/2" do
+    test "flow writers can create a preview environment template" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, flow: flow, namespace: "test")
+
+      {:ok, template} = Flows.upsert_preview_environment_template(%{
+        name: "test",
+        flow_id: flow.id,
+        template: %{namespace: "test-blah"},
+        reference_service_id: svc.id
+      }, user)
+
+      assert template.name == "test"
+      assert template.flow_id == flow.id
+      assert template.template.namespace == "test-blah"
+      assert template.reference_service_id == svc.id
+    end
+
+    test "preview environment templates must reference services in a flow" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, namespace: "test")
+
+      {:error, _} = Flows.upsert_preview_environment_template(%{
+        name: "test",
+        flow_id: flow.id,
+        template: %{namespace: "test-blah", name: svc.name, helm: %{values: Jason.encode(%{image: "test"})}},
+        reference_service_id: svc.id
+      }, user)
+    end
+
+    test "preview environment templates must use a prefix of the reference service's namespace" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, flow: flow, namespace: "test")
+
+      {:error, _} = Flows.upsert_preview_environment_template(%{
+        name: "test",
+        flow_id: flow.id,
+        template: %{namespace: "blah", helm: %{values: Jason.encode(%{image: "test"})}},
+        reference_service_id: svc.id
+      }, user)
+    end
+
+    test "non writers cannot create a preview environment template" do
+      flow = insert(:flow)
+      svc = insert(:service, flow: flow, namespace: "test")
+
+      {:error, _} = Flows.upsert_preview_environment_template(%{
+        name: "test",
+        flow_id: flow.id,
+        template: %{namespace: "test-blah"},
+        reference_service_id: svc.id
+      }, insert(:user))
+    end
+  end
+
+  describe "delete_preview_environment_template/2" do
+    test "writers can delete a preview environment template" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      template = insert(:preview_environment_template, flow: flow)
+
+      {:ok, del} = Flows.delete_preview_environment_template(template.id, user)
+
+      assert del.id == template.id
+      refute refetch(template)
+    end
+
+    test "it will fail to delete if there are instances outstanding" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      template = insert(:preview_environment_template, flow: flow)
+      insert(:preview_environment_instance, template: template)
+
+      {:error, _} = Flows.delete_preview_environment_template(template.id, user)
+    end
+
+    test "non-writers cannot delete" do
+      template = insert(:preview_environment_template)
+      {:error, _} = Flows.delete_preview_environment_template(template.id, insert(:user))
+    end
+  end
 end

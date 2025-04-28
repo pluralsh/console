@@ -10,9 +10,8 @@ defmodule Console.AI.Stream.Exec do
 
   @spec handle_openai(map) :: stream_message
   defp handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c), do: c
-  defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}) do
-    {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} -> {ind, call} end)}
-  end
+  defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}),
+    do: {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} -> {ind, call} end)}
   defp handle_openai(_), do: :pass
 
   @spec handle_openai(map) :: stream_message

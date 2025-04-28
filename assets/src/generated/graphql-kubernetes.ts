@@ -8353,7 +8353,7 @@ export type ResourceUpdateMutationResult = Apollo.MutationResult<ResourceUpdateM
 export type ResourceUpdateMutationOptions = Apollo.BaseMutationOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
 export const DeployFromInputDocument = gql`
     mutation DeployFromInput($input: deployment_AppDeploymentFromFileSpec_Input!) {
-  handleDeployFromFile(input: $input) @rest(type: "Void ", path: "appdeploymentfromfile", method: "POST", bodyKey: "input") {
+  handleDeployFromFile(input: $input) @rest(type: "Void", path: "appdeploymentfromfile", method: "POST", bodyKey: "input") {
     name
     error
   }

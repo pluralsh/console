@@ -32,6 +32,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
 
+  @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
+
   @doc """
   Fully creates a pr against the working dispatcher implementation
   """
@@ -69,6 +71,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def files(%ScmConnection{} = conn, url) do
     impl = dispatcher(conn)
     impl.files(conn, url)
+  end
+
+  def pr_info(%ScmConnection{} = conn, url) do
+    impl = dispatcher(conn)
+    impl.pr_info(url)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do

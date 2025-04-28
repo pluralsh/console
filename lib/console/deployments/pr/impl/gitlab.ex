@@ -105,6 +105,12 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
+  def pr_info(url) do
+    with {:ok, group, repo, number} <- get_pull_id(url) do
+      {:ok, %{group: group, repo: repo, number: number}}
+    end
+  end
+
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do

@@ -102,6 +102,51 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert from_connection(found["pullRequests"])
              |> ids_equal(prs)
     end
+
+    test "it can fetch preview environment templates within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      templates = insert_list(3, :preview_environment_template, flow: flow)
+      insert_list(3, :preview_environment_template)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            previewEnvironmentTemplates(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert from_connection(found["previewEnvironmentTemplates"])
+             |> ids_equal(templates)
+    end
+
+    test "it can fetch preview environment instances within a flow" do
+      user      = insert(:user)
+      flow      = insert(:flow, read_bindings: [%{user_id: user.id}])
+      template  = insert(:preview_environment_template, flow: flow)
+      instances = insert_list(3, :preview_environment_instance, template: template)
+      insert_list(3, :preview_environment_instance)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            previewEnvironmentInstances(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert from_connection(found["previewEnvironmentInstances"])
+             |> ids_equal(instances)
+    end
   end
 
   describe "mcpServers" do
@@ -139,6 +184,59 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       """, %{"id" => mcp_server.id}, %{current_user: user})
 
       assert found["id"] == mcp_server.id
+    end
+  end
+
+  describe "previewEnvironmentTemplate" do
+    test "it can fetch a preview environment template by id" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      template = insert(:preview_environment_template, flow: flow)
+
+      {:ok, %{data: %{"previewEnvironmentTemplate" => found}}} = run_query("""
+        query previewEnvironmentTemplate($id: ID!) {
+          previewEnvironmentTemplate(id: $id) {
+            id
+            name
+          }
+        }
+      """, %{"id" => template.id}, %{current_user: user})
+
+      assert found["id"] == template.id
+      assert found["name"] == template.name
+    end
+
+    test "it can fetch a preview environment template by flow id and name" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      template = insert(:preview_environment_template, flow: flow)
+
+      {:ok, %{data: %{"previewEnvironmentTemplate" => found}}} = run_query("""
+        query previewEnvironmentTemplate($flowId: ID!, $name: String!) {
+          previewEnvironmentTemplate(flowId: $flowId, name: $name) {
+            id
+            name
+          }
+        }
+      """, %{"flowId" => flow.id, "name" => template.name}, %{current_user: user})
+
+      assert found["id"] == template.id
+      assert found["name"] == template.name
+    end
+
+    test "non-readers cannot fetch preview environment templates" do
+      user = insert(:user)
+      flow = insert(:flow)
+      template = insert(:preview_environment_template, flow: flow)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query previewEnvironmentTemplate($id: ID!) {
+          previewEnvironmentTemplate(id: $id) {
+            id
+            name
+          }
+        }
+      """, %{"id" => template.id}, %{current_user: user})
     end
   end
 end

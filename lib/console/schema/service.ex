@@ -21,6 +21,7 @@ defmodule Console.Schema.Service do
     ServiceDependency,
     AiInsight,
     ServiceVuln,
+    PreviewEnvironmentInstance,
     ClusterScalingRecommendation,
     Flow
   }
@@ -145,6 +146,7 @@ defmodule Console.Schema.Service do
     has_one :provider,           ClusterProvider
     has_one :global_service,     GlobalService
     has_one :namespace_instance, NamespaceInstance
+    has_one :preview_instance,   PreviewEnvironmentInstance
 
     has_many :vulns,   ServiceVuln
     has_many :imports, ServiceImport, on_replace: :delete

@@ -2706,6 +2706,8 @@ export type Flow = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   pipelines?: Maybe<PipelineConnection>;
+  previewEnvironmentInstances?: Maybe<PreviewEnvironmentInstanceConnection>;
+  previewEnvironmentTemplates?: Maybe<PreviewEnvironmentTemplateConnection>;
   /** the project this flow belongs to */
   project?: Maybe<Project>;
   pullRequests?: Maybe<PullRequestConnection>;
@@ -2729,6 +2731,22 @@ export type FlowAlertsArgs = {
 
 
 export type FlowPipelinesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowPreviewEnvironmentInstancesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowPreviewEnvironmentTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5594,6 +5612,70 @@ export type PrUpdateSpec = {
   yq?: Maybe<Scalars['String']['output']>;
 };
 
+/** An instance of a preview environment template */
+export type PreviewEnvironmentInstance = {
+  __typename?: 'PreviewEnvironmentInstance';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pullRequest?: Maybe<PullRequest>;
+  service?: Maybe<Service>;
+  template?: Maybe<PreviewEnvironmentTemplate>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PreviewEnvironmentInstanceConnection = {
+  __typename?: 'PreviewEnvironmentInstanceConnection';
+  edges?: Maybe<Array<Maybe<PreviewEnvironmentInstanceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PreviewEnvironmentInstanceEdge = {
+  __typename?: 'PreviewEnvironmentInstanceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PreviewEnvironmentInstance>;
+};
+
+/** A template for generating preview environments */
+export type PreviewEnvironmentTemplate = {
+  __typename?: 'PreviewEnvironmentTemplate';
+  commentTemplate?: Maybe<Scalars['String']['output']>;
+  connection?: Maybe<ScmConnection>;
+  flow?: Maybe<Flow>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  referenceService?: Maybe<Service>;
+  template?: Maybe<ServiceTemplate>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PreviewEnvironmentTemplateAttributes = {
+  /** a liquid template for custom information in the PR comment */
+  commentTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** an scm connection id to use for PR preview comment generation */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** the flow that will own the preview environment */
+  flowId: Scalars['ID']['input'];
+  /** the name of the preview environment template */
+  name: Scalars['String']['input'];
+  /** the service that will be cloned to create the preview environment */
+  referenceServiceId: Scalars['ID']['input'];
+  /** a set of service configuration overrides to use while cloning */
+  template: ServiceTemplateAttributes;
+};
+
+export type PreviewEnvironmentTemplateConnection = {
+  __typename?: 'PreviewEnvironmentTemplateConnection';
+  edges?: Maybe<Array<Maybe<PreviewEnvironmentTemplateEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PreviewEnvironmentTemplateEdge = {
+  __typename?: 'PreviewEnvironmentTemplateEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PreviewEnvironmentTemplate>;
+};
+
 /** A unit of organization to control permissions for a set of objects within your Console instance */
 export type Project = {
   __typename?: 'Project';
@@ -6076,6 +6158,7 @@ export type RootMutationType = {
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
+  deletePreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   deleteProject?: Maybe<Project>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deletePullRequest?: Maybe<PullRequest>;
@@ -6197,6 +6280,7 @@ export type RootMutationType = {
   upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  upsertPreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
@@ -6663,6 +6747,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeletePrAutomationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePreviewEnvironmentTemplateArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7215,6 +7304,11 @@ export type RootMutationTypeUpsertPolicyConstraintsArgs = {
 };
 
 
+export type RootMutationTypeUpsertPreviewEnvironmentTemplateArgs = {
+  attributes: PreviewEnvironmentTemplateAttributes;
+};
+
+
 export type RootMutationTypeUpsertUserArgs = {
   attributes: UserAttributes;
 };
@@ -7369,6 +7463,7 @@ export type RootQueryType = {
   policyStatistics?: Maybe<Array<Maybe<PolicyStatistic>>>;
   prAutomation?: Maybe<PrAutomation>;
   prAutomations?: Maybe<PrAutomationConnection>;
+  previewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   project?: Maybe<Project>;
   projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
@@ -8220,6 +8315,13 @@ export type RootQueryTypePrAutomationsArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<PrRole>;
+};
+
+
+export type RootQueryTypePreviewEnvironmentTemplateArgs = {
+  flowId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
