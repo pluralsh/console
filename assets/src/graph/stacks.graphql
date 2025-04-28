@@ -148,6 +148,9 @@ fragment StackRunDetails on StackRun {
   cancellationReason
   stack {
     name
+    deleteRun {
+      id
+    }
     observableMetrics {
       ...ObservableMetric
     }

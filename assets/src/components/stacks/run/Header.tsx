@@ -1,5 +1,4 @@
 import {
-  AppIcon,
   Button,
   Callout,
   GitCommitIcon,
@@ -38,7 +37,7 @@ import {
 } from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { TRUNCATE } from '../../utils/truncate'
-import { StackTypeIcon } from '../common/StackTypeIcon'
+import StackRunIcon from '../common/StackRunIcon.tsx'
 
 function getDirectory(stackRun: StackRunDetailsFragment) {
   return [
@@ -106,13 +105,9 @@ export default function StackRunHeader({
           borderBottom: theme.borders.default,
         }}
       >
-        <AppIcon
-          icon={
-            <StackTypeIcon
-              stackType={stackRun.type}
-              size={36}
-            />
-          }
+        <StackRunIcon
+          status={stackRun.status}
+          deleting={stackRun.stack?.deleteRun?.id === stackRun.id}
           size="small"
         />
         <StackRunHeaderInfo stackRun={stackRun} />

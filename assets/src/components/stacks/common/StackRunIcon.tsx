@@ -33,6 +33,7 @@ const statusToColor = (status: StackStatus, deleting: boolean) => {
 export default function StackRunIcon({
   status,
   deleting = false,
+  ...props
 }: {
   status: StackStatus
   deleting?: boolean
@@ -43,6 +44,7 @@ export default function StackRunIcon({
   return (
     <AppIcon
       size="xxsmall"
+      {...props}
       icon={
         <Icon
           size={32}
