@@ -77,7 +77,7 @@ func (o *OllamaProxy) handleStreamingOllama(
 		// Process any tool calls in the response
 		if len(resp.Message.ToolCalls) > 0 {
 			var toolCalls []openai.ToolCall
-			for i, tc := range resp.Message.ToolCalls {
+			for _, tc := range resp.Message.ToolCalls {
 				// Convert the map back to a JSON string for arguments
 				argBytes, err := json.Marshal(tc.Function.Arguments)
 				if err != nil {
@@ -86,7 +86,7 @@ func (o *OllamaProxy) handleStreamingOllama(
 
 				toolCalls = append(toolCalls, openai.ToolCall{
 					ID:    uuid.NewString(),
-					Index: i,
+					Index: tc.Function.Index,
 					Type:  "function",
 					Function: struct {
 						Name      string `json:"name"`
