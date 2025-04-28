@@ -1,9 +1,9 @@
 import { useTheme } from 'styled-components'
 import {
-  CaretDownIcon,
   Chip,
   ChipProps,
   MagicWandIcon,
+  MinusIcon,
   PlusIcon,
 } from '@pluralsh/design-system'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -70,8 +70,7 @@ function PromptsControl({
         },
       }}
     >
-      {/* TODO: Add minus icon. */}
-      {showAll ? <CaretDownIcon size={12} /> : <PlusIcon size={12} />}
+      {showAll ? <MinusIcon size={12} /> : <PlusIcon size={12} />}
       <span
         css={{
           ...theme.partials.text.body2,
