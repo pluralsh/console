@@ -9,6 +9,7 @@ import (
 	"github.com/ollama/ollama/openai"
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
+	"k8s.io/klog/v2"
 )
 
 type ollamaEmbedRequest struct {
@@ -111,6 +112,8 @@ func (o *OllamaEmbeddingsProxy) handleEmbeddingOllama(
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(openaiResp)
+	if err := json.NewEncoder(w).Encode(openaiResp); err != nil {
+		klog.Errorf("Error encoding response: %v", err)
+		return
+	}
 }

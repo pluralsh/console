@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,8 +23,61 @@ const (
 )
 
 type OllamaProxy struct {
+	toolRegistry *ToolRegistry
 	ollamaClient *ollamaapi.Client
 	api.OpenAIProxy
+}
+
+// ToolRegistry manages a collection of tools for efficient lookup
+type ToolRegistry struct {
+	tools       map[string]ollamaapi.ToolCall
+	toolIndices map[string]int    // maps tool names to their stable indices
+	toolCallIds map[string]string // maps tool names to their stable ids
+	nextIndex   int               // counter for assigning indices
+}
+
+func NewToolRegistry() *ToolRegistry {
+	return &ToolRegistry{
+		tools:       make(map[string]ollamaapi.ToolCall),
+		toolIndices: make(map[string]int),
+		toolCallIds: make(map[string]string),
+		nextIndex:   0,
+	}
+}
+
+func toolCallId() string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, 8)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return "call_" + strings.ToLower(string(b))
+}
+
+func (r *ToolRegistry) Register(tool ollamaapi.ToolCall) {
+	name := tool.Function.Name
+	if _, exists := r.tools[name]; !exists {
+		r.toolIndices[name] = r.nextIndex
+		r.toolCallIds[name] = toolCallId()
+		r.nextIndex++
+	}
+	r.tools[name] = tool
+}
+
+func (r *ToolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
+	tool, exists := r.tools[name]
+	if !exists {
+		return ollamaapi.ToolCall{}, -1, "", false
+	}
+	return tool, r.toolIndices[name], r.toolCallIds[name], true
+}
+
+func (r *ToolRegistry) GetIndex(name string) int {
+	return r.toolIndices[name]
+}
+
+func (r *ToolRegistry) GetToolId(name string) string {
+	return r.toolCallIds[name]
 }
 
 func NewOllamaProxy(host string) (api.OpenAIProxy, error) {
@@ -31,7 +86,12 @@ func NewOllamaProxy(host string) (api.OpenAIProxy, error) {
 		return nil, err
 	}
 	ollamaClient := ollamaapi.NewClient(parsedUrl, http.DefaultClient)
-	return &OllamaProxy{ollamaClient: ollamaClient}, nil
+
+	toolRegistry := NewToolRegistry()
+	return &OllamaProxy{
+		toolRegistry: toolRegistry,
+		ollamaClient: ollamaClient,
+	}, nil
 }
 
 func (o *OllamaProxy) Proxy() http.HandlerFunc {
@@ -64,7 +124,7 @@ func (o *OllamaProxy) handleStreamingOllama(
 		return
 	}
 
-	input, err := convertOpenAIToOllamaChatRequest(req)
+	input, err := o.convertOpenAIToOllamaChatRequest(req)
 	if err != nil {
 		klog.ErrorS(err, "failed to convert ollama request")
 		return
@@ -74,19 +134,23 @@ func (o *OllamaProxy) handleStreamingOllama(
 		chunk := openai.ChunkChoice{}
 		var finishReason *string
 
-		// Process any tool calls in the response
 		if len(resp.Message.ToolCalls) > 0 {
 			var toolCalls []openai.ToolCall
 			for _, tc := range resp.Message.ToolCalls {
-				// Convert the map back to a JSON string for arguments
+				_, index, id, exists := o.toolRegistry.Get(tc.Function.Name)
+				if !exists {
+					klog.ErrorS(fmt.Errorf("tool not found"), "tool does not exist in registry", "tool", tc.Function.Name)
+					continue
+				}
+
 				argBytes, err := json.Marshal(tc.Function.Arguments)
 				if err != nil {
 					return err
 				}
 
 				toolCalls = append(toolCalls, openai.ToolCall{
-					ID:    uuid.NewString(),
-					Index: tc.Function.Index,
+					ID:    id,
+					Index: index,
 					Type:  "function",
 					Function: struct {
 						Name      string `json:"name"`
@@ -144,7 +208,7 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 	w http.ResponseWriter,
 	req *openai.ChatCompletionRequest,
 ) {
-	input, err := convertOpenAIToOllamaChatRequest(req)
+	input, err := o.convertOpenAIToOllamaChatRequest(req)
 	if err != nil {
 		klog.ErrorS(err, "failed to convert ollama request")
 		return
@@ -176,11 +240,15 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 						Content: ollamaResponse.Message.Content,
 					}
 
-					// Add tool calls if present
 					if len(ollamaResponse.Message.ToolCalls) > 0 {
 						var toolCalls []openai.ToolCall
 						for _, tc := range ollamaResponse.Message.ToolCalls {
-							// Convert the map back to a JSON string for arguments
+							_, index, id, exists := o.toolRegistry.Get(tc.Function.Name)
+							if !exists {
+								klog.ErrorS(fmt.Errorf("tool not found"), "tool does not exist in registry", "tool", tc.Function.Name)
+								continue
+							}
+
 							argBytes, err := json.Marshal(tc.Function.Arguments)
 							if err != nil {
 								klog.ErrorS(err, "failed to marshal tool call arguments")
@@ -188,6 +256,8 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 							}
 
 							toolCalls = append(toolCalls, openai.ToolCall{
+								ID:    id,
+								Index: index,
 								Function: struct {
 									Name      string `json:"name"`
 									Arguments string `json:"arguments"`
@@ -214,28 +284,24 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 
 }
 
-func convertOpenAIToOllamaChatRequest(req *openai.ChatCompletionRequest) (*ollamaapi.ChatRequest, error) {
+func (o *OllamaProxy) convertOpenAIToOllamaChatRequest(req *openai.ChatCompletionRequest) (*ollamaapi.ChatRequest, error) {
 	var messages []ollamaapi.Message
-	for _, i := range req.Messages {
-		var toolCalls []ollamaapi.ToolCall
-		for _, tc := range i.ToolCalls {
-			var argsMap map[string]interface{}
-			if err := json.Unmarshal([]byte(tc.Function.Arguments), &argsMap); err != nil {
-				return nil, err
-			}
 
-			toolCalls = append(toolCalls, ollamaapi.ToolCall{
-				Function: ollamaapi.ToolCallFunction{
-					Name:      tc.Function.Name,
-					Arguments: argsMap,
-				},
-			})
+	for _, tool := range req.Tools {
+		otc := ollamaapi.ToolCall{
+			Function: ollamaapi.ToolCallFunction{
+				Name: tool.Function.Name,
+			},
 		}
+		if _, _, _, exists := o.toolRegistry.Get(otc.Function.Name); !exists {
+			o.toolRegistry.Register(otc)
+		}
+	}
 
+	for _, i := range req.Messages {
 		messages = append(messages, ollamaapi.Message{
-			Role:      i.Role,
-			Content:   i.Content.(string),
-			ToolCalls: toolCalls,
+			Role:    i.Role,
+			Content: i.Content.(string),
 		})
 	}
 

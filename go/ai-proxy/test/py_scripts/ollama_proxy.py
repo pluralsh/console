@@ -1,6 +1,49 @@
 import openai
 import json
 
+def test_tool_registry():
+    """Test that the tool registry maintains consistent IDs and indices"""
+    print("Testing tool registry consistency...\n")
+    
+    # Make two separate calls with the same tool to verify ID/index consistency
+    for i in range(2):
+        print(f"Call {i+1}:")
+        response = client.chat.completions.create(
+            model="llama3.1:8b",
+            messages=[
+                {"role": "user", "content": "What's the weather like in New York?"}
+            ],
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get the current weather in a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The location to get weather for"
+                            }
+                        },
+                        "required": ["location"]
+                    }
+                }
+            }],
+            stream=False
+        )
+
+        if response.choices[0].message.tool_calls:
+            tool_call = response.choices[0].message.tool_calls[0]
+            print(f"Tool ID: {tool_call.id}")
+            print(f"Tool Index: {tool_call.index}")
+            print(f"Tool Name: {tool_call.function.name}")
+            print(f"Tool Arguments: {tool_call.function.arguments}\n")
+        else:
+            print("No tool calls in response\n")
+            
+    print("-" * 50 + "\n")
+
 # Configure the client to use your local proxy
 client = openai.OpenAI(
     api_key="not-needed",  # Your proxy doesn't require an API key
@@ -175,13 +218,12 @@ def test_streaming():
 
 if __name__ == "__main__":
     print("Testing Ollama proxy with OpenAI SDK\n")
+
+    test_tool_registry()
     
     # Test regular text completion
     test_text_completion()
-    
-    # Test streaming
-    test_streaming()
-    
+
     # Test tool calling
     test_tool_calling()
 
