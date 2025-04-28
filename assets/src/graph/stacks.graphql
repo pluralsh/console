@@ -46,6 +46,9 @@ fragment Stack on InfrastructureStack {
   deletedAt
   name
   type
+  deleteRun {
+    ...StackRun
+  }
   configuration {
     image
     version
@@ -527,6 +530,12 @@ mutation ApproveStackRun($id: ID!) {
 mutation RestartStackRun($id: ID!) {
   restartStackRun(id: $id) {
     ...StackRun
+  }
+}
+
+mutation RestoreStack($id: ID!) {
+  restoreStack(id: $id) {
+    ...StackTiny
   }
 }
 
