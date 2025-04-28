@@ -94,15 +94,6 @@ export function ChatbotPanelThread({
 
   const [showPrompts, setShowPrompts] = useState<boolean>(isEmpty(messages))
 
-  const prompts = [
-    'Give me the details of the deployment resource.',
-    'Query the error logs on the prod cluster.',
-    'What are all the components of the prod clusters service?',
-    'Give me the details of the deployment resource.',
-    'Query the error logs on the prod cluster.',
-    'What are all the components of the prod clusters service?',
-  ] // TODO: Replace with real data.
-
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
@@ -212,9 +203,8 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
-        {showPrompts && !isEmpty(prompts) && (
+        {showPrompts && (
           <ChatbotPanelExamplePrompts
-            prompts={prompts}
             setShowPrompts={setShowPrompts}
             sendMessage={sendMessage}
           />

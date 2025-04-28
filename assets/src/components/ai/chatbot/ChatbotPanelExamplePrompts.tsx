@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { Dispatch, SetStateAction, useState } from 'react'
 import chroma from 'chroma-js'
-import { isEmpty } from 'lodash'
+import prompts from './prompts.json'
 
 const PROMPTS_LIMIT = 3
 
@@ -85,19 +85,15 @@ function PromptsControl({
 }
 
 export function ChatbotPanelExamplePrompts({
-  prompts,
   setShowPrompts,
   sendMessage,
 }: {
-  prompts: string[]
   setShowPrompts: Dispatch<SetStateAction<boolean>>
   sendMessage: (newMessage: string) => void
 }) {
   const theme = useTheme()
   const hasMorePrompts = prompts.length > PROMPTS_LIMIT
   const [showAll, setShowAll] = useState(!hasMorePrompts)
-
-  if (isEmpty(prompts)) return null
 
   return (
     <div
