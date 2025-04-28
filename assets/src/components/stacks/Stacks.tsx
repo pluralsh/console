@@ -15,6 +15,7 @@ import {
   SearchIcon,
   SubTab,
   TabList,
+  Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -140,6 +141,7 @@ export default function Stacks() {
   const tab = pathMatch?.params?.tab || ''
   const [listRef, setListRef] = useState<any>(null)
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+  const [showRestoreToast, setShowRestoreToast] = useState(false)
 
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -245,6 +247,17 @@ export default function Stacks() {
         gap: theme.spacing.xlarge,
       }}
     >
+      {showRestoreToast && (
+        <Toast
+          position={'bottom'}
+          onClose={() => setShowRestoreToast(false)}
+          closeTimeout={5000}
+          margin="large"
+          severity="success"
+        >
+          Stack &quot;{tinyStack?.name}&quot; restored.
+        </Toast>
+      )}
       <div
         css={{
           display: 'flex',
@@ -406,7 +419,7 @@ export default function Stacks() {
             ) : (
               <RestoreStackButton
                 id={tinyStack?.id ?? ''}
-                name={tinyStack?.name ?? ''}
+                setShowToast={setShowRestoreToast}
               />
             )}
             <StackCustomRun stackId={tinyStack?.id ?? ''} />

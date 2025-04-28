@@ -1,17 +1,16 @@
-import { Button, GraphQLToast, Toast } from '@pluralsh/design-system'
-import { ReactNode, useState } from 'react'
+import { Button, GraphQLToast } from '@pluralsh/design-system'
+import { Dispatch, ReactNode } from 'react'
 import { useRestoreStackMutation } from '../../generated/graphql.ts'
 
 interface RestoreStackButtonProps {
   id: string
-  name: string
+  setShowToast: Dispatch<boolean>
 }
 
 export default function RestoreStackButton({
   id,
-  name,
+  setShowToast,
 }: RestoreStackButtonProps): ReactNode {
-  const [showToast, setShowToast] = useState(false)
   const [restore, { error, loading }] = useRestoreStackMutation({
     variables: { id },
     onCompleted: () => setShowToast(true),
@@ -28,17 +27,6 @@ export default function RestoreStackButton({
           margin="xlarge"
           marginVertical="xxxlarge"
         />
-      )}
-      {showToast && (
-        <Toast
-          position={'bottom'}
-          onClose={() => setShowToast(false)}
-          closeTimeout={5000}
-          margin="large"
-          severity="success"
-        >
-          Stack &quot;{name}&quot; restored.
-        </Toast>
       )}
       <Button
         loading={loading}
