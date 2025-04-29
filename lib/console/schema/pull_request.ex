@@ -15,8 +15,12 @@ defmodule Console.Schema.PullRequest do
     field :polled_sha, :string
     field :commit_sha, :string
     field :approver,   :string
+    field :preview,    :string
+    field :attributes, :map
 
     field :notifications_policy_id, :binary_id
+
+    field :comment_id, :string, virtual: true
 
     belongs_to :cluster, Cluster
     belongs_to :service, Service

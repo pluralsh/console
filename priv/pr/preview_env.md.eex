@@ -1,0 +1,12 @@
+Plural has deployed a preview environment for this PR.
+
+Service Name: <%= @service.name %>
+Service Status: <%= @service.component_status %> ![](https://img.shields.io/badge/<%= @service.status %>-<%= @status_color  %>)
+<%= if @comment_template do %>
+
+<details>
+<summary>Preview Environment details</summary>
+<%=  @comment_template %>
+</details>
+<% end %>
+View your preview environment in the Plural Console [here](<%= @url %>)

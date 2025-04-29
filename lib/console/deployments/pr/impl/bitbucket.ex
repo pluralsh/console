@@ -99,6 +99,12 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
+  def pr_info(url) do
+    with {:ok, workspace, repo, number} <- get_pull_id(url) do
+      {:ok, %{workspace: workspace, repo: repo, number: number}}
+    end
+  end
+
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()

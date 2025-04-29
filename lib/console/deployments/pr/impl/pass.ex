@@ -10,4 +10,6 @@ defmodule Console.Deployments.Pr.Impl.Pass do
   def review(_, _, _), do: {:ok, ""}
 
   def files(_, _), do: {:ok, []}
+
+  def pr_info(_), do: {:ok, %{}}
 end

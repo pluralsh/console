@@ -19,6 +19,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Broadcast,
   Console.Deployments.PubSub.Pipeline,
   Console.Deployments.PubSub.Notifications,
+  Console.Deployments.PubSub.Preview,
   Console.Deployments.PubSub.Email,
   Console.AI.PubSub.Consumer,
   Console.AI.PubSub.Vector.Consumer

@@ -84,3 +84,11 @@ defmodule Console.PubSub.ScmWebhook, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.FlowCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.FlowUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.FlowDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PreviewEnvironmentTemplateCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PreviewEnvironmentTemplateUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PreviewEnvironmentTemplateDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PreviewEnvironmentInstanceCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PreviewEnvironmentInstanceUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PreviewEnvironmentInstanceDeleted, do: use Piazza.PubSub.Event

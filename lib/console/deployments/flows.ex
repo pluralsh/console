@@ -3,11 +3,18 @@ defmodule Console.Deployments.Flows do
   alias Console.PubSub
   import Console.Deployments.Policies
   alias Console.Deployments.Settings
-  alias Console.Schema.{Flow, User, McpServer, McpServerAssociation}
+  alias Console.Schema.{
+    Flow,
+    User,
+    McpServer,
+    McpServerAssociation,
+    PreviewEnvironmentTemplate,
+    Service
+  }
 
   @type flow_resp :: {:ok, Flow.t} | Console.error
   @type server_resp :: {:ok, McpServer.t} | Console.error
-
+  @type preview_environment_template_resp :: {:ok, PreviewEnvironmentTemplate.t} | Console.error
   @spec get!(binary) :: Flow.t
   def get!(id), do: Repo.get!(Flow, id)
 
@@ -31,6 +38,22 @@ defmodule Console.Deployments.Flows do
 
   @spec get_mcp_server_by_name(binary) :: McpServer.t | nil
   def get_mcp_server_by_name(name), do: Repo.get_by(McpServer, name: name)
+
+  @spec get_preview_environment_template!(binary) :: PreviewEnvironmentTemplate.t
+  def get_preview_environment_template!(id), do: Repo.get!(PreviewEnvironmentTemplate, id)
+
+  @spec get_preview_environment_template(binary) :: PreviewEnvironmentTemplate.t | nil
+  def get_preview_environment_template(id), do: Repo.get(PreviewEnvironmentTemplate, id)
+
+  @spec get_preview_environment_template_for_flow(binary, binary) :: PreviewEnvironmentTemplate.t | nil
+  def get_preview_environment_template_for_flow(flow_id, name),
+    do: Repo.get_by(PreviewEnvironmentTemplate, flow_id: flow_id, name: name)
+
+  @spec get_preview_environment_template_by_name!(binary) :: PreviewEnvironmentTemplate.t
+  def get_preview_environment_template_by_name!(name), do: Repo.get_by!(PreviewEnvironmentTemplate, name: name)
+
+  @spec get_preview_environment_template_by_name(binary) :: PreviewEnvironmentTemplate.t | nil
+  def get_preview_environment_template_by_name(name), do: Repo.get_by(PreviewEnvironmentTemplate, name: name)
 
   @doc "fetches and determines if the user has access to the given flow"
   @spec accessible(binary, User.t) :: flow_resp
@@ -139,6 +162,47 @@ defmodule Console.Deployments.Flows do
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
+  end
+
+  @doc """
+  Either creates a new preview environment template or updates an existing one
+  """
+  @spec upsert_preview_environment_template(map, User.t) :: preview_environment_template_resp
+  def upsert_preview_environment_template(%{name: name} = attrs, %User{} = user) do
+    start_transaction()
+    |> add_operation(:template, fn _ ->
+      case get_preview_environment_template_by_name(name) do
+        %PreviewEnvironmentTemplate{} = template -> template
+        nil -> %PreviewEnvironmentTemplate{}
+      end
+      |> PreviewEnvironmentTemplate.changeset(attrs)
+      |> allow(user, :create)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:post_validate, fn %{template: template} ->
+      with {:flow, %PreviewEnvironmentTemplate{
+              flow: %Flow{id: id},
+              reference_service: %Service{flow_id: id, namespace: namespace}
+            } = template} <- {:flow, Repo.preload(template, [:flow, :reference_service, :template])},
+           {:ns, %PreviewEnvironmentTemplate{template: %{namespace: ^namespace <> _}}} <- {:ns, template} do
+        {:ok, template}
+      else
+        {:flow, _} -> {:error, "the reference service must belong to the flow"}
+        {:ns, _} -> {:error, "the destination namespace must be prefixed by the reference service's namespace"}
+      end
+    end)
+    |> execute(extract: :template)
+  end
+
+  @doc """
+  Deletes an existing preview environment template, will throw if not found
+  """
+  @spec delete_preview_environment_template(binary, User.t) :: preview_environment_template_resp
+  def delete_preview_environment_template(id, %User{} = user) do
+    get_preview_environment_template!(id)
+    |> PreviewEnvironmentTemplate.changeset()
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """
