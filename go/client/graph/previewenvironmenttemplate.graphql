@@ -1,0 +1,32 @@
+fragment PreviewEnvironmentTemplateFragment on PreviewEnvironmentTemplate {
+    id
+    name
+    commentTemplate
+    flow {
+        id
+    }
+    connection {
+        id
+    }
+    template {
+        name
+    }
+}
+
+query GetPreviewEnvironmentTemplate($id: ID, $flowId: ID $name: String) {
+    previewEnvironmentTemplate(id: $id, flowId: $flowId, name: $name) {
+        ...PreviewEnvironmentTemplateFragment
+    }
+}
+
+mutation UpsertPreviewEnvironmentTemplate($attributes: PreviewEnvironmentTemplateAttributes!) {
+    upsertPreviewEnvironmentTemplate(attributes: $attributes) {
+        ...PreviewEnvironmentTemplateFragment
+    }
+}
+
+mutation DeletePreviewEnvironmentTemplate($id: ID!) {
+    deletePreviewEnvironmentTemplate(id: $id) {
+        id
+    }
+}

@@ -51,6 +51,7 @@ rules:
   - pipelines
   - prautomations
   - prautomationtriggers
+  - previewenvironmenttemplates
   - projects
   - providers
   - scmconnections
@@ -93,6 +94,7 @@ rules:
   - pipelines/finalizers
   - prautomations/finalizers
   - prautomationtriggers/finalizers
+  - previewenvironmenttemplates/finalizers
   - projects/finalizers
   - providers/finalizers
   - scmconnections/finalizers
@@ -129,6 +131,7 @@ rules:
   - pipelines/status
   - prautomations/status
   - prautomationtriggers/status
+  - previewenvironmenttemplates/status
   - projects/status
   - providers/status
   - scmconnections/status

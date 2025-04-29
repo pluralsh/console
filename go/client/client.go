@@ -158,6 +158,9 @@ type ConsoleClient interface {
 	GetPipelines(ctx context.Context, after *string, interceptors ...clientv2.RequestInterceptor) (*GetPipelines, error)
 	CreatePipelineContext(ctx context.Context, pipelineID string, attributes PipelineContextAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePipelineContext, error)
 	GetPipelineContext(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPipelineContext, error)
+	GetPreviewEnvironmentTemplate(ctx context.Context, id *string, flowID *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPreviewEnvironmentTemplate, error)
+	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes PreviewEnvironmentTemplateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPreviewEnvironmentTemplate, error)
+	DeletePreviewEnvironmentTemplate(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePreviewEnvironmentTemplate, error)
 	ListProjects(ctx context.Context, after *string, before *string, first *int64, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListProjects, error)
 	GetProject(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetProject, error)
 	CreateProject(ctx context.Context, attributes ProjectAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateProject, error)
@@ -3538,6 +3541,52 @@ func (t *PipelineEdgeFragment) GetNode() *PipelineFragment {
 	return t.Node
 }
 
+type PreviewEnvironmentTemplateFragment struct {
+	ID              string                                         "json:\"id\" graphql:\"id\""
+	Name            string                                         "json:\"name\" graphql:\"name\""
+	CommentTemplate *string                                        "json:\"commentTemplate,omitempty\" graphql:\"commentTemplate\""
+	Flow            *PreviewEnvironmentTemplateFragment_Flow       "json:\"flow,omitempty\" graphql:\"flow\""
+	Connection      *PreviewEnvironmentTemplateFragment_Connection "json:\"connection,omitempty\" graphql:\"connection\""
+	Template        *PreviewEnvironmentTemplateFragment_Template   "json:\"template,omitempty\" graphql:\"template\""
+}
+
+func (t *PreviewEnvironmentTemplateFragment) GetID() string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.ID
+}
+func (t *PreviewEnvironmentTemplateFragment) GetName() string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.Name
+}
+func (t *PreviewEnvironmentTemplateFragment) GetCommentTemplate() *string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.CommentTemplate
+}
+func (t *PreviewEnvironmentTemplateFragment) GetFlow() *PreviewEnvironmentTemplateFragment_Flow {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.Flow
+}
+func (t *PreviewEnvironmentTemplateFragment) GetConnection() *PreviewEnvironmentTemplateFragment_Connection {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.Connection
+}
+func (t *PreviewEnvironmentTemplateFragment) GetTemplate() *PreviewEnvironmentTemplateFragment_Template {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment{}
+	}
+	return t.Template
+}
+
 type ProjectFragment struct {
 	ID            string                   "json:\"id\" graphql:\"id\""
 	InsertedAt    *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
@@ -6656,6 +6705,39 @@ func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragm
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
+}
+
+type PreviewEnvironmentTemplateFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *PreviewEnvironmentTemplateFragment_Flow) GetID() string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment_Flow{}
+	}
+	return t.ID
+}
+
+type PreviewEnvironmentTemplateFragment_Connection struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *PreviewEnvironmentTemplateFragment_Connection) GetID() string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment_Connection{}
+	}
+	return t.ID
+}
+
+type PreviewEnvironmentTemplateFragment_Template struct {
+	Name *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *PreviewEnvironmentTemplateFragment_Template) GetName() *string {
+	if t == nil {
+		t = &PreviewEnvironmentTemplateFragment_Template{}
+	}
+	return t.Name
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -11959,6 +12041,83 @@ func (t *GetPipelines_Pipelines) GetEdges() []*PipelineEdgeFragment {
 	return t.Edges
 }
 
+type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow) GetID() string {
+	if t == nil {
+		t = &GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow{}
+	}
+	return t.ID
+}
+
+type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection) GetID() string {
+	if t == nil {
+		t = &GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection{}
+	}
+	return t.ID
+}
+
+type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template struct {
+	Name *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template) GetName() *string {
+	if t == nil {
+		t = &GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template{}
+	}
+	return t.Name
+}
+
+type UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow{}
+	}
+	return t.ID
+}
+
+type UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection) GetID() string {
+	if t == nil {
+		t = &UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Connection{}
+	}
+	return t.ID
+}
+
+type UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template struct {
+	Name *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template) GetName() *string {
+	if t == nil {
+		t = &UpsertPreviewEnvironmentTemplate_UpsertPreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Template{}
+	}
+	return t.Name
+}
+
+type DeletePreviewEnvironmentTemplate_DeletePreviewEnvironmentTemplate struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeletePreviewEnvironmentTemplate_DeletePreviewEnvironmentTemplate) GetID() string {
+	if t == nil {
+		t = &DeletePreviewEnvironmentTemplate_DeletePreviewEnvironmentTemplate{}
+	}
+	return t.ID
+}
+
 type ListProjects_Projects_Edges struct {
 	Node *ProjectFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -15579,6 +15738,39 @@ func (t *GetPipelineContext) GetPipelineContext() *PipelineContextFragment {
 		t = &GetPipelineContext{}
 	}
 	return t.PipelineContext
+}
+
+type GetPreviewEnvironmentTemplate struct {
+	PreviewEnvironmentTemplate *PreviewEnvironmentTemplateFragment "json:\"previewEnvironmentTemplate,omitempty\" graphql:\"previewEnvironmentTemplate\""
+}
+
+func (t *GetPreviewEnvironmentTemplate) GetPreviewEnvironmentTemplate() *PreviewEnvironmentTemplateFragment {
+	if t == nil {
+		t = &GetPreviewEnvironmentTemplate{}
+	}
+	return t.PreviewEnvironmentTemplate
+}
+
+type UpsertPreviewEnvironmentTemplate struct {
+	UpsertPreviewEnvironmentTemplate *PreviewEnvironmentTemplateFragment "json:\"upsertPreviewEnvironmentTemplate,omitempty\" graphql:\"upsertPreviewEnvironmentTemplate\""
+}
+
+func (t *UpsertPreviewEnvironmentTemplate) GetUpsertPreviewEnvironmentTemplate() *PreviewEnvironmentTemplateFragment {
+	if t == nil {
+		t = &UpsertPreviewEnvironmentTemplate{}
+	}
+	return t.UpsertPreviewEnvironmentTemplate
+}
+
+type DeletePreviewEnvironmentTemplate struct {
+	DeletePreviewEnvironmentTemplate *DeletePreviewEnvironmentTemplate_DeletePreviewEnvironmentTemplate "json:\"deletePreviewEnvironmentTemplate,omitempty\" graphql:\"deletePreviewEnvironmentTemplate\""
+}
+
+func (t *DeletePreviewEnvironmentTemplate) GetDeletePreviewEnvironmentTemplate() *DeletePreviewEnvironmentTemplate_DeletePreviewEnvironmentTemplate {
+	if t == nil {
+		t = &DeletePreviewEnvironmentTemplate{}
+	}
+	return t.DeletePreviewEnvironmentTemplate
 }
 
 type ListProjects struct {
@@ -26401,6 +26593,108 @@ func (c *Client) GetPipelineContext(ctx context.Context, id string, interceptors
 	return &res, nil
 }
 
+const GetPreviewEnvironmentTemplateDocument = `query GetPreviewEnvironmentTemplate ($id: ID, $flowId: ID, $name: String) {
+	previewEnvironmentTemplate(id: $id, flowId: $flowId, name: $name) {
+		... PreviewEnvironmentTemplateFragment
+	}
+}
+fragment PreviewEnvironmentTemplateFragment on PreviewEnvironmentTemplate {
+	id
+	name
+	commentTemplate
+	flow {
+		id
+	}
+	connection {
+		id
+	}
+	template {
+		name
+	}
+}
+`
+
+func (c *Client) GetPreviewEnvironmentTemplate(ctx context.Context, id *string, flowID *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPreviewEnvironmentTemplate, error) {
+	vars := map[string]any{
+		"id":     id,
+		"flowId": flowID,
+		"name":   name,
+	}
+
+	var res GetPreviewEnvironmentTemplate
+	if err := c.Client.Post(ctx, "GetPreviewEnvironmentTemplate", GetPreviewEnvironmentTemplateDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertPreviewEnvironmentTemplateDocument = `mutation UpsertPreviewEnvironmentTemplate ($attributes: PreviewEnvironmentTemplateAttributes!) {
+	upsertPreviewEnvironmentTemplate(attributes: $attributes) {
+		... PreviewEnvironmentTemplateFragment
+	}
+}
+fragment PreviewEnvironmentTemplateFragment on PreviewEnvironmentTemplate {
+	id
+	name
+	commentTemplate
+	flow {
+		id
+	}
+	connection {
+		id
+	}
+	template {
+		name
+	}
+}
+`
+
+func (c *Client) UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes PreviewEnvironmentTemplateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPreviewEnvironmentTemplate, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertPreviewEnvironmentTemplate
+	if err := c.Client.Post(ctx, "UpsertPreviewEnvironmentTemplate", UpsertPreviewEnvironmentTemplateDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeletePreviewEnvironmentTemplateDocument = `mutation DeletePreviewEnvironmentTemplate ($id: ID!) {
+	deletePreviewEnvironmentTemplate(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeletePreviewEnvironmentTemplate(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePreviewEnvironmentTemplate, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeletePreviewEnvironmentTemplate
+	if err := c.Client.Post(ctx, "DeletePreviewEnvironmentTemplate", DeletePreviewEnvironmentTemplateDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListProjectsDocument = `query ListProjects ($after: String, $before: String, $first: Int, $last: Int, $q: String) {
 	projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
 		pageInfo {
@@ -31313,6 +31607,9 @@ var DocumentOperationNames = map[string]string{
 	GetPipelinesDocument:                              "GetPipelines",
 	CreatePipelineContextDocument:                     "CreatePipelineContext",
 	GetPipelineContextDocument:                        "GetPipelineContext",
+	GetPreviewEnvironmentTemplateDocument:             "GetPreviewEnvironmentTemplate",
+	UpsertPreviewEnvironmentTemplateDocument:          "UpsertPreviewEnvironmentTemplate",
+	DeletePreviewEnvironmentTemplateDocument:          "DeletePreviewEnvironmentTemplate",
 	ListProjectsDocument:                              "ListProjects",
 	GetProjectDocument:                                "GetProject",
 	CreateProjectDocument:                             "CreateProject",
