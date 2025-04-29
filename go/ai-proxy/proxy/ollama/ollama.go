@@ -4,16 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/polly/algorithms"
 	"k8s.io/klog/v2"
 )
 
@@ -28,56 +27,60 @@ type OllamaProxy struct {
 	api.OpenAIProxy
 }
 
-// ToolRegistry manages a collection of tools for efficient lookup
+type toolEntry struct {
+	tool   ollamaapi.ToolCall
+	index  int
+	callId string
+}
+
 type ToolRegistry struct {
-	tools       map[string]ollamaapi.ToolCall
-	toolIndices map[string]int    // maps tool names to their stable indices
-	toolCallIds map[string]string // maps tool names to their stable ids
-	nextIndex   int               // counter for assigning indices
+	entries   map[string]toolEntry
+	nextIndex int
 }
 
 func NewToolRegistry() *ToolRegistry {
 	return &ToolRegistry{
-		tools:       make(map[string]ollamaapi.ToolCall),
-		toolIndices: make(map[string]int),
-		toolCallIds: make(map[string]string),
-		nextIndex:   0,
+		entries:   make(map[string]toolEntry),
+		nextIndex: 0,
 	}
-}
-
-func toolCallId() string {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, 8)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return "call_" + strings.ToLower(string(b))
 }
 
 func (r *ToolRegistry) Register(tool ollamaapi.ToolCall) {
 	name := tool.Function.Name
-	if _, exists := r.tools[name]; !exists {
-		r.toolIndices[name] = r.nextIndex
-		r.toolCallIds[name] = toolCallId()
+	if _, exists := r.entries[name]; !exists {
+		r.entries[name] = toolEntry{
+			tool:   tool,
+			index:  r.nextIndex,
+			callId: algorithms.String(8),
+		}
 		r.nextIndex++
+	} else {
+		entry := r.entries[name]
+		entry.tool = tool
+		r.entries[name] = entry
 	}
-	r.tools[name] = tool
 }
 
 func (r *ToolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
-	tool, exists := r.tools[name]
+	entry, exists := r.entries[name]
 	if !exists {
 		return ollamaapi.ToolCall{}, -1, "", false
 	}
-	return tool, r.toolIndices[name], r.toolCallIds[name], true
+	return entry.tool, entry.index, entry.callId, true
 }
 
 func (r *ToolRegistry) GetIndex(name string) int {
-	return r.toolIndices[name]
+	if entry, exists := r.entries[name]; exists {
+		return entry.index
+	}
+	return -1
 }
 
 func (r *ToolRegistry) GetToolId(name string) string {
-	return r.toolCallIds[name]
+	if entry, exists := r.entries[name]; exists {
+		return entry.callId
+	}
+	return ""
 }
 
 func NewOllamaProxy(host string) (api.OpenAIProxy, error) {
