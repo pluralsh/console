@@ -1,5 +1,5 @@
 # Build the binary
-FROM golang:1.23.7 as builder
+FROM golang:1.24.0 as builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG VERSION
@@ -19,6 +19,9 @@ COPY args ./args
 COPY environment ./environment
 COPY internal ./internal
 COPY proxy ./proxy
+
+# Update dependencies after copying all source files
+RUN go mod tidy
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command

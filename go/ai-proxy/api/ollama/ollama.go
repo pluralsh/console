@@ -3,5 +3,6 @@ package ollama
 type Endpoint string
 
 const (
-	EndpointChat = "/api/chat"
+	EndpointChat       = "/api/chat"
+	EndpointEmbeddings = "/api/embed"
 )
