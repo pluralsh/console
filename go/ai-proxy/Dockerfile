@@ -12,7 +12,6 @@ WORKDIR /workspace
 # Expecting to copy go.mod and if present go.sum.
 COPY go.* ./
 RUN go mod download
-RUN go mod tidy
 
 COPY *.go ./
 COPY api ./api
@@ -20,6 +19,9 @@ COPY args ./args
 COPY environment ./environment
 COPY internal ./internal
 COPY proxy ./proxy
+
+# Update dependencies after copying all source files
+RUN go mod tidy
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
