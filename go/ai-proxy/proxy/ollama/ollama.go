@@ -54,12 +54,6 @@ func (r *toolRegistry) Register(tool ollamaapi.ToolCall) {
 			callId: algorithms.String(8),
 		}
 		r.nextIndex++
-	} else {
-		r.entries[name] = toolEntry{
-			tool:   tool,
-			index:  r.entries[name].index,
-			callId: r.entries[name].callId,
-		}
 	}
 }
 
@@ -298,9 +292,7 @@ func (o *OllamaProxy) convertOpenAIToOllamaChatRequest(req *openai.ChatCompletio
 				Name: tool.Function.Name,
 			},
 		}
-		if _, _, _, exists := o.toolRegistry.Get(otc.Function.Name); !exists {
-			o.toolRegistry.Register(otc)
-		}
+		o.toolRegistry.Register(otc)
 	}
 
 	for _, i := range req.Messages {
