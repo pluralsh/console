@@ -2,7 +2,7 @@ module github.com/pluralsh/console/go/client
 
 go 1.22.5
 
-toolchain go1.23.7
+toolchain go1.23.8
 
 require github.com/Yamashou/gqlgenc v0.29.0
 
