@@ -1,4 +1,7 @@
-import { Flex, SubTab, TabList } from '@pluralsh/design-system'
+import { mergeDeep } from '@apollo/client/utilities'
+import { EmptyState, Flex, SubTab, TabList } from '@pluralsh/design-system'
+import { POLL_INTERVAL } from 'components/cluster/constants.ts'
+import { GqlError } from 'components/utils/Alert.tsx'
 import {
   Dispatch,
   ReactNode,
@@ -11,7 +14,12 @@ import {
 } from 'react'
 import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { AiInsight, ClusterFragment } from '../../../generated/graphql.ts'
+import {
+  AiInsight,
+  ClusterFragment,
+  ClusterInsightFragment,
+  useClusterInsightQuery,
+} from '../../../generated/graphql.ts'
 import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
@@ -24,11 +32,11 @@ import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
-import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 
 const DIRECTORY: Array<DirectoryEntry> = [
   { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },
@@ -42,16 +50,44 @@ interface DirectoryEntry {
 
 export default function ClusterInsights(): ReactNode {
   const theme = useTheme()
-  const { cluster, refetch, clusterLoading } = useClusterContext()
+  const { cluster, clusterLoading } = useClusterContext()
   const tabStateRef = useRef<any>(null)
-  const tab =
-    useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/:tab/*`)?.params
-      ?.tab || ''
+  const { tab } =
+    useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/:tab?/*`)?.params ??
+    {}
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
+
+  const {
+    data,
+    loading: insightLoading,
+    error,
+    refetch,
+  } = useClusterInsightQuery({
+    variables: { id: cluster?.id ?? '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   const [navigationContent, setNavigationContent] = useState<ReactNode>()
   const [actionContent, setActionContent] = useState<ReactNode>()
+  const ctx: ClusterInsightsContextType = useMemo(
+    () => ({
+      cluster: mergeDeep(cluster, data?.cluster),
+      clusterLoading: clusterLoading || insightLoading,
+      refetch,
+      setNavigationContent,
+      setActionContent,
+    }),
+    [cluster, data?.cluster, clusterLoading, insightLoading, refetch]
+  )
 
+  if (error) return <GqlError error={error} />
+  if (!data)
+    return insightLoading ? (
+      <LoadingIndicator />
+    ) : (
+      <EmptyState message="Cluster insights not found." />
+    )
   return (
     <Flex
       direction="column"
@@ -104,17 +140,7 @@ export default function ClusterInsights(): ReactNode {
         </Flex>
       </Flex>
       <Suspense fallback={<LoadingIndicator />}>
-        <Outlet
-          context={
-            {
-              cluster,
-              clusterLoading,
-              refetch,
-              setNavigationContent,
-              setActionContent,
-            } as ClusterInsightsContextType
-          }
-        />
+        <Outlet context={ctx} />
       </Suspense>
     </Flex>
   )
@@ -153,7 +179,7 @@ export function ClusterInsightsSummary(): ReactNode {
 }
 
 type ClusterInsightsContextType = {
-  cluster: ClusterFragment
+  cluster: ClusterFragment & Nullable<ClusterInsightFragment>
   clusterLoading: boolean
   refetch: () => void
   setNavigationContent: Dispatch<SetStateAction<Nullable<ReactNode>>>
