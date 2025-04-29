@@ -21,6 +21,7 @@ defmodule Console.Schema.Service do
     ServiceDependency,
     AiInsight,
     ServiceVuln,
+    PreviewEnvironmentInstance,
     ClusterScalingRecommendation,
     Flow
   }
@@ -145,6 +146,7 @@ defmodule Console.Schema.Service do
     has_one :provider,           ClusterProvider
     has_one :global_service,     GlobalService
     has_one :namespace_instance, NamespaceInstance
+    has_one :preview_instance,   PreviewEnvironmentInstance
 
     has_many :vulns,   ServiceVuln
     has_many :imports, ServiceImport, on_replace: :delete
@@ -333,6 +335,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:dependencies)
     |> cast_assoc(:imports)
     |> cast_assoc(:insight)
+    |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

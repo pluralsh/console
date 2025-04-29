@@ -1,5 +1,8 @@
 name: CI / Console
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
 on:
   push:
     branches: [master]
@@ -97,7 +100,7 @@ jobs:
       - name: Verify Changed files
         run: |
           git diff --exit-code -- priv || {
-            echo "::error Agent chart not downloaded, run `mix test` to compile it locally."
+            echo "::error Agent chart not downloaded, run mix test to compile it locally."
             exit 1
           }
       - uses: 8398a7/action-slack@v3

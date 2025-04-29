@@ -1,9 +1,7 @@
 import {
   ArrowScroll,
-  FillLevelProvider,
   Flex,
   SearchIcon,
-  SubTab,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
@@ -27,6 +25,8 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
+import { CreatePolicyReportButton } from './CreatePolicyReportModal.tsx'
+import { PastReportsButton } from './PastReportsModal.tsx'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -34,9 +34,9 @@ const breadcrumbs = [
 ]
 
 export enum ViolationFilter {
-  All = 'All',
-  Passing = 'Passing',
-  Violated = 'Violated',
+  All = 'all',
+  Passing = 'passing',
+  Violated = 'violations',
 }
 
 const violatedParam = (filter: ViolationFilter) => {
@@ -82,6 +82,7 @@ export function Policies() {
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: { field: ConstraintViolationField.Kind },
   })
+
   const { data: namespacesData } = useViolationStatisticsQuery({
     variables: { field: ConstraintViolationField.Namespace },
   })
@@ -102,34 +103,17 @@ export function Policies() {
               placeholder="Search policies"
             />
           </IconExpander>
-          <FillLevelProvider value={1}>
-            <Flex>
-              {Object.values(ViolationFilter)?.map((label) => (
-                <SubTab
-                  key={label}
-                  textValue={label}
-                  active={violationFilter === label}
-                  onClick={() => {
-                    setViolationFilter(label as ViolationFilter)
-                  }}
-                >
-                  <Flex gap="small">
-                    {label}
-                    {/* TODO: add back when back end supports */}
-                    {/* <AggregatedPolicyStatsChip
-                    violationFilter={label as ViolationFilter}
-                    kindsData={kindsData}
-                    namespacesData={namespacesData}
-                  /> */}
-                  </Flex>
-                </SubTab>
-              ))}
-            </Flex>
-          </FillLevelProvider>
+          <Flex
+            gap={'small'}
+            width={250}
+          >
+            <PastReportsButton />
+            <CreatePolicyReportButton />
+          </Flex>
         </FiltersWrapperSC>
       </ArrowScroll>
     ),
-    [searchString, violationFilter]
+    [searchString]
   )
 
   useSetPageHeaderContent(header)
@@ -152,6 +136,8 @@ export function Policies() {
         }}
       />
       <PoliciesFilter
+        violationsFilter={violationFilter}
+        setViolationsFilter={setViolationFilter}
         selectedNamespaces={selectedNamespaces}
         setSelectedNamespaces={setSelectedNamespaces}
         selectedKinds={selectedKinds}
@@ -167,7 +153,7 @@ export function Policies() {
 
 const FiltersWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   overflow: 'auto',
 }))
 

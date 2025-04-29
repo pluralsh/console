@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.Flows
+  alias Console.Deployments.{Flows, Policies}
   alias Console.Schema.{
     Flow,
     Service,
@@ -8,7 +8,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     McpServer,
     PullRequest,
     McpServerAudit,
-    Alert
+    Alert,
+    PreviewEnvironmentTemplate,
+    PreviewEnvironmentInstance
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
@@ -55,8 +57,32 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> paginate(args)
   end
 
+  def list_preview_environment_templates(flow, args, _) do
+    PreviewEnvironmentTemplate.for_flow(flow.id)
+    |> PreviewEnvironmentTemplate.ordered()
+    |> paginate(args)
+  end
+
+  def list_preview_environment_instances(flow, args, _) do
+    PreviewEnvironmentInstance.for_flow(flow.id)
+    |> PreviewEnvironmentInstance.ordered()
+    |> paginate(args)
+  end
+
   def resolve_flow(%{id: id}, %{context: %{current_user: user}}),
     do: Flows.accessible(id, user)
+
+  def resolve_preview_environment_template(%{id: id}, %{context: %{current_user: user}})
+    when is_binary(id) do
+    Flows.get_preview_environment_template(id)
+    |> Policies.allow(user, :read)
+  end
+  def resolve_preview_environment_template(%{flow_id: id, name: name}, %{context: %{current_user: user}})
+    when is_binary(id) and is_binary(name) do
+    Flows.get_preview_environment_template_for_flow(id, name)
+    |> Policies.allow(user, :read)
+  end
+  def resolve_preview_environment_template(_, _), do: {:error, "must specify either id or flowId and name"}
 
   def upsert_flow(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Flows.upsert_flow(attrs, user)
@@ -72,4 +98,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
 
   def delete_mcp_server(%{id: id}, %{context: %{current_user: user}}),
     do: Flows.delete_mcp_server(id, user)
+
+  def upsert_preview_environment_template(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Flows.upsert_preview_environment_template(attrs, user)
+
+  def delete_preview_environment_template(%{id: id}, %{context: %{current_user: user}}),
+    do: Flows.delete_preview_environment_template(id, user)
 end

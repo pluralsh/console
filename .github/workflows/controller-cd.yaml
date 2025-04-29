@@ -16,6 +16,7 @@ env:
   GOBIN: /home/runner/go/bin
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: ghcr.io/pluralsh/deployment-controller
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
 jobs:
   test:
     name: Unit test

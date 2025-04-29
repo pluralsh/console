@@ -22,8 +22,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { FlowCard } from './FlowCard'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'flows', url: FLOWS_ABS_PATH }]
-// TODO: change this when we have actual docs for Flow
-export const FLOW_DOCS_URL = 'https://docs.plural.sh/'
+export const FLOW_DOCS_URL = 'https://docs.plural.sh/plural-features/flows'
 
 export function Flows() {
   useSetBreadcrumbs(breadcrumbs)

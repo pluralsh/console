@@ -221,6 +221,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :vulns,          :service_vuln, resolve: dataloader(Deployments), description: "sideload detected vulnerabilities for this service"
     field :flow,           :flow, resolve: dataloader(Deployments), description: "the flow this service belongs to"
 
+    field :network_graph, list_of(:network_mesh_edge) do
+      arg :time,      :datetime
+
+      resolve &Deployments.network_graph/3
+    end
+
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
       resolve &Deployments.list_revisions/3

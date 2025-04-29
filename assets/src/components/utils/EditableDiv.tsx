@@ -49,9 +49,9 @@ export function EditableDiv({
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      // for handling enter key
+      // for handling enter key when onEnter callback is defined
       // if any modifier key is pressed, just allow default behavior (which is adding a new line usually)
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && onEnter) {
         if (e.shiftKey || e.ctrlKey || e.altKey) return
         e.preventDefault()
         onEnter?.()

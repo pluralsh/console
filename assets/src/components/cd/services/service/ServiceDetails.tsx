@@ -1,11 +1,11 @@
-import { Chip, Flex } from '@pluralsh/design-system'
+import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { memo, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
+  useMatch,
   useOutletContext,
-  useParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -28,8 +28,8 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
+  CLUSTER_ABS_PATH,
   SERVICE_COMPONENTS_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   SERVICE_PRS_PATH,
   getClusterDetailsPath,
@@ -106,26 +106,29 @@ export const useServiceContext = () => useOutletContext<ServiceContextType>()
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
   service,
+  tab,
 }: Parameters<typeof getClusterBreadcrumbs>[0] & {
   service: { name?: Nullable<string>; id: string }
-}) => [
-  ...getClusterBreadcrumbs({ cluster }),
-  {
-    label: 'services',
-    url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
-  },
-  ...(service?.id && cluster?.id
-    ? [
-        {
-          label: service?.name || service?.id,
-          url: getServiceDetailsPath({
-            clusterId: cluster?.id,
-            serviceId: service?.id,
-          }),
-        },
-      ]
-    : []),
-]
+  tab?: string
+}) => {
+  const pathPrefix = getServiceDetailsPath({
+    clusterId: cluster?.id,
+    serviceId: service?.id,
+  })
+  return [
+    ...getClusterBreadcrumbs({ cluster }),
+    {
+      label: 'services',
+      url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
+    },
+    ...(service?.id && cluster?.id
+      ? [{ label: service?.name || service?.id, url: pathPrefix }]
+      : []),
+    ...(service?.id && cluster?.id && tab
+      ? [{ label: tab, url: `${pathPrefix}/${tab}` }]
+      : []),
+  ]
+}
 
 export const DirLabelWithChip = memo(
   ({
@@ -215,7 +218,6 @@ export const getDirectory = ({
       ),
       enabled: true,
     },
-    // { path: 'network', label: 'Network', enabled: true },
     {
       path: 'insights',
       label: <InsightsTabLabel insight={serviceDeployment.insight} />,
@@ -223,6 +225,7 @@ export const getDirectory = ({
     },
     { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
+    { path: 'network', label: 'Network', enabled: true },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
     // {
@@ -248,14 +251,12 @@ export const getDirectory = ({
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const params = useParams()
   const projectId = useProjectId()
-  const serviceId = params[SERVICE_PARAM_ID] as string
-  const clusterId = params[SERVICE_PARAM_CLUSTER_ID] as string
-  const pathPrefix = getServiceDetailsPath({
-    clusterId,
-    serviceId,
-  })
+  const { clusterId, serviceId, tab } =
+    useMatch(`${CLUSTER_ABS_PATH}/services/:${SERVICE_PARAM_ID}/:tab?/*`)
+      ?.params ?? {}
+
+  const pathPrefix = getServiceDetailsPath({ clusterId, serviceId })
   const docPageContext = useDocPageContext()
   const logsEnabled = useLogsEnabled()
   const metricsEnabled = useMetricsEnabled()
@@ -276,7 +277,7 @@ function ServiceDetailsBase() {
     refetch,
     loading,
   } = useServiceDeploymentQuery({
-    variables: { id: serviceId },
+    variables: { id: serviceId ?? '' },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
@@ -295,6 +296,19 @@ function ServiceDetailsBase() {
         metricsEnabled,
       }),
     [logsEnabled, metricsEnabled, serviceDeployment]
+  )
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getServiceDetailsBreadcrumbs({
+          cluster: serviceDeployment?.cluster ?? { id: clusterId ?? '' },
+          service: serviceDeployment ?? { id: serviceId ?? '' },
+          tab,
+        }),
+      ],
+      [clusterId, serviceDeployment, serviceId, tab]
+    )
   )
 
   return (

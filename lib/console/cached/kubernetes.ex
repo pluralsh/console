@@ -46,8 +46,8 @@ defmodule Console.Cached.Kubernetes do
       table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
       {:noreply, %{state | pid: pid, table: table}}
     else
-      err ->
-        Logger.warning "failed to start #{model} watcher for cache: #{inspect(err)}"
+      _err ->
+        Logger.warning "did not start #{model} watcher for cache"
         Process.send_after(self(), {:start, request}, :timer.seconds(120))
         {:noreply, state}
     end

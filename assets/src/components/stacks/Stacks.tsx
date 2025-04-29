@@ -15,6 +15,7 @@ import {
   SearchIcon,
   SubTab,
   TabList,
+  Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -67,8 +68,10 @@ import { MoreMenu } from '../utils/MoreMenu'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
+import StackStatusChip from './common/StackStatusChip.tsx'
 import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
+import RestoreStackButton from './RestoreStackButton.tsx'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
 import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
@@ -138,6 +141,7 @@ export default function Stacks() {
   const tab = pathMatch?.params?.tab || ''
   const [listRef, setListRef] = useState<any>(null)
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+  const [showRestoreToast, setShowRestoreToast] = useState(false)
 
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -196,6 +200,7 @@ export default function Stacks() {
   const deleteLabel = fullStack?.deletedAt
     ? 'Retry stack delete'
     : 'Delete  stack'
+  const deleting = !!fullStack?.deletedAt
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -242,6 +247,17 @@ export default function Stacks() {
         gap: theme.spacing.xlarge,
       }}
     >
+      {showRestoreToast && (
+        <Toast
+          position={'bottom'}
+          onClose={() => setShowRestoreToast(false)}
+          closeTimeout={5000}
+          margin="large"
+          severity="success"
+        >
+          Stack &quot;{tinyStack?.name}&quot; restored.
+        </Toast>
+      )}
       <div
         css={{
           display: 'flex',
@@ -363,8 +379,23 @@ export default function Stacks() {
             }}
           >
             <div css={{ flexGrow: 1 }}>
-              <div css={{ ...theme.partials.text.subtitle1 }}>
+              <div
+                css={{
+                  display: 'flex',
+                  gap: theme.spacing.small,
+                  alignItems: 'center',
+
+                  ...theme.partials.text.subtitle1,
+                }}
+              >
                 {tinyStack?.name}
+                {deleting && (
+                  <StackStatusChip
+                    status={tinyStack?.status}
+                    deleting={deleting}
+                    size="small"
+                  />
+                )}
               </div>
               <div
                 css={{
@@ -375,15 +406,22 @@ export default function Stacks() {
                 {tinyStack?.repository?.url}
               </div>
             </div>
-            <KickButton
-              floating
-              pulledAt={tinyStack?.repository?.pulledAt}
-              kickMutationHook={useKickStackMutation}
-              message="Resync"
-              tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
-              variables={{ id: tinyStack?.id }}
-              width="max-content"
-            />
+            {!deleting ? (
+              <KickButton
+                floating
+                pulledAt={tinyStack?.repository?.pulledAt}
+                kickMutationHook={useKickStackMutation}
+                message="Resync"
+                tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
+                variables={{ id: tinyStack?.id }}
+                width="max-content"
+              />
+            ) : (
+              <RestoreStackButton
+                id={tinyStack?.id ?? ''}
+                setShowToast={setShowRestoreToast}
+              />
+            )}
             <StackCustomRun stackId={tinyStack?.id ?? ''} />
             <MoreMenu
               disabled={!fullStack}

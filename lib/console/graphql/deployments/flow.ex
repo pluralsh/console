@@ -37,6 +37,15 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :value, non_null(:string)
   end
 
+  input_object :preview_environment_template_attributes do
+    field :name,                 non_null(:string), description: "the name of the preview environment template"
+    field :comment_template,     :string, description: "a liquid template for custom information in the PR comment"
+    field :flow_id,              non_null(:id), description: "the flow that will own the preview environment"
+    field :reference_service_id, non_null(:id), description: "the service that will be cloned to create the preview environment"
+    field :template,             non_null(:service_template_attributes), description: "a set of service configuration overrides to use while cloning"
+    field :connection_id,        :id, description: "an scm connection id to use for PR preview comment generation"
+  end
+
   object :flow do
     field :id,          non_null(:id)
     field :name,        non_null(:string)
@@ -64,6 +73,14 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     connection field :alerts, node_type: :alert do
       resolve &Deployments.alerts_for_flow/3
+    end
+
+    connection field :preview_environment_templates, node_type: :preview_environment_template do
+      resolve &Deployments.list_preview_environment_templates/3
+    end
+
+    connection field :preview_environment_instances, node_type: :preview_environment_instance do
+      resolve &Deployments.list_preview_environment_instances/3
     end
 
     timestamps()
@@ -124,9 +141,36 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :tool,   :mcp_tool
   end
 
+  @desc "A template for generating preview environments"
+  object :preview_environment_template do
+    field :id,               non_null(:id)
+    field :name,             non_null(:string)
+    field :comment_template, :string
+
+    field :flow,              :flow,             resolve: dataloader(Deployments)
+    field :reference_service, :service,          resolve: dataloader(Deployments)
+    field :template,          :service_template, resolve: dataloader(Deployments)
+    field :connection,        :scm_connection,   resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "An instance of a preview environment template"
+  object :preview_environment_instance do
+    field :id,           non_null(:id)
+
+    field :service,      :service, resolve: dataloader(Deployments)
+    field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :template,     :preview_environment_template, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :flow
   connection node_type: :mcp_server
   connection node_type: :mcp_server_audit
+  connection node_type: :preview_environment_template
+  connection node_type: :preview_environment_instance
 
   object :flow_queries do
     connection field :flows, node_type: :flow do
@@ -155,6 +199,15 @@ defmodule Console.GraphQl.Deployments.Flow do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_mcp_server/2
+    end
+
+    field :preview_environment_template, :preview_environment_template do
+      middleware Authenticated
+      arg :id,      :id
+      arg :flow_id, :id
+      arg :name,    :string
+
+      resolve &Deployments.resolve_preview_environment_template/2
     end
   end
 
@@ -185,6 +238,20 @@ defmodule Console.GraphQl.Deployments.Flow do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_mcp_server/2
+    end
+
+    field :upsert_preview_environment_template, :preview_environment_template do
+      middleware Authenticated
+      arg :attributes, non_null(:preview_environment_template_attributes)
+
+      resolve &Deployments.upsert_preview_environment_template/2
+    end
+
+    field :delete_preview_environment_template, :preview_environment_template do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_preview_environment_template/2
     end
   end
 end

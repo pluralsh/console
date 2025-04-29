@@ -403,6 +403,8 @@ type RootQueryType {
 
   mcpServer(id: ID!): McpServer
 
+  previewEnvironmentTemplate(id: ID, flowId: ID, name: String): PreviewEnvironmentTemplate
+
   oidcProviders(after: String, first: Int, before: String, last: Int, q: String): OidcProviderConnection
 
   aiInsight(id: ID!): AiInsight
@@ -916,6 +918,10 @@ type RootMutationType {
 
   deleteMcpServer(id: ID!): McpServer
 
+  upsertPreviewEnvironmentTemplate(attributes: PreviewEnvironmentTemplateAttributes!): PreviewEnvironmentTemplate
+
+  deletePreviewEnvironmentTemplate(id: ID!): PreviewEnvironmentTemplate
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -962,7 +968,12 @@ type RootMutationType {
 
   deleteThread(id: ID!): ChatThread
 
-  cloneThread(id: ID!): ChatThread
+  cloneThread(
+    id: ID!
+
+    "The largest allowed sequence number to include in the cloned chat. Leave nil to clone the whole chat"
+    seq: Int
+  ): ChatThread
 
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
@@ -1101,6 +1112,26 @@ input McpHeaderAttributes {
   value: String!
 }
 
+input PreviewEnvironmentTemplateAttributes {
+  "the name of the preview environment template"
+  name: String!
+
+  "a liquid template for custom information in the PR comment"
+  commentTemplate: String
+
+  "the flow that will own the preview environment"
+  flowId: ID!
+
+  "the service that will be cloned to create the preview environment"
+  referenceServiceId: ID!
+
+  "a set of service configuration overrides to use while cloning"
+  template: ServiceTemplateAttributes!
+
+  "an scm connection id to use for PR preview comment generation"
+  connectionId: ID
+}
+
 type Flow {
   id: ID!
 
@@ -1129,6 +1160,10 @@ type Flow {
   pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
+  previewEnvironmentTemplates(after: String, first: Int, before: String, last: Int): PreviewEnvironmentTemplateConnection
+
+  previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
 
   insertedAt: DateTime
 
@@ -1199,6 +1234,29 @@ type McpServerTool {
   tool: McpTool
 }
 
+"A template for generating preview environments"
+type PreviewEnvironmentTemplate {
+  id: ID!
+  name: String!
+  commentTemplate: String
+  flow: Flow
+  referenceService: Service
+  template: ServiceTemplate
+  connection: ScmConnection
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"An instance of a preview environment template"
+type PreviewEnvironmentInstance {
+  id: ID!
+  service: Service
+  pullRequest: PullRequest
+  template: PreviewEnvironmentTemplate
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type FlowConnection {
   pageInfo: PageInfo!
   edges: [FlowEdge]
@@ -1212,6 +1270,16 @@ type McpServerConnection {
 type McpServerAuditConnection {
   pageInfo: PageInfo!
   edges: [McpServerAuditEdge]
+}
+
+type PreviewEnvironmentTemplateConnection {
+  pageInfo: PageInfo!
+  edges: [PreviewEnvironmentTemplateEdge]
+}
+
+type PreviewEnvironmentInstanceConnection {
+  pageInfo: PageInfo!
+  edges: [PreviewEnvironmentInstanceEdge]
 }
 
 "Supported OIDC-compatible Auth Providers"
@@ -4451,6 +4519,8 @@ type ServiceDeployment {
   "the flow this service belongs to"
   flow: Flow
 
+  networkGraph(time: DateTime): [NetworkMeshEdge]
+
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
@@ -7564,6 +7634,7 @@ type AiInsightEvidence {
 type LogsEvidence {
   serviceId: ID
   clusterId: ID
+  line: String
   lines: [LogLine]
 }
 
@@ -9239,6 +9310,16 @@ type ProjectEdge {
 
 type OidcProviderEdge {
   node: OidcProvider
+  cursor: String
+}
+
+type PreviewEnvironmentInstanceEdge {
+  node: PreviewEnvironmentInstance
+  cursor: String
+}
+
+type PreviewEnvironmentTemplateEdge {
+  node: PreviewEnvironmentTemplate
   cursor: String
 }
 

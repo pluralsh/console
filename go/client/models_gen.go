@@ -2221,13 +2221,15 @@ type Flow struct {
 	// write policy for this flow
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the project this flow belongs to
-	Project      *Project                     `json:"project,omitempty"`
-	Services     *ServiceDeploymentConnection `json:"services,omitempty"`
-	Pipelines    *PipelineConnection          `json:"pipelines,omitempty"`
-	PullRequests *PullRequestConnection       `json:"pullRequests,omitempty"`
-	Alerts       *AlertConnection             `json:"alerts,omitempty"`
-	InsertedAt   *string                      `json:"insertedAt,omitempty"`
-	UpdatedAt    *string                      `json:"updatedAt,omitempty"`
+	Project                     *Project                              `json:"project,omitempty"`
+	Services                    *ServiceDeploymentConnection          `json:"services,omitempty"`
+	Pipelines                   *PipelineConnection                   `json:"pipelines,omitempty"`
+	PullRequests                *PullRequestConnection                `json:"pullRequests,omitempty"`
+	Alerts                      *AlertConnection                      `json:"alerts,omitempty"`
+	PreviewEnvironmentTemplates *PreviewEnvironmentTemplateConnection `json:"previewEnvironmentTemplates,omitempty"`
+	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
+	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
+	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
 
 type FlowAttributes struct {
@@ -2989,6 +2991,7 @@ type LoginRequest struct {
 type LogsEvidence struct {
 	ServiceID *string    `json:"serviceId,omitempty"`
 	ClusterID *string    `json:"clusterId,omitempty"`
+	Line      *string    `json:"line,omitempty"`
 	Lines     []*LogLine `json:"lines,omitempty"`
 }
 
@@ -4629,6 +4632,64 @@ type PrUpdateSpec struct {
 	MatchStrategy     *MatchStrategy      `json:"matchStrategy,omitempty"`
 }
 
+// An instance of a preview environment template
+type PreviewEnvironmentInstance struct {
+	ID          string                      `json:"id"`
+	Service     *Service                    `json:"service,omitempty"`
+	PullRequest *PullRequest                `json:"pullRequest,omitempty"`
+	Template    *PreviewEnvironmentTemplate `json:"template,omitempty"`
+	InsertedAt  *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt   *string                     `json:"updatedAt,omitempty"`
+}
+
+type PreviewEnvironmentInstanceConnection struct {
+	PageInfo PageInfo                          `json:"pageInfo"`
+	Edges    []*PreviewEnvironmentInstanceEdge `json:"edges,omitempty"`
+}
+
+type PreviewEnvironmentInstanceEdge struct {
+	Node   *PreviewEnvironmentInstance `json:"node,omitempty"`
+	Cursor *string                     `json:"cursor,omitempty"`
+}
+
+// A template for generating preview environments
+type PreviewEnvironmentTemplate struct {
+	ID               string           `json:"id"`
+	Name             string           `json:"name"`
+	CommentTemplate  *string          `json:"commentTemplate,omitempty"`
+	Flow             *Flow            `json:"flow,omitempty"`
+	ReferenceService *Service         `json:"referenceService,omitempty"`
+	Template         *ServiceTemplate `json:"template,omitempty"`
+	Connection       *ScmConnection   `json:"connection,omitempty"`
+	InsertedAt       *string          `json:"insertedAt,omitempty"`
+	UpdatedAt        *string          `json:"updatedAt,omitempty"`
+}
+
+type PreviewEnvironmentTemplateAttributes struct {
+	// the name of the preview environment template
+	Name string `json:"name"`
+	// a liquid template for custom information in the PR comment
+	CommentTemplate *string `json:"commentTemplate,omitempty"`
+	// the flow that will own the preview environment
+	FlowID string `json:"flowId"`
+	// the service that will be cloned to create the preview environment
+	ReferenceServiceID string `json:"referenceServiceId"`
+	// a set of service configuration overrides to use while cloning
+	Template ServiceTemplateAttributes `json:"template"`
+	// an scm connection id to use for PR preview comment generation
+	ConnectionID *string `json:"connectionId,omitempty"`
+}
+
+type PreviewEnvironmentTemplateConnection struct {
+	PageInfo PageInfo                          `json:"pageInfo"`
+	Edges    []*PreviewEnvironmentTemplateEdge `json:"edges,omitempty"`
+}
+
+type PreviewEnvironmentTemplateEdge struct {
+	Node   *PreviewEnvironmentTemplate `json:"node,omitempty"`
+	Cursor *string                     `json:"cursor,omitempty"`
+}
+
 // A unit of organization to control permissions for a set of objects within your Console instance
 type Project struct {
 	ID          string  `json:"id"`
@@ -5350,7 +5411,8 @@ type ServiceDeployment struct {
 	// sideload detected vulnerabilities for this service
 	Vulns *ServiceVuln `json:"vulns,omitempty"`
 	// the flow this service belongs to
-	Flow *Flow `json:"flow,omitempty"`
+	Flow         *Flow              `json:"flow,omitempty"`
+	NetworkGraph []*NetworkMeshEdge `json:"networkGraph,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service

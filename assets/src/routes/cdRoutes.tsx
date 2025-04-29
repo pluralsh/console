@@ -22,7 +22,7 @@ import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
 import { ServiceRevisions } from 'components/cd/services/service/ServiceRevisions'
-import { ServiceRepoSettings } from 'components/cd/services/service/settings/ServiceRepoSettings'
+import { ServiceGitSettings } from 'components/cd/services/service/settings/ServiceGitSettings.tsx'
 import { ServiceSecrets } from 'components/cd/services/service/settings/ServiceSecrets'
 import Services from 'components/cd/services/Services'
 
@@ -146,14 +146,17 @@ import {
   SERVICE_POD_REL_PATH,
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
-  SERVICE_SETTINGS_REPO_REL_PATH,
+  SERVICE_SETTINGS_GIT_REL_PATH,
+  SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
-// import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
+import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
+import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
+
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
 
@@ -607,10 +610,10 @@ const serviceDetailsRoutes = (
       element={<ServiceMetrics />}
       path="metrics"
     />
-    {/* <Route
+    <Route
       element={<ServiceNetwork />}
       path="network"
-    /> */}
+    />
     <Route
       element={<ServiceInsights />}
       path="insights"
@@ -624,13 +627,17 @@ const serviceDetailsRoutes = (
         element={
           <Navigate
             replace
-            to={SERVICE_SETTINGS_REPO_REL_PATH}
+            to={SERVICE_SETTINGS_GIT_REL_PATH}
           />
         }
       />
       <Route
-        element={<ServiceRepoSettings />}
-        path={SERVICE_SETTINGS_REPO_REL_PATH}
+        element={<ServiceGitSettings />}
+        path={SERVICE_SETTINGS_GIT_REL_PATH}
+      />
+      <Route
+        element={<ServiceHelmSettings />}
+        path={SERVICE_SETTINGS_HELM_REL_PATH}
       />
       <Route
         element={<ServiceSecrets />}

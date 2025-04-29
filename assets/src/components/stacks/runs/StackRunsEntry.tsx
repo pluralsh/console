@@ -4,23 +4,21 @@ import {
   IconFrame,
   Tooltip,
 } from '@pluralsh/design-system'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import { useNavigate } from 'react-router'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 import { CSSObject, useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
-
 import { StackRunFragment } from '../../../generated/graphql'
 import {
   getStackRunsAbsPath,
   STACK_RUNS_INSIGHTS_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
-
 import { TRUNCATE } from '../../utils/truncate'
-
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import StackRunIcon from '../common/StackRunIcon'
 import StackStatusChip from '../common/StackStatusChip'
+import { StackOutletContextT } from '../Stacks.tsx'
 
 export default function StackRunsEntry({
   stackRun,
@@ -33,6 +31,7 @@ export default function StackRunsEntry({
 }) {
   const navigate = useNavigate()
   const { stackId } = useParams()
+  const { stack } = useOutletContext() as StackOutletContextT
   const {
     id,
     insertedAt,
@@ -61,7 +60,10 @@ export default function StackRunsEntry({
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
-      <StackRunIcon status={stackRun.status} />
+      <StackRunIcon
+        status={stackRun.status}
+        deleting={stack?.deleteRun?.id === id}
+      />
       <div
         css={{
           display: 'flex',

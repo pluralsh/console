@@ -45,6 +45,7 @@ import {
 import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
 import CloudAddons from './runtime/CloudAddons.tsx'
 import { produce } from 'immer'
+import { clusterDeprecatedCustomResourcesColumns } from './clusterDeprecatedCustomResourcesColumns.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -90,6 +91,12 @@ function FlyoverContent({
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
+
+  const numUpgradePlans = 3
+  let numUpgrades = numUpgradePlans
+  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
+  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
+  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
 
   const kubeVersion = getClusterKubeVersion(cluster)
   const { data, error } = useRuntimeServicesQuery({
@@ -148,6 +155,9 @@ function FlyoverContent({
           meta: { refetch, setError, data },
         }}
       />
+      <div css={{ ...theme.partials.text.body1Bold }}>
+        Upgrade blockers ({numUpgradePlans - numUpgrades})
+      </div>
       <Accordion
         type="single"
         fillLevel={1}
@@ -357,6 +367,39 @@ function FlyoverContent({
                 <EmptyState description="No known cloud add-ons found" />
               )}
             </div>
+          )}
+        </AccordionItem>
+      </Accordion>
+      <div css={{ ...theme.partials.text.body1Bold }}>
+        Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
+      </div>
+      <Accordion
+        type="single"
+        fillLevel={1}
+      >
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={cluster?.deprecatedCustomResources?.length === 0}
+              icon={ChecklistIcon}
+              title="Deprecated custom resources"
+              subtitle="Ensure all custom resources are updated to the version required for upgrade"
+            />
+          }
+        >
+          {!isEmpty(cluster?.deprecatedCustomResources) ? (
+            <Table
+              flush
+              data={cluster?.deprecatedCustomResources ?? []}
+              columns={clusterDeprecatedCustomResourcesColumns}
+              css={{
+                maxHeight: 258,
+                height: '100%',
+              }}
+            />
+          ) : (
+            <EmptyState description="You do not have any deprecated custom resources." />
           )}
         </AccordionItem>
       </Accordion>

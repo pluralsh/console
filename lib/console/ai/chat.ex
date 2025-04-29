@@ -217,8 +217,8 @@ defmodule Console.AI.Chat do
   @doc """
   Copies all the messages from `thread_id` into a new thread, if the user has access
   """
-  @spec clone_thread(binary, User.t) :: thread_resp
-  def clone_thread(thread_id, %User{} = user) do
+  @spec clone_thread(integer | nil, binary, User.t) :: thread_resp
+  def clone_thread(seq \\ nil, thread_id, %User{} = user) do
     start_transaction()
     |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:clone, fn %{thread: thread} ->
@@ -228,6 +228,7 @@ defmodule Console.AI.Chat do
     end)
     |> add_operation(:chats, fn %{thread: thread} ->
       Chat.for_thread(thread_id)
+      |> Chat.before(seq)
       |> Repo.all()
       |> Enum.map(&Console.mapify/1)
       |> save_messages(thread.id, user)

@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   Dispatch,
+  SetStateAction,
 } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -72,7 +73,8 @@ export interface MoreMenuItem {
 }
 
 export interface HeaderContext {
-  setHeaderContent: Dispatch<ReactNode>
+  setHeaderContent: Dispatch<SetStateAction<ReactNode>>
+  setHeaderAction?: Dispatch<SetStateAction<ReactNode>>
   setMoreMenuItems?: Dispatch<Array<MoreMenuItem>>
   menuKey?: string
   setMenuKey?: Dispatch<string>
@@ -111,6 +113,25 @@ export const useSetPageHeaderContent = (headerContent?: ReactNode) => {
       setHeaderContent?.(null)
     }
   }, [setHeaderContent, headerContent])
+}
+
+export const useSetPageHeaderAction = (action?: ReactNode) => {
+  const ctx = useContext(PageHeaderContext)
+
+  if (!ctx) {
+    console.warn(
+      'useSetPageHeaderAction() must be used within a PageHeaderContext'
+    )
+  }
+  const { setHeaderAction } = ctx || {}
+
+  useLayoutEffect(() => {
+    setHeaderAction?.(action)
+
+    return () => {
+      setHeaderAction?.(null)
+    }
+  }, [setHeaderAction, action])
 }
 
 export const CD_BASE_CRUMBS = [
@@ -202,9 +223,10 @@ export default function ContinuousDeployment() {
     []
   )
   const pageHeaderContext = useMemo(
-    () => ({
-      setHeaderContent,
-    }),
+    () =>
+      ({
+        setHeaderContent,
+      }) as HeaderContext,
     []
   )
 

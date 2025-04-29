@@ -44,26 +44,36 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
-  def pr(%{"pull_request" => %{"html_url" => url} = pr}) do
+  def pr(%{"pull_request" => %{"html_url" => url} = pr} = event) do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["head"]["ref"],
       title: pr["title"],
-      body: pr["body"]
+      body: pr["body"],
+      commit_sha: pr["head"]["sha"]
     }, pr_associations(pr_content(pr)))
+    |> add_approver(event)
     |> Console.drop_nils()
 
     {:ok, url, attrs}
   end
   def pr(_), do: :ignore
 
-  def review(conn, %PullRequest{url: url}, body) do
+  defp add_approver(attrs, %{"review" => %{"state" => "approved", "user" => u}}),
+    do: Map.put(attrs, :approver, u["email"] || u["login"])
+  defp add_approver(attrs, _), do: attrs
+
+  def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, owner, repo, number} <- get_pull_id(url),
-         {:ok, client} <- client(conn) do
-      case Tentacat.Pulls.Reviews.create(client, owner, repo, number, %{
-            "body" => filter_ansi(body),
-            "event" => "COMMENT"
-      }) do
+         {:ok, client} <- client(conn),
+         body = %{"body" => filter_ansi(body), "event" => "COMMENT"} do
+
+      case pr do
+        %PullRequest{comment_id: id} when is_binary(id) ->
+          Tentacat.put("repos/#{owner}/#{repo}/pulls/#{number}/reviews/#{id}", client, Map.delete(body, "event"))
+        _ -> Tentacat.Pulls.Reviews.create(client, owner, repo, number, body)
+      end
+      |> case do
         {_, %{"id" => id}, _} -> {:ok, "#{id}"}
         {_, body, _} -> {:error, "failed to create review comment: #{Jason.encode!(body)}"}
       end
@@ -80,6 +90,12 @@ defmodule Console.Deployments.Pr.Impl.Github do
       err ->
         Logger.info("failed to list pr files #{inspect(err)}")
         err
+    end
+  end
+
+  def pr_info(url) do
+    with {:ok, owner, repo, number} <- get_pull_id(url) do
+      {:ok, %{owner: owner, repo: repo, number: number}}
     end
   end
 

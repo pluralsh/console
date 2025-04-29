@@ -12,25 +12,27 @@ import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { useTheme } from 'styled-components'
 import { ApolloError, FetchResult, ServerError } from '@apollo/client'
 
-import { Confirm } from '../../utils/Confirm'
+import { Confirm, ConfirmProps } from '../../utils/Confirm'
 import {
   useNamespacedResourceDeleteMutation,
   useResourceDeleteMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
-import { Resource } from './types'
+import { Kind, Resource } from './types'
 
 interface DeleteResourceProps {
   resource: Resource
   refetch?: Nullable<
     (variables?: Partial<QueryHookOptions>) => Promise<unknown> | void
   >
+  customResource?: boolean
 }
 
 export default function DeleteResourceButton({
   resource,
   refetch,
+  customResource = false,
 }: DeleteResourceProps): ReactNode {
   const [open, setOpen] = useState(false)
 
@@ -49,6 +51,11 @@ export default function DeleteResourceButton({
           setOpen={setOpen}
           resource={resource}
           refetch={refetch}
+          confirmationEnabled={
+            customResource ||
+            resource.typeMeta.kind === Kind.CustomResourceDefinition
+          }
+          confirmationText={resource.objectMeta.name}
         />
       )}
     </div>
@@ -84,7 +91,23 @@ function toServerError(data: FetchResult): ServerError {
   } as ServerError
 }
 
-function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
+interface DeleteResourceModalProps
+  extends Pick<ConfirmProps, 'confirmationEnabled' | 'confirmationText'> {
+  open: boolean
+  setOpen: (open: boolean) => void
+  resource: Resource
+  refetch?: Nullable<
+    (variables?: Partial<QueryHookOptions>) => Promise<unknown> | void
+  >
+}
+
+function DeleteResourceModal({
+  open,
+  setOpen,
+  resource,
+  refetch,
+  ...modalProps
+}: DeleteResourceModalProps): ReactNode {
   const theme = useTheme()
   const [deleting, setDeleting] = useState(false)
   const [deleteNow, setDeleteNow] = useState(false)
@@ -115,11 +138,13 @@ function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
     },
     onError: () => setDeleting(false),
     onCompleted: () =>
-      refetch?.({
-        fetchPolicy: 'no-cache',
-      })
-        .then(() => setOpen(false))
-        .finally(() => setDeleting(false)),
+      refetch
+        ? refetch({
+            fetchPolicy: 'no-cache',
+          })!
+            .then(() => setOpen(false))
+            .finally(() => setDeleting(false))
+        : undefined,
   })
 
   return (
@@ -174,6 +199,7 @@ function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
           </Checkbox>
         </div>
       }
+      {...modalProps}
     />
   )
 }

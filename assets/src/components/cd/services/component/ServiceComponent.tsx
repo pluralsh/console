@@ -21,24 +21,19 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
-import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 import { isNonNullable } from 'utils/isNonNullable'
+import { getServiceDetailsBreadcrumbs } from '../service/ServiceDetails'
 
 const getServiceComponentBreadcrumbs = ({
-  service,
   cluster,
+  service,
   componentName,
   componentId,
-  ...props
-}: Parameters<typeof getServiceComponentsBreadcrumbs>[0] & {
+}: Parameters<typeof getServiceDetailsBreadcrumbs>[0] & {
   componentName: string | null | undefined
   componentId: string | null | undefined
 }) => [
-  ...getServiceComponentsBreadcrumbs({
-    cluster,
-    service,
-    ...props,
-  }),
+  ...getServiceDetailsBreadcrumbs({ cluster, service, tab: 'components' }),
   {
     label: componentName || componentId || '',
     url: getServiceComponentPath({

@@ -1,5 +1,5 @@
 import { Card } from '@pluralsh/design-system'
-import { ComponentProps, ReactNode, use } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 import { Handle, NodeProps, Position } from '@xyflow/react'
 import styled, { useTheme } from 'styled-components'
 
@@ -8,8 +8,6 @@ import isEmpty from 'lodash/isEmpty'
 import { useNodeEdges } from '../../hooks/reactFlowHooks'
 
 import { isVisible } from './edges'
-import { GraphLayoutCtx } from './graph'
-import { DagreDirection } from 'components/cd/pipelines/utils/nodeLayouter'
 
 const HANDLE_SIZE = 8
 
@@ -46,7 +44,6 @@ export function NodeBase({
 } & ComponentProps<typeof NodeBaseCardSC>) {
   const theme = useTheme()
   const { incomers, outgoers } = useNodeEdges(id)
-  const { rankdir = 'LR' } = use(GraphLayoutCtx) ?? {}
 
   return (
     <>
@@ -64,30 +61,17 @@ export function NodeBase({
           type="target"
           isConnectable={false}
           $isConnected={!isEmpty(incomers.filter(isVisible))}
-          position={directionToTargetPosition[rankdir]}
+          position={Position.Left}
         />
         {children}
         <NodeHandleSC
           type="source"
           isConnectable={false}
           $isConnected={!isEmpty(outgoers.filter(isVisible))}
-          position={directionToSourcePosition[rankdir]}
+          position={Position.Right}
         />
       </NodeBaseCardSC>
       {additionalContent}
     </>
   )
-}
-
-export const directionToTargetPosition: Record<DagreDirection, Position> = {
-  LR: Position.Left,
-  TB: Position.Top,
-  RL: Position.Right,
-  BT: Position.Bottom,
-}
-export const directionToSourcePosition: Record<DagreDirection, Position> = {
-  LR: Position.Right,
-  TB: Position.Bottom,
-  RL: Position.Left,
-  BT: Position.Top,
 }

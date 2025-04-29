@@ -937,6 +937,22 @@ defmodule Console.Factory do
     }
   end
 
+  def preview_environment_template_factory do
+    %Schema.PreviewEnvironmentTemplate{
+      name: sequence(:preview_environment_template, & "preview-env-template-#{&1}"),
+      flow: build(:flow),
+      reference_service: build(:service)
+    }
+  end
+
+  def preview_environment_instance_factory do
+    %Schema.PreviewEnvironmentInstance{
+      template: build(:preview_environment_template),
+      service: build(:service),
+      pull_request: build(:pull_request)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

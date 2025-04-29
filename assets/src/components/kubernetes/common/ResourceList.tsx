@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useMemo } from 'react'
+import { Dispatch, ReactElement, useCallback, useEffect, useMemo } from 'react'
 import type {
   QueryHookOptions,
   QueryResult,
@@ -17,9 +17,9 @@ import { useCluster } from '../Cluster'
 import { useDataSelect } from './DataSelect'
 import {
   QueryName,
-  ResourceListItemsKey,
-  ResourceList as ResourceListT,
   Resource as ResourceT,
+  ResourceList as ResourceListT,
+  ResourceListItemsKey,
   ResourceVariables,
   toKind,
 } from './types'
@@ -50,6 +50,7 @@ interface ResourceListProps<
   disableOnRowClick?: boolean
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+  setRefetch?: Dispatch<Dispatch<(variables?: Partial<TVariables>) => unknown>>
 }
 
 export function ResourceList<
@@ -69,6 +70,7 @@ export function ResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
+  setRefetch,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
@@ -109,6 +111,10 @@ export function ResourceList<
   }, [fetchMore, hasNextPage, page, queryName, itemsKey])
 
   useEffect(() => {
+    setRefetch?.(() => refetch)
+  }, [refetch, setRefetch])
+
+  useEffect(() => {
     setNamespaced(namespaced)
   }, [setNamespaced, namespaced])
 
@@ -125,7 +131,7 @@ export function ResourceList<
         isFetchingNextPage={loading}
         reactTableOptions={{
           ...reactTableOptions,
-          ...{ meta: { ...reactTableOptions.meta, refetch } },
+          ...{ meta: { ...reactTableOptions.meta, refetch, customResource } },
         }}
         virtualizeRows
         onRowClick={

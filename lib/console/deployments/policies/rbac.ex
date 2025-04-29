@@ -35,7 +35,8 @@ defmodule Console.Deployments.Policies.Rbac do
     ClusterISOImage,
     Flow,
     McpServer,
-    OIDCProvider
+    OIDCProvider,
+    PreviewEnvironmentTemplate
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -129,6 +130,8 @@ defmodule Console.Deployments.Policies.Rbac do
       _ -> Settings.fetch()
     end)
   end
+  def evaluate(%PreviewEnvironmentTemplate{} = template, %User{} = user, action),
+    do: recurse(template, user, action, & &1.flow)
   def evaluate(%Catalog{} = catalog, %User{} = user, action),
     do: recurse(catalog, user, action, & &1.project)
   def evaluate(%User{} = sa, %User{} = user, :assume), do: recurse(sa, user, :assume)
@@ -195,6 +198,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(pcr, run: [stack: @stack_preloads])
   def preload(%User{} = user), do: Repo.preload(user, [:assume_bindings])
   def preload(%SharedSecret{} = share), do: Repo.preload(share, [:notification_bindings])
+  def preload(%PreviewEnvironmentTemplate{} = template),
+    do: Repo.preload(template, [flow: @top_preloads])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

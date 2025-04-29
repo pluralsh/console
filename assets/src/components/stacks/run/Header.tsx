@@ -1,5 +1,4 @@
 import {
-  AppIcon,
   Button,
   Callout,
   GitCommitIcon,
@@ -8,17 +7,17 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import { ReactNode, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useTheme } from 'styled-components'
-
-import { isEmpty } from 'lodash'
 
 import {
   ServiceErrorsChip,
   ServiceErrorsModal,
 } from 'components/cd/services/ServicesTableErrors'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
+
+import { isEmpty } from 'lodash'
+import { ReactNode, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import {
   StackRunDetailsFragment,
   StackStatus,
@@ -27,18 +26,18 @@ import {
   useRestartStackRunMutation,
 } from '../../../generated/graphql'
 import {
+  getStackRunsAbsPath,
   STACK_RUNS_INSIGHTS_REL_PATH,
   STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
-  getStackRunsAbsPath,
   STACK_RUNS_VIOLATIONS_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { TRUNCATE } from '../../utils/truncate'
-import { StackTypeIcon } from '../common/StackTypeIcon'
+import StackRunIcon from '../common/StackRunIcon.tsx'
 
 function getDirectory(stackRun: StackRunDetailsFragment) {
   return [
@@ -106,13 +105,9 @@ export default function StackRunHeader({
           borderBottom: theme.borders.default,
         }}
       >
-        <AppIcon
-          icon={
-            <StackTypeIcon
-              stackType={stackRun.type}
-              size={36}
-            />
-          }
+        <StackRunIcon
+          status={stackRun.status}
+          deleting={stackRun.stack?.deleteRun?.id === stackRun.id}
           size="small"
         />
         <StackRunHeaderInfo stackRun={stackRun} />

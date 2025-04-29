@@ -43,6 +43,19 @@ mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
     )
 }
 
+mutation DeployFromInput($input: deployment_AppDeploymentFromFileSpec_Input!) {
+  handleDeployFromFile(input: $input)
+    @rest(
+      type: "Void"
+      path: "appdeploymentfromfile"
+      method: "POST"
+      bodyKey: "input"
+    ) {
+    name
+    error
+  }
+}
+
 mutation ResourceScale(
   $kind: String!
   $namespace: String!
