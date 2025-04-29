@@ -8,6 +8,7 @@ import { DeploymentsCard } from './deployments/DeploymentsCard'
 import { PrCard } from './pullrequests/PrCard'
 import { ServiceCatalogs } from './ServiceCatalog.tsx'
 import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
+import { GettingStarted } from './GettingStarted.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -18,34 +19,37 @@ export default function Home() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ResponsivePageFullWidth maxContentWidth={1440}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-          paddingBottom: theme.spacing.large,
-        }}
-      >
-        <ClusterOverviewCard />
-        <ServiceCatalogs />
-        <AiThreads />
-        {isManager && <ConstraintViolationsCard />}
+    <>
+      <GettingStarted />
+      <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{
             display: 'flex',
             flexDirection: 'column',
             gap: theme.spacing.large,
-
-            '@media (min-width: 1168px)': {
-              flexDirection: 'row',
-            },
+            paddingBottom: theme.spacing.large,
           }}
         >
-          <PrCard />
-          <DeploymentsCard />
+          <ClusterOverviewCard />
+          <ServiceCatalogs />
+          <AiThreads />
+          {isManager && <ConstraintViolationsCard />}
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+
+              '@media (min-width: 1168px)': {
+                flexDirection: 'row',
+              },
+            }}
+          >
+            <PrCard />
+            <DeploymentsCard />
+          </div>
         </div>
-      </div>
-    </ResponsivePageFullWidth>
+      </ResponsivePageFullWidth>
+    </>
   )
 }
