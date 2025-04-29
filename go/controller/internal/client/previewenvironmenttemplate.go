@@ -3,12 +3,12 @@ package client
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	console "github.com/pluralsh/console/go/client"
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) DeletePreviewEnvironmentTemplate(ctx context.Context, id string) error {
