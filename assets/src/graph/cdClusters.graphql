@@ -218,6 +218,9 @@ fragment ClustersRow on Cluster {
   insight {
     ...AiInsightSummary
   }
+  deprecatedCustomResources {
+    ...DeprecatedCustomResource
+  }
 }
 
 fragment ClusterUpgradePlan on ClusterUpgradePlan {
@@ -297,6 +300,15 @@ fragment Cluster on Cluster {
       }
     }
   }
+}
+
+fragment DeprecatedCustomResource on DeprecatedCustomResource {
+  name
+  group
+  kind
+  namespace
+  version
+  nextVersion
 }
 
 fragment CloudAddon on CloudAddon {
