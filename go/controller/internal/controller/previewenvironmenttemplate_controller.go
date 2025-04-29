@@ -118,7 +118,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 
 	// If object is not being deleted, do nothing
 	if previewEnvTmpl.GetDeletionTimestamp().IsZero() {
-		return &ctrl.Result{}
+		return nil
 	}
 
 	// if object is being deleted but there is no console ID available to delete the resource
