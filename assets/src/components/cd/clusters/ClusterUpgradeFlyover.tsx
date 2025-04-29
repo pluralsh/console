@@ -18,7 +18,6 @@ import {
 import {
   ClusterDistro,
   ClustersRowFragment,
-  DeprecatedCustomResourceFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
   useRuntimeServicesQuery,
@@ -374,37 +373,27 @@ function FlyoverContent({
       <div css={{ ...theme.partials.text.body1Bold }}>
         Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
       </div>
-      <Table
-        data={
-          [
-            {
-              name: 'agents.agent.k8s.elastic.com',
-              group: 'agent.k8s.elastic.co',
-              kind: 'Agent',
-              namespace: 'infra',
-              version: 'v1beta1',
-              nextVersion: 'v1beta2',
-            },
-            {
-              name: 'agents.agent.k8s.elastic.com',
-              group: 'agent.k8s.elastic.co',
-              kind: 'Agent',
-              namespace: 'infra',
-              version: 'v1beta1',
-              nextVersion: 'v1beta2',
-            },
-            {
-              name: 'agents.agent.k8s.elastic.com',
-              group: 'agent.k8s.elastic.co',
-              kind: 'Agent',
-              namespace: 'infra',
-              version: 'v1beta1',
-              nextVersion: 'v1beta2',
-            },
-          ] as DeprecatedCustomResourceFragment[]
-        }
-        columns={clusterDeprecatedCustomResourcesColumns}
-      />
+      <Accordion
+        type="single"
+        fillLevel={1}
+      >
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={cluster?.deprecatedCustomResources?.length === 0}
+              icon={ChecklistIcon}
+              title="Deprecated custom resources"
+              subtitle="Ensure all custom resources are updated to the version required for upgrade"
+            />
+          }
+        >
+          <Table
+            data={cluster?.deprecatedCustomResources ?? []}
+            columns={clusterDeprecatedCustomResourcesColumns}
+          />
+        </AccordionItem>
+      </Accordion>
     </div>
   )
 }
