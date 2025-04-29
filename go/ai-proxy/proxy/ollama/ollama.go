@@ -22,7 +22,7 @@ const (
 )
 
 type OllamaProxy struct {
-	toolRegistry *ToolRegistry
+	toolRegistry toolRegistry
 	ollamaClient *ollamaapi.Client
 	api.OpenAIProxy
 }
@@ -33,19 +33,19 @@ type toolEntry struct {
 	callId string
 }
 
-type ToolRegistry struct {
+type toolRegistry struct {
 	entries   map[string]toolEntry
 	nextIndex int
 }
 
-func NewToolRegistry() *ToolRegistry {
-	return &ToolRegistry{
+func newToolRegistry() toolRegistry {
+	return toolRegistry{
 		entries:   make(map[string]toolEntry),
 		nextIndex: 0,
 	}
 }
 
-func (r *ToolRegistry) Register(tool ollamaapi.ToolCall) {
+func (r toolRegistry) Register(tool ollamaapi.ToolCall) {
 	name := tool.Function.Name
 	if _, exists := r.entries[name]; !exists {
 		r.entries[name] = toolEntry{
@@ -61,7 +61,7 @@ func (r *ToolRegistry) Register(tool ollamaapi.ToolCall) {
 	}
 }
 
-func (r *ToolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
+func (r toolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
 	entry, exists := r.entries[name]
 	if !exists {
 		return ollamaapi.ToolCall{}, -1, "", false
@@ -69,14 +69,14 @@ func (r *ToolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) 
 	return entry.tool, entry.index, entry.callId, true
 }
 
-func (r *ToolRegistry) GetIndex(name string) int {
+func (r toolRegistry) GetIndex(name string) int {
 	if entry, exists := r.entries[name]; exists {
 		return entry.index
 	}
 	return -1
 }
 
-func (r *ToolRegistry) GetToolId(name string) string {
+func (r toolRegistry) GetToolId(name string) string {
 	if entry, exists := r.entries[name]; exists {
 		return entry.callId
 	}
@@ -90,7 +90,7 @@ func NewOllamaProxy(host string) (api.OpenAIProxy, error) {
 	}
 	ollamaClient := ollamaapi.NewClient(parsedUrl, http.DefaultClient)
 
-	toolRegistry := NewToolRegistry()
+	toolRegistry := newToolRegistry()
 	return &OllamaProxy{
 		toolRegistry: toolRegistry,
 		ollamaClient: ollamaClient,
