@@ -12,6 +12,7 @@ WORKDIR /workspace
 # Expecting to copy go.mod and if present go.sum.
 COPY go.* ./
 RUN go mod download
+RUN go mod tidy
 
 COPY *.go ./
 COPY api ./api
