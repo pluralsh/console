@@ -388,10 +388,19 @@ function FlyoverContent({
             />
           }
         >
-          <Table
-            data={cluster?.deprecatedCustomResources ?? []}
-            columns={clusterDeprecatedCustomResourcesColumns}
-          />
+          {!isEmpty(cluster?.deprecatedCustomResources) ? (
+            <Table
+              flush
+              data={cluster?.deprecatedCustomResources ?? []}
+              columns={clusterDeprecatedCustomResourcesColumns}
+              css={{
+                maxHeight: 258,
+                height: '100%',
+              }}
+            />
+          ) : (
+            <EmptyState description="You do not have any deprecated custom resources." />
+          )}
         </AccordionItem>
       </Accordion>
     </div>
