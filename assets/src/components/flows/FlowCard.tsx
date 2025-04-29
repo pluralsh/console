@@ -109,6 +109,7 @@ export function FlowCard({
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   padding: theme.spacing.medium,
   gap: theme.spacing.small,
 }))

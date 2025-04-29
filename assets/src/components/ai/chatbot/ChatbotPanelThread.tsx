@@ -48,6 +48,8 @@ export function ChatbotPanelThread({
   shouldUseMCP,
   showMcpServers,
   setShowMcpServers,
+  showExamplePrompts = false,
+  setShowExamplePrompts,
 }: {
   currentThread: ChatThreadTinyFragment
   fullscreen: boolean
@@ -55,6 +57,8 @@ export function ChatbotPanelThread({
   shouldUseMCP: boolean
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
+  showExamplePrompts: boolean
+  setShowExamplePrompts: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -91,8 +95,6 @@ export function ChatbotPanelThread({
   })
 
   const messages = mapExistingNodes(data?.chatThread?.chats)
-
-  const [showPrompts, setShowPrompts] = useState<boolean>(isEmpty(messages))
 
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
@@ -203,9 +205,9 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
-        {showPrompts && (
+        {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
-            setShowPrompts={setShowPrompts}
+            setShowPrompts={setShowExamplePrompts}
             sendMessage={sendMessage}
           />
         )}
@@ -218,8 +220,8 @@ export function ChatbotPanelThread({
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
-        showPrompts={showPrompts}
-        setShowPrompts={setShowPrompts}
+        showPrompts={showExamplePrompts}
+        setShowPrompts={setShowExamplePrompts}
       />
     </>
   )

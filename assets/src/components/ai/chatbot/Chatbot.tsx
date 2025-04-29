@@ -104,6 +104,7 @@ function ChatbotPanelInner({
   const theme = useTheme()
   const { pathname } = useLocation()
   const [showMcpServers, setShowMcpServers] = useState(false)
+  const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const threadsQuery = useFetchPaginatedData({
     skip: !!currentThread || !!currentInsight,
@@ -118,6 +119,8 @@ function ChatbotPanelInner({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-first',
     pollInterval: POLL_INTERVAL,
+    onCompleted: (data) =>
+      setShowPrompts(isEmpty(data.chatThread?.chats?.edges)),
   })
   const shouldUseMCP = !!currentThread?.flow
   const tools =
@@ -172,6 +175,8 @@ function ChatbotPanelInner({
               shouldUseMCP={shouldUseMCP}
               showMcpServers={showMcpServers}
               setShowMcpServers={setShowMcpServers}
+              showExamplePrompts={showPrompts}
+              setShowExamplePrompts={setShowPrompts}
             />
           ) : currentInsight ? (
             <ChatbotPanelInsight

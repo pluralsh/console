@@ -94,7 +94,7 @@ const cols = [
       return (
         <StackedText
           first={getValue()}
-          second={formatDateTime(row.original.updatedAt, 'M/D/YYYY h:ma')}
+          second={formatDateTime(row.original.updatedAt, 'M/D/YYYY h:mma')}
         />
       )
     },
