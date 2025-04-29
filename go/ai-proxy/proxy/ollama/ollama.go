@@ -45,7 +45,7 @@ func newToolRegistry() toolRegistry {
 	}
 }
 
-func (r toolRegistry) Register(tool ollamaapi.ToolCall) {
+func (r *toolRegistry) Register(tool ollamaapi.ToolCall) {
 	name := tool.Function.Name
 	if _, exists := r.entries[name]; !exists {
 		r.entries[name] = toolEntry{
@@ -55,13 +55,15 @@ func (r toolRegistry) Register(tool ollamaapi.ToolCall) {
 		}
 		r.nextIndex++
 	} else {
-		entry := r.entries[name]
-		entry.tool = tool
-		r.entries[name] = entry
+		r.entries[name] = toolEntry{
+			tool:   tool,
+			index:  r.entries[name].index,
+			callId: r.entries[name].callId,
+		}
 	}
 }
 
-func (r toolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
+func (r *toolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
 	entry, exists := r.entries[name]
 	if !exists {
 		return ollamaapi.ToolCall{}, -1, "", false
@@ -69,14 +71,14 @@ func (r toolRegistry) Get(name string) (ollamaapi.ToolCall, int, string, bool) {
 	return entry.tool, entry.index, entry.callId, true
 }
 
-func (r toolRegistry) GetIndex(name string) int {
+func (r *toolRegistry) GetIndex(name string) int {
 	if entry, exists := r.entries[name]; exists {
 		return entry.index
 	}
 	return -1
 }
 
-func (r toolRegistry) GetToolId(name string) string {
+func (r *toolRegistry) GetToolId(name string) string {
 	if entry, exists := r.entries[name]; exists {
 		return entry.callId
 	}
