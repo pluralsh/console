@@ -69,3 +69,12 @@ func (in *PreviewEnvironmentTemplate) GetName() string {
 func (in *PreviewEnvironmentTemplate) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
+
+func (in *PreviewEnvironmentTemplate) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(in.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
+}

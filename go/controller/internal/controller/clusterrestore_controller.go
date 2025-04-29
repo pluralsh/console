@@ -127,7 +127,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 	if restore.Spec.HasBackupID() {
 		backupID = restore.Spec.GetBackupID()
 	} else {
-		helper := utils.NewConsoleHelper(ctx, r.ConsoleClient, r.Client)
+		helper := utils.NewConsoleHelper(ctx, r.Client)
 		clusterID, err := helper.IDFromRef(restore.Spec.BackupClusterRef, &v1alpha1.Cluster{})
 		if err != nil {
 			return nil, nil, err

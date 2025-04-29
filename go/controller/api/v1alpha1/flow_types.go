@@ -78,6 +78,16 @@ func (in *Flow) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+// ConsoleID implements PluralResource interface
+func (c *Flow) ConsoleID() *string {
+	return c.Status.ID
+}
+
+// ConsoleName implements PluralResource interface
+func (c *Flow) ConsoleName() string {
+	return c.FlowName()
+}
+
 func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpServerAssociationAttributes) console.FlowAttributes {
 	attrs := console.FlowAttributes{
 		Name:               in.FlowName(),
