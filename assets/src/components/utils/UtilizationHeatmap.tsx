@@ -38,7 +38,7 @@ export function UtilizationHeatmap({
   )
 
   const getColor = ({ value }: { value: number }) => {
-    const normalizedValue = (value - minValue) / (maxValue - minValue)
+    const normalizedValue = (value - minValue) / (maxValue - minValue) || 0
     return chroma(baseColor).set('hsl.l', 0.8 - normalizedValue / 6)
   }
 
