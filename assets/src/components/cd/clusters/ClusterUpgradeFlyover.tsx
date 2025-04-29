@@ -18,6 +18,7 @@ import {
 import {
   ClusterDistro,
   ClustersRowFragment,
+  DeprecatedCustomResourceFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
   useRuntimeServicesQuery,
@@ -45,6 +46,7 @@ import {
 import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
 import CloudAddons from './runtime/CloudAddons.tsx'
 import { produce } from 'immer'
+import { clusterDeprecatedCustomResourcesColumns } from './clusterDeprecatedCustomResourcesColumns.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -370,8 +372,39 @@ function FlyoverContent({
         </AccordionItem>
       </Accordion>
       <div css={{ ...theme.partials.text.body1Bold }}>
-        Warnings ({numUpgradePlans - numUpgrades})
+        Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
       </div>
+      <Table
+        data={
+          [
+            {
+              name: 'agents.agent.k8s.elastic.com',
+              group: 'agent.k8s.elastic.co',
+              kind: 'Agent',
+              namespace: 'infra',
+              version: 'v1beta1',
+              nextVersion: 'v1beta2',
+            },
+            {
+              name: 'agents.agent.k8s.elastic.com',
+              group: 'agent.k8s.elastic.co',
+              kind: 'Agent',
+              namespace: 'infra',
+              version: 'v1beta1',
+              nextVersion: 'v1beta2',
+            },
+            {
+              name: 'agents.agent.k8s.elastic.com',
+              group: 'agent.k8s.elastic.co',
+              kind: 'Agent',
+              namespace: 'infra',
+              version: 'v1beta1',
+              nextVersion: 'v1beta2',
+            },
+          ] as DeprecatedCustomResourceFragment[]
+        }
+        columns={clusterDeprecatedCustomResourcesColumns}
+      />
     </div>
   )
 }
