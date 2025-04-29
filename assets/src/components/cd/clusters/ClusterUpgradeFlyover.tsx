@@ -91,6 +91,12 @@ function FlyoverContent({
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
+  const numUpgradePlans = 3
+  let numUpgrades = numUpgradePlans
+  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
+  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
+  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+
   const kubeVersion = getClusterKubeVersion(cluster)
   const { data, error } = useRuntimeServicesQuery({
     variables: {
@@ -148,6 +154,9 @@ function FlyoverContent({
           meta: { refetch, setError, data },
         }}
       />
+      <div css={{ ...theme.partials.text.body1Bold }}>
+        Upgrade blockers ({numUpgradePlans - numUpgrades})
+      </div>
       <Accordion
         type="single"
         fillLevel={1}
@@ -360,6 +369,9 @@ function FlyoverContent({
           )}
         </AccordionItem>
       </Accordion>
+      <div css={{ ...theme.partials.text.body1Bold }}>
+        Warnings ({numUpgradePlans - numUpgrades})
+      </div>
     </div>
   )
 }
