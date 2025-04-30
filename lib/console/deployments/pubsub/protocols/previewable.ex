@@ -37,6 +37,11 @@ defimpl Console.Deployments.PubSub.Previewable, for: [
 ] do
   alias Console.Deployments.Flows.Preview
 
-  def reconcile(%@for{item: svc}),
-    do: Preview.sync_service(svc)
+  def reconcile(%@for{item: svc}) do
+    fresh = Timex.now() |> Timex.shift(seconds: -10)
+    case Timex.after?(svc.updated_at || Timex.now(), fresh) do
+      true -> Preview.sync_service(svc)
+      false -> :ok
+    end
+  end
 end

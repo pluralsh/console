@@ -190,6 +190,8 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :logging,               :logging_settings, description: "settings for connections to log aggregation datastores"
     field :mgmt_repo,             :string, description: "the root repo you used to run `plural up`"
 
+    field :onboarded, :boolean, description: "whether the console has been onboarded and getting started pages need to be shown"
+
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
 
@@ -367,6 +369,12 @@ defmodule Console.GraphQl.Deployments.Settings do
       arg :id,         non_null(:id)
 
       resolve &Deployments.delete_project/2
+    end
+
+    field :dismiss_onboarding, :deployment_settings do
+      middleware Authenticated
+
+      resolve &Deployments.dismiss_onboarding/2
     end
   end
 end

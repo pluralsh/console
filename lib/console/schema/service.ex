@@ -22,6 +22,7 @@ defmodule Console.Schema.Service do
     AiInsight,
     ServiceVuln,
     PreviewEnvironmentInstance,
+    PreviewEnvironmentTemplate,
     ClusterScalingRecommendation,
     Flow
   }
@@ -154,6 +155,7 @@ defmodule Console.Schema.Service do
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
     has_many :configuration, through: [:revision, :configuration]
+    has_many :preview_templates, PreviewEnvironmentTemplate, foreign_key: :reference_service_id
     has_many :scaling_recommendations, ClusterScalingRecommendation, foreign_key: :service_id
     has_many :dependencies, ServiceDependency,
       foreign_key: :service_id,

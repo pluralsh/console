@@ -51,6 +51,7 @@ defmodule Console.Schema.DeploymentSettings do
     field :create_policy_id, :binary_id
     field :git_policy_id,    :binary_id
     field :mgmt_repo,        :string
+    field :onboarded,        :boolean, default: false
 
     field :agent_helm_values, EncryptedString
 
@@ -186,6 +187,11 @@ defmodule Console.Schema.DeploymentSettings do
   @smtp ~w(sender port server user password ssl)a
 
   def smtp_config(), do: @smtp
+
+  def onboarded_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(onboarded)a)
+  end
 
   @valid ~w(name enabled mgmt_repo agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
 

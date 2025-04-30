@@ -26,8 +26,19 @@ defmodule Console.Schema.PreviewEnvironmentInstance do
     )
   end
 
+  def for_service(query \\ __MODULE__, id) do
+    from(i in query,
+      join: t in assoc(i, :template),
+      where: t.reference_service_id == ^id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(i in query, order_by: ^order)
+  end
+
+  def preloaded(query \\ __MODULE__, preloads \\ [:service, :pull_request, template: [:reference_service, :template]]) do
+    from(i in query, preload: ^preloads)
   end
 
   @valid ~w(template_id service_id pull_request_id)a
