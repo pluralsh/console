@@ -1403,7 +1403,8 @@ func (t *MCPServerFragment) GetConfirm() *bool {
 }
 
 type KustomizeFragment struct {
-	Path string "json:\"path\" graphql:\"path\""
+	Path       string "json:\"path\" graphql:\"path\""
+	EnableHelm *bool  "json:\"enableHelm,omitempty\" graphql:\"enableHelm\""
 }
 
 func (t *KustomizeFragment) GetPath() string {
@@ -1411,6 +1412,12 @@ func (t *KustomizeFragment) GetPath() string {
 		t = &KustomizeFragment{}
 	}
 	return t.Path
+}
+func (t *KustomizeFragment) GetEnableHelm() *bool {
+	if t == nil {
+		t = &KustomizeFragment{}
+	}
+	return t.EnableHelm
 }
 
 type ServiceDeploymentBaseFragment struct {
@@ -17398,6 +17405,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -17581,6 +17589,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -17780,6 +17789,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -17898,6 +17908,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18017,6 +18028,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18225,6 +18237,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18410,6 +18423,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18657,6 +18671,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18841,6 +18856,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -18991,6 +19007,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -19109,6 +19126,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -19173,6 +19191,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -19265,6 +19284,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -19465,6 +19485,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -19943,6 +19964,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20131,6 +20153,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20219,6 +20242,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20314,6 +20338,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20509,6 +20534,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20697,6 +20723,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20786,6 +20813,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20883,6 +20911,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -20981,6 +21010,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21077,6 +21107,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21176,6 +21207,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21540,6 +21572,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21842,6 +21875,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21908,6 +21942,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -21986,6 +22021,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -22205,6 +22241,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -22637,6 +22674,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -22824,6 +22862,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -25056,6 +25095,7 @@ fragment HelmSpecFragment on HelmSpec {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment SyncConfigFragment on SyncConfig {
 	createNamespace
@@ -25138,6 +25178,7 @@ fragment HelmSpecFragment on HelmSpec {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment SyncConfigFragment on SyncConfig {
 	createNamespace
@@ -25220,6 +25261,7 @@ fragment HelmSpecFragment on HelmSpec {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment SyncConfigFragment on SyncConfig {
 	createNamespace
@@ -25302,6 +25344,7 @@ fragment HelmSpecFragment on HelmSpec {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment SyncConfigFragment on SyncConfig {
 	createNamespace
@@ -26959,6 +27002,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -27614,6 +27658,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 }
 fragment KustomizeFragment on Kustomize {
 	path
+	enableHelm
 }
 fragment GitRefFragment on GitRef {
 	folder
