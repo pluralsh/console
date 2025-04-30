@@ -2906,12 +2906,17 @@ type KubernetesUnstructured struct {
 
 // metadata needed for configuring kustomize
 type Kustomize struct {
+	// the path to the kustomization file to use
 	Path string `json:"path"`
+	// if the kustomization will need to inflate a helm chart
+	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
 
 type KustomizeAttributes struct {
 	// the path to the kustomization file to use
 	Path string `json:"path"`
+	// if the kustomization will need to inflate a helm chart
+	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
 
 type LabelInput struct {

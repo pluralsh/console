@@ -428,7 +428,12 @@ spec:
                   kustomize:
                     description: Kustomize settings for service kustomization
                     properties:
+                      enableHelm:
+                        description: whether to enable helm for this kustomize deployment,
+                          used for inflating helm charts
+                        type: boolean
                       path:
+                        description: The path to the kustomization file to use
                         type: string
                     required:
                     - path

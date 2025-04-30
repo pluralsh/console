@@ -3576,10 +3576,15 @@ export type KubernetesUnstructured = {
 /** metadata needed for configuring kustomize */
 export type Kustomize = {
   __typename?: 'Kustomize';
+  /** if the kustomization will need to inflate a helm chart */
+  enableHelm?: Maybe<Scalars['Boolean']['output']>;
+  /** the path to the kustomization file to use */
   path: Scalars['String']['output'];
 };
 
 export type KustomizeAttributes = {
+  /** if the kustomization will need to inflate a helm chart */
+  enableHelm?: InputMaybe<Scalars['Boolean']['input']>;
   /** the path to the kustomization file to use */
   path: Scalars['String']['input'];
 };
