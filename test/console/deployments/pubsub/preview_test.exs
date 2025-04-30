@@ -154,5 +154,37 @@ defmodule Console.Deployments.PubSub.PreviewTest do
       event = %PubSub.ServiceUpdated{item: service}
       {:ok, "id"} = Preview.handle_event(event)
     end
+
+    test "it can backfill updates on preview template services" do
+      flow = insert(:flow)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow)
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          helm: %{values: """
+            image:
+              tag: {{ commitSha }}
+            """
+          },
+          name: "test-{{ commitSha }}"
+        )
+      )
+      preview_service = insert(:service, namespace: "test-123", name: "test-123", flow: flow)
+      insert(:preview_environment_instance,
+        pull_request: pr,
+        template: template,
+        service: preview_service,
+        status: %{comment_id: "id"}
+      )
+
+      event = %PubSub.ServiceUpdated{item: service}
+      :ok = Preview.handle_event(event)
+
+      %{"image" => %{"tag" => "pr-123"}} = Jason.decode!(refetch(preview_service).helm.values)
+    end
   end
 end

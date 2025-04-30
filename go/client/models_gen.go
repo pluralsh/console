@@ -2075,6 +2075,8 @@ type DeploymentSettings struct {
 	Logging *LoggingSettings `json:"logging,omitempty"`
 	// the root repo you used to run `plural up`
 	MgmtRepo *string `json:"mgmtRepo,omitempty"`
+	// whether the console has been onboarded and getting started pages need to be shown
+	Onboarded *bool `json:"onboarded,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version

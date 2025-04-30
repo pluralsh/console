@@ -50,4 +50,20 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
       assert deleted["name"] == proj.name
     end
   end
+
+  describe "dismissOnboarding" do
+    test "admins can dismiss the onboarding" do
+      settings = deployment_settings()
+      {:ok, %{data: %{"dismissOnboarding" => dismissed}}} = run_query("""
+        mutation dismissOnboarding {
+          dismissOnboarding {
+            onboarded
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert dismissed["onboarded"]
+      assert refetch(settings).onboarded
+    end
+  end
 end

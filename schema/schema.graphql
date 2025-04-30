@@ -904,6 +904,8 @@ type RootMutationType {
 
   deleteProject(id: ID!): Project
 
+  dismissOnboarding: DeploymentSettings
+
   createOidcProvider(type: OidcProviderType!, attributes: OidcProviderAttributes!): OidcProvider
 
   updateOidcProvider(type: OidcProviderType!, id: ID!, attributes: OidcProviderAttributes!): OidcProvider
@@ -1662,6 +1664,9 @@ type DeploymentSettings {
 
   "the root repo you used to run `plural up`"
   mgmtRepo: String
+
+  "whether the console has been onboarded and getting started pages need to be shown"
+  onboarded: Boolean
 
   "The console's expected agent version"
   agentVsn: String!

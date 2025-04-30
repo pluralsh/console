@@ -2556,6 +2556,8 @@ export type DeploymentSettings = {
   /** the root repo you used to run `plural up` */
   mgmtRepo?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  /** whether the console has been onboarded and getting started pages need to be shown */
+  onboarded?: Maybe<Scalars['Boolean']['output']>;
   /** the way we can connect to your prometheus instance */
   prometheusConnection?: Maybe<HttpConnection>;
   /** read policy across all objects */
@@ -6178,6 +6180,7 @@ export type RootMutationType = {
   /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
   detachServiceDeployment?: Maybe<ServiceDeployment>;
   detachStack?: Maybe<InfrastructureStack>;
+  dismissOnboarding?: Maybe<DeploymentSettings>;
   enableDeployments?: Maybe<DeploymentSettings>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;

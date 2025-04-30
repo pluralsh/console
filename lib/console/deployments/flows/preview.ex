@@ -46,10 +46,18 @@ defmodule Console.Deployments.Flows.Preview do
   end
 
   def sync_service(%Service{} = svc) do
-    fresh = Timex.now() |> Timex.shift(seconds: -10)
-    with true <- Timex.after?(svc.updated_at || Timex.now(), fresh),
-         %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} <- Repo.preload(svc, [:preview_instance]),
-      do: post_comment(inst)
+    case Repo.preload(svc, [:preview_instance, :preview_templates]) do
+      %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} ->
+        post_comment(inst)
+      %Service{preview_templates: [_ | _], id: id} ->
+        PreviewEnvironmentInstance.for_service(id)
+        |> PreviewEnvironmentInstance.preloaded()
+        |> PreviewEnvironmentInstance.ordered(asc: :id)
+        |> Repo.stream(method: :keyset)
+        |> Console.throttle()
+        |> Enum.each(&update_instance(&1, &1.pull_request))
+      _ -> :ok
+    end
   end
 
   defp post_comment(%PreviewEnvironmentInstance{} = inst) do
@@ -100,7 +108,7 @@ defmodule Console.Deployments.Flows.Preview do
   defp create_instance(_, _), do: :ok
 
   defp update_instance(
-    %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: svc} = inst,
+    %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,
     %PullRequest{} = pr
   ) do
     with {:ok, attrs} <- build_attributes(pr, tpl),

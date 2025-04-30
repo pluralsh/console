@@ -34,6 +34,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
 
+  def dismiss_onboarding(_, %{context: %{current_user: _user}}), do: Settings.onboarded()
+
   defp fetch_project(%{id: id}) when is_binary(id), do: Settings.get_project!(id)
   defp fetch_project(%{name: name}), do: Settings.get_project_by_name!(name)
 end
