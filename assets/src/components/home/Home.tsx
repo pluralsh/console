@@ -8,7 +8,7 @@ import { DeploymentsCard } from './deployments/DeploymentsCard'
 import { PrCard } from './pullrequests/PrCard'
 import { ServiceCatalogs } from './ServiceCatalog.tsx'
 import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
-import { GettingStarted } from './GettingStarted.tsx'
+import { GettingStartedPopup } from './GettingStarted.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <>
-      <GettingStarted />
+      <GettingStartedPopup />
       <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{

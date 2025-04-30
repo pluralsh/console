@@ -2,7 +2,7 @@ import { Button, Card, ConfettiIcon, Flex } from '@pluralsh/design-system'
 import { Body1BoldP, Body2P } from '../utils/typography/Text.tsx'
 import { useTheme } from 'styled-components'
 
-export function GettingStarted() {
+export function GettingStartedPopup() {
   const theme = useTheme()
 
   return (
@@ -24,12 +24,32 @@ export function GettingStarted() {
           position: 'absolute',
           top: 88,
           transform: 'translateX(-50%)',
-          width: 576,
         }}
       >
         <GettingStartedContent />
       </Card>
     </div>
+  )
+}
+
+export function GettingStartedBlock() {
+  const theme = useTheme()
+
+  return (
+    <Card
+      css={{
+        backgroundColor: theme.colors['fill-one'],
+        border: 'none',
+        borderTop: theme.borders['fill-two'],
+        borderRadius: 0,
+        display: 'flex',
+        flexGrow: 1,
+        justifyContent: 'center',
+        padding: theme.spacing.xxxlarge,
+      }}
+    >
+      <GettingStartedContent />
+    </Card>
   )
 }
 
@@ -43,6 +63,7 @@ export function GettingStartedContent() {
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.medium,
+        width: 576,
       }}
     >
       <ConfettiIcon
