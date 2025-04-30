@@ -15,12 +15,13 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 export default function Home() {
   const theme = useTheme()
   const isManager = useIsManager()
+  const showGettingStarted = true // TODO
 
   useSetBreadcrumbs(breadcrumbs)
 
   return (
     <>
-      <GettingStartedPopup />
+      {showGettingStarted && <GettingStartedPopup />}
       <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{
