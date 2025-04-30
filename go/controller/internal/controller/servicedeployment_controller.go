@@ -86,10 +86,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	if service.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		controllerutil.AddFinalizer(service, ServiceFinalizer)
-	}
-
 	if !service.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, service)
 	}
@@ -147,6 +143,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
+		controllerutil.AddFinalizer(service, ServiceFinalizer)
 		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
