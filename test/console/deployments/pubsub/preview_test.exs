@@ -37,6 +37,42 @@ defmodule Console.Deployments.PubSub.PreviewTest do
       %{service: svc} = Repo.preload(inst, :service)
       assert svc.namespace == "test-pr-123"
       assert svc.name == "test-pr-123"
+      assert svc.repository_id == service.repository_id
+      assert Jason.decode!(svc.helm.values) == %{"image" => %{"tag" => "pr-123"}}
+    end
+
+    test "it will can intelligently merge a helm preview instance" do
+      flow = insert(:flow)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow, helm: %{url: "https://helm.sh/repo", chart: "test", version: "1.0.0"})
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          helm: %{values: """
+            image:
+              tag: {{ commitSha }}
+            """
+          },
+          name: "test-{{ commitSha }}"
+        )
+      )
+
+      event = %PubSub.PullRequestCreated{item: pr}
+      {:ok, inst} = Preview.handle_event(event)
+
+      assert inst.pull_request_id == pr.id
+      assert inst.template_id == template.id
+
+      %{service: svc} = Repo.preload(inst, :service)
+      assert svc.namespace == "test-pr-123"
+      assert svc.name == "test-pr-123"
+      assert svc.repository_id == service.repository_id
+      assert svc.helm.url == "https://helm.sh/repo"
+      assert svc.helm.chart == "test"
+      assert svc.helm.version == "1.0.0"
       assert Jason.decode!(svc.helm.values) == %{"image" => %{"tag" => "pr-123"}}
     end
   end

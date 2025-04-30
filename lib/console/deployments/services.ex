@@ -395,7 +395,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
-      |> Repo.preload([:dependencies, :context_bindings])
+      |> Repo.preload([:dependencies, :context_bindings, :imports])
       |> allow(user, :write)
     end)
     |> add_operation(:config, fn %{source: source} ->
@@ -407,9 +407,10 @@ defmodule Console.Deployments.Services do
       |> Console.dedupe(:git, Console.mapify(source.git))
       |> Console.dedupe(:helm, Console.mapify(source.helm))
       |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
+      |> Console.dedupe(:imports, Enum.map(source.imports, & %{service_id: &1.service_id, stack_id: &1.stack_id}))
       |> Console.dedupe(:dependencies, Enum.map(source.dependencies, & %{name: &1.name}))
       |> Console.dedupe(:sync_config, Console.clean(source.sync_config))
-      |> Map.merge(attrs)
+      |> DeepMerge.deep_merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
     end)

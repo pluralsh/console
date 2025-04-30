@@ -341,6 +341,32 @@ defmodule Console.AI.ChatTest do
       refute refetch(chat)
     end
   end
+
+  describe "#clone_thread/2" do
+    test "it can clone a thread" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user, flow: insert(:flow))
+      for i <- 1..3, do: insert(:chat, content: "msg #{i}", seq: i, thread: thread, user: user)
+      {:ok, clone} = Chat.clone_thread(4, thread.id, user)
+
+      assert clone.id != thread.id
+      assert clone.summary == "Clone of #{thread.summary}"
+      assert clone.user_id == user.id
+      assert clone.flow_id == thread.flow_id
+
+      chats = Console.Schema.Chat.for_thread(clone.id)
+              |> Console.Schema.Chat.ordered()
+              |> Repo.all()
+
+      assert length(chats) == 3
+      for {c, i} <- Enum.with_index(chats) do
+        assert c.user_id == user.id
+        assert c.thread_id == clone.id
+        assert c.content == "msg #{i + 1}"
+        assert c.seq == i
+      end
+    end
+  end
 end
 
 defmodule Console.AI.ChatSyncTest do
@@ -633,31 +659,6 @@ defmodule Console.AI.ChatSyncTest do
       )
 
       {:error, _} = Chat.confirm_chat(chat.id, insert(:user))
-    end
-  end
-
-  describe "#clone_thread/2" do
-    test "it can clone a thread" do
-      user = insert(:user)
-      thread = insert(:chat_thread, user: user, flow: insert(:flow))
-      for i <- 1..3, do: insert_list(3, :chat, content: "msg #{i}", seq: i, thread: thread, user: user)
-      {:ok, clone} = Chat.clone_thread(thread.id, user)
-
-      assert clone.id != thread.id
-      assert clone.summary == "Clone of #{thread.summary}"
-      assert clone.user_id == user.id
-      assert clone.flow_id == thread.flow_id
-
-      chats = Console.Schema.Chat.for_thread(clone.id)
-              |> Console.Schema.Chat.ordered()
-              |> Repo.all()
-
-      for {c, i} <- Enum.with_index(chats) do
-        assert c.user_id == user.id
-        assert c.thread_id == clone.id
-        assert c.content == "msg #{i + 1}"
-        assert c.seq == i + 1
-      end
     end
   end
 end

@@ -43,7 +43,7 @@ defmodule Console.Deployments.Observer.Poller do
   defp poll_oci(%{oci: %{url: url} = oci} = target, last) do
     client = OCI.Client.new(url)
     with {:ok, oci} <- OCI.Auth.authenticate(client, oci.provider, oci.auth),
-         {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci),
+         {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci, &is_semver?/1),
          {:tag, [vsn | _]} <- {:tag, sorted(tags, target)},
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn}
