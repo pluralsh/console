@@ -153,45 +153,40 @@ var _ = Describe("PreviewEnvironmentTemplate Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		//It("should successfully reconcile the resource", func() {
-		//	By("Delete resource")
-		//	Expect(common.MaybePatch(k8sClient, &v1alpha1.Flow{
-		//		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
-		//	}, func(p *v1alpha1.Flow) {
-		//		p.Status.ID = lo.ToPtr(id)
-		//		p.Status.SHA = lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ====")
-		//	})).To(Succeed())
-		//	resource := &v1alpha1.Flow{}
-		//	err := k8sClient.Get(ctx, typeNamespacedName, resource)
-		//	Expect(err).NotTo(HaveOccurred())
-		//	err = k8sClient.Delete(ctx, resource)
-		//	Expect(err).NotTo(HaveOccurred())
-		//
-		//	flowFragment := &gqlclient.FlowFragment{
-		//		ID: id,
-		//	}
-		//	fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-		//	fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-		//	fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(flowFragment, nil)
-		//	fakeConsoleClient.On("DeleteFlow", mock.Anything, mock.Anything).Return(nil)
-		//
-		//	nsReconciler := &controller.FlowReconciler{
-		//		Client:        k8sClient,
-		//		Scheme:        k8sClient.Scheme(),
-		//		ConsoleClient: fakeConsoleClient,
-		//	}
-		//
-		//	_, err = nsReconciler.Reconcile(ctx, reconcile.Request{
-		//		NamespacedName: typeNamespacedName,
-		//	})
-		//
-		//	Expect(err).NotTo(HaveOccurred())
-		//
-		//	flow := &v1alpha1.Flow{}
-		//	err = k8sClient.Get(ctx, typeNamespacedName, flow)
-		//
-		//	Expect(err.Error()).To(Equal("flows.deployments.plural.sh \"test\" not found"))
-		//})
+		It("should successfully reconcile the resource", func() {
+			By("Delete resource")
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.PreviewEnvironmentTemplate{
+				ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
+			}, func(p *v1alpha1.PreviewEnvironmentTemplate) {
+				p.Status.ID = lo.ToPtr(id)
+				p.Status.SHA = lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ====")
+			})).To(Succeed())
+			resource := &v1alpha1.PreviewEnvironmentTemplate{}
+			err := k8sClient.Get(ctx, typeNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			err = k8sClient.Delete(ctx, resource)
+			Expect(err).NotTo(HaveOccurred())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetPreviewEnvironmentTemplate", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("DeletePreviewEnvironmentTemplate", mock.Anything, mock.Anything).Return(nil)
+
+			reconciler := &controller.PreviewEnvironmentTemplateReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			err = k8sClient.Get(ctx, typeNamespacedName, resource)
+
+			Expect(err.Error()).To(Equal("previewenvironmenttemplates.deployments.plural.sh \"test\" not found"))
+		})
 
 	})
 
