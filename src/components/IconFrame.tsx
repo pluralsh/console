@@ -193,6 +193,7 @@ function IconFrame<E extends ElementType = 'div'>({
   if (tooltip) {
     content = (
       <Tooltip
+        key={`${tooltip}`}
         displayOn="hover"
         arrow
         placement="top"
