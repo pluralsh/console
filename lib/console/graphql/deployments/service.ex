@@ -155,6 +155,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :kustomize_attributes do
     field :path, non_null(:string), description: "the path to the kustomization file to use"
+    field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
   end
 
   @desc "a reference to a service deployed from a git repo into a cluster"
@@ -327,7 +328,8 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "metadata needed for configuring kustomize"
   object :kustomize do
-    field :path, non_null(:string)
+    field :path, non_null(:string), description: "the path to the kustomization file to use"
+    field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
   end
 
   @desc "representation of a kubernetes component deployed by a service"
