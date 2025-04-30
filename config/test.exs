@@ -224,6 +224,27 @@ config :console,
   ]
 }|,
 
+  newrelic_webhook_payload: ~s|
+{
+	"id": "d1b1f3fd-995a-4066-88ab-8ce4f6960654",
+	"issueUrl": "https://radar-api.service.newrelic.com/accounts/1/issues/0ea2df1c-adab-45d2-aae0-042b609d2322?notifier=SLACK",
+	"title": "Memory Used % > 90 for at least 2 minutes on 'Some-Entity'",
+	"priority": "CRITICAL",
+	"impactedEntities": ["logs.itg.cloud","MonitorTTFB query"],
+	"totalIncidents": 42,
+	"state": "ACTIVATED",
+	"trigger": "INCIDENT_ADDED",
+	"isCorrelated": false,
+	"createdAt": 1617881246260,
+	"updatedAt": 1617881246260,
+	"sources": ["newrelic"],
+	"alertPolicyNames": ["Policy1","Policy2"],
+	"alertConditionNames": ["condition1","condition2"],
+	"workflowName": "DBA Team workflow",
+  "extra_message": "plrl_project: test-project, plrl_cluster: test-cluster, plrl_service: test-service"
+}
+|,
+
   test_kubeconfig: """
 apiVersion: v1
 clusters:
