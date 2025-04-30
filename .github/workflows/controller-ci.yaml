@@ -64,6 +64,6 @@ jobs:
           check-latest: true
       - uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v3.7.1
         with:
-          version: v1.61.0
+          version: v1.64.5
           working-directory: go/controller
           args: --timeout=30m

@@ -50,6 +50,9 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
     dryRun
     templated
     configuration { name value }
+    flow {
+        id
+    }
 }
 
 fragment ServiceDeploymentExtended on ServiceDeployment {

@@ -1999,6 +1999,53 @@ func (_c *ConsoleClientMock_DeletePrAutomation_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// DeletePreviewEnvironmentTemplate provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeletePreviewEnvironmentTemplate(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePreviewEnvironmentTemplate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePreviewEnvironmentTemplate'
+type ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call struct {
+	*mock.Call
+}
+
+// DeletePreviewEnvironmentTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeletePreviewEnvironmentTemplate(ctx interface{}, id interface{}) *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call {
+	return &ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call{Call: _e.mock.On("DeletePreviewEnvironmentTemplate", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call) Return(_a0 error) *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeletePreviewEnvironmentTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteProject provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) DeleteProject(ctx context.Context, id string) error {
 	ret := _m.Called(ctx, id)
@@ -3876,6 +3923,66 @@ func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Return(_a0 *client.PrAut
 }
 
 func (_c *ConsoleClientMock_GetPrAutomationByName_Call) RunAndReturn(run func(context.Context, string) (*client.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomationByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPreviewEnvironmentTemplate provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetPreviewEnvironmentTemplate(ctx context.Context, id *string, name *string) (*client.PreviewEnvironmentTemplateFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPreviewEnvironmentTemplate")
+	}
+
+	var r0 *client.PreviewEnvironmentTemplateFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.PreviewEnvironmentTemplateFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.PreviewEnvironmentTemplateFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PreviewEnvironmentTemplateFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPreviewEnvironmentTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPreviewEnvironmentTemplate'
+type ConsoleClientMock_GetPreviewEnvironmentTemplate_Call struct {
+	*mock.Call
+}
+
+// GetPreviewEnvironmentTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetPreviewEnvironmentTemplate(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call {
+	return &ConsoleClientMock_GetPreviewEnvironmentTemplate_Call{Call: _e.mock.On("GetPreviewEnvironmentTemplate", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call) Return(_a0 *client.PreviewEnvironmentTemplateFragment, _a1 error) *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.PreviewEnvironmentTemplateFragment, error)) *ConsoleClientMock_GetPreviewEnvironmentTemplate_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -7293,6 +7400,65 @@ func (_c *ConsoleClientMock_UpsertObserver_Call) Return(_a0 *client.ObserverFrag
 }
 
 func (_c *ConsoleClientMock_UpsertObserver_Call) RunAndReturn(run func(context.Context, client.ObserverAttributes) (*client.ObserverFragment, error)) *ConsoleClientMock_UpsertObserver_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertPreviewEnvironmentTemplate provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes client.PreviewEnvironmentTemplateAttributes) (*client.PreviewEnvironmentTemplateFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertPreviewEnvironmentTemplate")
+	}
+
+	var r0 *client.PreviewEnvironmentTemplateFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.PreviewEnvironmentTemplateAttributes) (*client.PreviewEnvironmentTemplateFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.PreviewEnvironmentTemplateAttributes) *client.PreviewEnvironmentTemplateFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PreviewEnvironmentTemplateFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.PreviewEnvironmentTemplateAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertPreviewEnvironmentTemplate'
+type ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call struct {
+	*mock.Call
+}
+
+// UpsertPreviewEnvironmentTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.PreviewEnvironmentTemplateAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertPreviewEnvironmentTemplate(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call {
+	return &ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call{Call: _e.mock.On("UpsertPreviewEnvironmentTemplate", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call) Run(run func(ctx context.Context, attributes client.PreviewEnvironmentTemplateAttributes)) *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.PreviewEnvironmentTemplateAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call) Return(_a0 *client.PreviewEnvironmentTemplateFragment, _a1 error) *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call) RunAndReturn(run func(context.Context, client.PreviewEnvironmentTemplateAttributes) (*client.PreviewEnvironmentTemplateFragment, error)) *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call {
 	_c.Call.Return(run)
 	return _c
 }
