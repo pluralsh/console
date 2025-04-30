@@ -15,71 +15,73 @@ import (
 type Reconciler string
 
 const (
-	GitRepositoryReconciler         Reconciler = "gitrepository"
-	HelmRepositoryReconciler        Reconciler = "helmrepository"
-	ServiceDeploymentReconciler     Reconciler = "servicedeployment"
-	ClusterReconciler               Reconciler = "cluster"
-	ClusterRestoreReconciler        Reconciler = "clusterrestore"
-	ProviderReconciler              Reconciler = "provider"
-	GlobalServiceReconciler         Reconciler = "globalservice"
-	PipelineReconciler              Reconciler = "pipeline"
-	ScmConnectionReconciler         Reconciler = "scmconnection"
-	ServiceAccountReconciler        Reconciler = "serviceaccount"
-	PrAutomationReconciler          Reconciler = "prautomation"
-	PipelineContextReconciler       Reconciler = "pipelinecontext"
-	ClusterRestoreTriggerReconciler Reconciler = "restoretrigger"
-	PrAutomationTriggerReconciler   Reconciler = "prautomationtrigger"
-	NotificationSinkReconciler      Reconciler = "notificationsink"
-	NotificationRouterReconciler    Reconciler = "notificationrouter"
-	ManagedNamespaceReconciler      Reconciler = "managednamespace"
-	StackReconciler                 Reconciler = "stack"
-	StackDefinitionReconciler       Reconciler = "stackdefinition"
-	CustomStackRunReconciler        Reconciler = "customstackrun"
-	DeploymentSettingsReconciler    Reconciler = "deploymentsettings"
-	ProjectReconciler               Reconciler = "project"
-	NamespaceCredentialsReconciler  Reconciler = "namespacecredentials"
-	ObservabilityProviderReconciler Reconciler = "observabilityprovider"
-	ObserverReconciler              Reconciler = "observerprovider"
-	CatalogReconciler               Reconciler = "catalogprovider"
-	OIDCProviderReconciler          Reconciler = "oidcprovider"
-	GeneratedSecretReconciler       Reconciler = "generatedsecret"
-	BootstrapTokenReconciler        Reconciler = "bootstraptoken"
-	FlowReconciler                  Reconciler = "flow"
-	MCPServerReconciler             Reconciler = "mcpserver"
+	GitRepositoryReconciler              Reconciler = "gitrepository"
+	HelmRepositoryReconciler             Reconciler = "helmrepository"
+	ServiceDeploymentReconciler          Reconciler = "servicedeployment"
+	ClusterReconciler                    Reconciler = "cluster"
+	ClusterRestoreReconciler             Reconciler = "clusterrestore"
+	ProviderReconciler                   Reconciler = "provider"
+	GlobalServiceReconciler              Reconciler = "globalservice"
+	PipelineReconciler                   Reconciler = "pipeline"
+	ScmConnectionReconciler              Reconciler = "scmconnection"
+	ServiceAccountReconciler             Reconciler = "serviceaccount"
+	PrAutomationReconciler               Reconciler = "prautomation"
+	PipelineContextReconciler            Reconciler = "pipelinecontext"
+	ClusterRestoreTriggerReconciler      Reconciler = "restoretrigger"
+	PrAutomationTriggerReconciler        Reconciler = "prautomationtrigger"
+	NotificationSinkReconciler           Reconciler = "notificationsink"
+	NotificationRouterReconciler         Reconciler = "notificationrouter"
+	ManagedNamespaceReconciler           Reconciler = "managednamespace"
+	StackReconciler                      Reconciler = "stack"
+	StackDefinitionReconciler            Reconciler = "stackdefinition"
+	CustomStackRunReconciler             Reconciler = "customstackrun"
+	DeploymentSettingsReconciler         Reconciler = "deploymentsettings"
+	ProjectReconciler                    Reconciler = "project"
+	NamespaceCredentialsReconciler       Reconciler = "namespacecredentials"
+	ObservabilityProviderReconciler      Reconciler = "observabilityprovider"
+	ObserverReconciler                   Reconciler = "observerprovider"
+	CatalogReconciler                    Reconciler = "catalogprovider"
+	OIDCProviderReconciler               Reconciler = "oidcprovider"
+	GeneratedSecretReconciler            Reconciler = "generatedsecret"
+	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
+	FlowReconciler                       Reconciler = "flow"
+	MCPServerReconciler                  Reconciler = "mcpserver"
+	PreviewEnvironmentTemplateReconciler Reconciler = "previewenvironmenttemplate"
 )
 
 var validReconcilers = map[string]Reconciler{
-	"GitRepositoryReconciler":         GitRepositoryReconciler,
-	"HelmRepositoryReconciler":        HelmRepositoryReconciler,
-	"ServiceDeploymentReconciler":     ServiceDeploymentReconciler,
-	"ClusterReconciler":               ClusterReconciler,
-	"ClusterRestoreReconciler":        ClusterRestoreReconciler,
-	"GlobalServiceReconciler":         GlobalServiceReconciler,
-	"PipelineReconciler":              PipelineReconciler,
-	"ScmConnectionReconciler":         ScmConnectionReconciler,
-	"ServiceAccountReconciler":        ServiceAccountReconciler,
-	"PrAutomationReconciler":          PrAutomationReconciler,
-	"PipelineContextReconciler":       PipelineContextReconciler,
-	"ClusterRestoreTriggerReconciler": ClusterRestoreTriggerReconciler,
-	"PrAutomationTriggerReconciler":   PrAutomationTriggerReconciler,
-	"NotificationSinkReconciler":      NotificationSinkReconciler,
-	"NotificationRouterReconciler":    NotificationRouterReconciler,
-	"ManagedNamespaceReconciler":      ManagedNamespaceReconciler,
-	"StackReconciler":                 StackReconciler,
-	"StackDefinitionReconciler":       StackDefinitionReconciler,
-	"CustomStackRunReconciler":        CustomStackRunReconciler,
-	"DeploymentSettingsReconciler":    DeploymentSettingsReconciler,
-	"ProjectReconciler":               ProjectReconciler,
-	"NamespaceCredentialsReconciler":  NamespaceCredentialsReconciler,
-	"ObservabilityProviderReconciler": ObservabilityProviderReconciler,
-	"ObserverReconciler":              ObserverReconciler,
-	"CatalogReconciler":               CatalogReconciler,
-	"OIDCProviderReconciler":          OIDCProviderReconciler,
-	"GeneratedSecretReconciler":       GeneratedSecretReconciler,
-	"BootstrapTokenReconciler":        BootstrapTokenReconciler,
-	"FlowReconciler":                  FlowReconciler,
-	"MCPServerReconciler":             MCPServerReconciler,
-	"ProviderReconciler":              ProviderReconciler,
+	"GitRepositoryReconciler":              GitRepositoryReconciler,
+	"HelmRepositoryReconciler":             HelmRepositoryReconciler,
+	"ServiceDeploymentReconciler":          ServiceDeploymentReconciler,
+	"ClusterReconciler":                    ClusterReconciler,
+	"ClusterRestoreReconciler":             ClusterRestoreReconciler,
+	"GlobalServiceReconciler":              GlobalServiceReconciler,
+	"PipelineReconciler":                   PipelineReconciler,
+	"ScmConnectionReconciler":              ScmConnectionReconciler,
+	"ServiceAccountReconciler":             ServiceAccountReconciler,
+	"PrAutomationReconciler":               PrAutomationReconciler,
+	"PipelineContextReconciler":            PipelineContextReconciler,
+	"ClusterRestoreTriggerReconciler":      ClusterRestoreTriggerReconciler,
+	"PrAutomationTriggerReconciler":        PrAutomationTriggerReconciler,
+	"NotificationSinkReconciler":           NotificationSinkReconciler,
+	"NotificationRouterReconciler":         NotificationRouterReconciler,
+	"ManagedNamespaceReconciler":           ManagedNamespaceReconciler,
+	"StackReconciler":                      StackReconciler,
+	"StackDefinitionReconciler":            StackDefinitionReconciler,
+	"CustomStackRunReconciler":             CustomStackRunReconciler,
+	"DeploymentSettingsReconciler":         DeploymentSettingsReconciler,
+	"ProjectReconciler":                    ProjectReconciler,
+	"NamespaceCredentialsReconciler":       NamespaceCredentialsReconciler,
+	"ObservabilityProviderReconciler":      ObservabilityProviderReconciler,
+	"ObserverReconciler":                   ObserverReconciler,
+	"CatalogReconciler":                    CatalogReconciler,
+	"OIDCProviderReconciler":               OIDCProviderReconciler,
+	"GeneratedSecretReconciler":            GeneratedSecretReconciler,
+	"BootstrapTokenReconciler":             BootstrapTokenReconciler,
+	"FlowReconciler":                       FlowReconciler,
+	"MCPServerReconciler":                  MCPServerReconciler,
+	"ProviderReconciler":                   ProviderReconciler,
+	"PreviewEnvironmentTemplateReconciler": PreviewEnvironmentTemplateReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
@@ -353,6 +355,13 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			UserGroupCache:   userGroupCache,
 		}
 	},
+	PreviewEnvironmentTemplateReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PreviewEnvironmentTemplateReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -412,6 +421,7 @@ func Reconcilers() ReconcilerList {
 		BootstrapTokenReconciler,
 		FlowReconciler,
 		MCPServerReconciler,
+		PreviewEnvironmentTemplateReconciler,
 	}
 }
 

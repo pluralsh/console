@@ -1,4 +1,57 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: mgmt
+  namespace: default
+spec:
+  handle: lukasz
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: k8s-helm
+  namespace: default
+spec:
+  url: https://github.com/zreigz/k8s-helm.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Flow
+metadata:
+  labels:
+    app.kubernetes.io/name: flow
+    app.kubernetes.io/instance: flow-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: flow-template
+  namespace: default
+spec:
+  name: flow-template
+  description: "test flow"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: test-service
+  namespace: default
+spec:
+  flowRef:
+    name: flow-template
+    namespace: default
+  version: 0.0.1
+  git:
+    folder: nginx
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: k8s-helm
+    namespace: default
+  clusterRef:
+    kind: Cluster
+    name: mgmt
+    namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: PreviewEnvironmentTemplate
 metadata:
   labels:
@@ -8,5 +61,13 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
   name: previewenvironmenttemplate-sample
+  namespace: default
 spec:
-  # TODO(user): Add fields here
+  template:
+    namespace: default
+  flowRef:
+    name: flow-template
+    namespace: default
+  referenceServiceRef:
+    name: test-service
+    namespace: default

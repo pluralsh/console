@@ -136,7 +136,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return &waitForResources
 	}
 
 	// try to delete the resource
@@ -144,7 +144,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return &waitForResources
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -185,6 +185,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 	if serviceID == nil {
 		return nil, &waitForResources, fmt.Errorf("service is not ready")
 	}
+	attr.ReferenceServiceID = *serviceID
 
 	if previewEnvTmpl.Spec.ScmConnectionRef != nil {
 		connectionID, err := helper.IDFromRef(previewEnvTmpl.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})

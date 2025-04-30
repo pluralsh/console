@@ -34,7 +34,9 @@ type PreviewEnvironmentTemplateSpec struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="PreviewEnvironmentTemplate Id"
 
 // PreviewEnvironmentTemplate is the Schema for the previewenvironmenttemplates API
 type PreviewEnvironmentTemplate struct {
