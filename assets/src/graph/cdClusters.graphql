@@ -286,12 +286,6 @@ fragment Cluster on Cluster {
   parentCluster {
     ...ClustersRow
   }
-  insight {
-    ...AiInsight
-  }
-  insightComponents {
-    ...ClusterInsightComponent
-  }
   alerts(first: 500) {
     # just to get the count
     edges {
@@ -299,6 +293,16 @@ fragment Cluster on Cluster {
         id
       }
     }
+  }
+}
+
+fragment ClusterInsight on Cluster {
+  id
+  insight {
+    ...AiInsight
+  }
+  insightComponents {
+    ...ClusterInsightComponent
   }
 }
 
@@ -517,6 +521,12 @@ query Cluster($id: ID, $handle: String) {
 query ClusterBasic($id: ID!) {
   cluster(id: $id) {
     ...ClusterBasic
+  }
+}
+
+query ClusterInsight($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterInsight
   }
 }
 
