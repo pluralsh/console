@@ -225,7 +225,7 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
         align="center"
       >
         <Flex
-          gap="small"
+          gap="medium"
           align="center"
         >
           <AppIcon

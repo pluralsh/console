@@ -3,7 +3,7 @@ import { fromNow } from 'utils/datetime'
 
 import { useTheme } from 'styled-components'
 import { AiInsight } from '../../../../generated/graphql.ts'
-import AIPinButton from '../../../ai/AIPinButton.tsx'
+import { AIPinButton } from '../../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,

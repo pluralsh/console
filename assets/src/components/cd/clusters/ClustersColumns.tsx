@@ -20,7 +20,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { filesize } from 'filesize'
 
-import { Cluster, ClustersRowFragment } from 'generated/graphql'
+import { ClusterBasicFragment, ClustersRowFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import semver from 'semver'
@@ -33,12 +33,12 @@ import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
+import { UsageBar } from '../../utils/UsageBar.tsx'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
 import { ClusterHealth } from './ClusterHealthChip'
 import ClusterUpgrade from './ClusterUpgrade'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
-import { UsageBar } from '../../utils/UsageBar.tsx'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -51,20 +51,7 @@ export const ColClusterContentSC = styled.div(({ theme }) => ({
 export function ColClusterContent({
   cluster,
 }: {
-  cluster: Nullable<
-    Pick<
-      Cluster,
-      | 'id'
-      | 'name'
-      | 'version'
-      | 'currentVersion'
-      | 'protect'
-      | 'self'
-      | 'deletedAt'
-      | 'handle'
-      | 'virtual'
-    >
-  >
+  cluster: Nullable<ClusterBasicFragment>
 }) {
   const theme = useTheme()
 

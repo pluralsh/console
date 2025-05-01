@@ -216,7 +216,7 @@ const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
     overflow: 'auto hidden',
     height: '100%',
     width: '100%',
-    maxWidth: $fullscreen ? '75vw' : 1096,
+    maxWidth: $fullscreen ? '80vw' : 1096,
   })
 )
 

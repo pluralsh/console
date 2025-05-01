@@ -189,6 +189,12 @@ mutation DeleteChatThread($id: ID!) {
   }
 }
 
+mutation CloneChatThread($id: ID!, $seq: Int) {
+  cloneThread(id: $id, seq: $seq) {
+    ...ChatThread
+  }
+}
+
 mutation AddChatContext(
   $source: ContextSource!
   $sourceId: ID

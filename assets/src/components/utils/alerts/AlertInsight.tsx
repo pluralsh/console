@@ -3,7 +3,7 @@ import { useAiInsightQuery } from 'generated/graphql'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 
-import AIPinButton from 'components/ai/AIPinButton'
+import { AIPinButton } from 'components/ai/AIPinButton'
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix'
 import {
   ChatWithAIButton,
