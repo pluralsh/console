@@ -1,5 +1,6 @@
 import {
   ArrowLeftIcon,
+  BrainIcon,
   ChatFilledIcon,
   CloseIcon,
   ExpandIcon,
@@ -11,11 +12,14 @@ import dayjs from 'dayjs'
 import { AiInsightFragment, ChatThreadTinyFragment } from 'generated/graphql'
 import styled from 'styled-components'
 import { useChatbot } from '../AIContext'
-import AIPinButton from '../AIPinButton'
+import { AIPinButton } from '../AIPinButton'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../AITableEntry'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton'
 import { Body1BoldP } from 'components/utils/typography/Text'
 import { AISuggestFix } from './AISuggestFix'
+import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
+
+type HeaderState = 'list' | 'thread' | 'insight'
 
 export function ChatbotHeader({
   fullscreen,
@@ -28,24 +32,17 @@ export function ChatbotHeader({
 }) {
   const { setFullscreen, closeChatbot, goToThreadList } = useChatbot()
   const insight = currentThread?.insight || currentInsight
+  let state: HeaderState = 'list'
+  if (currentThread) state = 'thread'
+  else if (insight) state = 'insight'
+
   const timestamp = getThreadOrPinTimestamp(currentThread)
   const isStale =
     !!timestamp && dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
-  const isShowingList = !currentThread && !currentInsight
-  const type = currentThread ? 'thread' : 'insight'
 
   return (
     <WrapperSC $fullscreen={fullscreen}>
-      {!isShowingList && (
-        <IconFrame
-          tooltip="View all threads"
-          icon={<ArrowLeftIcon />}
-          type="secondary"
-          clickable
-          onClick={() => goToThreadList()}
-        />
-      )}
-      {isShowingList ? (
+      {state === 'list' ? (
         <Flex
           alignItems="center"
           gap="small"
@@ -58,32 +55,42 @@ export function ChatbotHeader({
           <Body1BoldP>All threads</Body1BoldP>
         </Flex>
       ) : (
-        <AIEntryLabel
-          insight={insight}
-          thread={currentThread}
-          isInsight={type === 'insight'}
-          isStale={isStale}
-        />
+        <>
+          <IconFrame
+            tooltip="View all threads"
+            icon={<ArrowLeftIcon />}
+            type="secondary"
+            clickable
+            onClick={() => goToThreadList()}
+          />
+          <AIEntryLabel
+            insight={insight}
+            thread={currentThread}
+            isInsight={state === 'insight'}
+            isStale={isStale}
+          />
+        </>
       )}
       <IconFrame
         {...(fullscreen
           ? { icon: <ShrinkIcon css={{ width: 16 }} />, size: 'large' }
           : { icon: <ExpandIcon /> })}
         type="secondary"
+        tooltip={fullscreen ? 'Collapse' : 'Expand'}
         clickable
         onClick={() => setFullscreen(!fullscreen)}
       />
-      <AIPinButton
-        size={fullscreen ? 'large' : 'medium'}
-        insight={insight}
-        thread={currentThread}
-      />
-      {type === 'insight' && insight && (
+      {state === 'insight' && (
         <>
+          <AIPinButton
+            size={fullscreen ? 'large' : 'medium'}
+            insight={insight}
+            thread={currentThread}
+          />
           <ChatWithAIButton
             floating
             iconOnly={!fullscreen}
-            insightId={insight.id}
+            insightId={insight?.id}
             messages={[insightMessage(insight)]}
             bodyText="Chat about it"
           />
@@ -93,13 +100,26 @@ export function ChatbotHeader({
           />
         </>
       )}
-      <IconFrame
-        size={fullscreen ? 'large' : 'medium'}
-        icon={<CloseIcon css={{ width: 16 }} />}
-        type="secondary"
-        clickable
-        onClick={() => closeChatbot()}
-      />
+      {state === 'thread' ? (
+        <>
+          <IconFrame
+            clickable
+            type="secondary"
+            size={fullscreen ? 'large' : 'medium'}
+            icon={<BrainIcon css={{ width: 16 }} />}
+          />
+          <ChatbotThreadMoreMenu fullscreen={fullscreen} />
+        </>
+      ) : (
+        <IconFrame
+          clickable
+          tooltip="Close"
+          type="secondary"
+          size={fullscreen ? 'large' : 'medium'}
+          icon={<CloseIcon css={{ width: 16 }} />}
+          onClick={() => closeChatbot()}
+        />
+      )}
     </WrapperSC>
   )
 }

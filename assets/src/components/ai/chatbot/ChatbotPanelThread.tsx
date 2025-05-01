@@ -20,26 +20,26 @@ import {
   AiDelta,
   AiRole,
   ChatThreadDetailsQueryResult,
-  ChatThreadTinyFragment,
+  ChatThreadFragment,
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
+import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
+import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 import {
   GeneratingResponseMessage,
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
-import { produce } from 'immer'
-import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -51,7 +51,7 @@ export function ChatbotPanelThread({
   showExamplePrompts = false,
   setShowExamplePrompts,
 }: {
-  currentThread: ChatThreadTinyFragment
+  currentThread: ChatThreadFragment
   fullscreen: boolean
   threadDetailsQuery: ChatThreadDetailsQueryResult
   shouldUseMCP: boolean
@@ -259,7 +259,7 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
+export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     position: 'relative',
     ...($fullscreen && {

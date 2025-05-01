@@ -35,9 +35,10 @@ export function ChatbotPanelEvidence({
         {headerText}
       </Body1P>
       {Object.entries(aggregatedEvidence).map(
-        ([evidenceType, evidence]) =>
+        ([evidenceType, evidence], i) =>
           !isEmpty(evidence) && (
             <Flex
+              key={i}
               direction="column"
               gap="xxsmall"
             >
