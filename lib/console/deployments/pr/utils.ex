@@ -13,6 +13,8 @@ defmodule Console.Deployments.Pr.Utils do
   @flow_regex [~r/plrl\/flow\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(flow:([[:alnum:]_\-]*)\)/, ~r/Plural [fF]low:\s+([[:alnum:]_\-]+)/]
   @preview_regex [~r/plrl\/preview\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(preview:([[:alnum:]_\-]*)\)/, ~r/Plural [pP]review:\s+([[:alnum:]_\-]+)/]
 
+  @solid_opts [strict_variables: true, strict_filters: true]
+
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
   def pr_associations(content, scopes \\ ~w(stack service cluster flow)a) do
@@ -64,20 +66,20 @@ defmodule Console.Deployments.Pr.Utils do
 
   def render_solid_raw(template, ctx) do
     with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res}} <- {:render, Solid.render(tpl, %{"context" => ctx})} do
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
       {:ok, IO.iodata_to_binary(res)}
     else
-      {:parse, {:error, %Solid.TemplateError{message: message}}} -> {:error, message}
+      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
       {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
     end
   end
 
   def render_solid(template, ctx) do
     with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res}} <- {:render, Solid.render(tpl, %{"context" => ctx})} do
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
       {:ok, IO.iodata_to_binary(res)}
     else
-      {:parse, {:error, %Solid.TemplateError{message: message}}} -> {:error, message}
+      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
       {:render, {:error, errs, _}} -> {:error, "encountered #{length(errs)} while rendering pr description"}
     end
   end

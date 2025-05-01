@@ -84,6 +84,34 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert sender.id == hook.id
     end
 
+    test "it can associate a flow with a pr and preview environment", %{conn: conn} do
+      hook = insert(:scm_webhook)
+      pr   = insert(:pull_request)
+      flow = insert(:flow)
+
+      payload = Jason.encode!(%{
+        "pull_request" => %{
+          "html_url" => pr.url,
+          "body" => """
+          Plural Flow: #{flow.name}
+          Plural Preview: test
+          """
+        }
+      })
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      pr = refetch(pr)
+      assert pr.flow_id == flow.id
+      assert pr.preview == "test"
+    end
+
     test "it can detect and create stack prs", %{conn: conn} do
       stack = insert(:stack)
       hook = insert(:scm_webhook)

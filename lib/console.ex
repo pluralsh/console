@@ -4,6 +4,7 @@ defmodule Console do
   @ttl :timer.minutes(30)
 
   @type error :: {:error, term}
+  @cache Application.compile_env(:console, :cache_adapter)
 
   def version(), do: conf(:version)
 
@@ -16,11 +17,27 @@ defmodule Console do
   def coalesce(val, _), do: val
 
   def debounce(scope, fun, opts \\ []) do
-    case conf(:cache_adapter).get({:plrl_debounce, scope}) do
+    case @cache.get({:plrl_debounce, scope}) do
       nil ->
-        conf(:cache_adapter).put({:plrl_debounce, scope}, opts[:placeholder] || :ok, opts ++ [ttl: @ttl])
+        @cache.put({:plrl_debounce, scope}, opts[:placeholder] || :ok, opts ++ [ttl: @ttl])
         fun.()
       res -> res
+    end
+  end
+
+  @doc """
+  Executes a function only once, even if the function is called multiple times, within a given time frame.
+
+  If ignored, just returns ok
+  """
+  @spec nonce(term, term, (() -> term), keyword()) :: term | :ok
+  def nonce(scope, input, fun, opts \\ []) when is_function(fun, 0) do
+    sha = :erlang.phash2(input)
+    case @cache.get({:plrl_nonce, scope}) do
+      ^sha -> :ok
+      _ ->
+        @cache.put({:plrl_nonce, scope}, sha, opts ++ [ttl: @ttl])
+        fun.()
     end
   end
 

@@ -87,6 +87,7 @@ defmodule Console.Schema.PullRequest do
     flow_id
     creator
     labels
+    preview
   )a
 
   def changeset(model, attrs \\ %{}) do
