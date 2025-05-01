@@ -70,9 +70,11 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     },
     ...(focused ? { '&': { ...theme.partials.focus.outline } } : {}),
     '.left-content': {
+      display: 'flex',
       marginRight: theme.spacing.small,
     },
     '.right-content, .selected-indicator': {
+      display: 'flex',
       marginLeft: theme.spacing.xsmall,
       color: theme.colors['action-primary'],
     },
@@ -182,9 +184,11 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
       flexGrow: 1,
     },
     '.leftContent': {
+      display: 'flex',
       marginRight: theme.spacing.small,
     },
     '.rightContent': {
+      display: 'flex',
       marginLeft: theme.spacing.small,
     },
     '&:focus, &:focus-visible': {
