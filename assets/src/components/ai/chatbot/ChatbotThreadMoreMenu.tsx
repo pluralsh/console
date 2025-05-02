@@ -9,7 +9,6 @@ import {
   PushPinFilledIcon,
   PushPinOutlineIcon,
   Spinner,
-  Toast,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -17,7 +16,6 @@ import { useState } from 'react'
 import { useChatbot } from '../AIContext'
 import { useAiPin } from '../AIPinButton'
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
-import { useTheme } from 'styled-components'
 
 enum MenuItemKey {
   Pin = 'pin',
@@ -27,13 +25,11 @@ enum MenuItemKey {
 }
 
 export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
-  const { spacing } = useTheme()
-  const { forkThread, loading: forkLoading, currentThread } = useChatbot()
+  const { forkThread, mutationLoading, currentThread } = useChatbot()
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
   const [pinHovered, setPinHovered] = useState(false)
   const [forkHovered, setForkHovered] = useState(false)
-  const [showToast, setShowToast] = useState(false)
 
   const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
     thread: currentThread,
@@ -53,10 +49,7 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
       case MenuItemKey.Fork:
         forkThread({
           id: currentThread?.id ?? '',
-          onCompleted: () => {
-            setShowToast(true)
-            closeMenu()
-          },
+          onCompleted: () => closeMenu(),
         })
         break
       default:
@@ -114,7 +107,7 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
           onMouseEnter={() => setForkHovered(true)}
           onMouseLeave={() => setForkHovered(false)}
           key={MenuItemKey.Fork}
-          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
+          leftContent={mutationLoading ? <Spinner /> : <GitForkIcon />}
           rightContent={<ArrowRightIcon color="icon-default" />}
           label="Fork thread"
         />
@@ -139,16 +132,6 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
         open={menuKey === MenuItemKey.Delete}
         onClose={closeMenu}
       />
-      <Toast
-        show={showToast}
-        margin={spacing.medium}
-        closeTimeout={3000}
-        position="bottom"
-        severity="success"
-        onClose={() => setShowToast(false)}
-      >
-        Thread forked!
-      </Toast>
     </>
   )
 }

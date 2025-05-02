@@ -64,7 +64,11 @@ export function ChatWithAIButton({
   bodyText?: string
   iconOnly?: boolean
 } & ComponentPropsWithRef<typeof Button>) {
-  const { createNewThread, loading, closeChatbot } = useChatbot()
+  const {
+    createNewThread,
+    mutationLoading: loading,
+    closeChatbot,
+  } = useChatbot()
   const aiEnabled = useAIEnabled()
   const bodyText = aiEnabled ? bodyTextProp : 'Enable AI to chat'
 

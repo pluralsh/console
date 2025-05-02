@@ -36,7 +36,7 @@ export function AITableActions({
   thread: Nullable<ChatThreadTinyFragment>
 }) {
   const [menuKey, setMenuKey] = useState<Nullable<string>>('')
-  const { goToThread, forkThread, loading: forkLoading } = useChatbot()
+  const { goToThread, forkThread, mutationLoading } = useChatbot()
 
   if (!thread) return null
 
@@ -56,7 +56,7 @@ export function AITableActions({
       <MoreMenu
         onSelectionChange={onSelectionChange}
         width={256}
-        {...(forkLoading && { triggerButton: <Spinner /> })}
+        {...(mutationLoading && { triggerButton: <Spinner /> })}
       >
         <ListBoxItem
           key={MenuItemKey.OpenChat}

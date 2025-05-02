@@ -1,7 +1,11 @@
-import { IconFrame, MoreIcon, Select } from '@pluralsh/design-system'
-import { ComponentProps, useState } from 'react'
+import {
+  IconFrame,
+  MoreIcon,
+  Select,
+  SelectPropsSingle,
+} from '@pluralsh/design-system'
+import { ComponentProps, ReactNode, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { SelectPropsSingle } from '../../../../../design-system/dist/components/Select'
 
 export function MoreMenuTrigger({
   ref,
@@ -33,9 +37,10 @@ export function MoreMenu({
   onSelectionChange,
   disabled = false,
   ...props
-}: Omit<SelectPropsSingle, 'onSelectionChange'> & {
+}: Omit<SelectPropsSingle, 'onSelectionChange' | 'children'> & {
   onSelectionChange?: (selectedKey: any) => void
   disabled?: boolean
+  children?: ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -55,7 +60,7 @@ export function MoreMenu({
       triggerButton={<MoreMenuTrigger disabled={disabled} />}
       {...props}
     >
-      {children}
+      {children as any}
     </Select>
   )
 }

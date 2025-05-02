@@ -29,7 +29,9 @@ import { GqlError } from 'components/utils/Alert'
 
 type ChatMessageContentProps = {
   id?: string
+  seq?: number
   showActions?: boolean
+  side: 'left' | 'right'
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
@@ -41,7 +43,9 @@ type ChatMessageContentProps = {
 
 export function ChatMessageContent({
   id,
+  seq,
   showActions,
+  side,
   content,
   type = ChatType.Text,
   attributes,
@@ -55,7 +59,9 @@ export function ChatMessageContent({
       return (
         <FileMessageContent
           id={id}
+          seq={seq}
           showActions={showActions}
+          side={side}
           content={content}
           attributes={attributes}
         />
@@ -80,7 +86,9 @@ export function ChatMessageContent({
 
 function FileMessageContent({
   id,
+  seq,
   showActions,
+  side,
   content,
   attributes,
 }: ChatMessageContentProps) {
@@ -105,8 +113,12 @@ function FileMessageContent({
             <CaptionP $color="text-light">{fileName || 'File'}</CaptionP>
             <ChatMessageActions
               id={id ?? ''}
+              seq={seq}
               content={fileName}
               show={showActions}
+              side={side}
+              iconFrameType="floating"
+              css={{ position: 'absolute', right: 16, top: 4 }}
             />
           </Flex>
         }
@@ -145,7 +157,7 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
-}: ChatMessageContentProps) {
+}: Omit<ChatMessageContentProps, 'side'>) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt

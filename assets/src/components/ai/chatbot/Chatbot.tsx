@@ -95,12 +95,8 @@ export function ChatbotPanel({
 function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const {
-    currentThread,
-    currentInsight,
-    loading: loadingDetails,
-    error,
-  } = useChatbot()
+  const { currentThread, currentInsight, detailsLoading, detailsError } =
+    useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
@@ -163,8 +159,8 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
             currentThread={currentThread}
             currentInsight={currentInsight}
           />
-          {error && <GqlError error={error} />}
-          {!currentThread && !currentInsight && loadingDetails ? (
+          {detailsError && <GqlError error={detailsError} />}
+          {!currentThread && !currentInsight && detailsLoading ? (
             <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
               <LoadingIndicator />
             </ChatbotMessagesWrapperSC>
