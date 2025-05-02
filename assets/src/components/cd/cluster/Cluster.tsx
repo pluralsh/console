@@ -80,18 +80,24 @@ const getDirectory = ({
   logsEnabled,
   isVCluster,
   metricsEnabled,
+  meshEnabled,
 }: {
   cluster: Nullable<ClusterFragment>
   logsEnabled: boolean
   isVCluster: boolean
   metricsEnabled: boolean
+  meshEnabled: boolean
 }): DirectoryEntry[] => [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
   { path: CLUSTER_DETAILS_PATH, label: 'Details' },
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
   { path: CLUSTER_METRICS_PATH, label: 'Metrics', enabled: metricsEnabled },
   { path: CLUSTER_LOGS_PATH, label: 'Logs', enabled: logsEnabled },
-  { path: CLUSTER_NETWORK_PATH, label: 'Network', enabled: metricsEnabled },
+  {
+    path: CLUSTER_NETWORK_PATH,
+    label: 'Network',
+    enabled: meshEnabled && metricsEnabled,
+  },
   {
     path: CLUSTER_INSIGHTS_PATH,
     label: <InsightsTabLabel insight={cluster?.insight} />,
@@ -186,6 +192,7 @@ export default function Cluster() {
   })
 
   const cluster = data?.cluster
+  const meshEnabled = !!cluster?.operationalLayout?.serviceMesh
   const directory = useMemo(
     () =>
       getDirectory({
@@ -193,8 +200,9 @@ export default function Cluster() {
         logsEnabled,
         isVCluster: cluster?.virtual ?? false,
         metricsEnabled,
+        meshEnabled,
       }).filter((t) => t.enabled !== false),
-    [cluster, logsEnabled, metricsEnabled]
+    [cluster, logsEnabled, metricsEnabled, meshEnabled]
   )
   const currentTab = directory.find(({ path }) => path === tab)
 

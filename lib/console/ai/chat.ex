@@ -230,7 +230,7 @@ defmodule Console.AI.Chat do
       Chat.for_thread(thread.id)
       |> Chat.before(seq)
       |> Repo.all()
-      |> Enum.map(&Map.take(&1, ~w(content role confirm confirmed_at attributes server_id pull_request_id)a))
+      |> Enum.map(&Map.take(&1, ~w(content type role confirm confirmed_at attributes server_id pull_request_id)a))
       |> Enum.map(&Console.mapify/1)
       |> save_messages(clone.id, user)
     end)
