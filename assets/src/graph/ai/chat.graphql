@@ -47,6 +47,9 @@ fragment ChatThreadTiny on ChatThread {
   insertedAt
   updatedAt
   lastMessageAt
+  settings {
+    ...ChatThreadSettings
+  }
   insight {
     ...AiInsightSummary
   }
@@ -58,12 +61,7 @@ fragment ChatThreadTiny on ChatThread {
 }
 
 fragment ChatThread on ChatThread {
-  id
-  default
-  summary
-  insertedAt
-  updatedAt
-  lastMessageAt
+  ...ChatThreadTiny
   chats(first: 100) {
     edges {
       node {
@@ -80,6 +78,10 @@ fragment ChatThread on ChatThread {
   tools {
     ...McpServerTool
   }
+}
+
+fragment ChatThreadSettings on ChatThreadSettings {
+  memory
 }
 
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
