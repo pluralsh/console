@@ -2220,6 +2220,12 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.11.4-eksbuild.10
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.2
     compatibilities:
     - '1.32'
@@ -3021,12 +3027,19 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.32.3-eksbuild.7
+    compatibilities:
+    - '1.32'
   - version: v1.32.3-eksbuild.2
     compatibilities:
     - '1.32'
   - version: v1.32.0-eksbuild.2
     compatibilities:
     - '1.32'
+  - version: v1.31.7-eksbuild.7
+    compatibilities:
+    - '1.32'
+    - '1.31'
   - version: v1.31.3-eksbuild.2
     compatibilities:
     - '1.32'
@@ -3046,6 +3059,11 @@
   - version: v1.31.0-eksbuild.2
     compatibilities:
     - '1.31'
+  - version: v1.30.11-eksbuild.5
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.9-eksbuild.3
     compatibilities:
     - '1.32'
@@ -3086,6 +3104,12 @@
   - version: v1.30.0-eksbuild.2
     compatibilities:
     - '1.30'
+  - version: v1.29.15-eksbuild.5
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.29.13-eksbuild.3
     compatibilities:
     - '1.32'
@@ -3149,6 +3173,11 @@
     compatibilities:
     - '1.30'
     - '1.29'
+  - version: v1.28.15-eksbuild.20
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.28.15-eksbuild.9
     compatibilities:
     - '1.30'
@@ -3213,6 +3242,12 @@
   - version: v1.28.1-eksbuild.1
     compatibilities:
     - '1.28'
+  - version: v1.27.16-eksbuild.30
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.27.16-eksbuild.19
     compatibilities:
     - '1.30'
@@ -3293,6 +3328,12 @@
   - version: v1.27.1-eksbuild.1
     compatibilities:
     - '1.27'
+  - version: v1.26.15-eksbuild.35
+    compatibilities:
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
   - version: v1.26.15-eksbuild.24
     compatibilities:
     - '1.29'
@@ -3378,6 +3419,12 @@
   - version: v1.26.2-eksbuild.1
     compatibilities:
     - '1.26'
+  - version: v1.25.16-eksbuild.38
+    compatibilities:
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.25.16-eksbuild.27
     compatibilities:
     - '1.28'
