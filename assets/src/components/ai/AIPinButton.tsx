@@ -12,18 +12,26 @@ import {
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from '../../generated/graphql.ts'
+import { useCallback } from 'react'
 
-interface AIPinButtonProps {
+type AIPinButtonProps = {
   insight?: Nullable<AiInsightFragment>
   thread?: Nullable<ChatThreadTinyFragment>
   size?: 'medium' | 'large'
 }
 
-export default function AIPinButton({
+export function useAiPin({
   insight,
   thread,
-  size = 'large',
-}: AIPinButtonProps) {
+}: {
+  insight?: Nullable<AiInsightFragment>
+  thread?: Nullable<ChatThreadTinyFragment>
+}): {
+  isPinned: boolean
+  pinCreating: boolean
+  pinDeleting: boolean
+  handlePin: (onCompleted?: () => void) => void
+} {
   const name =
     insight?.text?.substring(0, 250) ?? thread?.summary?.substring(0, 250) ?? ''
   const pinIDs = thread
@@ -56,15 +64,38 @@ export default function AIPinButton({
 
   const isPinned = !!pin?.aiPin?.id
 
-  if (!insight && !thread) {
-    return null
-  }
+  const handlePin = useCallback(
+    (onCompleted?: () => void) => {
+      if (pinCreating || pinDeleting) return
+      if (isPinned)
+        deletePin({
+          variables: { id: pin?.aiPin?.id ?? '' },
+          onCompleted,
+          errorPolicy: 'ignore',
+        })
+      else createPin({ onCompleted, errorPolicy: 'ignore' })
+    },
+    [pinCreating, pinDeleting, isPinned, deletePin, pin?.aiPin?.id, createPin]
+  )
 
-  const handleClick = () => {
-    if (pinCreating || pinDeleting) return
-    if (isPinned) deletePin({ variables: { id: pin?.aiPin?.id ?? '' } })
-    else createPin()
+  return {
+    isPinned,
+    pinCreating,
+    pinDeleting,
+    handlePin,
   }
+}
+
+export function AIPinButton({
+  insight,
+  thread,
+  size = 'large',
+}: AIPinButtonProps) {
+  const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
+    insight,
+    thread,
+  })
+  if (!insight && !thread) return null
 
   return (
     <IconFrame
@@ -72,7 +103,7 @@ export default function AIPinButton({
       type="secondary"
       size={size}
       tooltip={isPinned ? 'Unpin' : 'Pin to dashboard'}
-      onClick={handleClick}
+      onClick={() => handlePin()}
       icon={
         pinCreating || pinDeleting ? (
           <Spinner

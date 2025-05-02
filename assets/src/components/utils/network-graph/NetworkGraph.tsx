@@ -262,5 +262,5 @@ function getNetworkNodesAndEdges(networkData: NetworkMeshEdgeFragment[]): {
 
 const elkOptions = {
   'elk.algorithm': 'force',
-  'elk.spacing.nodeNode': '5',
+  'elk.spacing.nodeNode': '30',
 }

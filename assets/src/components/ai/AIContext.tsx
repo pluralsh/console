@@ -1,8 +1,16 @@
+import { ApolloCache, ApolloError } from '@apollo/client'
+import { Toast } from '@pluralsh/design-system'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
   AiInsightFragment,
   AiInsightSummaryFragment,
   ChatThreadAttributes,
-  ChatThreadTinyFragment,
+  ChatThreadDetailsDocument,
+  ChatThreadFragment,
+  CloneChatThreadMutation,
+  CloneChatThreadMutationVariables,
+  useChatThreadDetailsQuery,
+  useCloneChatThreadMutation,
   useCreateChatThreadMutation,
 } from 'generated/graphql.ts'
 import {
@@ -10,11 +18,13 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
+  use,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react'
+import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
 
 export enum AIVerbosityLevel {
@@ -36,12 +46,15 @@ type ChatbotContextT = {
   setOpen: (open: boolean) => void
   fullscreen: boolean
   setFullscreen: Dispatch<SetStateAction<boolean>>
-  currentThread: Nullable<ChatThreadTinyFragment>
-  setCurrentThread: (thread: Nullable<ChatThreadTinyFragment>) => void
+  currentThread: Nullable<ChatThreadFragment>
+  setCurrentThreadId: (threadId: Nullable<string>) => void
   currentInsight: Nullable<AiInsightSummaryFragment>
   setCurrentInsight: Dispatch<
     SetStateAction<Nullable<AiInsightSummaryFragment>>
   >
+  threadLoading: boolean
+  threadError: ApolloError | undefined
+  setShowForkToast: (show: boolean) => void
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -59,31 +72,53 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 }
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
+  const { spacing } = useTheme()
   const [open, setOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const [currentThread, setCurrentThread] =
-    useState<Nullable<ChatThreadTinyFragment>>()
+  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [currentInsight, setCurrentInsight] =
     useState<Nullable<AiInsightSummaryFragment>>()
+  const [showForkToast, setShowForkToast] = useState(false)
 
-  const context = useMemo(
-    () => ({
-      open,
-      setOpen,
-      currentThread,
-      setCurrentThread,
-      fullscreen,
-      setFullscreen,
-      currentInsight,
-      setCurrentInsight,
-    }),
-    [open, currentThread, fullscreen, currentInsight]
-  )
+  const {
+    data: threadData,
+    loading: threadLoading,
+    error: threadError,
+  } = useChatThreadDetailsQuery({
+    variables: { id: currentThreadId ?? '' },
+    skip: !currentThreadId,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   return (
-    <ChatbotContext.Provider value={context}>
+    <ChatbotContext
+      value={{
+        open,
+        setOpen,
+        currentThread: threadData?.chatThread,
+        setCurrentThreadId,
+        fullscreen,
+        setFullscreen,
+        currentInsight,
+        setCurrentInsight,
+        threadLoading,
+        threadError,
+        setShowForkToast,
+      }}
+    >
       {children}
-    </ChatbotContext.Provider>
+      <Toast
+        show={showForkToast}
+        margin={spacing.medium}
+        closeTimeout={3000}
+        position="bottom"
+        severity="success"
+        onClose={() => setShowForkToast(false)}
+      >
+        Thread forked!
+      </Toast>
+    </ChatbotContext>
   )
 }
 
@@ -105,15 +140,11 @@ function ExplainWithAIContextProvider({ children }: { children: ReactNode }) {
     [prompt, setPrompt, verbosityLevel, setVerbosityLevel]
   )
 
-  return (
-    <ExplainWithAIContext.Provider value={context}>
-      {children}
-    </ExplainWithAIContext.Provider>
-  )
+  return <ExplainWithAIContext value={context}>{children}</ExplainWithAIContext>
 }
 
 export function useChatbotContext() {
-  const context = useContext(ChatbotContext)
+  const context = use(ChatbotContext)
   if (!context) {
     throw new Error('useChatbot must be used within a ChatbotProvider')
   }
@@ -123,48 +154,91 @@ export function useChatbotContext() {
 export function useChatbot() {
   const {
     setOpen,
-    setCurrentThread,
+    currentThread,
+    setCurrentThreadId,
     fullscreen,
     setFullscreen,
+    currentInsight,
     setCurrentInsight,
+    threadLoading,
+    threadError,
+    setShowForkToast,
   } = useChatbotContext()
-  const [mutation, { loading, error }] = useCreateChatThreadMutation()
-  // const navigate = useNavigate()
+
+  const [createThread, { loading: createLoading, error: createError }] =
+    useCreateChatThreadMutation()
+  const [forkThread, { loading: forkLoading, error: forkError }] =
+    useCloneChatThreadMutation()
 
   return {
     createNewThread: (attributes: ChatThreadAttributes) => {
-      mutation({
+      createThread({
         variables: { attributes },
         onCompleted: (data) => {
-          setCurrentThread(data.createThread)
+          setCurrentThreadId(data.createThread?.id)
           setCurrentInsight(null)
           setOpen(true)
         },
+        update: (cache, { data }) =>
+          addThreadToCache(cache, data?.createThread),
       })
     },
-    goToThread: (thread: ChatThreadTinyFragment) => {
-      setCurrentThread(thread)
+    forkThread: ({
+      id,
+      seq,
+      onCompleted,
+    }: CloneChatThreadMutationVariables & {
+      onCompleted?: (data: CloneChatThreadMutation) => void
+    }) => {
+      forkThread({
+        variables: { id, seq },
+        onCompleted: (data) => {
+          setCurrentThreadId(data.cloneThread?.id)
+          setCurrentInsight(null)
+          setOpen(true)
+          setShowForkToast(true)
+          onCompleted?.(data)
+        },
+        update: (cache, { data }) => addThreadToCache(cache, data?.cloneThread),
+      })
+    },
+    goToThread: (threadId: string) => {
+      setCurrentThreadId(threadId)
       setCurrentInsight(null)
       setOpen(true)
     },
     goToInsight: (insight: AiInsightFragment) => {
-      setCurrentThread(null)
+      setCurrentThreadId(null)
       setCurrentInsight(insight)
       setOpen(true)
     },
     goToThreadList: () => {
-      setCurrentThread(null)
+      setCurrentThreadId(null)
       setCurrentInsight(null)
       setOpen(true)
     },
-    closeChatbot: () => {
-      setOpen(false)
-    },
+    closeChatbot: () => setOpen(false),
+    currentThread,
+    currentInsight,
     fullscreen,
     setFullscreen,
-    loading,
-    error,
+    detailsLoading: threadLoading,
+    detailsError: threadError,
+    mutationLoading: createLoading || forkLoading,
+    mutationError: createError || forkError,
   }
+}
+
+const addThreadToCache = (
+  cache: ApolloCache<any>,
+  thread: Nullable<ChatThreadFragment>
+) => {
+  if (!thread) return
+  cache.writeQuery({
+    query: ChatThreadDetailsDocument,
+    variables: { id: thread.id },
+    data: { chatThread: thread },
+  })
 }
 
 export const useExplainWithAIContext = () => {

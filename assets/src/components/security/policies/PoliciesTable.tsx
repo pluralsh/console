@@ -3,7 +3,10 @@ import { Button, Table, TableProps } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import { PolicyConstraint, PolicyConstraintsQuery } from 'generated/graphql'
+import {
+  PolicyConstraintFragment,
+  PolicyConstraintsQuery,
+} from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
 import { getPolicyPath } from 'routes/securityRoutesConsts'
@@ -75,7 +78,7 @@ export function PoliciesTable({
         data={data?.policyConstraints?.edges || []}
         loading={!data && loading}
         columns={caret ? columnsWithActions : columns}
-        onRowClick={(_e, { original }: Row<Edge<PolicyConstraint>>) =>
+        onRowClick={(_e, { original }: Row<Edge<PolicyConstraintFragment>>) =>
           navigate(
             getPolicyPath({
               policyId: original.node?.id,

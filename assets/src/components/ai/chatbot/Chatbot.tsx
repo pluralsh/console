@@ -7,9 +7,7 @@ import {
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
-  AiInsightFragment,
   ChatThreadFragment,
-  ChatThreadTinyFragment,
   useChatThreadDetailsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql'
@@ -17,26 +15,27 @@ import { isEmpty } from 'lodash'
 import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { AITable } from '../AITable.tsx'
 import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
-import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
+import {
+  ChatbotMessagesWrapperSC,
+  ChatbotPanelThread,
+} from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
-  currentThread?: Nullable<ChatThreadTinyFragment>
-  currentInsight?: Nullable<AiInsightFragment>
 }
 
 export function Chatbot() {
-  const { open, setOpen, fullscreen, currentThread, currentInsight } =
-    useChatbotContext()
+  const { open, setOpen, fullscreen } = useChatbotContext()
   const settings = useDeploymentSettings()
 
   if (!settings.ai?.enabled) {
@@ -54,8 +53,6 @@ export function Chatbot() {
       <ChatbotPanel
         fullscreen={fullscreen}
         open={open}
-        currentThread={currentThread}
-        currentInsight={currentInsight}
       />
     </div>
   )
@@ -95,14 +92,11 @@ export function ChatbotPanel({
   )
 }
 
-function ChatbotPanelInner({
-  fullscreen,
-  currentThread,
-  currentInsight,
-  ...props
-}: ChatbotPanelInnerProps) {
+function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const { currentThread, currentInsight, detailsLoading, detailsError } =
+    useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
@@ -112,13 +106,11 @@ function ChatbotPanelInner({
     keyPath: ['chatThreads'],
   })
 
-  // optimistically updating when a user sends a message relies on using cache-first fetch policy here
+  // optimistically updating when a user sends a message relies on using cache-first (default) fetch policy here
+  // fresh data is fetched by the network in AIContext provider, where Apollo will populate the cache
   const threadDetailsQuery = useChatThreadDetailsQuery({
     skip: !currentThread,
     variables: { id: currentThread?.id ?? '' },
-    fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-first',
-    pollInterval: POLL_INTERVAL,
     onCompleted: (data) =>
       setShowPrompts(isEmpty(data.chatThread?.chats?.edges)),
   })
@@ -167,7 +159,12 @@ function ChatbotPanelInner({
             currentThread={currentThread}
             currentInsight={currentInsight}
           />
-          {currentThread ? (
+          {detailsError && <GqlError error={detailsError} />}
+          {!currentThread && !currentInsight && detailsLoading ? (
+            <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
+              <LoadingIndicator />
+            </ChatbotMessagesWrapperSC>
+          ) : currentThread ? (
             <ChatbotPanelThread
               currentThread={currentThread}
               threadDetailsQuery={threadDetailsQuery}
@@ -216,7 +213,7 @@ const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
     overflow: 'auto hidden',
     height: '100%',
     width: '100%',
-    maxWidth: $fullscreen ? '75vw' : 1096,
+    maxWidth: $fullscreen ? '80vw' : 1096,
   })
 )
 

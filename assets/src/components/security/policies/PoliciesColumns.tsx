@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { PolicyConstraint } from 'generated/graphql'
+import { PolicyConstraintFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
 import {
@@ -11,7 +11,7 @@ import {
 } from '@pluralsh/design-system'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 
-const columnHelper = createColumnHelper<Edge<PolicyConstraint>>()
+const columnHelper = createColumnHelper<Edge<PolicyConstraintFragment>>()
 
 export const ColPolicyName = columnHelper.accessor(({ node }) => node, {
   id: 'name',

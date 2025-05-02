@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 import { AiInsight } from '../../../generated/graphql.ts'
-import AIPinButton from '../../ai/AIPinButton.tsx'
+import { AIPinButton } from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,

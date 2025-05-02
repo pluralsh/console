@@ -5,8 +5,10 @@ import {
   CheckIcon,
   CopyIcon,
   Flex,
+  GitForkIcon,
   GitHubLogoIcon,
   IconFrame,
+  IconFrameProps,
   Markdown,
   PluralLogoMark,
   Spinner,
@@ -27,10 +29,12 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
 
 export function ChatMessage({
   id,
+  seq,
   content,
   role,
   type = ChatType.Text,
@@ -45,6 +49,7 @@ export function ChatMessage({
   ...props
 }: {
   id?: string
+  seq?: number
   content?: Nullable<string>
   role: AiRole
   type?: ChatType
@@ -58,9 +63,6 @@ export function ChatMessage({
   highlightToolContent?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
-  const [showActionsTimeout, setShowActionsTimeout] = useState<
-    NodeJS.Timeout | undefined
-  >(undefined)
   let finalContent: ReactNode
   const rightAlign = role === AiRole.User
 
@@ -70,7 +72,9 @@ export function ChatMessage({
     finalContent = (
       <ChatMessageContent
         id={id ?? ''}
+        seq={seq}
         showActions={showActions && !disableActions}
+        side={rightAlign ? 'right' : 'left'}
         content={content ?? ''}
         type={type}
         attributes={attributes}
@@ -98,14 +102,8 @@ export function ChatMessage({
       >
         {role !== AiRole.User && <PluralAssistantIcon />}
         <div
-          onMouseEnter={() => {
-            setShowActions(true)
-            setShowActionsTimeout(setTimeout(() => setShowActions(false), 1600))
-          }}
-          onMouseLeave={() => {
-            setShowActions(false)
-            clearTimeout(showActionsTimeout)
-          }}
+          onMouseEnter={() => setShowActions(true)}
+          onMouseLeave={() => setShowActions(false)}
           css={{
             overflow: 'hidden',
             flex: rightAlign ? undefined : 1,
@@ -113,11 +111,15 @@ export function ChatMessage({
           }}
         >
           {finalContent}
-          <ChatMessageActions
-            id={id ?? ''}
-            content={content ?? ''}
-            show={showActions && type !== ChatType.File && !disableActions}
-          />
+          {type !== ChatType.File && (
+            <ChatMessageActions
+              id={id ?? ''}
+              seq={seq}
+              content={content ?? ''}
+              show={showActions && !disableActions}
+              side={rightAlign ? 'right' : 'left'}
+            />
+          )}
         </div>
       </Flex>
     </ChatMessageSC>
@@ -126,20 +128,31 @@ export function ChatMessage({
 
 export function ChatMessageActions({
   id,
+  seq,
   content,
   show = true,
+  side,
+  iconFrameType = 'tertiary',
   ...props
 }: {
   id: string
+  seq: number | undefined
   content: string
   show?: boolean
-} & Omit<ComponentPropsWithRef<typeof ActionsWrapperSC>, '$show'>) {
+  side: 'left' | 'right'
+  iconFrameType?: IconFrameProps['type']
+} & Omit<ComponentPropsWithRef<typeof ActionsWrapperSC>, '$show' | '$side'>) {
+  const { forkThread, currentThread, mutationLoading } = useChatbot()
   const [copied, setCopied] = useState(false)
 
   const showCopied = () => {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const onDelete = () => !deleteLoading && deleteMessage({ variables: { id } })
+  const onFork = () =>
+    !mutationLoading && forkThread({ id: currentThread?.id ?? '', seq: seq })
 
   const [deleteMessage, { loading: deleteLoading }] = useDeleteChatMutation({
     awaitRefetchQueries: true,
@@ -150,6 +163,7 @@ export function ChatMessageActions({
     <ActionsWrapperSC
       onClick={(e) => e.stopPropagation()}
       $show={show}
+      $side={side}
       {...props}
     >
       <WrapWithIf
@@ -165,22 +179,34 @@ export function ChatMessageActions({
           clickable
           as="div"
           tooltip="Copy to clipboard"
-          type="floating"
-          size="medium"
-          icon={copied ? <CheckIcon color="icon-success" /> : <CopyIcon />}
+          type={iconFrameType}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
         />
       </WrapWithIf>
       <IconFrame
         clickable
         as="div"
-        tooltip="Delete message"
-        type="floating"
-        size="medium"
-        onClick={
-          deleteLoading ? undefined : () => deleteMessage({ variables: { id } })
-        }
+        tooltip="Fork thread from this message"
+        type={iconFrameType}
+        onClick={onFork}
         icon={
-          deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
+          mutationLoading ? <Spinner /> : <GitForkIcon color="icon-xlight" />
+        }
+      />
+      <IconFrame
+        clickable
+        as="div"
+        tooltip="Delete message"
+        type={iconFrameType}
+        onClick={onDelete}
+        icon={
+          deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-xlight" />
         }
       />
     </ActionsWrapperSC>
@@ -225,7 +251,7 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
         align="center"
       >
         <Flex
-          gap="small"
+          gap="medium"
           align="center"
         >
           <AppIcon
@@ -243,16 +269,17 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
   )
 }
 
-const ActionsWrapperSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  position: 'absolute',
-  zIndex: theme.zIndexes.tooltip,
-  top: 4,
-  right: theme.spacing.small,
+const ActionsWrapperSC = styled.div<{
+  $show: boolean
+  $side: 'left' | 'right'
+}>(({ theme, $show, $side }) => ({
   display: 'flex',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.xxsmall,
   opacity: $show ? 1 : 0,
   transition: '0.3s opacity ease',
   pointerEvents: $show ? 'auto' : 'none',
+  justifyContent: $side === 'left' ? 'flex-start' : 'flex-end',
+  padding: `${theme.spacing.xxxsmall}px 0`,
 }))
 
 const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({

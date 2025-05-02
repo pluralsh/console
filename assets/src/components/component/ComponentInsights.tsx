@@ -3,7 +3,7 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
 import { AiInsight } from '../../generated/graphql.ts'
-import AIPinButton from '../ai/AIPinButton.tsx'
+import { AIPinButton } from '../ai/AIPinButton.tsx'
 import {
   ChatWithAIButton,
   insightMessage,

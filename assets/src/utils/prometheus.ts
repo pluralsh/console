@@ -99,8 +99,8 @@ function formatCPU(value: number): string {
     divider *= coreBase
     power += 1
   }
-
-  return `${Number((value / divider).toFixed(0))}${corePowerSuffixes[power]}`
+  const decimals = value / divider < 1 ? 3 : 0
+  return `${Number((value / divider).toFixed(decimals))}${corePowerSuffixes[power]}`
 }
 
 function formatMemory(value: number): string {

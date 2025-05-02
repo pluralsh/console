@@ -90,7 +90,7 @@ export function AITableEntry({
 
   const onClick = useCallback(() => {
     if (isInsight && insight) goToInsight(insight)
-    if (!isInsight && thread) goToThread(thread)
+    if (!isInsight && thread) goToThread(thread.id)
   }, [isInsight, insight, goToInsight, thread, goToThread])
 
   if ((isInsight && !insight) || (!isInsight && !thread)) return null

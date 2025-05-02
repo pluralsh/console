@@ -12,7 +12,7 @@ import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_PATH,
 } from '../../../routes/cdRoutesConsts.tsx'
-import AIPinButton from '../../ai/AIPinButton.tsx'
+import { AIPinButton } from '../../ai/AIPinButton.tsx'
 import {
   ChatWithAIButton,
   insightMessage,

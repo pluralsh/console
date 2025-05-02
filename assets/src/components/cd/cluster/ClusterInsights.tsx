@@ -26,7 +26,7 @@ import {
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_INSIGHTS_SUMMARY_PATH,
 } from '../../../routes/cdRoutesConsts.tsx'
-import AIPinButton from '../../ai/AIPinButton.tsx'
+import { AIPinButton } from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
