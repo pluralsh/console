@@ -2167,6 +2167,16 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.17.2-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.17.1-eksbuild.2
     compatibilities:
     - '1.32'
@@ -3734,6 +3744,16 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.15.0-eksbuild.4
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v2.15.0-eksbuild.3
     compatibilities:
     - '1.32'
