@@ -5,6 +5,7 @@ import {
   TabPanel,
   Table,
   useSetBreadcrumbs,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
@@ -60,6 +61,8 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
+import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
+import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -106,6 +109,7 @@ export default function Clusters() {
   const navigate = useNavigate()
   const projectId = useProjectId()
   const cdIsEnabled = useCDEnabled()
+  const onboarded = useOnboarded()
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
@@ -239,17 +243,35 @@ export default function Clusters() {
         stateRef={tabStateRef}
         css={{ height: '100%', overflow: 'hidden' }}
       >
-        <ClustersTable
-          fullHeightWrap
-          data={tableData || []}
-          refetch={refetch}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          onVirtualSliceChange={setVirtualSlice}
-        />
+        <WrapWithIf
+          condition={!onboarded}
+          wrapper={
+            <div
+              css={{
+                display: 'flex',
+                border: theme.borders['fill-two'],
+                borderRadius: theme.borderRadiuses.medium,
+                flexDirection: 'column',
+                overflow: 'hidden',
+                height: '100%',
+              }}
+            />
+          }
+        >
+          <ClustersTable
+            flush={!onboarded}
+            fullHeightWrap={!!onboarded}
+            data={tableData || []}
+            refetch={refetch}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+          {!onboarded && <GettingStartedBlock />}
+        </WrapWithIf>
       </TabPanel>
     </div>
   ) : (

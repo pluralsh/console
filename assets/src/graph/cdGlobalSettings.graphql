@@ -47,6 +47,7 @@ fragment DeploymentSettings on DeploymentSettings {
   selfManaged
   insertedAt
   updatedAt
+  onboarded
   agentHelmValues
   logging {
     enabled
@@ -164,5 +165,11 @@ mutation DeleteObservabilityProvider($id: ID!) {
 mutation DeleteObservabilityWebhook($id: ID!) {
   deleteObservabilityWebhook(id: $id) {
     ...ObservabilityWebhook
+  }
+}
+
+mutation DissmissOnboarding {
+  dismissOnboarding {
+    onboarded
   }
 }

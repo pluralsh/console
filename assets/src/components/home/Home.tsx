@@ -8,44 +8,50 @@ import { DeploymentsCard } from './deployments/DeploymentsCard'
 import { PrCard } from './pullrequests/PrCard'
 import { ServiceCatalogs } from './ServiceCatalog.tsx'
 import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
+import { GettingStartedPopup } from './GettingStarted.tsx'
+import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export default function Home() {
   const theme = useTheme()
   const isManager = useIsManager()
+  const onboarded = useOnboarded()
 
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ResponsivePageFullWidth maxContentWidth={1440}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-          paddingBottom: theme.spacing.large,
-        }}
-      >
-        <ClusterOverviewCard />
-        <ServiceCatalogs />
-        <AiThreads />
-        {isManager && <ConstraintViolationsCard />}
+    <>
+      {!onboarded && <GettingStartedPopup />}
+      <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{
             display: 'flex',
             flexDirection: 'column',
             gap: theme.spacing.large,
-
-            '@media (min-width: 1168px)': {
-              flexDirection: 'row',
-            },
+            paddingBottom: theme.spacing.large,
           }}
         >
-          <PrCard />
-          <DeploymentsCard />
+          <ClusterOverviewCard />
+          <ServiceCatalogs />
+          <AiThreads />
+          {isManager && <ConstraintViolationsCard />}
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+
+              '@media (min-width: 1168px)': {
+                flexDirection: 'row',
+              },
+            }}
+          >
+            <PrCard />
+            <DeploymentsCard />
+          </div>
         </div>
-      </div>
-    </ResponsivePageFullWidth>
+      </ResponsivePageFullWidth>
+    </>
   )
 }
