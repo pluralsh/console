@@ -160,7 +160,7 @@ defmodule Console.MixProject do
       {:briefly, "~> 0.5.0"},
       {:libring, "~> 1.7"},
       {:http_stream, "~> 1.0.0"},
-      {:solid, "~> 0.15"},
+      {:solid, "~> 1.0.0-rc.0"},
       {:x509, "~> 0.8.5"},
       {:bamboo_phoenix, "~> 1.0"},
       {:slipstream, "~> 1.0"},

@@ -124,29 +124,23 @@ function Pipeline({ style, data, ...props }: EdgeProps) {
 function Network({ style, selected, data }: EdgeProps<NetworkEdgeData>) {
   const { colors } = useTheme()
   const path = generateElkEdgePath(data?.elkPathData)
-  const isBidirectional = data?.statsArr?.length === 2
-
-  let color: string = colors.border
-  let markerType = MarkerType.Arrow
-  if (selected) {
-    markerType = MarkerType.ArrowPrimary
-    color = colors['border-primary']
-  } else if (style?.stroke === colors['text-light']) {
-    markerType = MarkerType.ArrowHovered
-    color = colors['text-light']
-  }
-  const markerUrl = `url(#${markerType})`
 
   return (
     <BaseEdge
       path={path}
       style={{
         ...style,
-        stroke: color,
+        stroke: selected
+          ? colors['border-primary']
+          : style?.stroke || colors.border,
         transition: 'stroke 0.1s ease-out',
+        ...(selected && {
+          strokeDasharray: 8,
+          strokeDashoffset: 0,
+          animation: 'dash-animation 1s linear infinite',
+        }),
       }}
-      markerStart={isBidirectional ? markerUrl : undefined}
-      markerEnd={markerUrl}
+      css={{ '@keyframes dash-animation': { to: { strokeDashoffset: 16 } } }}
     />
   )
 }

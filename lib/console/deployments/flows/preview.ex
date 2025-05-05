@@ -45,29 +45,49 @@ defmodule Console.Deployments.Flows.Preview do
     end
   end
 
-  def sync_service(%Service{} = svc) do
-    fresh = Timex.now() |> Timex.shift(seconds: -10)
-    with true <- Timex.after?(svc.updated_at || Timex.now(), fresh),
-         %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} <- Repo.preload(svc, [:preview_instance]),
-      do: post_comment(inst)
+  def fresh?(updated_at), do: Timex.after?(updated_at || Timex.now(), Timex.shift(Timex.now(), minutes: -1))
+
+  def sync_service(%Service{deleted_at: nil} = svc) do
+    case Repo.preload(svc, [:preview_instance, :preview_templates]) do
+      %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} ->
+        post_comment(inst)
+      %Service{preview_templates: [_ | _], id: id, updated_at: updated_at} ->
+        if fresh?(updated_at) do
+          PreviewEnvironmentInstance.for_service(id)
+          |> PreviewEnvironmentInstance.preloaded()
+          |> PreviewEnvironmentInstance.ordered(asc: :id)
+          |> Repo.stream(method: :keyset)
+          |> Console.throttle()
+          |> Enum.each(&update_instance(&1, &1.pull_request))
+        end
+      _ -> :ok
+    end
   end
+  def sync_service(_), do: :ok
 
   defp post_comment(%PreviewEnvironmentInstance{} = inst) do
     %PreviewEnvironmentInstance{
-      pull_request: %PullRequest{url: url} = pr,
+      pull_request: %PullRequest{url: url, commit_sha: sha} = pr,
       service: svc,
       template: %PreviewEnvironmentTemplate{comment_template: msg} = tpl,
-    } = inst = Repo.preload(inst, [:service, :template, :pull_request])
+    } = inst = Repo.preload(inst, [:template, :pull_request, service: :cluster])
 
     with %ScmConnection{} = conn <- scm_connection(tpl),
          message = EEx.eval_string(@preview_comment, assigns: [
            url: Console.url("/cd/clusters/#{svc.cluster_id}/services/#{svc.id}/components"),
            comment_template: msg,
            service: svc,
-           status_color: color(svc.status)
+           sha: sha,
+           status_color: color(svc.status),
+           status_emoji: emoji(svc.status),
+           status_text: status(svc.status),
+           logs_url: Console.url("/cd/clusters/#{svc.cluster_id}/services/#{svc.id}/logs"),
+           flow_url: Console.url("/flows/#{tpl.flow_id}/services")
          ]),
          {:ok, message} <- render_liquid(message, liquid_context(pr, tpl)) do
-      Pr.Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(inst, ~w(status comment_id)a)}, message)
+      Console.nonce({:svc_review, svc.id}, message, fn ->
+        Pr.Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(inst, ~w(status comment_id)a)}, message)
+      end, ttl: :timer.seconds(15))
     else
       _ -> {:error, "could not create review comment for pr: #{url}"}
     end
@@ -82,7 +102,7 @@ defmodule Console.Deployments.Flows.Preview do
   def delete_instance(_), do: :ok
 
   defp create_instance(
-    %PreviewEnvironmentTemplate{reference_service: ref} = template,
+    %PreviewEnvironmentTemplate{reference_service: %Service{} = ref} = template,
     %PullRequest{} = pr
   ) do
     with {:ok, attrs} <- build_attributes(pr, template),
@@ -100,7 +120,7 @@ defmodule Console.Deployments.Flows.Preview do
   defp create_instance(_, _), do: :ok
 
   defp update_instance(
-    %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: svc} = inst,
+    %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,
     %PullRequest{} = pr
   ) do
     with {:ok, attrs} <- build_attributes(pr, tpl),
@@ -115,7 +135,9 @@ defmodule Console.Deployments.Flows.Preview do
     with {:ok, ns}   <- render_liquid(tpl.namespace || svc.namespace, ctx),
          {:ok, name} <- render_liquid(tpl.name || svc.name, ctx),
          {:ok, tpl}  <- template_helm_vals(svc,tpl, ctx) do
-      {:ok, ServiceTemplate.attributes(tpl, ns, name)}
+      ServiceTemplate.attributes(tpl, ns, name)
+      |> drop_nils_recursive()
+      |> ok()
     end
   end
 
@@ -140,27 +162,39 @@ defmodule Console.Deployments.Flows.Preview do
   defp scm_connection(_), do: Git.default_scm_connection()
 
   defp template_helm_vals(%Service{} = svc, %ServiceTemplate{helm: %{values: v}} = tpl, ctx) do
-    with {:ok, svc_values} <- Console.deep_get(svc, ~w(helm values)a, "{}") |> YamlElixir.read_from_string(),
-         {:ok, new_str}    <- render_liquid(v, ctx),
-         {:ok, new_values} <- YamlElixir.read_from_string(new_str),
-         {:ok, vals}       <- DeepMerge.deep_merge(svc_values, new_values) |> Jason.encode(),
+    with {:ok, svc_values}  <- safe_yaml(Console.deep_get(svc, ~w(helm values)a)),
+         {:ok, tpl_values}  <- render_liquid(v, ctx),
+         {:ok, new_values}  <- safe_yaml(tpl_values),
+         {:ok, vals}        <- DeepMerge.deep_merge(svc_values, new_values) |> Jason.encode(),
       do: {:ok, put_in(tpl.helm.values, vals)}
   end
   defp template_helm_vals(_, %ServiceTemplate{} = tpl, _), do: {:ok, tpl}
 
-  defp render_liquid(template, ctx) do
+  defp safe_yaml(val) when is_binary(val), do: YamlElixir.read_from_string(val)
+  defp safe_yaml(nil), do: {:ok, %{}}
+
+  defp render_liquid(template, ctx) when is_binary(template) do
     with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res}} <- {:render, Solid.render(tpl, ctx, strict_variables: true)} do
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, ctx, strict_variables: true)} do
       {:ok, IO.iodata_to_binary(res)}
     else
-      {:parse, {:error, %Solid.TemplateError{message: message}}} -> {:error, message}
+      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
       {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
     end
   end
+  defp render_liquid(template, _), do: {:ok, template}
 
   defp color(:healthy), do: :green
   defp color(:failed), do: :red
   defp color(_), do: :yellow
+
+  defp emoji(:healthy), do: ":white_check_mark:"
+  defp emoji(:failed), do: ":x:"
+  defp emoji(_), do: ":wrench:"
+
+  defp status(:healthy), do: "ready!"
+  defp status(:failed), do: "failed to deploy (check Plural to see details)"
+  defp status(_), do: "building..."
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
@@ -169,4 +203,17 @@ defmodule Console.Deployments.Flows.Preview do
   defp notify({:ok, %PreviewEnvironmentInstance{} = inst}, :update),
     do: handle_notify(PubSub.PreviewEnvironmentInstanceUpdated, inst)
   defp notify(pass, _), do: pass
+
+  defp drop_nils_recursive(%{__struct__: _} = struct) do
+    Map.from_struct(struct)
+    |> drop_nils_recursive()
+  end
+
+  defp drop_nils_recursive(%{} = map) do
+    Enum.filter(map, &elem(&1, 1) != nil)
+    |> Map.new(fn {k, v} -> {k, drop_nils_recursive(v)} end)
+  end
+
+  defp drop_nils_recursive(list) when is_list(list), do: Enum.map(list, &drop_nils_recursive/1)
+  defp drop_nils_recursive(v), do: v
 end

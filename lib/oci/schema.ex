@@ -52,6 +52,13 @@ defmodule Console.OCI.Tags do
   @type t :: %__MODULE__{}
   defstruct [:name, tags: []]
 
+  def new(body, filter) when is_function(filter, 1) do
+    %__MODULE__{
+      tags: Enum.filter(body["tags"], filter),
+      name: body["name"]
+    }
+  end
+
   def new(%{"tags" => tags, "name" => name}),
     do: %__MODULE__{tags: tags, name: name}
 

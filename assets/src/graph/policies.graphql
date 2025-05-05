@@ -1,6 +1,6 @@
 fragment PolicyConstraint on PolicyConstraint {
   cluster {
-    ...Cluster
+    ...ClusterBasic
   }
   description
   id

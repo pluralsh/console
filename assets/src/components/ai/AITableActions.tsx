@@ -1,12 +1,15 @@
 import {
+  ArrowRightIcon,
   Button,
   ChatOutlineIcon,
   Flex,
   FormField,
+  GitForkIcon,
   Input,
   ListBoxItem,
   Modal,
   PencilIcon,
+  Spinner,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
@@ -17,12 +20,13 @@ import {
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
 import { useState } from 'react'
-import { useChatbot } from './AIContext'
+import { useChatbot, useChatbotContext } from './AIContext'
 import { GqlError } from 'components/utils/Alert'
 
 enum MenuItemKey {
   OpenChat = 'open-chat',
   Rename = 'rename',
+  Fork = 'fork',
   Delete = 'delete',
 }
 
@@ -32,36 +36,50 @@ export function AITableActions({
   thread: Nullable<ChatThreadTinyFragment>
 }) {
   const [menuKey, setMenuKey] = useState<Nullable<string>>('')
-  const { goToThread } = useChatbot()
+  const { goToThread, forkThread, mutationLoading } = useChatbot()
 
   if (!thread) return null
 
   const onSelectionChange = (newKey: string) => {
-    if (newKey === MenuItemKey.OpenChat) goToThread(thread)
+    if (newKey === MenuItemKey.OpenChat) goToThread(thread.id)
+    else if (newKey === MenuItemKey.Fork)
+      forkThread({
+        id: thread.id,
+        onCompleted: (data) =>
+          data.cloneThread && goToThread(data.cloneThread.id),
+      })
     else setMenuKey(newKey)
   }
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
-      <MoreMenu onSelectionChange={onSelectionChange}>
+      <MoreMenu
+        onSelectionChange={onSelectionChange}
+        width={256}
+        {...(mutationLoading && { triggerButton: <Spinner /> })}
+      >
         <ListBoxItem
           key={MenuItemKey.OpenChat}
           leftContent={<ChatOutlineIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
           label="Open Chat"
-          textValue="Open Chat"
         />
         <ListBoxItem
           key={MenuItemKey.Rename}
           leftContent={<PencilIcon />}
           label="Rename thread"
-          textValue="Rename thread"
+        />
+        <ListBoxItem
+          key={MenuItemKey.Fork}
+          leftContent={<GitForkIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
+          label="Fork thread"
         />
         <ListBoxItem
           key={MenuItemKey.Delete}
           destructive
           leftContent={<TrashCanIcon color="icon-danger" />}
           label="Delete thread"
-          textValue="Delete thread"
         />
       </MoreMenu>
       {/* Modals */}
@@ -148,10 +166,15 @@ export function DeleteAiThreadModal({
   open: boolean
   onClose: Nullable<() => void>
 }) {
+  const { setCurrentThreadId } = useChatbotContext()
   const [mutation, { loading, error }] = useDeleteChatThreadMutation({
     variables: { id: thread.id },
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreads', 'AiPins'],
+    onCompleted: () => {
+      setCurrentThreadId(null)
+      onClose?.()
+    },
   })
 
   return (

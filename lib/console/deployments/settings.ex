@@ -202,6 +202,17 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  Sets the onboarded status to true for this instance
+  """
+  @spec onboarded() :: settings_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
+  def onboarded() do
+    fetch_consistent()
+    |> DeploymentSettings.onboarded_changeset(%{onboarded: true})
+    |> Repo.update()
+  end
+
+  @doc """
   Updates global deployment settings and busts cache
   """
   @spec vector_store_initialized() :: settings_resp

@@ -84,6 +84,34 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert sender.id == hook.id
     end
 
+    test "it can associate a flow with a pr and preview environment", %{conn: conn} do
+      hook = insert(:scm_webhook)
+      pr   = insert(:pull_request)
+      flow = insert(:flow)
+
+      payload = Jason.encode!(%{
+        "pull_request" => %{
+          "html_url" => pr.url,
+          "body" => """
+          Plural Flow: #{flow.name}
+          Plural Preview: test
+          """
+        }
+      })
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      pr = refetch(pr)
+      assert pr.flow_id == flow.id
+      assert pr.preview == "test"
+    end
+
     test "it can detect and create stack prs", %{conn: conn} do
       stack = insert(:stack)
       hook = insert(:scm_webhook)
@@ -179,6 +207,18 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [] = Console.Repo.all(Console.Schema.Alert)
     end
 
+    test "it will ignore if no associated plural resource is found (newrelic)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :newrelic)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/newrelic/#{hook.external_id}", String.trim(Console.conf(:newrelic_webhook_payload)))
+      |> response(200)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
     test "it can handle payloads with text in body (grafana)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :grafana)
       svc = insert(:service)
@@ -255,5 +295,29 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       assert_receive {:event, %Console.PubSub.AlertCreated{}}
     end
+  end
+
+  test "it can handle payloads with text in body (newrelic)", %{conn: conn} do
+    hook = insert(:observability_webhook, type: :newrelic)
+    proj = insert(:project, name: "test-project")
+    cluster = insert(:cluster, handle: "test-cluster")
+    svc = insert(:service, name: "test-service", cluster: cluster)
+
+    webhook = String.trim(Console.conf(:newrelic_webhook_payload)) |> Jason.decode!()
+
+    conn
+    |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+    |> put_req_header("content-type", "application/json")
+    |> post("/ext/v1/webhooks/observability/newrelic/#{hook.external_id}", Jason.encode!(webhook))
+    |> response(200)
+
+    [alert] = Console.Repo.all(Console.Schema.Alert)
+              |> Enum.map(&Console.Repo.preload(&1, :tags))
+
+    assert alert.service_id == svc.id
+    assert alert.cluster_id == cluster.id
+    assert alert.project_id == proj.id
+
+    assert_receive {:event, %Console.PubSub.AlertCreated{}}
   end
 end

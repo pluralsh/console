@@ -20,26 +20,26 @@ import {
   AiDelta,
   AiRole,
   ChatThreadDetailsQueryResult,
-  ChatThreadTinyFragment,
+  ChatThreadFragment,
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
   useChatMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
+import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
+import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 import {
   GeneratingResponseMessage,
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
-import { produce } from 'immer'
-import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -48,13 +48,17 @@ export function ChatbotPanelThread({
   shouldUseMCP,
   showMcpServers,
   setShowMcpServers,
+  showExamplePrompts = false,
+  setShowExamplePrompts,
 }: {
-  currentThread: ChatThreadTinyFragment
+  currentThread: ChatThreadFragment
   fullscreen: boolean
   threadDetailsQuery: ChatThreadDetailsQueryResult
   shouldUseMCP: boolean
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
+  showExamplePrompts: boolean
+  setShowExamplePrompts: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -91,8 +95,6 @@ export function ChatbotPanelThread({
   })
 
   const messages = mapExistingNodes(data?.chatThread?.chats)
-
-  const [showPrompts, setShowPrompts] = useState<boolean>(isEmpty(messages))
 
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
@@ -203,9 +205,9 @@ export function ChatbotPanelThread({
             <GeneratingResponseMessage />
           ))}
         {messageError && <GqlError error={messageError} />}
-        {showPrompts && (
+        {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
-            setShowPrompts={setShowPrompts}
+            setShowPrompts={setShowExamplePrompts}
             sendMessage={sendMessage}
           />
         )}
@@ -218,8 +220,8 @@ export function ChatbotPanelThread({
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
-        showPrompts={showPrompts}
-        setShowPrompts={setShowPrompts}
+        showPrompts={showExamplePrompts}
+        setShowPrompts={setShowExamplePrompts}
       />
     </>
   )
@@ -257,7 +259,7 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
+export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     position: 'relative',
     ...($fullscreen && {

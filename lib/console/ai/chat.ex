@@ -226,12 +226,13 @@ defmodule Console.AI.Chat do
       |> ChatThread.changeset(Map.merge(Console.mapify(thread), %{summary: "Clone of #{thread.summary}"}))
       |> Repo.insert()
     end)
-    |> add_operation(:chats, fn %{thread: thread} ->
-      Chat.for_thread(thread_id)
+    |> add_operation(:chats, fn %{thread: thread, clone: clone} ->
+      Chat.for_thread(thread.id)
       |> Chat.before(seq)
       |> Repo.all()
+      |> Enum.map(&Map.take(&1, ~w(content role confirm confirmed_at attributes server_id pull_request_id)a))
       |> Enum.map(&Console.mapify/1)
-      |> save_messages(thread.id, user)
+      |> save_messages(clone.id, user)
     end)
     |> execute(extract: :clone)
   end

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/proxy/bedrock"
+	"github.com/pluralsh/console/go/ai-proxy/proxy/ollama"
 	"github.com/pluralsh/console/go/ai-proxy/proxy/openai"
 	"github.com/pluralsh/console/go/ai-proxy/proxy/provider"
 )
@@ -30,6 +31,8 @@ func NewOpenAIProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, 
 		return openai.NewOpenAIProxy(host, credentials)
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockProxy(credentials)
+	case api.ProviderOllama:
+		return ollama.NewOllamaProxy(host)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
@@ -40,6 +43,8 @@ func NewOpenAIEmbeddingsProxy(p api.Provider, host, credentials string) (api.Ope
 		return openai.NewOpenAIEmbeddingsProxy(host, credentials)
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockEmbeddingsProxy(credentials)
+	case api.ProviderOllama:
+		return ollama.NewOllamaEmbeddingsProxy(host)
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }

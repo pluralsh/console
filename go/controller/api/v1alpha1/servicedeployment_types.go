@@ -25,7 +25,12 @@ const (
 )
 
 type ServiceKustomize struct {
+	// The path to the kustomization file to use
 	Path string `json:"path"`
+
+	// whether to enable helm for this kustomize deployment, used for inflating helm charts
+	// +kubebuilder:validation:Optional
+	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
 
 func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
@@ -33,7 +38,7 @@ func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
 		return nil
 	}
 
-	return &console.KustomizeAttributes{Path: sk.Path}
+	return &console.KustomizeAttributes{Path: sk.Path, EnableHelm: sk.EnableHelm}
 }
 
 type ServiceHelm struct {

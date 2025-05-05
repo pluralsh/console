@@ -218,6 +218,9 @@ fragment ClustersRow on Cluster {
   insight {
     ...AiInsightSummary
   }
+  deprecatedCustomResources {
+    ...DeprecatedCustomResource
+  }
 }
 
 fragment ClusterUpgradePlan on ClusterUpgradePlan {
@@ -283,12 +286,6 @@ fragment Cluster on Cluster {
   parentCluster {
     ...ClustersRow
   }
-  insight {
-    ...AiInsight
-  }
-  insightComponents {
-    ...ClusterInsightComponent
-  }
   alerts(first: 500) {
     # just to get the count
     edges {
@@ -297,6 +294,25 @@ fragment Cluster on Cluster {
       }
     }
   }
+}
+
+fragment ClusterInsight on Cluster {
+  id
+  insight {
+    ...AiInsight
+  }
+  insightComponents {
+    ...ClusterInsightComponent
+  }
+}
+
+fragment DeprecatedCustomResource on DeprecatedCustomResource {
+  name
+  group
+  kind
+  namespace
+  version
+  nextVersion
 }
 
 fragment CloudAddon on CloudAddon {
@@ -505,6 +521,12 @@ query Cluster($id: ID, $handle: String) {
 query ClusterBasic($id: ID!) {
   cluster(id: $id) {
     ...ClusterBasic
+  }
+}
+
+query ClusterInsight($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterInsight
   }
 }
 

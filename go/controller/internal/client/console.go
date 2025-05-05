@@ -157,6 +157,9 @@ type ConsoleClient interface {
 	GetMCPServer(ctx context.Context, id string) (*console.MCPServerFragment, error)
 	UpsertMCPServer(ctx context.Context, attr console.McpServerAttributes) (*console.MCPServerFragment, error)
 	DeleteMCPServer(ctx context.Context, id string) error
+	DeletePreviewEnvironmentTemplate(ctx context.Context, id string) error
+	GetPreviewEnvironmentTemplate(ctx context.Context, id, name *string) (*console.PreviewEnvironmentTemplateFragment, error)
+	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes console.PreviewEnvironmentTemplateAttributes) (*console.PreviewEnvironmentTemplateFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

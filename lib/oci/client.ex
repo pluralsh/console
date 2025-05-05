@@ -28,13 +28,13 @@ defmodule Console.OCI.Client do
     put_in(client.client.options.dkr_repo, "#{repo}/#{suffix}")
   end
 
-  def tags(client, query \\ "", acc \\ %Tags{}) do
+  def tags(client, filter \\ fn _ -> true end, query \\ "", acc \\ %Tags{}) do
     case authed_get(client, "/v2/:repo/tags/list?n=1000#{query}") do
       {:ok, %Req.Response{status: 200, body: body, headers: %{"link" => _}}} ->
-        new = Tags.new(body)
-        tags(client, "&last=#{List.last(new.tags)}", merge_tags(acc, new))
+        new = Tags.new(body, filter)
+        tags(client, filter, "&last=#{List.last(new.tags)}", merge_tags(acc, new))
       {:ok, %Req.Response{status: 200, body: body}} ->
-        {:ok, merge_tags(acc, Tags.new(body))}
+        {:ok, merge_tags(acc, Tags.new(body, filter))}
       err -> handle_error(err)
     end
   end

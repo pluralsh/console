@@ -17,16 +17,19 @@ defimpl Console.Deployments.PubSub.Previewable, for: [
   Console.PubSub.PullRequestUpdated
 ] do
   alias Console.Schema.PullRequest
+  alias Console.Deployments.Notifications.Utils
   alias Console.Deployments.Flows.Preview
 
   def reconcile(%@for{item: %PullRequest{status: s} = pr}) when s in ~w(merged closed)a,
     do: Preview.delete_instance(pr)
-  def reconcile(%@for{item: %PullRequest{} = pr}), do: Preview.sync_instance(pr)
+  def reconcile(%@for{item: %PullRequest{} = pr}) do
+    Utils.deduplicate({:pr_updated, pr.id}, fn ->
+      Preview.sync_instance(pr)
+    end, ttl: :timer.seconds(15))
+  end
 end
 
-defimpl Console.Deployments.PubSub.Previewable, for: [
-  Console.PubSub.PreviewEnvironmentInstanceCreated,
-] do
+defimpl Console.Deployments.PubSub.Previewable, for: Console.PubSub.PreviewEnvironmentInstanceCreated do
   alias Console.Deployments.Flows.Preview
 
   def reconcile(%@for{item: inst}), do: Preview.pr_comment(inst)
@@ -34,9 +37,14 @@ end
 
 defimpl Console.Deployments.PubSub.Previewable, for: [
   Console.PubSub.ServiceUpdated,
+  Console.PubSub.ServiceComponentsUpdated
 ] do
   alias Console.Deployments.Flows.Preview
 
-  def reconcile(%@for{item: svc}),
-    do: Preview.sync_service(svc)
+  def reconcile(%@for{item: svc}) do
+    case Preview.fresh?(svc.updated_at) do
+      true -> Preview.sync_service(svc)
+      false -> :ok
+    end
+  end
 end

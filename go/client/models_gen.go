@@ -2075,6 +2075,8 @@ type DeploymentSettings struct {
 	Logging *LoggingSettings `json:"logging,omitempty"`
 	// the root repo you used to run `plural up`
 	MgmtRepo *string `json:"mgmtRepo,omitempty"`
+	// whether the console has been onboarded and getting started pages need to be shown
+	Onboarded *bool `json:"onboarded,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -2904,12 +2906,17 @@ type KubernetesUnstructured struct {
 
 // metadata needed for configuring kustomize
 type Kustomize struct {
+	// the path to the kustomization file to use
 	Path string `json:"path"`
+	// if the kustomization will need to inflate a helm chart
+	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
 
 type KustomizeAttributes struct {
 	// the path to the kustomization file to use
 	Path string `json:"path"`
+	// if the kustomization will need to inflate a helm chart
+	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
 
 type LabelInput struct {

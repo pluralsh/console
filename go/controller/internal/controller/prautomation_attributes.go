@@ -13,7 +13,7 @@ import (
 )
 
 func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.PrAutomation) (*console.PrAutomationAttributes, *ctrl.Result, error) {
-	helper := utils.NewConsoleHelper(ctx, in.ConsoleClient, in.Client)
+	helper := utils.NewConsoleHelper(ctx, in.Client)
 
 	clusterID, err := helper.IDFromRef(pra.Spec.ClusterRef, &v1alpha1.Cluster{})
 	if err != nil {

@@ -11,7 +11,7 @@ import {
 import { LogLine } from 'components/cd/logs/LogLine'
 import { TRUNCATE } from 'components/utils/truncate'
 import { LogsEvidenceFragment } from 'generated/graphql'
-import { useState } from 'react'
+import { ReactElement, ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -60,29 +60,48 @@ export function LogsEvidencePanel({
             condition={!isTable}
             wrapper={<Card clickable />}
           >
-            <LogEvidenceLineSC
+            <BasicEvidenceLine
               key={i}
-              $table={isTable}
+              icon={<LogsIcon />}
+              content={log.line ?? log.lines?.[0]?.log}
               onClick={() => setSelectedLog(log)}
-            >
-              <IconFrame
-                icon={<LogsIcon />}
-                css={{ flexShrink: 0 }}
-                type="floating"
-              />
-              <span css={{ ...TRUNCATE, flex: 1 }}>
-                {log.line ?? log.lines?.[0]?.log}
-              </span>
-              <IconFrame
-                clickable
-                icon={<CaretRightIcon />}
-                onClick={() => setSelectedLog(log)}
-              />
-            </LogEvidenceLineSC>
+              isTable={isTable}
+            />
           </WrapWithIf>
         ))
       )}
     </EvidenceWrapperSC>
+  )
+}
+
+export function BasicEvidenceLine({
+  icon,
+  content,
+  onClick,
+  isTable,
+}: {
+  icon: ReactElement
+  content: ReactNode
+  onClick: () => void
+  isTable: boolean
+}) {
+  return (
+    <EvidenceLineSC
+      $table={isTable}
+      onClick={onClick}
+    >
+      <IconFrame
+        icon={icon}
+        css={{ flexShrink: 0 }}
+        type="floating"
+      />
+      <span css={{ ...TRUNCATE, flex: 1 }}>{content}</span>
+      <IconFrame
+        clickable
+        icon={<CaretRightIcon />}
+        onClick={onClick}
+      />
+    </EvidenceLineSC>
   )
 }
 
@@ -96,19 +115,17 @@ export const EvidenceWrapperSC = styled.div<{
   overflow: 'auto',
 }))
 
-const LogEvidenceLineSC = styled.div<{ $table: boolean }>(
-  ({ theme, $table }) => ({
-    ...theme.partials.text.body2Bold,
-    width: '100%',
-    color: theme.colors['text-light'],
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.small,
-    cursor: 'pointer',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    borderBottom: $table ? theme.borders.input : 'none',
-    '&:hover': {
-      backgroundColor: $table ? theme.colors['fill-one-hover'] : 'transparent',
-    },
-  })
-)
+const EvidenceLineSC = styled.div<{ $table: boolean }>(({ theme, $table }) => ({
+  ...theme.partials.text.body2Bold,
+  width: '100%',
+  color: theme.colors['text-light'],
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  cursor: 'pointer',
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  borderBottom: $table ? theme.borders.input : 'none',
+  '&:hover': {
+    backgroundColor: $table ? theme.colors['fill-one-hover'] : 'transparent',
+  },
+}))

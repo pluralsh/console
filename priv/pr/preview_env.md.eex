@@ -1,12 +1,16 @@
-Plural has deployed a preview environment for this PR.
+### <%= @status_emoji %> Deploy preview for <%= @service.name %> is <%= @status_text %>
 
-Service Name: <%= @service.name %>
-Service Status: <%= @service.component_status %> ![](https://img.shields.io/badge/<%= @service.status %>-<%= @status_color  %>)
-<%= if @comment_template do %>
-
-<details>
-<summary>Preview Environment details</summary>
-<%=  @comment_template %>
-</details>
+| Name  | Details |
+| :---: | ------- |
+| :zap: Service | <%= @service.name %> (<%= @service.component_status %> ready) |
+| :cloud: Cluster | <%= @service.cluster.name %> (<%= @service.cluster.distro %>) |
+| :octocat: Commit sha | <%= @sha %> |
+| ![](https://docs.plural.sh/favicon-16.png) Plural URL | [<%= Solid.StandardFilter.truncate(@url, 75) %>](<%= @url %>) |
+| :mag: Logs URL | [<%= Solid.StandardFilter.truncate(@logs_url, 75) %>](<%= @logs_url %>) |
+| :ocean: Flow URL | [<%= Solid.StandardFilter.truncate(@flow_url, 75) %>](<%= @flow_url %>) |<%= if @comment_template do %>
+<%= @comment_template %>
 <% end %>
-View your preview environment in the Plural Console [here](<%= @url %>)
+
+---
+
+You can learn more about preview environments and Plural Flows [here](https://docs.plural.sh/plural-features/flows)
