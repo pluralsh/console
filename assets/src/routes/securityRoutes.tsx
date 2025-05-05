@@ -7,6 +7,7 @@ import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnRe
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
 
 import {
+  COMPLIANCE_REPORTS_ABS_PATH,
   POLICIES_ABS_PATH,
   POLICIES_AFFECTED_RESOURCES_PATH,
   POLICIES_DETAILS_PATH,
@@ -23,6 +24,7 @@ import PolicyAffectedResources from 'components/security/policies/policy/affecte
 import { KUBERNETES_PARAM_CLUSTER } from './kubernetesRoutesConsts'
 import Cluster from 'components/kubernetes/Cluster'
 import { SecurityOverview } from 'components/security/overview/SecurityOverview'
+import { ComplianceReports } from '../components/security/compliance/ComplianceReports.tsx'
 
 export const securityRoutes = [
   <Route
@@ -41,6 +43,10 @@ export const securityRoutes = [
     <Route
       path={SECURITY_OVERVIEW_ABS_PATH}
       element={<SecurityOverview />}
+    />
+    <Route
+      path={COMPLIANCE_REPORTS_ABS_PATH}
+      element={<ComplianceReports />}
     />
     <Route
       path={POLICIES_REL_PATH}

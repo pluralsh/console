@@ -26,13 +26,12 @@ import {
   SECURITY_REL_PATH,
   SECURITY_ABS_PATH,
   VULNERABILITY_REPORTS_ABS_PATH,
-  VULNERABILITY_REPORTS_REL_PATH,
 } from 'routes/securityRoutesConsts'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
   {
-    label: VULNERABILITY_REPORTS_REL_PATH,
+    label: 'vulnerability reports',
     url: VULNERABILITY_REPORTS_ABS_PATH,
   },
 ]

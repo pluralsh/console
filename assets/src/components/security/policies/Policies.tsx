@@ -1,6 +1,5 @@
 import {
   ArrowScroll,
-  Flex,
   SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -25,8 +24,6 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
-import { CreatePolicyReportButton } from './CreatePolicyReportModal.tsx'
-import { PastReportsButton } from './PastReportsModal.tsx'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -103,13 +100,6 @@ export function Policies() {
               placeholder="Search policies"
             />
           </IconExpander>
-          <Flex
-            gap={'small'}
-            width={250}
-          >
-            <PastReportsButton />
-            <CreatePolicyReportButton />
-          </Flex>
         </FiltersWrapperSC>
       </ArrowScroll>
     ),
