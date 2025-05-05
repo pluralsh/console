@@ -62,6 +62,7 @@ import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
+import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -108,7 +109,7 @@ export default function Clusters() {
   const navigate = useNavigate()
   const projectId = useProjectId()
   const cdIsEnabled = useCDEnabled()
-  const showGettingStarted = true // TODO
+  const onboarded = useOnboarded()
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
@@ -243,7 +244,7 @@ export default function Clusters() {
         css={{ height: '100%', overflow: 'hidden' }}
       >
         <WrapWithIf
-          condition={showGettingStarted}
+          condition={!onboarded}
           wrapper={
             <div
               css={{
@@ -258,8 +259,8 @@ export default function Clusters() {
           }
         >
           <ClustersTable
-            flush={showGettingStarted}
-            fullHeightWrap={!showGettingStarted}
+            flush={!onboarded}
+            fullHeightWrap={!!onboarded}
             data={tableData || []}
             refetch={refetch}
             virtualizeRows
@@ -269,7 +270,7 @@ export default function Clusters() {
             reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
-          {showGettingStarted && <GettingStartedBlock />}
+          {!onboarded && <GettingStartedBlock />}
         </WrapWithIf>
       </TabPanel>
     </div>

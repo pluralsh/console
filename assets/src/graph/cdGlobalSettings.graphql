@@ -47,6 +47,7 @@ fragment DeploymentSettings on DeploymentSettings {
   selfManaged
   insertedAt
   updatedAt
+  onboarded
   agentHelmValues
   logging {
     enabled

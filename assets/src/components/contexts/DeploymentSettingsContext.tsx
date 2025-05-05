@@ -35,6 +35,12 @@ export function useAIEnabled() {
   return ctx.ai?.enabled
 }
 
+export function useOnboarded() {
+  const ctx = useDeploymentSettings()
+
+  return ctx.onboarded
+}
+
 export function DeploymentSettingsProvider({
   children,
 }: {

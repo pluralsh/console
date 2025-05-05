@@ -9,19 +9,20 @@ import { PrCard } from './pullrequests/PrCard'
 import { ServiceCatalogs } from './ServiceCatalog.tsx'
 import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 import { GettingStartedPopup } from './GettingStarted.tsx'
+import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export default function Home() {
   const theme = useTheme()
   const isManager = useIsManager()
-  const showGettingStarted = true // TODO
+  const onboarded = useOnboarded()
 
   useSetBreadcrumbs(breadcrumbs)
 
   return (
     <>
-      {showGettingStarted && <GettingStartedPopup />}
+      {!onboarded && <GettingStartedPopup />}
       <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{
