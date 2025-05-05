@@ -11501,6 +11501,11 @@ export type DeleteObservabilityWebhookMutationVariables = Exact<{
 
 export type DeleteObservabilityWebhookMutation = { __typename?: 'RootMutationType', deleteObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type DissmissOnboardingMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DissmissOnboardingMutation = { __typename?: 'RootMutationType', dismissOnboarding?: { __typename?: 'DeploymentSettings', onboarded?: boolean | null } | null };
+
 export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, description?: string | null, labels?: Record<string, unknown> | null, annotations?: Record<string, unknown> | null, pullSecrets?: Array<string | null> | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: Record<string, unknown> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
 
 export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
@@ -21423,6 +21428,38 @@ export function useDeleteObservabilityWebhookMutation(baseOptions?: Apollo.Mutat
 export type DeleteObservabilityWebhookMutationHookResult = ReturnType<typeof useDeleteObservabilityWebhookMutation>;
 export type DeleteObservabilityWebhookMutationResult = Apollo.MutationResult<DeleteObservabilityWebhookMutation>;
 export type DeleteObservabilityWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteObservabilityWebhookMutation, DeleteObservabilityWebhookMutationVariables>;
+export const DissmissOnboardingDocument = gql`
+    mutation DissmissOnboarding {
+  dismissOnboarding {
+    onboarded
+  }
+}
+    `;
+export type DissmissOnboardingMutationFn = Apollo.MutationFunction<DissmissOnboardingMutation, DissmissOnboardingMutationVariables>;
+
+/**
+ * __useDissmissOnboardingMutation__
+ *
+ * To run a mutation, you first call `useDissmissOnboardingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDissmissOnboardingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [dissmissOnboardingMutation, { data, loading, error }] = useDissmissOnboardingMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDissmissOnboardingMutation(baseOptions?: Apollo.MutationHookOptions<DissmissOnboardingMutation, DissmissOnboardingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DissmissOnboardingMutation, DissmissOnboardingMutationVariables>(DissmissOnboardingDocument, options);
+      }
+export type DissmissOnboardingMutationHookResult = ReturnType<typeof useDissmissOnboardingMutation>;
+export type DissmissOnboardingMutationResult = Apollo.MutationResult<DissmissOnboardingMutation>;
+export type DissmissOnboardingMutationOptions = Apollo.BaseMutationOptions<DissmissOnboardingMutation, DissmissOnboardingMutationVariables>;
 export const ManagedNamespacesDocument = gql`
     query ManagedNamespaces($first: Int, $after: String, $projectId: ID) {
   managedNamespaces(first: $first, after: $after, projectId: $projectId) {
@@ -29116,6 +29153,7 @@ export const namedOperations = {
     UpsertObservabilityWebhook: 'UpsertObservabilityWebhook',
     DeleteObservabilityProvider: 'DeleteObservabilityProvider',
     DeleteObservabilityWebhook: 'DeleteObservabilityWebhook',
+    DissmissOnboarding: 'DissmissOnboarding',
     UpsertObserver: 'UpsertObserver',
     DeleteObserver: 'DeleteObserver',
     deletePipeline: 'deletePipeline',

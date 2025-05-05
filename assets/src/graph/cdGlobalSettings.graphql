@@ -167,3 +167,9 @@ mutation DeleteObservabilityWebhook($id: ID!) {
     ...ObservabilityWebhook
   }
 }
+
+mutation DissmissOnboarding {
+  dismissOnboarding {
+    onboarded
+  }
+}

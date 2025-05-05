@@ -1,6 +1,8 @@
 import { Button, Card, ConfettiIcon, Flex } from '@pluralsh/design-system'
 import { Body1BoldP, Body2P } from '../utils/typography/Text.tsx'
 import { useTheme } from 'styled-components'
+import { useDissmissOnboardingMutation } from '../../generated/graphql.ts'
+import { GqlError } from '../utils/Alert.tsx'
 
 export function GettingStartedPopup() {
   const theme = useTheme()
@@ -55,6 +57,7 @@ export function GettingStartedBlock() {
 
 export function GettingStartedContent() {
   const theme = useTheme()
+  const [dismiss, { loading, error }] = useDissmissOnboardingMutation()
 
   return (
     <div
@@ -76,11 +79,18 @@ export function GettingStartedContent() {
         can begin to add more clusters. Check out the docs or contact us to
         learn more.
       </Body2P>
+      {error && <GqlError error={error} />}
       <Flex
         gap="xsmall"
         marginTop={theme.spacing.xsmall}
       >
-        <Button secondary>Dismiss</Button>
+        <Button
+          secondary
+          loading={loading}
+          onClick={() => dismiss()}
+        >
+          Dismiss
+        </Button>
         <Button
           floating
           as="a"
