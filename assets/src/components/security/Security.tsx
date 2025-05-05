@@ -3,6 +3,7 @@ import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import {
+  COMPLIANCE_REPORTS_REL_PATH,
   POLICIES_REL_PATH,
   SECURITY_OVERVIEW_REL_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
@@ -13,6 +14,7 @@ const directory = [
   { path: SECURITY_OVERVIEW_REL_PATH, label: 'Security overview' },
   { path: POLICIES_REL_PATH, label: 'Policies' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerability reports' },
+  { path: COMPLIANCE_REPORTS_REL_PATH, label: 'Compliance reports' },
 ]
 
 export function Security() {

@@ -5,6 +5,10 @@ export const SECURITY_OVERVIEW_REL_PATH = 'overview' as const
 export const SECURITY_OVERVIEW_ABS_PATH =
   `${SECURITY_ABS_PATH}/${SECURITY_OVERVIEW_REL_PATH}` as const
 
+export const COMPLIANCE_REPORTS_REL_PATH = 'compliance-reports' as const
+export const COMPLIANCE_REPORTS_ABS_PATH =
+  `${SECURITY_ABS_PATH}/${COMPLIANCE_REPORTS_REL_PATH}` as const
+
 export const POLICIES_REL_PATH = 'policies' as const
 export const POLICIES_ABS_PATH =
   `${SECURITY_ABS_PATH}/${POLICIES_REL_PATH}` as const
