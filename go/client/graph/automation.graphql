@@ -1,0 +1,49 @@
+fragment ScmWebhookFragment on ScmWebhook {
+  id
+  insertedAt
+  updatedAt
+  name
+  owner
+  type
+  url
+}
+
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+  id
+  insertedAt
+  updatedAt
+  name
+  type
+  url
+}
+
+query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
+  scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...ScmWebhookFragment
+      }
+    }
+  }
+}
+
+mutation CreateScmWebhook($connectionId: ID!, $owner: String!) {
+  createScmWebhook(connectionId: $connectionId, owner: $owner) {
+    ...ScmWebhookFragment
+  }
+}
+
+mutation DeleteScmWebhook($id: ID!) {
+  deleteScmWebhook(id: $id) {
+    ...ScmWebhookFragment
+  }
+}
+
+mutation CreateObservabilityWebhook($id: ID!) {
+  deleteObservabilityWebhook(id: $id) {
+    ...ObservabilityWebhookFragment
+  }
+}
