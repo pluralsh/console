@@ -23,6 +23,59 @@ fragment FlowBasicWithBindings on Flow {
   }
 }
 
+fragment PreviewEnvironmentTemplate on PreviewEnvironmentTemplate {
+  id
+  name
+  commentTemplate
+  referenceService {
+    id
+    name
+    cluster {
+      id
+    }
+  }
+  template {
+    ...ServiceTemplateWithoutConfiguration
+  }
+}
+
+fragment PreviewEnvironmentInstance on PreviewEnvironmentInstance {
+  id
+  pullRequest {
+    url
+  }
+  service {
+    ...ServiceDeploymentTiny
+  }
+  template {
+    name
+  }
+  updatedAt
+  insertedAt
+}
+
+fragment PreviewEnvironmentInstanceConnection on PreviewEnvironmentInstanceConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...PreviewEnvironmentInstance
+    }
+  }
+}
+
+fragment PreviewEnvironmentTemplateConnection on PreviewEnvironmentTemplateConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...PreviewEnvironmentTemplate
+    }
+  }
+}
+
 query Flows($first: Int = 100, $after: String, $q: String) {
   flows(first: $first, after: $after, q: $q) {
     edges {
@@ -74,6 +127,32 @@ query FlowPrs($id: ID!, $first: Int = 100, $after: String) {
     id
     pullRequests(first: $first, after: $after) {
       ...PullRequestConnection
+    }
+  }
+}
+
+query FlowPreviewEnvironmentInstances(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+) {
+  flow(id: $id) {
+    id
+    previewEnvironmentInstances(first: $first, after: $after) {
+      ...PreviewEnvironmentInstanceConnection
+    }
+  }
+}
+
+query FlowPreviewEnvironmentTemplates(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+) {
+  flow(id: $id) {
+    id
+    previewEnvironmentTemplates(first: $first, after: $after) {
+      ...PreviewEnvironmentTemplateConnection
     }
   }
 }

@@ -169,6 +169,12 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
     name
     handle
   }
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
 }
 
 fragment ServiceTreeNode on ServiceDeployment {
