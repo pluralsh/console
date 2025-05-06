@@ -1,5 +1,7 @@
 [
-  "Give me the details of the deployment resource.",
   "Query the error logs on the prod cluster.",
-  "What are all the components of the prod clusters service?"
+  "Can you describe the dev cluster's plural service?",
+  "What are all the components of the prod cluster's service?",
+  "Give me the details of the deployment resource in that plural service?",
+  "Can you search for recent prs with changes related to the error logs?"
 ]

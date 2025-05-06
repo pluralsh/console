@@ -286,6 +286,9 @@ fragment Cluster on Cluster {
   parentCluster {
     ...ClustersRow
   }
+  operationalLayout {
+    serviceMesh
+  }
   alerts(first: 500) {
     # just to get the count
     edges {

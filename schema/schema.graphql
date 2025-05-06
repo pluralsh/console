@@ -139,6 +139,8 @@ type RootQueryType {
     after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String
   ): PullRequestConnection
 
+  scmWebhook(id: ID, externalId: String): ScmWebhook
+
   scmWebhooks(after: String, first: Int, before: String, last: Int): ScmWebhookConnection
 
   dependencyManagementServices(after: String, first: Int, before: String, last: Int): DependencyManagementServiceConnection
@@ -5538,6 +5540,9 @@ type Cluster {
   "an ai insight generated about issues discovered which might impact the health of this cluster"
   insight: AiInsight
 
+  "a high level description of the setup of common resources in a cluster"
+  operationalLayout: OperationalLayout
+
   "a set of kubernetes resources used to generate the ai insight for this cluster"
   insightComponents: [ClusterInsightComponent]
 
@@ -6283,6 +6288,11 @@ type NetworkMeshEdge {
   from: NetworkMeshWorkload!
   to: NetworkMeshWorkload!
   statistics: NetworkMeshStatistics!
+}
+
+"a high level description of the setup of common resources in a cluster"
+type OperationalLayout {
+  serviceMesh: ServiceMesh
 }
 
 type ClusterConnection {
