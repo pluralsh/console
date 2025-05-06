@@ -8,16 +8,8 @@ fragment ScmWebhookFragment on ScmWebhook {
   url
 }
 
-fragment ObservabilityWebhookFragment on ObservabilityWebhook {
-  id
-  insertedAt
-  updatedAt
-  name
-  type
-  url
-}
 
-query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
+query ListScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
   scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
       ...PageInfoFragment
@@ -27,6 +19,12 @@ query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
         ...ScmWebhookFragment
       }
     }
+  }
+}
+
+query GetScmWebhook($id: ID, $externalId: String) {
+  scmWebhook(id: $id, externalId: $externalId) {
+    ...ScmWebhookFragment
   }
 }
 
@@ -42,7 +40,41 @@ mutation DeleteScmWebhook($id: ID!) {
   }
 }
 
-mutation CreateObservabilityWebhook($id: ID!) {
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+  id
+  insertedAt
+  updatedAt
+  name
+  type
+  url
+}
+
+query ListObservabilityWebhooks($after: String, $before: String, $first: Int, $last: Int) {
+  observabilityWebhooks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...ObservabilityWebhookFragment
+      }
+    }
+  }
+}
+
+query GetObservabilityWebhook($id: ID, $name: String) {
+  observabilityWebhook(id: $id, name: $name) {
+    ...ObservabilityWebhookFragment
+  }
+}
+
+mutation UpsertObservabilityWebhook($attributes: ObservabilityWebhookAttributes!) {
+  upsertObservabilityWebhook(attributes: $attributes) {
+    ...ObservabilityWebhookFragment
+  }
+}
+
+mutation DeleteObservabilityWebhook($id: ID!) {
   deleteObservabilityWebhook(id: $id) {
     ...ObservabilityWebhookFragment
   }
