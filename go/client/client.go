@@ -10,6 +10,14 @@ import (
 
 type ConsoleClient interface {
 	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
+	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
+	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
+	CreateScmWebhook(ctx context.Context, connectionID string, owner string, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhook, error)
+	DeleteScmWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteScmWebhook, error)
+	ListObservabilityWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityWebhooks, error)
+	GetObservabilityWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityWebhook, error)
+	UpsertObservabilityWebhook(ctx context.Context, attributes ObservabilityWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityWebhook, error)
+	DeleteObservabilityWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityWebhook, error)
 	CreateClusterBackup(ctx context.Context, attributes BackupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterBackup, error)
 	GetClusterBackup(ctx context.Context, id *string, clusterID *string, namespace *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterBackup, error)
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
@@ -227,6 +235,105 @@ type Client struct {
 
 func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+}
+
+type ScmWebhookFragment struct {
+	ID         string  "json:\"id\" graphql:\"id\""
+	InsertedAt *string "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	Name       string  "json:\"name\" graphql:\"name\""
+	Owner      string  "json:\"owner\" graphql:\"owner\""
+	Type       ScmType "json:\"type\" graphql:\"type\""
+	URL        string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ScmWebhookFragment) GetID() string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *ScmWebhookFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *ScmWebhookFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *ScmWebhookFragment) GetName() string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *ScmWebhookFragment) GetOwner() string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.Owner
+}
+func (t *ScmWebhookFragment) GetType() *ScmType {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return &t.Type
+}
+func (t *ScmWebhookFragment) GetURL() string {
+	if t == nil {
+		t = &ScmWebhookFragment{}
+	}
+	return t.URL
+}
+
+type ObservabilityWebhookFragment struct {
+	ID         string                   "json:\"id\" graphql:\"id\""
+	InsertedAt *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                  "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	Name       string                   "json:\"name\" graphql:\"name\""
+	Type       ObservabilityWebhookType "json:\"type\" graphql:\"type\""
+	URL        string                   "json:\"url\" graphql:\"url\""
+}
+
+func (t *ObservabilityWebhookFragment) GetID() string {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *ObservabilityWebhookFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *ObservabilityWebhookFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *ObservabilityWebhookFragment) GetName() string {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *ObservabilityWebhookFragment) GetType() *ObservabilityWebhookType {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return &t.Type
+}
+func (t *ObservabilityWebhookFragment) GetURL() string {
+	if t == nil {
+		t = &ObservabilityWebhookFragment{}
+	}
+	return t.URL
 }
 
 type ClusterBackupFragment struct {
@@ -7416,6 +7523,64 @@ func (t *StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	return t.RequireApproval
 }
 
+type ListScmWebhooks_ScmWebhooks_Edges struct {
+	Node *ScmWebhookFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListScmWebhooks_ScmWebhooks_Edges) GetNode() *ScmWebhookFragment {
+	if t == nil {
+		t = &ListScmWebhooks_ScmWebhooks_Edges{}
+	}
+	return t.Node
+}
+
+type ListScmWebhooks_ScmWebhooks struct {
+	PageInfo PageInfoFragment                     "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ListScmWebhooks_ScmWebhooks_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListScmWebhooks_ScmWebhooks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListScmWebhooks_ScmWebhooks{}
+	}
+	return &t.PageInfo
+}
+func (t *ListScmWebhooks_ScmWebhooks) GetEdges() []*ListScmWebhooks_ScmWebhooks_Edges {
+	if t == nil {
+		t = &ListScmWebhooks_ScmWebhooks{}
+	}
+	return t.Edges
+}
+
+type ListObservabilityWebhooks_ObservabilityWebhooks_Edges struct {
+	Node *ObservabilityWebhookFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListObservabilityWebhooks_ObservabilityWebhooks_Edges) GetNode() *ObservabilityWebhookFragment {
+	if t == nil {
+		t = &ListObservabilityWebhooks_ObservabilityWebhooks_Edges{}
+	}
+	return t.Node
+}
+
+type ListObservabilityWebhooks_ObservabilityWebhooks struct {
+	PageInfo PageInfoFragment                                         "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ListObservabilityWebhooks_ObservabilityWebhooks_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListObservabilityWebhooks_ObservabilityWebhooks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListObservabilityWebhooks_ObservabilityWebhooks{}
+	}
+	return &t.PageInfo
+}
+func (t *ListObservabilityWebhooks_ObservabilityWebhooks) GetEdges() []*ListObservabilityWebhooks_ObservabilityWebhooks_Edges {
+	if t == nil {
+		t = &ListObservabilityWebhooks_ObservabilityWebhooks{}
+	}
+	return t.Edges
+}
+
 type CreateClusterBackup_CreateClusterBackup_ClusterBackupFragment_Cluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -14463,6 +14628,94 @@ func (t *AddClusterAuditLog) GetAddClusterAuditLog() *bool {
 	return t.AddClusterAuditLog
 }
 
+type ListScmWebhooks struct {
+	ScmWebhooks *ListScmWebhooks_ScmWebhooks "json:\"scmWebhooks,omitempty\" graphql:\"scmWebhooks\""
+}
+
+func (t *ListScmWebhooks) GetScmWebhooks() *ListScmWebhooks_ScmWebhooks {
+	if t == nil {
+		t = &ListScmWebhooks{}
+	}
+	return t.ScmWebhooks
+}
+
+type GetScmWebhook struct {
+	ScmWebhook *ScmWebhookFragment "json:\"scmWebhook,omitempty\" graphql:\"scmWebhook\""
+}
+
+func (t *GetScmWebhook) GetScmWebhook() *ScmWebhookFragment {
+	if t == nil {
+		t = &GetScmWebhook{}
+	}
+	return t.ScmWebhook
+}
+
+type CreateScmWebhook struct {
+	CreateScmWebhook *ScmWebhookFragment "json:\"createScmWebhook,omitempty\" graphql:\"createScmWebhook\""
+}
+
+func (t *CreateScmWebhook) GetCreateScmWebhook() *ScmWebhookFragment {
+	if t == nil {
+		t = &CreateScmWebhook{}
+	}
+	return t.CreateScmWebhook
+}
+
+type DeleteScmWebhook struct {
+	DeleteScmWebhook *ScmWebhookFragment "json:\"deleteScmWebhook,omitempty\" graphql:\"deleteScmWebhook\""
+}
+
+func (t *DeleteScmWebhook) GetDeleteScmWebhook() *ScmWebhookFragment {
+	if t == nil {
+		t = &DeleteScmWebhook{}
+	}
+	return t.DeleteScmWebhook
+}
+
+type ListObservabilityWebhooks struct {
+	ObservabilityWebhooks *ListObservabilityWebhooks_ObservabilityWebhooks "json:\"observabilityWebhooks,omitempty\" graphql:\"observabilityWebhooks\""
+}
+
+func (t *ListObservabilityWebhooks) GetObservabilityWebhooks() *ListObservabilityWebhooks_ObservabilityWebhooks {
+	if t == nil {
+		t = &ListObservabilityWebhooks{}
+	}
+	return t.ObservabilityWebhooks
+}
+
+type GetObservabilityWebhook struct {
+	ObservabilityWebhook *ObservabilityWebhookFragment "json:\"observabilityWebhook,omitempty\" graphql:\"observabilityWebhook\""
+}
+
+func (t *GetObservabilityWebhook) GetObservabilityWebhook() *ObservabilityWebhookFragment {
+	if t == nil {
+		t = &GetObservabilityWebhook{}
+	}
+	return t.ObservabilityWebhook
+}
+
+type UpsertObservabilityWebhook struct {
+	UpsertObservabilityWebhook *ObservabilityWebhookFragment "json:\"upsertObservabilityWebhook,omitempty\" graphql:\"upsertObservabilityWebhook\""
+}
+
+func (t *UpsertObservabilityWebhook) GetUpsertObservabilityWebhook() *ObservabilityWebhookFragment {
+	if t == nil {
+		t = &UpsertObservabilityWebhook{}
+	}
+	return t.UpsertObservabilityWebhook
+}
+
+type DeleteObservabilityWebhook struct {
+	DeleteObservabilityWebhook *ObservabilityWebhookFragment "json:\"deleteObservabilityWebhook,omitempty\" graphql:\"deleteObservabilityWebhook\""
+}
+
+func (t *DeleteObservabilityWebhook) GetDeleteObservabilityWebhook() *ObservabilityWebhookFragment {
+	if t == nil {
+		t = &DeleteObservabilityWebhook{}
+	}
+	return t.DeleteObservabilityWebhook
+}
+
 type CreateClusterBackup struct {
 	CreateClusterBackup *ClusterBackupFragment "json:\"createClusterBackup,omitempty\" graphql:\"createClusterBackup\""
 }
@@ -16774,6 +17027,297 @@ func (c *Client) AddClusterAuditLog(ctx context.Context, attributes ClusterAudit
 
 	var res AddClusterAuditLog
 	if err := c.Client.Post(ctx, "AddClusterAuditLog", AddClusterAuditLogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListScmWebhooksDocument = `query ListScmWebhooks ($after: String, $before: String, $first: Int, $last: Int) {
+	scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... ScmWebhookFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ScmWebhookFragment on ScmWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	owner
+	type
+	url
+}
+`
+
+func (c *Client) ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error) {
+	vars := map[string]any{
+		"after":  after,
+		"before": before,
+		"first":  first,
+		"last":   last,
+	}
+
+	var res ListScmWebhooks
+	if err := c.Client.Post(ctx, "ListScmWebhooks", ListScmWebhooksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetScmWebhookDocument = `query GetScmWebhook ($id: ID, $externalId: String) {
+	scmWebhook(id: $id, externalId: $externalId) {
+		... ScmWebhookFragment
+	}
+}
+fragment ScmWebhookFragment on ScmWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	owner
+	type
+	url
+}
+`
+
+func (c *Client) GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error) {
+	vars := map[string]any{
+		"id":         id,
+		"externalId": externalID,
+	}
+
+	var res GetScmWebhook
+	if err := c.Client.Post(ctx, "GetScmWebhook", GetScmWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateScmWebhookDocument = `mutation CreateScmWebhook ($connectionId: ID!, $owner: String!) {
+	createScmWebhook(connectionId: $connectionId, owner: $owner) {
+		... ScmWebhookFragment
+	}
+}
+fragment ScmWebhookFragment on ScmWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	owner
+	type
+	url
+}
+`
+
+func (c *Client) CreateScmWebhook(ctx context.Context, connectionID string, owner string, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhook, error) {
+	vars := map[string]any{
+		"connectionId": connectionID,
+		"owner":        owner,
+	}
+
+	var res CreateScmWebhook
+	if err := c.Client.Post(ctx, "CreateScmWebhook", CreateScmWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteScmWebhookDocument = `mutation DeleteScmWebhook ($id: ID!) {
+	deleteScmWebhook(id: $id) {
+		... ScmWebhookFragment
+	}
+}
+fragment ScmWebhookFragment on ScmWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	owner
+	type
+	url
+}
+`
+
+func (c *Client) DeleteScmWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteScmWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteScmWebhook
+	if err := c.Client.Post(ctx, "DeleteScmWebhook", DeleteScmWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListObservabilityWebhooksDocument = `query ListObservabilityWebhooks ($after: String, $before: String, $first: Int, $last: Int) {
+	observabilityWebhooks(after: $after, before: $before, first: $first, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... ObservabilityWebhookFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	type
+	url
+}
+`
+
+func (c *Client) ListObservabilityWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityWebhooks, error) {
+	vars := map[string]any{
+		"after":  after,
+		"before": before,
+		"first":  first,
+		"last":   last,
+	}
+
+	var res ListObservabilityWebhooks
+	if err := c.Client.Post(ctx, "ListObservabilityWebhooks", ListObservabilityWebhooksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetObservabilityWebhookDocument = `query GetObservabilityWebhook ($id: ID, $name: String) {
+	observabilityWebhook(id: $id, name: $name) {
+		... ObservabilityWebhookFragment
+	}
+}
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	type
+	url
+}
+`
+
+func (c *Client) GetObservabilityWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityWebhook, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetObservabilityWebhook
+	if err := c.Client.Post(ctx, "GetObservabilityWebhook", GetObservabilityWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertObservabilityWebhookDocument = `mutation UpsertObservabilityWebhook ($attributes: ObservabilityWebhookAttributes!) {
+	upsertObservabilityWebhook(attributes: $attributes) {
+		... ObservabilityWebhookFragment
+	}
+}
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	type
+	url
+}
+`
+
+func (c *Client) UpsertObservabilityWebhook(ctx context.Context, attributes ObservabilityWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityWebhook, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertObservabilityWebhook
+	if err := c.Client.Post(ctx, "UpsertObservabilityWebhook", UpsertObservabilityWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteObservabilityWebhookDocument = `mutation DeleteObservabilityWebhook ($id: ID!) {
+	deleteObservabilityWebhook(id: $id) {
+		... ObservabilityWebhookFragment
+	}
+}
+fragment ObservabilityWebhookFragment on ObservabilityWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	type
+	url
+}
+`
+
+func (c *Client) DeleteObservabilityWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteObservabilityWebhook
+	if err := c.Client.Post(ctx, "DeleteObservabilityWebhook", DeleteObservabilityWebhookDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -31943,6 +32487,14 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 
 var DocumentOperationNames = map[string]string{
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
+	ListScmWebhooksDocument:                           "ListScmWebhooks",
+	GetScmWebhookDocument:                             "GetScmWebhook",
+	CreateScmWebhookDocument:                          "CreateScmWebhook",
+	DeleteScmWebhookDocument:                          "DeleteScmWebhook",
+	ListObservabilityWebhooksDocument:                 "ListObservabilityWebhooks",
+	GetObservabilityWebhookDocument:                   "GetObservabilityWebhook",
+	UpsertObservabilityWebhookDocument:                "UpsertObservabilityWebhook",
+	DeleteObservabilityWebhookDocument:                "DeleteObservabilityWebhook",
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
