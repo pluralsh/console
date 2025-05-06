@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -20,6 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/yaml"
 )
+
+const apiVersion = "deployments.plural.sh/v1alpha1"
 
 // ClusterSyncReconciler reconciles a ClusterSync object
 type ClusterSyncReconciler struct {
@@ -81,7 +84,7 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 		for _, cluster := range clusters {
-			clusterCRD, err := templateCluster(cluster, yamlTemplate)
+			clusterCRD, u, err := templateCluster(cluster, yamlTemplate)
 			if err != nil {
 				logger.Error(err, "failed to template cluster")
 				continue
@@ -92,7 +95,9 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			existingCluster := &v1alpha1.Cluster{}
 			if err := r.Client.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
 				if apierrors.IsNotFound(err) {
-					if err := r.Client.Create(ctx, clusterCRD); err != nil {
+					// to avoid spec.cloud validation
+					u.SetNamespace(clusterCRD.Namespace)
+					if err := r.Client.Create(ctx, u); err != nil {
 						logger.Error(err, "failed to create cluster")
 					}
 				} else {
@@ -121,10 +126,10 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return requeue, nil
 }
 
-func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (*v1alpha1.Cluster, error) {
+func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (*v1alpha1.Cluster, *unstructured.Unstructured, error) {
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(clusterAPI.Node)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	configuration := map[string]interface{}{
 		"cluster": unstructuredObj,
@@ -132,14 +137,23 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 
 	templated, err := utils.RenderString(template, configuration)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	cst := &v1alpha1.Cluster{}
 	if err := yaml.Unmarshal([]byte(templated), cst); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-
-	return cst, nil
+	unstructuredObj, err = runtime.DefaultUnstructuredConverter.ToUnstructured(cst)
+	if err != nil {
+		return nil, nil, err
+	}
+	if cst.Spec.Cloud == "" {
+		unstructured.RemoveNestedField(unstructuredObj, "spec", "cloud")
+	}
+	u := &unstructured.Unstructured{Object: unstructuredObj}
+	u.SetKind("Cluster")
+	u.SetAPIVersion(apiVersion)
+	return cst, u, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
