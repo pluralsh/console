@@ -145,7 +145,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         distro
     }
     kustomize {
-        path
+        ...KustomizeFragment
     }
     helm {
         release

@@ -764,7 +764,7 @@ type ServiceDeploymentForAgent struct {
 	Templated     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
 	Sha           *string                                    "json:\"sha,omitempty\" graphql:\"sha\""
 	Cluster       *ServiceDeploymentForAgent_Cluster         "json:\"cluster,omitempty\" graphql:\"cluster\""
-	Kustomize     *ServiceDeploymentForAgent_Kustomize       "json:\"kustomize,omitempty\" graphql:\"kustomize\""
+	Kustomize     *KustomizeFragment                         "json:\"kustomize,omitempty\" graphql:\"kustomize\""
 	Helm          *ServiceDeploymentForAgent_Helm            "json:\"helm,omitempty\" graphql:\"helm\""
 	Configuration []*ServiceDeploymentForAgent_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Contexts      []*ServiceDeploymentForAgent_Contexts      "json:\"contexts,omitempty\" graphql:\"contexts\""
@@ -833,7 +833,7 @@ func (t *ServiceDeploymentForAgent) GetCluster() *ServiceDeploymentForAgent_Clus
 	}
 	return t.Cluster
 }
-func (t *ServiceDeploymentForAgent) GetKustomize() *ServiceDeploymentForAgent_Kustomize {
+func (t *ServiceDeploymentForAgent) GetKustomize() *KustomizeFragment {
 	if t == nil {
 		t = &ServiceDeploymentForAgent{}
 	}
@@ -5344,17 +5344,6 @@ func (t *ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
 	return t.Distro
 }
 
-type ServiceDeploymentForAgent_Kustomize struct {
-	Path string "json:\"path\" graphql:\"path\""
-}
-
-func (t *ServiceDeploymentForAgent_Kustomize) GetPath() string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Kustomize{}
-	}
-	return t.Path
-}
-
 type ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -6212,17 +6201,6 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Distro
-}
-
-type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize struct {
-	Path string "json:\"path\" graphql:\"path\""
-}
-
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize) GetPath() string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize{}
-	}
-	return t.Path
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
@@ -10775,17 +10753,6 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	return t.Distro
 }
 
-type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize struct {
-	Path string "json:\"path\" graphql:\"path\""
-}
-
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize) GetPath() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Kustomize{}
-	}
-	return t.Path
-}
-
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -11191,17 +11158,6 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Distro
-}
-
-type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize struct {
-	Path string "json:\"path\" graphql:\"path\""
-}
-
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize) GetPath() string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Kustomize{}
-	}
-	return t.Path
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
@@ -21661,7 +21617,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		distro
 	}
 	kustomize {
-		path
+		... KustomizeFragment
 	}
 	helm {
 		release
@@ -21700,6 +21656,10 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			secret
 		}
 	}
+}
+fragment KustomizeFragment on Kustomize {
+	path
+	enableHelm
 }
 `
 
@@ -22102,7 +22062,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		distro
 	}
 	kustomize {
-		path
+		... KustomizeFragment
 	}
 	helm {
 		release
@@ -22141,6 +22101,10 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			secret
 		}
 	}
+}
+fragment KustomizeFragment on Kustomize {
+	path
+	enableHelm
 }
 `
 
