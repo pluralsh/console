@@ -2149,7 +2149,7 @@ type DeprecatedCustomResource struct {
 	Group     string  `json:"group"`
 	Version   string  `json:"version"`
 	Kind      string  `json:"kind"`
-	Namespace string  `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	Name      *string `json:"name,omitempty"`
 	// the next discovered version of this resource
 	NextVersion string `json:"nextVersion"`

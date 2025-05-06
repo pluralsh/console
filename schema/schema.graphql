@@ -5844,7 +5844,7 @@ type DeprecatedCustomResource {
 
   kind: String!
 
-  namespace: String!
+  namespace: String
 
   name: String
 
