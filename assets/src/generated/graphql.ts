@@ -6612,7 +6612,8 @@ export type RootMutationTypeCreateUserArgs = {
 
 
 export type RootMutationTypeDeleteAccessTokenArgs = {
-  token: Scalars['String']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 

@@ -667,7 +667,8 @@ defmodule Console.GraphQl.Users do
 
     field :delete_access_token, :access_token do
       middleware Authenticated
-      arg :token, non_null(:string)
+      arg :id,    :id
+      arg :token, :string
 
       safe_resolve &User.delete_access_token/2
     end

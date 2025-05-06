@@ -280,6 +280,14 @@ defmodule Console.Services.Users do
     end
   end
 
+  @spec delete_access_token_by_id(binary, User.t) :: token_resp
+  def delete_access_token_by_id(id, user) do
+    case Repo.get(AccessToken, id) do
+      %AccessToken{token: token} -> delete_access_token(token, user)
+      _ -> {:error, "not found"}
+    end
+  end
+
   defp group_attrs(%{"groups" => [_ | _] = groups}), do: groups
   defp group_attrs(%{"adgroups" => [_ | _] = groups}), do: groups
   defp group_attrs(%{"groups" => group}) when is_binary(group), do: [group]
