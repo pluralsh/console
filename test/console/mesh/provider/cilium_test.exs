@@ -6,7 +6,7 @@ defmodule Console.Mesh.Provider.LinkerdTest do
 
   describe "#graph/2" do
     test "it can fetch the graph for a cluster" do
-      cluster = insert(:cluster, operational_layout: %{service_mesh: :linkerd})
+      cluster = insert(:cluster, operational_layout: %{service_mesh: :cilium})
       deployment_settings(prometheus_connection: %{host: "https://prom.example.com"})
 
       expect(Console.Mesh.Prometheus, :query, 6, fn _, _, _ ->
@@ -38,12 +38,12 @@ defmodule Console.Mesh.Provider.LinkerdTest do
 
   defp metric(source, destination) do
     %{
-      "deployment" => "nginx",
-      "namespace" => source,
-      "service" => "nginx-service",
-      "dst_deployment" => "nginx",
-      "dst_namespace" => destination,
-      "dst_service" => "nginx-service"
+      "source.workload.name" => "nginx",
+      "source.namespace.name" => source,
+      "source.service.name" => "nginx-service",
+      "dest.workload.name" => "nginx",
+      "dest.namespace.name" => destination,
+      "dest.service.name" => "nginx-service"
     }
   end
 end
