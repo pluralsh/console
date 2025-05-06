@@ -147,10 +147,10 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :name,             non_null(:string)
     field :comment_template, :string
 
-    field :flow,              :flow,             resolve: dataloader(Deployments)
-    field :reference_service, :service,          resolve: dataloader(Deployments)
-    field :template,          :service_template, resolve: dataloader(Deployments)
-    field :connection,        :scm_connection,   resolve: dataloader(Deployments)
+    field :flow,              :flow,               resolve: dataloader(Deployments)
+    field :reference_service, :service_deployment, resolve: dataloader(Deployments)
+    field :template,          :service_template,   resolve: dataloader(Deployments)
+    field :connection,        :scm_connection,     resolve: dataloader(Deployments)
 
     timestamps()
   end
@@ -159,8 +159,8 @@ defmodule Console.GraphQl.Deployments.Flow do
   object :preview_environment_instance do
     field :id,           non_null(:id)
 
-    field :service,      :service, resolve: dataloader(Deployments)
-    field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :service,      :service_deployment,           resolve: dataloader(Deployments)
+    field :pull_request, :pull_request,                 resolve: dataloader(Deployments)
     field :template,     :preview_environment_template, resolve: dataloader(Deployments)
 
     timestamps()

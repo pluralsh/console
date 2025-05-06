@@ -5633,7 +5633,7 @@ export type PreviewEnvironmentInstance = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   pullRequest?: Maybe<PullRequest>;
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
   template?: Maybe<PreviewEnvironmentTemplate>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -5659,7 +5659,7 @@ export type PreviewEnvironmentTemplate = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
-  referenceService?: Maybe<Service>;
+  referenceService?: Maybe<ServiceDeployment>;
   template?: Maybe<ServiceTemplate>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
