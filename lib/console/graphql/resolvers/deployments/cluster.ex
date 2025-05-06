@@ -331,11 +331,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   defp cluster_filters(query, args) do
     Enum.reduce(args, query, fn
       {:tag, %{name: n, value: v}}, q -> Cluster.with_tag(q, n, v)
-      {:tag_query, tq}, q -> Cluster.with_tag_query(q, tq)
+      {:tag_query, %{} = tq}, q -> Cluster.with_tag_query(q, tq)
       {:healthy, h}, q -> Cluster.health(q, h)
       {:backups, e}, q -> Cluster.with_backups(q, !!e)
-      {:project_id, id}, q -> Cluster.for_project(q, id)
-      {:parent_id, id}, q -> Cluster.for_parent(q, id)
+      {:project_id, id}, q when is_binary(id) -> Cluster.for_project(q, id)
+      {:parent_id, id}, q when is_binary(id) -> Cluster.for_parent(q, id)
       {:upgradeable, true}, q -> Cluster.upgradeable(q)
       {:upgradeable, false}, q -> Cluster.not_upgradeable(q)
       _, q -> q

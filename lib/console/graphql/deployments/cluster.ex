@@ -713,7 +713,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :group,        non_null(:string)
     field :version,      non_null(:string)
     field :kind,         non_null(:string)
-    field :namespace,    non_null(:string)
+    field :namespace,    :string
     field :name,         :string
     field :next_version, non_null(:string), description: "the next discovered version of this resource"
     field :cluster,      :cluster, resolve: dataloader(Deployments), description: "the cluster this resource belongs to"
