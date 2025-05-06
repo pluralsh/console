@@ -139,7 +139,7 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 		return nil, err
 	}
 
-	return nil, nil
+	return cst, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
