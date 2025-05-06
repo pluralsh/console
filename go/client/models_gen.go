@@ -4649,7 +4649,7 @@ type PrUpdateSpec struct {
 // An instance of a preview environment template
 type PreviewEnvironmentInstance struct {
 	ID          string                      `json:"id"`
-	Service     *Service                    `json:"service,omitempty"`
+	Service     *ServiceDeployment          `json:"service,omitempty"`
 	PullRequest *PullRequest                `json:"pullRequest,omitempty"`
 	Template    *PreviewEnvironmentTemplate `json:"template,omitempty"`
 	InsertedAt  *string                     `json:"insertedAt,omitempty"`
@@ -4668,15 +4668,15 @@ type PreviewEnvironmentInstanceEdge struct {
 
 // A template for generating preview environments
 type PreviewEnvironmentTemplate struct {
-	ID               string           `json:"id"`
-	Name             string           `json:"name"`
-	CommentTemplate  *string          `json:"commentTemplate,omitempty"`
-	Flow             *Flow            `json:"flow,omitempty"`
-	ReferenceService *Service         `json:"referenceService,omitempty"`
-	Template         *ServiceTemplate `json:"template,omitempty"`
-	Connection       *ScmConnection   `json:"connection,omitempty"`
-	InsertedAt       *string          `json:"insertedAt,omitempty"`
-	UpdatedAt        *string          `json:"updatedAt,omitempty"`
+	ID               string             `json:"id"`
+	Name             string             `json:"name"`
+	CommentTemplate  *string            `json:"commentTemplate,omitempty"`
+	Flow             *Flow              `json:"flow,omitempty"`
+	ReferenceService *ServiceDeployment `json:"referenceService,omitempty"`
+	Template         *ServiceTemplate   `json:"template,omitempty"`
+	Connection       *ScmConnection     `json:"connection,omitempty"`
+	InsertedAt       *string            `json:"insertedAt,omitempty"`
+	UpdatedAt        *string            `json:"updatedAt,omitempty"`
 }
 
 type PreviewEnvironmentTemplateAttributes struct {

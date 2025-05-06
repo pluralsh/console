@@ -1244,7 +1244,7 @@ type PreviewEnvironmentTemplate {
   name: String!
   commentTemplate: String
   flow: Flow
-  referenceService: Service
+  referenceService: ServiceDeployment
   template: ServiceTemplate
   connection: ScmConnection
   insertedAt: DateTime
@@ -1254,7 +1254,7 @@ type PreviewEnvironmentTemplate {
 "An instance of a preview environment template"
 type PreviewEnvironmentInstance {
   id: ID!
-  service: Service
+  service: ServiceDeployment
   pullRequest: PullRequest
   template: PreviewEnvironmentTemplate
   insertedAt: DateTime
