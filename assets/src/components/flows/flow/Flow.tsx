@@ -30,6 +30,7 @@ import styled from 'styled-components'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
+  { path: 'previews', label: 'Previews' },
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'prs', label: 'PRs' },
   { path: 'alerts', label: 'Alerts' },
