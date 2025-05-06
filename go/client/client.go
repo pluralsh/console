@@ -13,6 +13,7 @@ type ConsoleClient interface {
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
 	CreateScmWebhook(ctx context.Context, connectionID string, owner string, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhook, error)
+	CreateScmWebhookPointer(ctx context.Context, attributes ScmWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhookPointer, error)
 	DeleteScmWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteScmWebhook, error)
 	ListObservabilityWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityWebhooks, error)
 	GetObservabilityWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityWebhook, error)
@@ -14661,6 +14662,17 @@ func (t *CreateScmWebhook) GetCreateScmWebhook() *ScmWebhookFragment {
 	return t.CreateScmWebhook
 }
 
+type CreateScmWebhookPointer struct {
+	CreateScmWebhookPointer *ScmWebhookFragment "json:\"createScmWebhookPointer,omitempty\" graphql:\"createScmWebhookPointer\""
+}
+
+func (t *CreateScmWebhookPointer) GetCreateScmWebhookPointer() *ScmWebhookFragment {
+	if t == nil {
+		t = &CreateScmWebhookPointer{}
+	}
+	return t.CreateScmWebhookPointer
+}
+
 type DeleteScmWebhook struct {
 	DeleteScmWebhook *ScmWebhookFragment "json:\"deleteScmWebhook,omitempty\" graphql:\"deleteScmWebhook\""
 }
@@ -17142,6 +17154,39 @@ func (c *Client) CreateScmWebhook(ctx context.Context, connectionID string, owne
 
 	var res CreateScmWebhook
 	if err := c.Client.Post(ctx, "CreateScmWebhook", CreateScmWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateScmWebhookPointerDocument = `mutation CreateScmWebhookPointer ($attributes: ScmWebhookAttributes!) {
+	createScmWebhookPointer(attributes: $attributes) {
+		... ScmWebhookFragment
+	}
+}
+fragment ScmWebhookFragment on ScmWebhook {
+	id
+	insertedAt
+	updatedAt
+	name
+	owner
+	type
+	url
+}
+`
+
+func (c *Client) CreateScmWebhookPointer(ctx context.Context, attributes ScmWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhookPointer, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateScmWebhookPointer
+	if err := c.Client.Post(ctx, "CreateScmWebhookPointer", CreateScmWebhookPointerDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -32490,6 +32535,7 @@ var DocumentOperationNames = map[string]string{
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",
 	CreateScmWebhookDocument:                          "CreateScmWebhook",
+	CreateScmWebhookPointerDocument:                   "CreateScmWebhookPointer",
 	DeleteScmWebhookDocument:                          "DeleteScmWebhook",
 	ListObservabilityWebhooksDocument:                 "ListObservabilityWebhooks",
 	GetObservabilityWebhookDocument:                   "GetObservabilityWebhook",
