@@ -826,6 +826,14 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve &Deployments.list_pull_requests/2
     end
 
+    field :scm_webhook, :scm_webhook do
+      middleware Authenticated
+      arg :id,   :id
+      arg :external_id, :string
+
+      resolve &Deployments.resolve_scm_webhook/2
+    end
+
     connection field :scm_webhooks, node_type: :scm_webhook do
       middleware Authenticated
 

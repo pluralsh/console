@@ -41,10 +41,6 @@ defmodule Console.Mesh.Provider do
     %Cluster{operational_layout: %OperationalLayout{service_mesh: :istio}} = cluster,
     %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
   ) when is_binary(h), do: {:ok, Istio.new(conn, cluster)}
-  defp client(
-    cluster,
-    %DeploymentSettings{prometheus_connection: %Connection{host: h} = conn}
-  ) when is_binary(h), do: {:ok, Ebpf.new(conn, cluster)}
   defp client(_, _), do: {:error, "no prometheus connection configured"}
 
   defp filter_namespace({:ok, [_ | _] = edges}, ns) when is_binary(ns) and byte_size(ns) > 0 do

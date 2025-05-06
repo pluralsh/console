@@ -452,6 +452,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
     field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
 
+    field :operational_layout, :operational_layout, resolve: dataloader(Deployments), description: "a high level description of the setup of common resources in a cluster"
     field :insight_components, list_of(:cluster_insight_component), resolve: dataloader(Deployments), description: "a set of kubernetes resources used to generate the ai insight for this cluster"
 
     field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
@@ -1052,6 +1053,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :from,        non_null(:network_mesh_workload)
     field :to,          non_null(:network_mesh_workload)
     field :statistics,  non_null(:network_mesh_statistics)
+  end
+
+  @desc "a high level description of the setup of common resources in a cluster"
+  object :operational_layout do
+    field :service_mesh, :service_mesh
   end
 
   connection node_type: :cluster

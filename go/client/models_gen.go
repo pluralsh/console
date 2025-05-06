@@ -941,6 +941,8 @@ type Cluster struct {
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
+	// a high level description of the setup of common resources in a cluster
+	OperationalLayout *OperationalLayout `json:"operationalLayout,omitempty"`
 	// a set of kubernetes resources used to generate the ai insight for this cluster
 	InsightComponents []*ClusterInsightComponent `json:"insightComponents,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
@@ -3845,6 +3847,11 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+}
+
+// a high level description of the setup of common resources in a cluster
+type OperationalLayout struct {
+	ServiceMesh *ServiceMesh `json:"serviceMesh,omitempty"`
 }
 
 type OperationalLayoutAttributes struct {

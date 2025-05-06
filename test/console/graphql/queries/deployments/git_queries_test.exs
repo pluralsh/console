@@ -247,4 +247,34 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
              |> ids_equal(catalogs)
     end
   end
+
+  describe "scmWebhook" do
+    test "it can fetch a scm webhook by id" do
+      webhook = insert(:scm_webhook)
+
+      {:ok, %{data: %{"scmWebhook" => found}}} = run_query("""
+        query SCMWebhook($id: ID!) {
+          scmWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => webhook.id}, %{current_user: insert(:user)})
+
+      assert found["id"] == webhook.id
+    end
+
+    test "it can fetch an scm webhook by external id" do
+      webhook = insert(:scm_webhook)
+
+      {:ok, %{data: %{"scmWebhook" => found}}} = run_query("""
+        query SCMWebhook($externalId: String!) {
+          scmWebhook(externalId: $externalId) {
+            id
+          }
+        }
+      """, %{"externalId" => webhook.external_id}, %{current_user: insert(:user)})
+
+      assert found["id"] == webhook.id
+    end
+  end
 end

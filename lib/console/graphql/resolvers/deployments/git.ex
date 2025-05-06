@@ -14,6 +14,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     DependencyManagementService
   }
 
+  def resolve_scm_webhook(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_scm_webhook(id)}
+  def resolve_scm_webhook(%{external_id: ext_id}, _), do: {:ok, Git.get_scm_webhook_by_ext_id(ext_id)}
+
   def resolve_scm_connection(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_scm_connection(id)}
   def resolve_scm_connection(%{name: name}, _), do: {:ok, Git.get_scm_connection_by_name(name)}
 

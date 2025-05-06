@@ -158,10 +158,12 @@ export const getDirectory = ({
   serviceDeployment,
   logsEnabled = false,
   metricsEnabled = false,
+  meshEnabled = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   logsEnabled?: boolean | undefined
   metricsEnabled?: boolean | undefined
+  meshEnabled?: boolean | undefined
 }): Directory => {
   if (!serviceDeployment) {
     return []
@@ -225,7 +227,11 @@ export const getDirectory = ({
     },
     { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
-    { path: 'network', label: 'Network', enabled: true },
+    {
+      path: 'network',
+      label: 'Network',
+      enabled: meshEnabled && metricsEnabled,
+    },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
     // {
@@ -288,14 +294,17 @@ function ServiceDetailsBase() {
   //   [serviceData?.serviceDeployment?.docs]
   // )
 
+  const meshEnabled =
+    !!serviceDeployment?.cluster?.operationalLayout?.serviceMesh
   const directory = useMemo(
     () =>
       getDirectory({
         serviceDeployment,
         logsEnabled,
         metricsEnabled,
+        meshEnabled,
       }),
-    [logsEnabled, metricsEnabled, serviceDeployment]
+    [logsEnabled, metricsEnabled, serviceDeployment, meshEnabled]
   )
 
   useSetBreadcrumbs(

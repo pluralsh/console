@@ -76,6 +76,12 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
   ...ServiceDeploymentsRow
+  cluster {
+    ...ClusterMinimal
+    operationalLayout {
+      serviceMesh
+    }
+  }
   namespace
   message
   version
