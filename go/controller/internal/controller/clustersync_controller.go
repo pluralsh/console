@@ -2,21 +2,23 @@ package controller
 
 import (
 	"context"
-	console "github.com/pluralsh/console/go/client"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	"github.com/samber/lo"
+	"github.com/pluralsh/polly/algorithms"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/yaml"
 )
 
 // ClusterSyncReconciler reconciles a ClusterSync object
@@ -65,24 +67,79 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return handleRequeue(res, err, clusterSync.SetCondition)
 	}
 
-	clusterAPI, err := r.ConsoleClient.GetClusterByHandle(lo.ToPtr(clusterSync.GetName()))
+	yamlTemplateBytes, err := yaml.Marshal(clusterSync.Spec.ClusterSpec)
 	if err != nil {
-		logger.V(5).Info("failed to get cluster by handle", "clusterHandle", clusterSync.GetName())
-		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		if apierrors.IsNotFound(err) {
-			return requeue, nil
-		}
 		return ctrl.Result{}, err
 	}
-	if project.Status.HasID() && project.Status.GetID() != clusterAPI.Project.ID {
-		logger.V(5).Info("cluster project id does not match project id", "clusterProjectID", clusterAPI.Project.ID, "projectID", project.Status.GetID())
-		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "cluster project id does not match project id")
-		return requeue, nil
+	yamlTemplate := string(yamlTemplateBytes)
+
+	pager := r.ListClusters(ctx, project.Status.ID, clusterSync.Spec.Tags)
+	for pager.HasNext() {
+		clusters, err := pager.NextPage()
+		if err != nil {
+			logger.Error(err, "failed to fetch cluster list")
+			return ctrl.Result{}, err
+		}
+		for _, cluster := range clusters {
+			clusterCRD, err := templateCluster(cluster, yamlTemplate)
+			if err != nil {
+				logger.Error(err, "failed to template cluster")
+				continue
+			}
+			if clusterCRD.Namespace == "" {
+				clusterCRD.Namespace = clusterSync.Namespace
+			}
+			existingCluster := &v1alpha1.Cluster{}
+			if err := r.Client.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
+				if apierrors.IsNotFound(err) {
+					if err := r.Client.Create(ctx, clusterCRD); err != nil {
+						logger.Error(err, "failed to create cluster")
+					}
+				} else {
+					logger.Error(err, "failed to get cluster")
+				}
+				continue
+			}
+			existingSHA, err := utils.HashObject(existingCluster.Spec)
+			if err != nil {
+				logger.Error(err, "failed to hash existing cluster")
+				continue
+			}
+			newSHA, err := utils.HashObject(clusterCRD.Spec)
+			if err != nil {
+				logger.Error(err, "failed to hash templated cluster")
+				continue
+			}
+			if existingSHA != newSHA {
+				if err := r.Client.Patch(ctx, clusterCRD, client.MergeFrom(existingCluster)); err != nil {
+					logger.Error(err, "failed to patch cluster")
+				}
+			}
+		}
 	}
 
-	clusterSync.Spec.SyncSpec = templateClusterSpec(*clusterSync, *clusterAPI)
-
 	return requeue, nil
+}
+
+func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (*v1alpha1.Cluster, error) {
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(clusterAPI.Node)
+	if err != nil {
+		return nil, err
+	}
+	configuration := map[string]interface{}{
+		"cluster": unstructuredObj,
+	}
+
+	templated, err := utils.RenderString(template, configuration)
+	if err != nil {
+		return nil, err
+	}
+	cst := &v1alpha1.Cluster{}
+	if err := yaml.Unmarshal([]byte(templated), cst); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -93,29 +150,21 @@ func (r *ClusterSyncReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func templateClusterSpec(clusterSync v1alpha1.ClusterSync, clusterAPI console.ClusterFragment) v1alpha1.SyncSpec {
-	syncSpec := v1alpha1.SyncSpec{
-		ObjectMeta: v1.ObjectMeta{},
-		Spec: v1alpha1.ClusterSpec{
-			Handle:        nil,
-			Version:       nil,
-			ProviderRef:   nil,
-			ProjectRef:    nil,
-			Cloud:         "",
-			Protect:       nil,
-			Tags:          nil,
-			Metadata:      nil,
-			Bindings:      nil,
-			CloudSettings: nil,
-			NodePools:     nil,
-		},
+func (r *ClusterSyncReconciler) ListClusters(ctx context.Context, projectID *string, tags map[string]string) *algorithms.Pager[*console.ClusterEdgeFragment] {
+	logger := log.FromContext(ctx)
+	logger.V(4).Info("create cluster pager")
+	fetch := func(page *string, size int64) ([]*console.ClusterEdgeFragment, *algorithms.PageInfo, error) {
+		resp, err := r.ConsoleClient.ListClustersWithParameters(page, &size, projectID, tags)
+		if err != nil {
+			logger.Error(err, "failed to fetch stack run")
+			return nil, nil, err
+		}
+		pageInfo := &algorithms.PageInfo{
+			HasNext:  resp.PageInfo.HasNextPage,
+			After:    resp.PageInfo.EndCursor,
+			PageSize: size,
+		}
+		return resp.Edges, pageInfo, nil
 	}
-	if clusterSync.Spec.SyncSpec.Name == "" {
-		syncSpec.Name = clusterSync.GetName()
-	}
-	if clusterSync.Spec.SyncSpec.Namespace == "" {
-		syncSpec.Namespace = clusterSync.GetNamespace()
-	}
-
-	return syncSpec
+	return algorithms.NewPager[*console.ClusterEdgeFragment](100, fetch)
 }

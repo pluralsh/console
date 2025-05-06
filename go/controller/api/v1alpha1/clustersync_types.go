@@ -89,7 +89,7 @@ type SpecTemplate struct {
 
 	// NodePools contains specs of node pools managed by this cluster.
 	// +kubebuilder:validation:Optional
-	NodePools []ClusterNodePool `json:"nodePools"`
+	NodePools []ClusterNodePool `json:"nodePools,omitempty"`
 }
 
 //+kubebuilder:object:root=true

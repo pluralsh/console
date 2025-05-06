@@ -140,6 +140,13 @@ query ListClusters($cursor: String, $before: String, $last: Int) {
     }
 }
 
+query ListClustersWithParameters($after: String, $first: Int, $before: String, $last: Int) {
+    clusters(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges { ...ClusterEdgeFragment }
+    }
+}
+
 query GetCluster($id: ID) {
     cluster(id: $id) {
         ...ClusterFragment

@@ -47,6 +47,7 @@ const (
 	FlowReconciler                       Reconciler = "flow"
 	MCPServerReconciler                  Reconciler = "mcpserver"
 	PreviewEnvironmentTemplateReconciler Reconciler = "previewenvironmenttemplate"
+	ClusterSyncReconciler                           = "clustersync"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -82,6 +83,7 @@ var validReconcilers = map[string]Reconciler{
 	"MCPServerReconciler":                  MCPServerReconciler,
 	"ProviderReconciler":                   ProviderReconciler,
 	"PreviewEnvironmentTemplateReconciler": PreviewEnvironmentTemplateReconciler,
+	"ClusterSyncReconciler":                ClusterSyncReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
@@ -362,6 +364,13 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:        mgr.GetScheme(),
 		}
 	},
+	ClusterSyncReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ClusterSyncReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -422,6 +431,7 @@ func Reconcilers() ReconcilerList {
 		FlowReconciler,
 		MCPServerReconciler,
 		PreviewEnvironmentTemplateReconciler,
+		ClusterSyncReconciler,
 	}
 }
 

@@ -30,6 +30,7 @@ type ConsoleClient interface {
 	PingCluster(ctx context.Context, attributes ClusterPing, interceptors ...clientv2.RequestInterceptor) (*PingCluster, error)
 	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, deprecated []*DeprecatedCustomResourceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
 	ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error)
+	ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error)
 	GetCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetCluster, error)
 	GetTinyCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetTinyCluster, error)
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
@@ -8261,6 +8262,120 @@ func (t *ListClusters_Clusters) GetEdges() []*ClusterEdgeFragment {
 	return t.Edges
 }
 
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
+	ID        string                    "json:\"id\" graphql:\"id\""
+	Name      string                    "json:\"name\" graphql:\"name\""
+	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Group
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.State
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Version
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Content
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetName() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Name
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetValue() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Value
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
+	}
+	return t.ID
+}
+
+type ListClustersWithParameters_Clusters struct {
+	PageInfo PageInfoFragment       "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ClusterEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListClustersWithParameters_Clusters) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters{}
+	}
+	return &t.PageInfo
+}
+func (t *ListClustersWithParameters_Clusters) GetEdges() []*ClusterEdgeFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters{}
+	}
+	return t.Edges
+}
+
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	Name      string                    "json:\"name\" graphql:\"name\""
@@ -14727,6 +14842,17 @@ func (t *ListClusters) GetClusters() *ListClusters_Clusters {
 	return t.Clusters
 }
 
+type ListClustersWithParameters struct {
+	Clusters *ListClustersWithParameters_Clusters "json:\"clusters,omitempty\" graphql:\"clusters\""
+}
+
+func (t *ListClustersWithParameters) GetClusters() *ListClustersWithParameters_Clusters {
+	if t == nil {
+		t = &ListClustersWithParameters{}
+	}
+	return t.Clusters
+}
+
 type GetCluster struct {
 	Cluster *ClusterFragment "json:\"cluster,omitempty\" graphql:\"cluster\""
 }
@@ -18300,6 +18426,207 @@ func (c *Client) ListClusters(ctx context.Context, cursor *string, before *strin
 
 	var res ListClusters
 	if err := c.Client.Post(ctx, "ListClusters", ListClustersDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListClustersWithParametersDocument = `query ListClustersWithParameters ($after: String, $first: Int, $before: String, $last: Int) {
+	clusters(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... ClusterEdgeFragment
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ClusterEdgeFragment on ClusterEdge {
+	node {
+		... ClusterFragment
+	}
+}
+fragment ClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	version
+	insertedAt
+	pingedAt
+	protect
+	currentVersion
+	kasUrl
+	deletedAt
+	metadata
+	tags {
+		... ClusterTags
+	}
+	provider {
+		... ClusterProviderFragment
+	}
+	nodePools {
+		... NodePoolFragment
+	}
+	status {
+		... ClusterStatusFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment ClusterProviderFragment on ClusterProvider {
+	id
+	name
+	namespace
+	cloud
+	editable
+	deletedAt
+	repository {
+		... GitRepositoryFragment
+	}
+	service {
+		... ServiceDeploymentFragment
+	}
+	credentials {
+		... ProviderCredentialFragment
+	}
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment ServiceDeploymentFragment on ServiceDeployment {
+	... ServiceDeploymentBaseFragment
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+		content {
+			... ComponentContentFragment
+		}
+	}
+	protect
+	deletedAt
+	sha
+	tarball
+	dryRun
+	templated
+	configuration {
+		name
+		value
+	}
+	flow {
+		id
+	}
+}
+fragment ServiceDeploymentBaseFragment on ServiceDeployment {
+	id
+	name
+	namespace
+	version
+	status
+	kustomize {
+		... KustomizeFragment
+	}
+	git {
+		... GitRefFragment
+	}
+	helm {
+		... HelmSpecFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+}
+fragment KustomizeFragment on Kustomize {
+	path
+	enableHelm
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment HelmSpecFragment on HelmSpec {
+	valuesFiles
+}
+fragment ComponentContentFragment on ComponentContent {
+	id
+	live
+	desired
+}
+fragment ProviderCredentialFragment on ProviderCredential {
+	id
+	name
+	namespace
+	kind
+}
+fragment NodePoolFragment on NodePool {
+	id
+	name
+	minSize
+	maxSize
+	instanceType
+	labels
+	taints {
+		... NodePoolTaintFragment
+	}
+}
+fragment NodePoolTaintFragment on Taint {
+	key
+	value
+	effect
+}
+fragment ClusterStatusFragment on ClusterStatus {
+	conditions {
+		... ClusterConditionFragment
+	}
+}
+fragment ClusterConditionFragment on ClusterCondition {
+	status
+	type
+	message
+	reason
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListClustersWithParameters
+	if err := c.Client.Post(ctx, "ListClustersWithParameters", ListClustersWithParametersDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -31999,6 +32326,7 @@ var DocumentOperationNames = map[string]string{
 	PingClusterDocument:                               "PingCluster",
 	RegisterRuntimeServicesDocument:                   "RegisterRuntimeServices",
 	ListClustersDocument:                              "ListClusters",
+	ListClustersWithParametersDocument:                "ListClustersWithParameters",
 	GetClusterDocument:                                "GetCluster",
 	GetTinyClusterDocument:                            "GetTinyCluster",
 	GetAgentURLDocument:                               "GetAgentUrl",
