@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
@@ -79,6 +80,8 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return requeue, nil
 	}
 
+	clusterSync.Spec.SyncSpec = templateClusterSpec(*clusterSync, *clusterAPI)
+
 	return requeue, nil
 }
 
@@ -88,4 +91,31 @@ func (r *ClusterSyncReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ClusterSync{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
+}
+
+func templateClusterSpec(clusterSync v1alpha1.ClusterSync, clusterAPI console.ClusterFragment) v1alpha1.SyncSpec {
+	syncSpec := v1alpha1.SyncSpec{
+		ObjectMeta: v1.ObjectMeta{},
+		Spec: v1alpha1.ClusterSpec{
+			Handle:        nil,
+			Version:       nil,
+			ProviderRef:   nil,
+			ProjectRef:    nil,
+			Cloud:         "",
+			Protect:       nil,
+			Tags:          nil,
+			Metadata:      nil,
+			Bindings:      nil,
+			CloudSettings: nil,
+			NodePools:     nil,
+		},
+	}
+	if clusterSync.Spec.SyncSpec.Name == "" {
+		syncSpec.Name = clusterSync.GetName()
+	}
+	if clusterSync.Spec.SyncSpec.Namespace == "" {
+		syncSpec.Namespace = clusterSync.GetNamespace()
+	}
+
+	return syncSpec
 }
