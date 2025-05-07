@@ -1,6 +1,6 @@
 defmodule Console.Schema.GlobalService do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, Cluster, Project, ClusterProvider, ServiceTemplate}
+  alias Console.Schema.{Service, Cluster, Project, ClusterProvider, ServiceTemplate, TemplateContext}
 
   schema "global_services" do
     field :reparent, :boolean
@@ -23,6 +23,8 @@ defmodule Console.Schema.GlobalService do
     belongs_to :parent,   Service
     belongs_to :provider, ClusterProvider
 
+    has_one :context, TemplateContext, foreign_key: :global_id, on_replace: :delete
+
     timestamps()
   end
 
@@ -43,7 +45,7 @@ defmodule Console.Schema.GlobalService do
     from(g in query, order_by: ^order)
   end
 
-  def preloaded(query \\ __MODULE__, preloads \\ [template: :dependencies, service: :dependencies]) do
+  def preloaded(query \\ __MODULE__, preloads \\ [:context, template: :dependencies, service: :dependencies]) do
     from(g in query, preload: ^preloads)
   end
 
@@ -55,6 +57,7 @@ defmodule Console.Schema.GlobalService do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:template)
+    |> cast_assoc(:context)
     |> cast_embed(:tags, with: &tag_changeset/2)
     |> cast_embed(:cascade, with: &cascade_changeset/2)
     |> unique_constraint(:service_id)

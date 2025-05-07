@@ -56,6 +56,15 @@ spec:
                       but leave kubernetes objects in-place
                     type: boolean
                 type: object
+              context:
+                description: Context to be used for dynamic template overrides of
+                  things like helm chart, version or values files
+                properties:
+                  raw:
+                    description: A raw yaml map to use for service template context
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
               distro:
                 description: Distro of kubernetes this cluster is running
                 enum:

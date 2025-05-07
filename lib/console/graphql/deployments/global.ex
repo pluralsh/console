@@ -13,6 +13,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
     field :template,    :service_template_attributes
     field :cascade,     :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
+    field :context,     :template_context_attributes, description: "additional context used to template service metadata during global service reconciliation"
   end
 
   @desc "Attributes for configuring a managed namespace"
@@ -59,6 +60,11 @@ defmodule Console.GraphQl.Deployments.Global do
     field :detach, :boolean
   end
 
+  @desc "Additional context used to template service metadata during global service reconciliation"
+  input_object :template_context_attributes do
+    field :raw, :json
+  end
+
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
     field :id,       non_null(:id), description: "internal id of this global service"
@@ -73,6 +79,8 @@ defmodule Console.GraphQl.Deployments.Global do
     field :template, :service_template,   resolve: dataloader(Deployments), description: "the service template used to spawn services"
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
     field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
+
+    field :context, :template_context, resolve: dataloader(Deployments), description: "additional context used to template service metadata during global service reconciliation"
 
     connection field :services, node_type: :service_deployment do
       arg :q, :string
@@ -146,6 +154,11 @@ defmodule Console.GraphQl.Deployments.Global do
   object :cascade do
     field :delete, :boolean, description: "whether to perform a drain-delete for all owned resources"
     field :detach, :boolean, description: "whether to perform a detach-delete for all owned resources"
+  end
+
+  @desc "Additional context used to template service metadata during global service reconciliation"
+  object :template_context do
+    field :raw, :map
   end
 
   connection node_type: :global_service

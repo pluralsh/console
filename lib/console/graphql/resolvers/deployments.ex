@@ -91,7 +91,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceComponentChild,
     OperationalLayout,
     PreviewEnvironmentInstance,
-    PreviewEnvironmentTemplate
+    PreviewEnvironmentTemplate,
+    TemplateContext
   }
 
   def query(Project, _), do: Project
@@ -172,6 +173,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(OperationalLayout, _), do: OperationalLayout
   def query(PreviewEnvironmentInstance, _), do: PreviewEnvironmentInstance
   def query(PreviewEnvironmentTemplate, _), do: PreviewEnvironmentTemplate
+  def query(TemplateContext, _), do: TemplateContext
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

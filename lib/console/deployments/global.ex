@@ -15,7 +15,8 @@ defmodule Console.Deployments.Global do
     NamespaceInstance,
     ServiceTemplate,
     ServiceDependency,
-    Revision
+    Revision,
+    TemplateContext
   }
   require Logger
 
@@ -70,12 +71,15 @@ defmodule Console.Deployments.Global do
   """
   def update(attrs, id, %User{} = user) do
     start_transaction()
-    |> add_operation(:global, fn _ ->
+    |> add_operation(:fetch, fn _ ->
       get!(id)
-      |> Repo.preload(template: :dependencies)
-      |> GlobalService.changeset(attrs)
+      |> Repo.preload([:context, template: :dependencies])
       |> allow(user, :write)
-      |> when_ok(:update)
+    end)
+    |> add_operation(:global, fn %{fetch: global} ->
+      global
+      |> GlobalService.changeset(attrs)
+      |> Repo.update()
     end)
     |> add_operation(:rev, fn %{global: global} ->
       Repo.preload(global, template: :dependencies)
@@ -212,7 +216,7 @@ defmodule Console.Deployments.Global do
   def add_to_cluster(global, cluster), do: add_to_cluster(global, cluster, bot())
 
   @spec add_to_cluster(GlobalService.t, Cluster.t, User.t) :: Services.service_resp
-  def add_to_cluster(%GlobalService{} = global, %Cluster{id: cid}, user) do
+  def add_to_cluster(%GlobalService{} = global, %Cluster{id: cid} = cluster, user) do
     global = load_configuration(global)
     case {global, Services.get_service_by_name(cid, svc_name(global))} do
       {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
@@ -221,6 +225,7 @@ defmodule Console.Deployments.Global do
         ServiceTemplate.attributes(tpl)
         |> Map.put(:owner_id, gid)
         |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
+        |> dynamic_template(cluster, global)
         |> Services.create_service(cid, user)
       {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
         Services.clone_service(%{owner_id: gid}, sid, cid, user)
@@ -326,7 +331,7 @@ defmodule Console.Deployments.Global do
   """
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
-    %{service: svc} = global = Repo.preload(global, [template: :dependencies, service: [:context_bindings, :dependencies]])
+    %{service: svc} = global = Repo.preload(global, [:context, template: :dependencies, service: [:context_bindings, :dependencies]])
     global = load_configuration(global)
     bot = bot()
 
@@ -450,14 +455,15 @@ defmodule Console.Deployments.Global do
   it can resync a service owned by a global service
   """
   @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
-  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id}, %Service{} = dest, %User{} = user) do
+  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id} = global, %Service{} = dest, %User{} = user) do
     Logger.info "Attempting to resync service #{dest.id}"
-    dest = Repo.preload(dest, [:context_bindings, :dependencies])
+    dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
     tpl = Repo.preload(tpl, [:dependencies])
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
               |> Map.put(:owner_id, id)
+              |> dynamic_template(dest.cluster, global)
               |> Services.update_service(dest.id, user)
       false ->
         Logger.info "did not update service due to no differences"
@@ -614,6 +620,36 @@ defmodule Console.Deployments.Global do
 
   defp spec_fields(%{ignore_sync: true}), do: ~w(helm git kustomize)a
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
+
+  defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
+    Enum.reduce([
+      ~w(helm version)a,
+      ~w(helm chart)a,
+      ~w(helm values_files)a,
+      ~w(helm values)a,
+      ~w(git ref)a,
+      ~w(git folder)a
+    ], attrs, fn path, attrs ->
+      case get_in(attrs, path) do
+        str when is_binary(str) -> put_in(attrs, path, render_solid_raw(str, cluster, ctx))
+        [v | _] = vals when is_binary(v) ->
+          put_in(attrs, path, Enum.map(vals, &render_solid_raw(&1, cluster, ctx)))
+        _ -> attrs
+      end
+    end)
+  end
+  defp dynamic_template(attrs, _, _), do: attrs
+
+  @solid_opts [strict_variables: false, strict_filters: true]
+
+  def render_solid_raw(template, %Cluster{} = cluster, ctx) do
+    with {:ok, tpl} <- Solid.parse(template),
+         {:ok, res, _} <- Solid.render(tpl, %{"context" => ctx, "cluster" => cluster}, @solid_opts) do
+      IO.iodata_to_binary(res)
+    else
+      _ -> template
+    end
+  end
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)

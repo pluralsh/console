@@ -581,5 +581,60 @@ defmodule Console.Deployments.GlobalSyncTest do
       assert svc.owner_id == global.id
       refute svc.deleted_at
     end
+
+    test "it can sync template global services with dynamic template overrides" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      another_sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider)
+      sync3 = insert(:cluster, tags: [%{name: "sync", value: "test2"}])
+
+      global = insert(:global_service,
+        template: build(:service_template,
+          repository_id: git.id,
+          name: "source",
+          namespace: "my-service",
+          git: %{ref: "main", folder: ~s({{ context[cluster.handle].folder | default: "k8s" }})},
+          configuration: [%{name: "name", value: "value"}]
+        ),
+        cascade: %{delete: true},
+        context: build(:template_context, raw: %{sync.handle => %{"folder" => "k8s-special"}}),
+        tags: [%{name: "sync", value: "test"}]
+      )
+
+
+      :ok = Global.sync_clusters(global)
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "k8s-special"
+      assert svc.namespace == "my-service"
+      assert svc.owner_id == global.id
+
+      svc2 = Services.get_service_by_name(another_sync.id, "source")
+
+      assert svc2.git.ref == "main"
+      assert svc2.git.folder == "k8s"
+      assert svc2.namespace == "my-service"
+      assert svc2.owner_id == global.id
+
+      for cluster <- [sync2, sync3] do
+        refute Services.get_service_by_name(cluster.id, "source")
+      end
+
+      :ok = Global.sync_clusters(global)
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "k8s-special"
+      assert svc.namespace == "my-service"
+      assert svc.owner_id == global.id
+      refute svc.deleted_at
+    end
   end
 end

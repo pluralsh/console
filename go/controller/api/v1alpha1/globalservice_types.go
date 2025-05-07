@@ -20,8 +20,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
 func init() {
@@ -64,6 +66,10 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Cascade *Cascade `json:"cascade,omitempty"`
 
+	// Context to be used for dynamic template overrides of things like helm chart, version or values files
+	// +kubebuilder:validation:Optional
+	Context *TemplateContext `json:"context,omitempty"`
+
 	// Distro of kubernetes this cluster is running
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S
@@ -82,6 +88,13 @@ type GlobalServiceSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Template *ServiceTemplate `json:"template,omitempty"`
+}
+
+// TemplateContext is a spec for describing data for templating the metadata of the services spawned by a global service
+type TemplateContext struct {
+	// A raw yaml map to use for service template context
+	// +kubebuilder:validation:Optional
+	Raw *runtime.RawExtension `json:"raw,omitempty"`
 }
 
 func (gss *GlobalServiceSpec) TagsAttribute() []*console.TagAttributes {
@@ -121,7 +134,16 @@ func (gs *GlobalService) Attributes(providerId, projectId *string) console.Globa
 		Reparent:   gs.Spec.Reparent,
 		Cascade:    gs.Spec.Cascade.Attributes(),
 		Tags:       gs.Spec.TagsAttribute(),
+		Context:    gs.Spec.Context.Attributes(),
 	}
+}
+
+func (tc *TemplateContext) Attributes() *console.TemplateContextAttributes {
+	if tc == nil {
+		return nil
+	}
+
+	return &console.TemplateContextAttributes{Raw: lo.ToPtr(string(tc.Raw.Raw))}
 }
 
 func (p *GlobalService) SetCondition(condition metav1.Condition) {

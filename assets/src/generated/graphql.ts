@@ -3001,6 +3001,8 @@ export type GlobalService = {
   __typename?: 'GlobalService';
   /** behavior for all owned resources when this global service is deleted */
   cascade?: Maybe<Cascade>;
+  /** additional context used to template service metadata during global service reconciliation */
+  context?: Maybe<TemplateContext>;
   /** the kubernetes distribution to target with this global service */
   distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
@@ -3040,6 +3042,8 @@ export type GlobalServiceServicesArgs = {
 export type GlobalServiceAttributes = {
   /** behavior for all owned resources when this global service is deleted */
   cascade?: InputMaybe<CascadeAttributes>;
+  /** additional context used to template service metadata during global service reconciliation */
+  context?: InputMaybe<TemplateContextAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
   /** name for this global service */
@@ -9946,6 +9950,17 @@ export type TargetRef = {
   apiVersion?: Maybe<Scalars['String']['output']>;
   kind?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+};
+
+/** Additional context used to template service metadata during global service reconciliation */
+export type TemplateContext = {
+  __typename?: 'TemplateContext';
+  raw?: Maybe<Scalars['Map']['output']>;
+};
+
+/** Additional context used to template service metadata during global service reconciliation */
+export type TemplateContextAttributes = {
+  raw?: InputMaybe<Scalars['Json']['input']>;
 };
 
 export type TerminatedState = {
