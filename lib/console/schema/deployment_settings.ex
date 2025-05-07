@@ -31,6 +31,11 @@ defmodule Console.Schema.DeploymentSettings do
       field :index,    :string
       field :user,     :string
       field :password, EncryptedString
+      field :aws_enabled, :boolean, default: false
+      field :aws_access_key_id, :string
+      field :aws_secret_access_key, EncryptedString
+      field :aws_region, :string
+      field :aws_session_token, EncryptedString
     end
 
     def changeset(model, attrs \\ %{}) do

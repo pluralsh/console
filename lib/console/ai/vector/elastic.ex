@@ -37,6 +37,22 @@ defmodule Console.AI.Vector.Elastic do
   def new(%Elastic{} = conn), do: %__MODULE__{conn: conn}
 
   @headers [{"Content-Type", "application/json"}]
+  @aws_service_name "es"
+
+  def init(%__MODULE__{conn: %Elastic{index: index, aws_enabled: true} = es}) do
+    Req.new([
+      url: url(es, index),
+      headers: headers(es),
+      body: Jason.encode!(@index_mappings),
+      aws_sigv4: aws_sigv4_headers(es)
+    ])
+    |> Req.put()
+    |> handle_response("could not initialize elasticsearch:")
+    |> case do
+      :ok -> initialized()
+      err -> err
+    end
+  end
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     url(es, index)
@@ -48,7 +64,30 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts \\ []) do
+  def insert(elastic_module, data, opts \\ [])
+
+  def insert(%__MODULE__{conn: %Elastic{aws_enabled: true} = es}, data, opts) do
+    filters = Keyword.get(opts, :filters, [])
+    with {datatype, text} <- Content.content(data),
+         {:ok, embeddings} <- Provider.embeddings(text) do
+      Req.new([
+        url: url(es, "#{es.index}/_doc"),
+        headers: headers(es),
+        body: Jason.encode!(doc_filters(%{
+          passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
+          datatype: datatype,
+          "@timestamp": DateTime.utc_now(),
+          "#{datatype}": Console.mapify(data)
+        }, filters)),
+        aws_sigv4: aws_sigv4_headers(es)
+      ])
+      |> Req.post()
+      |> IO.inspect(label: "insert response")
+      |> handle_response("could not insert vector into elasticsearch:")
+    end
+  end
+
+  def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts) do
     filters = Keyword.get(opts, :filters, [])
     with {datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
@@ -67,6 +106,26 @@ defmodule Console.AI.Vector.Elastic do
     Map.put(doc, :filters, Map.new(filters))
   end
   defp doc_filters(doc, _), do: doc
+
+  def fetch(elastic_module, text, opts \\ [])
+
+  def fetch(%__MODULE__{conn: %Elastic{aws_enabled: true} = es}, text, opts) do
+    count = Keyword.get(opts, :count, 5)
+    filters = Keyword.get(opts, :filters, [])
+    with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
+         query = vector_query(embedding, count, filters),
+         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, query) do
+      Enum.map(hits, fn %Snap.Hit{source: source} ->
+        datatype = source["datatype"]
+        case source[datatype] do
+          %{} = data -> Content.decode(datatype, data)
+          _ -> nil
+        end
+      end)
+      |> Enum.filter(& &1)
+      |> ok()
+    end
+  end
 
   def fetch(%__MODULE__{conn: %Elastic{} = es}, text, opts) do
     count = Keyword.get(opts, :count, 5)
@@ -102,7 +161,9 @@ defmodule Console.AI.Vector.Elastic do
   defp query_filters(query, _), do: query
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code}}, _) when code >= 200 and code < 300, do: :ok
+  defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
   defp handle_response({:ok, %HTTPoison.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
+  defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: elasticsearch error"}
 
   defp url(%Elastic{host: host}, path), do: Path.join(host, path)
@@ -110,4 +171,13 @@ defmodule Console.AI.Vector.Elastic do
   defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
   defp headers(_), do: @headers
+
+  defp aws_sigv4_headers(es) do
+    [
+      service: @aws_service_name,
+      region: es.aws_region || System.get_env("AWS_REGION"),
+      access_key_id: es.aws_access_key_id || System.get_env("AWS_ACCESS_KEY_ID"),
+      secret_access_key: es.aws_secret_access_key || System.get_env("AWS_SECRET_ACCESS_KEY")
+    ]
+  end
 end

@@ -10,13 +10,29 @@ defmodule ElasticsearchUtils do
   @host Application.compile_env(:elasticsearch, :host)
   @index Application.compile_env(:elasticsearch, :index)
   @vector_index Application.compile_env(:elasticsearch, :vector_index)
+  @aws_access_key_id Application.compile_env(:elasticsearch, :aws_access_key_id)
+  @aws_secret_access_key Application.compile_env(:elasticsearch, :aws_secret_access_key)
+  @aws_session_token Application.compile_env(:elasticsearch, :aws_session_token)
+  @aws_region Application.compile_env(:elasticsearch, :aws_region)
 
   def index(), do: @index
   def vector_index(), do: @vector_index
 
   def vector(), do: Enum.map(1..Console.AI.Utils.embedding_dims(), fn _ -> :rand.uniform() end)
 
-  def es_vector_settings(), do: %{host: @host, index: @vector_index}
+  def es_vector_settings(), do: %{host: @host, index: @vector_index,}
+
+  def os_vector_settings() do
+    %{
+      host: @host,
+      index: @vector_index,
+      aws_enabled: true,
+      aws_access_key_id: @aws_access_key_id,
+      aws_secret_access_key: @aws_secret_access_key,
+      aws_session_token: @aws_session_token,
+      aws_region: @aws_region
+    }
+  end
 
   def log_document(%Service{} = service, message) do
     %{
