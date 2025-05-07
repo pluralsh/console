@@ -2,10 +2,8 @@ import {
   BrowseAppsIcon,
   Button,
   Card,
-  Code,
   Flex,
   Flyover,
-  Modal,
   Table,
 } from '@pluralsh/design-system'
 import {
@@ -19,16 +17,23 @@ import {
   ColTemplate,
 } from './PreviewInstancesTableCols'
 
+import { Row } from '@tanstack/react-table'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useFlowPreviewEnvironmentInstancesQuery } from 'generated/graphql'
+import {
+  PreviewEnvironmentInstance,
+  useFlowPreviewEnvironmentInstancesQuery,
+} from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { PreviewTemplatesTable } from './PreviewTemplatesTable'
+import { SpawnPreviewModal } from './SpawnPreviewModal'
 
 export function FlowPreviews() {
+  const navigate = useNavigate()
   const { flowId } = useParams()
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null
@@ -102,6 +107,15 @@ export function FlowPreviews() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No preview instances found.' }}
+        onRowClick={(_, row: Row<PreviewEnvironmentInstance>) => {
+          navigate(
+            getServiceDetailsPath({
+              clusterId: row.original.service?.cluster?.id ?? '',
+              serviceId: row.original.service?.id ?? '',
+            })
+          )
+        }}
       />
       <Flyover
         header="Templates"
@@ -113,30 +127,11 @@ export function FlowPreviews() {
           selectedTemplateId={selectedTemplateId}
         />
       </Flyover>
-      <Modal
+      <SpawnPreviewModal
         open={showModal}
         onClose={() => setShowModal(false)}
-        header="Spawn a PR preview"
-      >
-        <Flex
-          gap="large"
-          flexDirection="column"
-        >
-          <span>
-            To spawn a PR preview environment for your PR, add the following
-            annotations into the PR body:
-          </span>
-          <Code>
-            {'Plural Flow: {flow - name}\nPlural Preview: {template-name}'}
-          </Code>
-          <Button
-            secondary
-            onClick={() => setShowModal(false)}
-          >
-            Close
-          </Button>
-        </Flex>
-      </Modal>
+        flowId={flowId ?? ''}
+      />
     </Card>
   )
 }
@@ -147,7 +142,7 @@ const cols = [
   ColCluster,
   ColActivity,
   ColStatus,
-  ColTemplate,
   ColErrors,
+  ColTemplate,
   ColLinkout,
 ]
