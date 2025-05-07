@@ -45,6 +45,8 @@ export function DeleteClusterModal({
           cluster?
         </>
       }
+      confirmationEnabled={true}
+      confirmationText={cluster.name}
     />
   )
 }
