@@ -288,7 +288,6 @@ const settingsBreadcrumbs = [
 export function AccessTokens() {
   const isInSettings = useLocation().pathname.includes('settings')
   const [open, setOpen] = useState(false)
-  const [displayNewBanner, setDisplayNewBanner] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       queryHook: useAccessTokensQuery,
@@ -368,19 +367,9 @@ export function AccessTokens() {
           <AccessTokensCreateModal
             open={open}
             setOpen={setOpen}
-            setDisplayNewBanner={setDisplayNewBanner}
           />
         </ModalMountTransition>
       </Suspense>
-      <Toast
-        show={displayNewBanner}
-        severity="success"
-        marginBottom="medium"
-        marginRight="xxxxlarge"
-        onClose={() => setDisplayNewBanner(false)}
-      >
-        New access token created.
-      </Toast>
     </div>
   )
 }
