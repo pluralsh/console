@@ -498,4 +498,15 @@ defmodule Console.Schema.Cluster do
 
   defp minimal_coerce("v" <> vsn), do: vsn
   defp minimal_coerce(vsn), do: vsn
+
+  defimpl Solid.Matcher do
+    def match(cluster, ["name"]), do: {:ok, cluster.name}
+    def match(cluster, ["handle"]), do: {:ok, cluster.handle}
+    def match(cluster, ["distro"]), do: {:ok, cluster.distro}
+    def match(cluster, ["version"]), do: {:ok, cluster.version}
+    def match(cluster, ["currentVersion"]), do: {:ok, cluster.current_version}
+    def match(cluster, ["kubeletVersion"]), do: {:ok, cluster.kubelet_version}
+    def match(cluster, ["metadata" | rest]), do: @protocol.match(cluster.metadata, rest)
+    def match(_, _), do: {:error, :not_found}
+  end
 end
