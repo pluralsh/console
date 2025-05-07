@@ -378,6 +378,23 @@ defmodule Console.Services.UsersTest do
     end
   end
 
+  describe "delete_access_token_by_id/2" do
+    test "a user can delete their token by id" do
+      token = insert(:access_token)
+
+      {:ok, deleted} = Users.delete_access_token_by_id(token.id, token.user)
+
+      assert deleted.id == token.id
+      refute refetch(token)
+    end
+
+    test "you cannot delete others tokens by id" do
+      token = insert(:access_token)
+
+      {:error, _} = Users.delete_access_token_by_id(token.id, insert(:user))
+    end
+  end
+
   describe "#create_bootstrap_token/2" do
     test "admins can create bootstrap tokens" do
       admin = admin_user()

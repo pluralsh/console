@@ -515,7 +515,7 @@ type RootMutationType {
 
   createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
 
-  deleteAccessToken(token: String!): AccessToken
+  deleteAccessToken(id: ID, token: String): AccessToken
 
   createBootstrapToken(attributes: BootstrapTokenAttributes!): BootstrapToken
 

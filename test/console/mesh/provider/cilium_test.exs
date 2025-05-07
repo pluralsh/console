@@ -1,4 +1,4 @@
-defmodule Console.Mesh.Provider.LinkerdTest do
+defmodule Console.Mesh.Provider.CiliumTest do
   use Console.DataCase, async: true
   alias Console.Mesh.{Provider, Edge}
   alias Prometheus.{Response, Data, Result}
