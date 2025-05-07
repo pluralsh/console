@@ -1,10 +1,10 @@
 import { useTheme } from 'styled-components'
 
-import { Confirm } from '../../utils/Confirm'
 import {
   ClustersRowFragment,
   useDetachClusterMutation,
 } from '../../../generated/graphql'
+import { Confirm } from '../../utils/Confirm'
 
 export function DetachClusterModal({
   cluster,
@@ -46,6 +46,8 @@ export function DetachClusterModal({
           not disturb any kubernetes objects.
         </>
       }
+      confirmationEnabled={true}
+      confirmationText={cluster.name}
     />
   )
 }
