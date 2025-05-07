@@ -1,6 +1,5 @@
 import {
   Button,
-  CopyIcon,
   EmptyState,
   Flex,
   IconFrame,
@@ -8,7 +7,6 @@ import {
   ListIcon,
   Modal,
   Table,
-  Toast,
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -24,7 +22,6 @@ import {
 
 import isEmpty from 'lodash/isEmpty'
 import { Suspense, useMemo, useState } from 'react'
-import CopyToClipboard from 'react-copy-to-clipboard'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 
@@ -56,7 +53,6 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
-import { ObscuredToken } from './ObscuredToken'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -135,7 +131,7 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
   const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteAccessTokenMutation({
-    variables: { token: token.token ?? '' },
+    variables: { token: token.id ?? '' }, // TODO
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -163,9 +159,6 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
             }}
           >
             <p>Are you sure you want to delete this api access token?</p>
-            <p>
-              <ObscuredToken token={token.token} />
-            </p>
           </div>
         }
         close={() => setConfirm(false)}
@@ -206,49 +199,12 @@ function AuditsButton({ token }: { token: AccessTokenFragment }) {
   )
 }
 
-function CopyButton({ token }: { token: AccessTokenFragment }) {
-  const [displayCopyBanner, setDisplayCopyBanner] = useState(false)
-
-  return (
-    <>
-      <Toast
-        show={displayCopyBanner}
-        onClose={() => setDisplayCopyBanner(false)}
-        closeTimeout={1000}
-        severity="success"
-        marginBottom="medium"
-        marginRight="xxxxlarge"
-      >
-        Access token copied successfully.
-      </Toast>
-      <CopyToClipboard
-        text={token.token}
-        onCopy={() => setDisplayCopyBanner(true)}
-      >
-        <Button
-          small
-          secondary
-          startIcon={<CopyIcon size={15} />}
-        >
-          Copy token
-        </Button>
-      </CopyToClipboard>
-    </>
-  )
-}
-
 const tokenColumnHelper = createColumnHelper<AccessTokenFragment>()
 const tokenColumns = [
-  tokenColumnHelper.accessor((row) => row.token, {
-    id: 'token',
-    header: 'Token',
-    cell: ({ getValue }) => (
-      <ObscuredToken
-        showFirst={13}
-        token={getValue()}
-        // reveal
-      />
-    ),
+  tokenColumnHelper.accessor((row) => row.id, {
+    id: 'id',
+    header: 'ID',
+    cell: ({ getValue }) => getValue(),
     meta: { truncate: true },
   }),
   tokenColumnHelper.accessor((row) => row.insertedAt, {
@@ -269,7 +225,6 @@ const tokenColumns = [
             gap: theme.spacing.xsmall,
           }}
         >
-          <CopyButton token={original} />
           <AccessTokensScopes token={original} />
           <AuditsButton token={original} />
           <DeleteAccessToken token={original} />
