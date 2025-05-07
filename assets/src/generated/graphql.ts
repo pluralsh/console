@@ -10718,6 +10718,11 @@ export type McpServerAuditsQueryVariables = Exact<{
 
 export type McpServerAuditsQuery = { __typename?: 'RootQueryType', mcpServer?: { __typename?: 'McpServer', id: string, audits?: { __typename?: 'McpServerAuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'McpServerAuditEdge', node?: { __typename?: 'McpServerAudit', id: string, arguments?: Record<string, unknown> | null, tool: string, insertedAt?: string | null, updatedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
+export type GenerateMcpTokenQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GenerateMcpTokenQuery = { __typename?: 'RootQueryType', mcpToken?: string | null };
+
 export type UpsertMcpServerMutationVariables = Exact<{
   attributes: McpServerAttributes;
 }>;
@@ -18099,6 +18104,43 @@ export type McpServerAuditsQueryHookResult = ReturnType<typeof useMcpServerAudit
 export type McpServerAuditsLazyQueryHookResult = ReturnType<typeof useMcpServerAuditsLazyQuery>;
 export type McpServerAuditsSuspenseQueryHookResult = ReturnType<typeof useMcpServerAuditsSuspenseQuery>;
 export type McpServerAuditsQueryResult = Apollo.QueryResult<McpServerAuditsQuery, McpServerAuditsQueryVariables>;
+export const GenerateMcpTokenDocument = gql`
+    query GenerateMcpToken {
+  mcpToken
+}
+    `;
+
+/**
+ * __useGenerateMcpTokenQuery__
+ *
+ * To run a query within a React component, call `useGenerateMcpTokenQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGenerateMcpTokenQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGenerateMcpTokenQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGenerateMcpTokenQuery(baseOptions?: Apollo.QueryHookOptions<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>(GenerateMcpTokenDocument, options);
+      }
+export function useGenerateMcpTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>(GenerateMcpTokenDocument, options);
+        }
+export function useGenerateMcpTokenSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>(GenerateMcpTokenDocument, options);
+        }
+export type GenerateMcpTokenQueryHookResult = ReturnType<typeof useGenerateMcpTokenQuery>;
+export type GenerateMcpTokenLazyQueryHookResult = ReturnType<typeof useGenerateMcpTokenLazyQuery>;
+export type GenerateMcpTokenSuspenseQueryHookResult = ReturnType<typeof useGenerateMcpTokenSuspenseQuery>;
+export type GenerateMcpTokenQueryResult = Apollo.QueryResult<GenerateMcpTokenQuery, GenerateMcpTokenQueryVariables>;
 export const UpsertMcpServerDocument = gql`
     mutation UpsertMcpServer($attributes: McpServerAttributes!) {
   upsertMcpServer(attributes: $attributes) {
@@ -29154,6 +29196,7 @@ export const namedOperations = {
     McpServers: 'McpServers',
     McpServer: 'McpServer',
     McpServerAudits: 'McpServerAudits',
+    GenerateMcpToken: 'GenerateMcpToken',
     ClusterAlerts: 'ClusterAlerts',
     ServiceAlerts: 'ServiceAlerts',
     Audits: 'Audits',
