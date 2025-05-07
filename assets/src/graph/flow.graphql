@@ -46,8 +46,11 @@ fragment PreviewEnvironmentInstance on PreviewEnvironmentInstance {
   }
   service {
     ...ServiceDeploymentTiny
+    protect
+    deletedAt
   }
   template {
+    id
     name
   }
   updatedAt

@@ -2,6 +2,7 @@ import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
 import { isNonNullable } from './isNonNullable'
+import { isEmpty } from 'lodash'
 
 export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
@@ -193,4 +194,29 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   const { edges } = connection
 
   return (edges || []).map((edge) => edge?.node).filter(isNonNullable)
+}
+
+// strips __typename's and removes any value in an object where isEmpty is true (except for booleans)
+export function deepOmitFalsy<T extends Nullable<Record<string, any>>>(
+  obj: T
+): T {
+  if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) return obj
+
+  const result = {} as Record<string, any>
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '__typename') continue
+    let processedVal = value
+    // process arrays and objects recursively, then check final reduced value
+    if (Array.isArray(value))
+      processedVal = value
+        .map((item) => deepOmitFalsy(item))
+        .filter((item) => !isEmpty(item))
+    else if (value && typeof value === 'object')
+      processedVal = deepOmitFalsy(value)
+
+    if (!isEmpty(processedVal) || typeof processedVal === 'boolean')
+      result[key] = processedVal
+  }
+
+  return result as T
 }

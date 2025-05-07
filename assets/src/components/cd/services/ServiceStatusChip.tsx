@@ -42,6 +42,7 @@ export function ServiceStatusChip({
   return (
     <Chip
       severity={serviceStatusToSeverity(status)}
+      css={{ whiteSpace: 'nowrap' }}
       {...props}
     >
       {componentStatus && <>{componentStatus} </>}
