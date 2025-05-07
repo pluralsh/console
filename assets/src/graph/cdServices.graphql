@@ -165,9 +165,13 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
   id
   name
   cluster {
-    id
-    name
-    handle
+    ...ClusterMinimal
+  }
+  componentStatus
+  status
+  errors {
+    message
+    source
   }
 }
 

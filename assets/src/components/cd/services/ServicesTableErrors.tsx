@@ -81,6 +81,7 @@ export function ServicesTableErrors({
           e.stopPropagation()
           setIsOpen(true)
         }}
+        css={{ minWidth: 'max-content' }}
         clickable
         errors={serviceErrors}
         alwaysShow={alwaysShow}

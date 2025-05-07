@@ -57,10 +57,10 @@ export function ServiceSettings() {
 
   const directory = useMemo(() => {
     const hasGitRepo = !!ctx.service.repository
-    const hasHelmRepo = !!ctx.service.helm?.chart
+    const hasHelmRepo = !!ctx.service.helm?.chart || !!ctx.service.helm?.values
 
     return getDirectory({ gitEnabled: hasGitRepo, helmEnabled: hasHelmRepo })
-  }, [ctx.service.helm?.chart, ctx.service.repository])
+  }, [ctx.service])
 
   const breadcrumbs = useMemo(
     () =>
