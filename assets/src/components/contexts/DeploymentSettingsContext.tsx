@@ -38,7 +38,7 @@ export function useAIEnabled() {
 export function useOnboarded() {
   const ctx = useDeploymentSettings()
 
-  return ctx.onboarded === true
+  return ctx.onboarded !== false
 }
 
 export function DeploymentSettingsProvider({
