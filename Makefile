@@ -92,6 +92,25 @@ data: ## dir for test sqlite data
 
 testup: secrets data ## sets up dependent services for test
 	docker compose up -d
+	# Sleep since we need to wait for services to start
+	@echo "Waiting 10 seconds for containers to start..."
+	@sleep 10 
+	@echo "Creating OpenSearch domain (opensearch-local)..."
+	# access key id, secret access key, session token must be the same values as in config/test.exs under :opensearch
+	aws configure set aws_access_key_id test-access-key --no-cli-pager
+	aws configure set aws_secret_access_key test-secret-key --no-cli-pager
+	aws configure set aws_session_token test-session-token --no-cli-pager
+	aws configure set aws_default_region us-east-1 --no-cli-pager
+	# create opensearch domain but use the sigv4-proxy endpoint (localhost:4567 as set in docker-compose.yml)
+	aws opensearch create-domain \
+	    --domain-name opensearch-local \
+	    --engine-version "OpenSearch_2.11" \
+	    --cluster-config InstanceType=t3.small.search,InstanceCount=1 \
+	    --ebs-options EBSEnabled=true,VolumeType=gp2,VolumeSize=10 \
+	    --endpoint-url http://localhost:4567 \
+	    --region us-east-1 \
+		--no-cli-pager
+	@echo "Test environment setup complete."
 
 testdown: ## tear down test dependencies
 	docker compose down

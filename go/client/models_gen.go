@@ -3010,13 +3010,16 @@ type LoggingSettings struct {
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
 	// configures a connection to elasticsearch for logging
 	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
+	// configures a connection to aws opensearch for logging
+	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
 }
 
 type LoggingSettingsAttributes struct {
-	Enabled  *bool                              `json:"enabled,omitempty"`
-	Driver   *LogDriver                         `json:"driver,omitempty"`
-	Victoria *HTTPConnectionAttributes          `json:"victoria,omitempty"`
-	Elastic  *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+	Enabled    *bool                              `json:"enabled,omitempty"`
+	Driver     *LogDriver                         `json:"driver,omitempty"`
+	Victoria   *HTTPConnectionAttributes          `json:"victoria,omitempty"`
+	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
 }
 
 type LoginInfo struct {
@@ -3880,6 +3883,22 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+}
+
+type OpensearchConnection struct {
+	Host string `json:"host"`
+	// the index to query for log data
+	Index          string  `json:"index"`
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	AWSRegion      *string `json:"awsRegion,omitempty"`
+}
+
+type OpensearchConnectionAttributes struct {
+	Host               string  `json:"host"`
+	Index              string  `json:"index"`
+	AWSAccessKeyID     *string `json:"awsAccessKeyId,omitempty"`
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	AWSRegion          *string `json:"awsRegion,omitempty"`
 }
 
 // a high level description of the setup of common resources in a cluster
@@ -6380,9 +6399,10 @@ type UtilizationHeatMap struct {
 }
 
 type VectorStoreAttributes struct {
-	Enabled *bool                              `json:"enabled,omitempty"`
-	Store   *VectorStore                       `json:"store,omitempty"`
-	Elastic *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+	Enabled    *bool                              `json:"enabled,omitempty"`
+	Store      *VectorStore                       `json:"store,omitempty"`
+	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
 }
 
 // a shortform reference to an addon by version
@@ -9343,16 +9363,18 @@ func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
 type VectorStore string
 
 const (
-	VectorStoreElastic VectorStore = "ELASTIC"
+	VectorStoreElastic    VectorStore = "ELASTIC"
+	VectorStoreOpensearch VectorStore = "OPENSEARCH"
 )
 
 var AllVectorStore = []VectorStore{
 	VectorStoreElastic,
+	VectorStoreOpensearch,
 }
 
 func (e VectorStore) IsValid() bool {
 	switch e {
-	case VectorStoreElastic:
+	case VectorStoreElastic, VectorStoreOpensearch:
 		return true
 	}
 	return false

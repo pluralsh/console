@@ -1,5 +1,6 @@
 defmodule Console.AI.VectorStore do
   alias Console.AI.Vector.Elastic
+  alias Console.AI.Vector.Opensearch
   alias Console.Schema.{
     DeploymentSettings,
     DeploymentSettings.AI,
@@ -54,5 +55,7 @@ defmodule Console.AI.VectorStore do
 
   defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :elastic, elastic: elastic}}}),
     do: {:ok, Elastic.new(elastic)}
+  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :opensearch, opensearch: opensearch}}}),
+    do: {:ok, Opensearch.new(opensearch)}
   defp store(_), do: {:error, "AI vector store not yet configured"}
 end

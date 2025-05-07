@@ -5,7 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
   defenum LogDriver, victoria: 0, elastic: 1
-  defenum VectorStore, elastic: 0
+  defenum VectorStore, elastic: 0, opensearch: 1
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -20,6 +20,15 @@ defmodule Console.Schema.DeploymentSettings do
       model
       |> cast(attrs, ~w(host user password)a)
       |> validate_required([:host])
+    end
+
+    def headers(%__MODULE__{user: u, password: p}, headers) when is_binary(u) and is_binary(p) do
+      [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | headers]
+    end
+    def headers(_, headers), do: headers
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
     end
   end
 
@@ -37,6 +46,55 @@ defmodule Console.Schema.DeploymentSettings do
       model
       |> cast(attrs, ~w(host index user password)a)
       |> validate_required([:host, :index])
+    end
+
+    def headers(%__MODULE__{user: u, password: p}, headers) when is_binary(u) and is_binary(p) do
+      [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | headers]
+    end
+
+    def headers(_, headers), do: headers
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
+    end
+  end
+
+  defmodule Opensearch do
+    use Piazza.Ecto.Schema
+
+    @aws_service_name "es"
+
+    embedded_schema do
+      field :host,     :string
+      field :index,    :string
+      field :aws_access_key_id, :string
+      field :aws_secret_access_key, EncryptedString
+      field :aws_region, :string
+      field :aws_session_token, EncryptedString
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region aws_session_token)a)
+      |> validate_required([:host, :index])
+    end
+
+    def headers(%__MODULE__{} = os, headers) do
+      session_token = Map.get(os, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")
+      [{"X-Amz-Security-Token", session_token} | headers]
+    end
+
+    def aws_sigv4_headers(%__MODULE__{} = os) do
+      [
+        service: @aws_service_name,
+        region: Map.get(os, :aws_region) || System.get_env("AWS_REGION"),
+        access_key_id: Map.get(os, :aws_access_key_id) || System.get_env("AWS_ACCESS_KEY_ID"),
+        secret_access_key: Map.get(os, :aws_secret_access_key) || System.get_env("AWS_SECRET_ACCESS_KEY")
+      ]
+    end
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
     end
   end
 
@@ -101,6 +159,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :store,       VectorStore, default: :elastic
 
         embeds_one :elastic, Elastic, on_replace: :update
+        embeds_one :opensearch, Opensearch, on_replace: :update
       end
 
       embeds_one :tools, ToolsConfig, on_replace: :update do
@@ -297,6 +356,7 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(enabled store)a)
     |> cast_embed(:elastic)
+    |> cast_embed(:opensearch)
     |> set_initialized()
   end
 
@@ -308,8 +368,10 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defp set_initialized(changeset) do
-    case {get_change(changeset, :store), get_change(changeset, :elastic)} do
-      {:elastic, e} when not is_nil(e) ->
+    case {get_change(changeset, :store), get_change(changeset, :elastic), get_change(changeset, :opensearch)} do
+      {:elastic, e, _} when not is_nil(e) ->
+        put_change(changeset, :initialized, false)
+      {:opensearch, _, o} when not is_nil(o) ->
         put_change(changeset, :initialized, false)
       _ -> changeset
     end
