@@ -3,11 +3,10 @@ git_url: https://github.com/traefik/traefik
 release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 versions:
-- version: 3.3.6
+- version: 3.4.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  chart_version: 35.0.1
 - version: 3.3.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
