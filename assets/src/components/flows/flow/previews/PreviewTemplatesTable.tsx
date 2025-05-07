@@ -1,4 +1,5 @@
-import { Code, Table } from '@pluralsh/design-system'
+import { Code, Tab, Table, TabList, TabPanel } from '@pluralsh/design-system'
+import { Key } from '@react-types/shared'
 import { ExpandedState, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -6,11 +7,11 @@ import {
   PreviewEnvironmentTemplateFragment,
   useFlowPreviewEnvironmentTemplatesQuery,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy, mapExistingNodes } from 'utils/graphql'
 import { stringify } from 'yaml'
 import {
-  ColCommentTemplate,
   ColExpanderWithInitialScroll,
   ColName,
   ColReferenceService,
@@ -66,9 +67,11 @@ export function PreviewTemplatesTable({
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      getRowCanExpand={() => true}
+      getRowCanExpand={(row) =>
+        !!row.original?.template || !!row.original?.commentTemplate
+      }
       expandedRowType="custom"
-      renderExpanded={PreviewTemplateTableExpander}
+      renderExpanded={({ row }) => <PreviewTemplateTableExpander row={row} />}
       onRowClick={(_, row) => row.getToggleExpandedHandler()()}
       reactTableOptions={reactTableOptions}
       {...expandedRowBorderFix}
@@ -81,25 +84,61 @@ function PreviewTemplateTableExpander({
 }: {
   row: Row<PreviewEnvironmentTemplateFragment>
 }) {
-  const template = deepOmitFalsy(row.original.template)
+  const { colors } = useTheme()
+  const [activeTab, setActiveTab] = useState<Key>('service')
+  const tabStateRef = useRef<any>(null)
+  const serviceTemplate = deepOmitFalsy(row.original?.template)
+  const commentTemplate = row.original?.commentTemplate ?? ''
 
   return (
-    <Code
-      language="yaml"
-      showHeader={false}
-      fillLevel={3}
-      showLineNumbers
-      css={{
-        borderRadius: 0,
-        borderRight: 'none',
-        borderBottom: 'none',
-        borderLeft: 'none',
-      }}
-    >
-      {stringify(template)}
-    </Code>
+    <div css={{ background: colors['fill-three'], maxWidth: 520 }}>
+      <TabList
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: activeTab,
+          onSelectionChange: setActiveTab,
+        }}
+      >
+        {!!serviceTemplate ? (
+          <TemplateTabSC key="service">Service template</TemplateTabSC>
+        ) : null}
+        {!!commentTemplate ? (
+          <TemplateTabSC key="comment">Comment template</TemplateTabSC>
+        ) : null}
+      </TabList>
+      <TabPanel
+        stateRef={tabStateRef}
+        tabKey={activeTab}
+      >
+        <Code
+          language={activeTab === 'service' ? 'yaml' : undefined}
+          showHeader={false}
+          fillLevel={3}
+          showLineNumbers={activeTab === 'service'}
+          css={{
+            borderRadius: 0,
+            borderRight: 'none',
+            borderBottom: 'none',
+            borderLeft: 'none',
+          }}
+        >
+          {activeTab === 'service'
+            ? stringify(serviceTemplate)
+            : commentTemplate}
+        </Code>
+      </TabPanel>
+    </div>
   )
 }
+
+const TemplateTabSC = styled(Tab)(({ theme }) => ({
+  flex: 0.5,
+  '& *': {
+    justifyContent: 'center',
+    '&:hover': { background: theme.colors['fill-three-hover'] },
+  },
+}))
 
 // TODO: add this to DS
 // should also probably add a native scroll-to-row ability
@@ -107,9 +146,4 @@ const expandedRowBorderFix = {
   'tr[data-expander-row] td': { padding: 0 },
 }
 
-const cols = [
-  ColExpanderWithInitialScroll,
-  ColName,
-  ColCommentTemplate,
-  ColReferenceService,
-]
+const cols = [ColExpanderWithInitialScroll, ColName, ColReferenceService]

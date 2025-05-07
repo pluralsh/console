@@ -1,10 +1,21 @@
-import { ArrowTopRightIcon, Button, Flex, Table } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  Flex,
+  FormField,
+  Modal,
+  Table,
+  Toast,
+} from '@pluralsh/design-system'
 import { FLOW_DOCS_URL } from 'components/flows/Flows'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useMcpServersQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import {
+  useGenerateMcpTokenLazyQuery,
+  useMcpServersQuery,
+} from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import {
@@ -13,8 +24,12 @@ import {
   ColInfo,
   McpTableAction,
 } from './McpServerTableCols'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 
 export function McpServers() {
+  const [showJwtModal, setShowJwtModal] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+
   const {
     data,
     loading,
@@ -27,11 +42,21 @@ export function McpServers() {
     queryHook: useMcpServersQuery,
     keyPath: ['mcpServers'],
   })
+
+  const [
+    generateToken,
+    { data: token, loading: generatingToken, error: tokenError },
+  ] = useGenerateMcpTokenLazyQuery({
+    onCompleted: () => setShowJwtModal(true),
+    fetchPolicy: 'network-only',
+  })
+
   const mcpServers = useMemo(() => mapExistingNodes(data?.mcpServers), [data])
   if (error) return <GqlError error={error} />
 
   return (
     <WrapperSC>
+      {tokenError && <GqlError error={tokenError} />}
       <Flex justifyContent="space-between">
         <StackedText
           first="MCP servers"
@@ -41,16 +66,25 @@ export function McpServers() {
           secondPartialType="body2"
           secondColor="text-light"
         />
-        <Button
-          secondary
-          as="a"
-          href={FLOW_DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          endIcon={<ArrowTopRightIcon />}
-        >
-          Add MCP server via CRD
-        </Button>
+        <Flex gap="small">
+          <Button
+            secondary
+            as="a"
+            href={FLOW_DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Add via CRD
+          </Button>
+          <Button
+            floating
+            loading={generatingToken}
+            onClick={() => generateToken()}
+          >
+            Generate JWT
+          </Button>
+        </Flex>
       </Flex>
       <Table
         fullHeightWrap
@@ -68,6 +102,38 @@ export function McpServers() {
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No MCP servers found.' }}
       />
+      <Modal
+        open={showJwtModal}
+        onClose={() => setShowJwtModal(false)}
+        header="Generate JWT"
+        actions={
+          <Flex gap="medium">
+            <Button secondary>Close</Button>
+            <Button
+              onClick={() =>
+                navigator.clipboard
+                  .writeText(token?.mcpToken ?? '')
+                  .then(() => setShowToast(true))
+              }
+            >
+              Copy token
+            </Button>
+          </Flex>
+        }
+      >
+        <FormField label="JSON web token (JWT)">
+          <InputRevealer value={token?.mcpToken ?? ''} />
+        </FormField>
+      </Modal>
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        closeTimeout={2500}
+        severity="success"
+        position="bottom"
+      >
+        JWT copied successfully!
+      </Toast>
     </WrapperSC>
   )
 }
