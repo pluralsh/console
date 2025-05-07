@@ -14,7 +14,10 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { ServiceDeploymentsRowFragment } from 'generated/graphql'
+import {
+  ClusterMinimalFragment,
+  ServiceDeploymentsRowFragment,
+} from 'generated/graphql'
 import { toDateOrUndef } from 'utils/datetime'
 import { Edge } from 'utils/graphql'
 import { shortenSha1 } from 'utils/sha'
@@ -51,50 +54,63 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
   header: 'Deployment',
   cell: function Cell({ getValue }) {
-    const serviceDeployment = getValue()
-
-    return (
-      serviceDeployment && (
-        <DecoratedName
-          suffix={
-            <ProtectBadge
-              isProtected={serviceDeployment?.protect}
-              resource="service"
-            />
-          }
-          deletedAt={serviceDeployment.deletedAt}
-        >
-          {serviceDeployment.name}
-        </DecoratedName>
-      )
-    )
+    return <DecoratedServiceDeployment serviceDeployment={getValue()} />
   },
 })
+
+export function DecoratedServiceDeployment({
+  serviceDeployment,
+}: {
+  serviceDeployment: Nullable<ServiceDeploymentsRowFragment>
+}) {
+  if (!serviceDeployment) return null
+  return (
+    <DecoratedName
+      suffix={
+        <ProtectBadge
+          isProtected={serviceDeployment?.protect}
+          resource="service"
+        />
+      }
+      deletedAt={serviceDeployment.deletedAt}
+    >
+      {serviceDeployment.name}
+    </DecoratedName>
+  )
+}
 
 export const ColCluster = columnHelper.accessor(
   ({ node }) => node?.cluster?.name,
   {
     id: 'clusterName',
     header: 'Cluster',
-    cell: ({ getValue, row: { original } }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-      const clusterName = getValue()
-
-      return (
-        <ColWithIcon
-          css={{ width: 'max-content' }}
-          icon={getClusterIconUrl({
-            cluster: original?.node?.cluster,
-            mode: theme.mode,
-          })}
-        >
-          {clusterName}
-        </ColWithIcon>
-      )
+    cell: ({ row: { original } }) => {
+      const cluster = original?.node?.cluster
+      if (!cluster) return null
+      return <ClusterNameAndIcon cluster={cluster} />
     },
   }
 )
+
+export function ClusterNameAndIcon({
+  cluster,
+}: {
+  cluster: Nullable<ClusterMinimalFragment>
+}) {
+  const theme = useTheme()
+  if (!cluster) return null
+  return (
+    <ColWithIcon
+      css={{ width: 'max-content' }}
+      icon={getClusterIconUrl({
+        cluster,
+        mode: theme.mode,
+      })}
+    >
+      {cluster.name}
+    </ColWithIcon>
+  )
+}
 
 export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',

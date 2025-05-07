@@ -1,11 +1,12 @@
 import {
-  FlowAlerts,
   FlowAlertInsight,
+  FlowAlerts,
 } from 'components/flows/flow/FlowAlerts.tsx'
 import { FlowMcpConnections } from 'components/flows/flow/FlowMcpConnections.tsx'
 import { FlowPipelines } from 'components/flows/flow/FlowPipelines.tsx'
 import { FlowPrs } from 'components/flows/flow/FlowPrs.tsx'
 import { FlowServices } from 'components/flows/flow/FlowServices.tsx'
+import { FlowPreviews } from 'components/flows/flow/previews/FlowPreviews.tsx'
 import { Navigate, Route } from 'react-router-dom'
 import { Flows } from '../components/flows/Flows.tsx'
 import { Flow } from '../components/flows/flow/Flow.tsx'
@@ -37,6 +38,10 @@ export const flowRoutes = [
     <Route
       path={'services'}
       element={<FlowServices />}
+    />
+    <Route
+      path={'previews'}
+      element={<FlowPreviews />}
     />
     <Route
       path={'pipelines'}

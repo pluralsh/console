@@ -22,7 +22,7 @@ export function SubTabs({ directory }: { directory: SubtabDirectory }) {
             textValue={label}
             to={path}
           >
-            <SubTab>{label}</SubTab>
+            <SubTab css={{ minWidth: 'max-content' }}>{label}</SubTab>
           </LinkTabWrap>
         ))}
     </Flex>

@@ -1,18 +1,18 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
+import { ServiceDeploymentTinyFragment } from 'generated/graphql'
 import { Key, useCallback } from 'react'
-import { ServiceDeployment } from 'generated/graphql'
+import { useMatch, useNavigate } from 'react-router-dom'
 import {
   SERVICE_ABS_PATH,
   SERVICE_PARAM_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
-import { useMatch, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 export default function ServiceSelector({
   serviceDeployments,
 }: {
-  serviceDeployments: Pick<ServiceDeployment, 'id' | 'name' | 'cluster'>[]
+  serviceDeployments: ServiceDeploymentTinyFragment[]
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
