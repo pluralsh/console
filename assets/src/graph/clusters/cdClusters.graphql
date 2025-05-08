@@ -194,9 +194,6 @@ fragment ClustersRow on Cluster {
     namespace
     supportedVersions
   }
-  prAutomations {
-    ...PrAutomation
-  }
   self
   service {
     id
@@ -217,9 +214,6 @@ fragment ClustersRow on Cluster {
   virtual
   insight {
     ...AiInsightSummary
-  }
-  deprecatedCustomResources {
-    ...DeprecatedCustomResource
   }
 }
 
@@ -307,15 +301,6 @@ fragment ClusterInsight on Cluster {
   insightComponents {
     ...ClusterInsightComponent
   }
-}
-
-fragment DeprecatedCustomResource on DeprecatedCustomResource {
-  name
-  group
-  kind
-  namespace
-  version
-  nextVersion
 }
 
 fragment CloudAddon on CloudAddon {
@@ -410,6 +395,25 @@ fragment ClusterBasic on Cluster {
   deletedAt
   version
   currentVersion
+}
+
+fragment ClusterRuntimeServices on Cluster {
+  id
+  name
+  currentVersion
+  version
+  runtimeServices {
+    ...RuntimeService
+  }
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  upgradeInsights {
+    ...UpgradeInsight
+  }
+  cloudAddons {
+    ...CloudAddon
+  }
 }
 
 fragment ClusterWithNodes on Cluster {
@@ -609,22 +613,7 @@ query RuntimeServices(
   $hasKubeVersion: Boolean!
 ) {
   cluster(id: $id) {
-    id
-    name
-    currentVersion
-    version
-    runtimeServices {
-      ...RuntimeService
-    }
-    apiDeprecations {
-      ...ApiDeprecation
-    }
-    upgradeInsights {
-      ...UpgradeInsight
-    }
-    cloudAddons {
-      ...CloudAddon
-    }
+    ...ClusterRuntimeServices
   }
 }
 
