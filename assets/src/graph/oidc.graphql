@@ -1,0 +1,65 @@
+fragment OidcProvider on OidcProvider {
+  id
+  name
+  description
+  authMethod
+  redirectUris
+  clientId
+  clientSecret
+  bindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query OidcProviders(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $q: String
+) {
+  oidcProviders(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    q: $q
+  ) {
+    edges {
+      node {
+        ...OidcProvider
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+mutation CreateOidcProvider(
+  $type: OidcProviderType!
+  $attributes: OidcProviderAttributes!
+) {
+  createOidcProvider(type: $type, attributes: $attributes) {
+    ...OidcProvider
+  }
+}
+
+mutation UpdateOidcProvider(
+  $type: OidcProviderType!
+  $id: ID!
+  $attributes: OidcProviderAttributes!
+) {
+  updateOidcProvider(type: $type, id: $id, attributes: $attributes) {
+    ...OidcProvider
+  }
+}
+
+mutation DeleteOidcProvider($type: OidcProviderType!, $id: ID!) {
+  deleteOidcProvider(type: $type, id: $id) {
+    ...OidcProvider
+  }
+}

@@ -12715,6 +12715,44 @@ export type AcceptLoginMutationVariables = Exact<{
 
 export type AcceptLoginMutation = { __typename?: 'RootMutationType', acceptLogin?: { __typename?: 'OauthResponse', redirectTo: string } | null };
 
+export type OidcProviderFragment = { __typename?: 'OidcProvider', id: string, name: string, description?: string | null, authMethod?: OidcAuthMethod | null, redirectUris?: Array<string | null> | null, clientId: string, clientSecret: string, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type OidcProvidersQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type OidcProvidersQuery = { __typename?: 'RootQueryType', oidcProviders?: { __typename?: 'OidcProviderConnection', edges?: Array<{ __typename?: 'OidcProviderEdge', node?: { __typename?: 'OidcProvider', id: string, name: string, description?: string | null, authMethod?: OidcAuthMethod | null, redirectUris?: Array<string | null> | null, clientId: string, clientSecret: string, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type CreateOidcProviderMutationVariables = Exact<{
+  type: OidcProviderType;
+  attributes: OidcProviderAttributes;
+}>;
+
+
+export type CreateOidcProviderMutation = { __typename?: 'RootMutationType', createOidcProvider?: { __typename?: 'OidcProvider', id: string, name: string, description?: string | null, authMethod?: OidcAuthMethod | null, redirectUris?: Array<string | null> | null, clientId: string, clientSecret: string, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpdateOidcProviderMutationVariables = Exact<{
+  type: OidcProviderType;
+  id: Scalars['ID']['input'];
+  attributes: OidcProviderAttributes;
+}>;
+
+
+export type UpdateOidcProviderMutation = { __typename?: 'RootMutationType', updateOidcProvider?: { __typename?: 'OidcProvider', id: string, name: string, description?: string | null, authMethod?: OidcAuthMethod | null, redirectUris?: Array<string | null> | null, clientId: string, clientSecret: string, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeleteOidcProviderMutationVariables = Exact<{
+  type: OidcProviderType;
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteOidcProviderMutation = { __typename?: 'RootMutationType', deleteOidcProvider?: { __typename?: 'OidcProvider', id: string, name: string, description?: string | null, authMethod?: OidcAuthMethod | null, redirectUris?: Array<string | null> | null, clientId: string, clientSecret: string, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null };
 
 export type PersonaFragment = { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null };
@@ -16602,6 +16640,23 @@ export const AppNotificationFragmentDoc = gql`
   text
 }
     `;
+export const OidcProviderFragmentDoc = gql`
+    fragment OidcProvider on OidcProvider {
+  id
+  name
+  description
+  authMethod
+  redirectUris
+  clientId
+  clientSecret
+  bindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const PolicyConstraintFragmentDoc = gql`
     fragment PolicyConstraint on PolicyConstraint {
   cluster {
@@ -26564,6 +26619,161 @@ export function useAcceptLoginMutation(baseOptions?: Apollo.MutationHookOptions<
 export type AcceptLoginMutationHookResult = ReturnType<typeof useAcceptLoginMutation>;
 export type AcceptLoginMutationResult = Apollo.MutationResult<AcceptLoginMutation>;
 export type AcceptLoginMutationOptions = Apollo.BaseMutationOptions<AcceptLoginMutation, AcceptLoginMutationVariables>;
+export const OidcProvidersDocument = gql`
+    query OidcProviders($after: String, $first: Int, $before: String, $last: Int, $q: String) {
+  oidcProviders(after: $after, first: $first, before: $before, last: $last, q: $q) {
+    edges {
+      node {
+        ...OidcProvider
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${OidcProviderFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useOidcProvidersQuery__
+ *
+ * To run a query within a React component, call `useOidcProvidersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useOidcProvidersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useOidcProvidersQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useOidcProvidersQuery(baseOptions?: Apollo.QueryHookOptions<OidcProvidersQuery, OidcProvidersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<OidcProvidersQuery, OidcProvidersQueryVariables>(OidcProvidersDocument, options);
+      }
+export function useOidcProvidersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<OidcProvidersQuery, OidcProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<OidcProvidersQuery, OidcProvidersQueryVariables>(OidcProvidersDocument, options);
+        }
+export function useOidcProvidersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<OidcProvidersQuery, OidcProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<OidcProvidersQuery, OidcProvidersQueryVariables>(OidcProvidersDocument, options);
+        }
+export type OidcProvidersQueryHookResult = ReturnType<typeof useOidcProvidersQuery>;
+export type OidcProvidersLazyQueryHookResult = ReturnType<typeof useOidcProvidersLazyQuery>;
+export type OidcProvidersSuspenseQueryHookResult = ReturnType<typeof useOidcProvidersSuspenseQuery>;
+export type OidcProvidersQueryResult = Apollo.QueryResult<OidcProvidersQuery, OidcProvidersQueryVariables>;
+export const CreateOidcProviderDocument = gql`
+    mutation CreateOidcProvider($type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
+  createOidcProvider(type: $type, attributes: $attributes) {
+    ...OidcProvider
+  }
+}
+    ${OidcProviderFragmentDoc}`;
+export type CreateOidcProviderMutationFn = Apollo.MutationFunction<CreateOidcProviderMutation, CreateOidcProviderMutationVariables>;
+
+/**
+ * __useCreateOidcProviderMutation__
+ *
+ * To run a mutation, you first call `useCreateOidcProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOidcProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOidcProviderMutation, { data, loading, error }] = useCreateOidcProviderMutation({
+ *   variables: {
+ *      type: // value for 'type'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateOidcProviderMutation(baseOptions?: Apollo.MutationHookOptions<CreateOidcProviderMutation, CreateOidcProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateOidcProviderMutation, CreateOidcProviderMutationVariables>(CreateOidcProviderDocument, options);
+      }
+export type CreateOidcProviderMutationHookResult = ReturnType<typeof useCreateOidcProviderMutation>;
+export type CreateOidcProviderMutationResult = Apollo.MutationResult<CreateOidcProviderMutation>;
+export type CreateOidcProviderMutationOptions = Apollo.BaseMutationOptions<CreateOidcProviderMutation, CreateOidcProviderMutationVariables>;
+export const UpdateOidcProviderDocument = gql`
+    mutation UpdateOidcProvider($type: OidcProviderType!, $id: ID!, $attributes: OidcProviderAttributes!) {
+  updateOidcProvider(type: $type, id: $id, attributes: $attributes) {
+    ...OidcProvider
+  }
+}
+    ${OidcProviderFragmentDoc}`;
+export type UpdateOidcProviderMutationFn = Apollo.MutationFunction<UpdateOidcProviderMutation, UpdateOidcProviderMutationVariables>;
+
+/**
+ * __useUpdateOidcProviderMutation__
+ *
+ * To run a mutation, you first call `useUpdateOidcProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateOidcProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateOidcProviderMutation, { data, loading, error }] = useUpdateOidcProviderMutation({
+ *   variables: {
+ *      type: // value for 'type'
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateOidcProviderMutation(baseOptions?: Apollo.MutationHookOptions<UpdateOidcProviderMutation, UpdateOidcProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateOidcProviderMutation, UpdateOidcProviderMutationVariables>(UpdateOidcProviderDocument, options);
+      }
+export type UpdateOidcProviderMutationHookResult = ReturnType<typeof useUpdateOidcProviderMutation>;
+export type UpdateOidcProviderMutationResult = Apollo.MutationResult<UpdateOidcProviderMutation>;
+export type UpdateOidcProviderMutationOptions = Apollo.BaseMutationOptions<UpdateOidcProviderMutation, UpdateOidcProviderMutationVariables>;
+export const DeleteOidcProviderDocument = gql`
+    mutation DeleteOidcProvider($type: OidcProviderType!, $id: ID!) {
+  deleteOidcProvider(type: $type, id: $id) {
+    ...OidcProvider
+  }
+}
+    ${OidcProviderFragmentDoc}`;
+export type DeleteOidcProviderMutationFn = Apollo.MutationFunction<DeleteOidcProviderMutation, DeleteOidcProviderMutationVariables>;
+
+/**
+ * __useDeleteOidcProviderMutation__
+ *
+ * To run a mutation, you first call `useDeleteOidcProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteOidcProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteOidcProviderMutation, { data, loading, error }] = useDeleteOidcProviderMutation({
+ *   variables: {
+ *      type: // value for 'type'
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteOidcProviderMutation(baseOptions?: Apollo.MutationHookOptions<DeleteOidcProviderMutation, DeleteOidcProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteOidcProviderMutation, DeleteOidcProviderMutationVariables>(DeleteOidcProviderDocument, options);
+      }
+export type DeleteOidcProviderMutationHookResult = ReturnType<typeof useDeleteOidcProviderMutation>;
+export type DeleteOidcProviderMutationResult = Apollo.MutationResult<DeleteOidcProviderMutation>;
+export type DeleteOidcProviderMutationOptions = Apollo.BaseMutationOptions<DeleteOidcProviderMutation, DeleteOidcProviderMutationVariables>;
 export const PersonasDocument = gql`
     query Personas($cursor: String) {
   personas(first: 3, after: $cursor) {
@@ -29429,6 +29639,7 @@ export const namedOperations = {
     UnreadAppNotifications: 'UnreadAppNotifications',
     AppNotifications: 'AppNotifications',
     OIDCConsent: 'OIDCConsent',
+    OidcProviders: 'OidcProviders',
     Personas: 'Personas',
     PolicyConstraints: 'PolicyConstraints',
     PolicyConstraint: 'PolicyConstraint',
@@ -29563,6 +29774,9 @@ export const namedOperations = {
     ReadAppNotifications: 'ReadAppNotifications',
     Consent: 'Consent',
     AcceptLogin: 'AcceptLogin',
+    CreateOidcProvider: 'CreateOidcProvider',
+    UpdateOidcProvider: 'UpdateOidcProvider',
+    DeleteOidcProvider: 'DeleteOidcProvider',
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
@@ -29778,6 +29992,7 @@ export const namedOperations = {
     NotificationFilter: 'NotificationFilter',
     NotificationRouter: 'NotificationRouter',
     AppNotification: 'AppNotification',
+    OidcProvider: 'OidcProvider',
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PolicyConstraint: 'PolicyConstraint',
