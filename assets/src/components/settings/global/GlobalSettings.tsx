@@ -43,6 +43,10 @@ const directory = [
     label: 'Observability',
   },
   {
+    path: 'oidc',
+    label: 'OIDC',
+  },
+  {
     path: 'smtp',
     label: 'SMTP',
   },
