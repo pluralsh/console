@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"sigs.k8s.io/yaml"
 	"strconv"
+
+	"sigs.k8s.io/yaml"
 )
 
 func toYaml(val interface{}) (string, error) {
