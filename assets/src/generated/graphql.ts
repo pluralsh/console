@@ -26620,7 +26620,7 @@ export type AcceptLoginMutationHookResult = ReturnType<typeof useAcceptLoginMuta
 export type AcceptLoginMutationResult = Apollo.MutationResult<AcceptLoginMutation>;
 export type AcceptLoginMutationOptions = Apollo.BaseMutationOptions<AcceptLoginMutation, AcceptLoginMutationVariables>;
 export const OidcProvidersDocument = gql`
-    query OidcProviders($after: String, $first: Int, $before: String, $last: Int, $q: String) {
+    query OidcProviders($after: String, $first: Int = 100, $before: String, $last: Int, $q: String) {
   oidcProviders(after: $after, first: $first, before: $before, last: $last, q: $q) {
     edges {
       node {

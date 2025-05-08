@@ -16,7 +16,7 @@ fragment OidcProvider on OidcProvider {
 
 query OidcProviders(
   $after: String
-  $first: Int
+  $first: Int = 100
   $before: String
   $last: Int
   $q: String
