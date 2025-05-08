@@ -15,6 +15,7 @@ import {
   AccessTokenAudit,
   AccessTokenFragment,
   AccessTokensDocument,
+  DeleteAccessTokenMutationVariables,
   useAccessTokensQuery,
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
@@ -131,7 +132,9 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
   const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteAccessTokenMutation({
-    variables: { token: token.id ?? '' }, // TODO
+    variables: {
+      id: token.id ?? '',
+    } satisfies DeleteAccessTokenMutationVariables,
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,

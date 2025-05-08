@@ -13161,7 +13161,7 @@ export type CreateAccessTokenMutationVariables = Exact<{
 export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', token?: string | null, id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type DeleteAccessTokenMutationVariables = Exact<{
-  token: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
@@ -28532,8 +28532,8 @@ export type CreateAccessTokenMutationHookResult = ReturnType<typeof useCreateAcc
 export type CreateAccessTokenMutationResult = Apollo.MutationResult<CreateAccessTokenMutation>;
 export type CreateAccessTokenMutationOptions = Apollo.BaseMutationOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
 export const DeleteAccessTokenDocument = gql`
-    mutation DeleteAccessToken($token: String!) {
-  deleteAccessToken(token: $token) {
+    mutation DeleteAccessToken($id: ID!) {
+  deleteAccessToken(id: $id) {
     ...AccessToken
   }
 }
@@ -28553,7 +28553,7 @@ export type DeleteAccessTokenMutationFn = Apollo.MutationFunction<DeleteAccessTo
  * @example
  * const [deleteAccessTokenMutation, { data, loading, error }] = useDeleteAccessTokenMutation({
  *   variables: {
- *      token: // value for 'token'
+ *      id: // value for 'id'
  *   },
  * });
  */
