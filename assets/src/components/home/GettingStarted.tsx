@@ -57,7 +57,9 @@ export function GettingStartedBlock() {
 
 export function GettingStartedContent() {
   const theme = useTheme()
-  const [dismiss, { loading, error }] = useDissmissOnboardingMutation()
+  const [dismiss, { loading, error }] = useDissmissOnboardingMutation({
+    refetchQueries: ['DeploymentSettings'],
+  })
 
   return (
     <div

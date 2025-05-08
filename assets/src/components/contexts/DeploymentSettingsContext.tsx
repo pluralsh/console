@@ -48,6 +48,7 @@ export function DeploymentSettingsProvider({
 }) {
   const { data, loading } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
 
