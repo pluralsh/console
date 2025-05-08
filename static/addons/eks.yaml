@@ -4403,6 +4403,12 @@
     - '1.25'
     - '1.24'
   publisher: Solo.io
+- name: solodev_cms
+  versions:
+  - version: v10.3.95-eksbuild.1
+    compatibilities:
+    - '1.29'
+  publisher: Solodev
 - name: spacelift_workerpool-controller
   versions:
   - version: v0.25.0-eksbuild.1
