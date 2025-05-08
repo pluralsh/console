@@ -1,5 +1,5 @@
 import {
-  BookIcon,
+  BrainIcon,
   LogsIcon,
   Modal,
   PrOpenIcon,
@@ -18,11 +18,11 @@ import {
 import { groupBy, isEmpty } from 'lodash'
 import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { AlertsEvidencePanel } from './AlertEvidencePanel'
+import { KnowledgeEvidencePanel } from './KnowledgeEvidencePanel'
 import { LogsEvidencePanel } from './LogsEvidencePanel'
 import { PrEvidenceDetails } from './PrEvidenceDetails'
 import { GroupedPrEvidence, PrEvidencePanel } from './PrEvidencePanel'
-import { AlertsEvidencePanel } from './AlertEvidencePanel'
-import { KnowledgeEvidencePanel } from './KnowledgeEvidencePanel'
 
 export const DELIMITER = '<DELIM>' // arbitrary delimiter that will probably never be in a URL
 
@@ -48,7 +48,7 @@ export const evidenceDirectory: Record<
   [EvidenceType.Pr]: { icon: <PrOpenIcon />, label: 'PRs' },
   [EvidenceType.Alert]: { icon: <SirenIcon />, label: 'Alerts' },
   // TODO: change to knowledge icon when in DS
-  [EvidenceType.Knowledge]: { icon: <BookIcon />, label: 'Knowledge' },
+  [EvidenceType.Knowledge]: { icon: <BrainIcon />, label: 'Knowledge' },
 }
 
 export function InsightEvidence({

@@ -18,8 +18,7 @@ defmodule Console.AI.Provider do
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
   give a concise but clear explanation of issues in your companies kubernetes infrastructure.  The user is not necessarily
-  an expert in the domain, so please provide as much documentation and evidence as is necessary to explain what issue they're
-  facing.  Please provide a clear summary and any details to debug what's going on with the case provided.
+  an expert in the domain, so assume they're not familiar with the terminology and provide a clear explanation of the issue.
   """}
 
   @summary """

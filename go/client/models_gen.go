@@ -2451,7 +2451,9 @@ type GlobalService struct {
 	// the service to replicate across clusters
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// whether to only apply to clusters with this provider
-	Provider   *ClusterProvider             `json:"provider,omitempty"`
+	Provider *ClusterProvider `json:"provider,omitempty"`
+	// additional context used to template service metadata during global service reconciliation
+	Context    *TemplateContext             `json:"context,omitempty"`
 	Services   *ServiceDeploymentConnection `json:"services,omitempty"`
 	InsertedAt *string                      `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                      `json:"updatedAt,omitempty"`
@@ -2476,6 +2478,8 @@ type GlobalServiceAttributes struct {
 	Template *ServiceTemplateAttributes `json:"template,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *CascadeAttributes `json:"cascade,omitempty"`
+	// additional context used to template service metadata during global service reconciliation
+	Context *TemplateContextAttributes `json:"context,omitempty"`
 }
 
 type GlobalServiceConnection struct {
@@ -6143,6 +6147,16 @@ type TargetRef struct {
 	APIVersion *string `json:"apiVersion,omitempty"`
 	Kind       *string `json:"kind,omitempty"`
 	Name       *string `json:"name,omitempty"`
+}
+
+// Additional context used to template service metadata during global service reconciliation
+type TemplateContext struct {
+	Raw map[string]any `json:"raw,omitempty"`
+}
+
+// Additional context used to template service metadata during global service reconciliation
+type TemplateContextAttributes struct {
+	Raw *string `json:"raw,omitempty"`
 }
 
 type TerminatedState struct {

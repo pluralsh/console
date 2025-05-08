@@ -235,8 +235,11 @@ defmodule Console.GraphQl.Resolvers.User do
   def create_access_token(args, %{context: %{current_user: user}}),
     do: Users.create_access_token(args, user)
 
-  def delete_access_token(%{token: token}, %{context: %{current_user: user}}),
+  def delete_access_token(%{token: token}, %{context: %{current_user: user}}) when is_binary(token),
     do: Users.delete_access_token(token, user)
+
+  def delete_access_token(%{id: id}, %{context: %{current_user: user}}) when is_binary(id),
+    do: Users.delete_access_token_by_id(id, user)
 
   def create_bootstrap_token(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Users.create_bootstrap_token(attrs, user)

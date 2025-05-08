@@ -1,8 +1,11 @@
 import {
-  ArrowTopRightIcon,
+  Button,
+  CaretRightIcon,
+  DiffColumnIcon,
   Flex,
   GitHubLogoIcon,
   IconFrame,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ServiceDeprecations } from 'components/cd/services/ServiceDeprecations'
@@ -13,12 +16,9 @@ import {
 import { ServicesTableErrors } from 'components/cd/services/ServicesTableErrors'
 import { ServiceStatusChip } from 'components/cd/services/ServiceStatusChip'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { TRUNCATE_LEFT } from 'components/utils/truncate'
-import { InlineLink } from 'components/utils/typography/InlineLink'
+import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { InlineA } from 'components/utils/typography/Text'
 import { PreviewEnvironmentInstance } from 'generated/graphql'
-import { Link } from 'react-router-dom'
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 const columnHelper = createColumnHelper<PreviewEnvironmentInstance>()
 
@@ -55,8 +55,8 @@ export const ColPrUrl = columnHelper.accessor(
 export const ColService = columnHelper.accessor(
   (instance) => instance.service?.name,
   {
-    id: 'deployment',
-    header: 'Deployment',
+    id: 'service',
+    header: 'Service',
     enableSorting: true,
     cell: function Cell({ row: { original } }) {
       return (
@@ -115,12 +115,23 @@ export const ColTemplate = columnHelper.accessor(
     cell: function Cell({ table: { options }, row: { original } }) {
       const template = original?.template
       return (
-        <InlineLink
-          onClick={() => options.meta?.setSelectedTemplateId?.(template?.id)}
-          css={{ '&:not(:hover)': { textDecoration: 'none' } }}
+        <Tooltip
+          label={`View "${template?.name}"`}
+          placement="top"
         >
-          {template?.name}
-        </InlineLink>
+          <Button
+            small
+            floating
+            startIcon={<DiffColumnIcon />}
+            maxWidth={200}
+            onClick={(e) => {
+              e.stopPropagation()
+              options.meta?.setSelectedTemplateId?.(template?.id)
+            }}
+          >
+            <span css={{ ...TRUNCATE, maxWidth: 200 }}>{template?.name}</span>
+          </Button>
+        </Tooltip>
       )
     },
   }
@@ -146,18 +157,13 @@ export const ColLinkout = columnHelper.accessor(
   {
     id: 'linkout',
     header: '',
-    cell: function Cell({ getValue }) {
-      const service = getValue()
+    meta: { gridTemplate: 'min-content' },
+    cell: function Cell() {
       return (
         <IconFrame
-          as={Link}
           clickable
-          icon={<ArrowTopRightIcon />}
+          icon={<CaretRightIcon />}
           tooltip="Go to service"
-          to={getServiceDetailsPath({
-            serviceId: service?.id,
-            clusterId: service?.cluster?.id,
-          })}
         />
       )
     },

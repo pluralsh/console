@@ -53,17 +53,6 @@ export const ColName = columnHelper.accessor((template) => template.name, {
   },
 })
 
-export const ColCommentTemplate = columnHelper.accessor(
-  (template) => template.commentTemplate,
-  {
-    id: 'commentTemplate',
-    header: 'Comment template',
-    cell: function Cell({ getValue }) {
-      return getValue()
-    },
-  }
-)
-
 export const ColReferenceService = columnHelper.accessor(
   (template) => template.referenceService,
   {

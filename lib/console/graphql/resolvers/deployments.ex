@@ -89,7 +89,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     McpServer,
     DeprecatedCustomResource,
     ServiceComponentChild,
-    OperationalLayout
+    OperationalLayout,
+    PreviewEnvironmentInstance,
+    PreviewEnvironmentTemplate,
+    TemplateContext
   }
 
   def query(Project, _), do: Project
@@ -168,6 +171,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(DeprecatedCustomResource, _), do: DeprecatedCustomResource
   def query(ServiceComponentChild, _), do: ServiceComponentChild
   def query(OperationalLayout, _), do: OperationalLayout
+  def query(PreviewEnvironmentInstance, _), do: PreviewEnvironmentInstance
+  def query(PreviewEnvironmentTemplate, _), do: PreviewEnvironmentTemplate
+  def query(TemplateContext, _), do: TemplateContext
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

@@ -515,7 +515,7 @@ type RootMutationType {
 
   createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
 
-  deleteAccessToken(token: String!): AccessToken
+  deleteAccessToken(id: ID, token: String): AccessToken
 
   createBootstrapToken(attributes: BootstrapTokenAttributes!): BootstrapToken
 
@@ -2786,6 +2786,9 @@ input GlobalServiceAttributes {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: CascadeAttributes
+
+  "additional context used to template service metadata during global service reconciliation"
+  context: TemplateContextAttributes
 }
 
 "Attributes for configuring a managed namespace"
@@ -2875,6 +2878,11 @@ input CascadeAttributes {
   detach: Boolean
 }
 
+"Additional context used to template service metadata during global service reconciliation"
+input TemplateContextAttributes {
+  raw: Json
+}
+
 "a rules based mechanism to redeploy a service across a fleet of clusters"
 type GlobalService {
   "internal id of this global service"
@@ -2909,6 +2917,9 @@ type GlobalService {
 
   "whether to only apply to clusters with this provider"
   provider: ClusterProvider
+
+  "additional context used to template service metadata during global service reconciliation"
+  context: TemplateContext
 
   services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
 
@@ -3016,6 +3027,11 @@ type Cascade {
 
   "whether to perform a detach-delete for all owned resources"
   detach: Boolean
+}
+
+"Additional context used to template service metadata during global service reconciliation"
+type TemplateContext {
+  raw: Map
 }
 
 type GlobalServiceConnection {

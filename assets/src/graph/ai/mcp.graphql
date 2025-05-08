@@ -83,6 +83,10 @@ query McpServerAudits($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query GenerateMcpToken {
+  mcpToken
+}
+
 mutation UpsertMcpServer($attributes: McpServerAttributes!) {
   upsertMcpServer(attributes: $attributes) {
     ...McpServer

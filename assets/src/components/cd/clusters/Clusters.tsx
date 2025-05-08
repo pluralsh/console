@@ -252,7 +252,7 @@ export default function Clusters() {
                 border: theme.borders['fill-two'],
                 borderRadius: theme.borderRadiuses.medium,
                 flexDirection: 'column',
-                overflow: 'hidden',
+                overflow: 'auto',
                 height: '100%',
               }}
             />
@@ -270,7 +270,9 @@ export default function Clusters() {
             reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
-          {!onboarded && <GettingStartedBlock />}
+          {!onboarded && tableData && tableData?.length < 2 && (
+            <GettingStartedBlock />
+          )}
         </WrapWithIf>
       </TabPanel>
     </div>

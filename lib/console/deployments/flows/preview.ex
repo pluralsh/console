@@ -175,7 +175,7 @@ defmodule Console.Deployments.Flows.Preview do
 
   defp render_liquid(template, ctx) when is_binary(template) do
     with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, ctx, strict_variables: true)} do
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, ctx, strict_variables: false)} do
       {:ok, IO.iodata_to_binary(res)}
     else
       {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}

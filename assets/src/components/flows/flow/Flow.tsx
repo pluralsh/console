@@ -30,8 +30,8 @@ import styled from 'styled-components'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
-  { path: 'previews', label: 'Previews' },
   { path: 'pipelines', label: 'Pipelines' },
+  { path: 'previews', label: 'Previews' },
   { path: 'prs', label: 'PRs' },
   { path: 'alerts', label: 'Alerts' },
   { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },

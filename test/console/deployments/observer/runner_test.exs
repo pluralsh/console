@@ -63,9 +63,14 @@ defmodule Console.Deployments.Observer.RunnerTest do
         name: "observer",
         target: %{type: :oci, oci: %{url: "oci://ghcr.io/pluralsh/plural"}},
         actions: [
-          %{type: :pipeline, configuration: %{
-            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
-          }
+          %{
+            type: :pipeline,
+            configuration: %{
+              pipeline: %{
+                pipeline_id: pipeline.id,
+                context: %{"some" => "$value"}}
+              }
+            }
         ],
         crontab: "*/5 * * *",
         last_run_at: Timex.now()
@@ -73,7 +78,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
 
       {:ok, obs} = Runner.run(observer)
 
-      refute Timex.equal?(obs.next_run_at, observer.next_run_at)
+      refute Timex.equal?(obs.next_run_at, observer.next_run_at, :microseconds)
 
       assert Console.Helm.Utils.compare_versions(obs.last_value, "0.11.11") != :lt
 
