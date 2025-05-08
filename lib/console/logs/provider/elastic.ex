@@ -7,6 +7,7 @@ defmodule Console.Logs.Provider.Elastic do
   alias Console.Logs.{Query, Line, Time}
 
   @headers [{"Content-Type", "application/json"}]
+  @aws_service_name "es"
 
   @type t :: %__MODULE__{}
 
@@ -24,6 +25,17 @@ defmodule Console.Logs.Provider.Elastic do
     end
   end
 
+  def search(%Elastic{aws_enabled: true, host: host, index: index} = conn, query) do
+    Req.new([
+      url: "#{host}/#{index}/_search",
+      headers: headers(conn),
+      body: Jason.encode!(query),
+      aws_sigv4: aws_sigv4_headers(conn)
+    ])
+    |> Req.post()
+    |> search_response()
+  end
+
   def search(%Elastic{index: index, host: host} = conn, query) do
     HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn))
     |> search_response()
@@ -33,7 +45,12 @@ defmodule Console.Logs.Provider.Elastic do
     with {:ok, resp} <- Jason.decode(body),
       do: {:ok, Snap.SearchResponse.new(resp)}
   end
+  defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
+    # Req.Response is already decoded so we can just return the body
+    {:ok, Snap.SearchResponse.new(body)}
+  end
   defp search_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "es failure: #{body}"}
+  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "es failure: #{body}"}
   defp search_response(_), do: {:error, "network failure"}
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
@@ -128,4 +145,13 @@ defmodule Console.Logs.Provider.Elastic do
   defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
   defp headers(_), do: @headers
+
+  defp aws_sigv4_headers(es) do
+    [
+      service: @aws_service_name,
+      region: es.aws_region || System.get_env("AWS_REGION"),
+      access_key_id: es.aws_access_key_id || System.get_env("AWS_ACCESS_KEY_ID"),
+      secret_access_key: es.aws_secret_access_key || System.get_env("AWS_SECRET_ACCESS_KEY")
+    ]
+  end
 end

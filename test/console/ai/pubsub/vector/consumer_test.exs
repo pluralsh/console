@@ -215,7 +215,8 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       flow = insert(:flow)
       pr = insert(:pull_request, flow: flow, status: :merged, url: "https://github.com/owner/repo/pull/1")
 
-      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, vector()}]} end)
+      # Mock twice, once for indexing and once for fetching
+      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text -> {:ok, [{text, vector()}]} end)
       expect(Tentacat.Pulls, :find, fn _, "owner", "repo", "1" ->
         {:ok, %{"merged" => true, "html_url" => "https://github.com/owner/repo/pull/1"}, %{}}
       end)
@@ -240,6 +241,11 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       settings = Console.Deployments.Settings.fetch_consistent()
       assert settings.ai.vector_store.initialized
+
+      assert {:ok, [%Console.AI.VectorStore.Response{
+        type: :pr,
+        pr_file: %{filename: "terraform/main.tf"}
+      }]} = Console.AI.VectorStore.fetch("terraform", [])
     end
   end
 

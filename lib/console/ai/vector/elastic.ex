@@ -82,7 +82,6 @@ defmodule Console.AI.Vector.Elastic do
         aws_sigv4: aws_sigv4_headers(es)
       ])
       |> Req.post()
-      |> IO.inspect(label: "insert response")
       |> handle_response("could not insert vector into elasticsearch:")
     end
   end
@@ -107,31 +106,12 @@ defmodule Console.AI.Vector.Elastic do
   end
   defp doc_filters(doc, _), do: doc
 
-  def fetch(elastic_module, text, opts \\ [])
-
-  def fetch(%__MODULE__{conn: %Elastic{aws_enabled: true} = es}, text, opts) do
-    count = Keyword.get(opts, :count, 5)
-    filters = Keyword.get(opts, :filters, [])
-    with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
-         query = vector_query(embedding, count, filters),
-         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, query) do
-      Enum.map(hits, fn %Snap.Hit{source: source} ->
-        datatype = source["datatype"]
-        case source[datatype] do
-          %{} = data -> Content.decode(datatype, data)
-          _ -> nil
-        end
-      end)
-      |> Enum.filter(& &1)
-      |> ok()
-    end
-  end
-
   def fetch(%__MODULE__{conn: %Elastic{} = es}, text, opts) do
     count = Keyword.get(opts, :count, 5)
     filters = Keyword.get(opts, :filters, [])
+    num_candidates = Keyword.get(opts, :num_candidates, 100)
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
-         query = vector_query(embedding, count, filters),
+         query = vector_query(embedding, count, filters, num_candidates),
          {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, query) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
@@ -145,10 +125,10 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  defp vector_query(embedding, count, filters) do
+  defp vector_query(embedding, count, filters, num_candidates) do
     query_filters(%{
       size: count,
-      knn: %{field: "passages.vector", query_vector: embedding, k: count}
+      knn: %{field: "passages.vector", query_vector: embedding, k: count, num_candidates: num_candidates}
     }, filters)
   end
 
