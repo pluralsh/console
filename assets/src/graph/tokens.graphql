@@ -67,8 +67,8 @@ mutation CreateAccessToken($scopes: [ScopeAttributes]) {
   }
 }
 
-mutation DeleteAccessToken($token: String!) {
-  deleteAccessToken(token: $token) {
+mutation DeleteAccessToken($token: String, $id: ID) {
+  deleteAccessToken(token: $token, id: $id) {
     ...AccessToken
   }
 }
