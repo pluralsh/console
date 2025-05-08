@@ -8,7 +8,7 @@ defmodule Console.AI.Vector.Elastic do
   alias Console.AI.Vector.Content
   alias Console.Schema.DeploymentSettings.Elastic
 
-  @index_mappings %{
+  @index_mappings_es %{
     mappings: %{
       properties: %{
         passages: %{
@@ -32,18 +32,19 @@ defmodule Console.AI.Vector.Elastic do
     }
   }
 
+  @headers [{"Content-Type", "application/json"}]
+  @aws_service_name "es"
+
   defstruct [:conn]
 
   def new(%Elastic{} = conn), do: %__MODULE__{conn: conn}
 
-  @headers [{"Content-Type", "application/json"}]
-  @aws_service_name "es"
-
   def init(%__MODULE__{conn: %Elastic{index: index, aws_enabled: true} = es}) do
     Req.new([
       url: url(es, index),
+      method: :put,
       headers: headers(es),
-      body: Jason.encode!(@index_mappings),
+      body: Jason.encode!(@index_mappings_es),
       aws_sigv4: aws_sigv4_headers(es)
     ])
     |> Req.put()
@@ -56,7 +57,7 @@ defmodule Console.AI.Vector.Elastic do
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     url(es, index)
-    |> HTTPoison.put(Jason.encode!(@index_mappings), headers(es))
+    |> HTTPoison.put(Jason.encode!(@index_mappings_es), headers(es))
     |> handle_response("could not initialize elasticsearch:")
     |> case do
       :ok -> initialized()
@@ -67,11 +68,13 @@ defmodule Console.AI.Vector.Elastic do
   def insert(elastic_module, data, opts \\ [])
 
   def insert(%__MODULE__{conn: %Elastic{aws_enabled: true} = es}, data, opts) do
+    IO.inspect(data, label: "data")
     filters = Keyword.get(opts, :filters, [])
     with {datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
       Req.new([
         url: url(es, "#{es.index}/_doc"),
+        method: :post,
         headers: headers(es),
         body: Jason.encode!(doc_filters(%{
           passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
@@ -148,6 +151,9 @@ defmodule Console.AI.Vector.Elastic do
 
   defp url(%Elastic{host: host}, path), do: Path.join(host, path)
 
+  defp headers(%{aws_enabled: true} = es) do
+    [{"X-Amz-Security-Token", Map.get(es, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")} | @headers]
+  end
   defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
   defp headers(_), do: @headers
@@ -155,9 +161,9 @@ defmodule Console.AI.Vector.Elastic do
   defp aws_sigv4_headers(es) do
     [
       service: @aws_service_name,
-      region: es.aws_region || System.get_env("AWS_REGION"),
-      access_key_id: es.aws_access_key_id || System.get_env("AWS_ACCESS_KEY_ID"),
-      secret_access_key: es.aws_secret_access_key || System.get_env("AWS_SECRET_ACCESS_KEY")
+      region: Map.get(es, :aws_region) || System.get_env("AWS_REGION"),
+      access_key_id: Map.get(es, :aws_access_key_id) || System.get_env("AWS_ACCESS_KEY_ID"),
+      secret_access_key: Map.get(es, :aws_secret_access_key) || System.get_env("AWS_SECRET_ACCESS_KEY")
     ]
   end
 end
