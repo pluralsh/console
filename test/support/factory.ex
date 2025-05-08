@@ -957,6 +957,14 @@ defmodule Console.Factory do
     %Schema.TemplateContext{}
   end
 
+  def compliance_report_generator_factory do
+    %Schema.ComplianceReportGenerator{
+      name: sequence(:compliance_report_generator, & "compliance-report-generator-#{&1}"),
+      format: :csv,
+      read_policy_id: Ecto.UUID.generate()
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

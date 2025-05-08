@@ -43,4 +43,78 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
       }]}, %{cluster: cluster})
     end
   end
+
+  describe "upsertComplianceReportGenerator" do
+    test "admins can create a compliance report generator" do
+      group = insert(:group)
+
+      {:ok, %{data: %{"upsertComplianceReportGenerator" => gen}}} = run_query("""
+        mutation Upsert($attributes: ComplianceReportGeneratorAttributes!) {
+          upsertComplianceReportGenerator(attributes: $attributes) {
+            id
+            name
+            format
+            readBindings { group { name } }
+          }
+        }
+      """, %{"attributes" => %{
+        "name" => "my-generator",
+        "format" => "CSV",
+        "readBindings" => [%{"groupId" => group.id}]
+      }}, %{current_user: admin_user()})
+
+      assert gen["id"]
+      assert gen["name"] == "my-generator"
+      assert gen["format"] == "CSV"
+      [%{"group" => g}] = gen["readBindings"]
+      assert g["name"] == group.name
+    end
+
+    test "non-admins cannot create a compliance report generator" do
+      group = insert(:group)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Upsert($attributes: ComplianceReportGeneratorAttributes) {
+          upsertComplianceReportGenerator(attributes: $attributes) {
+            id
+            name
+            format
+            readBindings { group { name } }
+          }
+        }
+      """, %{"attributes" => %{
+        "name" => "my-generator",
+        "format" => "CSV",
+        "readBindings" => [%{"groupId" => group.id}]
+      }}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "deleteComplianceReportGenerator" do
+    test "admins can delete a compliance report generator" do
+      gen = insert(:compliance_report_generator)
+
+      {:ok, %{data: %{"deleteComplianceReportGenerator" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteComplianceReportGenerator(id: $id) { id }
+        }
+      """, %{"id" => gen.id}, %{current_user: admin_user()})
+
+      assert del["id"] == gen.id
+
+      refute refetch(gen)
+    end
+
+    test "non-admins cannot delete a compliance report generator" do
+      gen = insert(:compliance_report_generator)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteComplianceReportGenerator(id: $id) { id }
+        }
+      """, %{"id" => gen.id}, %{current_user: insert(:user)})
+
+      assert refetch(gen)
+    end
+  end
 end
