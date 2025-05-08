@@ -1,7 +1,6 @@
 import { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
-import { Button, Modal, Switch } from '@pluralsh/design-system'
-
+import { Button, Codeline, Modal, Switch } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 
 import {
@@ -22,11 +21,9 @@ export type Scope = {
 export function AccessTokensCreateModal({
   open,
   setOpen,
-  setDisplayNewBanner,
 }: {
   open: boolean
   setOpen: (open: boolean) => void
-  setDisplayNewBanner: (open: boolean) => void
 }) {
   const theme = useTheme()
   const [addScopes, setAddScopes] = useState(false)
@@ -38,7 +35,7 @@ export function AccessTokensCreateModal({
     setScopes([{ apis: [], ids: [] }])
   }, [setOpen, setAddScopes, setScopes])
 
-  const [mutation, { loading, error }] = useCreateAccessTokenMutation({
+  const [mutation, { data, loading, error }] = useCreateAccessTokenMutation({
     variables: {
       scopes: addScopes
         ? scopes.map(({ apis, ids }) => ({ apis, ids }))
@@ -50,10 +47,6 @@ export function AccessTokensCreateModal({
         update: (prev) =>
           appendConnection(prev, data?.createAccessToken, 'accessTokens'),
       }),
-    onCompleted: () => {
-      close()
-      setDisplayNewBanner(true)
-    },
   })
 
   const addScope = useCallback(() => {
@@ -101,79 +94,105 @@ export function AccessTokensCreateModal({
       asForm
       formProps={{ onSubmit }}
       actions={
-        <div css={{ display: 'flex', gap: theme.spacing.small, flexGrow: 1 }}>
-          <div css={{ display: 'flex', flexGrow: 1 }}>
-            <Switch
-              checked={addScopes}
-              onChange={(val) => setAddScopes(val)}
-            >
-              <div
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: theme.spacing.xsmall,
-                }}
-              >
-                Configure access scopes
-              </div>
-            </Switch>
-          </div>
-          {addScopes && (
-            <Button
-              secondary
-              onClick={addScope}
-            >
-              Add scope
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={!valid}
-            loading={loading}
-            primary
-          >
-            Create
-          </Button>
+        data ? (
           <Button
             type="button"
             secondary
             onClick={close}
           >
-            Cancel
+            Close
           </Button>
-        </div>
+        ) : (
+          <div css={{ display: 'flex', gap: theme.spacing.small, flexGrow: 1 }}>
+            <div css={{ display: 'flex', flexGrow: 1 }}>
+              <Switch
+                checked={addScopes}
+                onChange={(val) => setAddScopes(val)}
+              >
+                <div
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing.xsmall,
+                  }}
+                >
+                  Configure access scopes
+                </div>
+              </Switch>
+            </div>
+            {addScopes && (
+              <Button
+                secondary
+                onClick={addScope}
+              >
+                Add scope
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={!valid}
+              loading={loading}
+              primary
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              secondary
+              onClick={close}
+            >
+              Cancel
+            </Button>
+          </div>
+        )
       }
     >
-      <>
-        <p>Do you want to create new access token?</p>
-        {addScopes && (
-          <>
-            <div
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-                marginTop: theme.spacing.small,
-              }}
-            />
-            {scopes.map((scope, index) => (
-              <AccessTokensCreateScope
-                scope={scope}
-                setScope={(s: Scope) => setScope(s, index)}
-                canRemove={canRemoveScope}
-                remove={() => removeScope(index)}
+      {data ? (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+          }}
+        >
+          <p>
+            New access token created. Make sure to copy it now as you will not
+            be able to see it again.
+          </p>
+          <Codeline>{data.createAccessToken?.token}</Codeline>
+        </div>
+      ) : (
+        <>
+          <p>Do you want to create new access token?</p>
+          {addScopes && (
+            <>
+              <div
+                css={{
+                  ...theme.partials.text.body2,
+                  color: theme.colors['text-light'],
+                  marginTop: theme.spacing.small,
+                }}
               />
-            ))}
-          </>
-        )}
-        {error && (
-          <div css={{ marginTop: theme.spacing.medium }}>
-            <GqlError
-              header="Problem creating token"
-              error={error}
-            />
-          </div>
-        )}
-      </>
+              {scopes.map((scope, index) => (
+                <AccessTokensCreateScope
+                  scope={scope}
+                  setScope={(s: Scope) => setScope(s, index)}
+                  canRemove={canRemoveScope}
+                  remove={() => removeScope(index)}
+                />
+              ))}
+            </>
+          )}
+          {error && (
+            <div css={{ marginTop: theme.spacing.medium }}>
+              <GqlError
+                header="Problem creating token"
+                error={error}
+              />
+            </div>
+          )}
+        </>
+      )}
     </Modal>
   )
 }
