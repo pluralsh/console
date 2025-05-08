@@ -16,6 +16,12 @@ fragment ClusterFragment on Cluster {
     nodePools { ...NodePoolFragment }
     status { ...ClusterStatusFragment }
     project {...TinyProjectFragment }
+    writeBindings {
+        ...PolicyBindingFragment
+    }
+    readBindings {
+        ...PolicyBindingFragment
+    }
 
 }
 
@@ -140,8 +146,8 @@ query ListClusters($cursor: String, $before: String, $last: Int) {
     }
 }
 
-query ListClustersWithParameters($after: String, $first: Int, $before: String, $last: Int) {
-    clusters(after: $after, first: $first, before: $before, last: $last) {
+query ListClustersWithParameters($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $tagQuery: TagQuery) {
+    clusters(after: $after, first: $first, before: $before, last: $last, projectId: $projectId, tagQuery: $tagQuery) {
         pageInfo { ...PageInfoFragment}
         edges { ...ClusterEdgeFragment }
     }

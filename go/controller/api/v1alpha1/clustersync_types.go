@@ -4,7 +4,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ClusterSyncSpec defines the desired state of ClusterSync
@@ -76,20 +75,25 @@ type SpecTemplate struct {
 
 	// Metadata for the cluster
 	// +kubebuilder:validation:Optional
-	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
+	Metadata *string `json:"metadata,omitempty"`
 
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
-	Bindings *Bindings `json:"bindings,omitempty"`
-
-	// CloudSettings contains cloud-specific settings for this cluster.
-	// +kubebuilder:validation:Optional
-	// +structType=atomic
-	CloudSettings *ClusterCloudSettings `json:"cloudSettings,omitempty"`
+	Bindings *BindingsTemplate `json:"bindings,omitempty"`
 
 	// NodePools contains specs of node pools managed by this cluster.
 	// +kubebuilder:validation:Optional
-	NodePools []ClusterNodePool `json:"nodePools,omitempty"`
+	NodePools *string `json:"nodePools,omitempty"`
+}
+
+type BindingsTemplate struct {
+	// Read bindings.
+	// +kubebuilder:validation:Optional
+	Read *string `json:"read,omitempty"`
+
+	// Write bindings.
+	// +kubebuilder:validation:Optional
+	Write *string `json:"write,omitempty"`
 }
 
 //+kubebuilder:object:root=true

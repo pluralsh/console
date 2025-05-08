@@ -14,3 +14,9 @@ spec:
       name: "{{ .cluster.handle }}"
     spec:
       handle: "{{ .cluster.handle }}"
+      protect: "{{ .cluster.protect }}"
+      tags: "{ {{- range $i, $t := .cluster.tags }}{{ if $i }}, {{ end }}{{ $t.name }}: {{ $t.value }}{{- end }} }"
+      metadata: "{{ .cluster.metadata | toYaml | nindent 8}}"
+      bindings:
+        read: '{{ if .cluster.readBindings }}{{ range .cluster.readBindings }}{{ printf "\n  - UserID: %s" .user.id | nindent 2 }}{{ end }}{{ else }}null{{ end }}'
+        write: '{{ if .cluster.writeBindings }}{{ range .cluster.writeBindings }}{{ printf "\n  - UserID: %s" .user.id | nindent 2 }}{{ end }}{{ else }}null{{ end }}'

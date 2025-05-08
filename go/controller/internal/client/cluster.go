@@ -2,12 +2,11 @@ package client
 
 import (
 	stderrors "errors"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	console "github.com/pluralsh/console/go/client"
-
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
@@ -122,7 +121,7 @@ func (c *client) ListClustersWithParameters(after *string, first *int64, project
 		}
 	}
 
-	resp, err := c.consoleClient.ListClustersWithParameters(c.ctx, after, first, nil, nil)
+	resp, err := c.consoleClient.ListClustersWithParameters(c.ctx, after, first, nil, nil, projectID, tagQuery)
 	if err != nil {
 		return nil, err
 	}

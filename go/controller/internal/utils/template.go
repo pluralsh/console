@@ -10,6 +10,8 @@ import (
 
 func GetFuncMap() template.FuncMap {
 	funcs := sprig.TxtFuncMap()
+	funcs["toYaml"] = toYaml
+	funcs["unquote"] = unquote
 	return funcs
 }
 

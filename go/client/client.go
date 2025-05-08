@@ -30,7 +30,7 @@ type ConsoleClient interface {
 	PingCluster(ctx context.Context, attributes ClusterPing, interceptors ...clientv2.RequestInterceptor) (*PingCluster, error)
 	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, deprecated []*DeprecatedCustomResourceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
 	ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error)
-	ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error)
+	ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, tagQuery *TagQuery, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error)
 	GetCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetCluster, error)
 	GetTinyCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetTinyCluster, error)
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
@@ -397,6 +397,8 @@ type ClusterFragment struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *ClusterFragment) GetID() string {
@@ -500,6 +502,18 @@ func (t *ClusterFragment) GetProject() *TinyProjectFragment {
 		t = &ClusterFragment{}
 	}
 	return t.Project
+}
+func (t *ClusterFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.WriteBindings
+}
+func (t *ClusterFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.ReadBindings
 }
 
 type TinyClusterFragment struct {
@@ -7620,6 +7634,8 @@ type CreateCluster_CreateCluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *CreateCluster_CreateCluster) GetDeployToken() *string {
@@ -7729,6 +7745,18 @@ func (t *CreateCluster_CreateCluster) GetProject() *TinyProjectFragment {
 		t = &CreateCluster_CreateCluster{}
 	}
 	return t.Project
+}
+func (t *CreateCluster_CreateCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.WriteBindings
+}
+func (t *CreateCluster_CreateCluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.ReadBindings
 }
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -8597,6 +8625,8 @@ type GetClusterWithToken_Cluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 }
 
@@ -8701,6 +8731,18 @@ func (t *GetClusterWithToken_Cluster) GetProject() *TinyProjectFragment {
 		t = &GetClusterWithToken_Cluster{}
 	}
 	return t.Project
+}
+func (t *GetClusterWithToken_Cluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.WriteBindings
+}
+func (t *GetClusterWithToken_Cluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.ReadBindings
 }
 func (t *GetClusterWithToken_Cluster) GetDeployToken() *string {
 	if t == nil {
@@ -9273,6 +9315,8 @@ type UpsertVirtualCluster_UpsertVirtualCluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeployToken() *string {
@@ -9382,6 +9426,18 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProject() *TinyProjectFra
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.Project
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.WriteBindings
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.ReadBindings
 }
 
 type GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Provider struct {
@@ -17451,6 +17507,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -17582,6 +17644,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -17635,6 +17716,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -17766,6 +17853,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -18283,6 +18389,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18415,6 +18527,25 @@ fragment TinyProjectFragment on Project {
 	name
 	default
 }
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
 `
 
 func (c *Client) ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error) {
@@ -18436,8 +18567,8 @@ func (c *Client) ListClusters(ctx context.Context, cursor *string, before *strin
 	return &res, nil
 }
 
-const ListClustersWithParametersDocument = `query ListClustersWithParameters ($after: String, $first: Int, $before: String, $last: Int) {
-	clusters(after: $after, first: $first, before: $before, last: $last) {
+const ListClustersWithParametersDocument = `query ListClustersWithParameters ($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $tagQuery: TagQuery) {
+	clusters(after: $after, first: $first, before: $before, last: $last, projectId: $projectId, tagQuery: $tagQuery) {
 		pageInfo {
 			... PageInfoFragment
 		}
@@ -18483,6 +18614,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18615,14 +18752,35 @@ fragment TinyProjectFragment on Project {
 	name
 	default
 }
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
 `
 
-func (c *Client) ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error) {
+func (c *Client) ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, tagQuery *TagQuery, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error) {
 	vars := map[string]any{
-		"after":  after,
-		"first":  first,
-		"before": before,
-		"last":   last,
+		"after":     after,
+		"first":     first,
+		"before":    before,
+		"last":      last,
+		"projectId": projectID,
+		"tagQuery":  tagQuery,
 	}
 
 	var res ListClustersWithParameters
@@ -18670,6 +18828,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18801,6 +18965,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -18918,6 +19101,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19049,6 +19238,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -19103,6 +19311,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19234,6 +19448,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -19732,6 +19965,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19863,6 +20102,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 

@@ -66,104 +66,14 @@ spec:
                         properties:
                           read:
                             description: Read bindings.
-                            items:
-                              description: Binding ...
-                              properties:
-                                UserID:
-                                  type: string
-                                groupID:
-                                  type: string
-                                groupName:
-                                  type: string
-                                id:
-                                  type: string
-                                userEmail:
-                                  type: string
-                              type: object
-                            type: array
+                            type: string
                           write:
                             description: Write bindings.
-                            items:
-                              description: Binding ...
-                              properties:
-                                UserID:
-                                  type: string
-                                groupID:
-                                  type: string
-                                groupName:
-                                  type: string
-                                id:
-                                  type: string
-                                userEmail:
-                                  type: string
-                              type: object
-                            type: array
+                            type: string
                         type: object
                       cloud:
                         description: Cloud provider to use for this cluster.
                         type: string
-                      cloudSettings:
-                        description: CloudSettings contains cloud-specific settings
-                          for this cluster.
-                        properties:
-                          aws:
-                            description: AWS cluster customizations.
-                            properties:
-                              region:
-                                description: Region in AWS to deploy this cluster
-                                  to.
-                                type: string
-                            required:
-                            - region
-                            type: object
-                          azure:
-                            description: Azure cluster customizations.
-                            properties:
-                              location:
-                                description: Location in Azure to deploy this cluster
-                                  to.
-                                example: eastus
-                                type: string
-                              network:
-                                description: Network is a name for the Azure virtual
-                                  network for this cluster.
-                                example: mynetwork
-                                type: string
-                              resourceGroup:
-                                description: ResourceGroup is a name for the Azure
-                                  resource group for this cluster.
-                                example: myresourcegroup
-                                type: string
-                              subscriptionId:
-                                description: SubscriptionId is GUID of the Azure subscription
-                                  to hold this cluster.
-                                type: string
-                            required:
-                            - location
-                            - network
-                            - resourceGroup
-                            - subscriptionId
-                            type: object
-                          gcp:
-                            description: GCP cluster customizations.
-                            properties:
-                              network:
-                                description: Network in GCP to use when creating the
-                                  cluster.
-                                type: string
-                              project:
-                                description: Project in GCP to deploy cluster to.
-                                type: string
-                              region:
-                                description: Region in GCP to deploy cluster to.
-                                type: string
-                            required:
-                            - network
-                            - project
-                            - region
-                            type: object
-                        type: object
-                        x-kubernetes-map-type: atomic
                       handle:
                         description: |-
                           Handle is a short, unique human-readable name used to identify this cluster.
@@ -173,86 +83,11 @@ spec:
                         type: string
                       metadata:
                         description: Metadata for the cluster
-                        type: object
-                        x-kubernetes-preserve-unknown-fields: true
+                        type: string
                       nodePools:
                         description: NodePools contains specs of node pools managed
                           by this cluster.
-                        items:
-                          properties:
-                            cloudSettings:
-                              description: CloudSettings contains cloud-specific settings
-                                for this node pool.
-                              properties:
-                                aws:
-                                  description: AWS node pool customizations.
-                                  properties:
-                                    launchTemplateId:
-                                      description: LaunchTemplateId is an ID of custom
-                                        launch template for your nodes. Useful for
-                                        Golden AMI setups.
-                                      type: string
-                                  type: object
-                              type: object
-                              x-kubernetes-map-type: atomic
-                            instanceType:
-                              description: InstanceType contains the type of node
-                                to use. Usually cloud-specific.
-                              type: string
-                            labels:
-                              additionalProperties:
-                                type: string
-                              description: Labels to apply to the nodes in this pool.
-                                Useful for node selectors.
-                              type: object
-                            maxSize:
-                              description: MaxSize is maximum number of instances
-                                in this node pool.
-                              format: int64
-                              minimum: 1
-                              type: integer
-                            minSize:
-                              description: MinSize is minimum number of instances
-                                in this node pool.
-                              format: int64
-                              minimum: 1
-                              type: integer
-                            name:
-                              description: Name of the node pool. Must be unique.
-                              type: string
-                            taints:
-                              description: Taints you'd want to apply to a node, i.e.
-                                for preventing scheduling on spot instances.
-                              items:
-                                description: Taint represents a Kubernetes taint.
-                                properties:
-                                  effect:
-                                    description: Effect specifies the effect for the
-                                      taint.
-                                    enum:
-                                    - NoSchedule
-                                    - NoExecute
-                                    - PreferNoSchedule
-                                    type: string
-                                  key:
-                                    description: Key is the key of the taint.
-                                    type: string
-                                  value:
-                                    description: Value is the value of the taint.
-                                    type: string
-                                required:
-                                - effect
-                                - key
-                                - value
-                                type: object
-                              type: array
-                          required:
-                          - instanceType
-                          - maxSize
-                          - minSize
-                          - name
-                          type: object
-                        type: array
+                        type: string
                       projectRef:
                         description: |-
                           ProjectRef references project this cluster belongs to.

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -11,8 +11,10 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,6 +77,7 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 	yamlTemplate := string(yamlTemplateBytes)
+	var allErrs []error
 
 	pager := r.ListClusters(ctx, project.Status.ID, clusterSync.Spec.Tags)
 	for pager.HasNext() {
@@ -83,9 +86,11 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			logger.Error(err, "failed to fetch cluster list")
 			return ctrl.Result{}, err
 		}
+
 		for _, cluster := range clusters {
 			clusterCRD, u, err := templateCluster(cluster, yamlTemplate)
 			if err != nil {
+				allErrs = append(allErrs, err)
 				logger.Error(err, "failed to template cluster")
 				continue
 			}
@@ -99,31 +104,63 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					u.SetNamespace(clusterCRD.Namespace)
 					if err := r.Client.Create(ctx, u); err != nil {
 						logger.Error(err, "failed to create cluster")
+						allErrs = append(allErrs, err)
 					}
 				} else {
 					logger.Error(err, "failed to get cluster")
+					allErrs = append(allErrs, err)
 				}
 				continue
 			}
 			existingSHA, err := utils.HashObject(existingCluster.Spec)
 			if err != nil {
 				logger.Error(err, "failed to hash existing cluster")
+				allErrs = append(allErrs, err)
 				continue
 			}
 			newSHA, err := utils.HashObject(clusterCRD.Spec)
 			if err != nil {
 				logger.Error(err, "failed to hash templated cluster")
+				allErrs = append(allErrs, err)
 				continue
 			}
 			if existingSHA != newSHA {
-				if err := r.Client.Patch(ctx, clusterCRD, client.MergeFrom(existingCluster)); err != nil {
+				toUpdate, err := mergeClusters(existingCluster, clusterCRD)
+				if err != nil {
+					logger.Error(err, "failed to merge clusters")
+					allErrs = append(allErrs, err)
+				}
+				if err := r.Client.Update(ctx, toUpdate); err != nil {
 					logger.Error(err, "failed to patch cluster")
+					allErrs = append(allErrs, err)
 				}
 			}
 		}
 	}
 
+	utils.MarkCondition(clusterSync.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(clusterSync.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	if len(allErrs) > 0 {
+		aggregateError := utilerrors.NewAggregate(allErrs)
+		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, aggregateError.Error())
+		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	}
+
 	return requeue, nil
+}
+
+func mergeClusters(existing, new *v1alpha1.Cluster) (*unstructured.Unstructured, error) {
+	existing.Spec = new.Spec
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(existing)
+	if err != nil {
+		return nil, err
+	}
+	if new.Spec.Cloud == "" {
+		unstructured.RemoveNestedField(unstructuredObj, "spec", "cloud")
+	}
+	return &unstructured.Unstructured{
+		Object: unstructuredObj,
+	}, nil
 }
 
 func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (*v1alpha1.Cluster, *unstructured.Unstructured, error) {
@@ -135,14 +172,19 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 		"cluster": unstructuredObj,
 	}
 
-	templated, err := utils.RenderString(template, configuration)
+	cleaned := strings.ReplaceAll(template, "'", "")
+
+	templated, err := utils.RenderString(cleaned, configuration)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	cst := &v1alpha1.Cluster{}
 	if err := yaml.Unmarshal([]byte(templated), cst); err != nil {
 		return nil, nil, err
 	}
+	cst.APIVersion = apiVersion
+	cst.Kind = "Cluster"
 	unstructuredObj, err = runtime.DefaultUnstructuredConverter.ToUnstructured(cst)
 	if err != nil {
 		return nil, nil, err
@@ -151,8 +193,6 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 		unstructured.RemoveNestedField(unstructuredObj, "spec", "cloud")
 	}
 	u := &unstructured.Unstructured{Object: unstructuredObj}
-	u.SetKind("Cluster")
-	u.SetAPIVersion(apiVersion)
 	return cst, u, nil
 }
 
