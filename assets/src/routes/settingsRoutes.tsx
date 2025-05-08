@@ -52,7 +52,7 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
-import { OidcProviders } from 'components/settings/global/oidc/OidcProviders'
+import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 
 const userManagementRoutes = (
   <Route
@@ -152,7 +152,7 @@ const globalSettingsRoutes = (
     </Route>
     <Route
       path="oidc"
-      element={<OidcProviders />}
+      element={<OidcSettings />}
     />
     <Route
       path="smtp"
