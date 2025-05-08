@@ -161,7 +161,7 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
               gap: theme.spacing.medium,
             }}
           >
-            <p>Are you sure you want to delete this api access token?</p>
+            <p>Are you sure you want to delete this API access token?</p>
           </div>
         }
         close={() => setConfirm(false)}
