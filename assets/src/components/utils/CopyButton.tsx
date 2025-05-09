@@ -2,6 +2,7 @@ import {
   CheckIcon,
   CopyIcon,
   IconFrame,
+  SemanticColorKey,
   Tooltip,
 } from '@pluralsh/design-system'
 import { useCallback, useEffect, useState } from 'react'
@@ -10,9 +11,15 @@ type CopyButtonProps = {
   text?: string | null | undefined
   type?: 'secondary' | 'tertiary' | 'floating'
   tooltip?: string
+  iconColor?: SemanticColorKey
 }
 
-function CopyButton({ text, type = 'floating', tooltip }: CopyButtonProps) {
+function CopyButton({
+  text,
+  type = 'floating',
+  tooltip,
+  iconColor,
+}: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -38,7 +45,13 @@ function CopyButton({ text, type = 'floating', tooltip }: CopyButtonProps) {
     >
       <IconFrame
         clickable
-        icon={copied ? <CheckIcon /> : <CopyIcon />}
+        icon={
+          copied ? (
+            <CheckIcon color={iconColor} />
+          ) : (
+            <CopyIcon color={iconColor} />
+          )
+        }
         onClick={() => handleCopy()}
         textValue={text ?? undefined}
         type={type}
