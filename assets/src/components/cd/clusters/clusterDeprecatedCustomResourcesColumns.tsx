@@ -1,10 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { DeprecatedCustomResourceFragment } from '../../../generated/graphql'
+import { ClusterUpgradeDeprecatedCustomResourceFragment } from '../../../generated/graphql'
 import { Chip } from '@pluralsh/design-system'
 
 const columnHelperUpgrade =
-  createColumnHelper<DeprecatedCustomResourceFragment>()
+  createColumnHelper<ClusterUpgradeDeprecatedCustomResourceFragment>()
 
 export const clusterDeprecatedCustomResourcesColumns = [
   columnHelperUpgrade.accessor((cr) => cr?.name, {
