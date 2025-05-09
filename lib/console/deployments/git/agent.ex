@@ -16,7 +16,8 @@ defmodule Console.Deployments.Git.Agent do
   require Logger
 
   @poll :timer.seconds(120)
-  @jitter 15
+  @jitter 120
+  @jitter_offset :timer.seconds(60)
   @timeout 30_000
 
   defmodule State, do: defstruct [:git, :cache]
@@ -191,7 +192,8 @@ defmodule Console.Deployments.Git.Agent do
   defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + jitter())
 
   defp jitter() do
-    :rand.uniform(@jitter)
-    |> :timer.seconds()
+    seconds = :rand.uniform(@jitter)
+              |> :timer.seconds()
+    seconds - @jitter_offset
   end
 end
