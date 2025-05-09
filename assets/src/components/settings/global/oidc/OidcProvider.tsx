@@ -1,3 +1,4 @@
+// TODO: this is only partially implemented, refactored from the App codebase
 import {
   Button,
   Card,
@@ -18,7 +19,6 @@ import {
   Tooltip,
   usePrevious,
 } from '@pluralsh/design-system'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import {
   BindingInput,
   fetchGroups,
@@ -26,10 +26,10 @@ import {
 } from 'components/utils/BindingInput'
 import { Body2P } from 'components/utils/typography/Text'
 import {
-  User,
   Group,
   OidcAuthMethod,
   OidcProviderFragment,
+  User,
 } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import {
@@ -40,7 +40,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
 import { deepUpdate, updateCache } from 'utils/graphql'
 
 export function OidcProvider({
@@ -62,80 +61,6 @@ export function OidcProvider({
       />
       {JSON.stringify(provider)}
     </div>
-  )
-}
-
-export function UrlsInput({ uriFormat = '', urls, setUrls }: any) {
-  const [baseScheme, basePath] = ['https://', '/oauth2/callback']
-  const [value, setValue] = useState('')
-  const [scheme = baseScheme, path = basePath] = uriFormat
-    .split('{domain}')
-    .filter((v) => !!v)
-
-  const addUrl = useCallback(() => {
-    const url = uriFormat ? uriFormat.replace('{domain}', value) : value
-
-    if (url === `${baseScheme}${basePath}`) {
-      return
-    }
-
-    if (urls.indexOf(url) > -1) {
-      return
-    }
-
-    setUrls([...urls, url])
-    setValue('')
-  }, [urls, value, setValue, setUrls, uriFormat, basePath, baseScheme])
-
-  const removeUrl = useCallback(
-    (url) => setUrls(urls.filter((item) => item !== url)),
-    [setUrls, urls]
-  )
-
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-    >
-      <Flex
-        align="center"
-        gap="small"
-      >
-        <Input
-          value={value}
-          prefix={scheme}
-          suffix={path}
-          width="100%"
-          borderRadius="normal"
-          placeholder={uriFormat ? 'Enter a domain' : 'Enter a redirect url'}
-          onChange={({ target: { value } }) => setValue(value)}
-        />
-        <Button
-          secondary
-          onClick={addUrl}
-        >
-          Add
-        </Button>
-      </Flex>
-      <Flex
-        align="stretch"
-        wrap="wrap"
-        gap="xxsmall"
-      >
-        {urls.map((url, i) => (
-          <Chip
-            key={i}
-            size="small"
-            hue="lighter"
-            clickable
-            closeButton
-            onClick={() => removeUrl(url)}
-          >
-            {url}
-          </Chip>
-        ))}
-      </Flex>
-    </Flex>
   )
 }
 

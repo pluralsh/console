@@ -3,7 +3,6 @@ import {
   CaretRightIcon,
   Flex,
   IconFrame,
-  Modal,
   PlusIcon,
   Table,
   TrashCanIcon,
@@ -23,7 +22,7 @@ import {
 import { useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { OidcCreateProviderForm } from './OidcCreateProviderForm'
+import { OidcCreateProviderModal } from './OidcCreateProviderModal'
 
 const columnHelper = createColumnHelper<OidcProviderFragment>()
 
@@ -65,12 +64,10 @@ export function OidcProviders({
         <Body2BoldP>Add new Console OIDC provider</Body2BoldP>
         <IconFrame icon={<PlusIcon />} />
       </AddNewProviderCardSC>
-      <Modal
+      <OidcCreateProviderModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-      >
-        <OidcCreateProviderForm onClose={() => setShowCreateModal(false)} />
-      </Modal>
+      />
     </Flex>
   )
 }
@@ -109,6 +106,8 @@ const cols = [
       const [deleteProvider, { loading: deleteLoading, error: deleteError }] =
         useDeleteOidcProviderMutation({
           variables: { id, type: OidcProviderType.Console },
+          onCompleted: () => setShowDeleteModal(false),
+          refetchQueries: ['OidcProviders'],
         })
       return (
         <Flex gap="xxsmall">
