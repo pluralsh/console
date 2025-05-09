@@ -137,6 +137,7 @@ defmodule Console.Deployments.Flows.Preview do
          {:ok, tpl}  <- template_helm_vals(svc,tpl, ctx) do
       ServiceTemplate.attributes(tpl, ns, name)
       |> drop_nils_recursive()
+      |> ignore_empty_config() # do this to avoid wiping secrets present on clone
       |> ok()
     end
   end
@@ -183,6 +184,9 @@ defmodule Console.Deployments.Flows.Preview do
     end
   end
   defp render_liquid(template, _), do: {:ok, template}
+
+  defp ignore_empty_config(%{configuration: []} = attrs), do: Map.delete(attrs, :configuration)
+  defp ignore_empty_config(attrs), do: attrs
 
   defp color(:healthy), do: :green
   defp color(:failed), do: :red

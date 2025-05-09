@@ -1,10 +1,13 @@
 defmodule ConsoleWeb.Plugs.RemoteIp do
   alias RemoteIp
+  alias RemoteIp.Headers
 
   def init(opts), do: RemoteIp.init(opts)
 
-  def call(%{req_headers: headers} = conn, %RemoteIp.Config{headers: allowed}) do
-    ips = RemoteIp.Headers.parse(headers, allowed) |> Enum.reverse()
+  def call(%{req_headers: headers} = conn, opts) do
+    headers = Headers.take(headers, opts[:headers])
+    ips     = Headers.parse(headers, opts[:parsers])
+              |> Enum.reverse()
     %{conn | remote_ip: find_ip(ips, conn.remote_ip)}
   end
 
