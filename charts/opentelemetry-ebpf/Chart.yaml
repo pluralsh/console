@@ -1,0 +1,12 @@
+apiVersion: v2
+name: opentelemetry-ebpf
+description: OpenTelemetry eBPF thin Helm chart wrapper
+type: application
+version: 0.1.0
+appVersion: v0.10.2
+icon: https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png
+dependencies:
+  - name: opentelemetry-ebpf
+    alias: opentelemetry
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+    version: 0.1.6

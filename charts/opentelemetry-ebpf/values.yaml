@@ -1,0 +1,19 @@
+opentelemetry:
+  kernelCollector:
+    enabled: false
+
+# Example init container that can install linux headers on EKS nodes using AMI 2023
+#initContainers:
+#- name: install-kernel-headers
+#  image: amazonlinux:2023
+#  command: ["/bin/sh", "-c"]
+#    args:
+#      - |
+#        # Update the host's package database and install kernel headers
+#        /hostfs/usr/bin/yum install -y --installroot=/hostfs kernel-devel-$(uname -r)
+#        echo "Kernel headers installed on host for kernel $(uname -r)"
+#    securityContext:
+#      privileged: true
+#    volumeMounts:
+#      - name: host-root
+#        mountPath: /hostfs
