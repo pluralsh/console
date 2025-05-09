@@ -1,12 +1,12 @@
 package client
 
 import (
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	stderrors "errors"
 
 	console "github.com/pluralsh/console/go/client"
-
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
@@ -103,6 +103,32 @@ func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, e
 
 func (c *client) ListClusters() (*console.ListClusters, error) {
 	return c.consoleClient.ListClusters(c.ctx, nil, nil, nil)
+}
+
+func (c *client) ListClustersWithParameters(after *string, first *int64, projectID *string, tags map[string]string) (*console.ListClustersWithParameters_Clusters, error) {
+	var tagQuery *console.TagQuery
+
+	if len(tags) > 0 {
+		tagQuery = &console.TagQuery{
+			Op:   "AND",
+			Tags: make([]*console.TagInput, len(tags)),
+		}
+		for k, v := range tags {
+			tagQuery.Tags = append(tagQuery.Tags, &console.TagInput{
+				Name:  k,
+				Value: v,
+			})
+		}
+	}
+
+	resp, err := c.consoleClient.ListClustersWithParameters(c.ctx, after, first, nil, nil, projectID, tagQuery)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Clusters == nil {
+		return nil, stderrors.New("the response from ListClustersWithParameters is nil")
+	}
+	return resp.Clusters, nil
 }
 
 func (c *client) DeleteCluster(id string) (*console.DeleteCluster_DeleteCluster, error) {

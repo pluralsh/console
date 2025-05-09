@@ -5814,6 +5814,67 @@ func (_c *ConsoleClientMock_ListClusters_Call) RunAndReturn(run func() (*client.
 	return _c
 }
 
+// ListClustersWithParameters provides a mock function with given fields: after, first, projectID, tags
+func (_m *ConsoleClientMock) ListClustersWithParameters(after *string, first *int64, projectID *string, tags map[string]string) (*client.ListClustersWithParameters_Clusters, error) {
+	ret := _m.Called(after, first, projectID, tags)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListClustersWithParameters")
+	}
+
+	var r0 *client.ListClustersWithParameters_Clusters
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*string, *int64, *string, map[string]string) (*client.ListClustersWithParameters_Clusters, error)); ok {
+		return rf(after, first, projectID, tags)
+	}
+	if rf, ok := ret.Get(0).(func(*string, *int64, *string, map[string]string) *client.ListClustersWithParameters_Clusters); ok {
+		r0 = rf(after, first, projectID, tags)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.ListClustersWithParameters_Clusters)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*string, *int64, *string, map[string]string) error); ok {
+		r1 = rf(after, first, projectID, tags)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_ListClustersWithParameters_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListClustersWithParameters'
+type ConsoleClientMock_ListClustersWithParameters_Call struct {
+	*mock.Call
+}
+
+// ListClustersWithParameters is a helper method to define mock.On call
+//   - after *string
+//   - first *int64
+//   - projectID *string
+//   - tags map[string]string
+func (_e *ConsoleClientMock_Expecter) ListClustersWithParameters(after interface{}, first interface{}, projectID interface{}, tags interface{}) *ConsoleClientMock_ListClustersWithParameters_Call {
+	return &ConsoleClientMock_ListClustersWithParameters_Call{Call: _e.mock.On("ListClustersWithParameters", after, first, projectID, tags)}
+}
+
+func (_c *ConsoleClientMock_ListClustersWithParameters_Call) Run(run func(after *string, first *int64, projectID *string, tags map[string]string)) *ConsoleClientMock_ListClustersWithParameters_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(*string), args[1].(*int64), args[2].(*string), args[3].(map[string]string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_ListClustersWithParameters_Call) Return(_a0 *client.ListClustersWithParameters_Clusters, _a1 error) *ConsoleClientMock_ListClustersWithParameters_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_ListClustersWithParameters_Call) RunAndReturn(run func(*string, *int64, *string, map[string]string) (*client.ListClustersWithParameters_Clusters, error)) *ConsoleClientMock_ListClustersWithParameters_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListPipelines provides a mock function with no fields
 func (_m *ConsoleClientMock) ListPipelines() (*client.GetPipelines, error) {
 	ret := _m.Called()

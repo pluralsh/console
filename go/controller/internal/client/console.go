@@ -160,6 +160,7 @@ type ConsoleClient interface {
 	DeletePreviewEnvironmentTemplate(ctx context.Context, id string) error
 	GetPreviewEnvironmentTemplate(ctx context.Context, id, name *string) (*console.PreviewEnvironmentTemplateFragment, error)
 	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes console.PreviewEnvironmentTemplateAttributes) (*console.PreviewEnvironmentTemplateFragment, error)
+	ListClustersWithParameters(after *string, first *int64, projectID *string, tags map[string]string) (*console.ListClustersWithParameters_Clusters, error)
 }
 
 func New(url, token string) ConsoleClient {
