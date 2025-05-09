@@ -549,6 +549,21 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_file_factory do
+    %Schema.StackFile{
+      path: "some/path",
+      content: "some content"
+    }
+  end
+
+  def stack_environment_factory do
+    %Schema.StackEnvironment{
+      name: "foo",
+      value: "bar",
+      secret: true
+    }
+  end
+
   def run_step_factory do
     %Schema.RunStep{
       name: sequence(:run_step, & "step-#{&1}"),

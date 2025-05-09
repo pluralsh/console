@@ -31,13 +31,33 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> paginate(args)
   end
 
-  def safe_stack_outputs(_, outputs, %{context: %{cluster: %{}}}), do: outputs
-  def safe_stack_outputs(parent, outputs, %{context: %{current_user: user}}) do
-    case allow(parent, user, :write) do
+  def safe_stack_outputs(%{cluster_id: id}, outputs, %{context: %{cluster: %{id: id}}}), do: {:ok, outputs}
+  def safe_stack_outputs(parent, outputs, ctx) do
+    case allow(parent, actor(ctx), :write) do
       {:ok, _} -> outputs
       _ -> Enum.filter(outputs, & ! &1.secret)
     end
   end
+  def safe_stack_outputs(_, _), do: {:error, "you are not allowed to read this field"}
+
+
+  def safe_stack_field(%{cluster_id: id}, val, %{context: %{cluster: %{id: id}}}), do: {:ok, val}
+  def safe_stack_field(parent, val, ctx) do
+    case allow(parent, actor(ctx), :write) do
+      {:ok, _} -> val
+      _ -> {:error, "you are not allowed to read this field"}
+    end
+  end
+  def safe_stack_field(_, _), do: {:error, "you are not allowed to read this field"}
+
+  def safe_field(%{cluster_id: id} = parent, field, %{context: %{cluster: %{id: id}}}), do: {:ok, Map.get(parent, field)}
+  def safe_field(parent, field, ctx) do
+    case allow(parent, actor(ctx), :write) do
+      {:ok, _} -> {:ok, Map.get(parent, field)}
+      _ -> {:error, "you are not allowed to read this field"}
+    end
+  end
+  def safe_field(_, _), do: {:error, "you are not allowed to read this field"}
 
   defp stack_filters(query, args) do
     Enum.reduce(args, query, fn
@@ -95,6 +115,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def resolve_custom_stack_run(%{id: id}, %{context: %{current_user: user}}) do
     Stacks.get_custom_run!(id)
     |> allow(user, :read)
+  end
+
+  def state_file(state, _, %{context: %{current_user: user}}) do
+    %{stack: stack} = Console.Repo.preload(state, :stack)
+    with {:ok, _} <- allow(stack, user, :write) do
+      {:ok, state.state}
+    end
   end
 
   def create_stack(%{attributes: attrs}, %{context: %{current_user: user}}),
