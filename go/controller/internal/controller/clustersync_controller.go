@@ -12,7 +12,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -24,7 +26,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-const apiVersion = "deployments.plural.sh/v1alpha1"
+const (
+	apiVersion           = "deployments.plural.sh/v1alpha1"
+	clusterSyncLabelName = "plural.sh/cluster-sync"
+)
 
 // ClusterSyncReconciler reconciles a ClusterSync object
 type ClusterSyncReconciler struct {
@@ -79,6 +84,11 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	yamlTemplate := string(yamlTemplateBytes)
 	var allErrs []error
 
+	toDelete, err := r.getClustersToDelete(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	pager := r.ListClusters(ctx, project.Status.ID, clusterSync.Spec.Tags)
 	for pager.HasNext() {
 		clusters, err := pager.NextPage()
@@ -88,53 +98,21 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 
 		for _, cluster := range clusters {
-			clusterCRD, u, err := templateCluster(cluster, yamlTemplate)
-			if err != nil {
+			delete(toDelete, cluster.Node.ID)
+			if err := r.reconcileCluster(ctx, cluster, yamlTemplate, clusterSync.Namespace); err != nil {
 				allErrs = append(allErrs, err)
-				logger.Error(err, "failed to template cluster")
-				continue
 			}
-			if clusterCRD.Namespace == "" {
-				clusterCRD.Namespace = clusterSync.Namespace
-			}
-			existingCluster := &v1alpha1.Cluster{}
-			if err := r.Client.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
-				if apierrors.IsNotFound(err) {
-					// to avoid spec.cloud validation
-					u.SetNamespace(clusterCRD.Namespace)
-					if err := r.Client.Create(ctx, u); err != nil {
-						logger.Error(err, "failed to create cluster")
-						allErrs = append(allErrs, err)
-					}
-				} else {
-					logger.Error(err, "failed to get cluster")
-					allErrs = append(allErrs, err)
-				}
-				continue
-			}
-			existingSHA, err := utils.HashObject(existingCluster.Spec)
-			if err != nil {
-				logger.Error(err, "failed to hash existing cluster")
-				allErrs = append(allErrs, err)
-				continue
-			}
-			newSHA, err := utils.HashObject(clusterCRD.Spec)
-			if err != nil {
-				logger.Error(err, "failed to hash templated cluster")
-				allErrs = append(allErrs, err)
-				continue
-			}
-			if existingSHA != newSHA {
-				toUpdate, err := mergeClusters(existingCluster, clusterCRD)
-				if err != nil {
-					logger.Error(err, "failed to merge clusters")
-					allErrs = append(allErrs, err)
-				}
-				if err := r.Client.Update(ctx, toUpdate); err != nil {
-					logger.Error(err, "failed to patch cluster")
-					allErrs = append(allErrs, err)
-				}
-			}
+		}
+	}
+	for clusterID, clusterNamespacedName := range toDelete {
+		logger.Info("deleting cluster", "clusterID", clusterID, "clusterNamespacedName", clusterNamespacedName)
+		if err := r.Client.Delete(ctx, &v1alpha1.Cluster{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      clusterNamespacedName.Name,
+				Namespace: clusterNamespacedName.Namespace,
+			},
+		}); err != nil {
+			allErrs = append(allErrs, err)
 		}
 	}
 
@@ -147,6 +125,112 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	return requeue, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *ClusterSyncReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		For(&v1alpha1.ClusterSync{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Complete(r)
+}
+
+func (r *ClusterSyncReconciler) getClustersToDelete(ctx context.Context) (map[string]types.NamespacedName, error) {
+	// Create a requirement that matches presence of the label
+	req, err := labels.NewRequirement(clusterSyncLabelName, selection.Exists, nil)
+	if err != nil {
+		return nil, err
+	}
+	selector := labels.NewSelector().Add(*req)
+	clusters := &v1alpha1.ClusterList{}
+	if err := r.List(ctx, clusters, &client.ListOptions{LabelSelector: selector}); err != nil {
+		return nil, err
+	}
+	clusterMap := make(map[string]types.NamespacedName, len(clusters.Items))
+	for _, cluster := range clusters.Items {
+		if cluster.GetDeletionTimestamp() != nil {
+			continue
+		}
+		clusterID := cluster.GetLabels()[clusterSyncLabelName]
+		if clusterID == "" {
+			continue
+		}
+		clusterMap[clusterID] = types.NamespacedName{
+			Name:      cluster.GetName(),
+			Namespace: cluster.GetNamespace(),
+		}
+	}
+	return clusterMap, nil
+}
+
+func (r *ClusterSyncReconciler) reconcileCluster(ctx context.Context, cluster *console.ClusterEdgeFragment, yamlTemplate, namespace string) error {
+	logger := log.FromContext(ctx)
+	logger.V(4).Info("reconciling cluster")
+	clusterCRD, u, err := templateCluster(cluster, yamlTemplate)
+	if err != nil {
+		logger.Error(err, "failed to template cluster")
+		return err
+	}
+	if clusterCRD.Namespace == "" {
+		clusterCRD.Namespace = namespace
+	}
+	existingCluster := &v1alpha1.Cluster{}
+	if err := r.Client.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+
+		// to avoid spec.cloud validation
+		u.SetNamespace(clusterCRD.Namespace)
+		if err := r.Client.Create(ctx, u); err != nil {
+			logger.Error(err, "failed to create cluster")
+			return err
+		}
+
+		return nil
+	}
+
+	existingSHA, err := utils.HashObject(existingCluster.Spec)
+	if err != nil {
+		logger.Error(err, "failed to hash existing cluster")
+		return err
+	}
+	newSHA, err := utils.HashObject(clusterCRD.Spec)
+	if err != nil {
+		logger.Error(err, "failed to hash templated cluster")
+		return err
+	}
+	if existingSHA != newSHA {
+		toUpdate, err := mergeClusters(existingCluster, clusterCRD)
+		if err != nil {
+			logger.Error(err, "failed to merge clusters")
+			return err
+		}
+		if err := r.Client.Update(ctx, toUpdate); err != nil {
+			logger.Error(err, "failed to patch cluster")
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *ClusterSyncReconciler) ListClusters(ctx context.Context, projectID *string, tags map[string]string) *algorithms.Pager[*console.ClusterEdgeFragment] {
+	logger := log.FromContext(ctx)
+	logger.V(4).Info("create cluster pager")
+	fetch := func(page *string, size int64) ([]*console.ClusterEdgeFragment, *algorithms.PageInfo, error) {
+		resp, err := r.ConsoleClient.ListClustersWithParameters(page, &size, projectID, tags)
+		if err != nil {
+			logger.Error(err, "failed to fetch stack run")
+			return nil, nil, err
+		}
+		pageInfo := &algorithms.PageInfo{
+			HasNext:  resp.PageInfo.HasNextPage,
+			After:    resp.PageInfo.EndCursor,
+			PageSize: size,
+		}
+		return resp.Edges, pageInfo, nil
+	}
+	return algorithms.NewPager[*console.ClusterEdgeFragment](100, fetch)
 }
 
 func mergeClusters(existing, new *v1alpha1.Cluster) (*unstructured.Unstructured, error) {
@@ -185,6 +269,7 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 	}
 	cst.APIVersion = apiVersion
 	cst.Kind = "Cluster"
+	cst.SetLabels(map[string]string{clusterSyncLabelName: clusterAPI.Node.ID})
 	unstructuredObj, err = runtime.DefaultUnstructuredConverter.ToUnstructured(cst)
 	if err != nil {
 		return nil, nil, err
@@ -194,31 +279,4 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 	}
 	u := &unstructured.Unstructured{Object: unstructuredObj}
 	return cst, u, nil
-}
-
-// SetupWithManager sets up the controller with the Manager.
-func (r *ClusterSyncReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.ClusterSync{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Complete(r)
-}
-
-func (r *ClusterSyncReconciler) ListClusters(ctx context.Context, projectID *string, tags map[string]string) *algorithms.Pager[*console.ClusterEdgeFragment] {
-	logger := log.FromContext(ctx)
-	logger.V(4).Info("create cluster pager")
-	fetch := func(page *string, size int64) ([]*console.ClusterEdgeFragment, *algorithms.PageInfo, error) {
-		resp, err := r.ConsoleClient.ListClustersWithParameters(page, &size, projectID, tags)
-		if err != nil {
-			logger.Error(err, "failed to fetch stack run")
-			return nil, nil, err
-		}
-		pageInfo := &algorithms.PageInfo{
-			HasNext:  resp.PageInfo.HasNextPage,
-			After:    resp.PageInfo.EndCursor,
-			PageSize: size,
-		}
-		return resp.Edges, pageInfo, nil
-	}
-	return algorithms.NewPager[*console.ClusterEdgeFragment](100, fetch)
 }
