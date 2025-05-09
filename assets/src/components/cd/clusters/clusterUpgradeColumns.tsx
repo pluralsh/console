@@ -12,16 +12,16 @@ import {
 
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
-import { useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { coerce } from 'semver'
 
 import {
   ApiDeprecation,
-  ClustersRowFragment,
   ClusterUpgradePlanFragment,
-  RuntimeServicesQuery,
+  ClusterUpgradeFragment,
+  ClusterUpgradeQuery,
 } from '../../../generated/graphql'
 import {
   nextSupportedVersion,
@@ -43,10 +43,10 @@ type PreFlightChecklistItem = {
   value?: boolean // this is set after fetching the upgrade plan data
 }
 
-const supportedVersions = (cluster: ClustersRowFragment | null) =>
+const supportedVersions = (cluster: ClusterUpgradeFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
 
-const columnHelperUpgrade = createColumnHelper<ClustersRowFragment>()
+const columnHelperUpgrade = createColumnHelper<ClusterUpgradeFragment>()
 const columnHelperPreFlight = createColumnHelper<PreFlightChecklistItem>()
 
 export const clusterUpgradeColumns = [
@@ -91,10 +91,10 @@ export const clusterUpgradeColumns = [
       const [targetVersion, setTargetVersion] =
         useState<Nullable<string>>(upgradeVersion)
 
-      const { refetch, setError, runtimeServiceData } = table.options.meta as {
+      const { refetch, setError, data } = table.options.meta as {
         refetch?: () => void
-        setError?: (error: Nullable<ApolloError>) => void
-        runtimeServiceData?: RuntimeServicesQuery
+        setError?: Dispatch<SetStateAction<Nullable<ApolloError>>>
+        data?: ClusterUpgradeQuery
       }
 
       useEffect(() => {
@@ -103,7 +103,7 @@ export const clusterUpgradeColumns = [
         }
       }, [targetVersion, upgrades])
 
-      if (!isEmpty(cluster.prAutomations)) {
+      if (!!cluster.prAutomations && cluster.prAutomations.length > 0) {
         return (
           <ClusterUpgradePR
             prs={cluster.prAutomations}
@@ -146,8 +146,7 @@ export const clusterUpgradeColumns = [
             cluster={cluster}
             targetVersion={targetVersion}
             apiDeprecations={
-              (runtimeServiceData?.cluster
-                ?.apiDeprecations as ApiDeprecation[]) || []
+              (data?.cluster?.apiDeprecations as ApiDeprecation[]) || []
             }
             refetch={refetch}
             setError={setError}

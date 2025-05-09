@@ -20,7 +20,7 @@ import {
   ClustersRowFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
-  useRuntimeServicesQuery,
+  useClusterUpgradeQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useMemo, useRef, useState } from 'react'
@@ -46,6 +46,7 @@ import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
 import CloudAddons from './runtime/CloudAddons.tsx'
 import { produce } from 'immer'
 import { clusterDeprecatedCustomResourcesColumns } from './clusterDeprecatedCustomResourcesColumns.tsx'
+import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -80,10 +81,12 @@ const statesWithIssues = [
 ]
 
 function FlyoverContent({
-  cluster,
+  clusterId,
+  kubeVersion,
   refetch,
 }: {
-  cluster: Nullable<ClustersRowFragment>
+  clusterId: string
+  kubeVersion: string
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
@@ -92,27 +95,28 @@ function FlyoverContent({
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
+  const { data, error } = useClusterUpgradeQuery({
+    variables: {
+      kubeVersion,
+      hasKubeVersion: true,
+      id: clusterId,
+    },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const cluster = data?.cluster
+
   const numUpgradePlans = 3
   let numUpgrades = numUpgradePlans
   if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
   if (!cluster?.upgradePlan?.deprecations) --numUpgrades
   if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
 
-  const kubeVersion = getClusterKubeVersion(cluster)
-  const { data, error } = useRuntimeServicesQuery({
-    variables: {
-      kubeVersion,
-      hasKubeVersion: true,
-      id: cluster?.id ?? '',
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
-  const runtimeServices = data?.cluster?.runtimeServices
-  const cloudAddons = data?.cluster?.cloudAddons
-  const apiDeprecations = data?.cluster?.apiDeprecations
-  const upgradeInsights = data?.cluster?.upgradeInsights
+  const runtimeServices = cluster?.runtimeServices
+  const cloudAddons = cluster?.cloudAddons
+  const apiDeprecations = cluster?.apiDeprecations
+  const upgradeInsights = cluster?.upgradeInsights
 
   const upgradeIssues = upgradeInsights?.filter(
     (i) => i?.status && statesWithIssues.includes(i.status)
@@ -130,6 +134,16 @@ function FlyoverContent({
     [cluster?.upgradePlan]
   )
 
+  if (error)
+    return (
+      <GqlError
+        header="Failed to fetch cluster upgrade plan"
+        error={error}
+      />
+    )
+
+  if (!cluster) return <LoadingIndicator />
+
   return (
     <div
       css={{
@@ -138,14 +152,10 @@ function FlyoverContent({
         gap: theme.spacing.large,
       }}
     >
-      {(upgradeError || error) && (
+      {upgradeError && (
         <GqlError
-          header={
-            upgradeError
-              ? 'Could not upgrade cluster'
-              : 'Failed to fetch upgrade plan'
-          }
-          error={upgradeError || error}
+          header="Could not upgrade cluster"
+          error={upgradeError}
         />
       )}
       <Table
@@ -418,6 +428,8 @@ export function ClusterUpgradeFlyover({
   cluster: Nullable<ClustersRowFragment>
   refetch: Nullable<() => void>
 }) {
+  const kubeVersion = getClusterKubeVersion(cluster)
+
   return (
     <Flyover
       header={`Upgrade Plan for ${cluster?.name}`}
@@ -426,7 +438,8 @@ export function ClusterUpgradeFlyover({
       minWidth={920}
     >
       <FlyoverContent
-        cluster={cluster}
+        clusterId={cluster?.id ?? ''}
+        kubeVersion={kubeVersion}
         refetch={refetch}
       />
     </Flyover>
