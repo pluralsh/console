@@ -1,14 +1,8 @@
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
 import styled from 'styled-components'
-
-import { getGlobalSettingsBreadcrumbs } from '../GlobalSettings'
 
 import { SettingsPageHeader } from 'components/settings/Settings'
 import { SubTabs } from 'components/utils/SubTabs'
 import { Outlet, useOutletContext } from 'react-router-dom'
-
-const breadcrumbs = getGlobalSettingsBreadcrumbs('observability')
 
 const directory = [
   { path: 'providers', label: 'Providers' },
@@ -16,7 +10,6 @@ const directory = [
 ]
 
 export default function Observability() {
-  useSetBreadcrumbs(breadcrumbs)
   const curContext = useOutletContext()
 
   return (

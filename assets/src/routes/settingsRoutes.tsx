@@ -41,6 +41,7 @@ import { ObservabilityProviders } from 'components/settings/global/observability
 import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
 import { RequireCdEnabled } from './cdRoutes'
 import {
+  ACCESS_TOKENS_REL_PATH,
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
@@ -51,6 +52,7 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
+import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 
 const userManagementRoutes = (
   <Route
@@ -149,6 +151,10 @@ const globalSettingsRoutes = (
       />
     </Route>
     <Route
+      path="oidc"
+      element={<OidcSettings />}
+    />
+    <Route
       path="smtp"
       element={<GlobalSettingsSMTP />}
     />
@@ -234,7 +240,7 @@ export const settingsRoutes = (
     {notificationsRoutes}
     {auditRoutes}
     <Route
-      path="access-tokens"
+      path={ACCESS_TOKENS_REL_PATH}
       element={<AccessTokens />}
     />
   </Route>

@@ -1,8 +1,5 @@
-import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
-import {
-  getGlobalSettingsBreadcrumbs,
-  useGlobalSettingsContext,
-} from 'components/settings/global/GlobalSettings'
+import { Card } from '@pluralsh/design-system'
+import { useGlobalSettingsContext } from 'components/settings/global/GlobalSettings'
 import { splitBindings } from 'components/settings/usermanagement/roles/RoleFormBindings'
 import { GqlError } from 'components/utils/Alert'
 import { BindingInput } from 'components/utils/BindingInput'
@@ -29,11 +26,7 @@ enum GlobalSettingsPermissionsType {
   Create = 'create',
 }
 
-const breadcrumbs = getGlobalSettingsBreadcrumbs('permissions')
-
 export function GlobalSettingsPermissions() {
-  useSetBreadcrumbs(breadcrumbs)
-
   return (
     <SettingsWrapperSC>
       {Object.values(GlobalSettingsPermissionsType).map((type) => (

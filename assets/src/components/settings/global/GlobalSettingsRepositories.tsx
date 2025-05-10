@@ -1,4 +1,4 @@
-import { Button, FormField, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Button, FormField } from '@pluralsh/design-system'
 import {
   useGitRepositoriesQuery,
   useUpdateDeploymentSettingsMutation,
@@ -8,20 +8,14 @@ import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
-import {
-  getGlobalSettingsBreadcrumbs,
-  useGlobalSettingsContext,
-} from 'components/settings/global/GlobalSettings'
+import { useGlobalSettingsContext } from 'components/settings/global/GlobalSettings'
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
 
-const breadcrumbs = getGlobalSettingsBreadcrumbs('repositories')
-
 export function GlobalSettingsRepositories() {
-  useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
 

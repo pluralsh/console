@@ -29,6 +29,10 @@ export const AUDITS_REL_PATH = 'audits' as const
 export const AUDITS_ABS_PATH =
   `${SETTINGS_ABS_PATH}/${AUDITS_REL_PATH}` as const
 
+export const ACCESS_TOKENS_REL_PATH = 'access-tokens' as const
+export const ACCESS_TOKENS_ABS_PATH =
+  `${SETTINGS_ABS_PATH}/${ACCESS_TOKENS_REL_PATH}` as const
+
 export const NOTIFICATIONS_BASE_CRUMBS = [
   {
     label: 'settings',
