@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Policy, Clusters}
-  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, ComplianceReport}
+  alias Console.Deployments.{Policy, Clusters, Policies}
+  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
 
   def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_vulnerability(id)
@@ -44,6 +44,30 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     ComplianceReport.ordered()
     |> paginate(args)
   end
+
+  def list_compliance_reports(generator, args, %{context: %{current_user: _user}}) do
+    ComplianceReport.ordered()
+    |> ComplianceReport.for_generator(generator.id)
+    |> paginate(args)
+  end
+
+  def list_compliance_report_generators(args, %{context: %{current_user: user}}) do
+    ComplianceReportGenerator.for_user(user)
+    |> ComplianceReportGenerator.ordered()
+    |> paginate(args)
+  end
+
+  def resolve_compliance_report_generator(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
+    Policy.get_report_generator(id)
+    |> Policies.allow(user, :read)
+  end
+
+  def resolve_compliance_report_generator(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
+    Policy.get_report_generator_by_name(name)
+    |> Policies.allow(user, :read)
+  end
+
+  def resolve_compliance_report_generator(_, _), do: {:error, "must specify either id or name"}
 
   def policy_statistics(%{aggregate: f} = args, %{context: %{current_user: user}}) do
     PolicyConstraint.for_user(user)
@@ -97,6 +121,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def upsert_vulnerabilities(%{vulnerabilities: vulns}, %{context: %{cluster: cluster}}),
     do: Policy.upsert_vulnerabilities(vulns, cluster)
+
+  def upsert_compliance_report_generator(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.upsert_compliance_report_generator(attrs, user)
+
+  def delete_compliance_report_generator(%{id: id}, %{context: %{current_user: user}}),
+    do: Policy.delete_compliance_report_generator(id, user)
 
   defp apply_filters(query, args) do
     Enum.reduce(args, query, fn

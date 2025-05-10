@@ -36,7 +36,8 @@ defmodule Console.Deployments.Policies.Rbac do
     Flow,
     McpServer,
     OIDCProvider,
-    PreviewEnvironmentTemplate
+    PreviewEnvironmentTemplate,
+    ComplianceReportGenerator
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -100,6 +101,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(flow, user, action, & &1.project)
   def evaluate(%McpServer{} = mcp, user, action),
     do: recurse(mcp, user, action, & &1.project)
+  def evaluate(%ComplianceReportGenerator{} = gen, user, action),
+    do: recurse(gen, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -200,6 +203,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%SharedSecret{} = share), do: Repo.preload(share, [:notification_bindings])
   def preload(%PreviewEnvironmentTemplate{} = template),
     do: Repo.preload(template, [flow: @top_preloads])
+  def preload(%ComplianceReportGenerator{} = gen),
+    do: Repo.preload(gen, [:read_bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

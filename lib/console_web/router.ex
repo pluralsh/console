@@ -81,6 +81,7 @@ defmodule ConsoleWeb.Router do
     scope "/v1", ConsoleWeb do
       get "/digests", GitController, :digest
       get "/compliance/report", ComplianceController, :report
+      get "/compliance/report/:name", ComplianceController, :report
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
     end

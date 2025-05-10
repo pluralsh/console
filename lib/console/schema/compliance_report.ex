@@ -1,24 +1,31 @@
 defmodule Console.Schema.ComplianceReport do
   use Piazza.Ecto.Schema
+  alias Console.Schema.ComplianceReportGenerator
 
   schema "compliance_reports" do
     field :name, :string
     field :sha256, :string
 
+    belongs_to :generator, ComplianceReportGenerator
+
     timestamps()
   end
 
-  def name() do
-    "#{Console.rand_alphanum(8)}-#{Console.rand_alphanum(8)}"
+  def name(prefix \\ nil), do: "#{prefix || Console.rand_alphanum(8)}-#{Console.rand_alphanum(8)}"
+
+  def for_generator(query \\ __MODULE__, id) do
+    from(r in query, where: r.generator_id == ^id)
   end
 
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
-    from(q in query, order_by: ^order)
+    from(r in query, order_by: ^order)
   end
+
+  @valid ~w(name sha256 generator_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [:name, :sha256])
+    |> cast(attrs, @valid)
     |> validate_required([:name])
     |> unique_constraint([:name])
   end

@@ -1,8 +1,17 @@
 defmodule Console.Deployments.Policy do
   use Console.Services.Base
-  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, Service}
+  import Console.Deployments.Policies
+  alias Console.Schema.{
+    PolicyConstraint,
+    Cluster,
+    VulnerabilityReport,
+    Service,
+    ComplianceReportGenerator,
+    User
+  }
 
   @type summary_resp :: {:ok, integer} | Console.error
+  @type generator_resp :: {:ok, ComplianceReportGenerator.t} | Console.error
 
   @doc """
   Returns a constraint if present or nil otherwise
@@ -15,6 +24,18 @@ defmodule Console.Deployments.Policy do
   """
   @spec get_vulnerability(binary) :: VulnerabilityReport.t | nil
   def get_vulnerability(id), do: Repo.get(VulnerabilityReport, id)
+
+  @doc """
+  Returns a compliance report generator if present
+  """
+  @spec get_report_generator(binary) :: ComplianceReportGenerator.t | nil
+  def get_report_generator(id), do: Repo.get(ComplianceReportGenerator, id)
+
+  @doc """
+  Returns a compliance report generator by name if present
+  """
+  @spec get_report_generator_by_name(binary) :: ComplianceReportGenerator.t | nil
+  def get_report_generator_by_name(name), do: Repo.get_by(ComplianceReportGenerator, name: name)
 
   @doc """
   Upserts a list of vulnerability reports for a cluster
@@ -87,5 +108,23 @@ defmodule Console.Deployments.Policy do
     end)
     |> execute()
     |> when_ok(&map_size/1)
+  end
+
+  @spec upsert_compliance_report_generator(map, User.t) :: generator_resp
+  def upsert_compliance_report_generator(%{name: name} = attrs, %User{} = user) do
+    case get_report_generator_by_name(name) do
+      %ComplianceReportGenerator{} = generator -> generator
+      nil -> %ComplianceReportGenerator{}
+    end
+    |> ComplianceReportGenerator.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @spec delete_compliance_report_generator(binary, User.t) :: generator_resp
+  def delete_compliance_report_generator(id, %User{} = user) do
+    get_report_generator(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 end

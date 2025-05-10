@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Policy do
   ecto_enum :vuln_report_grade, Console.Schema.VulnerabilityReport.Grade
   ecto_enum :vuln_attack_vector, Console.Schema.Vulnerability.AttackVector
   ecto_enum :vuln_user_interaction, Console.Schema.Vulnerability.UserInteraction
+  ecto_enum :compliance_report_format, Console.Schema.ComplianceReportGenerator.Format
 
   enum :policy_aggregate do
     value :cluster
@@ -122,6 +123,12 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   input_object :namespace_vuln_attributes do
     field :namespace, non_null(:string)
+  end
+
+  input_object :compliance_report_generator_attributes do
+    field :format,        non_null(:compliance_report_format), description: "the format of the compliance report when a user generates it"
+    field :name,          non_null(:string), description: "the name of this generator"
+    field :read_bindings, list_of(:policy_binding_attributes)
   end
 
   @desc "A OPA Gatekeeper Constraint reference"
@@ -294,9 +301,24 @@ defmodule Console.GraphQl.Deployments.Policy do
     timestamps()
   end
 
+  object :compliance_report_generator do
+    field :id,       non_null(:id)
+    field :name,     non_null(:string)
+    field :format,   non_null(:compliance_report_format)
+
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "download policy for this report"
+
+    connection field :compliance_reports, node_type: :compliance_reports do
+      resolve &Deployments.list_compliance_reports/3
+    end
+
+    timestamps()
+  end
+
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report
   connection node_type: :compliance_reports
+  connection node_type: :compliance_report_generator
 
   object :policy_queries do
     connection field :policy_constraints, node_type: :policy_constraint do
@@ -377,6 +399,20 @@ defmodule Console.GraphQl.Deployments.Policy do
 
       resolve &Deployments.list_compliance_reports/2
     end
+
+    connection field :compliance_report_generators, node_type: :compliance_report_generator do
+      middleware Authenticated
+
+      resolve &Deployments.list_compliance_report_generators/2
+    end
+
+    field :compliance_report_generator, :compliance_report_generator do
+      middleware Authenticated
+      arg :id,   :id
+      arg :name, :string
+
+      resolve &Deployments.resolve_compliance_report_generator/2
+    end
   end
 
   object :public_policy_mutations do
@@ -392,6 +428,20 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :vulnerabilities, list_of(:vulnerability_report_attributes)
 
       resolve &Deployments.upsert_vulnerabilities/2
+    end
+
+    field :upsert_compliance_report_generator, :compliance_report_generator do
+      middleware Authenticated
+      arg :attributes, non_null(:compliance_report_generator_attributes)
+
+      resolve &Deployments.upsert_compliance_report_generator/2
+    end
+
+    field :delete_compliance_report_generator, :compliance_report_generator do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_compliance_report_generator/2
     end
   end
 end

@@ -71,6 +71,122 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert from_connection(found["pullRequests"])
              |> ids_equal(prs)
     end
+
+    test "only writers can view variables" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            variables
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert found["variables"] == %{"foo" => "bar"}
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            variables
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test  "only writers can view state" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      state = insert(:stack_state, stack: stack)
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            state {
+              id
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert found["state"]["id"] == state.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            state {
+              id
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test "only writers can view files" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      file = insert(:stack_file, stack: stack)
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            files {
+              path
+              content
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert hd(found["files"])["path"] == file.path
+      assert hd(found["files"])["content"] == file.content
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            files {
+              path
+              content
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test "only writers can view secret environment variables" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      insert(:stack_environment, stack: stack, secret: true)
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            environment {
+              name
+              value
+              secret
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert hd(found["environment"])["name"] == "foo"
+      assert hd(found["environment"])["value"] == "bar"
+      assert hd(found["environment"])["secret"] == true
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            environment {
+              name
+              value
+              secret
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
   end
 
   describe "infrastructureStacks" do
@@ -214,6 +330,178 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       """, %{"id" => run.id}, %{current_user: user})
 
       assert found["id"] == run.id
+    end
+
+    test "only writers can view variables" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      run = insert(:stack_run, stack: stack, variables: %{"foo" => "bar"})
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query stackRun($id: ID!) {
+          stackRun(id: $id) {
+            variables
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["variables"] == %{"foo" => "bar"}
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query stackRun($id: ID!) {
+          stackRun(id: $id) {
+            variables
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: run.cluster})
+
+      assert found["variables"] == %{"foo" => "bar"}
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            variables
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test  "only writers can view state" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      run = insert(:stack_run, stack: stack)
+      state = insert(:stack_state, run: run)
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            state {
+              id
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["state"]["id"] == state.id
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            state {
+              id
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: run.cluster})
+
+      assert found["state"]["id"] == state.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            state {
+              id
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: insert(:user)})
+    end
+
+    test "only writers can view files" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      run = insert(:stack_run, stack: stack)
+      file = insert(:stack_file, run: run)
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            files {
+              path
+              content
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert hd(found["files"])["path"] == file.path
+      assert hd(found["files"])["content"] == file.content
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            files {
+              path
+              content
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: run.cluster})
+
+      assert hd(found["files"])["path"] == file.path
+      assert hd(found["files"])["content"] == file.content
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            files {
+              path
+              content
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: insert(:user)})
+    end
+
+    test "only writers can view secret environment variables" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], variables: %{"foo" => "bar"})
+      run = insert(:stack_run, stack: stack)
+      env = insert(:stack_environment, run: run, secret: true)
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            environment {
+              name
+              value
+              secret
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert hd(found["environment"])["name"] == env.name
+      assert hd(found["environment"])["value"] == env.value
+      assert hd(found["environment"])["secret"] == true
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            environment {
+              name
+              value
+              secret
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: run.cluster})
+
+      assert hd(found["environment"])["name"] == env.name
+      assert hd(found["environment"])["value"] == env.value
+      assert hd(found["environment"])["secret"] == true
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            environment {
+              name
+              value
+              secret
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: insert(:user)})
     end
   end
 

@@ -308,4 +308,90 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
              |> ids_equal(reports)
     end
   end
+
+  describe "complianceReportGenerators" do
+    test "it can list the accessible compliance report generators for a user" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+
+      gen1 = insert(:compliance_report_generator, read_bindings: [%{user_id: user.id}])
+      gen2 = insert(:compliance_report_generator, read_bindings: [%{group_id: group.id}])
+      insert(:compliance_report_generator)
+
+      {:ok, %{data: %{"complianceReportGenerators" => found}}} = run_query("""
+        query {
+          complianceReportGenerators(first: 5) {
+            edges { node { id name } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([gen1, gen2])
+    end
+  end
+
+  describe "complianceReportGenerator" do
+    test "it can fetch a compliance report generator by id" do
+      gen = insert(:compliance_report_generator)
+
+      {:ok, %{data: %{"complianceReportGenerator" => found}}} = run_query("""
+        query ComplianceReportGenerator($id: ID!) {
+          complianceReportGenerator(id: $id) { id name }
+        }
+      """, %{"id" => gen.id}, %{current_user: admin_user()})
+
+      assert found["id"] == gen.id
+      assert found["name"] == gen.name
+    end
+
+    test "it can sideload reports on a generator" do
+      user = insert(:user)
+      gen = insert(:compliance_report_generator, read_bindings: [%{user_id: user.id}])
+
+      reports = insert_list(3, :compliance_report, generator: gen)
+      insert_list(3, :compliance_report)
+
+      {:ok, %{data: %{"complianceReportGenerator" => found}}} = run_query("""
+        query ComplianceReportGenerator($id: ID!) {
+          complianceReportGenerator(id: $id) {
+            id
+            name
+            complianceReports(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => gen.id}, %{current_user: user})
+
+      assert found["id"]   == gen.id
+      assert found["name"] == gen.name
+
+      assert from_connection(found["complianceReports"])
+             |> ids_equal(reports)
+    end
+
+    test "it can fetch a compliance report generator by name" do
+      gen = insert(:compliance_report_generator, name: "my-generator")
+
+      {:ok, %{data: %{"complianceReportGenerator" => found}}} = run_query("""
+        query ComplianceReportGenerator($name: String!) {
+          complianceReportGenerator(name: $name) { id name }
+        }
+      """, %{"name" => gen.name}, %{current_user: admin_user()})
+
+      assert found["id"] == gen.id
+      assert found["name"] == gen.name
+    end
+
+    test "users not within policy cannot view report generators" do
+      gen = insert(:compliance_report_generator)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query ComplianceReportGenerator($id: ID!) {
+          complianceReportGenerator(id: $id) { id name }
+        }
+      """, %{"id" => gen.id}, %{current_user: insert(:user)})
+    end
+  end
 end

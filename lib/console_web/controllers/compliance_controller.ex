@@ -4,11 +4,14 @@ defmodule ConsoleWeb.ComplianceController do
   alias Console.Schema.ComplianceReport
   alias Console.Compliance.Report
 
-  def report(conn, %{"format" => fmt}) do
+  def report(conn, args) do
     with %User{} = user <- Guardian.Plug.current_resource(conn),
-         {:ok, _} <- Report.allow(user),
-         {:ok, fmt} <- format(fmt) do
-      report = %ComplianceReport{name: ComplianceReport.name()}
+         {:ok, gen, fmt} <- validate(args, user) do
+      report = %ComplianceReport{
+        name: ComplianceReport.name(Map.get(gen, :name)),
+        generator_id: Map.get(gen, :id)
+      }
+
       conn =
         conn
         |> put_resp_content_type("application/zip")
@@ -33,6 +36,17 @@ defmodule ConsoleWeb.ComplianceController do
     else
       _ -> send_resp(conn, 403, "Forbidden")
     end
+  end
+
+  defp validate(%{"name" => name}, %User{} = user) do
+    with {:ok, gen} <- Report.allow(name, user),
+      do: {:ok, gen, gen.format}
+  end
+
+  defp validate(%{"format" => fmt}, %User{} = user) do
+    with {:ok, _} <- Report.allow(user),
+         {:ok, fmt} <- format(fmt),
+      do: {:ok, %{}, fmt}
   end
 
   defp format("csv"), do: {:ok, :csv}
