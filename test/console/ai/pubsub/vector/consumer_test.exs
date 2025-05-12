@@ -196,15 +196,15 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
     end
   end
 
-  describe "PullRequestCreated (AWS OpenSearch)" do
+  describe "PullRequestCreated (OpenSearch)" do
     @tag opensearch: true
     test "it can vector index pr files from github" do
       deployment_settings(ai: %{
         enabled: true,
         vector_store: %{
           enabled: true,
-          store: :elastic,
-          elastic: os_vector_settings(),
+          store: :opensearch,
+          opensearch: os_vector_settings(),
         },
         provider: :openai,
         openai: %{access_token: "key"}

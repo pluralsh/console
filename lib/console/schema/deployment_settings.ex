@@ -5,7 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
   defenum LogDriver, victoria: 0, elastic: 1
-  defenum VectorStore, elastic: 0
+  defenum VectorStore, elastic: 0, opensearch: 1
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -31,7 +31,21 @@ defmodule Console.Schema.DeploymentSettings do
       field :index,    :string
       field :user,     :string
       field :password, EncryptedString
-      field :aws_enabled, :boolean, default: false
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host index user password)a)
+      |> validate_required([:host, :index])
+    end
+  end
+
+  defmodule Opensearch do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :host,     :string
+      field :index,    :string
       field :aws_access_key_id, :string
       field :aws_secret_access_key, EncryptedString
       field :aws_region, :string
@@ -40,7 +54,7 @@ defmodule Console.Schema.DeploymentSettings do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(host index user password)a)
+      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region aws_session_token)a)
       |> validate_required([:host, :index])
     end
   end
@@ -106,6 +120,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :store,       VectorStore, default: :elastic
 
         embeds_one :elastic, Elastic, on_replace: :update
+        embeds_one :opensearch, Opensearch, on_replace: :update
       end
 
       embeds_one :tools, ToolsConfig, on_replace: :update do
@@ -302,6 +317,7 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(enabled store)a)
     |> cast_embed(:elastic)
+    |> cast_embed(:opensearch)
     |> set_initialized()
   end
 
@@ -315,6 +331,8 @@ defmodule Console.Schema.DeploymentSettings do
   defp set_initialized(changeset) do
     case {get_change(changeset, :store), get_change(changeset, :elastic)} do
       {:elastic, e} when not is_nil(e) ->
+        put_change(changeset, :initialized, false)
+      {:opensearch, o} when not is_nil(o) ->
         put_change(changeset, :initialized, false)
       _ -> changeset
     end

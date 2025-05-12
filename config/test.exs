@@ -277,6 +277,11 @@ config :bamboo, :refute_timeout, 10
 config :elasticsearch,
   host: "http://localhost:9200",
   index: "testindex",
+  vector_index: "plrl-vector-testindex"
+
+config :opensearch,
+  host: "http://localhost:9200",
+  index: "testindex",
   vector_index: "plrl-vector-testindex",
   aws_access_key_id: "TEST_ACCESS_KEY_ID",
   aws_secret_access_key: "TEST_SECRET_ACCESS_KEY",

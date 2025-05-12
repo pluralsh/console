@@ -1,12 +1,13 @@
-defmodule Console.Logs.Provider.Elastic do
+defmodule Console.Logs.Provider.Opensearch do
   @moduledoc """
   Log driver implementation for victoria metrics
   """
   @behaviour Console.Logs.Provider
-  alias Console.Schema.{Cluster, Service, DeploymentSettings.Elastic}
+  alias Console.Schema.{Cluster, Service, DeploymentSettings.Opensearch}
   alias Console.Logs.{Query, Line, Time}
 
   @headers [{"Content-Type", "application/json"}]
+  @aws_service_name "es"
 
   @type t :: %__MODULE__{}
 
@@ -24,17 +25,23 @@ defmodule Console.Logs.Provider.Elastic do
     end
   end
 
-  def search(%Elastic{index: index, host: host} = conn, query) do
+  def search(%Opensearch{host: host, index: index} = conn, query) do
     IO.inspect(query, label: "query")
-    HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn))
+    Req.new([
+      url: "#{host}/#{index}/_search",
+      method: :post,
+      headers: headers(conn),
+      body: Jason.encode!(query),
+      aws_sigv4: aws_sigv4_headers(conn)
+    ])
+    |> Req.post()
     |> search_response()
   end
 
-  defp search_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
-    with {:ok, resp} <- Jason.decode(body),
-      do: {:ok, Snap.SearchResponse.new(resp)}
+  defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
+    {:ok, Snap.SearchResponse.new(body)}
   end
-  defp search_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "es failure: #{body}"}
+  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "opensearch failure: #{body}"}
   defp search_response(_), do: {:error, "network failure"}
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
@@ -126,7 +133,16 @@ defmodule Console.Logs.Provider.Elastic do
   defp sort(%Query{time: %Time{reverse: true}}), do: [%{"@timestamp": %{order: "asc"}}]
   defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]
 
-  defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
-    do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
-  defp headers(_), do: @headers
+  defp headers(%Opensearch{} = es) do
+    [{"X-Amz-Security-Token", Map.get(es, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")} | @headers]
+  end
+
+  defp aws_sigv4_headers(es) do
+    [
+      service: @aws_service_name,
+      region: Map.get(es, :aws_region) || System.get_env("AWS_REGION"),
+      access_key_id: Map.get(es, :aws_access_key_id) || System.get_env("AWS_ACCESS_KEY_ID"),
+      secret_access_key: Map.get(es, :aws_secret_access_key) || System.get_env("AWS_SECRET_ACCESS_KEY")
+    ]
+  end
 end

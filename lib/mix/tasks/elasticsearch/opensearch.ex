@@ -4,7 +4,6 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
   @es_config %{
     host: "https://search-test-os-domain-ywqsnt77dn2gzynamrk67fdqlq.us-east-1.es.amazonaws.com",
     index: "os-test-index",
-    aws_enabled: true,
     aws_region: "us-east-1",
   }
 
@@ -32,7 +31,8 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
           knn: %{
             "passages.vector": %{
               vector: @test_vector,
-              k: 5
+              k: 5,
+              num_candidates: 100
             }
           }
         }
@@ -173,7 +173,7 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
 
   defp url(%{host: host}, path), do: Path.join(host, path)
 
-  defp headers(%{aws_enabled: true} = es) do
+  defp headers(%{} = es) do
     [{"X-Amz-Security-Token", Map.get(es, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")} | @headers]
   end
   defp headers(%{user: u, password: p}) when is_binary(u) and is_binary(p),

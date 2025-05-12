@@ -8,7 +8,7 @@ defmodule Console.AI.Vector.Elastic do
   alias Console.AI.Vector.Content
   alias Console.Schema.DeploymentSettings.Elastic
 
-  @index_mappings_es %{
+  @index_mappings %{
     mappings: %{
       properties: %{
         passages: %{
@@ -32,32 +32,15 @@ defmodule Console.AI.Vector.Elastic do
     }
   }
 
-  @headers [{"Content-Type", "application/json"}]
-  @aws_service_name "es"
-
   defstruct [:conn]
 
   def new(%Elastic{} = conn), do: %__MODULE__{conn: conn}
 
-  def init(%__MODULE__{conn: %Elastic{index: index, aws_enabled: true} = es}) do
-    Req.new([
-      url: url(es, index),
-      method: :put,
-      headers: headers(es),
-      body: Jason.encode!(@index_mappings_es),
-      aws_sigv4: aws_sigv4_headers(es)
-    ])
-    |> Req.put()
-    |> handle_response("could not initialize elasticsearch:")
-    |> case do
-      :ok -> initialized()
-      err -> err
-    end
-  end
+  @headers [{"Content-Type", "application/json"}]
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     url(es, index)
-    |> HTTPoison.put(Jason.encode!(@index_mappings_es), headers(es))
+    |> HTTPoison.put(Jason.encode!(@index_mappings), headers(es))
     |> handle_response("could not initialize elasticsearch:")
     |> case do
       :ok -> initialized()
@@ -65,31 +48,7 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  def insert(elastic_module, data, opts \\ [])
-
-  def insert(%__MODULE__{conn: %Elastic{aws_enabled: true} = es}, data, opts) do
-    IO.inspect(data, label: "data")
-    filters = Keyword.get(opts, :filters, [])
-    with {datatype, text} <- Content.content(data),
-         {:ok, embeddings} <- Provider.embeddings(text) do
-      Req.new([
-        url: url(es, "#{es.index}/_doc"),
-        method: :post,
-        headers: headers(es),
-        body: Jason.encode!(doc_filters(%{
-          passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
-          datatype: datatype,
-          "@timestamp": DateTime.utc_now(),
-          "#{datatype}": Console.mapify(data)
-        }, filters)),
-        aws_sigv4: aws_sigv4_headers(es)
-      ])
-      |> Req.post()
-      |> handle_response("could not insert vector into elasticsearch:")
-    end
-  end
-
-  def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts) do
+  def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts \\ []) do
     filters = Keyword.get(opts, :filters, [])
     with {datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
@@ -112,9 +71,9 @@ defmodule Console.AI.Vector.Elastic do
   def fetch(%__MODULE__{conn: %Elastic{} = es}, text, opts) do
     count = Keyword.get(opts, :count, 5)
     filters = Keyword.get(opts, :filters, [])
-    num_candidates = Keyword.get(opts, :num_candidates, 100)
+    n_candidates = Keyword.get(opts, :n_candidates, 100)
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
-         query = vector_query(embedding, count, filters, num_candidates),
+         query = vector_query(embedding, count, filters, n_candidates),
          {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, query) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
@@ -128,10 +87,10 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  defp vector_query(embedding, count, filters, num_candidates) do
+  defp vector_query(embedding, count, filters, n_candidates) do
     query_filters(%{
       size: count,
-      knn: %{field: "passages.vector", query_vector: embedding, k: count, num_candidates: num_candidates}
+      knn: %{field: "passages.vector", query_vector: embedding, k: count, num_candidates: n_candidates}
     }, filters)
   end
 
@@ -144,26 +103,12 @@ defmodule Console.AI.Vector.Elastic do
   defp query_filters(query, _), do: query
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code}}, _) when code >= 200 and code < 300, do: :ok
-  defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
   defp handle_response({:ok, %HTTPoison.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
-  defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: elasticsearch error"}
 
   defp url(%Elastic{host: host}, path), do: Path.join(host, path)
 
-  defp headers(%{aws_enabled: true} = es) do
-    [{"X-Amz-Security-Token", Map.get(es, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")} | @headers]
-  end
   defp headers(%Elastic{user: u, password: p}) when is_binary(u) and is_binary(p),
     do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
   defp headers(_), do: @headers
-
-  defp aws_sigv4_headers(es) do
-    [
-      service: @aws_service_name,
-      region: Map.get(es, :aws_region) || System.get_env("AWS_REGION"),
-      access_key_id: Map.get(es, :aws_access_key_id) || System.get_env("AWS_ACCESS_KEY_ID"),
-      secret_access_key: Map.get(es, :aws_secret_access_key) || System.get_env("AWS_SECRET_ACCESS_KEY")
-    ]
-  end
 end
