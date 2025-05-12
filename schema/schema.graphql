@@ -607,6 +607,8 @@ type RootMutationType {
 
   deleteCatalog(id: ID!): Catalog
 
+  registerGithubApp(name: String!, installationId: String!): ScmConnection
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster

@@ -146,27 +146,6 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-  Creates an scm connection and attempts to register a webhook simultaneously for the connection
-  """
-  @spec create_scm_connection(map, User.t) :: connection_resp
-  def create_scm_connection(attrs, %User{} = user) do
-    start_transaction()
-    |> add_operation(:conn, fn _ ->
-      %ScmConnection{}
-      |> ScmConnection.changeset(attrs)
-      |> allow(user, :edit)
-      |> when_ok(:insert)
-    end)
-    |> add_operation(:hook, fn %{conn: conn} ->
-      case attrs do
-        %{owner: owner} when is_binary(owner) -> create_webhook_for_connection(owner, conn)
-        _ -> {:ok, conn} # don't attempt webhook creation here
-      end
-    end)
-    |> execute(extract: :conn)
-  end
-
-  @doc """
   Creates another webhook (besides the default) for a given scm connection
   """
   @spec create_webhook_for_connection(binary, binary, User.t) :: webhook_resp
@@ -208,6 +187,27 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Creates an scm connection and attempts to register a webhook simultaneously for the connection
+  """
+  @spec create_scm_connection(map, User.t) :: connection_resp
+  def create_scm_connection(attrs, %User{} = user) do
+    start_transaction()
+    |> add_operation(:conn, fn _ ->
+      %ScmConnection{}
+      |> ScmConnection.changeset(attrs)
+      |> allow(user, :edit)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:hook, fn %{conn: conn} ->
+      case attrs do
+        %{owner: owner} when is_binary(owner) -> create_webhook_for_connection(owner, conn)
+        _ -> {:ok, conn} # don't attempt webhook creation here
+      end
+    end)
+    |> execute(extract: :conn)
+  end
+
+  @doc """
   Updates the attributes of a scm connection
   """
   @spec update_scm_connection(map, binary, User.t) :: connection_resp
@@ -226,6 +226,31 @@ defmodule Console.Deployments.Git do
     get_scm_connection!(id)
     |> allow(user, :edit)
     |> when_ok(:delete)
+  end
+
+  @spec upsert_scm_connection(map, User.t) :: connection_resp
+  def upsert_scm_connection(%{name: name} = attrs, %User{} = user) do
+    case get_scm_connection_by_name(name) do
+      %ScmConnection{id: id} -> update_scm_connection(attrs, id, user)
+      nil -> create_scm_connection(attrs, user)
+    end
+  end
+
+  @doc """
+  Responds to a github app installation and registers an scm connection in response
+  """
+  @spec register_github_app(binary, binary, User.t) :: connection_resp
+  def register_github_app(name, installation_id, %User{} = user) do
+    case {Console.conf(:github_app_id), Console.conf(:github_app_pem)} do
+      {app_id, pem} when is_binary(app_id) and is_binary(pem) ->
+        upsert_scm_connection(%{
+          type: :github,
+          name: name,
+          token: nil,
+          github: %{app_id: app_id, installation_id: installation_id, private_key: pem}
+        }, user)
+      _ -> {:error, "you need to configure the github app id and pem in your environment before using this api"}
+    end
   end
 
   @doc """

@@ -47,7 +47,9 @@ config :console,
   local_cache: Console.TestCache,
   multilevel_cache: Console.MultilevelCache,
   grafana_dns: "grafana.example.com",
-  prom_plugins: []
+  prom_plugins: [],
+  github_app_id: "1234567890"
+  # github_app_pem: priv_string
 
 config :console, :login_link,
   key: "test-key",

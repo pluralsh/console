@@ -6274,6 +6274,7 @@ export type RootMutationType = {
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
+  registerGithubApp?: Maybe<ScmConnection>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   resetObserver?: Maybe<Observer>;
@@ -7018,6 +7019,12 @@ export type RootMutationTypeProceedArgs = {
 export type RootMutationTypeReconfigureRenovateArgs = {
   repos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   serviceId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRegisterGithubAppArgs = {
+  installationId: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 
