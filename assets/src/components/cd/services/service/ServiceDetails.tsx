@@ -6,6 +6,7 @@ import {
   useLocation,
   useMatch,
   useOutletContext,
+  useParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -50,7 +51,6 @@ import { ServiceSelector } from '../ServiceSelector'
 
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
-import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
@@ -63,33 +63,30 @@ type ServiceContextType = {
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
 
 export const getServiceDetailsBreadcrumbs = ({
-  type = 'cd',
   cluster,
   service,
   flow,
   tab,
 }: Parameters<typeof getClusterBreadcrumbs>[0] & {
-  type: 'cd' | 'flow'
   service: { name?: Nullable<string>; id: string }
   flow?: Nullable<{ name?: Nullable<string>; id: string }>
   tab?: string
 }) => {
   const pathPrefix = getServiceDetailsPath({
-    type,
     clusterId: cluster?.id,
     serviceId: service?.id,
     flowId: flow?.id,
   })
   return [
-    ...(type === 'cd'
-      ? [
+    ...(flow?.id
+      ? getFlowBreadcrumbs(flow?.id, flow?.name ?? '', 'services')
+      : [
           ...getClusterBreadcrumbs({ cluster }),
           {
             label: 'services',
             url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
           },
-        ]
-      : getFlowBreadcrumbs(flow?.id, flow?.name || '', 'services')),
+        ]),
     ...(service?.id
       ? [{ label: service?.name || service?.id, url: pathPrefix }]
       : []),
@@ -226,10 +223,10 @@ export const getDirectory = ({
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const referrer = pathname.includes(FLOWS_ABS_PATH) ? 'flow' : 'cd'
-  const { serviceId, tab, flowId } =
+  const { serviceId, flowId } = useParams()
+  const { tab } =
     useMatch(
-      `${referrer === 'cd' ? CD_SERVICE_PATH_MATCHER_ABS : FLOW_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
+      `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
     )?.params ?? {}
 
   const {
@@ -252,7 +249,6 @@ function ServiceDetailsBase() {
   })
 
   const pathPrefix = getServiceDetailsPath({
-    type: referrer,
     flowId,
     clusterId,
     serviceId,
@@ -283,14 +279,13 @@ function ServiceDetailsBase() {
     useMemo(
       () => [
         ...getServiceDetailsBreadcrumbs({
-          type: referrer,
           cluster: serviceDeployment?.cluster ?? { id: clusterId ?? '' },
           service: serviceDeployment ?? { id: serviceId ?? '' },
           flow: flowData?.flow,
           tab,
         }),
       ],
-      [clusterId, flowData?.flow, referrer, serviceDeployment, serviceId, tab]
+      [clusterId, flowData?.flow, serviceDeployment, serviceId, tab]
     )
   )
 

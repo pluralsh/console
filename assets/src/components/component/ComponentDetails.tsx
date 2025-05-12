@@ -120,7 +120,6 @@ export function ComponentDetails({
   useEffect(() => {
     if (currentTab) return
     const redirectPath = getServiceDetailsPath({
-      type: flowId ? 'flow' : 'cd',
       clusterId: service?.cluster?.id,
       serviceId: service?.id,
       flowId,
@@ -176,6 +175,7 @@ export function ComponentDetails({
                   <Button
                     as={Link}
                     to={getServiceDetailsPath({
+                      flowId,
                       serviceId: pluralServiceDeploymentRef?.id,
                       clusterId: pluralServiceDeploymentRef?.cluster.id,
                     })}

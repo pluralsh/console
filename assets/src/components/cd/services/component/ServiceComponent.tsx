@@ -79,7 +79,6 @@ export function ServiceComponent() {
     useMemo(
       () =>
         getServiceComponentBreadcrumbs({
-          type: referrer,
           cluster: serviceDeployment?.cluster || { id: clusterId ?? '' },
           service: serviceDeployment || { id: serviceId ?? '' },
           flow: flowData?.flow,
@@ -87,7 +86,6 @@ export function ServiceComponent() {
           componentName,
         }),
       [
-        referrer,
         serviceDeployment,
         clusterId,
         serviceId,

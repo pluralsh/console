@@ -2,7 +2,7 @@ import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { useFlowQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Outlet, useLocation, useMatch } from 'react-router-dom'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
   FLOW_SERVICE_PATH_MATCHER_ABS,
@@ -11,7 +11,6 @@ import {
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
@@ -41,10 +40,8 @@ const getServiceSettingsBreadcrumbs = ({
   service,
   flow,
   tab,
-  type,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => {
   const detailsCrumbs = getServiceDetailsBreadcrumbs({
-    type,
     cluster,
     service,
     flow,
@@ -59,12 +56,10 @@ const getServiceSettingsBreadcrumbs = ({
 
 export function ServiceSettings() {
   const ctx = useServiceContext()
-  const referrer = useLocation().pathname.includes(FLOWS_ABS_PATH)
-    ? 'flow'
-    : 'cd'
-  const { serviceId, tab, flowId } =
+  const { serviceId, flowId } = useParams()
+  const { tab } =
     useMatch(
-      `${referrer === 'cd' ? CD_SERVICE_PATH_MATCHER_ABS : FLOW_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
+      `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
     )?.params ?? {}
   const { data: flowData } = useFlowQuery({
     variables: { id: flowId ?? '' },
@@ -81,13 +76,12 @@ export function ServiceSettings() {
   const breadcrumbs = useMemo(
     () =>
       getServiceSettingsBreadcrumbs({
-        type: referrer,
         cluster: ctx?.service?.cluster,
         service: ctx?.service ?? { id: serviceId ?? '' },
         flow: flowData?.flow,
         tab: tab ?? '',
       }),
-    [ctx?.service, flowData?.flow, referrer, serviceId, tab]
+    [ctx?.service, flowData?.flow, serviceId, tab]
   )
   useSetBreadcrumbs(breadcrumbs)
 

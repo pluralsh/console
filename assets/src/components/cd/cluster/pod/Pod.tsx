@@ -82,7 +82,6 @@ export default function Pod() {
           ? getFlowBreadcrumbs(flowId, flowData?.flow?.name, 'services')
           : type === 'service'
             ? getServiceDetailsBreadcrumbs({
-                type: 'cd',
                 service: serviceData?.serviceDeployment ?? {
                   id: serviceId ?? '',
                 },

@@ -62,7 +62,6 @@ export const NODE_ABS_PATH = getNodeDetailsPath({
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
 export const CD_SERVICE_REL_PATH = getServiceDetailsPath({
-  type: 'cd',
   isRelative: true,
   clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
@@ -111,20 +110,18 @@ export function getClusterDetailsPath({
 }
 
 export function getServiceDetailsPath({
-  type = 'cd',
   clusterId,
   serviceId,
   flowId,
   isRelative = false,
 }: Parameters<typeof getClusterDetailsPath>[0] & {
-  type?: 'cd' | 'flow'
   serviceId: Nullable<string>
   flowId?: Nullable<string>
 }) {
   return `${
-    type === 'cd'
-      ? getClusterDetailsPath({ clusterId, isRelative })
-      : getFlowDetailsPath({ flowId })
+    flowId
+      ? getFlowDetailsPath({ flowId })
+      : getClusterDetailsPath({ clusterId, isRelative })
   }/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
 }
 
@@ -221,7 +218,6 @@ export function getPodDetailsPath({
       break
     case 'service':
       path = getServiceDetailsPath({
-        type: 'cd',
         clusterId,
         serviceId,
         isRelative,
@@ -229,7 +225,6 @@ export function getPodDetailsPath({
       break
     case 'flow':
       path = getServiceDetailsPath({
-        type: 'flow',
         serviceId,
         flowId,
         isRelative,

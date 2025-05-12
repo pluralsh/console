@@ -62,17 +62,8 @@ export function ServiceSelector({
         const service = serviceList.find(
           (deployment) => deployment.id === newKey
         )
-        console.log(
-          getServiceDetailsPath({
-            type: referrer,
-            flowId,
-            clusterId: service?.cluster?.id,
-            serviceId: service?.id,
-          })
-        )
         navigate(
           `${getServiceDetailsPath({
-            type: referrer,
             flowId,
             clusterId: service?.cluster?.id,
             serviceId: service?.id,
@@ -80,7 +71,7 @@ export function ServiceSelector({
         )
       }
     },
-    [currentService?.id, flowId, navigate, referrer, serviceList, urlSuffix]
+    [currentService?.id, flowId, navigate, serviceList, urlSuffix]
   )
 
   return (

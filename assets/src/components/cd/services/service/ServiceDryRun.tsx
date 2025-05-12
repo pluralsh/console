@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   CD_ABS_PATH,
   SERVICES_REL_PATH,
@@ -27,6 +27,7 @@ export default function ServiceDryRun() {
   const theme = useTheme()
   const [splitView, setSplitView] = useState(true)
   const { service } = useServiceContext()
+  const { flowId } = useParams()
 
   const [live, desired] = useMemo(
     () => [
@@ -50,6 +51,7 @@ export default function ServiceDryRun() {
       getServiceDetailsPath({
         serviceId: service.id,
         clusterId: service.cluster?.id,
+        flowId,
       })
     )
 

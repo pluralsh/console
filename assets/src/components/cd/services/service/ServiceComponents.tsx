@@ -37,7 +37,6 @@ import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 export function ServiceComponents() {
   const { serviceId, clusterId, flowId } = useParams()
-  const referrer = flowId ? 'flow' : 'cd'
   const [showDeprecations, setShowDeprecations] = useState(false)
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -132,7 +131,6 @@ export function ServiceComponents() {
           setUrl={(c) =>
             c?.name && c?.kind
               ? `${getServiceComponentPath({
-                  type: referrer,
                   clusterId,
                   serviceId,
                   flowId,

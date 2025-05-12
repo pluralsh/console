@@ -80,8 +80,7 @@ export function ServiceGitSettings() {
     if (hasGitRepo) return
     navigate(
       getServiceSettingsPath({
-        type: !flowId ? 'cd' : 'flow',
-        flowId: flowId,
+        flowId,
         clusterId: service?.cluster?.id,
         serviceId: service?.id,
         isRelative: false,
