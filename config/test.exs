@@ -280,8 +280,8 @@ config :elasticsearch,
   vector_index: "plrl-vector-testindex"
 
 config :opensearch,
-  host: "http://localhost:9200",
-  index: "testindex",
+  host: "https://not-a-real-host.com",
+  index: "plrl-testindex",
   vector_index: "plrl-vector-testindex",
   aws_access_key_id: "TEST_ACCESS_KEY_ID",
   aws_secret_access_key: "TEST_SECRET_ACCESS_KEY",

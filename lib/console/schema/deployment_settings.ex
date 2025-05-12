@@ -41,6 +41,9 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defmodule Opensearch do
+    @moduledoc """
+    Opensearch settings for the deployment.
+    """
     use Piazza.Ecto.Schema
 
     embedded_schema do

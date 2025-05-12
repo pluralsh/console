@@ -26,7 +26,7 @@ defmodule Console.Logs.Provider.Opensearch do
   end
 
   def search(%Opensearch{host: host, index: index} = conn, query) do
-    IO.inspect(query, label: "query")
+    IO.inspect(query, label: "opensearch query")
     Req.new([
       url: "#{host}/#{index}/_search",
       method: :post,
@@ -68,21 +68,52 @@ defmodule Console.Logs.Provider.Opensearch do
     }
   end
 
-  defp add_terms(query, %Query{resource: %Cluster{} = cluster}),
-    do: put_in(query[:bool][:filter], [%{term: %{"cluster.handle.keyword" => cluster.handle}}])
+  defp add_terms(query, %Query{resource: %Cluster{} = cluster}) do
+    put_in(query[:bool][:filter], [
+      %{nested: %{
+        path: "cluster",
+        query: %{
+          term: %{"cluster.handle.keyword" => cluster.handle}
+        }
+      }}
+    ])
+  end
+
   defp add_terms(query, %Query{resource: %Service{cluster: %Cluster{} = cluster} = svc}) do
     put_in(query[:bool][:filter], [
-      %{term: %{"kubernetes.namespace.keyword" => svc.namespace}},
-      %{term: %{"cluster.handle.keyword" => cluster.handle}}
+      %{nested: %{
+        path: "kubernetes",
+        query: %{
+          term: %{"kubernetes.namespace.keyword" => svc.namespace}
+        }
+      }},
+      %{nested: %{
+        path: "cluster",
+        query: %{
+          term: %{"cluster.handle.keyword" => cluster.handle}
+        }
+      }}
     ])
   end
   defp add_terms(query, _), do: query
 
-  defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}), do: add_filter(query, %{terms: %{"kubernetes.namespace.keyword" => ns}})
+  defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}) do
+    add_filter(query, %{
+      nested: %{
+        path: "kubernetes",
+        query: %{
+          terms: %{"kubernetes.namespace.keyword" => ns}
+        }
+      }
+    })
+  end
   defp add_namespaces(query, _), do: query
 
-  defp add_range(q, %Query{time: %Time{after: aft, before: bef}}) when not is_nil(aft) and not is_nil(bef),
-    do: add_filter(q, %{range: %{"@timestamp": %{gte: aft, lte: bef}}})
+  defp add_range(q, %Query{time: %Time{after: aft, before: bef}}) when not is_nil(aft) and not is_nil(bef) do
+    add_filter(q, %{
+      range: %{"@timestamp": %{gte: aft, lte: bef}}
+    })
+  end
   defp add_range(q, %Query{time: %Time{after: aft, before: nil, duration: dur}}) when not is_nil(aft),
     do: add_filter(q, %{range: %{"@timestamp": maybe_dur(:gte, aft, dur)}})
   defp add_range(q, %Query{time: %Time{after: nil, before: bef, duration: dur}}) when not is_nil(bef),
@@ -97,7 +128,14 @@ defmodule Console.Logs.Provider.Opensearch do
 
   defp add_facets(q, %Query{facets: [_ | _] = facets}) do
     Enum.reduce(facets, q, fn %{key: k, value: v}, acc ->
-      add_filter(acc, %{term: %{"#{k}.keyword" => v}})
+      add_filter(acc, %{
+        nested: %{
+          path: k,
+          query: %{
+            term: %{"#{k}.keyword" => v}
+          }
+        }
+      })
     end)
   end
   defp add_facets(q, _), do: q
@@ -119,8 +157,20 @@ defmodule Console.Logs.Provider.Opensearch do
   defp add_filter(%{bool: %{filter: fs}} = q, f) when is_list(fs), do: put_in(q[:bool][:filter], [f | fs])
   defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
-  defp maybe_query(q) when is_binary(q) and byte_size(q) > 0,
-    do: %{bool: %{must: %{match: %{message: q}}}}
+  defp maybe_query(q) when is_binary(q) and byte_size(q) > 0 do
+    %{
+      bool: %{
+        must: [
+          %{nested: %{
+            path: "message",
+            query: %{
+              match: %{message: q}
+            }
+          }}
+        ]
+      }
+    }
+  end
   defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) do

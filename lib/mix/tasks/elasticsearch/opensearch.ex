@@ -32,7 +32,6 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
             "passages.vector": %{
               vector: @test_vector,
               k: 5,
-              num_candidates: 100
             }
           }
         }
@@ -81,9 +80,9 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
 
     # Now proceed with your task
     exists = index_exists?(@es_config)
-    IO.inspect(exists, label: "index exists")
+    IO.inspect(exists, label: "index already exists")
     if exists do
-      IO.puts("Index exists, deleting it first...")
+      IO.puts("Deleting it first...")
       IO.inspect(delete(@es_config), label: "delete response")
     else
       IO.puts("Index does not exist, creating it...")
@@ -92,6 +91,7 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
     IO.inspect(insert(@es_config, @data), label: "insert response")
     IO.inspect(refresh(@es_config), label: "refresh response")
     IO.inspect(search(@es_config, @query), label: "search response")
+    count(@es_config)
   end
 
   def index_exists?(%{index: index} = es) do
@@ -165,6 +165,18 @@ defmodule Mix.Tasks.Elasticsearch.Opensearch do
     ])
     |> Req.post()
     |> handle_response("could not refresh elasticsearch:")
+  end
+
+  def count(%{index: index} = es) do
+    Req.new([
+      url: url(es, "#{index}/_count"),
+      method: :get,
+      headers: headers(es),
+      aws_sigv4: aws_sigv4_headers(es)
+    ])
+    |> Req.get()
+    |> IO.inspect(label: "count response")
+    |> handle_response("could not count elasticsearch:")
   end
 
   defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok

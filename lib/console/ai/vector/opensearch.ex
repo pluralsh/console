@@ -46,7 +46,7 @@ defmodule Console.AI.Vector.Opensearch do
   def new(%Opensearch{} = conn), do: %__MODULE__{conn: conn}
 
   def init(%__MODULE__{conn: %Opensearch{index: index} = os}) do
-    IO.inspect(os, label: "os")
+    IO.inspect(os, label: "os config")
     Req.new([
       url: url(os, index),
       method: :put,
@@ -87,9 +87,8 @@ defmodule Console.AI.Vector.Opensearch do
   def fetch(%__MODULE__{conn: %Opensearch{} = os}, text, opts) do
     count = Keyword.get(opts, :count, 5)
     filters = Keyword.get(opts, :filters, [])
-    n_candidates = Keyword.get(opts, :n_candidates, 100)
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
-         query = vector_query(embedding, count, filters, n_candidates),
+         query = vector_query(embedding, count, filters),
          {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Opensearch.search(os, query) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
@@ -107,18 +106,39 @@ defmodule Console.AI.Vector.Opensearch do
   defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: opensearch error"}
 
-  defp vector_query(embedding, count, filters, n_candidates) do
+  defp vector_query(embedding, count, filters) do
     query_filters(%{
       size: count,
-      knn: %{field: "passages.vector", query_vector: embedding, k: count, num_candidates: n_candidates}
+      query: %{
+        nested: %{
+          path: "passages",
+          query: %{
+            knn: %{
+              "passages.vector": %{
+                vector: embedding,
+                k: count
+              }
+            }
+          }
+        }
+      }
     }, filters)
   end
 
   defp query_filters(query, [_ | _] = filters) do
-    put_in(query, [:knn, :filter], Enum.map(filters, fn
-      {k, {:raw, v}} -> %{term: %{k => v}}
-      {k, v} -> %{term: %{"filters.#{k}.keyword" => v}}
-    end))
+    update_in(query, [:query, :nested, :query], fn nested_query ->
+      %{
+        bool: %{
+          must: [
+            nested_query,
+            %{bool: %{filter: Enum.map(filters, fn
+              {k, {:raw, v}} -> %{term: %{k => v}}
+              {k, v} -> %{term: %{"filters.#{k}.keyword" => v}}
+            end)}}
+          ]
+        }
+      }
+    end)
   end
   defp query_filters(query, _), do: query
 

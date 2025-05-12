@@ -25,7 +25,6 @@ defmodule Console.Logs.Provider.Elastic do
   end
 
   def search(%Elastic{index: index, host: host} = conn, query) do
-    IO.inspect(query, label: "query")
     HTTPoison.post("#{host}/#{index}/_search", Jason.encode!(query), headers(conn))
     |> search_response()
   end
