@@ -13134,7 +13134,7 @@ export type LogsDeltaSubscriptionVariables = Exact<{
 
 export type LogsDeltaSubscription = { __typename?: 'RootSubscriptionType', runLogsDelta?: { __typename?: 'RunLogsDelta', delta?: Delta | null, payload?: { __typename?: 'RunLogs', id: string, logs: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
-export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
 
@@ -13143,7 +13143,7 @@ export type SharedSecretFragment = { __typename?: 'SharedSecret', secret: string
 export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
 
 export type TokenAuditsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13158,14 +13158,14 @@ export type CreateAccessTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', token?: string | null, id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type DeleteAccessTokenMutationVariables = Exact<{
-  token: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type ShareSecretMutationVariables = Exact<{
   attributes: SharedSecretAttributes;
@@ -16892,7 +16892,6 @@ export const AccessTokenFragmentDoc = gql`
   id
   insertedAt
   updatedAt
-  token
   scopes {
     api
     apis
@@ -28502,6 +28501,7 @@ export const CreateAccessTokenDocument = gql`
     mutation CreateAccessToken($scopes: [ScopeAttributes]) {
   createAccessToken(scopes: $scopes) {
     ...AccessToken
+    token
   }
 }
     ${AccessTokenFragmentDoc}`;
@@ -28532,8 +28532,8 @@ export type CreateAccessTokenMutationHookResult = ReturnType<typeof useCreateAcc
 export type CreateAccessTokenMutationResult = Apollo.MutationResult<CreateAccessTokenMutation>;
 export type CreateAccessTokenMutationOptions = Apollo.BaseMutationOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
 export const DeleteAccessTokenDocument = gql`
-    mutation DeleteAccessToken($token: String!) {
-  deleteAccessToken(token: $token) {
+    mutation DeleteAccessToken($id: ID!) {
+  deleteAccessToken(id: $id) {
     ...AccessToken
   }
 }
@@ -28553,7 +28553,7 @@ export type DeleteAccessTokenMutationFn = Apollo.MutationFunction<DeleteAccessTo
  * @example
  * const [deleteAccessTokenMutation, { data, loading, error }] = useDeleteAccessTokenMutation({
  *   variables: {
- *      token: // value for 'token'
+ *      id: // value for 'id'
  *   },
  * });
  */
