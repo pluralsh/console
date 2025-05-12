@@ -9,7 +9,7 @@ import { useMemo, useRef } from 'react'
 
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { SubTab, TabList } from '@pluralsh/design-system'
+import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
@@ -41,6 +41,10 @@ const directory = [
   {
     path: 'observability',
     label: 'Observability',
+  },
+  {
+    path: 'oidc',
+    label: 'OIDC',
   },
   {
     path: 'smtp',
@@ -75,6 +79,13 @@ export function GlobalSettings() {
 
   const currentTab = directory.find((tab) =>
     pathname?.startsWith(`${GLOBAL_SETTINGS_ABS_PATH}/${tab.path}`)
+  )
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => getGlobalSettingsBreadcrumbs(currentTab?.path ?? ''),
+      [currentTab]
+    )
   )
 
   const headerContent = (

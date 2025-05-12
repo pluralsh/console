@@ -5,14 +5,17 @@ import { TRUNCATE } from '../truncate'
 import { SemanticColorKey } from '@pluralsh/design-system'
 
 type PartialType = keyof DefaultTheme['partials']['text']
+type SpacingType = keyof DefaultTheme['spacing']
 
-export const StackedTextSC = styled.div<{ $truncate?: boolean }>(
-  ({ $truncate }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    ...($truncate ? TRUNCATE : {}),
-  })
-)
+export const StackedTextSC = styled.div<{
+  $truncate?: boolean
+  $gap?: SpacingType
+}>(({ $truncate, $gap, theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  ...($gap ? { gap: theme.spacing[$gap] } : {}),
+  ...($truncate ? TRUNCATE : {}),
+}))
 const FirstSC = styled.div<{
   $truncate?: boolean
   $partialType?: PartialType
@@ -50,6 +53,7 @@ export const StackedText = memo(
     secondPartialType,
     firstColor,
     secondColor,
+    gap,
     ...props
   }: {
     first: ReactNode
@@ -59,9 +63,11 @@ export const StackedText = memo(
     secondPartialType?: PartialType
     firstColor?: SemanticColorKey
     secondColor?: SemanticColorKey
+    gap?: SpacingType
   } & ComponentProps<typeof StackedTextSC>) => (
     <StackedTextSC
       $truncate={truncate}
+      $gap={gap}
       {...props}
     >
       <FirstSC

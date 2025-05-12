@@ -39,6 +39,7 @@ fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
   git {
     folder
     ref
+    files
   }
   helm {
     chart
@@ -50,11 +51,13 @@ fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
       name
       value
     }
+    values
     valuesFiles
     version
   }
   kustomize {
     path
+    enableHelm
   }
   name
   namespace

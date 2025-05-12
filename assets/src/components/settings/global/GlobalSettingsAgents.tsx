@@ -1,4 +1,4 @@
-import { CodeEditor, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { CodeEditor } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 import { useState } from 'react'
@@ -9,20 +9,14 @@ import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 
 import { ListWrapperSC } from '../usermanagement/users/UsersList'
 
-import {
-  getGlobalSettingsBreadcrumbs,
-  useGlobalSettingsContext,
-} from './GlobalSettings'
+import { useGlobalSettingsContext } from './GlobalSettings'
 
 const INTRO_TEXT =
   '# Add any agent helm values here\n' +
   '# this will reconfigure all agents to use these default values.\n' +
   '# please double-check before modifying'
 
-const breadcrumbs = getGlobalSettingsBreadcrumbs('agents')
-
 export function GlobalSettingsAgents() {
-  useSetBreadcrumbs(breadcrumbs)
   const { deploymentSettings } = useGlobalSettingsContext()
   const intro = deploymentSettings?.agentHelmValues || INTRO_TEXT
   const [values, setValues] = useState(intro)
