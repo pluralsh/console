@@ -20,11 +20,11 @@ import {
   UserFragment,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { SetStateAction, useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
-const READONLY_COLOR = 'text-input-disabled'
+export const READONLY_COLOR = 'text-input-disabled'
 
 export function OidcCreateProviderModal({
   open,
@@ -217,28 +217,24 @@ const WrapperFormSC = styled.form(({ theme }) => ({
 }))
 
 export function UrlsInput({
-  uriFormat = 'https://{domain}/oauth2/callback',
   urls,
   setUrls,
 }: {
-  uriFormat?: string
   urls: string[]
   setUrls: (urls: string[]) => void
 }) {
-  const [value, setValue] = useState('')
-  const [scheme, path] = uriFormat.split('{domain}').filter((v) => !!v)
+  const [value, setValue] = useState<string>('')
 
   const addUrl = useCallback(() => {
-    const url = `${scheme}${value}${path}`
-
-    if (url === `${scheme}${path}` || urls.includes(url)) return
+    const url = value.trim()
+    if (!url || urls.includes(url)) return
 
     setUrls([...urls, url])
     setValue('')
-  }, [value, scheme, path, urls, setUrls])
+  }, [value, urls, setUrls])
 
   const removeUrl = useCallback(
-    (url) => setUrls(urls.filter((item) => item !== url)),
+    (url: string) => setUrls(urls.filter((item) => item !== url)),
     [setUrls, urls]
   )
 
@@ -253,11 +249,8 @@ export function UrlsInput({
       >
         <Input
           value={value}
-          prefix={scheme}
-          suffix={path}
           width="100%"
-          borderRadius="normal"
-          placeholder={uriFormat ? 'Enter a domain' : 'Enter a redirect URL'}
+          placeholder="Enter a redirect URL"
           onChange={({ target: { value } }) => setValue(value)}
         />
         <Button
@@ -290,7 +283,7 @@ export function UrlsInput({
 }
 
 function updateForm<T>(
-  setForm: (updater: SetStateAction<T>) => void,
+  setForm: (updater: Dispatch<SetStateAction<T>>) => void,
   updater: (draft: T) => void
 ) {
   setForm((prev) => produce(prev, updater))

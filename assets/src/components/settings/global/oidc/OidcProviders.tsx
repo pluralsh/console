@@ -8,8 +8,6 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
@@ -17,29 +15,23 @@ import {
   OidcProviderFragment,
   OidcProviderType,
   useDeleteOidcProviderMutation,
-  useOidcProvidersQuery,
 } from 'generated/graphql'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { OidcCreateProviderModal } from './OidcCreateProviderModal'
 
 const columnHelper = createColumnHelper<OidcProviderFragment>()
 
 export function OidcProviders({
-  setSelectedProvider,
+  providers,
+  loading,
+  setSelectedProviderId,
 }: {
-  setSelectedProvider: (provider: OidcProviderFragment | null) => void
+  providers: OidcProviderFragment[]
+  loading: boolean
+  setSelectedProviderId: (providerId: string | null) => void
 }) {
   const [showCreateModal, setShowCreateModal] = useState(false)
-
-  const { data, loading, error } = useOidcProvidersQuery({
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-  const providers = mapExistingNodes(data?.oidcProviders)
-
-  if (error) return <GqlError error={error} />
 
   return (
     <Flex
@@ -52,10 +44,10 @@ export function OidcProviders({
         rowBg="base"
         data={providers}
         columns={cols}
-        loading={loading && !data}
+        loading={loading}
         maxHeight={600}
         emptyStateProps={{ message: 'No providers found.' }}
-        onRowClick={(_, row) => setSelectedProvider?.(row.original)}
+        onRowClick={(_, row) => setSelectedProviderId(row.original.id)}
       />
       <AddNewProviderCardSC
         clickable
