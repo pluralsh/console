@@ -129,9 +129,9 @@ export const ColPorts = columnHelper.accessor((row) => row.ports, {
   cell: (props) => {
     const content = props
       .getValue()
-      ?.map((port) =>
+      ?.map((port, i) =>
         port ? (
-          <div>
+          <div key={i}>
             {port.protocol ? `${port.protocol} ` : ''}
             {port.containerPort}
           </div>

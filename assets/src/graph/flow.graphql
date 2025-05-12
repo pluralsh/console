@@ -101,6 +101,7 @@ query Flow($id: ID!) {
 query FlowServices($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
+    name
     services(first: $first, after: $after) {
       ...ServiceDeploymentsConnection
     }

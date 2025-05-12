@@ -1,14 +1,17 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
+import { useFlowQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useLocation, useMatch } from 'react-router-dom'
 import {
-  CLUSTER_ABS_PATH,
+  CD_SERVICE_PATH_MATCHER_ABS,
+  FLOW_SERVICE_PATH_MATCHER_ABS,
   SERVICE_SETTINGS_GIT_REL_PATH,
   SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
 } from 'routes/cdRoutesConsts'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
@@ -36,24 +39,37 @@ const getDirectory = ({
 const getServiceSettingsBreadcrumbs = ({
   cluster,
   service,
+  flow,
   tab,
-}: Parameters<typeof getServiceDetailsBreadcrumbs>[0] & {
-  tab: string
-}) => {
-  const detailsCrumbs = getServiceDetailsBreadcrumbs({ cluster, service })
+  type,
+}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => {
+  const detailsCrumbs = getServiceDetailsBreadcrumbs({
+    type,
+    cluster,
+    service,
+    flow,
+  })
   const detailsUrl = detailsCrumbs.at(-1)?.url
   return [
     ...detailsCrumbs,
     { label: 'settings', url: `${detailsUrl}/settings` },
-    { label: tab, url: `${detailsUrl}/settings/${tab}` },
+    { label: tab ?? '', url: `${detailsUrl}/settings/${tab}` },
   ]
 }
 
 export function ServiceSettings() {
   const ctx = useServiceContext()
-  const { clusterId, serviceId, tab } =
-    useMatch(`${CLUSTER_ABS_PATH}/services/:serviceId/settings/:tab/*`)
-      ?.params ?? {}
+  const referrer = useLocation().pathname.includes(FLOWS_ABS_PATH)
+    ? 'flow'
+    : 'cd'
+  const { serviceId, tab, flowId } =
+    useMatch(
+      `${referrer === 'cd' ? CD_SERVICE_PATH_MATCHER_ABS : FLOW_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
+    )?.params ?? {}
+  const { data: flowData } = useFlowQuery({
+    variables: { id: flowId ?? '' },
+    skip: !flowId,
+  })
 
   const directory = useMemo(() => {
     const hasGitRepo = !!ctx.service.repository
@@ -65,11 +81,13 @@ export function ServiceSettings() {
   const breadcrumbs = useMemo(
     () =>
       getServiceSettingsBreadcrumbs({
-        cluster: ctx?.service?.cluster ?? { id: clusterId ?? '' },
+        type: referrer,
+        cluster: ctx?.service?.cluster,
         service: ctx?.service ?? { id: serviceId ?? '' },
+        flow: flowData?.flow,
         tab: tab ?? '',
       }),
-    [clusterId, ctx?.service, serviceId, tab]
+    [ctx?.service, flowData?.flow, referrer, serviceId, tab]
   )
   useSetBreadcrumbs(breadcrumbs)
 

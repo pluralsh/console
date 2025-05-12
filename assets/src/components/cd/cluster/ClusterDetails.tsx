@@ -9,16 +9,16 @@ import {
 import {
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
-  CLUSTER_PODS_PATH,
   CLUSTER_PRS_REL_PATH,
   getClusterDetailsPath,
+  PODS_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { ClusterContextType } from './Cluster'
 
 export const CLUSTER_DETAILS_TABS = {
   [CLUSTER_METADATA_PATH]: 'Metadata',
   [CLUSTER_NODES_PATH]: 'Nodes',
-  [CLUSTER_PODS_PATH]: 'Pods',
+  [PODS_REL_PATH]: 'Pods',
   [CLUSTER_PRS_REL_PATH]: 'PRs',
 } as const
 

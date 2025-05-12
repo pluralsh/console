@@ -1,3 +1,5 @@
+import { FLOW_ABS_PATH, getFlowDetailsPath } from './flowRoutesConsts'
+
 function encodeSlashes(str: string) {
   return str.replaceAll('/', '%2F')
 }
@@ -28,7 +30,6 @@ export const CLUSTER_METRICS_PATH = 'metrics' as const
 export const CLUSTER_DETAILS_PATH = 'details' as const
 export const CLUSTER_NETWORK_PATH = 'network' as const
 export const CLUSTER_NODES_PATH = 'nodes' as const
-export const CLUSTER_PODS_PATH = 'pods' as const
 export const CLUSTER_INSIGHTS_PATH = 'insights' as const
 export const CLUSTER_INSIGHTS_SUMMARY_PATH = '' as const
 export const CLUSTER_INSIGHTS_COMPONENTS_PATH = 'components' as const
@@ -58,62 +59,25 @@ export const NODE_ABS_PATH = getNodeDetailsPath({
   name: `:${NODE_PARAM_NAME}`,
 })
 
-export const POD_PARAM_NAME = 'name' as const
-export const POD_PARAM_NAMESPACE = 'namespace' as const
-export const POD_PARAM_CLUSTER = 'clusterId' as const
-export const POD_REL_PATH = getPodDetailsPath({
-  isRelative: true,
-  clusterId: `:${POD_PARAM_CLUSTER}`,
-  name: `:${POD_PARAM_NAME}`,
-  namespace: `:${POD_PARAM_NAMESPACE}`,
-})
-export const POD_ABS_PATH = getPodDetailsPath({
-  clusterId: `:${POD_PARAM_CLUSTER}`,
-  name: `:${POD_PARAM_NAME}`,
-  namespace: `:${POD_PARAM_NAMESPACE}`,
-})
-
-export const SERVICE_PODS_PATH = 'pods' as const
-export const SERVICE_POD_PARAM_NAME = 'name' as const
-export const SERVICE_POD_PARAM_NAMESPACE = 'namespace' as const
-export const SERVICE_POD_PARAM_SERVICE = 'serviceId' as const
-export const SERVICE_POD_PARAM_CLUSTER = 'clusterId' as const
-export const SERVICE_POD_REL_PATH = getServicePodDetailsPath({
-  isRelative: true,
-  clusterId: `:${SERVICE_POD_PARAM_CLUSTER}`,
-  serviceId: `:${SERVICE_POD_PARAM_SERVICE}`,
-  name: `:${SERVICE_POD_PARAM_NAME}`,
-  namespace: `:${SERVICE_POD_PARAM_NAMESPACE}`,
-})
-export const SERVICE_POD_ABS_PATH = getServicePodDetailsPath({
-  clusterId: `:${SERVICE_POD_PARAM_CLUSTER}`,
-  serviceId: `:${SERVICE_POD_PARAM_SERVICE}`,
-  name: `:${SERVICE_POD_PARAM_NAME}`,
-  namespace: `:${SERVICE_POD_PARAM_NAMESPACE}`,
-})
-
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
-export const SERVICE_REL_PATH = getServiceDetailsPath({
+export const CD_SERVICE_REL_PATH = getServiceDetailsPath({
+  type: 'cd',
   isRelative: true,
   clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
 })
-export const SERVICE_ABS_PATH = getServiceDetailsPath({
-  clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
-  serviceId: `:${SERVICE_PARAM_ID}`,
-})
+export const CD_SERVICE_PATH_MATCHER_ABS =
+  `${CLUSTER_ABS_PATH}/${SERVICES_REL_PATH}/:${SERVICE_PARAM_ID}` as const
+export const FLOW_SERVICE_PATH_MATCHER_ABS =
+  `${FLOW_ABS_PATH}/${SERVICES_REL_PATH}/:${SERVICE_PARAM_ID}` as const
+
 export const SERVICE_COMPONENTS_PATH = 'components'
 export const SERVICE_PRS_PATH = 'prs'
 
 export const COMPONENT_PARAM_ID = `componentId` as const
-export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
-  isRelative: true,
-  clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
-  serviceId: `:${SERVICE_PARAM_ID}`,
-  componentId: `:${COMPONENT_PARAM_ID}`,
-})
-export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_ABS_PATH}/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
+export const CD_SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_SERVICE_PATH_MATCHER_ABS}/${SERVICE_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`
+export const FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS = `${FLOW_SERVICE_PATH_MATCHER_ABS}/${SERVICE_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`
 
 export const GLOBAL_SERVICES_REL_PATH = 'globalservices'
 export const GLOBAL_SERVICE_PARAM_ID = 'globalServiceId' as const
@@ -126,6 +90,11 @@ export const NAMESPACES_PARAM_ID = 'namespaceId' as const
 export const NAMESPACE_INFO_PATH = 'info' as const
 export const NAMESPACE_SERVICES_PATH = 'services' as const
 
+export const PODS_REL_PATH = 'pods' as const
+export const POD_PARAM_NAME = 'name' as const
+export const POD_PARAM_NAMESPACE = 'namespace' as const
+export const POD_PARAM_CLUSTER = 'clusterId' as const
+
 export const ALERT_INSIGHT_REL_PATH =
   `${CLUSTER_ALERTS_REL_PATH}/insight/:insightId` as const
 
@@ -133,7 +102,7 @@ export function getClusterDetailsPath({
   clusterId,
   isRelative = false,
 }: {
-  clusterId: string | null | undefined
+  clusterId?: Nullable<string>
   isRelative?: boolean
 }) {
   return `${
@@ -142,28 +111,30 @@ export function getClusterDetailsPath({
 }
 
 export function getServiceDetailsPath({
+  type = 'cd',
   clusterId,
   serviceId,
+  flowId,
   isRelative = false,
 }: Parameters<typeof getClusterDetailsPath>[0] & {
-  serviceId: string | null | undefined
+  type?: 'cd' | 'flow'
+  serviceId: Nullable<string>
+  flowId?: Nullable<string>
 }) {
-  return `${getClusterDetailsPath({
-    clusterId,
-    isRelative,
-  })}/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
+  return `${
+    type === 'cd'
+      ? getClusterDetailsPath({ clusterId, isRelative })
+      : getFlowDetailsPath({ flowId })
+  }/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
 }
 
 export function getServiceSettingsPath({
-  clusterId,
-  serviceId,
   subTab,
-  isRelative = false,
-}: Parameters<typeof getClusterDetailsPath>[0] & {
+  ...props
+}: Parameters<typeof getServiceDetailsPath>[0] & {
   subTab: string
-  serviceId: string | null | undefined
 }) {
-  return `${getServiceDetailsPath({ clusterId, serviceId, isRelative })}/settings/${subTab}`
+  return `${getServiceDetailsPath({ ...props })}/settings/${subTab}`
 }
 
 export function getGlobalServiceDetailsPath({
@@ -227,47 +198,46 @@ export function getNodeDetailsPath({
 }
 
 export function getPodDetailsPath({
-  clusterId,
-  name,
-  namespace,
-  isRelative = false,
-}: {
-  clusterId: string | null | undefined
-  name?: string | null
-  namespace?: string | null
-  isRelative?: boolean
-}) {
-  let path = isRelative ? '' : `${CD_ABS_PATH}/`
-
-  path += `${CLUSTERS_REL_PATH}/${clusterId}/${CLUSTER_PODS_PATH}`
-
-  if (namespace) {
-    path += `/${namespace}`
-  }
-
-  if (name) {
-    path += `/${name}`
-  }
-
-  return path
-}
-
-export function getServicePodDetailsPath({
+  type = 'cluster',
   clusterId,
   serviceId,
+  flowId,
   name,
   namespace,
   isRelative = false,
 }: {
-  clusterId: string | null | undefined
-  serviceId: string | null | undefined
-  name?: string | null
-  namespace?: string | null
+  type: 'cluster' | 'service' | 'flow'
+  clusterId?: Nullable<string>
+  serviceId?: Nullable<string>
+  flowId?: Nullable<string>
+  name?: Nullable<string>
+  namespace?: Nullable<string>
   isRelative?: boolean
 }) {
-  let path = getServiceDetailsPath({ serviceId, clusterId, isRelative })
+  let path = ''
+  switch (type) {
+    case 'cluster':
+      path = `${getClusterDetailsPath({ clusterId, isRelative })}`
+      break
+    case 'service':
+      path = getServiceDetailsPath({
+        type: 'cd',
+        clusterId,
+        serviceId,
+        isRelative,
+      })
+      break
+    case 'flow':
+      path = getServiceDetailsPath({
+        type: 'flow',
+        serviceId,
+        flowId,
+        isRelative,
+      })
+      break
+  }
 
-  path += `/${SERVICE_PODS_PATH}`
+  path += `/${PODS_REL_PATH}`
 
   if (namespace) {
     path += `/${namespace}`

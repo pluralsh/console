@@ -250,6 +250,7 @@ export default function ClusterPods() {
           onVirtualSliceChange={setVirtualSlice}
           refetch={refetch}
           linkBasePath={getPodDetailsPath({
+            type: 'cluster',
             clusterId,
             isRelative: false,
           })}

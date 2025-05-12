@@ -4,32 +4,32 @@ import {
   Modal,
   Tooltip,
 } from '@pluralsh/design-system'
-import { ComponentProps, useState } from 'react'
-import { type NodeProps, Position, type Node } from '@xyflow/react'
-import { useTheme } from 'styled-components'
+import { Position, type Node, type NodeProps } from '@xyflow/react'
 import isEmpty from 'lodash/isEmpty'
+import { ComponentProps, useState } from 'react'
+import { useTheme } from 'styled-components'
 
-import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
+import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { TRUNCATE } from 'components/utils/truncate'
 
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
 } from 'routes/kubernetesRoutesConsts'
-import { CLUSTER_PARAM_ID } from 'routes/cdRoutesConsts'
 
-import { RawYaml } from '../ComponentRaw'
-import { NodeBaseCardSC, NodeHandleSC } from '../../utils/reactflow/nodes'
 import { ComponentIcon } from '../../cd/services/service/component/misc.tsx'
+import { NodeBaseCardSC, NodeHandleSC } from '../../utils/reactflow/nodes'
+import { ComponentDetailsContext } from '../ComponentDetails.tsx'
+import { RawYaml } from '../ComponentRaw'
 
 type ComponentNode = Node<TreeNodeMeta>
 
 export function ComponentTreeNode({ id, data }: NodeProps<ComponentNode>) {
   const theme = useTheme()
-  const clusterId = useParams()[CLUSTER_PARAM_ID]
+  const { cluster } = useOutletContext<ComponentDetailsContext>()
   const [open, setOpen] = useState(false)
   const { incomers, outgoers } = useNodeEdges(id)
   const kind = data?.kind?.toLowerCase()
@@ -43,12 +43,12 @@ export function ComponentTreeNode({ id, data }: NodeProps<ComponentNode>) {
   const dashboardUrl =
     kind === 'certificate'
       ? getCustomResourceDetailsAbsPath(
-          clusterId,
+          cluster?.id,
           'certificates.cert-manager.io',
           name,
           namespace
         )
-      : getResourceDetailsAbsPath(clusterId, kind, name, namespace)
+      : getResourceDetailsAbsPath(cluster?.id, kind, name, namespace)
 
   return (
     <NodeBaseCardSC
@@ -140,9 +140,7 @@ export function ComponentTreeNode({ id, data }: NodeProps<ComponentNode>) {
         to={dashboardUrl}
         icon={<ArrowTopRightIcon />}
         tooltip="View details on K8s dashboard"
-        tooltipProps={{
-          placement: 'right',
-        }}
+        tooltipProps={{ placement: 'right' }}
       />
       <NodeHandleSC
         type="source"

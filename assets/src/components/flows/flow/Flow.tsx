@@ -37,7 +37,7 @@ const directory: SubtabDirectory = [
   { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
 ]
 
-const getBreadcrumbs = (
+export const getFlowBreadcrumbs = (
   flowId: string = '',
   flowName: string = '',
   tab: string = ''
@@ -62,7 +62,7 @@ export function Flow() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => getBreadcrumbs(flowId, flow?.name || '', tab),
+      () => getFlowBreadcrumbs(flowId, flow?.name || '', tab),
       [flowId, flow, tab]
     )
   )

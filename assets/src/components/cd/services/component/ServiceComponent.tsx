@@ -4,14 +4,13 @@ import { useParams } from 'react-router-dom'
 
 import {
   ServiceDeploymentComponentFragment,
+  useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
 
 import {
-  COMPONENT_PARAM_ID,
-  SERVICE_COMPONENT_PATH_MATCHER_ABS,
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
+  CD_SERVICE_COMPONENT_PATH_MATCHER_ABS,
+  FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS,
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
 
@@ -29,30 +28,39 @@ const getServiceComponentBreadcrumbs = ({
   service,
   componentName,
   componentId,
+  ...props
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0] & {
   componentName: string | null | undefined
   componentId: string | null | undefined
 }) => [
-  ...getServiceDetailsBreadcrumbs({ cluster, service, tab: 'components' }),
+  ...getServiceDetailsBreadcrumbs({
+    cluster,
+    service,
+    tab: 'components',
+    ...props,
+  }),
   {
     label: componentName || componentId || '',
     url: getServiceComponentPath({
       clusterId: cluster?.id,
       serviceId: service?.id,
       componentId,
+      ...props,
     }),
   },
 ]
 
-export default function ServiceComponent() {
-  const params = useParams()
-  const componentId = params[COMPONENT_PARAM_ID]
-  const clusterId = params[SERVICE_PARAM_CLUSTER_ID]!
-  const serviceId = params[SERVICE_PARAM_ID]!
+export function ServiceComponent() {
+  const { componentId, clusterId, serviceId, flowId } = useParams()
+  const referrer = flowId ? 'flow' : 'cd'
 
   const settings = useDeploymentSettings()
   const { data, loading, error } = useServiceDeploymentQuery({
     variables: { id: serviceId || '' },
+  })
+  const { data: flowData } = useFlowQuery({
+    variables: { id: flowId || '' },
+    skip: !flowId,
   })
 
   const serviceDeployment = data?.serviceDeployment
@@ -71,12 +79,22 @@ export default function ServiceComponent() {
     useMemo(
       () =>
         getServiceComponentBreadcrumbs({
-          cluster: serviceDeployment?.cluster || { id: serviceId },
-          service: serviceDeployment || { id: clusterId },
+          type: referrer,
+          cluster: serviceDeployment?.cluster || { id: clusterId ?? '' },
+          service: serviceDeployment || { id: serviceId ?? '' },
+          flow: flowData?.flow,
           componentId,
           componentName,
         }),
-      [serviceDeployment, serviceId, clusterId, componentId, componentName]
+      [
+        referrer,
+        serviceDeployment,
+        clusterId,
+        serviceId,
+        flowData?.flow,
+        componentId,
+        componentName,
+      ]
     )
   )
 
@@ -90,7 +108,11 @@ export default function ServiceComponent() {
       serviceComponents={components}
       service={data?.serviceDeployment}
       hasPrometheus={!!settings?.prometheusConnection}
-      pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
+      pathMatchString={
+        referrer === 'flow'
+          ? FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS
+          : CD_SERVICE_COMPONENT_PATH_MATCHER_ABS
+      }
     />
   )
 }

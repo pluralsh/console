@@ -1,25 +1,19 @@
-import {
-  useNavigate,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Pod } from 'generated/graphql'
-import { useTheme } from 'styled-components'
-import { Key, useEffect, useMemo, useRef, useState } from 'react'
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { Pod, useServiceDeploymentTinyQuery } from 'generated/graphql'
+import { useMemo, useRef } from 'react'
+import { useTheme } from 'styled-components'
 
-import { ShellContext, TerminalActions } from '../../../terminal/Terminal'
+import { Key } from '@react-types/shared'
 import { ShellWithContext } from '../../../cluster/containers/ContainerShell'
-import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
+import { ShellContext, TerminalActions } from '../../../terminal/Terminal'
 
-// It's used by multiple routes.
 export default function PodShell() {
   const { pod } = useOutletContext() as { pod: Pod }
-  const { clusterId, serviceId, namespace, name } = useParams()
-  const [searchParams] = useSearchParams()
+  const { serviceId } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const container = searchParams.get('container')
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
@@ -28,7 +22,6 @@ export default function PodShell() {
   }
 
   const theme = useTheme()
-  const navigate = useNavigate()
   const containers: Array<string> = useMemo(
     () => [
       ...(pod.spec?.initContainers?.map((c) => c!.name!) ?? []),
@@ -36,26 +29,12 @@ export default function PodShell() {
     ],
     [pod]
   )
-  const [selected, setSelected] = useState<Key>(
-    container ?? (containers.at(0) as Key)
-  )
 
-  useEffect(() => {
-    if (serviceId) {
-      navigate(
-        `${getServicePodDetailsPath({
-          clusterId,
-          serviceId,
-          name,
-          namespace,
-        })}/shell?container=${selected}`
-      )
-    } else {
-      navigate(
-        `/cd/clusters/${clusterId}/pods/${namespace}/${name}/shell?container=${selected}`
-      )
-    }
-  }, [selected, serviceId, clusterId, namespace, name, container, navigate])
+  const { data: serviceData } = useServiceDeploymentTinyQuery({
+    variables: { id: serviceId ?? '' },
+    skip: !serviceId,
+  })
+  const clusterId = serviceData?.serviceDeployment?.cluster?.id
 
   return (
     <ScrollablePage
@@ -71,10 +50,11 @@ export default function PodShell() {
         }}
       >
         <FormField label="Container">
-          {/* @ts-ignore */}
           <Select
-            selectedKey={selected}
-            onSelectionChange={(key) => setSelected(key)}
+            selectedKey={container ?? (containers.at(0) as Key)}
+            onSelectionChange={(key) =>
+              setSearchParams({ container: `${key}` })
+            }
           >
             {containers.map((c) => (
               <ListBoxItem
@@ -89,7 +69,7 @@ export default function PodShell() {
             clusterId={clusterId}
             name={pod.metadata.name}
             namespace={pod.metadata.namespace || ''}
-            container={(selected as string) || ''}
+            container={container ?? ''}
           />
         </ShellContext.Provider>
       </div>

@@ -88,6 +88,7 @@ export default function NodeInfo() {
           pods={pods}
           refetch={refetch}
           linkBasePath={getPodDetailsPath({
+            type: 'cluster',
             clusterId,
             isRelative: false,
           })}
