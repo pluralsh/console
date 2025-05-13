@@ -15,7 +15,7 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: MCP Server ID
+    - description: Compliance Report Generator ID
       jsonPath: .status.id
       name: ID
       type: string

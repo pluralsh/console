@@ -21,7 +21,7 @@ type ComplianceReportGeneratorList struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="MCP Server ID"
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="Compliance Report Generator ID"
 
 type ComplianceReportGenerator struct {
 	metav1.TypeMeta   `json:",inline"`
