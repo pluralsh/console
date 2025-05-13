@@ -14,10 +14,11 @@ defmodule Console.Deployments.Git.Cache do
 
   defmodule Line do
     @expiry [minutes: -10]
-    defstruct [:file, :sha, :digest, :touched, :message]
+    defstruct [:key, :file, :sha, :digest, :touched, :message]
 
-    def new(file, sha, message) do
+    def new(key, file, sha, message) do
       %__MODULE__{
+        key: key,
         file: file,
         digest: Console.sha_file(file),
         sha: sha,
@@ -57,6 +58,17 @@ defmodule Console.Deployments.Git.Cache do
     %__MODULE__{git: git, dir: dir}
   end
 
+  def get(%__MODULE__{} = cache, %Git{ref: ref, folder: folder, files: [_ | _] = files}),
+    do: get(cache, ref, folder, files)
+  def get(%__MODULE__{} = cache, %Git{ref: ref, folder: folder}), do: get(cache, ref, folder)
+
+  def get(cache, ref, path, filter \\ fn _ -> true end)
+  def get(%__MODULE__{heads: %{}} = cache, ref, path, filter) do
+    with {:ok, sha} <- commit(cache, ref),
+      do: get_commit(cache, sha, path, filter)
+  end
+  def get(_, _, _, _), do: {:error, :not_found}
+
   def fetch(%__MODULE__{} = cache, %Git{ref: ref, folder: folder, files: [_ | _] = files}),
     do: fetch(cache, ref, folder, files)
   def fetch(%__MODULE__{} = cache, %Git{ref: ref, folder: folder}), do: fetch(cache, ref, folder)
@@ -86,7 +98,22 @@ defmodule Console.Deployments.Git.Cache do
     cache_key = cache_key(sha, path, filter)
     case Map.get(cache, cache_key) do
       %Line{} = l -> {:ok, Line.touch(l)}
-      _ -> new_line(c, g, sha, path, filter)
+      _ -> new_line(c, cache_key, g, sha, path, filter)
+    end
+  end
+
+  defp get_commit(%__MODULE__{cache: cache}, sha, path, filter) do
+    cache_key = cache_key(sha, path, filter)
+    case Map.get(cache, cache_key) do
+      %Line{} = l -> {:ok, l}
+      _ -> {:error, :not_found}
+    end
+  end
+
+  def touch(%__MODULE__{cache: c} = cache, %Line{key: key}) do
+    case Map.get(c, key) do
+      %Line{} = l -> put_in(cache.cache[key], Line.touch(l))
+      _ -> cache
     end
   end
 
@@ -126,11 +153,11 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  defp new_line(cache, repo, sha, path, filter) do
+  defp new_line(cache, key, repo, sha, path, filter) do
     with {:ok, _} <- git(repo, "checkout", ["-f", sha]),
          {:ok, msg} <- msg(repo),
          {:ok, f} <- tarball(cache, sha, path, filter),
-      do: {:ok, Line.new(f, sha, msg)}
+      do: {:ok, Line.new(key, f, sha, msg)}
   end
 
   defp find_head(heads, ref) do

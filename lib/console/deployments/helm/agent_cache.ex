@@ -47,6 +47,13 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
+  def get(%__MODULE__{cache: lines}, chart, vsn) do
+    case lines[{chart, vsn}] do
+      %Line{} = l -> {:ok, l}
+      nil -> {:error, :not_found}
+    end
+  end
+
   def fetch(%__MODULE__{index: nil} = cache, chart, vsn) do
     with {:ok, cache} <- refresh(cache),
       do: fetch(cache, chart, vsn)
@@ -58,6 +65,9 @@ defmodule Console.Deployments.Helm.AgentCache do
       nil -> write(cache, chart, vsn)
     end
   end
+
+  def touch(%__MODULE__{} = cache, %Line{} = line),
+    do: put_in(cache.cache[{line.chart, line.vsn}], Line.touch(line))
 
   def write(%__MODULE__{client: client} = cache, chart, vsn) do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")

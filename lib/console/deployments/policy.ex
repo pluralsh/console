@@ -113,7 +113,7 @@ defmodule Console.Deployments.Policy do
   @spec upsert_compliance_report_generator(map, User.t) :: generator_resp
   def upsert_compliance_report_generator(%{name: name} = attrs, %User{} = user) do
     case get_report_generator_by_name(name) do
-      %ComplianceReportGenerator{} = generator -> generator
+      %ComplianceReportGenerator{} = generator -> Repo.preload(generator, [:read_bindings])
       nil -> %ComplianceReportGenerator{}
     end
     |> ComplianceReportGenerator.changeset(attrs)

@@ -37,15 +37,9 @@ spec:
       {{ toYaml .Values.console.securityContext | nindent 8 }}
       {{ end }}
       terminationGracePeriodSeconds: {{ .Values.shutdownDelay }}
-      {{ if .Values.cliContainer.enabled }}
+      {{ if .Values.initContainers }}
       initContainers:
-      - name: cli-override
-        image: {{ .Values.cliContainer.image.repository }}:{{ .Values.cliContainer.image.tag }}
-        imagePullPolicy: IfNotPresent
-        command: [ "/bin/sh", "-c", "cp /go/bin/plural /shared/plural"]
-        volumeMounts:
-          - name: cli-override
-            mountPath: /shared
+      {{ toYaml .Values.initContainers | nindent 6 }}
       {{- end }}
       containers:
       {{ if .Values.console.additionalContainers }}
