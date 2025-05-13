@@ -17,7 +17,7 @@ import {
   useFetchPaginatedData,
 } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
-import { CreatePolicyReportButton } from '../policies/CreatePolicyReportModal.tsx'
+import { CreateComplianceReportButton } from './CreateComplianceReportModal.tsx'
 import { useMemo } from 'react'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment.tsx'
 
@@ -65,7 +65,7 @@ export function ComplianceReports() {
   const header = useMemo(
     () => (
       <Flex>
-        <CreatePolicyReportButton />
+        <CreateComplianceReportButton />
       </Flex>
     ),
     []
