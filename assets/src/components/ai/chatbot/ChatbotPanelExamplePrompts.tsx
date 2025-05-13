@@ -6,9 +6,10 @@ import {
   MinusIcon,
   PlusIcon,
 } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useRef, useState } from 'react'
 import chroma from 'chroma-js'
 import prompts from './prompts.json'
+import { useClickOutside } from '@react-hooks-library/core'
 
 const PROMPTS_LIMIT = 3
 
@@ -95,6 +96,9 @@ export function ChatbotPanelExamplePrompts({
   const theme = useTheme()
   const hasMorePrompts = prompts.length > PROMPTS_LIMIT
   const [showAll, setShowAll] = useState(!hasMorePrompts)
+  const ref = useRef<any>(null)
+
+  useClickOutside(ref, () => setShowPrompts(false))
 
   return (
     <div
@@ -115,29 +119,36 @@ export function ChatbotPanelExamplePrompts({
         css={{
           backdropFilter: 'blur(12px)',
           borderTop: `1px solid ${chroma(theme.colors['border-fill-two']).alpha(0.1).hex()}`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.xsmall,
-          padding: theme.spacing.medium,
         }}
       >
-        {(showAll ? prompts : prompts.slice(0, PROMPTS_LIMIT)).map((p, i) => (
-          <Prompt
-            key={i}
-            onClick={() => {
-              sendMessage(p)
-              setShowPrompts(false)
-            }}
-          >
-            {p}
-          </Prompt>
-        ))}
-        {hasMorePrompts && (
-          <PromptsControl
-            showAll={showAll}
-            setShowAll={setShowAll}
-          />
-        )}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xsmall,
+            padding: theme.spacing.medium,
+            width: 'max-content',
+          }}
+          ref={ref}
+        >
+          {(showAll ? prompts : prompts.slice(0, PROMPTS_LIMIT)).map((p, i) => (
+            <Prompt
+              key={i}
+              onClick={() => {
+                sendMessage(p)
+                setShowPrompts(false)
+              }}
+            >
+              {p}
+            </Prompt>
+          ))}
+          {hasMorePrompts && (
+            <PromptsControl
+              showAll={showAll}
+              setShowAll={setShowAll}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
