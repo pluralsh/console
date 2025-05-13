@@ -22,7 +22,14 @@ const fetchPolicyReport = (format: ReportFormat, token: string) => {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
   }).then((res) => {
-    const writeStream = streamSaver.createWriteStream('report.zip')
+    const filename =
+      res.headers
+        ?.get('content-disposition')
+        ?.split(';')
+        ?.find((n) => n.includes('filename='))
+        ?.replace('filename=', '')
+        ?.trim() ?? 'report.zip'
+    const writeStream = streamSaver.createWriteStream(filename)
     return res.body?.pipeTo(writeStream)
   })
 }
