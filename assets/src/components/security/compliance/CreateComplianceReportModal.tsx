@@ -31,7 +31,7 @@ const fetchPolicyReport = (format: ReportFormat, token: string) => {
   })
 }
 
-export function CreatePolicyReportModal({
+export function CreateComplianceReportModal({
   open,
   onClose,
 }: {
@@ -56,7 +56,7 @@ export function CreatePolicyReportModal({
       onClose={onClose}
       asForm
       onSubmit={onSubmit}
-      header="Create policy report"
+      header="Create compliance report"
       actions={
         <div
           css={{
@@ -69,7 +69,7 @@ export function CreatePolicyReportModal({
             primary
             type="submit"
           >
-            Create policy report
+            Create compliance report
           </Button>
           <Button
             secondary
@@ -100,7 +100,7 @@ export function CreatePolicyReportModal({
   )
 }
 
-export function CreatePolicyReportButton() {
+export function CreateComplianceReportButton() {
   const [open, setOpen] = useState(false)
 
   return (
@@ -112,7 +112,7 @@ export function CreatePolicyReportButton() {
         Create report
       </Button>
       <ModalMountTransition open={open}>
-        <CreatePolicyReportModal
+        <CreateComplianceReportModal
           open={open}
           onClose={() => setOpen(false)}
         />
