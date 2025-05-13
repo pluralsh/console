@@ -36,13 +36,24 @@ fragment GlobalService on GlobalService {
 
 fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
   contexts
+  dependencies {
+    id
+    name
+    status
+  }
   git {
     folder
     ref
-    files
   }
   helm {
     chart
+    git {
+      folder
+      ref
+    }
+    ignoreCrds
+    ignoreHooks
+    release
     repository {
       name
       namespace
@@ -51,6 +62,7 @@ fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
       name
       value
     }
+    url
     values
     valuesFiles
     version
@@ -67,6 +79,7 @@ fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
   repositoryId
   syncConfig {
     createNamespace
+    enforceNamespace
     namespaceMetadata {
       annotations
       labels

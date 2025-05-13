@@ -6,15 +6,15 @@ import {
   useLocation,
   useMatch,
   useOutletContext,
+  useParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
+  useFlowQuery,
   useServiceDeploymentQuery,
-  useServiceDeploymentsTinyQuery,
 } from 'generated/graphql'
-import { mapExistingNodes } from 'utils/graphql'
 
 import {
   DocPageContextProvider,
@@ -28,12 +28,12 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
-  CLUSTER_ABS_PATH,
-  SERVICE_COMPONENTS_PATH,
-  SERVICE_PARAM_ID,
-  SERVICE_PRS_PATH,
+  CD_SERVICE_PATH_MATCHER_ABS,
+  FLOW_SERVICE_PATH_MATCHER_ABS,
   getClusterDetailsPath,
   getServiceDetailsPath,
+  SERVICE_COMPONENTS_PATH,
+  SERVICE_PRS_PATH,
 } from 'routes/cdRoutesConsts'
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
@@ -47,53 +47,12 @@ import {
 
 import FractionalChip from 'components/utils/FractionalChip'
 
-import ServiceSelector from '../ServiceSelector'
+import { ServiceSelector } from '../ServiceSelector'
 
-import { useProjectId } from '../../../contexts/ProjectsContext'
-
+import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
-
-// function getDocsData(
-//   docs:
-//     | (Pick<FileContent, 'content' | 'path'> | null | undefined)[]
-//     | null
-//     | undefined
-// ) {
-//   return docs?.map((doc, i) => {
-//     const content = getMdContent(doc?.content, config)
-//     const headings = collectHeadings(content)
-//     const id = headings?.[0]?.id || `page-${i}`
-//     const label = headings?.[0]?.title || `Page ${i}`
-//     const path = `docs/${id}`
-
-//     const subpaths = headings
-//       .map((heading) => {
-//         if (heading.level === 3 && heading.id && heading.title) {
-//           return {
-//             path: `${path}#${heading.id}`,
-//             label: `${heading.title}`,
-//             id: heading.id,
-//             type: 'docPageHash',
-//           }
-//         }
-
-//         return null
-//       })
-//       .filter((heading) => !!heading)
-
-//     return {
-//       path,
-//       id,
-//       label,
-//       subpaths,
-//       content,
-//       headings,
-//       type: 'docPage',
-//     }
-//   })
-// }
 
 type ServiceContextType = {
   service: ServiceDeploymentDetailsFragment
@@ -106,26 +65,33 @@ export const useServiceContext = () => useOutletContext<ServiceContextType>()
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
   service,
+  flow,
   tab,
 }: Parameters<typeof getClusterBreadcrumbs>[0] & {
   service: { name?: Nullable<string>; id: string }
+  flow?: Nullable<{ name?: Nullable<string>; id: string }>
   tab?: string
 }) => {
   const pathPrefix = getServiceDetailsPath({
     clusterId: cluster?.id,
     serviceId: service?.id,
+    flowId: flow?.id,
   })
   return [
-    ...getClusterBreadcrumbs({ cluster }),
-    {
-      label: 'services',
-      url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
-    },
-    ...(service?.id && cluster?.id
+    ...(flow?.id
+      ? getFlowBreadcrumbs(flow?.id, flow?.name ?? '', 'services')
+      : [
+          ...getClusterBreadcrumbs({ cluster }),
+          {
+            label: 'services',
+            url: `${getClusterDetailsPath({ clusterId: cluster?.id })}/services`,
+          },
+        ]),
+    ...(service?.id
       ? [{ label: service?.name || service?.id, url: pathPrefix }]
       : []),
-    ...(service?.id && cluster?.id && tab
-      ? [{ label: tab, url: `${pathPrefix}/${tab}` }]
+    ...(service?.id && tab
+      ? [{ label: tab, ...(tab !== 'pods' && { url: `${pathPrefix}/${tab}` }) }]
       : []),
   ]
 }
@@ -257,25 +223,11 @@ export const getDirectory = ({
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const projectId = useProjectId()
-  const { clusterId, serviceId, tab } =
-    useMatch(`${CLUSTER_ABS_PATH}/services/:${SERVICE_PARAM_ID}/:tab?/*`)
-      ?.params ?? {}
-
-  const pathPrefix = getServiceDetailsPath({ clusterId, serviceId })
-  const docPageContext = useDocPageContext()
-  const logsEnabled = useLogsEnabled()
-  const metricsEnabled = useMetricsEnabled()
-
-  const { data: serviceListData } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId, projectId },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-  const serviceList = useMemo(
-    () => mapExistingNodes(serviceListData?.serviceDeployments),
-    [serviceListData?.serviceDeployments]
-  )
+  const { serviceId, flowId } = useParams()
+  const { tab } =
+    useMatch(
+      `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
+    )?.params ?? {}
 
   const {
     data: serviceData,
@@ -289,6 +241,22 @@ function ServiceDetailsBase() {
     errorPolicy: 'all',
   })
   const { serviceDeployment } = serviceData || {}
+  const clusterId = serviceDeployment?.cluster?.id
+
+  const { data: flowData } = useFlowQuery({
+    variables: { id: flowId ?? '' },
+    skip: !flowId,
+  })
+
+  const pathPrefix = getServiceDetailsPath({
+    flowId,
+    clusterId,
+    serviceId,
+  })
+  const docPageContext = useDocPageContext()
+  const logsEnabled = useLogsEnabled()
+  const metricsEnabled = useMetricsEnabled()
+
   // const docs = useMemo(
   //   () => getDocsData(serviceData?.serviceDeployment?.docs),
   //   [serviceData?.serviceDeployment?.docs]
@@ -313,10 +281,11 @@ function ServiceDetailsBase() {
         ...getServiceDetailsBreadcrumbs({
           cluster: serviceDeployment?.cluster ?? { id: clusterId ?? '' },
           service: serviceDeployment ?? { id: serviceId ?? '' },
+          flow: flowData?.flow,
           tab,
         }),
       ],
-      [clusterId, serviceDeployment, serviceId, tab]
+      [clusterId, flowData?.flow, serviceDeployment, serviceId, tab]
     )
   )
 
@@ -332,9 +301,7 @@ function ServiceDetailsBase() {
             maxHeight: '100%',
           }}
         >
-          {serviceList?.length > 1 && (
-            <ServiceSelector serviceDeployments={serviceList} />
-          )}
+          <ServiceSelector currentService={serviceDeployment} />
           <div
             css={{
               overflowY: 'auto',

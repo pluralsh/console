@@ -16,6 +16,11 @@ import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOW_PARAM_ID,
 } from './flowRoutesConsts.tsx'
+import {
+  getComponentRoutes,
+  getPodDetailsRoutes,
+  getServiceDetailsRoutes,
+} from './cdRoutes.tsx'
 
 export const flowRoutes = [
   <Route
@@ -23,7 +28,7 @@ export const flowRoutes = [
     element={<Flows />}
   />,
   <Route
-    path={`${FLOWS_ABS_PATH}/${FLOW_PARAM_ID}`}
+    path={`${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}`}
     element={<Flow />}
   >
     <Route
@@ -61,7 +66,10 @@ export const flowRoutes = [
     />
   </Route>,
   <Route
-    path={`${FLOWS_ABS_PATH}/${FLOW_PARAM_ID}/${ALERT_INSIGHT_REL_PATH}`}
+    path={`${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}/${ALERT_INSIGHT_REL_PATH}`}
     element={<FlowAlertInsight />}
   />,
+  getServiceDetailsRoutes('flow'),
+  getPodDetailsRoutes('flow'),
+  getComponentRoutes('flow'),
 ]

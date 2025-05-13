@@ -16,7 +16,14 @@ export default function ProjectSelect() {
   const { projects, projectId, setProjectId } = useProjectsContext()
 
   return (
-    <div css={{ width: 280, marginLeft: theme.spacing.large }}>
+    <div
+      css={{
+        width: 280,
+        borderRadius: theme.borderRadiuses.medium,
+        marginLeft: theme.spacing.large,
+      }}
+      style={{ border: projectId ? theme.borders['outline-focused'] : 'none' }}
+    >
       <Select
         transparent
         aria-label="project"

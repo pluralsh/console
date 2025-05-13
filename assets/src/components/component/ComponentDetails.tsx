@@ -5,7 +5,13 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, Outlet, useMatch, useNavigate } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 
 import { GqlError } from 'components/utils/Alert'
 import {
@@ -50,6 +56,7 @@ export function ComponentDetails({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { flowId } = useParams()
   const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
   const componentKind = component.kind?.toLowerCase() || ''
@@ -112,16 +119,18 @@ export function ComponentDetails({
 
   useEffect(() => {
     if (currentTab) return
-
-    if (isEmpty(filteredDirectory)) {
-      navigate(`/cd/clusters/${service?.cluster?.id}/services/${service?.id}`)
-    } else {
+    const redirectPath = getServiceDetailsPath({
+      clusterId: service?.cluster?.id,
+      serviceId: service?.id,
+      flowId,
+    })
+    if (isEmpty(filteredDirectory)) navigate(redirectPath)
+    else
       navigate(
-        `/cd/clusters/${service?.cluster?.id}/services/${service?.id}/components/${component.id}/${filteredDirectory[0].path}`,
+        `${redirectPath}/components/${component.id}/${filteredDirectory[0].path}`,
         { replace: true }
       )
-    }
-  }, [navigate, currentTab, filteredDirectory, service, component])
+  }, [navigate, currentTab, filteredDirectory, service, component, flowId])
 
   if (!me || (!data && loading)) return <LoadingIndicator />
 
@@ -166,6 +175,7 @@ export function ComponentDetails({
                   <Button
                     as={Link}
                     to={getServiceDetailsPath({
+                      flowId,
                       serviceId: pluralServiceDeploymentRef?.id,
                       clusterId: pluralServiceDeploymentRef?.cluster.id,
                     })}

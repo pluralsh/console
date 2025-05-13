@@ -16,11 +16,7 @@ import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import {
-  SERVICE_PARAM_CLUSTER_ID,
-  SERVICE_PARAM_ID,
-  getServiceComponentPath,
-} from 'routes/cdRoutesConsts'
+import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -39,9 +35,8 @@ import {
 import { countDeprecations } from './deprecationUtils'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
-export default function ServiceComponents() {
-  const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
+export function ServiceComponents() {
+  const { serviceId, clusterId, flowId } = useParams()
   const [showDeprecations, setShowDeprecations] = useState(false)
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -138,6 +133,7 @@ export default function ServiceComponents() {
               ? `${getServiceComponentPath({
                   clusterId,
                   serviceId,
+                  flowId,
                   componentId: c.id,
                 })}`
               : undefined

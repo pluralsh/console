@@ -19,7 +19,7 @@ import {
 } from '../../deployModal/DeployServiceSettingsGit'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useServiceContext } from '../ServiceDetails'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   getServiceSettingsPath,
   SERVICE_SETTINGS_HELM_REL_PATH,
@@ -28,6 +28,7 @@ import {
 export function ServiceGitSettings() {
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
+  const { flowId } = useParams()
   const navigate = useNavigate()
 
   const {
@@ -76,19 +77,17 @@ export function ServiceGitSettings() {
   const formIsValid = !hasGitRepo || !!(state.gitRef && state.gitFolder)
 
   useEffect(() => {
-    if (hasGitRepo) {
-      return
-    }
-
+    if (hasGitRepo) return
     navigate(
       getServiceSettingsPath({
+        flowId,
         clusterId: service?.cluster?.id,
         serviceId: service?.id,
         isRelative: false,
         subTab: SERVICE_SETTINGS_HELM_REL_PATH,
       })
     )
-  }, [hasGitRepo, navigate, service])
+  }, [hasGitRepo, navigate, service, flowId])
 
   return (
     <form

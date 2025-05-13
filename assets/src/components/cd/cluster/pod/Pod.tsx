@@ -1,34 +1,37 @@
-import { useMemo, useRef } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
+  EmptyState,
   Tab,
   TabList,
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { useMemo, useRef } from 'react'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { GqlError } from 'components/utils/Alert'
 
+import { getServiceDetailsBreadcrumbs } from 'components/cd/services/service/ServiceDetails.tsx'
+import { getFlowBreadcrumbs } from 'components/flows/flow/Flow.tsx'
 import {
-  POD_ABS_PATH,
-  POD_PARAM_CLUSTER,
-  POD_PARAM_NAME,
-  POD_PARAM_NAMESPACE,
-  getPodDetailsPath,
-} from '../../../../routes/cdRoutesConsts'
-import { useClusterQuery, usePodQuery } from '../../../../generated/graphql'
+  useClusterQuery,
+  useFlowQuery,
+  usePodQuery,
+  useServiceDeploymentTinyQuery,
+} from '../../../../generated/graphql'
+import { getPodDetailsPath } from '../../../../routes/cdRoutesConsts'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import LogsLegend from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -39,61 +42,105 @@ const DIRECTORY = [
 ]
 
 export default function Pod() {
-  const params = useParams()
-  const clusterId = (params[POD_PARAM_CLUSTER] as string)!
-  const namespace = (params[POD_PARAM_NAMESPACE] as string)!
-  const name = (params[POD_PARAM_NAME] as string)!
-  const tabStateRef = useRef<any>(undefined)
   const theme = useTheme()
-  const tab = useMatch(`${POD_ABS_PATH}/:tab`)?.params?.tab || ''
+  const tabStateRef = useRef<any>(undefined)
+
+  const {
+    clusterId: clusterIdParam,
+    serviceId,
+    flowId,
+    name = '',
+    namespace = '',
+  } = useParams()
+  const type = flowId ? 'flow' : serviceId ? 'service' : 'cluster'
+  const tab =
+    useMatch(
+      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, name, namespace })}/:tab`
+    )?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
+
+  const { data: serviceData } = useServiceDeploymentTinyQuery({
+    variables: { id: serviceId ?? '' },
+    skip: !serviceId,
+  })
+  const clusterId =
+    clusterIdParam ?? serviceData?.serviceDeployment?.cluster?.id
 
   const { data: clusterData } = useClusterQuery({
     variables: { id: clusterId },
+    skip: !clusterId,
+  })
+  const { data: flowData } = useFlowQuery({
+    variables: { id: flowId ?? '' },
+    skip: !flowId,
   })
 
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...getClusterBreadcrumbs({
-          cluster: clusterData?.cluster || { id: clusterId },
-          tab: 'pods',
-        }),
-        ...(clusterId && name && namespace
+        ...(type === 'flow'
+          ? getFlowBreadcrumbs(flowId, flowData?.flow?.name, 'services')
+          : type === 'service'
+            ? getServiceDetailsBreadcrumbs({
+                service: serviceData?.serviceDeployment ?? {
+                  id: serviceId ?? '',
+                },
+                cluster: clusterData?.cluster,
+                tab: 'pods',
+              })
+            : getClusterBreadcrumbs({
+                cluster: clusterData?.cluster || { id: clusterId ?? '' },
+                tab: 'pods',
+              })),
+        ...(name && namespace
           ? [
               {
                 label: name,
-                url: getPodDetailsPath({ clusterId, name, namespace }),
+                url: getPodDetailsPath({
+                  type,
+                  clusterId,
+                  serviceId,
+                  flowId,
+                  name,
+                  namespace,
+                }),
               },
-              ...(tab
-                ? [
-                    {
-                      label: tab,
-                      url: '',
-                    },
-                  ]
-                : []),
+              ...(tab ? [{ label: tab, url: '' }] : []),
             ]
           : []),
       ],
-      [clusterData?.cluster, clusterId, name, namespace, tab]
+      [
+        clusterData?.cluster,
+        clusterId,
+        flowData?.flow?.name,
+        flowId,
+        name,
+        namespace,
+        serviceData?.serviceDeployment,
+        serviceId,
+        tab,
+        type,
+      ]
     )
   )
-
-  const { data, error } = usePodQuery({
+  const { data, loading, error } = usePodQuery({
     variables: { name, namespace, clusterId },
-    pollInterval: 10 * 1000,
+    skip: !name || !namespace || !clusterId,
+    pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
   const pod = data?.pod
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!pod) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!pod && loading) return <LoadingIndicator />
+  if (!pod)
+    return (
+      <EmptyState
+        message="Pod not found"
+        description="Please check the pod name and namespace"
+      />
+    )
 
   return (
     <ResponsiveLayoutPage>

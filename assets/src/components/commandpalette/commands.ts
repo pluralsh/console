@@ -36,7 +36,7 @@ import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
-  CLUSTER_PODS_PATH,
+  PODS_REL_PATH,
   SERVICES_REL_PATH,
   getClusterDetailsPath,
 } from '../../routes/cdRoutesConsts'
@@ -273,7 +273,7 @@ export function useCommands({
                 navigate(
                   `${getClusterDetailsPath({
                     clusterId: cluster?.id,
-                  })}/${CLUSTER_PODS_PATH}`
+                  })}/${PODS_REL_PATH}`
                 )
             },
             deps: [navigate, cluster?.id],

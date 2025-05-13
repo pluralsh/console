@@ -9,7 +9,6 @@ import {
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 
 export function FlowServices() {
@@ -39,12 +38,7 @@ export function FlowServices() {
       data={data?.flow?.services?.edges ?? []}
       columns={columns}
       onRowClick={(_, { original }: Row<Edge<ServiceDeploymentsRowFragment>>) =>
-        navigate(
-          getServiceDetailsPath({
-            clusterId: original.node?.cluster?.id,
-            serviceId: original.node?.id,
-          })
-        )
+        navigate(original.node?.id ?? '')
       }
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}

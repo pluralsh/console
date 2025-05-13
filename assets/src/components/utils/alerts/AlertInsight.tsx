@@ -61,7 +61,7 @@ export function AlertInsight({
               type === 'cluster'
                 ? `${getClusterDetailsPath({ clusterId })}/alerts`
                 : type === 'service'
-                  ? `${getServiceDetailsPath({ clusterId, serviceId })}/alerts`
+                  ? `${getServiceDetailsPath({ clusterId, serviceId, flowId })}/alerts`
                   : `${getFlowDetailsPath({ flowId })}/alerts`
             )
           }

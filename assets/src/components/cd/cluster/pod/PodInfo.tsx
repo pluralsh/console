@@ -5,7 +5,6 @@ import { Link, useOutletContext, useParams } from 'react-router-dom'
 
 import { SubTitle } from '../../../utils/SubTitle'
 
-import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
 import { Readiness } from '../../../../utils/status'
 import { PodConditions } from './PodConditions.tsx'
 import {
@@ -22,6 +21,7 @@ import {
 } from './PodContainers.tsx'
 import { PodMetadata } from './PodMetadata.tsx'
 import { useTheme } from 'styled-components'
+import { getPodDetailsPath } from 'routes/cdRoutesConsts.tsx'
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
   (statuses || []).reduce(
@@ -65,7 +65,8 @@ export const ColActions = columnHelper.display({
         <ShellLink
           to={
             serviceId
-              ? `${getServicePodDetailsPath({
+              ? `${getPodDetailsPath({
+                  type: 'service',
                   clusterId,
                   serviceId,
                   name: podName,

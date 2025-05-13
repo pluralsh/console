@@ -11,8 +11,8 @@ import Namespaces from 'components/cd/namespaces/Namespaces'
 import Pipelines from 'components/cd/pipelines/Pipelines'
 import Repositories from 'components/cd/repos/Repositories'
 
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
-import ServiceComponents from 'components/cd/services/service/ServiceComponents'
+import { ServiceComponent } from 'components/cd/services/component/ServiceComponent'
+import { ServiceComponents } from 'components/cd/services/service/ServiceComponents'
 
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
@@ -78,8 +78,6 @@ import { ManagedNamespaceServices } from '../components/cd/namespaces/details/Ma
 
 import Observers from '../components/cd/observers/Observers'
 
-import ServicePod from '../components/cd/services/service/pod/Pod'
-
 import ServicePRs from '../components/cd/services/service/ServicePRs'
 
 import ServicesTable from '../components/cd/services/ServicesTable'
@@ -95,7 +93,9 @@ import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
+import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
+import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
 import { ServiceSettings } from 'components/cd/services/service/settings/ServiceSettings.tsx'
 import {
   AlertInsight,
@@ -110,6 +110,8 @@ import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 import {
   ALERT_INSIGHT_REL_PATH,
   CD_REL_PATH,
+  CD_SERVICE_COMPONENT_PATH_MATCHER_ABS,
+  CD_SERVICE_REL_PATH,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_ALERTS_REL_PATH,
   CLUSTER_ALL_ADDONS_REL_PATH,
@@ -123,13 +125,16 @@ import {
   CLUSTER_METRICS_PATH,
   CLUSTER_NETWORK_PATH,
   CLUSTER_NODES_PATH,
-  CLUSTER_PODS_PATH,
+  CLUSTER_PARAM_ID,
   CLUSTER_PRS_REL_PATH,
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
   CLUSTERS_REL_PATH,
   COMPONENT_PARAM_ID,
+  FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS,
+  FLOW_SERVICE_PATH_MATCHER_ABS,
+  getPodDetailsPath,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SERVICES_REL_PATH,
   NAMESPACE_INFO_PATH,
@@ -139,13 +144,13 @@ import {
   NODE_REL_PATH,
   OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
-  POD_REL_PATH,
+  POD_PARAM_NAME,
+  POD_PARAM_NAMESPACE,
+  PODS_REL_PATH,
   REPOS_REL_PATH,
-  SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_COMPONENTS_PATH,
-  SERVICE_POD_REL_PATH,
+  SERVICE_PARAM_ID,
   SERVICE_PRS_PATH,
-  SERVICE_REL_PATH,
   SERVICE_SETTINGS_GIT_REL_PATH,
   SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
@@ -153,9 +158,8 @@ import {
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
+import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
-import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
-import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -168,9 +172,13 @@ function CDRootRedirect() {
   )
 }
 
-export const componentRoutes = (
+export const getComponentRoutes = (type: 'service' | 'flow') => (
   <Route
-    path={SERVICE_COMPONENT_PATH_MATCHER_REL}
+    path={
+      type === 'service'
+        ? CD_SERVICE_COMPONENT_PATH_MATCHER_ABS
+        : FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS
+    }
     element={<ServiceComponent />}
   >
     <Route
@@ -368,7 +376,7 @@ const clusterDetailsRoutes = [
         element={<ClusterNodes />}
       />
       <Route
-        path={CLUSTER_PODS_PATH}
+        path={PODS_REL_PATH}
         element={<ClusterPods />}
       />
       <Route
@@ -500,9 +508,16 @@ const nodeDetailsRoutes = (
   </Route>
 )
 
-const podDetailsRoutes = (
+export const getPodDetailsRoutes = (type: 'service' | 'cluster' | 'flow') => (
   <Route
-    path={POD_REL_PATH}
+    path={getPodDetailsPath({
+      type,
+      clusterId: `:${CLUSTER_PARAM_ID}`,
+      serviceId: `:${SERVICE_PARAM_ID}`,
+      flowId: `:${FLOW_PARAM_ID}`,
+      name: `:${POD_PARAM_NAME}`,
+      namespace: `:${POD_PARAM_NAMESPACE}`,
+    })}
     element={<Pod />}
   >
     <Route
@@ -528,37 +543,9 @@ const podDetailsRoutes = (
   </Route>
 )
 
-const servicePodDetailsRoutes = (
+export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
   <Route
-    path={SERVICE_POD_REL_PATH}
-    element={<ServicePod />}
-  >
-    <Route
-      index
-      element={<PodInfo />}
-    />
-    <Route
-      path="events"
-      element={<PodEvents />}
-    />
-    <Route
-      path="raw"
-      element={<PodRaw />}
-    />
-    <Route
-      path="logs"
-      element={<Logs />}
-    />
-    <Route
-      path="shell"
-      element={<PodShell />}
-    />
-  </Route>
-)
-
-const serviceDetailsRoutes = (
-  <Route
-    path={SERVICE_REL_PATH}
+    path={type === 'cd' ? CD_SERVICE_REL_PATH : FLOW_SERVICE_PATH_MATCHER_ABS}
     element={<ServiceDetails />}
   >
     <Route
@@ -672,10 +659,10 @@ export const cdRoutes = [
     {mainRoutes}
     {clusterDetailsRoutes}
     {nodeDetailsRoutes}
-    {podDetailsRoutes}
-    {servicePodDetailsRoutes}
-    {serviceDetailsRoutes}
-    {componentRoutes}
+    {getPodDetailsRoutes('cluster')}
+    {getPodDetailsRoutes('service')}
+    {getServiceDetailsRoutes('cd')}
+    {getComponentRoutes('service')}
     {pipelineRoutes}
     {globalServiceRoutes}
     {namespacesRoutes}

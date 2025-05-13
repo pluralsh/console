@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { PreviewEnvironmentTemplateFragment } from 'generated/graphql'
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
@@ -61,10 +61,12 @@ export const ColReferenceService = columnHelper.accessor(
     cell: function Cell({ getValue }) {
       const { spacing, colors } = useTheme()
       const service = getValue()
+      const { flowId } = useParams()
       return (
         <InlineLink
           as={Link}
           to={getServiceDetailsPath({
+            flowId,
             serviceId: service?.id,
             clusterId: service?.cluster?.id,
           })}

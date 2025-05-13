@@ -1,14 +1,13 @@
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useLocation, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import {
-  SERVICE_PARAM_CLUSTER_ID,
-  getServicePodDetailsPath,
-} from '../../../routes/cdRoutesConsts'
+import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
 
 import { ComponentDetailsContext } from '../ComponentDetails'
 
-import { InfoSectionH2 } from './common'
+import { PodFragment } from 'generated/graphql.ts'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
   ColContainers,
   ColCpuReservation,
@@ -20,8 +19,7 @@ import {
   ColRestarts,
   PodsList,
 } from '../../cd/cluster/pod/PodsList.tsx'
-import { PodFragment } from 'generated/graphql.ts'
-import { isNonNullable } from 'utils/isNonNullable.ts'
+import { InfoSectionH2 } from './common'
 
 const columns = [
   ColName,
@@ -40,10 +38,14 @@ const columns = [
 ]
 
 export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
-  const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
+  const theme = useTheme()
+  const referrer = useLocation().pathname.includes(FLOWS_ABS_PATH)
+    ? 'flow'
+    : 'service'
+  const { flowId } = useParams()
   const { refetch, component, ...rest } =
     useOutletContext<ComponentDetailsContext>()
-  const theme = useTheme()
+  const clusterId = rest.cluster?.id
 
   const linkToK8sDashboard =
     component.kind.toLowerCase() === 'job' ||
@@ -66,14 +68,16 @@ export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
         pods={filteredPods}
         columns={columns}
         linkToK8sDashboard={linkToK8sDashboard}
-        clusterId={clusterId}
+        clusterId={rest.cluster?.id}
         serviceId={rest?.serviceId}
         refetch={refetch}
-        {...(clusterId && rest?.serviceId
+        {...((clusterId || flowId) && rest?.serviceId
           ? {
-              linkBasePath: getServicePodDetailsPath({
+              linkBasePath: getPodDetailsPath({
+                type: referrer,
                 serviceId: rest?.serviceId,
                 clusterId,
+                flowId,
               }),
             }
           : {})}
