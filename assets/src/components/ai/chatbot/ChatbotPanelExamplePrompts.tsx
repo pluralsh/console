@@ -22,6 +22,7 @@ function Prompt({ children, ...props }: ChipProps) {
         borderRadius: 16,
         height: 32,
       }}
+      width="max-content"
       {...props}
     >
       <MagicWandIcon size={12} />
@@ -48,7 +49,6 @@ function PromptsControl({
 
   return (
     <Chip
-      onClick={() => setShowAll(!showAll)}
       css={{
         borderRadius: 16,
         cursor: 'pointer',
@@ -69,6 +69,8 @@ function PromptsControl({
           color: theme.colors['text-xlight'],
         },
       }}
+      onClick={() => setShowAll(!showAll)}
+      width="max-content"
     >
       {showAll ? <MinusIcon size={12} /> : <PlusIcon size={12} />}
       <span
