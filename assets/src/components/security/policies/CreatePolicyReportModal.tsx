@@ -27,7 +27,8 @@ const fetchPolicyReport = (format: ReportFormat, token: string) => {
         ?.get('content-disposition')
         ?.split(';')
         ?.find((n) => n.includes('filename='))
-        ?.replace('filename=', '')
+        ?.replaceAll('filename=', '')
+        ?.replaceAll('"', '')
         ?.trim() ?? 'report.zip'
     const writeStream = streamSaver.createWriteStream(filename)
     return res.body?.pipeTo(writeStream)
