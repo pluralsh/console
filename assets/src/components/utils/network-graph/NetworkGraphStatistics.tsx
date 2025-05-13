@@ -37,7 +37,7 @@ function NetworkGraphStatisticsCard({
 }) {
   return (
     <WrapperSC>
-      <CaptionP>
+      <CaptionP css={{ wordBreak: 'break-word' }}>
         <strong>{from}</strong> {'\u2192'} <strong>{to}</strong>
       </CaptionP>
       <Statistic

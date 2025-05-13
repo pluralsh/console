@@ -9,27 +9,20 @@ import type {
   ElkLabel,
   ElkNode,
   ElkPort,
-  ELK as ElkType,
   LayoutOptions,
 } from 'elkjs'
 import { produce } from 'immer'
 import { useEffect } from 'react'
 
-let elkInstance: ElkType | null = null
+import ELK from 'elkjs/lib/elk.bundled.js'
 
-async function getElkInstance() {
-  if (elkInstance) return elkInstance
-  const ELKConstructor = (await import('elkjs/lib/elk.bundled.js')).default
-  elkInstance = new ELKConstructor()
-  return elkInstance
-}
+const elkInstance = new ELK()
 
 async function getLayoutedElements(
   nodes: Node[],
   edges: Edge[],
   layoutOptions?: LayoutOptions
 ): Promise<{ nodes: Node[]; edges: Edge[] }> {
-  const elk = await getElkInstance()
   const elkGraph = {
     id: 'root',
     layoutOptions,
@@ -56,7 +49,7 @@ async function getLayoutedElements(
   }
 
   // this mutates the graph object
-  await elk.layout(elkGraph)
+  await elkInstance.layout(elkGraph)
 
   const nodeIdToElkNode = new Map<string, ElkNode>()
   const edgeIdToElkEdge = new Map<string, ElkExtendedEdge>()
