@@ -549,6 +549,21 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_file_factory do
+    %Schema.StackFile{
+      path: "some/path",
+      content: "some content"
+    }
+  end
+
+  def stack_environment_factory do
+    %Schema.StackEnvironment{
+      name: "foo",
+      value: "bar",
+      secret: true
+    }
+  end
+
   def run_step_factory do
     %Schema.RunStep{
       name: sequence(:run_step, & "step-#{&1}"),
@@ -955,6 +970,14 @@ defmodule Console.Factory do
 
   def template_context_factory do
     %Schema.TemplateContext{}
+  end
+
+  def compliance_report_generator_factory do
+    %Schema.ComplianceReportGenerator{
+      name: sequence(:compliance_report_generator, & "compliance-report-generator-#{&1}"),
+      format: :csv,
+      read_policy_id: Ecto.UUID.generate()
+    }
   end
 
   def setup_rbac(user, repos \\ ["*"], perms) do

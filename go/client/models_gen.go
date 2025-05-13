@@ -1587,6 +1587,35 @@ type CommandAttributes struct {
 	Dir  *string   `json:"dir,omitempty"`
 }
 
+type ComplianceReportGenerator struct {
+	ID     string                 `json:"id"`
+	Name   string                 `json:"name"`
+	Format ComplianceReportFormat `json:"format"`
+	// download policy for this report
+	ReadBindings      []*PolicyBinding             `json:"readBindings,omitempty"`
+	ComplianceReports *ComplianceReportsConnection `json:"complianceReports,omitempty"`
+	InsertedAt        *string                      `json:"insertedAt,omitempty"`
+	UpdatedAt         *string                      `json:"updatedAt,omitempty"`
+}
+
+type ComplianceReportGeneratorAttributes struct {
+	// the format of the compliance report when a user generates it
+	Format ComplianceReportFormat `json:"format"`
+	// the name of this generator
+	Name         string                     `json:"name"`
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+}
+
+type ComplianceReportGeneratorConnection struct {
+	PageInfo PageInfo                         `json:"pageInfo"`
+	Edges    []*ComplianceReportGeneratorEdge `json:"edges,omitempty"`
+}
+
+type ComplianceReportGeneratorEdge struct {
+	Node   *ComplianceReportGenerator `json:"node,omitempty"`
+	Cursor *string                    `json:"cursor,omitempty"`
+}
+
 type ComplianceReports struct {
 	ID         string  `json:"id"`
 	Name       string  `json:"name"`
@@ -7073,6 +7102,47 @@ func (e *ClusterDistro) UnmarshalGQL(v any) error {
 }
 
 func (e ClusterDistro) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ComplianceReportFormat string
+
+const (
+	ComplianceReportFormatCSV  ComplianceReportFormat = "CSV"
+	ComplianceReportFormatJSON ComplianceReportFormat = "JSON"
+)
+
+var AllComplianceReportFormat = []ComplianceReportFormat{
+	ComplianceReportFormatCSV,
+	ComplianceReportFormatJSON,
+}
+
+func (e ComplianceReportFormat) IsValid() bool {
+	switch e {
+	case ComplianceReportFormatCSV, ComplianceReportFormatJSON:
+		return true
+	}
+	return false
+}
+
+func (e ComplianceReportFormat) String() string {
+	return string(e)
+}
+
+func (e *ComplianceReportFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ComplianceReportFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ComplianceReportFormat", str)
+	}
+	return nil
+}
+
+func (e ComplianceReportFormat) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

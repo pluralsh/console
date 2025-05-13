@@ -8,7 +8,7 @@ defmodule Console.Compliance.Datasource.Services do
   @impl Console.Compliance.Datasource
   def stream do
     Service.stream()
-    |> Service.preloaded([:repository, cluster: :project])
+    |> Service.preloaded([:repository, :revision, cluster: :project])
     |> Console.Repo.stream(method: :keyset)
     |> Stream.map(fn s ->
       %{
@@ -17,6 +17,7 @@ defmodule Console.Compliance.Datasource.Services do
         project: s.cluster.project.name,
         namespace: s.namespace,
         health: s.status,
+        sha: Console.deep_get(s, [:revision, :sha]),
         repository: Console.deep_get(s, [:repository, :url]),
         git_ref: Console.deep_get(s, [:git, :ref]),
         git_folder: Console.deep_get(s, [:git, :folder]),

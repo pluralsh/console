@@ -357,6 +357,10 @@ type RootQueryType {
 
   complianceReports(after: String, first: Int, before: String, last: Int): ComplianceReportsConnection
 
+  complianceReportGenerators(after: String, first: Int, before: String, last: Int): ComplianceReportGeneratorConnection
+
+  complianceReportGenerator(id: ID, name: String): ComplianceReportGenerator
+
   managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
   globalService(id: ID!): GlobalService
@@ -603,6 +607,8 @@ type RootMutationType {
 
   deleteCatalog(id: ID!): Catalog
 
+  registerGithubApp(name: String!, installationId: String!): ScmConnection
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
@@ -815,6 +821,10 @@ type RootMutationType {
   upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
 
   upsertVulnerabilities(vulnerabilities: [VulnerabilityReportAttributes]): Int
+
+  upsertComplianceReportGenerator(attributes: ComplianceReportGeneratorAttributes!): ComplianceReportGenerator
+
+  deleteComplianceReportGenerator(id: ID!): ComplianceReportGenerator
 
   createGlobalService(
     serviceId: ID
@@ -3079,6 +3089,11 @@ enum VulnUserInteraction {
   REQUIRED
 }
 
+enum ComplianceReportFormat {
+  CSV
+  JSON
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -3196,6 +3211,16 @@ input ServiceVulnAttributes {
 
 input NamespaceVulnAttributes {
   namespace: String!
+}
+
+input ComplianceReportGeneratorAttributes {
+  "the format of the compliance report when a user generates it"
+  format: ComplianceReportFormat!
+
+  "the name of this generator"
+  name: String!
+
+  readBindings: [PolicyBindingAttributes]
 }
 
 "A OPA Gatekeeper Constraint reference"
@@ -3374,6 +3399,23 @@ type ComplianceReports {
   updatedAt: DateTime
 }
 
+type ComplianceReportGenerator {
+  id: ID!
+
+  name: String!
+
+  format: ComplianceReportFormat!
+
+  "download policy for this report"
+  readBindings: [PolicyBinding]
+
+  complianceReports(after: String, first: Int, before: String, last: Int): ComplianceReportsConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type PolicyConstraintConnection {
   pageInfo: PageInfo!
   edges: [PolicyConstraintEdge]
@@ -3387,6 +3429,11 @@ type VulnerabilityReportConnection {
 type ComplianceReportsConnection {
   pageInfo: PageInfo!
   edges: [ComplianceReportsEdge]
+}
+
+type ComplianceReportGeneratorConnection {
+  pageInfo: PageInfo!
+  edges: [ComplianceReportGeneratorEdge]
 }
 
 enum SinkType {
@@ -9278,6 +9325,11 @@ type NotificationRouterEdge {
 
 type NotificationSinkEdge {
   node: NotificationSink
+  cursor: String
+}
+
+type ComplianceReportGeneratorEdge {
+  node: ComplianceReportGenerator
   cursor: String
 }
 

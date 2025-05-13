@@ -1971,6 +1971,51 @@ export type CommandAttributes = {
   dir?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum ComplianceReportFormat {
+  Csv = 'CSV',
+  Json = 'JSON'
+}
+
+export type ComplianceReportGenerator = {
+  __typename?: 'ComplianceReportGenerator';
+  complianceReports?: Maybe<ComplianceReportsConnection>;
+  format: ComplianceReportFormat;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** download policy for this report */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type ComplianceReportGeneratorComplianceReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ComplianceReportGeneratorAttributes = {
+  /** the format of the compliance report when a user generates it */
+  format: ComplianceReportFormat;
+  /** the name of this generator */
+  name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ComplianceReportGeneratorConnection = {
+  __typename?: 'ComplianceReportGeneratorConnection';
+  edges?: Maybe<Array<Maybe<ComplianceReportGeneratorEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ComplianceReportGeneratorEdge = {
+  __typename?: 'ComplianceReportGeneratorEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ComplianceReportGenerator>;
+};
+
 export type ComplianceReports = {
   __typename?: 'ComplianceReports';
   id: Scalars['ID']['output'];
@@ -6155,6 +6200,7 @@ export type RootMutationType = {
   deleteClusterIsoImage?: Maybe<ClusterIsoImage>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
+  deleteComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
   deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
@@ -6228,6 +6274,7 @@ export type RootMutationType = {
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
+  registerGithubApp?: Maybe<ScmConnection>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   resetObserver?: Maybe<Observer>;
@@ -6291,6 +6338,7 @@ export type RootMutationType = {
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   upsertCatalog?: Maybe<Catalog>;
+  upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
   upsertMcpServer?: Maybe<McpServer>;
@@ -6656,6 +6704,11 @@ export type RootMutationTypeDeleteClusterRegistrationArgs = {
 };
 
 
+export type RootMutationTypeDeleteComplianceReportGeneratorArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteCustomStackRunArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6969,6 +7022,12 @@ export type RootMutationTypeReconfigureRenovateArgs = {
 };
 
 
+export type RootMutationTypeRegisterGithubAppArgs = {
+  installationId: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeRegisterRuntimeServicesArgs = {
   deprecated?: InputMaybe<Array<InputMaybe<DeprecatedCustomResourceAttributes>>>;
   layout?: InputMaybe<OperationalLayoutAttributes>;
@@ -7279,6 +7338,11 @@ export type RootMutationTypeUpsertCatalogArgs = {
 };
 
 
+export type RootMutationTypeUpsertComplianceReportGeneratorArgs = {
+  attributes: ComplianceReportGeneratorAttributes;
+};
+
+
 export type RootMutationTypeUpsertFlowArgs = {
   attributes: FlowAttributes;
 };
@@ -7402,6 +7466,8 @@ export type RootQueryType = {
   clusterVulnerabilityAggregate?: Maybe<Array<Maybe<ClusterVulnAggregate>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
+  complianceReportGenerator?: Maybe<ComplianceReportGenerator>;
+  complianceReportGenerators?: Maybe<ComplianceReportGeneratorConnection>;
   complianceReports?: Maybe<ComplianceReportsConnection>;
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
   componentTree?: Maybe<ComponentTree>;
@@ -7809,6 +7875,20 @@ export type RootQueryTypeClustersArgs = {
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
   upgradeable?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type RootQueryTypeComplianceReportGeneratorArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeComplianceReportGeneratorsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

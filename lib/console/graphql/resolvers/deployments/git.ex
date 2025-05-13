@@ -171,6 +171,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_catalog(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_catalog(id, user)
 
+  def register_github_app(%{name: name, installation_id: inst_id}, %{context: %{current_user: user}}),
+    do: Git.register_github_app(name, inst_id, user)
+
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)

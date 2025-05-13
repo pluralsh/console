@@ -243,3 +243,9 @@ if is_set("CONSOLE_HYDRA_ADMIN") and is_set("CONSOLE_HYDRA_PUBLIC") do
     hydra_admin: get_env("CONSOLE_HYDRA_ADMIN"),
     hydra_public: get_env("CONSOLE_HYDRA_PUBLIC")
 end
+
+if is_set("CONSOLE_GITHUB_APP_ID") and is_set("CONSOLE_GITHUB_APP_PEM") do
+  config :console,
+    github_app_id: get_env("CONSOLE_GITHUB_APP_ID"),
+    github_app_pem: get_env("CONSOLE_GITHUB_APP_PEM")
+end

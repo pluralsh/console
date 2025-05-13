@@ -90,7 +90,7 @@ defmodule Console.AI.MCP.Agent do
     |> Timex.shift(seconds: -30)
     |> Timex.before?(used)
     |> case do
-      true -> {:stop, :expired, state}
+      true -> {:stop, {:shutdown, :expired}, state}
       false -> {:noreply, state}
     end
   end

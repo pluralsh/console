@@ -822,4 +822,20 @@ defmodule Console.Deployments.GitSyncTest do
       assert pr.title == pra.title
     end
   end
+
+  describe "#register_github_app/3" do
+    test "it can register a github app" do
+      {:ok, priv} = ExPublicKey.generate_key()
+      {:ok, priv_string} = ExPublicKey.pem_encode(priv)
+      Application.put_env(:console, :github_app_pem, priv_string)
+
+      {:ok, scm} = Git.register_github_app("plural", "1234567890", admin_user())
+
+      assert scm.name == "plural"
+      assert scm.type == :github
+      assert scm.github.app_id == Console.conf(:github_app_id)
+      assert scm.github.installation_id == "1234567890"
+      assert scm.github.private_key == priv_string
+    end
+  end
 end

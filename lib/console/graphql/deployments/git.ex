@@ -1070,5 +1070,13 @@ defmodule Console.GraphQl.Deployments.Git do
 
       resolve &Deployments.delete_catalog/2
     end
+
+    field :register_github_app, :scm_connection do
+      middleware Authenticated
+      arg :name, non_null(:string)
+      arg :installation_id, non_null(:string)
+
+      resolve &Deployments.register_github_app/2
+    end
   end
 end
