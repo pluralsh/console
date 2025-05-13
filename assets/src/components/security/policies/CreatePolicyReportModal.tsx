@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { parse } from 'content-disposition'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { fetchToken } from '../../../helpers/auth.ts'
@@ -22,14 +23,9 @@ const fetchPolicyReport = (format: ReportFormat, token: string) => {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
   }).then((res) => {
+    const contentDisposition = res.headers?.get('content-disposition') ?? ''
     const filename =
-      res.headers
-        ?.get('content-disposition')
-        ?.split(';')
-        ?.find((n) => n.includes('filename='))
-        ?.replaceAll('filename=', '')
-        ?.replaceAll('"', '')
-        ?.trim() ?? 'report.zip'
+      parse(contentDisposition)?.parameters?.filename ?? 'report.zip'
     const writeStream = streamSaver.createWriteStream(filename)
     return res.body?.pipeTo(writeStream)
   })
