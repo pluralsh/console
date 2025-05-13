@@ -1,0 +1,23 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ClusterSync
+metadata:
+  labels:
+    app.kubernetes.io/name: clustersync
+    app.kubernetes.io/instance: clustersync-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: clustersync-sample
+spec:
+  clusterSpec:
+    metadata:
+      name: "{{ .cluster.handle }}"
+    spec:
+      handle: "{{ .cluster.handle }}"
+      version: "{{ if .cluster.version }}{{ .cluster.version }}{{ else }}null{{ end }}"
+      protect: "{{ if .cluster.protect }}{{ .cluster.protect }}{{ else }}false{{ end }}"
+      tags: "{ {{- range $i, $t := .cluster.tags }}{{ if $i }}, {{ end }}{{ $t.name }}: {{ $t.value }}{{- end }} }"
+      metadata: "{{ .cluster.metadata | toYaml | nindent 8}}"
+      bindings:
+        read: '{{ if .cluster.readBindings }}{{ range .cluster.readBindings }}{{ printf "\n  - UserID: %s" .user.id | nindent 2 }}{{ end }}{{ else }}null{{ end }}'
+        write: '{{ if .cluster.writeBindings }}{{ range .cluster.writeBindings }}{{ printf "\n  - UserID: %s" .user.id | nindent 2 }}{{ end }}{{ else }}null{{ end }}'

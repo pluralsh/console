@@ -1,0 +1,27 @@
+# permissions for end users to view clustersyncs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: clustersync-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: controller
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+  name: clustersync-viewer-role
+rules:
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clustersyncs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clustersyncs/status
+  verbs:
+  - get

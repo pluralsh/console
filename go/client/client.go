@@ -39,6 +39,7 @@ type ConsoleClient interface {
 	PingCluster(ctx context.Context, attributes ClusterPing, interceptors ...clientv2.RequestInterceptor) (*PingCluster, error)
 	RegisterRuntimeServices(ctx context.Context, services []*RuntimeServiceAttributes, layout *OperationalLayoutAttributes, deprecated []*DeprecatedCustomResourceAttributes, serviceID *string, interceptors ...clientv2.RequestInterceptor) (*RegisterRuntimeServices, error)
 	ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error)
+	ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, tagQuery *TagQuery, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error)
 	GetCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetCluster, error)
 	GetTinyCluster(ctx context.Context, id *string, interceptors ...clientv2.RequestInterceptor) (*GetTinyCluster, error)
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
@@ -504,6 +505,8 @@ type ClusterFragment struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *ClusterFragment) GetID() string {
@@ -607,6 +610,18 @@ func (t *ClusterFragment) GetProject() *TinyProjectFragment {
 		t = &ClusterFragment{}
 	}
 	return t.Project
+}
+func (t *ClusterFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.WriteBindings
+}
+func (t *ClusterFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.ReadBindings
 }
 
 type TinyClusterFragment struct {
@@ -7763,6 +7778,8 @@ type CreateCluster_CreateCluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *CreateCluster_CreateCluster) GetDeployToken() *string {
@@ -7872,6 +7889,18 @@ func (t *CreateCluster_CreateCluster) GetProject() *TinyProjectFragment {
 		t = &CreateCluster_CreateCluster{}
 	}
 	return t.Project
+}
+func (t *CreateCluster_CreateCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.WriteBindings
+}
+func (t *CreateCluster_CreateCluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.ReadBindings
 }
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -8405,6 +8434,120 @@ func (t *ListClusters_Clusters) GetEdges() []*ClusterEdgeFragment {
 	return t.Edges
 }
 
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
+	ID        string                    "json:\"id\" graphql:\"id\""
+	Name      string                    "json:\"name\" graphql:\"name\""
+	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Group
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.State
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Version
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Content
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetName() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Name
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetValue() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Value
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
+	}
+	return t.ID
+}
+
+type ListClustersWithParameters_Clusters struct {
+	PageInfo PageInfoFragment       "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ClusterEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListClustersWithParameters_Clusters) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters{}
+	}
+	return &t.PageInfo
+}
+func (t *ListClustersWithParameters_Clusters) GetEdges() []*ClusterEdgeFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters{}
+	}
+	return t.Edges
+}
+
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	Name      string                    "json:\"name\" graphql:\"name\""
@@ -8626,6 +8769,8 @@ type GetClusterWithToken_Cluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 }
 
@@ -8730,6 +8875,18 @@ func (t *GetClusterWithToken_Cluster) GetProject() *TinyProjectFragment {
 		t = &GetClusterWithToken_Cluster{}
 	}
 	return t.Project
+}
+func (t *GetClusterWithToken_Cluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.WriteBindings
+}
+func (t *GetClusterWithToken_Cluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.ReadBindings
 }
 func (t *GetClusterWithToken_Cluster) GetDeployToken() *string {
 	if t == nil {
@@ -9302,6 +9459,8 @@ type UpsertVirtualCluster_UpsertVirtualCluster struct {
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
 	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 }
 
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeployToken() *string {
@@ -9411,6 +9570,18 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProject() *TinyProjectFra
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.Project
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.WriteBindings
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.ReadBindings
 }
 
 type GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Provider struct {
@@ -14948,6 +15119,17 @@ func (t *ListClusters) GetClusters() *ListClusters_Clusters {
 	return t.Clusters
 }
 
+type ListClustersWithParameters struct {
+	Clusters *ListClustersWithParameters_Clusters "json:\"clusters,omitempty\" graphql:\"clusters\""
+}
+
+func (t *ListClustersWithParameters) GetClusters() *ListClustersWithParameters_Clusters {
+	if t == nil {
+		t = &ListClustersWithParameters{}
+	}
+	return t.Clusters
+}
+
 type GetCluster struct {
 	Cluster *ClusterFragment "json:\"cluster,omitempty\" graphql:\"cluster\""
 }
@@ -17870,6 +18052,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18001,6 +18189,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -18054,6 +18261,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18185,6 +18398,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -18702,6 +18934,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -18834,6 +19072,25 @@ fragment TinyProjectFragment on Project {
 	name
 	default
 }
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
 `
 
 func (c *Client) ListClusters(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusters, error) {
@@ -18845,6 +19102,234 @@ func (c *Client) ListClusters(ctx context.Context, cursor *string, before *strin
 
 	var res ListClusters
 	if err := c.Client.Post(ctx, "ListClusters", ListClustersDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListClustersWithParametersDocument = `query ListClustersWithParameters ($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $tagQuery: TagQuery) {
+	clusters(after: $after, first: $first, before: $before, last: $last, projectId: $projectId, tagQuery: $tagQuery) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... ClusterEdgeFragment
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ClusterEdgeFragment on ClusterEdge {
+	node {
+		... ClusterFragment
+	}
+}
+fragment ClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	version
+	insertedAt
+	pingedAt
+	protect
+	currentVersion
+	kasUrl
+	deletedAt
+	metadata
+	tags {
+		... ClusterTags
+	}
+	provider {
+		... ClusterProviderFragment
+	}
+	nodePools {
+		... NodePoolFragment
+	}
+	status {
+		... ClusterStatusFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment ClusterProviderFragment on ClusterProvider {
+	id
+	name
+	namespace
+	cloud
+	editable
+	deletedAt
+	repository {
+		... GitRepositoryFragment
+	}
+	service {
+		... ServiceDeploymentFragment
+	}
+	credentials {
+		... ProviderCredentialFragment
+	}
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment ServiceDeploymentFragment on ServiceDeployment {
+	... ServiceDeploymentBaseFragment
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+		content {
+			... ComponentContentFragment
+		}
+	}
+	protect
+	deletedAt
+	sha
+	tarball
+	dryRun
+	templated
+	configuration {
+		name
+		value
+	}
+	flow {
+		id
+	}
+}
+fragment ServiceDeploymentBaseFragment on ServiceDeployment {
+	id
+	name
+	namespace
+	version
+	status
+	kustomize {
+		... KustomizeFragment
+	}
+	git {
+		... GitRefFragment
+	}
+	helm {
+		... HelmSpecFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+}
+fragment KustomizeFragment on Kustomize {
+	path
+	enableHelm
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment HelmSpecFragment on HelmSpec {
+	valuesFiles
+}
+fragment ComponentContentFragment on ComponentContent {
+	id
+	live
+	desired
+}
+fragment ProviderCredentialFragment on ProviderCredential {
+	id
+	name
+	namespace
+	kind
+}
+fragment NodePoolFragment on NodePool {
+	id
+	name
+	minSize
+	maxSize
+	instanceType
+	labels
+	taints {
+		... NodePoolTaintFragment
+	}
+}
+fragment NodePoolTaintFragment on Taint {
+	key
+	value
+	effect
+}
+fragment ClusterStatusFragment on ClusterStatus {
+	conditions {
+		... ClusterConditionFragment
+	}
+}
+fragment ClusterConditionFragment on ClusterCondition {
+	status
+	type
+	message
+	reason
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) ListClustersWithParameters(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, tagQuery *TagQuery, interceptors ...clientv2.RequestInterceptor) (*ListClustersWithParameters, error) {
+	vars := map[string]any{
+		"after":     after,
+		"first":     first,
+		"before":    before,
+		"last":      last,
+		"projectId": projectID,
+		"tagQuery":  tagQuery,
+	}
+
+	var res ListClustersWithParameters
+	if err := c.Client.Post(ctx, "ListClustersWithParameters", ListClustersWithParametersDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -18888,6 +19373,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19019,6 +19510,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -19136,6 +19646,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19267,6 +19783,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -19321,6 +19856,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -19452,6 +19993,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -19950,6 +20510,12 @@ fragment ClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment ClusterTags on Tag {
 	name
@@ -20081,6 +20647,25 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -32561,6 +33146,7 @@ var DocumentOperationNames = map[string]string{
 	PingClusterDocument:                               "PingCluster",
 	RegisterRuntimeServicesDocument:                   "RegisterRuntimeServices",
 	ListClustersDocument:                              "ListClusters",
+	ListClustersWithParametersDocument:                "ListClustersWithParameters",
 	GetClusterDocument:                                "GetCluster",
 	GetTinyClusterDocument:                            "GetTinyCluster",
 	GetAgentURLDocument:                               "GetAgentUrl",
