@@ -9,7 +9,8 @@ defmodule Console.AI.Chat.Engine do
     Pods,
     Component,
     Prs,
-    Pipelines
+    Pipelines,
+    Alerts
   }
   alias Console.AI.Tools.Knowledge.{
     CreateEntity,
@@ -43,7 +44,8 @@ defmodule Console.AI.Chat.Engine do
     Pods,
     Component,
     Prs,
-    Pipelines
+    Pipelines,
+    Alerts
   ]
 
   @memory_tools [
