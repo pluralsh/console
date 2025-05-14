@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "properties": {
+        "severities": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical", "undefined"]
+            },
+            "description": "Optional. Filter alerts by one or more severity levels. If omitted, alerts of all severities are returned."
+        },
+        "state": {
+            "type": "string",
+            "enum": ["firing", "resolved"],
+            "description": "Optional. Filter alerts by state (e.g., 'firing' for only active alerts). If omitted, alerts of all states are returned."
+        },
+        "types": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["grafana", "pagerduty", "newrelic", "datadog"]
+            },
+            "description": "Optional. Filter alerts by type. If omitted, alerts of all types are returned."
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}
