@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 from utils import (
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     expand_kube_versions,
     get_github_releases,
 )
@@ -25,12 +25,17 @@ def scrape():
     versions = []
     kube_versions = expand_kube_versions("1.27", "1.30")
     releases = get_github_releases("projectcalico", "calico")
+    chart_versions = get_chart_versions(app_name, "tigera-operator")
     for release in releases:
         ver = release.lstrip("v")
+        chart_version = chart_versions.get(ver)
+        if not chart_version:
+            continue
         version_info = OrderedDict(
             [
                 ("version", ver),
                 ("kube", kube_versions),
+                ("chart_version", chart_version),
             ]
         )
         versions.append(version_info)
@@ -39,4 +44,3 @@ def scrape():
         f"../../static/compatibilities/{app_name}.yaml", versions
     )
 
-    update_chart_versions(app_name, "tigera-operator")

@@ -4,7 +4,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     validate_semver,
 )
 
@@ -39,7 +39,7 @@ def clean_versions(versions):
     return clean_list
 
 
-def extract_table_data(table):
+def extract_table_data(table, chart_versions):
     rows = []
     for row in table.find_all("tr")[1:]:  # Skip the header row
         columns = row.find_all("td")
@@ -52,11 +52,16 @@ def extract_table_data(table):
             ingress_nginx_version = validate_semver(ingress_nginx_version)
             if not ingress_nginx_version:
                 continue
+            ver = str(ingress_nginx_version)
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
 
             version_info = OrderedDict(
                 [
-                    ("version", str(ingress_nginx_version)),
+                    ("version", ver),
                     ("kube", k8s_supported_versions),
+                    ("chart_version", chart_version),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
@@ -75,8 +80,8 @@ def scrape():
     if not table:
         return
 
-    rows = extract_table_data(table)
+    chart_versions = get_chart_versions("ingress-nginx")
+    rows = extract_table_data(table, chart_versions)
     update_compatibility_info(
         "../../static/compatibilities/ingress-nginx.yaml", rows
     )
-    update_chart_versions("ingress-nginx")

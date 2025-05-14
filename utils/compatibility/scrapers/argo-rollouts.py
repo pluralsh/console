@@ -9,7 +9,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     print_success,
 )
 
@@ -33,8 +33,15 @@ def scrape():
         print_error("No release tags found.")
         return
 
+    chart_versions = get_chart_versions(app_name)
     rows = []
     for tag in release_tags:
+        tag_version = tag.lstrip("v")
+        chart_version = chart_versions.get(tag_version)
+        # Skip if there's no chart version mapped
+        if not chart_version:
+            continue
+
         response = requests.get(
             f"https://raw.githubusercontent.com/argoproj/argo-rollouts/refs/tags/{tag}/.github/workflows/testing.yaml")
         if response.status_code != 200:
@@ -50,8 +57,9 @@ def scrape():
         kube_versions = [str(entry["version"]) for entry in matrix]
         rows.append(OrderedDict(
             [
-                ("version", tag.lstrip("v")),
+                ("version", tag_version),
                 ("kube", kube_versions),
+                ("chart_version", chart_version),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]
@@ -59,4 +67,3 @@ def scrape():
         print_success(f"Fetched compatibility info for tag: {tag}")
 
     update_compatibility_info(f"../../static/compatibilities/{app_name}.yaml", rows)
-    update_chart_versions(app_name)

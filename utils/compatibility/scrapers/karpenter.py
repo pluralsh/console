@@ -6,7 +6,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     validate_semver,
     expand_kube_versions,
 )
@@ -50,7 +50,7 @@ def find_target_tables(sections):
     return target_tables
 
 
-def extract_table_data(target_tables):
+def extract_table_data(target_tables, chart_versions):
     if len(target_tables) < 2:
         print_error("Insufficient data in target tables.")
         return []
@@ -65,10 +65,15 @@ def extract_table_data(target_tables):
         kar_ver = validate_semver(kar_ver)
 
         if kar_ver:
+            ver = str(kar_ver)
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
             version_info = OrderedDict(
                 {
-                    "version": str(kar_ver),
+                    "version": ver,
                     "kube": expanded_k8s_ver,
+                    "chart_version": chart_version,
                     "requirements": [],
                     "incompatibilities": [],
                 }
@@ -87,11 +92,11 @@ def scrape():
     sections = parse_page(page_content)
     target_tables = find_target_tables(sections)
     if target_tables.__len__() >= 1:
-        rows = extract_table_data(target_tables)
+        chart_versions = get_chart_versions(app_name)
+        rows = extract_table_data(target_tables, chart_versions)
         update_compatibility_info(
             f"../../static/compatibilities/{app_name}.yaml", rows
         )
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name)

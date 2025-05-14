@@ -6,7 +6,7 @@ from packaging.version import Version
 from utils import (
     print_error,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     current_kube_version,
 )
 
@@ -49,11 +49,14 @@ compat_map = {
 }
 
 
-def extract_version_info(release_tags):
+def extract_version_info(release_tags, chart_versions):
     rows = []
     for tag in release_tags:
         tag_version = tag.lstrip("v")
         parsed_tag_version = Version(tag_version)
+        chart_version = chart_versions.get(tag_version)
+        if not chart_version:
+            continue
 
         if parsed_tag_version <= Version("0.9.0"):
             kube_versions = compat_map["0.9.0"]
@@ -64,6 +67,7 @@ def extract_version_info(release_tags):
             [
                 ("version", tag_version),
                 ("kube", kube_versions.copy()),
+                ("chart_version", chart_version),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]
@@ -77,9 +81,9 @@ def scrape():
     if not release_tags:
         print_error("No release tags found.")
         return
-
-    rows = extract_version_info(release_tags)
+    chart_versions = get_chart_versions("external-dns")
+    rows = extract_version_info(release_tags, chart_versions)
     update_compatibility_info(
         "../../static/compatibilities/external-dns.yaml", rows
     )
-    update_chart_versions("external-dns")
+

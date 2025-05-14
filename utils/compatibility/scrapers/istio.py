@@ -6,7 +6,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     validate_semver,
 )
 
@@ -32,7 +32,7 @@ def find_target_tables(sections):
     return target_tables
 
 
-def extract_table_data(target_tables):
+def extract_table_data(target_tables, chart_versions):
     rows = []
     table = target_tables[0]
     for row in table.find_all("tr")[1:]:  # Skip the header row
@@ -42,10 +42,15 @@ def extract_table_data(target_tables):
             kube_versions = columns[4].text.split(", ")
             is_supported = columns[1].text
             if istio_version and is_supported.lower() == "yes":
+                ver = str(istio_version)
+                chart_version = chart_versions.get(ver)
+                if not chart_version:
+                    continue
                 version_info = OrderedDict(
                     [
                         ("version", str(istio_version)),
                         ("kube", kube_versions),
+                        ("chart_version", chart_version),
                         ("requirements", []),
                         ("incompatibilities", []),
                     ]
@@ -64,11 +69,11 @@ def scrape():
     sections = parse_page(page_content)
     target_tables = find_target_tables(sections)
     if target_tables.__len__() >= 1:
-        rows = extract_table_data(target_tables)
+        chart_versions = get_chart_versions(app_name, "base")
+        rows = extract_table_data(target_tables, chart_versions)
         update_compatibility_info(
             f"../../static/compatibilities/{app_name}.yaml", rows
         )
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name, "base")
