@@ -46,6 +46,7 @@ const (
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
 	FlowReconciler                       Reconciler = "flow"
 	MCPServerReconciler                  Reconciler = "mcpserver"
+	ComplianceReportGeneratorReconciler  Reconciler = "compliancereportgenerator"
 	PreviewEnvironmentTemplateReconciler Reconciler = "previewenvironmenttemplate"
 	ClusterSyncReconciler                           = "clustersync"
 )
@@ -81,6 +82,7 @@ var validReconcilers = map[string]Reconciler{
 	"BootstrapTokenReconciler":             BootstrapTokenReconciler,
 	"FlowReconciler":                       FlowReconciler,
 	"MCPServerReconciler":                  MCPServerReconciler,
+	"ComplianceReportGeneratorReconciler":  ComplianceReportGeneratorReconciler,
 	"ProviderReconciler":                   ProviderReconciler,
 	"PreviewEnvironmentTemplateReconciler": PreviewEnvironmentTemplateReconciler,
 	"ClusterSyncReconciler":                ClusterSyncReconciler,
@@ -357,6 +359,15 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			UserGroupCache:   userGroupCache,
 		}
 	},
+	ComplianceReportGeneratorReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ComplianceReportGeneratorReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			CredentialsCache: credentialsCache,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+		}
+	},
 	PreviewEnvironmentTemplateReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
 		return &controller.PreviewEnvironmentTemplateReconciler{
 			Client:        mgr.GetClient(),
@@ -430,6 +441,7 @@ func Reconcilers() ReconcilerList {
 		BootstrapTokenReconciler,
 		FlowReconciler,
 		MCPServerReconciler,
+		ComplianceReportGeneratorReconciler,
 		PreviewEnvironmentTemplateReconciler,
 		ClusterSyncReconciler,
 	}
