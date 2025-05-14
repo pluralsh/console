@@ -172,7 +172,7 @@ defmodule Console.Deployments.Flows do
     start_transaction()
     |> add_operation(:template, fn _ ->
       case get_preview_environment_template_by_name(name) do
-        %PreviewEnvironmentTemplate{} = template -> template
+        %PreviewEnvironmentTemplate{} = template -> Repo.preload(template, [:template])
         nil -> %PreviewEnvironmentTemplate{}
       end
       |> PreviewEnvironmentTemplate.changeset(attrs)

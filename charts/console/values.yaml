@@ -80,11 +80,8 @@ ociAuth:
   tag: v0.10.23
   imagePullPolicy: IfNotPresent
 
-# initContainer currently isn't used in the helm chart
-initContainer:
-  image:
-    repository: gcr.io/pluralsh/library/busybox
-    tag: 1.35.0
+# initContainers is used to create a list of init containers for your console deployment
+initContainers: []
 
 # cliContainer is used to create a container for the plural cli
 cliContainer:

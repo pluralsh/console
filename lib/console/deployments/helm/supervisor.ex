@@ -12,6 +12,7 @@ defmodule Console.Deployments.Helm.Supervisor do
 
   @impl true
   def init(_init_arg) do
+    :ets.new(:helm_cache, [:set, :public, :named_table, write_concurrency: true, read_concurrency: true])
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 end

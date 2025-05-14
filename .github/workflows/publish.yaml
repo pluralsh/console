@@ -69,6 +69,19 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
+      - name: Docker meta
+        id: meta-ubuntu
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            dkr.plural.sh/console/console-ubuntu
+            ghcr.io/pluralsh/console-ubuntu
+            gcr.io/pluralsh/console-ubuntu
+            docker.io/pluralsh/console-ubuntu
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -122,6 +135,23 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             GIT_COMMIT=${{ github.sha }}
+            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+      - name: Build and push ubuntu images
+        uses: docker/build-push-action@v3
+        with:
+          context: "."
+          file: "./Dockerfile"
+          push: true
+          tags: ${{ steps.meta-ubuntu.outputs.tags }}
+          labels: ${{ steps.meta-ubuntu.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            ELIXIR_OS=ubuntu-focal-20250404
+            OS_VERSION=focal-20250404
+            OS_VARIANT=ubuntu
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
       - name: slack webhook
         uses: 8398a7/action-slack@v3
