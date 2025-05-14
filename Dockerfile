@@ -1,8 +1,9 @@
 ARG ELIXIR_VERSION=1.18.3
 ARG OTP_VERSION=27.3.2
-ARG ALPINE_VERSION=3.21.3
-ARG TOOLS_IMAGE=alpine:${ALPINE_VERSION}
-ARG RUNNER_IMAGE=alpine:${ALPINE_VERSION}
+ARG OS_VARIANT=alpine
+ARG OS_VERSION=3.21.3
+ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
+ARG RUNNER_IMAGE=${OS_VARIANT}:${OS_VERSION}
 
 FROM node:16.16-alpine3.15 as node
 
@@ -23,7 +24,7 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
 
 RUN yarn run build
 
-FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION} AS builder
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION} AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -32,16 +33,22 @@ ARG APP_NAME=console
 ARG MIX_ENV=prod
 # Set this to true if this release is not a Phoenix app
 ARG SKIP_PHOENIX=false
+ARG OS_VARIANT=alpine
 
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
-    MIX_ENV=${MIX_ENV}
+    MIX_ENV=${MIX_ENV} \
+    OS_VARIANT=${OS_VARIANT}
 
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
 # This step installs all the build tools we'll need
-RUN apk update && apk add git build-base && \
+RUN if [ "$OS_VARIANT" = "alpine" ]; then \
+      apk update && apk add git build-base; \
+    else \
+      apt-get update && apt-get install -y git build-essential; \
+    fi && \
   mix local.rebar --force && \
   mix local.hex --force
 
@@ -58,21 +65,10 @@ COPY --from=node /app/build ./priv/static
 
 RUN mix do agent.chart, release
 
-FROM ${TOOLS_IMAGE} as tools
+FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-
-# renovate: datasource=github-releases depName=helm/helm
-# ENV HELM_VERSION=v3.16.3
-
-# renovate: datasource=github-releases depName=hashicorp/terraform
-# ENV TERRAFORM_VERSION=v1.9.8
-
-# renovate: datasource=github-releases depName=pluralsh/plural-cli
 ENV CLI_VERSION=v0.12.3
-
-# renovate: datasource=github-tags depName=kubernetes/kubernetes
-# ENV KUBECTL_VERSION=v1.31.3
 
 COPY AGENT_VERSION AGENT_VERSION
 
@@ -93,17 +89,14 @@ RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSI
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM ${RUNNER_IMAGE}
 
+ARG OS_VARIANT=alpine
+
 COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN apk update && apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash && \
-  apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make && \
-  apk del build && \
-  addgroup --gid 10001 app && \
-  adduser -D -h /home/console -u 10001 -G app console && \
-  chown console:app /opt/app && \
-  mkdir -p /opt/app/data
+COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
+RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
 
 ARG APP_NAME=console
 ARG GIT_COMMIT
