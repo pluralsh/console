@@ -55,10 +55,11 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.project_id == ^id)
   end
 
-  def for_flow(query \\ __MODULE__, id) do
+  def for_flow(query \\ __MODULE__, flow_id) do
     from(a in query,
       join: s in assoc(a, :service),
-      where: s.flow_id == ^id
+      where: s.flow_id == ^flow_id,
+      distinct: true
     )
   end
 

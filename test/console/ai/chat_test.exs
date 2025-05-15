@@ -661,4 +661,78 @@ defmodule Console.AI.ChatSyncTest do
       {:error, _} = Chat.confirm_chat(chat.id, insert(:user))
     end
   end
+
+  describe "alerts test suite" do
+    @tag alerts: true
+    test "it can chat with a plural alerts tool call" do
+      user = insert(:user)
+      flow = insert(:flow)
+      service = insert(:service, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+
+      alert_title = "DB Maintenance Alert"
+      alert_message = "Database undergoing planned maintenance."
+      alert_type_enum = :grafana
+      alert_severity_enum = :low
+      alert_state_enum = :firing
+      alert_annotations_map = %{"scope" => "payments-db", "region" => "us-east-1"}
+
+      _alert_record = insert(:alert,
+        service: service,
+        title: alert_title,
+        message: alert_message,
+        type: alert_type_enum,
+        severity: alert_severity_enum,
+        state: alert_state_enum,
+        annotations: alert_annotations_map
+      )
+
+      deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+
+      # Mock the OpenAI completion calls
+      expect(Console.AI.OpenAI, :completion, fn _, messages, _opts ->
+        is_initial_call = Enum.any?(messages, fn
+          %{role: :user, content: content_text} ->
+            content_text == "user query triggering alert tool"
+          _ ->
+            false
+        end)
+
+        if is_initial_call do
+          {:ok, "I'll check the alerts for you", [%Tool{name: "__plrl__alerts", arguments: %{}}]}
+        else
+          {:ok, "final ai response after alerts tool"}
+        end
+      end)
+
+      # Add debug logging
+      IO.puts("\nStarting hybrid_chat test...")
+      {:ok, chats} = Chat.hybrid_chat([
+        %{role: :assistant, content: "initial assistant message"},
+        %{role: :user, content: "user query triggering alert tool"}
+      ], thread.id, user)
+      IO.inspect(chats, label: "hybrid_chat result")
+
+      [final_chat] = chats
+
+      assert final_chat.role == :assistant
+      assert final_chat.content == "final ai response after alerts tool"
+
+      # Verify the alert was created and can be queried
+      alerts = Console.Schema.Alert.for_flow(Console.Schema.Alert, flow.id) |> Console.Repo.all()
+      assert length(alerts) == 1
+      alert = hd(alerts)
+
+      assert alert.title == alert_title
+      assert alert.message == alert_message
+      assert alert.type == alert_type_enum
+      assert alert.severity == alert_severity_enum
+      assert alert.state == alert_state_enum
+      assert alert.annotations == alert_annotations_map
+    end
+  end
 end

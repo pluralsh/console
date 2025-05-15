@@ -2,14 +2,14 @@ defmodule Console.AI.Tools.Alerts do
   use Ecto.Schema
   import Ecto.Changeset
   import Console.AI.Tools.Utils
-  alias Console.Repo
-  alias Console.Schema.{Alert, AlertRule}
+  alias Console.Schema.{Alert, Flow}
+  # No VectorStore alias needed here
+  # alias Console.AI.Tool # Will use Console.AI.Tool.flow() directly
 
   embedded_schema do
-    field :query, :string
   end
 
-  @valid ~w(query)a
+  @valid ~w()a
 
   def changeset(model, attrs) do
     model
@@ -20,23 +20,27 @@ defmodule Console.AI.Tools.Alerts do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("alerts")
-  def description(), do: "Shows the alerts currently associated with this flow. This can be a source of truth for the stage of the Plural service deployments in the flow as well."
+  def description(), do: "Shows alerts for the current flow."
 
-  def implement(%__MODULE__{} = _query) do
-    case Console.AI.Tool.flow() do
-      {:flow, %Flow{id: flow_id}} ->
-        actual_alerts =
-          Console.Schema.Alert.for_flow(flow_id)
+  def implement(%__MODULE__{}) do
+    case Console.AI.Tool.flow() do # Get flow context
+      %Flow{id: flow_id} ->
+        alerts =
+          Alert.for_flow(Alert, flow_id) # Use Alert module as base for query
           |> Console.Repo.all()
+          |> IO.inspect(label: "alerts")
 
-        model(actual_alerts)
+        model(alerts)
         |> Jason.encode()
-
-      _ ->
+      nil ->
         {:error, "no flow found"}
+      _ ->
+        # This case might occur if Tool.flow() returns something unexpected like %{user: ..., flow: nil}
+        {:error, "Flow context not available or in unexpected format"}
     end
   end
 
+  # This model function expects a list of Console.Schema.Alert structs
   defp model(alerts) do
     Enum.map(alerts, fn alert ->
       %{
@@ -46,6 +50,7 @@ defmodule Console.AI.Tools.Alerts do
         title: alert.title,
         message: alert.message,
         annotations: alert.annotations
+        # Add other fields if necessary, e.g., alert.id, alert.url
       }
     end)
   end
