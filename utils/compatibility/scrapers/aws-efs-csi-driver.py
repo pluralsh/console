@@ -4,7 +4,7 @@ from packaging.version import Version
 from utils import (
     print_error,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     get_github_releases,
     get_latest_github_release,
     expand_kube_versions,
@@ -48,15 +48,20 @@ def get_kube_versions(version):
 def scrape():
     versions = []
     releases = get_github_releases("kubernetes-sigs", "aws-efs-csi-driver")
+    chart_versions = get_chart_versions(app_name)
     for release in releases:
         print(f"Processing release: {release}")
         if release.startswith("v"):
             ver = release.lstrip("v")
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
             kube_ver = get_kube_versions(ver)
             version_info = OrderedDict(
                 [
                     ("version", ver),
                     ("kube", kube_ver),
+                    ("chart_version", chart_version),
                 ]
             )
             versions.append(version_info)
@@ -68,4 +73,3 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name)

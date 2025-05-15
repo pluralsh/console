@@ -4,7 +4,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     validate_semver,
 )
 
@@ -32,15 +32,21 @@ def find_target_tables(sections):
 
 def extract_table_data(target_tables):
     rows = []
+    chart_versions = get_chart_versions(app_name)
     for row in target_tables[0].find_all("tr")[1:]:  # Skip the header row
         columns = row.find_all("td")
         app_version = validate_semver(columns[0].text)
         kube_versions = columns[2].get_text(strip=True).split(", ")
         if app_version:
+            ver = str(app_version)
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
             version_info = OrderedDict(
                 [
-                    ("version", str(app_version)),
+                    ("version", ver),
                     ("kube", kube_versions),
+                    ("chart_version", chart_version),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
@@ -65,4 +71,3 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name)

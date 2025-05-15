@@ -6,7 +6,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
 )
 
 
@@ -47,7 +47,7 @@ def expand_kube_versions(version_range):
     return expanded_versions
 
 
-def extract_table_data(target_tables):
+def extract_table_data(target_tables, chart_versions):
     rows = []
     for table in target_tables:
         for row in table.find_all("tr")[1:]:  # Skip the header row
@@ -62,10 +62,15 @@ def extract_table_data(target_tables):
                 expanded_versions = expand_kube_versions(
                     k8s_supported_versions
                 )
+                chart_version = chart_versions.get(cert_manager_version)
+                if not chart_version:
+                    continue
+
                 version_info = OrderedDict(
                     [
                         ("version", cert_manager_version),
                         ("kube", expanded_versions),
+                        ("chart_version", chart_version),
                         ("requirements", []),
                         ("incompatibilities", []),
                     ]
@@ -86,8 +91,8 @@ def scrape():
         print_error("No target tables found in the README section.")
         return
 
-    rows = extract_table_data(target_tables)
+    chart_versions = get_chart_versions("cert-manager")
+    rows = extract_table_data(target_tables, chart_versions)
     update_compatibility_info(
         "../../static/compatibilities/cert-manager.yaml", rows
     )
-    update_chart_versions("cert-manager")

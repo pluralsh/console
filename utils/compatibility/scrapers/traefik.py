@@ -3,7 +3,7 @@
 from collections import OrderedDict
 from utils import (
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     get_github_releases,
     current_kube_version,
     expand_kube_versions,
@@ -22,13 +22,19 @@ def scrape():
     kube_versions = expand_kube_versions(kube_start, kube_end)
 
     releases = get_github_releases("traefik", "traefik")
+    chart_versions = get_chart_versions(app_name)
+
     for release in releases:
         if "-" not in release:
             ver = release.lstrip("v")
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
             version_info = OrderedDict(
                 [
                     ("version", ver),
                     ("kube", kube_versions),
+                    ("chart_version", chart_version),
                 ]
             )
             versions.append(version_info)
@@ -37,4 +43,3 @@ def scrape():
         f"../../static/compatibilities/{app_name}.yaml", versions
     )
 
-    update_chart_versions(app_name)

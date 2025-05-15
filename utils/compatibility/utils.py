@@ -180,6 +180,53 @@ def get_latest_github_release(repo_owner, repo_name):
         )
 
 
+def get_chart_versions(app_name: str, chart_name: str = "") -> dict[str, str]:
+    map_versions = {}
+
+    if not chart_name:
+        chart_name = app_name
+
+    yaml_file_name = f"../../static/compatibilities/{app_name}.yaml"
+    try:
+        compatibility_yaml = read_yaml(yaml_file_name)
+    except Exception as e:
+        print_error(f"Error reading YAML file '{yaml_file_name}': {e}")
+        return map_versions
+
+    if not compatibility_yaml or "versions" not in compatibility_yaml:
+        print_error(f"No versions found for {app_name} in the compatibility YAML file.")
+        return map_versions
+
+    helm_repository_url = compatibility_yaml.get("helm_repository_url")
+    if not helm_repository_url:
+        print_error(f"'helm_repository_url' is missing in {yaml_file_name}.")
+        return map_versions
+
+    try:
+        chart_index_content = fetch_page(helm_repository_url + "/index.yaml")
+        if not chart_index_content:
+            raise ValueError("Empty response")
+        index_yaml = yaml.safe_load(chart_index_content)
+    except Exception as e:
+        print_error(f"Failed to fetch or parse index.yaml from {helm_repository_url}: {e}")
+        return map_versions
+
+    entries = index_yaml.get("entries", {})
+    chart_versions = entries.get(chart_name)
+    if not chart_versions:
+        print_error(f"No chart versions found for {chart_name} in index.yaml.")
+        return map_versions
+
+    for chart_entry in chart_versions:
+        app_version = chart_entry.get("appVersion", "").lstrip("v")
+        chart_version = chart_entry.get("version", "").lstrip("v")
+        if not map_versions.get(app_version):
+            map_versions[app_version] = chart_version
+            break
+
+    return map_versions
+
+
 def update_chart_versions(app_name, chart_name=""):
 
     if not chart_name:
@@ -215,8 +262,10 @@ def update_chart_versions(app_name, chart_name=""):
         app_version = chart_entry.get("appVersion", "").lstrip("v")
         chart_version = chart_entry.get("version", "").lstrip("v")
         for row in compatibility_yaml["versions"]:
-            if row["version"] == app_version:
+            if row["version"] == app_version and not row.get("chart_version"):
                 row["chart_version"] = chart_version
+                break
+
 
     if write_yaml(yaml_file_name, compatibility_yaml):
         print_success(
@@ -289,6 +338,10 @@ def reduce_versions(versions):
                     ("incompatibilities", data.get("incompatibilities", [])),
                 ]
             )
+
+            # Include chart_version if it exists in the original data
+            if "chart_version" in data:
+                version_info["chart_version"] = data["chart_version"]
 
             reduced_versions.append(version_info)
 

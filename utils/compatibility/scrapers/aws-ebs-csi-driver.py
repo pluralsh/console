@@ -7,7 +7,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
     expand_kube_versions,
     get_github_releases,
     current_kube_version,
@@ -30,15 +30,20 @@ def scrape():
 
     k8s_versions = expand_kube_versions("1.20", current_kube_version())
     releases = get_github_releases("kubernetes-sigs", "aws-ebs-csi-driver")
-
+    chart_versions = get_chart_versions(app_name)
     versions = []
     for release in releases:
         if release.startswith("v"):
             ver = release.lstrip("v")
+            chart_version = chart_versions.get(ver)
+            if not chart_version:
+                continue
+
             version_info = OrderedDict(
                 [
                     ("version", ver),
                     ("kube", k8s_versions),
+                    ("chart_version", chart_version),
                 ]
             )
             versions.append(version_info)
@@ -48,4 +53,3 @@ def scrape():
         f"../../static/compatibilities/{app_name}.yaml", versions
     )
 
-    update_chart_versions(app_name)

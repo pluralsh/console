@@ -3,7 +3,7 @@ from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
-    update_chart_versions,
+    get_chart_versions,
 )
 import re
 
@@ -17,7 +17,7 @@ def parse_page(content):
     return table
 
 
-def extract_table_data(table):
+def extract_table_data(table, chart_versions):
     rows = []
     table_rows = table.find_all("tr")
     for row in table_rows[1:]:  # Skip header row
@@ -40,9 +40,12 @@ def extract_table_data(table):
             re.sub(r"^v", "", version.strip())
             for version in re.split(r"&|,", kubernetes_versions)
         ]
+        chart_version = chart_versions.get(coredns_version)
+        if not chart_version:
+            continue
 
         rows.append(
-            {"version": coredns_version, "kube": kubernetes_versions_list}
+            {"version": coredns_version, "kube": kubernetes_versions_list, "chart_version": chart_version}
         )
     return rows
 
@@ -58,7 +61,8 @@ def scrape():
         print_error("No tables found in the page content.")
         return
 
-    rows = extract_table_data(tables)
+    chart_versions = get_chart_versions(app_name)
+    rows = extract_table_data(tables, chart_versions)
     if not rows:
         print_error("No compatibility information found.")
         return
@@ -67,4 +71,3 @@ def scrape():
         f"../../static/compatibilities/{app_name}.yaml", rows
     )
 
-    update_chart_versions(app_name)
