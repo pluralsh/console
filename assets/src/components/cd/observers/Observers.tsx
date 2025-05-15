@@ -177,6 +177,11 @@ const columns = [
     header: 'Crontab',
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor(({ node }) => node?.lastValue, {
+    id: 'lastValue',
+    header: 'Last value',
+    cell: ({ getValue }) => getValue(),
+  }),
   columnHelper.accessor(({ node }) => node?.lastRunAt, {
     id: 'lastRunAt',
     header: 'Last run',
