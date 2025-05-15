@@ -156,8 +156,8 @@ defmodule Console.Deployments.Git.Agent do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          resp <- clone(git),
          cache <- Cache.refresh(cache),
-         {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), cache} do
-      {:noreply, %{state | git: git, cache: store_cache(cache)}}
+         {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), %{cache | git: git}} do
+      {:noreply, %{state | git: git, cache: store_cache(%{cache | git: git})}}
     else
       {:git, nil} ->
         {:stop, {:shutdown, :normal}, state}
@@ -174,14 +174,14 @@ defmodule Console.Deployments.Git.Agent do
   def handle_info(:pull, %State{git: git, cache: cache} = state) do
     try do
       with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
-           {:pullable, true} <- {:pullable, should_pull?(state)},
+           {:pullable, {true, _}} <- {:pullable, {should_pull?(state), git}},
            res <- fetch(git),
            {:ok, git} <- save_status(res, git),
            cache <- refresh(git, cache) do
-        {:noreply, %State{git: git, cache: store_cache(cache), last_pull: Timex.now()}}
+        {:noreply, %State{git: git, cache: store_cache(%{cache | git: git}), last_pull: Timex.now()}}
       else
         {:git, nil} -> {:stop, {:shutdown, :normal}, state}
-        {:pullable, _} -> {:noreply, state}
+        {:pullable, {_, git}} -> {:noreply, %{state | git: git, cache: store_cache(%{cache | git: git})}}
         err ->
           Logger.info "unknown failure: #{inspect(err)}"
           {:noreply, state}
@@ -211,7 +211,7 @@ defmodule Console.Deployments.Git.Agent do
 
   defp refresh(%GitRepository{} = repo) do
     with %GitRepository{} = git <- Repo.get(GitRepository, repo.id) |> Repo.preload([:connection]),
-         git = Map.merge(git, Map.take(repo, [:private_key_file, :dir])),
+         git = Map.merge(git, Map.take(repo, ~w(private_key_file dir prev_private_key)a)),
          {:ok, git} <- refresh_key(git),
       do: git
   end

@@ -76,22 +76,22 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
-      - name: Build and push ubuntu images
-        uses: docker/build-push-action@v3
-        with:
-          context: "."
-          file: "./Dockerfile"
-          push: true
-          tags: ${{ steps.meta-ubuntu.outputs.tags }}
-          labels: ${{ steps.meta-ubuntu.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            GIT_COMMIT=${{ github.sha }}
-            OS_VERSION=focal-20250404
-            OS_VARIANT=ubuntu
-            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+      # - name: Build and push ubuntu images
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     context: "."
+      #     file: "./Dockerfile"
+      #     push: true
+      #     tags: ${{ steps.meta-ubuntu.outputs.tags }}
+      #     labels: ${{ steps.meta-ubuntu.outputs.labels }}
+      #     platforms: linux/amd64
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
+      #     build-args: |
+      #       GIT_COMMIT=${{ github.sha }}
+      #       OS_VERSION=focal-20250404
+      #       OS_VARIANT=ubuntu
+      #       VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
 
   test:
     name: Test

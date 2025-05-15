@@ -36,11 +36,22 @@ defmodule Console.GraphQl.Deployments.OAuth do
     field :client_id,     non_null(:string), description: "the generated client ID used in configuring OAuth clients"
     field :client_secret, non_null(:string), description: "the generated client secret, used in configuring an OAuth client"
     field :bindings,      list_of(:policy_binding),
-      resolve: dataloader(Deployments),
-      description: "bindings determining if a user can login with this oidc client"
+      description: "bindings determining if a user can login with this oidc client",
+      resolve: fn
+        %Console.Schema.OIDCProvider{} = provider, args, ctx ->
+          fun = dataloader(Deployments)
+          fun.(provider, args, ctx)
+        _, _, _ -> []
+      end
+
     field :write_bindings, list_of(:policy_binding),
-      resolve: dataloader(Deployments),
-      description: "bindings determining if a user can edit this oidc client"
+      description: "bindings determining if a user can edit this oidc client",
+      resolve: fn
+        %Console.Schema.OIDCProvider{} = provider, args, ctx ->
+          fun = dataloader(Deployments)
+          fun.(provider, args, ctx)
+        _, _, _ -> []
+      end
   end
 
   connection node_type: :oidc_provider

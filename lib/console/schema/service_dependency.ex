@@ -6,7 +6,7 @@ defmodule Console.Schema.ServiceDependency do
     field :name,   :string
     field :status, Service.Status
 
-    belongs_to :service, Service
+    belongs_to :service,  Service
     belongs_to :template, ServiceTemplate
 
     timestamps()

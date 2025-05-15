@@ -81,7 +81,7 @@ defmodule Console.Deployments.Helm.Agent do
          {:refresh, {:ok, cache}, repo} <- {:refresh, AgentCache.refresh(cache), repo},
          {:ok, repo}  <- refresh(repo) do
       schedule_pull()
-      {:noreply, %{state | cache: store_cache(cache), repo: repo}}
+      {:noreply, %{state | cache: store_cache(%{cache | repo: repo}), repo: repo}}
     else
       {:refresh, {:error, err}, repo} ->
         schedule_pull()

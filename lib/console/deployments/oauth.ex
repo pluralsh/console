@@ -75,5 +75,6 @@ defmodule Console.Deployments.OAuth do
     |> Map.update(:auth_method, :POST, &String.upcase("#{&1}"))
     |> Console.move([:redirect_uris], [:redirectUris])
     |> Console.move([:auth_method], [:authMethod])
+    |> Map.take(~w(authMethod redirectUris name description)a)
   end
 end

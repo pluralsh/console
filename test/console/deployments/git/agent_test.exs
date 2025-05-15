@@ -70,7 +70,7 @@ defmodule Console.Deployments.Git.AgentTest do
 
     @tag :skip
     test "it can fetch from private repos" do
-      key = Path.join(System.user_home!(), ".ssh/id_plrl_test") |> File.read!()
+      key = Path.join(System.user_home!(), ".ssh/id_ed25519") |> File.read!()
       git = insert(:git_repository, auth_method: :ssh, url: "git@github.com:pluralsh/test-repo.git", private_key: key)
       svc = insert(:service, repository: git, git: %{ref: "main", folder: "/"})
 
