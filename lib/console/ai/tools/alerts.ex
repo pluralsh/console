@@ -20,15 +20,13 @@ defmodule Console.AI.Tools.Alerts do
   def name(), do: plrl_tool("alerts")
   def description(), do: "Shows alerts for the current flow."
 
-  def implement(%__MODULE__{}) do
+  def implement(%__MODULE__{} = args) do
+    IO.inspect(args, label: "args")
     case Console.AI.Tool.flow() do
       %Flow{id: flow_id} ->
-        alerts =
-          Alert.for_flow(Alert, flow_id)
-          |> Console.Repo.all()
-          |> IO.inspect(label: "alerts")
-
-        model(alerts)
+        Alert.for_flow(Alert, flow_id)
+        |> Console.Repo.all()
+        |> model()
         |> Jason.encode()
       nil ->
         {:error, "no flow found"}
@@ -43,9 +41,12 @@ defmodule Console.AI.Tools.Alerts do
         severity: alert.severity,
         state: alert.state,
         title: alert.title,
+        url: alert.url,
         message: alert.message,
-        annotations: alert.annotations
-        # Add other fields if necessary, e.g., alert.id, alert.url
+        annotations: alert.annotations,
+        project_id: alert.project_id,
+        cluster_id: alert.cluster_id,
+        service_id: alert.service_id
       }
     end)
   end
