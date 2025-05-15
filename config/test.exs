@@ -280,3 +280,14 @@ config :elasticsearch,
   host: "http://localhost:9200",
   index: "testindex",
   vector_index: "plrl-vector-testindex"
+
+config :opensearch,
+  # create-domain endpoint done through localstack is always in format http://<domain>.<region>.opensearch.localhost.localstack.cloud:<localstack-port>
+  host: "http://opensearch-local.us-east-1.opensearch.localhost.localstack.cloud:4566",
+  index: "plrl-testindex",
+  vector_index: "plrl-vector-testindex",
+  # aws access key id, secret access key, session token must be the same values as in Makefile
+  aws_access_key_id: "test-access-key",
+  aws_secret_access_key: "test-secret-key",
+  aws_session_token: "test-session-token",
+  aws_region: "us-east-1"

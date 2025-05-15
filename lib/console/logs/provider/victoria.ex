@@ -7,9 +7,8 @@ defmodule Console.Logs.Provider.Victoria do
   alias Console.Logs.{Query, Time, Line, Stream.Exec}
   alias Console.Schema.{Cluster, Service, DeploymentSettings.Connection}
 
-  @headers [{"content-type", "application/x-www-form-urlencoded"}]
-
   @options [recv_timeout: :timer.seconds(30), timeout: :timer.seconds(30)]
+  @headers [{"Content-Type", "application/x-www-form-urlencoded"}]
 
   defstruct [:connection]
 
@@ -17,11 +16,11 @@ defmodule Console.Logs.Provider.Victoria do
 
   def query(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{} = query) when is_binary(host) do
     Exec.exec(fn ->
-      Path.join(host, "/select/logsql/query")
+      Connection.url(conn, "/select/logsql/query")
       |> HTTPoison.post({:form, [
         {"query", build_query(query)},
         {"limit", "#{Query.limit(query)}"}
-      ]}, headers(conn), [stream_to: self(), async: :once] ++ @options)
+      ]}, Connection.headers(conn, @headers), [stream_to: self(), async: :once] ++ @options)
     end, mapper: &line/1)
   end
   def query(_, _), do: {:error, "no victoria metrics host specified"}
@@ -45,10 +44,6 @@ defmodule Console.Logs.Provider.Victoria do
       facets: facets
     }
   end
-
-  defp headers(%Connection{user: u, password: p}) when is_binary(u) and is_binary(p),
-    do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | @headers]
-  defp headers(_), do: @headers
 
   defp add_resource(io, %Query{resource: %Cluster{} = cluster}),
     do: [cluster_label(cluster) | io]

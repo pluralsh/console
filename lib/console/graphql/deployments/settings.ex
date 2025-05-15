@@ -55,10 +55,11 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :logging_settings_attributes do
-    field :enabled,  :boolean
-    field :driver,   :log_driver
-    field :victoria, :http_connection_attributes
-    field :elastic,  :elasticsearch_connection_attributes
+    field :enabled,     :boolean
+    field :driver,      :log_driver
+    field :victoria,    :http_connection_attributes
+    field :elastic,     :elasticsearch_connection_attributes
+    field :opensearch,  :opensearch_connection_attributes
   end
 
   input_object :elasticsearch_connection_attributes do
@@ -66,6 +67,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :index,    non_null(:string)
     field :user,     :string
     field :password, :string
+  end
+
+  input_object :opensearch_connection_attributes do
+    field :host,                  non_null(:string)
+    field :index,                 non_null(:string)
+    field :aws_access_key_id,     :string
+    field :aws_secret_access_key, :string
+    field :aws_region,            :string
   end
 
   input_object :ai_settings_attributes do
@@ -142,9 +151,10 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :vector_store_attributes do
-    field :enabled, :boolean
-    field :store,   :vector_store
-    field :elastic, :elasticsearch_connection_attributes
+    field :enabled,    :boolean
+    field :store,      :vector_store
+    field :elastic,    :elasticsearch_connection_attributes
+    field :opensearch, :opensearch_connection_attributes
   end
 
   input_object :smtp_settings_attributes do
@@ -298,16 +308,24 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring log aggregation throughout Plural"
   object :logging_settings do
-    field :enabled,  :boolean
-    field :driver,   :log_driver, description: "the type of log aggregation solution you wish to use"
-    field :victoria, :http_connection, description: "configures a connection to victoria metrics"
-    field :elastic,  :elasticsearch_connection, description: "configures a connection to elasticsearch for logging"
+    field :enabled,    :boolean
+    field :driver,     :log_driver, description: "the type of log aggregation solution you wish to use"
+    field :victoria,   :http_connection, description: "configures a connection to victoria metrics"
+    field :elastic,    :elasticsearch_connection, description: "configures a connection to elasticsearch for logging"
+    field :opensearch, :opensearch_connection, description: "configures a connection to aws opensearch for logging"
   end
 
   object :elasticsearch_connection do
     field :host,     non_null(:string)
     field :index,    non_null(:string), description: "the index to query for log data"
     field :user,     :string
+  end
+
+  object :opensearch_connection do
+    field :host,              non_null(:string)
+    field :index,             non_null(:string), description: "the index to query for log data"
+    field :aws_access_key_id, :string
+    field :aws_region,        :string
   end
 
   connection node_type: :project

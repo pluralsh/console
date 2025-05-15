@@ -3711,6 +3711,8 @@ export type LoggingSettings = {
   /** configures a connection to elasticsearch for logging */
   elastic?: Maybe<ElasticsearchConnection>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** configures a connection to aws opensearch for logging */
+  opensearch?: Maybe<OpensearchConnection>;
   /** configures a connection to victoria metrics */
   victoria?: Maybe<HttpConnection>;
 };
@@ -3719,6 +3721,7 @@ export type LoggingSettingsAttributes = {
   driver?: InputMaybe<LogDriver>;
   elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  opensearch?: InputMaybe<OpensearchConnectionAttributes>;
   victoria?: InputMaybe<HttpConnectionAttributes>;
 };
 
@@ -4748,6 +4751,23 @@ export type OpenaiSettingsAttributes = {
   model?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type OpensearchConnection = {
+  __typename?: 'OpensearchConnection';
+  awsAccessKeyId?: Maybe<Scalars['String']['output']>;
+  awsRegion?: Maybe<Scalars['String']['output']>;
+  host: Scalars['String']['output'];
+  /** the index to query for log data */
+  index: Scalars['String']['output'];
+};
+
+export type OpensearchConnectionAttributes = {
+  awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
+  awsRegion?: InputMaybe<Scalars['String']['input']>;
+  awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  host: Scalars['String']['input'];
+  index: Scalars['String']['input'];
 };
 
 export enum Operation {
@@ -10261,12 +10281,14 @@ export enum ValidationUniqScope {
 }
 
 export enum VectorStore {
-  Elastic = 'ELASTIC'
+  Elastic = 'ELASTIC',
+  Opensearch = 'OPENSEARCH'
 }
 
 export type VectorStoreAttributes = {
   elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  opensearch?: InputMaybe<OpensearchConnectionAttributes>;
   store?: InputMaybe<VectorStore>;
 };
 

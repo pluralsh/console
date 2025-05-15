@@ -1373,6 +1373,7 @@ enum LogDriver {
 
 enum VectorStore {
   ELASTIC
+  OPENSEARCH
 }
 
 input ProjectAttributes {
@@ -1452,6 +1453,7 @@ input LoggingSettingsAttributes {
   driver: LogDriver
   victoria: HttpConnectionAttributes
   elastic: ElasticsearchConnectionAttributes
+  opensearch: OpensearchConnectionAttributes
 }
 
 input ElasticsearchConnectionAttributes {
@@ -1459,6 +1461,14 @@ input ElasticsearchConnectionAttributes {
   index: String!
   user: String
   password: String
+}
+
+input OpensearchConnectionAttributes {
+  host: String!
+  index: String!
+  awsAccessKeyId: String
+  awsSecretAccessKey: String
+  awsRegion: String
 }
 
 input AiSettingsAttributes {
@@ -1603,6 +1613,7 @@ input VectorStoreAttributes {
   enabled: Boolean
   store: VectorStore
   elastic: ElasticsearchConnectionAttributes
+  opensearch: OpensearchConnectionAttributes
 }
 
 input SmtpSettingsAttributes {
@@ -1854,6 +1865,9 @@ type LoggingSettings {
 
   "configures a connection to elasticsearch for logging"
   elastic: ElasticsearchConnection
+
+  "configures a connection to aws opensearch for logging"
+  opensearch: OpensearchConnection
 }
 
 type ElasticsearchConnection {
@@ -1863,6 +1877,17 @@ type ElasticsearchConnection {
   index: String!
 
   user: String
+}
+
+type OpensearchConnection {
+  host: String!
+
+  "the index to query for log data"
+  index: String!
+
+  awsAccessKeyId: String
+
+  awsRegion: String
 }
 
 type ProjectConnection {

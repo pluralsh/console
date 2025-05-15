@@ -29,8 +29,68 @@ services:
       - "npx -y @modelcontextprotocol/server-everything"
       - "--port"
       - "8000"
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    ports:
+    # elasticsearch already uses port 9200 on host, so let opensearch use 9300
+    - 9300:9200
+    environment:
+    - node.name=opensearch
+    - cluster.name=opensearch-docker-cluster
+    - discovery.type=single-node
+    - bootstrap.memory_lock=true
+    - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    - "DISABLE_SECURITY_PLUGIN=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+    - opensearch_data:/usr/share/opensearch/data
+  localstack:
+    container_name: localstack-main
+    image: localstack/localstack
+    ports:
+    - 4566:4566
+    environment:
+    - SERVICES=opensearch
+    - OPENSEARCH_CUSTOM_BACKEND=http://opensearch:9200
+    volumes:
+    - localstack_data:/usr/share/localstack/data
+    - /var/run/docker.sock:/var/run/docker.sock
+  sigv4-proxy:
+    container_name: sigv4-proxy
+    image: public.ecr.aws/aws-observability/aws-sigv4-proxy:latest
+    ports:
+    # host port 4567 must match the port in --endpoint-url in the aws opensearch create-domain command (see Makefile)
+    - 4567:8080
+    environment:
+    # access key id, secret access key, session token must be the same values as in Makefile
+    - AWS_REGION=us-east-1
+    - AWS_ACCESS_KEY_ID=test-access-key
+    - AWS_SECRET_ACCESS_KEY=test-secret-key
+    - AWS_SESSION_TOKEN=test-session-token
+    command:
+      - "--name"
+      - "es"
+      - "--region"
+      - "us-east-1"
+      - "--host"
+      - "localstack:4566"
+      - "--port"
+      - ":8080"
+      - "--upstream-url-scheme"
+      - "http"
+      - "--verbose"
+    depends_on:
+    - localstack
+
 volumes:
   database_data:
     driver: local
   es_data:
+    driver: local
+  opensearch_data:
+    driver: local
+  localstack_data:
     driver: local
