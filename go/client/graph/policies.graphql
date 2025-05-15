@@ -1,0 +1,50 @@
+fragment ComplianceReportGeneratorFragment on ComplianceReportGenerator {
+  id
+  name
+  format
+  readBindings {
+    ...PolicyBindingFragment
+  }
+}
+
+query ListComplianceReportGenerators(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+) {
+  complianceReportGenerators(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...ComplianceReportGeneratorFragment
+      }
+    }
+  }
+}
+
+query GetComplianceReportGenerator($id: ID, $name: String) {
+  complianceReportGenerator(id: $id, name: $name) {
+    ...ComplianceReportGeneratorFragment
+  }
+}
+
+mutation UpsertComplianceReportGenerator($attributes: ComplianceReportGeneratorAttributes!) {
+  upsertComplianceReportGenerator(attributes: $attributes) {
+    ...ComplianceReportGeneratorFragment
+  }
+}
+
+mutation DeleteComplianceReportGenerator($id: ID!) {
+  deleteComplianceReportGenerator(id: $id) {
+    ...ComplianceReportGeneratorFragment
+  }
+}
+

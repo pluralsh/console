@@ -168,6 +168,10 @@ type ConsoleClient interface {
 	GetPipelines(ctx context.Context, after *string, interceptors ...clientv2.RequestInterceptor) (*GetPipelines, error)
 	CreatePipelineContext(ctx context.Context, pipelineID string, attributes PipelineContextAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePipelineContext, error)
 	GetPipelineContext(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPipelineContext, error)
+	ListComplianceReportGenerators(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListComplianceReportGenerators, error)
+	GetComplianceReportGenerator(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetComplianceReportGenerator, error)
+	UpsertComplianceReportGenerator(ctx context.Context, attributes ComplianceReportGeneratorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertComplianceReportGenerator, error)
+	DeleteComplianceReportGenerator(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteComplianceReportGenerator, error)
 	GetPreviewEnvironmentTemplate(ctx context.Context, id *string, flowID *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPreviewEnvironmentTemplate, error)
 	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes PreviewEnvironmentTemplateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPreviewEnvironmentTemplate, error)
 	DeletePreviewEnvironmentTemplate(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePreviewEnvironmentTemplate, error)
@@ -3683,6 +3687,38 @@ func (t *PipelineEdgeFragment) GetNode() *PipelineFragment {
 		t = &PipelineEdgeFragment{}
 	}
 	return t.Node
+}
+
+type ComplianceReportGeneratorFragment struct {
+	ID           string                   "json:\"id\" graphql:\"id\""
+	Name         string                   "json:\"name\" graphql:\"name\""
+	Format       ComplianceReportFormat   "json:\"format\" graphql:\"format\""
+	ReadBindings []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+}
+
+func (t *ComplianceReportGeneratorFragment) GetID() string {
+	if t == nil {
+		t = &ComplianceReportGeneratorFragment{}
+	}
+	return t.ID
+}
+func (t *ComplianceReportGeneratorFragment) GetName() string {
+	if t == nil {
+		t = &ComplianceReportGeneratorFragment{}
+	}
+	return t.Name
+}
+func (t *ComplianceReportGeneratorFragment) GetFormat() *ComplianceReportFormat {
+	if t == nil {
+		t = &ComplianceReportGeneratorFragment{}
+	}
+	return &t.Format
+}
+func (t *ComplianceReportGeneratorFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &ComplianceReportGeneratorFragment{}
+	}
+	return t.ReadBindings
 }
 
 type PreviewEnvironmentTemplateFragment struct {
@@ -12718,6 +12754,35 @@ func (t *GetPipelines_Pipelines) GetEdges() []*PipelineEdgeFragment {
 	return t.Edges
 }
 
+type ListComplianceReportGenerators_ComplianceReportGenerators_Edges struct {
+	Node *ComplianceReportGeneratorFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListComplianceReportGenerators_ComplianceReportGenerators_Edges) GetNode() *ComplianceReportGeneratorFragment {
+	if t == nil {
+		t = &ListComplianceReportGenerators_ComplianceReportGenerators_Edges{}
+	}
+	return t.Node
+}
+
+type ListComplianceReportGenerators_ComplianceReportGenerators struct {
+	PageInfo PageInfoFragment                                                   "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ListComplianceReportGenerators_ComplianceReportGenerators_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
+	}
+	return &t.PageInfo
+}
+func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetEdges() []*ListComplianceReportGenerators_ComplianceReportGenerators_Edges {
+	if t == nil {
+		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
+	}
+	return t.Edges
+}
+
 type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -16536,6 +16601,50 @@ func (t *GetPipelineContext) GetPipelineContext() *PipelineContextFragment {
 		t = &GetPipelineContext{}
 	}
 	return t.PipelineContext
+}
+
+type ListComplianceReportGenerators struct {
+	ComplianceReportGenerators *ListComplianceReportGenerators_ComplianceReportGenerators "json:\"complianceReportGenerators,omitempty\" graphql:\"complianceReportGenerators\""
+}
+
+func (t *ListComplianceReportGenerators) GetComplianceReportGenerators() *ListComplianceReportGenerators_ComplianceReportGenerators {
+	if t == nil {
+		t = &ListComplianceReportGenerators{}
+	}
+	return t.ComplianceReportGenerators
+}
+
+type GetComplianceReportGenerator struct {
+	ComplianceReportGenerator *ComplianceReportGeneratorFragment "json:\"complianceReportGenerator,omitempty\" graphql:\"complianceReportGenerator\""
+}
+
+func (t *GetComplianceReportGenerator) GetComplianceReportGenerator() *ComplianceReportGeneratorFragment {
+	if t == nil {
+		t = &GetComplianceReportGenerator{}
+	}
+	return t.ComplianceReportGenerator
+}
+
+type UpsertComplianceReportGenerator struct {
+	UpsertComplianceReportGenerator *ComplianceReportGeneratorFragment "json:\"upsertComplianceReportGenerator,omitempty\" graphql:\"upsertComplianceReportGenerator\""
+}
+
+func (t *UpsertComplianceReportGenerator) GetUpsertComplianceReportGenerator() *ComplianceReportGeneratorFragment {
+	if t == nil {
+		t = &UpsertComplianceReportGenerator{}
+	}
+	return t.UpsertComplianceReportGenerator
+}
+
+type DeleteComplianceReportGenerator struct {
+	DeleteComplianceReportGenerator *ComplianceReportGeneratorFragment "json:\"deleteComplianceReportGenerator,omitempty\" graphql:\"deleteComplianceReportGenerator\""
+}
+
+func (t *DeleteComplianceReportGenerator) GetDeleteComplianceReportGenerator() *ComplianceReportGeneratorFragment {
+	if t == nil {
+		t = &DeleteComplianceReportGenerator{}
+	}
+	return t.DeleteComplianceReportGenerator
 }
 
 type GetPreviewEnvironmentTemplate struct {
@@ -28247,6 +28356,225 @@ func (c *Client) GetPipelineContext(ctx context.Context, id string, interceptors
 	return &res, nil
 }
 
+const ListComplianceReportGeneratorsDocument = `query ListComplianceReportGenerators ($after: String, $before: String, $first: Int, $last: Int) {
+	complianceReportGenerators(after: $after, before: $before, first: $first, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... ComplianceReportGeneratorFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ComplianceReportGeneratorFragment on ComplianceReportGenerator {
+	id
+	name
+	format
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) ListComplianceReportGenerators(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListComplianceReportGenerators, error) {
+	vars := map[string]any{
+		"after":  after,
+		"before": before,
+		"first":  first,
+		"last":   last,
+	}
+
+	var res ListComplianceReportGenerators
+	if err := c.Client.Post(ctx, "ListComplianceReportGenerators", ListComplianceReportGeneratorsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetComplianceReportGeneratorDocument = `query GetComplianceReportGenerator ($id: ID, $name: String) {
+	complianceReportGenerator(id: $id, name: $name) {
+		... ComplianceReportGeneratorFragment
+	}
+}
+fragment ComplianceReportGeneratorFragment on ComplianceReportGenerator {
+	id
+	name
+	format
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetComplianceReportGenerator(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetComplianceReportGenerator, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetComplianceReportGenerator
+	if err := c.Client.Post(ctx, "GetComplianceReportGenerator", GetComplianceReportGeneratorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertComplianceReportGeneratorDocument = `mutation UpsertComplianceReportGenerator ($attributes: ComplianceReportGeneratorAttributes!) {
+	upsertComplianceReportGenerator(attributes: $attributes) {
+		... ComplianceReportGeneratorFragment
+	}
+}
+fragment ComplianceReportGeneratorFragment on ComplianceReportGenerator {
+	id
+	name
+	format
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertComplianceReportGenerator(ctx context.Context, attributes ComplianceReportGeneratorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertComplianceReportGenerator, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertComplianceReportGenerator
+	if err := c.Client.Post(ctx, "UpsertComplianceReportGenerator", UpsertComplianceReportGeneratorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteComplianceReportGeneratorDocument = `mutation DeleteComplianceReportGenerator ($id: ID!) {
+	deleteComplianceReportGenerator(id: $id) {
+		... ComplianceReportGeneratorFragment
+	}
+}
+fragment ComplianceReportGeneratorFragment on ComplianceReportGenerator {
+	id
+	name
+	format
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) DeleteComplianceReportGenerator(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteComplianceReportGenerator, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteComplianceReportGenerator
+	if err := c.Client.Post(ctx, "DeleteComplianceReportGenerator", DeleteComplianceReportGeneratorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetPreviewEnvironmentTemplateDocument = `query GetPreviewEnvironmentTemplate ($id: ID, $flowId: ID, $name: String) {
 	previewEnvironmentTemplate(id: $id, flowId: $flowId, name: $name) {
 		... PreviewEnvironmentTemplateFragment
@@ -33275,6 +33603,10 @@ var DocumentOperationNames = map[string]string{
 	GetPipelinesDocument:                              "GetPipelines",
 	CreatePipelineContextDocument:                     "CreatePipelineContext",
 	GetPipelineContextDocument:                        "GetPipelineContext",
+	ListComplianceReportGeneratorsDocument:            "ListComplianceReportGenerators",
+	GetComplianceReportGeneratorDocument:              "GetComplianceReportGenerator",
+	UpsertComplianceReportGeneratorDocument:           "UpsertComplianceReportGenerator",
+	DeleteComplianceReportGeneratorDocument:           "DeleteComplianceReportGenerator",
 	GetPreviewEnvironmentTemplateDocument:             "GetPreviewEnvironmentTemplate",
 	UpsertPreviewEnvironmentTemplateDocument:          "UpsertPreviewEnvironmentTemplate",
 	DeletePreviewEnvironmentTemplateDocument:          "DeletePreviewEnvironmentTemplate",

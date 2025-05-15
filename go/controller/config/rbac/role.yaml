@@ -32,6 +32,7 @@ rules:
   - clusterrestoretriggers
   - clusters
   - clustersyncs
+  - complianceReportGenerators
   - customstackruns
   - deploymentsettings
   - flows
@@ -76,6 +77,7 @@ rules:
   - clusterrestoretriggers/finalizers
   - clusters/finalizers
   - clustersyncs/finalizers
+  - complianceReportGenerators/finalizers
   - customstackruns/finalizers
   - deploymentsettings/finalizers
   - flows/finalizers
@@ -114,6 +116,7 @@ rules:
   - clusterrestoretriggers/status
   - clusters/status
   - clustersyncs/status
+  - complianceReportGenerators/status
   - customstackruns/status
   - deploymentsettings/status
   - flows/status

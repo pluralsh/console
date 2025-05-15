@@ -1,0 +1,30 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ComplianceReportGenerator
+metadata:
+  labels:
+    app.kubernetes.io/name: compliancereportgenerator
+    app.kubernetes.io/instance: compliancereportgenerator-minimal
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: minimal
+  namespace: default
+spec:
+  format: CSV
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ComplianceReportGenerator
+metadata:
+  labels:
+    app.kubernetes.io/name: compliancereportgenerator
+    app.kubernetes.io/instance: compliancereportgenerator-full
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: full
+  namespace: default
+spec:
+  name: full
+  format: JSON
+  readBindings:
+    - userEmail: marcin@plural.sh

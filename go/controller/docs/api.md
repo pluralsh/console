@@ -14,6 +14,8 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Cluster](#cluster)
 - [ClusterRestore](#clusterrestore)
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
+- [ClusterSync](#clustersync)
+- [ComplianceReportGenerator](#compliancereportgenerator)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
 - [Flow](#flow)
@@ -34,6 +36,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [PipelineContext](#pipelinecontext)
 - [PrAutomation](#prautomation)
 - [PrAutomationTrigger](#prautomationtrigger)
+- [PreviewEnvironmentTemplate](#previewenvironmenttemplate)
 - [Project](#project)
 - [Provider](#provider)
 - [ScmConnection](#scmconnection)
@@ -143,6 +146,7 @@ Binding ...
 _Appears in:_
 - [Bindings](#bindings)
 - [CatalogBindings](#catalogbindings)
+- [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
 - [DeploymentSettingsBindings](#deploymentsettingsbindings)
 - [NotificationSinkSpec](#notificationsinkspec)
 - [PrAutomationBindings](#prautomationbindings)
@@ -170,6 +174,7 @@ _Appears in:_
 - [ClusterSpec](#clusterspec)
 - [FlowSpec](#flowspec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [MCPServerSpec](#mcpserverspec)
 - [PipelineSpec](#pipelinespec)
 - [ProjectSpec](#projectspec)
 - [ServiceSpec](#servicespec)
@@ -178,6 +183,23 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `read` _[Binding](#binding) array_ | Read bindings. |  | Optional: {} <br /> |
 | `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: {} <br /> |
+
+
+#### BindingsTemplate
+
+
+
+
+
+
+
+_Appears in:_
+- [SpecTemplate](#spectemplate)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `read` _string_ | Read bindings. |  | Optional: {} <br /> |
+| `write` _string_ | Write bindings. |  | Optional: {} <br /> |
 
 
 #### BootstrapToken
@@ -569,6 +591,59 @@ _Appears in:_
 | `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools contains specs of node pools managed by this cluster. |  | Optional: {} <br /> |
 
 
+#### ClusterSpecTemplate
+
+
+
+
+
+
+
+_Appears in:_
+- [ClusterSyncSpec](#clustersyncspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `metadata` _[MetadataTemplate](#metadatatemplate)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[SpecTemplate](#spectemplate)_ |  |  |  |
+
+
+
+
+#### ClusterSync
+
+
+
+ClusterSync is the Schema for the clustersyncs API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ClusterSync` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ClusterSyncSpec](#clustersyncspec)_ |  |  |  |
+
+
+#### ClusterSyncSpec
+
+
+
+ClusterSyncSpec defines the desired state of ClusterSync
+
+
+
+_Appears in:_
+- [ClusterSync](#clustersync)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `tags` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
+| `clusterSpec` _[ClusterSpecTemplate](#clusterspectemplate)_ |  |  |  |
 
 
 #### ClusterTarget
@@ -604,6 +679,42 @@ _Appears in:_
 | `cmd` _string_ | the command this hook will execute |  |  |
 | `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
 | `dir` _string_ |  |  | Optional: {} <br /> |
+
+
+#### ComplianceReportGenerator
+
+
+
+
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ComplianceReportGenerator` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)_ |  |  |  |
+
+
+#### ComplianceReportGeneratorSpec
+
+
+
+ComplianceReportGeneratorSpec defines the desired state of the resource.
+
+
+
+_Appears in:_
+- [ComplianceReportGenerator](#compliancereportgenerator)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: {} <br /> |
+| `format` _[ComplianceReportFormat](#compliancereportformat)_ | Format of the report to be generated. |  | Enum: [CSV JSON] <br />Required: {} <br /> |
+| `readBindings` _[Binding](#binding) array_ | ReadBindings represent the download policy for this report. |  | Optional: {} <br /> |
 
 
 #### ComponentState
@@ -922,11 +1033,11 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this Flow. If not provided Flow's own name from Flow.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `description` _string_ |  |  | Optional: {} <br /> |
-| `icon` _string_ |  |  | Optional: {} <br /> |
+| `description` _string_ | Longform description of the service managed by this flow |  | Optional: {} <br /> |
+| `icon` _string_ | Optional image icon for the flow to apply branding or improve identification |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to span a specific project only |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
-| `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ |  |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow |  | Optional: {} <br /> |
+| `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow. Can also be managed within the Plural Console UI securely. |  | Optional: {} <br /> |
 
 
 #### GateSpec
@@ -1107,6 +1218,7 @@ _Appears in:_
 | `tags` _object (keys:string, values:string)_ | Tags a set of tags to select clusters for this global service |  | Optional: {} <br /> |
 | `reparent` _boolean_ | Whether you'd want this global service to take ownership of existing Plural services |  | Optional: {} <br /> |
 | `cascade` _[Cascade](#cascade)_ | Cascade deletion options for this global service |  | Optional: {} <br /> |
+| `context` _[TemplateContext](#templatecontext)_ | Context to be used for dynamic template overrides of things like helm chart, version or values files |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro of kubernetes this cluster is running |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: {} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef to replicate across clusters |  | Optional: {} <br /> |
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
@@ -1434,6 +1546,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: {} <br /> |
 | `url` _string_ | URL is the HTTP URL the server is hosted on. |  | Required: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this MCP server |  | Optional: {} <br /> |
 | `authentication` _[MCPServerAuthentication](#mcpserverauthentication)_ | Authentication specs for this server. |  | Optional: {} <br /> |
 | `confirm` _boolean_ | Confirm whether a tool call against this server should require user confirmation. |  | Optional: {} <br /> |
 
@@ -1478,6 +1591,24 @@ _Appears in:_
 | `service` _[ServiceTemplate](#servicetemplate)_ |  |  | Optional: {} <br /> |
 | `target` _[ClusterTarget](#clustertarget)_ |  |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a managed namespace to span a specific project only |  | Optional: {} <br /> |
+
+
+#### MetadataTemplate
+
+
+
+
+
+
+
+_Appears in:_
+- [ClusterSpecTemplate](#clusterspectemplate)
+- [ObjectReferenceTemplate](#objectreferencetemplate)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `namespace` _string_ | Namespace specifies an optional namespace for categorizing or scoping related resources.<br />If empty then the ClusterSync's namespace will be used. |  | Optional: {} <br /> |
 
 
 #### NamespaceCredentials
@@ -1650,6 +1781,23 @@ _Appears in:_
 | `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br /><br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
 
 
+#### ObjectReferenceTemplate
+
+
+
+
+
+
+
+_Appears in:_
+- [SpecTemplate](#spectemplate)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `namespace` _string_ | Namespace specifies an optional namespace for categorizing or scoping related resources.<br />If empty then the ClusterSync's namespace will be used. |  | Optional: {} <br /> |
+
+
 #### ObservabilityProvider
 
 
@@ -1771,7 +1919,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | The name of the add-on you want to poll |  |  |
-| `kubernetesVersion` _string_ | The Kubernetes Version you want to ensure this add-on is compatible with |  | Optional: {} <br /> |
+| `kubernetesVersion` _string_ | The Kubernetes version you want to ensure this add-on is compatible with |  | Optional: {} <br /> |
+| `kubernetesVersions` _string array_ | The Kubernetes versions you want to ensure this add-on is compatible with, useful if working with a kubernetes version boundary during upgrade |  | Optional: {} <br /> |
 
 
 #### ObserverConfiguration
@@ -2289,7 +2438,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `role` _[PrRole](#prrole)_ |  |  | Enum: [CLUSTER SERVICE PIPELINE UPDATE UPGRADE] <br />Optional: {} <br /> |
+| `role` _[PrRole](#prrole)_ |  |  | Enum: [CLUSTER SERVICE PIPELINE UPDATE UPGRADE COST] <br />Optional: {} <br /> |
 | `addon` _string_ | Addon is a link to an addon name |  | Optional: {} <br /> |
 | `branch` _string_ | The base branch this pr will be based on (defaults to the repo's main branch) |  | Optional: {} <br /> |
 | `icon` _string_ | An icon url to annotate this pr automation |  | Optional: {} <br /> |
@@ -2421,6 +2570,45 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `label` _string_ | The label of this checkbox |  |  |
+
+
+#### PreviewEnvironmentTemplate
+
+
+
+PreviewEnvironmentTemplate is the Schema for the previewenvironmenttemplates API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `PreviewEnvironmentTemplate` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[PreviewEnvironmentTemplateSpec](#previewenvironmenttemplatespec)_ |  |  |  |
+
+
+#### PreviewEnvironmentTemplateSpec
+
+
+
+PreviewEnvironmentTemplateSpec defines the desired state of PreviewEnvironmentTemplate
+
+
+
+_Appears in:_
+- [PreviewEnvironmentTemplate](#previewenvironmenttemplate)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: {} <br /> |
+| `commentTemplate` _string_ | CommentTemplate liquid template for custom information. |  | Optional: {} <br /> |
+| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection. |  | Optional: {} <br /> |
+| `referenceServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ReferenceServiceRef specifies a reference to a Service Deployment object associated with the environment template. |  | Required: {} <br /> |
+| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a Flow this pipeline belongs within |  | Required: {} <br /> |
+| `template` _[ServiceTemplate](#servicetemplate)_ | Template set of service configuration overrides to use while cloning |  | Required: {} <br /> |
 
 
 #### Project
@@ -2730,6 +2918,7 @@ _Appears in:_
 | `repository` _[NamespacedName](#namespacedname)_ | pointer to the FluxCD helm repository to use |  | Optional: {} <br /> |
 | `git` _[GitRef](#gitref)_ | A reference to a git folder/ref |  | Optional: {} <br /> |
 | `ignoreHooks` _boolean_ | whether you want to completely ignore any helm hooks when actualizing this service |  | Optional: {} <br /> |
+| `ignoreCrds` _boolean_ | whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster) |  | Optional: {} <br /> |
 
 
 #### ServiceImport
@@ -2762,7 +2951,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ |  |  |  |
+| `path` _string_ | The path to the kustomization file to use |  |  |
+| `enableHelm` _boolean_ | whether to enable helm for this kustomize deployment, used for inflating helm charts |  | Optional: {} <br /> |
 
 
 #### ServiceSpec
@@ -2813,6 +3003,7 @@ Attributes for configuring a service in something like a managed namespace
 _Appears in:_
 - [GlobalServiceSpec](#globalservicespec)
 - [ManagedNamespaceSpec](#managednamespacespec)
+- [PreviewEnvironmentTemplateSpec](#previewenvironmenttemplatespec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -2828,6 +3019,7 @@ _Appears in:_
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig attributes to configure sync settings for this service |  | Optional: {} <br /> |
 | `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
+| `configuration` _object (keys:string, values:string)_ | Configuration is a set of non-secret service specific configuration useful for templating |  | Optional: {} <br /> |
 
 
 #### SinkConfiguration
@@ -2862,6 +3054,31 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ |  |  |  |
+
+
+#### SpecTemplate
+
+
+
+
+
+
+
+_Appears in:_
+- [ClusterSpecTemplate](#clusterspectemplate)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `handle` _string_ | Handle is a short, unique human-readable name used to identify this cluster.<br />Does not necessarily map to the cloud resource name.<br />This has to be specified in order to adopt existing cluster. |  | Optional: {} <br />Type: string <br /> |
+| `version` _string_ | Version of Kubernetes to use for this cluster. Can be skipped only for BYOK. |  | Optional: {} <br />Type: string <br /> |
+| `providerRef` _[ObjectReferenceTemplate](#objectreferencetemplate)_ | ProviderRef references provider to use for this cluster. Can be skipped only for BYOK. |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReferenceTemplate](#objectreferencetemplate)_ | ProjectRef references project this cluster belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+| `cloud` _string_ | Cloud provider to use for this cluster. |  | Optional: {} <br />Type: string <br /> |
+| `protect` _string_ | Protect cluster from being deleted. |  | Optional: {} <br /> |
+| `tags` _string_ | Tags used to filter clusters. |  | Optional: {} <br /> |
+| `metadata` _string_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: {} <br /> |
+| `bindings` _[BindingsTemplate](#bindingstemplate)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
+| `nodePools` _string_ | NodePools contains specs of node pools managed by this cluster. |  | Optional: {} <br /> |
 
 
 #### StackConfiguration
@@ -3079,6 +3296,22 @@ TaintEffect is the effect for a Kubernetes taint.
 _Appears in:_
 - [Taint](#taint)
 
+
+
+#### TemplateContext
+
+
+
+TemplateContext is a spec for describing data for templating the metadata of the services spawned by a global service
+
+
+
+_Appears in:_
+- [GlobalServiceSpec](#globalservicespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `raw` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | A raw yaml map to use for service template context |  | Optional: {} <br /> |
 
 
 #### Tools

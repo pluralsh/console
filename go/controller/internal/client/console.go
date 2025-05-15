@@ -161,6 +161,9 @@ type ConsoleClient interface {
 	GetPreviewEnvironmentTemplate(ctx context.Context, id, name *string) (*console.PreviewEnvironmentTemplateFragment, error)
 	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes console.PreviewEnvironmentTemplateAttributes) (*console.PreviewEnvironmentTemplateFragment, error)
 	ListClustersWithParameters(after *string, first *int64, projectID *string, tags map[string]string) (*console.ListClustersWithParameters_Clusters, error)
+	GetComplianceReportGenerator(ctx context.Context, id, name *string) (*console.ComplianceReportGeneratorFragment, error)
+	UpsertComplianceReportGenerator(ctx context.Context, attr console.ComplianceReportGeneratorAttributes) (*console.ComplianceReportGeneratorFragment, error)
+	DeleteComplianceReportGenerator(ctx context.Context, id string) error
 }
 
 func New(url, token string) ConsoleClient {
