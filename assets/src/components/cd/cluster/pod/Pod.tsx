@@ -124,8 +124,12 @@ export default function Pod() {
     )
   )
   const { data, loading, error } = usePodQuery({
-    variables: { name, namespace, clusterId },
-    skip: !name || !namespace || !clusterId,
+    variables: {
+      name,
+      namespace,
+      ...(serviceId ? { serviceId } : { clusterId }),
+    },
+    skip: !name || !namespace || !(serviceId || clusterId),
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
