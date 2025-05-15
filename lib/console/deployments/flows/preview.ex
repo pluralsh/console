@@ -15,6 +15,9 @@ defmodule Console.Deployments.Flows.Preview do
   @preview_comment Console.priv_file!("pr/preview_env.md.eex")
   @template_preloads ~w(template reference_service connection)a
 
+  @spec preload_instance(PreviewEnvironmentInstance.t | [PreviewEnvironmentInstance.t]) :: PreviewEnvironmentInstance.t | [PreviewEnvironmentInstance.t]
+  def preload_instance(inst_or_insts), do: Repo.preload(inst_or_insts, [:service, :pull_request, template: @template_preloads])
+
   def get_template(flow_id, name) do
     Repo.get_by(PreviewEnvironmentTemplate, flow_id: flow_id, name: name)
     |> Repo.preload(@template_preloads)
@@ -22,7 +25,7 @@ defmodule Console.Deployments.Flows.Preview do
 
   def get_instance(template_id, pr_id) do
     Repo.get_by(PreviewEnvironmentInstance, template_id: template_id, pull_request_id: pr_id)
-    |> Repo.preload([:service, :pull_request, template: @template_preloads])
+    |> preload_instance()
   end
 
   def sync_instance(%PullRequest{preview: p, flow_id: flow_id} = pr) when is_binary(p) and is_binary(flow_id) do
@@ -119,7 +122,7 @@ defmodule Console.Deployments.Flows.Preview do
   end
   defp create_instance(_, _), do: :ok
 
-  defp update_instance(
+  def update_instance(
     %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,
     %PullRequest{} = pr
   ) do
@@ -128,7 +131,7 @@ defmodule Console.Deployments.Flows.Preview do
          _ <- notify({:ok, %{inst | service: svc}}, :update),
       do: {:ok, svc}
   end
-  defp update_instance(_, _), do: :ok
+  def update_instance(_, _), do: :ok
 
   defp build_attributes(%PullRequest{} = pr, %PreviewEnvironmentTemplate{reference_service: svc, template: tpl} = template) do
     ctx = liquid_context(pr, template)

@@ -170,8 +170,9 @@ defmodule Console.Deployments.Flows do
   @spec upsert_preview_environment_template(map, User.t) :: preview_environment_template_resp
   def upsert_preview_environment_template(%{name: name, flow_id: flow_id} = attrs, %User{} = user) do
     start_transaction()
-    |> add_operation(:template, fn _ ->
-      case get_preview_environment_template_for_flow(flow_id, name) do
+    |> add_operation(:template, fn _ -> {:ok, get_preview_environment_template_for_flow(flow_id, name)} end)
+    |> add_operation(:update, fn %{template: template} ->
+      case template do
         %PreviewEnvironmentTemplate{} = template -> Repo.preload(template, [:template])
         nil -> %PreviewEnvironmentTemplate{}
       end
@@ -179,7 +180,7 @@ defmodule Console.Deployments.Flows do
       |> allow(user, :create)
       |> when_ok(&Repo.insert_or_update/1)
     end)
-    |> add_operation(:post_validate, fn %{template: template} ->
+    |> add_operation(:post_validate, fn %{update: template} ->
       with {:flow, %PreviewEnvironmentTemplate{
               flow: %Flow{id: id},
               reference_service: %Service{flow_id: id, namespace: namespace}
@@ -191,7 +192,14 @@ defmodule Console.Deployments.Flows do
         {:ns, _} -> {:error, "the destination namespace must be prefixed by the reference service's namespace"}
       end
     end)
-    |> execute(extract: :template)
+    |> execute()
+    |> case do
+      {:ok, %{template: %PreviewEnvironmentTemplate{}, update: %PreviewEnvironmentTemplate{} = u}} ->
+        handle_notify(PubSub.PreviewEnvironmentTemplateUpdated, u, actor: user)
+      {:ok, %{update: %PreviewEnvironmentTemplate{} = u}} ->
+        handle_notify(PubSub.PreviewEnvironmentTemplateCreated, u, actor: user)
+      err -> err
+    end
   end
 
   @doc """

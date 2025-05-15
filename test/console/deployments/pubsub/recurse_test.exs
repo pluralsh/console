@@ -455,6 +455,32 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       refute refetch(stack)
     end
   end
+
+  describe "PreviewEnvironmentTemplateUpdated" do
+    test "it will update the preview environment instances" do
+      bot("console")
+      template  = insert(:preview_environment_template,
+        template: %{
+          namespace: "test-preview",
+          helm: %{values: Jason.encode!(%{replicaCount: 1})}
+        }
+      )
+      instance  = insert(:preview_environment_instance, template: template)
+      instance2 = insert(:preview_environment_instance, template: template)
+      ignore = insert(:preview_environment_instance)
+
+      event = %PubSub.PreviewEnvironmentTemplateUpdated{item: template}
+      Recurse.handle_event(event)
+
+      vals = Jason.decode!(Repo.preload(refetch(instance), :service).service.helm.values)
+      assert vals["replicaCount"] == 1
+
+      vals2 = Jason.decode!(Repo.preload(refetch(instance2), :service).service.helm.values)
+      assert vals2["replicaCount"] == 1
+
+      refute Repo.preload(refetch(ignore), :service).service.helm
+    end
+  end
 end
 
 
