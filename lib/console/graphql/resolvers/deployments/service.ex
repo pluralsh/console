@@ -108,12 +108,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
       do: {:ok, result}
   end
 
-  def helm_values(%{parent: service} = helm, _, ctx) do
+  def helm_values(%{parent: %Service{} = service} = helm, _, ctx) do
     case allow(service, actor(ctx), :secrets) do
       {:ok, _} -> {:ok, helm.values}
       err -> err
     end
   end
+  def helm_values(helm, _, _), do: {:ok, Map.get(helm, :values)}
 
   def create_service(%{attributes: attrs, cluster: cluster}, %{context: %{current_user: user}}) when is_binary(cluster) do
     cluster = Clusters.find!(cluster)
