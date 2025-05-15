@@ -168,6 +168,31 @@ defmodule Console.Deployments.FlowsTest do
       assert template.reference_service_id == svc.id
     end
 
+    test "flow writers can update a preview environment template" do
+      user = insert(:user)
+      flow = insert(:flow, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, flow: flow, namespace: "test")
+      template = insert(:preview_environment_template,
+        name: "test",
+        template: %{namespace: "test-blah-blah"},
+        reference_service: svc,
+        flow: flow
+      )
+
+      {:ok, updated} = Flows.upsert_preview_environment_template(%{
+        name: "test",
+        flow_id: flow.id,
+        template: %{namespace: "test-blah"},
+        reference_service_id: svc.id
+      }, user)
+
+      assert updated.id == template.id
+      assert updated.name == "test"
+      assert updated.flow_id == flow.id
+      assert updated.template.namespace == "test-blah"
+      assert updated.reference_service_id == svc.id
+    end
+
     test "preview environment templates must reference services in a flow" do
       user = insert(:user)
       flow = insert(:flow, write_bindings: [%{user_id: user.id}])

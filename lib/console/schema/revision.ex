@@ -11,8 +11,8 @@ defmodule Console.Schema.Revision do
     embeds_one :helm, Service.Helm, on_replace: :update
     embeds_one :kustomize, Service.Kustomize, on_replace: :update
 
-    belongs_to :service, Service
-    belongs_to :template, ServiceTemplate
+    belongs_to :service,     Service
+    belongs_to :template,    ServiceTemplate
     has_many :configuration, ServiceConfiguration
 
     timestamps()

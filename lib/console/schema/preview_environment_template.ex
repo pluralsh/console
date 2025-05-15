@@ -13,7 +13,7 @@ defmodule Console.Schema.PreviewEnvironmentTemplate do
 
     belongs_to :flow,              Flow
     belongs_to :reference_service, Service
-    belongs_to :template,          ServiceTemplate
+    belongs_to :template,          ServiceTemplate, on_replace: :update
     belongs_to :connection,        ScmConnection
 
     timestamps()

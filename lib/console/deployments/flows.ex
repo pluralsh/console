@@ -168,16 +168,16 @@ defmodule Console.Deployments.Flows do
   Either creates a new preview environment template or updates an existing one
   """
   @spec upsert_preview_environment_template(map, User.t) :: preview_environment_template_resp
-  def upsert_preview_environment_template(%{name: name} = attrs, %User{} = user) do
+  def upsert_preview_environment_template(%{name: name, flow_id: flow_id} = attrs, %User{} = user) do
     start_transaction()
     |> add_operation(:template, fn _ ->
-      case get_preview_environment_template_by_name(name) do
+      case get_preview_environment_template_for_flow(flow_id, name) do
         %PreviewEnvironmentTemplate{} = template -> Repo.preload(template, [:template])
         nil -> %PreviewEnvironmentTemplate{}
       end
       |> PreviewEnvironmentTemplate.changeset(attrs)
       |> allow(user, :create)
-      |> when_ok(:insert)
+      |> when_ok(&Repo.insert_or_update/1)
     end)
     |> add_operation(:post_validate, fn %{template: template} ->
       with {:flow, %PreviewEnvironmentTemplate{
