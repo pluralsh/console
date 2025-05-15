@@ -614,55 +614,7 @@ defmodule Console.AI.ChatSyncTest do
       assert tool.attributes.tool.name == "__plrl__pull_requests"
       assert tool.attributes.tool.arguments == %{"query" => "error"}
     end
-  end
 
-  describe "confirm_chat/2" do
-    test "it can confirm a chat message and call its MCP server" do
-      user   = insert(:user)
-      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
-      flow   = insert(:flow)
-      insert(:mcp_server_association, server: server, flow: flow)
-
-      chat = insert(:chat,
-        user: user,
-        thread: insert(:chat_thread, user: user, flow: flow),
-        confirm: true,
-        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
-        server: server
-      )
-
-      {:ok, chat} = Chat.confirm_chat(chat.id, user)
-
-      assert chat.content =~ "Echo: a message"
-      assert chat.confirmed_at
-      assert chat.attributes.tool.name == "echo"
-      assert chat.attributes.tool.arguments == %{"message" => "a message"}
-
-      [audit] = Repo.all(McpServerAudit)
-
-      assert audit.server_id == server.id
-      assert audit.actor_id == user.id
-      assert audit.tool == "echo"
-    end
-
-    test "non thread members cannot confirm" do
-      user   = insert(:user)
-      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
-      flow   = insert(:flow)
-      insert(:mcp_server_association, server: server, flow: flow)
-
-      chat = insert(:chat,
-        thread: insert(:chat_thread, user: user, flow: flow),
-        confirm: true,
-        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
-        server: server
-      )
-
-      {:error, _} = Chat.confirm_chat(chat.id, insert(:user))
-    end
-  end
-
-  describe "alerts test suite" do
     @tag alerts: true
     test "it can chat with a plural alerts tool call" do
       user = insert(:user)
@@ -733,6 +685,52 @@ defmodule Console.AI.ChatSyncTest do
       assert alert.severity == alert_severity_enum
       assert alert.state == alert_state_enum
       assert alert.annotations == alert_annotations_map
+    end
+  end
+
+  describe "confirm_chat/2" do
+    test "it can confirm a chat message and call its MCP server" do
+      user   = insert(:user)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      flow   = insert(:flow)
+      insert(:mcp_server_association, server: server, flow: flow)
+
+      chat = insert(:chat,
+        user: user,
+        thread: insert(:chat_thread, user: user, flow: flow),
+        confirm: true,
+        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
+        server: server
+      )
+
+      {:ok, chat} = Chat.confirm_chat(chat.id, user)
+
+      assert chat.content =~ "Echo: a message"
+      assert chat.confirmed_at
+      assert chat.attributes.tool.name == "echo"
+      assert chat.attributes.tool.arguments == %{"message" => "a message"}
+
+      [audit] = Repo.all(McpServerAudit)
+
+      assert audit.server_id == server.id
+      assert audit.actor_id == user.id
+      assert audit.tool == "echo"
+    end
+
+    test "non thread members cannot confirm" do
+      user   = insert(:user)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      flow   = insert(:flow)
+      insert(:mcp_server_association, server: server, flow: flow)
+
+      chat = insert(:chat,
+        thread: insert(:chat_thread, user: user, flow: flow),
+        confirm: true,
+        attributes: %{tool: %{name: "echo", arguments: %{"message" => "a message"}}},
+        server: server
+      )
+
+      {:error, _} = Chat.confirm_chat(chat.id, insert(:user))
     end
   end
 end
