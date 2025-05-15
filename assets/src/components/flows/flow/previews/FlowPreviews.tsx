@@ -111,7 +111,6 @@ export function FlowPreviews() {
         onRowClick={(_, row: Row<PreviewEnvironmentInstance>) => {
           navigate(
             getServiceDetailsPath({
-              flowId,
               clusterId: row.original.service?.cluster?.id ?? '',
               serviceId: row.original.service?.id ?? '',
             })

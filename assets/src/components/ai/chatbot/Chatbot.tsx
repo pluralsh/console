@@ -114,9 +114,9 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
     onCompleted: (data) =>
       setShowPrompts(isEmpty(data.chatThread?.chats?.edges)),
   })
-  const shouldUseMCP = !!currentThread?.flow
   const tools =
     threadDetailsQuery.data?.chatThread?.tools?.filter(isNonNullable) ?? []
+  const shouldUseMCP = !!currentThread?.flow && !isEmpty(tools)
 
   const rows = useMemo(() => {
     const threads =
