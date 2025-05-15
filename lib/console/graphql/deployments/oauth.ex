@@ -41,7 +41,7 @@ defmodule Console.GraphQl.Deployments.OAuth do
         %Console.Schema.OIDCProvider{} = provider, args, ctx ->
           fun = dataloader(Deployments)
           fun.(provider, args, ctx)
-        _, _, _ -> []
+        _, _, _ -> {:ok, []}
       end
 
     field :write_bindings, list_of(:policy_binding),
@@ -50,7 +50,7 @@ defmodule Console.GraphQl.Deployments.OAuth do
         %Console.Schema.OIDCProvider{} = provider, args, ctx ->
           fun = dataloader(Deployments)
           fun.(provider, args, ctx)
-        _, _, _ -> []
+        _, _, _ -> {:ok, []}
       end
   end
 

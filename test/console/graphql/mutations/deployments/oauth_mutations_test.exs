@@ -23,6 +23,14 @@ defmodule Console.GraphQl.Deployments.OAuthMutationsTest do
             clientId
             clientSecret
             redirectUris
+            bindings {
+              user { id }
+              group { id }
+            }
+            writeBindings {
+              user { id }
+              group { id }
+            }
           }
         }
       """, %{"attrs" => attrs}, %{current_user: admin_user()})
