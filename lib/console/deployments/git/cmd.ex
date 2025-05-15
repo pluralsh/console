@@ -3,10 +3,14 @@ defmodule Console.Deployments.Git.Cmd do
   alias Console.Jwt.Github
 
   def save_private_key(%GitRepository{private_key: pk} = git) when is_binary(pk) do
-    with {:ok, path} <- Briefly.create(),
+    with {:ok, path} <- private_key_file(git),
          :ok <- File.write(path, pk),
-         :ok <- File.chmod(path, 0o400),
-      do: {:ok, %{git | private_key_file: path}}
+         :ok <- File.chmod(path, 0o400) do
+      {:ok, %{git | private_key_file: path}}
+    else
+      {:exists, _} -> maybe_overwrite_key(git)
+      err -> err
+    end
   end
 
   def save_private_key(%GitRepository{connection: %ScmConnection{token: t}} = git) when is_binary(t),
@@ -25,11 +29,20 @@ defmodule Console.Deployments.Git.Cmd do
 
   def save_private_key(git), do: {:ok, git}
 
-  def refresh_key(%GitRepository{private_key_file: f} = git) when is_binary(f) do
-    File.rm(f)
-    save_private_key(git)
-  end
   def refresh_key(git), do: save_private_key(git)
+
+  defp private_key_file(%GitRepository{private_key_file: f}) when is_binary(f), do: {:exists, f}
+  defp private_key_file(_), do: Briefly.create()
+
+  defp maybe_overwrite_key(%GitRepository{private_key_file: f, prev_private_key: f} = git), do: {:ok, git}
+  defp maybe_overwrite_key(%GitRepository{private_key_file: f, prev_private_key: nil} = git), do: {:ok, %{git | prev_private_key: f}}
+  defp maybe_overwrite_key(%GitRepository{private_key_file: k} = git) when is_binary(k) do
+    with {:ok, f} <- Briefly.create(),
+         :ok <- File.write(f, k),
+         :ok <- File.chmod(f, 0o400),
+      do: {:ok, %{git | prev_private_key: k, private_key_file: f}}
+  end
+  defp maybe_overwrite_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
     with {:ok, _} <- git(repo, "fetch", ["--all", "--tags", "--force", "--prune", "--prune-tags"]),

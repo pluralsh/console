@@ -22,6 +22,7 @@ defmodule Console.Schema.GitRepository do
 
     field :dir,              :string, virtual: true
     field :private_key_file, :string, virtual: true
+    field :prev_private_key, :string, virtual: true
 
     belongs_to :connection, ScmConnection
 
