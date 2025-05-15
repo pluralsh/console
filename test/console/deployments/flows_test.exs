@@ -166,6 +166,8 @@ defmodule Console.Deployments.FlowsTest do
       assert template.flow_id == flow.id
       assert template.template.namespace == "test-blah"
       assert template.reference_service_id == svc.id
+
+      assert_receive {:event, %PubSub.PreviewEnvironmentTemplateCreated{item: ^template}}
     end
 
     test "flow writers can update a preview environment template" do
@@ -191,6 +193,8 @@ defmodule Console.Deployments.FlowsTest do
       assert updated.flow_id == flow.id
       assert updated.template.namespace == "test-blah"
       assert updated.reference_service_id == svc.id
+
+      assert_receive {:event, %PubSub.PreviewEnvironmentTemplateUpdated{item: ^updated}}
     end
 
     test "preview environment templates must reference services in a flow" do

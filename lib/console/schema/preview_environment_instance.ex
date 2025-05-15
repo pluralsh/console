@@ -33,6 +33,10 @@ defmodule Console.Schema.PreviewEnvironmentInstance do
     )
   end
 
+  def for_template(query \\ __MODULE__, id) do
+    from(i in query, where: i.template_id == ^id)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(i in query, order_by: ^order)
   end

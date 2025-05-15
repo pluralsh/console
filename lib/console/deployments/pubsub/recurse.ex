@@ -188,3 +188,16 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
     end
   end
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.PreviewEnvironmentTemplateUpdated do
+  alias Console.Repo
+  alias Console.Deployments.Flows.Preview
+  alias Console.Schema.{PreviewEnvironmentTemplate, PreviewEnvironmentInstance}
+
+  def process(%{item: %PreviewEnvironmentTemplate{id: id}}) do
+    PreviewEnvironmentInstance.for_template(id)
+    |> Repo.all()
+    |> Preview.preload_instance()
+    |> Enum.each(&Preview.update_instance(&1, &1.pull_request))
+  end
+end
