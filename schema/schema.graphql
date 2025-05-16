@@ -209,6 +209,8 @@ type RootQueryType {
 
   clusterUsage(id: ID!): ClusterUsage
 
+  projectUsageHistory(after: String, first: Int, before: String, last: Int): ProjectUsageHistoryConnection
+
   clusterRegistration(id: ID, machineId: String): ClusterRegistration
 
   clusterRegistrations(after: String, first: Int, before: String, last: Int): ClusterRegistrationConnection
@@ -2173,6 +2175,9 @@ input StackConfigurationAttributes {
 
   "the hooks to customize execution for this stack"
   hooks: [StackHookAttributes]
+
+  "the terraform configuration for this stack"
+  terraform: TerraformConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -2184,6 +2189,14 @@ input StackHookAttributes {
 
   "the stage to run this hook before"
   afterStage: StepStage!
+}
+
+input TerraformConfigurationAttributes {
+  "equivalent to the -parallelism flag in terraform"
+  parallelism: Int
+
+  "equivalent to the -refresh flag in terraform"
+  refresh: Boolean
 }
 
 input StackCronAttributes {
@@ -2485,6 +2498,9 @@ type StackConfiguration {
 
   "the hooks to customize execution for this stack"
   hooks: [StackHook]
+
+  "the terraform configuration for this stack"
+  terraform: TerraformConfiguration
 }
 
 "Configuration for applying policy enforcement to a stack"
@@ -2505,6 +2521,14 @@ type StackHook {
 
   "the stage to run this hook before"
   afterStage: StepStage!
+}
+
+type TerraformConfiguration {
+  "equivalent to the -parallelism flag in terraform"
+  parallelism: Int
+
+  "equivalent to the -refresh flag in terraform"
+  refresh: Boolean
 }
 
 type StackRun {
@@ -6177,6 +6201,23 @@ type ClusterUsageHistory {
   updatedAt: DateTime
 }
 
+type ProjectUsageHistory {
+  timestamp: DateTime!
+  cpu: Float
+  memory: Float
+  gpu: Float
+  cpuCost: Float
+  memoryCost: Float
+  gpuCost: Float
+  ingressCost: Float
+  loadBalancerCost: Float
+  egressCost: Float
+  nodeCost: Float
+  storageCost: Float
+  controlPlaneCost: Float
+  projectId: ID
+}
+
 type ClusterNamespaceUsage {
   id: ID!
 
@@ -6436,6 +6477,11 @@ type ClusterRegistrationConnection {
 type ClusterIsoImageConnection {
   pageInfo: PageInfo!
   edges: [ClusterIsoImageEdge]
+}
+
+type ProjectUsageHistoryConnection {
+  pageInfo: PageInfo!
+  edges: [ProjectUsageHistoryEdge]
 }
 
 enum AuthMethod {
@@ -9235,6 +9281,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ProjectUsageHistoryEdge {
+  node: ProjectUsageHistory
   cursor: String
 }
 

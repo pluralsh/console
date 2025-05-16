@@ -77,6 +77,7 @@ defmodule Console.Deployments.Stacks.Commands do
   defp terraform_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
     indexed([
       cmd("init", "terraform", ["init", "-upgrade"], :init),
+      cmd("plan", "terraform", ["plan", "-destroy"], :plan),
       cmd("destroy", "terraform", ["destroy", "-auto-approve"], :destroy)
     ])
   end

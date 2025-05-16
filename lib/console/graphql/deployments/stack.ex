@@ -41,16 +41,22 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :stack_configuration_attributes do
-    field :image,   :string, description: "optional custom image you might want to use"
-    field :version, :string, description: "the semver of the tool you wish to use"
-    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
-    field :hooks,   list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
+    field :image,     :string, description: "optional custom image you might want to use"
+    field :version,   :string, description: "the semver of the tool you wish to use"
+    field :tag,       :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,     list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
+    field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
   end
 
   input_object :stack_hook_attributes do
     field :cmd,          non_null(:string), description: "a script hook to run at a stage"
     field :args,         list_of(:string), description: "args for `cmd`"
     field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
+  end
+
+  input_object :terraform_configuration_attributes do
+    field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
+    field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
   end
 
   input_object :stack_cron_attributes do
@@ -261,6 +267,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :version, :string, description: "the semver of the tool you wish to use"
     field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
+    field :terraform, :terraform_configuration, description: "the terraform configuration for this stack"
   end
 
   @desc "Configuration for applying policy enforcement to a stack"
@@ -273,6 +280,11 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cmd,          non_null(:string), description: "a script hook to run at a stage"
     field :args,         list_of(:string), description: "args for `cmd`"
     field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
+  end
+
+  object :terraform_configuration do
+    field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
+    field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
   end
 
   object :stack_run do

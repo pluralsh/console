@@ -4789,6 +4789,33 @@ type ProjectEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
+type ProjectUsageHistory struct {
+	Timestamp        string   `json:"timestamp"`
+	CPU              *float64 `json:"cpu,omitempty"`
+	Memory           *float64 `json:"memory,omitempty"`
+	Gpu              *float64 `json:"gpu,omitempty"`
+	CPUCost          *float64 `json:"cpuCost,omitempty"`
+	MemoryCost       *float64 `json:"memoryCost,omitempty"`
+	GpuCost          *float64 `json:"gpuCost,omitempty"`
+	IngressCost      *float64 `json:"ingressCost,omitempty"`
+	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
+	EgressCost       *float64 `json:"egressCost,omitempty"`
+	NodeCost         *float64 `json:"nodeCost,omitempty"`
+	StorageCost      *float64 `json:"storageCost,omitempty"`
+	ControlPlaneCost *float64 `json:"controlPlaneCost,omitempty"`
+	ProjectID        *string  `json:"projectId,omitempty"`
+}
+
+type ProjectUsageHistoryConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*ProjectUsageHistoryEdge `json:"edges,omitempty"`
+}
+
+type ProjectUsageHistoryEdge struct {
+	Node   *ProjectUsageHistory `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
+}
+
 // how a promotion for a service will be performed
 type PromotionCriteria struct {
 	ID string `json:"id"`
@@ -5768,6 +5795,8 @@ type StackConfiguration struct {
 	Tag *string `json:"tag,omitempty"`
 	// the hooks to customize execution for this stack
 	Hooks []*StackHook `json:"hooks,omitempty"`
+	// the terraform configuration for this stack
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 }
 
 type StackConfigurationAttributes struct {
@@ -5779,6 +5808,8 @@ type StackConfigurationAttributes struct {
 	Tag *string `json:"tag,omitempty"`
 	// the hooks to customize execution for this stack
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
+	// the terraform configuration for this stack
+	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 }
 
 type StackCron struct {
@@ -6213,6 +6244,20 @@ type TerminatedState struct {
 	StartedAt  *string `json:"startedAt,omitempty"`
 	Message    *string `json:"message,omitempty"`
 	Reason     *string `json:"reason,omitempty"`
+}
+
+type TerraformConfiguration struct {
+	// equivalent to the -parallelism flag in terraform
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag in terraform
+	Refresh *bool `json:"refresh,omitempty"`
+}
+
+type TerraformConfigurationAttributes struct {
+	// equivalent to the -parallelism flag in terraform
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag in terraform
+	Refresh *bool `json:"refresh,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state

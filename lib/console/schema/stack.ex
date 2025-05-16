@@ -50,18 +50,29 @@ defmodule Console.Schema.Stack do
         field :args,        {:array, :string}
         field :after_stage, Console.Schema.RunStep.Stage
       end
+
+      embeds_one :terraform, Terraform, on_replace: :update do
+        field :parallelism, :integer
+        field :refresh,     :boolean
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(image version tag)a)
       |> cast_embed(:hooks, with: &hook_changeset/2)
+      |> cast_embed(:terraform, with: &terraform_changeset/2)
     end
 
     defp hook_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(cmd args after_stage)a)
       |> validate_required(~w(cmd after_stage)a)
+    end
+
+    defp terraform_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(parallelism refresh)a)
     end
   end
 

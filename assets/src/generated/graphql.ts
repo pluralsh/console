@@ -5805,6 +5805,36 @@ export type ProjectEdge = {
   node?: Maybe<Project>;
 };
 
+export type ProjectUsageHistory = {
+  __typename?: 'ProjectUsageHistory';
+  controlPlaneCost?: Maybe<Scalars['Float']['output']>;
+  cpu?: Maybe<Scalars['Float']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
+  egressCost?: Maybe<Scalars['Float']['output']>;
+  gpu?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
+  ingressCost?: Maybe<Scalars['Float']['output']>;
+  loadBalancerCost?: Maybe<Scalars['Float']['output']>;
+  memory?: Maybe<Scalars['Float']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
+  nodeCost?: Maybe<Scalars['Float']['output']>;
+  projectId?: Maybe<Scalars['ID']['output']>;
+  storageCost?: Maybe<Scalars['Float']['output']>;
+  timestamp: Scalars['DateTime']['output'];
+};
+
+export type ProjectUsageHistoryConnection = {
+  __typename?: 'ProjectUsageHistoryConnection';
+  edges?: Maybe<Array<Maybe<ProjectUsageHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectUsageHistoryEdge = {
+  __typename?: 'ProjectUsageHistoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ProjectUsageHistory>;
+};
+
 /** how a promotion for a service will be performed */
 export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
@@ -7572,6 +7602,7 @@ export type RootQueryType = {
   prAutomations?: Maybe<PrAutomationConnection>;
   previewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   project?: Maybe<Project>;
+  projectUsageHistory?: Maybe<ProjectUsageHistoryConnection>;
   projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
   refresh?: Maybe<User>;
@@ -8450,6 +8481,14 @@ export type RootQueryTypePreviewEnvironmentTemplateArgs = {
 export type RootQueryTypeProjectArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeProjectUsageHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -9556,6 +9595,8 @@ export type StackConfiguration = {
   image?: Maybe<Scalars['String']['output']>;
   /** the docker image tag you wish to use if you're customizing the version */
   tag?: Maybe<Scalars['String']['output']>;
+  /** the terraform configuration for this stack */
+  terraform?: Maybe<TerraformConfiguration>;
   /** the semver of the tool you wish to use */
   version?: Maybe<Scalars['String']['output']>;
 };
@@ -9567,6 +9608,8 @@ export type StackConfigurationAttributes = {
   image?: InputMaybe<Scalars['String']['input']>;
   /** the docker image tag you wish to use if you're customizing the version */
   tag?: InputMaybe<Scalars['String']['input']>;
+  /** the terraform configuration for this stack */
+  terraform?: InputMaybe<TerraformConfigurationAttributes>;
   /** the semver of the tool you wish to use */
   version?: InputMaybe<Scalars['String']['input']>;
 };
@@ -10070,6 +10113,21 @@ export type TerminatedState = {
   message?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['String']['output']>;
+};
+
+export type TerraformConfiguration = {
+  __typename?: 'TerraformConfiguration';
+  /** equivalent to the -parallelism flag in terraform */
+  parallelism?: Maybe<Scalars['Int']['output']>;
+  /** equivalent to the -refresh flag in terraform */
+  refresh?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type TerraformConfigurationAttributes = {
+  /** equivalent to the -parallelism flag in terraform */
+  parallelism?: InputMaybe<Scalars['Int']['input']>;
+  /** equivalent to the -refresh flag in terraform */
+  refresh?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Urls for configuring terraform HTTP remote state */

@@ -82,6 +82,20 @@ spec:
                       Tag is the docker image tag you wish to use
                       if you're customizing the version
                     type: string
+                  terraform:
+                    description: Terraform is the terraform configuration for this
+                      stack
+                    properties:
+                      parallelism:
+                        description: Parallelism is the number of concurrent operations
+                          to run, equivalent to the -parallelism flag in terraform
+                        format: int64
+                        type: integer
+                      refresh:
+                        description: Refresh is whether to refresh the state of the
+                          stack, equivalent to the -refresh flag in terraform
+                        type: boolean
+                    type: object
                   version:
                     description: Version the semver of the tool you wish to use
                     type: string

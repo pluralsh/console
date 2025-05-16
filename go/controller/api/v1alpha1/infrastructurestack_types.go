@@ -163,6 +163,20 @@ type StackConfiguration struct {
 	// Hooks to run at various stages of the stack run
 	// +kubebuilder:validation:Optional
 	Hooks []*StackHook `json:"hooks,omitempty"`
+
+	// Terraform is the terraform configuration for this stack
+	// +kubebuilder:validation:Optional
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+}
+
+type TerraformConfiguration struct {
+	// Parallelism is the number of concurrent operations to run, equivalent to the -parallelism flag in terraform
+	// +kubebuilder:validation:Optional
+	Parallelism *int64 `json:"parallelism,omitempty"`
+
+	// Refresh is whether to refresh the state of the stack, equivalent to the -refresh flag in terraform
+	// +kubebuilder:validation:Optional
+	Refresh *bool `json:"refresh,omitempty"`
 }
 
 type StackCron struct {

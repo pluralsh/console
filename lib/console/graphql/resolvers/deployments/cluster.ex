@@ -136,6 +136,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
+  def list_aggregated_cluster_usage_history(args, %{context: %{current_user: user}}) do
+    ClusterUsageHistory.for_user(user)
+    |> ClusterUsageHistory.aggregated()
+    |> paginate(args)
+  end
+
   def list_cluster_usage_history(%ClusterUsage{cluster_id: cluster_id}, args, _) do
     ClusterUsageHistory.for_cluster(cluster_id)
     |> ClusterUsageHistory.ordered()
