@@ -18,7 +18,9 @@ defmodule Console.Deployments.Git.Agent do
   @poll :timer.seconds(120)
   @jitter 120
   @jitter_offset :timer.seconds(60)
-  @timeout 10_000
+  @timeout :timer.seconds(10)
+  @limit 20
+  @limit_interval :timer.seconds(1)
 
   defmodule State, do: defstruct [:git, :cache, :last_pull]
 
@@ -29,44 +31,50 @@ defmodule Console.Deployments.Git.Agent do
       {:ok, %Cache.Line{file: f, sha: sha, message: msg}} ->
         Services.update_sha(svc, sha, msg)
         File.open(f)
-      _ -> GenServer.call(pid, {:fetch, svc}, @timeout)
+      _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, svc}, @timeout) end)
     end
   end
 
   def fetch(pid, %Service.Git{} = ref) do
     case fetch_line(pid, ref) do
       {:ok, %Cache.Line{file: f}} -> File.open(f)
-      _ -> GenServer.call(pid, {:fetch, ref}, @timeout)
+      _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, ref}, @timeout) end)
     end
   end
 
   def digest(pid, %Service.Git{} = ref)  do
     case fetch_line(pid, ref) do
       {:ok, %Cache.Line{digest: sha}} -> {:ok, sha}
-      _ -> GenServer.call(pid, {:digest, ref}, @timeout)
+      _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:digest, ref}, @timeout) end)
     end
   end
 
-  defp fetch_line(pid, %Service.Git{} = ref) do
-    with {:ok, cache} <- get_cache(pid),
-         {:ok, %Cache.Line{} = line} <- Cache.get(cache, ref) do
-      send pid, {:touch, line}
-      {:ok, line}
+  def sha(pid, ref) do
+    case get_cache(pid) do
+      {:ok, %Cache{heads: %{}} = cache} -> Cache.commit(cache, ref)
+      _ -> GenServer.call(pid, {:sha, ref}, @timeout)
     end
   end
-  defp fetch_line(_, _), do: {:error, :not_found}
+
+  def changes(pid, sha1, sha2, folder) do
+    with {:ok, %Cache{changes: %{} = c, heads: %{}}} <- get_cache(pid),
+         {:ok, %Cache.Change{result: result} = change} <- Map.fetch(c, {folder, sha1, sha2}) do
+      send pid, {:touch, change}
+      result
+    else
+      _ -> rate_limited({:changes, pid}, fn ->
+        GenServer.call(pid, {:changes, sha1, sha2, folder}, @timeout)
+      end)
+    end
+  end
+
+  def tags(pid), do: GenServer.call(pid, :tags, @timeout)
 
   def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, @timeout)
 
   def refs(pid), do: GenServer.call(pid, :refs, @timeout)
 
   def addons(pid), do: GenServer.call(pid, :addons, @timeout)
-
-  def sha(pid, ref), do: GenServer.call(pid, {:sha, ref}, @timeout)
-
-  def tags(pid), do: GenServer.call(pid, :tags, @timeout)
-
-  def changes(pid, sha1, sha2, folder), do: GenServer.call(pid, {:changes, sha1, sha2, folder}, 30_000)
 
   def kick(pid), do: send(pid, :pull)
 
@@ -191,7 +199,7 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
-  def handle_info({:touch, %Cache.Line{} = line}, %State{cache: cache} = state),
+  def handle_info({:touch, line}, %State{cache: cache} = state),
     do: {:noreply, %{state | cache: store_cache(Cache.touch(cache, line))}}
 
   def handle_info(:move, %State{git: git} = state) do
@@ -215,6 +223,24 @@ defmodule Console.Deployments.Git.Agent do
          {:ok, git} <- refresh_key(git),
       do: git
   end
+
+  defp rate_limited(key, fun) when is_function(fun, 0) do
+    :erlang.term_to_binary(key)
+    |> Hammer.check_rate(@limit_interval, @limit)
+    |> case do
+      {:allow, _} -> fun.()
+      {:deny, _} -> {:error, :rate_limited}
+    end
+  end
+
+  defp fetch_line(pid, %Service.Git{} = ref) do
+    with {:ok, cache} <- get_cache(pid),
+         {:ok, %Cache.Line{} = line} <- Cache.get(cache, ref) do
+      send pid, {:touch, line}
+      {:ok, line}
+    end
+  end
+  defp fetch_line(_, _), do: {:error, :not_found}
 
   defp refresh(%GitRepository{health: :pullable} = git, cache), do: Cache.refresh(%{cache | git: git})
   defp refresh(_, cache), do: cache

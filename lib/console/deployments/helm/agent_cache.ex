@@ -6,7 +6,7 @@ defmodule Console.Deployments.Helm.AgentCache do
   defstruct [:repo, :client, :index, :dir, cache: %{}]
 
   defmodule Line do
-    @expiry [minutes: -10]
+    @expiry [minutes: -30]
     defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched]
 
     def new(file, chart, vsn, digest) do
