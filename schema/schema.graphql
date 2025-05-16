@@ -2175,6 +2175,9 @@ input StackConfigurationAttributes {
 
   "the hooks to customize execution for this stack"
   hooks: [StackHookAttributes]
+
+  "the terraform configuration for this stack"
+  terraform: TerraformConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -2186,6 +2189,14 @@ input StackHookAttributes {
 
   "the stage to run this hook before"
   afterStage: StepStage!
+}
+
+input TerraformConfigurationAttributes {
+  "equivalent to the -parallelism flag in terraform"
+  parallelism: Int
+
+  "equivalent to the -refresh flag in terraform"
+  refresh: Boolean
 }
 
 input StackCronAttributes {
@@ -2487,6 +2498,9 @@ type StackConfiguration {
 
   "the hooks to customize execution for this stack"
   hooks: [StackHook]
+
+  "the terraform configuration for this stack"
+  terraform: TerraformConfiguration
 }
 
 "Configuration for applying policy enforcement to a stack"
@@ -2507,6 +2521,14 @@ type StackHook {
 
   "the stage to run this hook before"
   afterStage: StepStage!
+}
+
+type TerraformConfiguration {
+  "equivalent to the -parallelism flag in terraform"
+  parallelism: Int
+
+  "equivalent to the -refresh flag in terraform"
+  refresh: Boolean
 }
 
 type StackRun {

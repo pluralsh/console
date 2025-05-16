@@ -5795,6 +5795,8 @@ type StackConfiguration struct {
 	Tag *string `json:"tag,omitempty"`
 	// the hooks to customize execution for this stack
 	Hooks []*StackHook `json:"hooks,omitempty"`
+	// the terraform configuration for this stack
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 }
 
 type StackConfigurationAttributes struct {
@@ -5806,6 +5808,8 @@ type StackConfigurationAttributes struct {
 	Tag *string `json:"tag,omitempty"`
 	// the hooks to customize execution for this stack
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
+	// the terraform configuration for this stack
+	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 }
 
 type StackCron struct {
@@ -6240,6 +6244,20 @@ type TerminatedState struct {
 	StartedAt  *string `json:"startedAt,omitempty"`
 	Message    *string `json:"message,omitempty"`
 	Reason     *string `json:"reason,omitempty"`
+}
+
+type TerraformConfiguration struct {
+	// equivalent to the -parallelism flag in terraform
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag in terraform
+	Refresh *bool `json:"refresh,omitempty"`
+}
+
+type TerraformConfigurationAttributes struct {
+	// equivalent to the -parallelism flag in terraform
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag in terraform
+	Refresh *bool `json:"refresh,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state

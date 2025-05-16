@@ -9595,6 +9595,8 @@ export type StackConfiguration = {
   image?: Maybe<Scalars['String']['output']>;
   /** the docker image tag you wish to use if you're customizing the version */
   tag?: Maybe<Scalars['String']['output']>;
+  /** the terraform configuration for this stack */
+  terraform?: Maybe<TerraformConfiguration>;
   /** the semver of the tool you wish to use */
   version?: Maybe<Scalars['String']['output']>;
 };
@@ -9606,6 +9608,8 @@ export type StackConfigurationAttributes = {
   image?: InputMaybe<Scalars['String']['input']>;
   /** the docker image tag you wish to use if you're customizing the version */
   tag?: InputMaybe<Scalars['String']['input']>;
+  /** the terraform configuration for this stack */
+  terraform?: InputMaybe<TerraformConfigurationAttributes>;
   /** the semver of the tool you wish to use */
   version?: InputMaybe<Scalars['String']['input']>;
 };
@@ -10109,6 +10113,21 @@ export type TerminatedState = {
   message?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['String']['output']>;
+};
+
+export type TerraformConfiguration = {
+  __typename?: 'TerraformConfiguration';
+  /** equivalent to the -parallelism flag in terraform */
+  parallelism?: Maybe<Scalars['Int']['output']>;
+  /** equivalent to the -refresh flag in terraform */
+  refresh?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type TerraformConfigurationAttributes = {
+  /** equivalent to the -parallelism flag in terraform */
+  parallelism?: InputMaybe<Scalars['Int']['input']>;
+  /** equivalent to the -refresh flag in terraform */
+  refresh?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Urls for configuring terraform HTTP remote state */
