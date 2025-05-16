@@ -5805,6 +5805,36 @@ export type ProjectEdge = {
   node?: Maybe<Project>;
 };
 
+export type ProjectUsageHistory = {
+  __typename?: 'ProjectUsageHistory';
+  controlPlaneCost?: Maybe<Scalars['Float']['output']>;
+  cpu?: Maybe<Scalars['Float']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
+  egressCost?: Maybe<Scalars['Float']['output']>;
+  gpu?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
+  ingressCost?: Maybe<Scalars['Float']['output']>;
+  loadBalancerCost?: Maybe<Scalars['Float']['output']>;
+  memory?: Maybe<Scalars['Float']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
+  nodeCost?: Maybe<Scalars['Float']['output']>;
+  projectId?: Maybe<Scalars['ID']['output']>;
+  storageCost?: Maybe<Scalars['Float']['output']>;
+  timestamp: Scalars['DateTime']['output'];
+};
+
+export type ProjectUsageHistoryConnection = {
+  __typename?: 'ProjectUsageHistoryConnection';
+  edges?: Maybe<Array<Maybe<ProjectUsageHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectUsageHistoryEdge = {
+  __typename?: 'ProjectUsageHistoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ProjectUsageHistory>;
+};
+
 /** how a promotion for a service will be performed */
 export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
@@ -7572,6 +7602,7 @@ export type RootQueryType = {
   prAutomations?: Maybe<PrAutomationConnection>;
   previewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   project?: Maybe<Project>;
+  projectUsageHistory?: Maybe<ProjectUsageHistoryConnection>;
   projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
   refresh?: Maybe<User>;
@@ -8450,6 +8481,14 @@ export type RootQueryTypePreviewEnvironmentTemplateArgs = {
 export type RootQueryTypeProjectArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeProjectUsageHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

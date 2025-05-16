@@ -1003,6 +1003,105 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     end
   end
 
+  describe "projectUsageHistory" do
+    test "it can list aggregated usage history for a project" do
+      user = admin_user()
+      project = insert(:project)
+      project2 = insert(:project)
+
+      times = Map.new(1..3, & {&1, Timex.now() |> Timex.shift(days: -&1)})
+
+      clusters = insert_list(3, :cluster, project: project)
+      for cluster <- clusters do
+        for i <- 1..3 do
+          insert(:cluster_usage_history,
+            cluster: cluster,
+            timestamp: times[i],
+            cpu: 50,
+            memory: 50,
+            cpu_cost: 50,
+            memory_cost: 50,
+            gpu_cost: 50,
+            ingress_cost: 50,
+            load_balancer_cost: 50,
+            egress_cost: 50,
+            node_cost: 50,
+            storage_cost: 50,
+            control_plane_cost: 50
+          )
+        end
+      end
+
+      clusters = insert_list(3, :cluster, project: project2)
+      for cluster <- clusters do
+        for i <- 1..3 do
+          insert(:cluster_usage_history,
+            cluster: cluster,
+            timestamp: times[i],
+            cpu: 100,
+            memory: 100,
+            cpu_cost: 100,
+            memory_cost: 100,
+            gpu_cost: 100,
+            ingress_cost: 100,
+            load_balancer_cost: 100,
+            egress_cost: 100,
+            node_cost: 100,
+            storage_cost: 100,
+            control_plane_cost: 100
+          )
+        end
+      end
+
+      {:ok, %{data: %{"projectUsageHistory" => found}}} = run_query("""
+        query {
+          projectUsageHistory(first: 100) {
+            edges {
+              node {
+                timestamp
+                cpu
+                memory
+                cpuCost
+                memoryCost
+                gpuCost
+                ingressCost
+                loadBalancerCost
+                egressCost
+                nodeCost
+                storageCost
+                controlPlaneCost
+                projectId
+              }
+            }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      fields = ~w(
+        cpu
+        memory
+        cpuCost
+        memoryCost
+        gpuCost
+        ingressCost
+        loadBalancerCost
+        egressCost
+        nodeCost
+        storageCost
+        controlPlaneCost
+      )
+
+      assert length(from_connection(found)) == 6
+
+      for h <- from_connection(found) do
+        for field <- fields do
+          assert h["timestamp"]
+          assert h[field] == if h["projectId"] == project.id, do: 150, else: 300
+        end
+      end
+    end
+  end
+
   defp wait(module) do
     Stream.repeatedly(fn -> module.ping() end)
     |> Stream.take(10)

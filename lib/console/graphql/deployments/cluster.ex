@@ -910,6 +910,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  object :project_usage_history do
+    field :timestamp,          non_null(:datetime)
+    field :cpu,                :float
+    field :memory,             :float
+    field :gpu,                :float
+    field :cpu_cost,           :float
+    field :memory_cost,        :float
+    field :gpu_cost,           :float
+    field :ingress_cost,       :float
+    field :load_balancer_cost, :float
+    field :egress_cost,        :float
+    field :node_cost,          :float
+    field :storage_cost,       :float
+    field :control_plane_cost, :float
+    field :project_id,         :id
+  end
+
   object :cluster_namespace_usage do
     field :id,        non_null(:id)
     field :namespace, :string
@@ -1071,7 +1088,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_audit_log
   connection node_type: :cluster_registration
   connection node_type: :cluster_iso_image
-
+  connection node_type: :project_usage_history
   delta :cluster
   delta :cluster_provider
 
@@ -1252,6 +1269,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_cluster_usage/2
+    end
+
+    connection field :project_usage_history, node_type: :project_usage_history do
+      middleware Authenticated
+
+      resolve &Deployments.list_aggregated_cluster_usage_history/2
     end
 
     field :cluster_registration, :cluster_registration do
