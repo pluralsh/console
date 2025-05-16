@@ -13,7 +13,7 @@ defmodule Console.Deployments.Git.Cache do
   defstruct [:git, :dir, :heads, cache: %{}, changes: %{}]
 
   defmodule Line do
-    @expiry [minutes: -10]
+    @expiry [minutes: -30]
     defstruct [:key, :file, :sha, :digest, :touched, :message]
 
     def new(key, file, sha, message) do
@@ -38,10 +38,10 @@ defmodule Console.Deployments.Git.Cache do
 
   defmodule Change do
     @expiry [hours: -1]
-    defstruct [:from, :to, :touched, :result]
+    defstruct [:from, :to, :touched, :result, :key]
 
-    def new(from, to, result) do
-      %__MODULE__{from: from, to: to, result: result, touched: Timex.now()}
+    def new(key, from, to, result) do
+      %__MODULE__{key: key, from: from, to: to, result: result, touched: Timex.now()}
     end
 
     def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}
@@ -117,6 +117,13 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
+  def touch(%__MODULE__{changes: c} = cache, %Change{key: key}) do
+    case Map.get(c, key) do
+      %Change{} = change -> put_in(cache.changes[key], Change.touch(change))
+      _ -> cache
+    end
+  end
+
   def commit(%__MODULE__{heads: heads}, ref) do
     case sha?(ref) do
       true -> {:ok, ref}
@@ -128,7 +135,7 @@ defmodule Console.Deployments.Git.Cache do
     key = {from, to, folder}
     with {:cache, nil} <- {:cache, Map.get(changes, key)},
          {:ok, _, _} = result <- changes(c, from, to, folder) do
-      line = Change.new(from, to, result)
+      line = Change.new(key, from, to, result)
       {put_in(c.changes[key], line), result}
     else
       {:cache, %Change{result: result} = line} ->

@@ -36,6 +36,9 @@ defmodule ConsoleWeb.GitController do
          {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Stacks.tarstream(run) end), run} do
       chunk_send_tar(conn, File.open!(path, [:raw]))
     else
+      {{:error, :rate_limited}, run} ->
+        Stacks.add_errors(run, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, run} ->
         Stacks.add_errors(run, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
@@ -51,6 +54,9 @@ defmodule ConsoleWeb.GitController do
          {{:ok, sha}, _} <- {Services.digest(svc), svc} do
       send_resp(conn, 200, sha)
     else
+      {{:error, :rate_limited}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
@@ -67,6 +73,9 @@ defmodule ConsoleWeb.GitController do
          {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Services.tarstream(svc) end), svc} do
       chunk_send_tar(conn, File.open!(path, [:raw]))
     else
+      {{:error, :rate_limited}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: err}])
         send_resp(conn, 402, err)
