@@ -5,9 +5,9 @@ defmodule Console.Deployments.Helm.AgentTest do
   describe "#start/1" do
     test "it can fetch a chart and version" do
       repo = "https://pluralsh.github.io/console"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "console", "0.3.15")
+      {:ok, f, _, _} = Agent.fetch(pid, "console", "0.3.15")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -19,9 +19,9 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can handle problem with yaml responses and json content types" do
       repo = "https://pkgs.tailscale.com/helmcharts"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "tailscale-operator", "x.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "tailscale-operator", "x.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -33,9 +33,9 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can handle shitty azure helm repos" do
       repo = "https://raw.githubusercontent.com/Azure/azure-service-operator/main/v2/charts"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "azure-service-operator", "x.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "azure-service-operator", "x.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -47,9 +47,9 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can handle https chart museum helm repos" do
       repo = "https://app.plural.sh/cm/rabbitmq"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "cluster-operator", "x.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "cluster-operator", "x.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -61,9 +61,9 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can fetch a chart from an oci registry" do
       repo = "oci://ghcr.io/stefanprodan/charts"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "podinfo", "x.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "podinfo", "x.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -76,7 +76,7 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can properly error on invalid charts" do
       repo = "oci://ghcr.io/stefanprodan/charts"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
       {:error, "error fetching" <> _} = Agent.fetch(pid, "incorrect", "x.x.x")
 
@@ -85,9 +85,9 @@ defmodule Console.Deployments.Helm.AgentTest do
 
     test "it can fetch a chart by floating version" do
       repo = "https://pluralsh.github.io/console"
-      {:ok, pid} = Agent.start(repo)
+      {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _} = Agent.fetch(pid, "console", "0.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "console", "0.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
@@ -110,4 +110,8 @@ defmodule Console.Deployments.Helm.AgentTest do
     {:ok, res} = :erl_tar.extract(tmp, [:compressed, :memory])
     Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
   end
+
+  defp handle({:error, {:already_started, pid}}), do: {:ok, pid}
+  defp handle({:ok, pid}), do: {:ok, pid}
+  defp handle(err), do: err
 end

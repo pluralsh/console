@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Helm.Agent do
   use GenServer, restart: :transient
   alias Console.Repo
-  alias Console.Deployments.Git
+  alias Console.Deployments.{Git, Local.Server}
   alias Console.Deployments.Helm.{AgentCache, Discovery}
   alias Console.Schema.HelmRepository
   require Logger
@@ -9,16 +9,16 @@ defmodule Console.Deployments.Helm.Agent do
   defmodule State, do: defstruct [:repo, :cache]
 
   @poll :timer.minutes(5)
-  @timeout 60_000
-  @jitter 15
+  @timeout :timer.seconds(60)
+  @jitter :timer.seconds(15)
 
   def registry(), do: __MODULE__
 
   @spec fetch(pid, binary, binary) :: {:ok, File.t(), binary} | {:error, term}
   def fetch(pid, chart, vsn) do
-    with {:ok, %AgentCache.Line{file: f, digest: d}} <- fetch_line(pid, chart, vsn),
-         {:ok, f} <- File.open(f) do
-      {:ok, f, d}
+    with {:ok, %AgentCache.Line{file: f, digest: d, internal_digest: i}} <- fetch_line(pid, chart, vsn),
+         {:ok, f} <- Server.open(f) do
+      {:ok, f, d, i}
     else
       _ -> GenServer.call(pid, {:fetch, chart, vsn}, @timeout)
     end
@@ -69,7 +69,7 @@ defmodule Console.Deployments.Helm.Agent do
   def handle_call({:fetch, c, v}, _, %State{cache: cache} = state) do
     with {:ok, l, cache} <- AgentCache.fetch(cache, c, v),
          {:ok, f} <- File.open(l.file) do
-      {:reply, {:ok, f, l.digest}, %{state | cache: store_cache(cache)}}
+      {:reply, {:ok, f, l.digest, l.internal_digest}, %{state | cache: store_cache(cache)}}
     else
       err -> handle_error(err, state)
     end
@@ -139,12 +139,7 @@ defmodule Console.Deployments.Helm.Agent do
   end
   defp handle_error(err, state), do: {:reply, err, state}
 
-  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + jitter())
-
-  defp jitter() do
-    :rand.uniform(@jitter)
-    |> :timer.seconds()
-  end
+  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + :rand.uniform(@jitter))
 
   defp get_cache(pid) do
     case :ets.lookup(:helm_cache, pid) do
