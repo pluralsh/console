@@ -49,7 +49,7 @@ defmodule Console.Deployments.Deprecations.Table do
       {:noreply, %{state | table: table}}
     else
       err ->
-        Logger.error "failed to fetch kubernetes deprecation table: #{err}"
+        Logger.error "failed to fetch kubernetes deprecation table: #{inspect(err)}"
         {:noreply, state}
     end
   end

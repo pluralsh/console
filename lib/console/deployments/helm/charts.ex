@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Helm.Charts do
   alias Kube.Client
   alias Kube.HelmChart
+  alias Console.SmartFile
   alias Console.Schema.Service
   alias Console.Cached.HelmChart, as: ChartCache
   alias Console.Deployments.Helm.{Server, Cache}
@@ -22,7 +23,7 @@ defmodule Console.Deployments.Helm.Charts do
   @doc """
   Downloads a chart artifact from the found chart crd of the given service
   """
-  @spec artifact(Service.t) :: {:ok, File.t, binary} | Console.error
+  @spec artifact(Service.t) :: {:ok, SmartFile.t, binary} | Console.error
   def artifact(%Service{} = svc) do
     with {:ok, chart} <- get(svc),
          {:ok, f} <- Server.fetch(chart) do

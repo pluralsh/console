@@ -10,7 +10,7 @@ defmodule Console.Deployments.Git.Agent do
   import Console.Deployments.Git.Cmd
   import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Repo
-  alias Console.Deployments.{Git.Cache, Git, Services}
+  alias Console.Deployments.{Git.Cache, Git, Services, Local.Server}
   alias Console.Schema.{GitRepository, Service}
 
   require Logger
@@ -19,7 +19,7 @@ defmodule Console.Deployments.Git.Agent do
   @jitter 120
   @jitter_offset :timer.seconds(60)
   @timeout :timer.seconds(10)
-  @limit 20
+  @limit 50
   @limit_interval :timer.seconds(1)
 
   defmodule State, do: defstruct [:git, :cache, :last_pull]
@@ -27,17 +27,20 @@ defmodule Console.Deployments.Git.Agent do
   def registry(), do: __MODULE__
 
   def fetch(pid, %Service{} = svc) do
-    case fetch_line(pid, svc.git) do
-      {:ok, %Cache.Line{file: f, sha: sha, message: msg}} ->
-        Services.update_sha(svc, sha, msg)
-        File.open(f)
+    with {:ok, %Cache.Line{file: f, sha: sha, digest: digest, message: msg}} <- fetch_line(pid, svc.git),
+         {:ok, _} <- Services.update_sha(svc, sha, msg),
+         {:ok, f} <- Server.open(f) do
+      {:ok, f, digest}
+    else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, svc}, @timeout) end)
     end
   end
 
   def fetch(pid, %Service.Git{} = ref) do
-    case fetch_line(pid, ref) do
-      {:ok, %Cache.Line{file: f}} -> File.open(f)
+    with {:ok, %Cache.Line{file: f, digest: digest}} <- fetch_line(pid, ref),
+         {:ok, f} <- Server.open(f) do
+      {:ok, f, digest}
+    else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, ref}, @timeout) end)
     end
   end
@@ -141,17 +144,20 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
-    case Cache.fetch(cache, ref) do
-      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: store_cache(cache)}}
+    with {:ok, %Cache.Line{file: f, digest: sha}, cache} <- Cache.fetch(cache, ref),
+         {:ok, f} <- File.open(f) do
+      {:reply, {:ok, f, sha}, %{state | cache: store_cache(cache)}}
+    else
       err -> {:reply, err, state}
     end
   end
 
   def handle_call({:fetch, %Service{git: %Service.Git{} = ref} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])
-    with {:ok, %Cache.Line{file: f, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref),
-         {:ok, _} <- Services.update_sha(svc, sha, msg) do
-      {:reply, File.open(f), %{state | cache: store_cache(cache)}}
+    with {:ok, %Cache.Line{file: f, digest: digest, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref),
+         {:ok, _} <- Services.update_sha(svc, sha, msg),
+         {:ok, f} <- File.open(f) do
+      {:reply, {:ok, f, digest}, %{state | cache: store_cache(cache)}}
     else
       err -> {:reply, err, state}
     end

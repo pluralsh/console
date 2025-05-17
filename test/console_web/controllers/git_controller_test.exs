@@ -20,6 +20,34 @@ defmodule ConsoleWeb.GitControllerTest do
       |> response(200)
     end
 
+    test "it will download helm content for valid deploy tokens", %{conn: conn} do
+      svc = insert(:service, helm: %{url: "https://pluralsh.github.io/console", chart: "console", version: "0.3.15"})
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: svc.id})
+      |> response(200)
+    end
+
+    test "it will download multisource content for valid deploy tokens", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service,
+        helm: %{
+          url: "https://pluralsh.github.io/console",
+          chart: "console",
+          version: "0.3.15",
+          values_files: ["values.yaml.tpl"]
+        },
+        repository: git,
+        git: %{ref: "master", folder: "templates"}
+      )
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: svc.id})
+      |> response(200)
+    end
+
     test "if fetching a bogus resource it will 402 and persist an error", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
       svc = insert(:service, repository: git, git: %{ref: "doesnt-exist", folder: "bin"})
