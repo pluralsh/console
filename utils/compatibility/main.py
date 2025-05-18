@@ -2,7 +2,7 @@
 import os
 import importlib
 from colorama import Fore, Style
-from utils import read_yaml, print_error, print_warning, latest_kube_version
+from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
 
 
 def call_scraper(scraper):
@@ -48,3 +48,11 @@ for name in manifest["names"]:
     )
     call_scraper(name)
     print("\n")
+
+addons = []
+for name in manifest["names"]:
+    addon = read_yaml(f"../../static/compatibilities/{name}.yaml")
+    addon["name"] = name
+    addons.append(addon)
+
+write_yaml("../../static/compatibilities.yaml", {"addons": addons})
