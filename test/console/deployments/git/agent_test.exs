@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Git.AgentTest do
   use Console.DataCase, async: false
+  alias Console.SmartFile
   alias Console.Deployments.Git.{Agent, Discovery}
 
   describe "#fetch/2" do
@@ -9,11 +10,11 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, pid} = Discovery.start(git)
 
-      fetch_and_check(pid, svc)
+      fetch_and_check(git, svc)
 
       send pid, :pull
 
-      fetch_and_check(pid, svc)
+      fetch_and_check(git, svc)
 
       git = refetch(git)
       assert git.health == :pullable
@@ -22,6 +23,8 @@ defmodule Console.Deployments.Git.AgentTest do
       assert refetch(svc).sha
 
       assert Process.alive?(pid)
+
+      Process.exit(pid, :kill)
     end
 
     test "it can checkout and tarball a subfolder of a repo with additional files" do
@@ -30,11 +33,13 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, pid} = Discovery.start(git)
 
-      files = fetch_and_extract(pid, svc)
+      files = fetch_and_extract(git, svc)
       for f <- ~w(.git-askpass .ssh-askpass ssh-add),
         do: assert files[f] == File.read!(Path.join("bin", f))
 
       assert files["AGENT_VERSION"]
+
+      Process.exit(pid, :kill)
     end
 
     @tag :skip
@@ -42,9 +47,9 @@ defmodule Console.Deployments.Git.AgentTest do
       git = insert(:git_repository, url: "https://github.com/pluralsh/bootstrap.git")
       svc = insert(:service, repository: git, git: %{ref: "main", folder: "resources/policy/constraints"})
 
-      {:ok, pid} = Discovery.start(git)
+      {:ok, _pid} = Discovery.start(git)
 
-      {:ok, f} = Agent.fetch(pid, svc)
+      {:ok, f} = Discovery.fetch(git, svc)
       {:ok, tmp} = Briefly.create()
 
       IO.binstream(f, 1024)
@@ -59,13 +64,15 @@ defmodule Console.Deployments.Git.AgentTest do
     test "busted credentials fail as expected" do
       git = insert(:git_repository, auth_method: :ssh, url: "git@github.com:pluralsh/test-repo.git", private_key: "busted")
 
-      {:ok, _pid} = Discovery.start(git)
+      {:ok, pid} = Discovery.start(git)
 
       :timer.sleep(:timer.seconds(2))
 
       git = refetch(git)
       assert git.health == :failed
       refute git.pulled_at
+
+      Process.exit(pid, :kill)
     end
 
     @tag :skip
@@ -107,18 +114,22 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, pid} = Discovery.start(git)
 
-      {:ok, sha} = Agent.sha(pid, "master")
+      {:ok, sha} = Discovery.sha(git, "master")
 
-      {:ok, :pass, msg} = Agent.changes(pid, nil, sha, "bin")
+      {:ok, :pass, msg} = Discovery.changes(git, nil, sha, "bin")
 
       assert is_binary(msg)
+
+      Process.exit(pid, :kill)
     end
   end
 
-  defp fetch_and_extract(pid, svc) do
-    {:ok, f} = Agent.fetch(pid, svc)
+  defp fetch_and_extract(git, svc) do
+    {:ok, f} = Discovery.fetch(git, svc)
     {:ok, tmp} = Briefly.create()
 
+    {:ok, f} = SmartFile.new(f)
+               |> SmartFile.convert()
     IO.binstream(f, 1024)
     |> Enum.into(File.stream!(tmp))
     File.close(f)
@@ -127,10 +138,12 @@ defmodule Console.Deployments.Git.AgentTest do
     Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
   end
 
-  defp fetch_and_check(pid, svc) do
-    {:ok, f} = Agent.fetch(pid, svc)
+  defp fetch_and_check(git, svc) do
+    {:ok, f} = Discovery.fetch(git, svc)
     {:ok, tmp} = Briefly.create()
 
+    {:ok, f} = SmartFile.new(f)
+               |> SmartFile.convert()
     IO.binstream(f, 1024)
     |> Enum.into(File.stream!(tmp))
     File.close(f)

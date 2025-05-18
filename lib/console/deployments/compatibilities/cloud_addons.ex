@@ -70,8 +70,12 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   end
 
   defp fetch_platform(url, platform) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url <> "#{platform}.yaml"),
-      do: decode_cloud_addon(platform, body)
+    case HTTPoison.get(url <> "#{platform}.yaml") do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        decode_cloud_addon(platform, body)
+      _ ->
+        {:error, "failed to fetch platform #{platform}"}
+    end
   end
 
   defp decode_cloud_addon(name, yaml) do
