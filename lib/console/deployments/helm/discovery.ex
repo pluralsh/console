@@ -19,7 +19,9 @@ defmodule Console.Deployments.Helm.Discovery do
     me = node()
     case worker_node(url) do
       ^me -> start_and_run(url, fun)
-      node -> :rpc.call(node, __MODULE__, :start_and_run, [url, fun], :timer.seconds(30))
+      node ->
+        :erpc.call(node, __MODULE__, :start_and_run, [url, fun], :timer.seconds(30))
+        |> Console.handle_rpc()
     end
   end
 

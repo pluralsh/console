@@ -108,6 +108,31 @@ defmodule Console.Deployments.Git.AgentTest do
     end
   end
 
+  describe "#digest/2" do
+    test "it can fetch a unique sha for a folder in a repo" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      {:ok, pid} = Discovery.start(git)
+
+      {:ok, sha} = Discovery.digest(git, svc.git)
+
+      assert is_binary(sha)
+
+      {:ok, sha2} = Discovery.digest(git, svc.git)
+
+      assert sha == sha2
+
+      git = refetch(git)
+      assert git.health == :pullable
+      assert git.pulled_at
+
+      assert Process.alive?(pid)
+
+      Process.exit(pid, :kill)
+    end
+  end
+
   describe "#changes" do
     test "it can fetch the sha for a ref and the changes in a sha" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")

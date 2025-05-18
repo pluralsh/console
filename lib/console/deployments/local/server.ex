@@ -25,6 +25,8 @@ defmodule Console.Deployments.Local.Server do
   @spec open(binary) :: {:ok, File.t} | error
   def open(path), do: GenServer.call(__MODULE__, {:open, path})
 
+  def sweep(), do: GenServer.call(__MODULE__, :sweep)
+
   @spec proxy(binary, SmartFile.eligible) :: {:ok, SmartFile.t} | error
   def proxy(digest, f) do
     case Cache.find(@table_name, digest) do
@@ -57,6 +59,8 @@ defmodule Console.Deployments.Local.Server do
       err -> {:reply, err, cache}
     end
   end
+
+  def handle_call(:sweep, _, cache), do: {:reply, :ok, Cache.sweep(cache)}
 
   def handle_call({:open, f}, _, cache), do: {:reply, File.open(f), cache}
 

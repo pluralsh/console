@@ -50,7 +50,6 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision]),
-         {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {Services.digest(svc), svc} do
       send_resp(conn, 200, sha)
     else

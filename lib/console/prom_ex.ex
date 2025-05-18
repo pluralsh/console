@@ -9,7 +9,7 @@ defmodule Console.PromEx do
       # PromEx built in plugins
       Plugins.Application,
       Plugins.Beam,
-      # {Plugins.Phoenix, router: ConsoleWeb.Router, endpoint: ConsoleWeb.Endpoint},
+      {Plugins.Phoenix, router: ConsoleWeb.Router, endpoint: ConsoleWeb.Endpoint},
       Plugins.Ecto,
       # Plugins.Oban,
       # Plugins.PhoenixLiveView,

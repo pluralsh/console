@@ -68,7 +68,9 @@ defmodule Console.Deployments.Git.Discovery do
     me = node()
     case agent_node(repo) do
       ^me -> start_and_run(repo, fun)
-      n -> :rpc.call(n, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
+      n ->
+        :erpc.call(n, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
+        |> Console.handle_rpc()
     end
   end
 

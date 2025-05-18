@@ -3,16 +3,28 @@ defmodule Console.Deployments.Helm.AgentTest do
   alias Console.Deployments.Helm.Agent
 
   describe "#start/1" do
-    test "it can fetch a chart and version" do
-      repo = "https://pluralsh.github.io/console"
+    test "it can fetch a chart and version and a floating version" do
+      # with the current caching structure it's actually important this is a distinct chart repo from
+      # other tests, otherwise it'll just use a lingering agent and its ets entries that hasn't been reaped in the full test suite
+      repo = "https://pluralsh.github.io/deployment-operator"
       {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _, _} = Agent.fetch(pid, "console", "0.3.15")
+      {:ok, f, _, _} = Agent.fetch(pid, "deployment-operator", "0.5.25")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
 
-      assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
+      {:ok, f, _, _} = Agent.fetch(pid, "deployment-operator", "0.x.x")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+
+      {:ok, chart} = YamlElixir.read_from_string(files["Chart.yaml"])
+      assert Version.compare(chart["appVersion"], "0.5.20") == :gt
+
+      git = Console.Deployments.Git.get_helm_repository(repo)
+      assert git
+      assert git.health == :pullable
 
       Process.exit(pid, :kill)
     end
@@ -79,23 +91,6 @@ defmodule Console.Deployments.Helm.AgentTest do
       {:ok, pid} = Agent.start(repo) |> handle()
 
       {:error, "error fetching" <> _} = Agent.fetch(pid, "incorrect", "x.x.x")
-
-      Process.exit(pid, :kill)
-    end
-
-    test "it can fetch a chart by floating version" do
-      repo = "https://pluralsh.github.io/console"
-      {:ok, pid} = Agent.start(repo) |> handle()
-
-      {:ok, f, _, _} = Agent.fetch(pid, "console", "0.x.x")
-
-      files = stream_and_untar(f)
-      assert files["Chart.yaml"]
-
-      {:ok, chart} = YamlElixir.read_from_string(files["Chart.yaml"])
-      assert Version.compare(chart["appVersion"], "0.10.0") == :gt
-
-      assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
 
       Process.exit(pid, :kill)
     end

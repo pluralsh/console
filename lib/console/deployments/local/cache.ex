@@ -9,7 +9,7 @@ defmodule Console.Deployments.Local.Cache do
   defmodule Line do
     @type t :: %__MODULE__{}
 
-    @expiry [minutes: :timer.minutes(5 * 60)]
+    @expiry [minutes: -5 * 60]
     defstruct [:file, :digest, :touched]
 
     def new(file, digest) do
@@ -66,14 +66,15 @@ defmodule Console.Deployments.Local.Cache do
 
   @spec sweep(t) :: t
   def sweep(%__MODULE__{table: t} = cache) do
-    deleted = :ets.foldl(t, fn {k, l}, acc ->
+    deleted = :ets.foldl(fn {k, l}, acc ->
       case Line.expired?(l) do
         true ->
+          Line.expire(l)
           :ets.delete(t, k)
           acc + 1
         _ -> acc
       end
-    end, 0)
+    end, 0, t)
     Logger.info("pruned #{deleted} expired files from local file server")
     cache
   end
@@ -98,13 +99,13 @@ defmodule Console.Deployments.Local.Cache do
   def find(%__MODULE__{table: table}, digest), do: find(table, digest)
   def find(table, digest) do
     case :ets.lookup(table, {:line, digest}) do
-      [{:line, line}] -> line
+      [{{:line, ^digest}, line}] -> line
       _ -> nil
     end
   end
 
   defp store(%__MODULE__{table: table} = cache, %Line{digest: digest} = line) do
-    :ets.insert(table, {:line, digest, line})
+    :ets.insert(table, {{:line, digest}, line})
     cache
   end
 end

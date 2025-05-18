@@ -466,7 +466,7 @@ defmodule Console.Deployments.Global do
               |> dynamic_template(dest.cluster, global)
               |> Services.update_service(dest.id, user)
       false ->
-        Logger.info "did not update service due to no differences"
+        Logger.debug "did not update service due to no differences"
         dest
     end
   end
@@ -496,7 +496,7 @@ defmodule Console.Deployments.Global do
       }, dest.id, user)
     else
       err ->
-        Logger.info "did not sync service due to: #{inspect(err)}"
+        Logger.debug "did not sync service due to: #{inspect(err)}"
         dest
     end
   end

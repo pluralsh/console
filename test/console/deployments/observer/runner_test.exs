@@ -160,6 +160,7 @@ defmodule Console.Deployments.Observer.SyncRunnerTest do
 
       {:ok, obs} = Runner.run(observer)
 
+      assert is_binary(obs.last_value)
       assert Console.Helm.Utils.compare_versions(obs.last_value, "v0.10.24") != :lt
 
       [context] = Console.Repo.all(Console.Schema.PipelineContext)
