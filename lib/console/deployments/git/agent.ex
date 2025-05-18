@@ -10,7 +10,8 @@ defmodule Console.Deployments.Git.Agent do
   import Console.Deployments.Git.Cmd
   import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Repo
-  alias Console.Deployments.{Git.Cache, Git, Services, Local.Server}
+  alias Console.Deployments.{Git, Git, Services, Local.Server}
+  alias Console.Deployments.Git.{Cache, Supervisor}
   alias Console.Schema.{GitRepository, Service}
 
   require Logger
@@ -27,7 +28,8 @@ defmodule Console.Deployments.Git.Agent do
   def registry(), do: __MODULE__
 
   def fetch(pid, %Service{} = svc) do
-    with {:ok, %Cache.Line{file: f, sha: sha, digest: digest, message: msg}} <- fetch_line(pid, svc.git),
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, %Cache.Line{file: f, sha: sha, digest: digest, message: msg}} <- Cache.get(tid, svc.git),
          {:ok, _} <- Services.update_sha(svc, sha, msg),
          {:ok, f} <- Server.open(f) do
       {:ok, f, digest}
@@ -37,7 +39,8 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def fetch(pid, %Service.Git{} = ref) do
-    with {:ok, %Cache.Line{file: f, digest: digest}} <- fetch_line(pid, ref),
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, %Cache.Line{file: f, digest: digest}} <- Cache.get(tid, ref),
          {:ok, f} <- Server.open(f) do
       {:ok, f, digest}
     else
@@ -46,22 +49,26 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def digest(pid, %Service.Git{} = ref)  do
-    case fetch_line(pid, ref) do
-      {:ok, %Cache.Line{digest: sha}} -> {:ok, sha}
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, %Cache.Line{digest: sha}} <- Cache.get(tid, ref) do
+      {:ok, sha}
+    else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:digest, ref}, @timeout) end)
     end
   end
 
   def sha(pid, ref) do
-    case get_cache(pid) do
-      {:ok, %Cache{heads: %{}} = cache} -> Cache.commit(cache, ref)
-      _ -> GenServer.call(pid, {:sha, ref}, @timeout)
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, sha} <- Cache.commit(tid, ref) do
+      {:ok, sha}
+    else
+      _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:sha, ref}, @timeout) end)
     end
   end
 
   def changes(pid, sha1, sha2, folder) do
-    with {:ok, %Cache{changes: %{} = c, heads: %{}}} <- get_cache(pid),
-         {:ok, %Cache.Change{result: result} = change} <- Map.fetch(c, {folder, sha1, sha2}) do
+    with {:ok, tid} <- Supervisor.table(pid),
+         %Cache.Change{result: result} = change <- Cache.get_change(tid, sha1, sha2, folder) do
       send pid, {:touch, change}
       result
     else
@@ -95,32 +102,34 @@ defmodule Console.Deployments.Git.Agent do
   def init(repo) do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
-    cache = Cache.new(repo)
+    table = :ets.new(:git_cache_entries, [:set, :protected, read_concurrency: true])
+    Supervisor.register(self(), table)
+    cache = Cache.new(repo, table)
     # :timer.send_interval(@poll, :pull)
     schedule_pull()
     :timer.send_interval(@poll, :move)
     send self(), :clone
     :telemetry.execute(metric_scope(:git_agent), %{count: 1}, %{url: repo.url})
 
-    {:ok, %State{git: repo, cache: store_cache(cache)}}
+    {:ok, %State{git: repo, cache: cache}}
   end
 
   def handle_call(:addons, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, "main", "addons", &String.ends_with?(&1, "addon.yaml")) do
-      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: store_cache(cache)}}
+      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
 
   def handle_call({:docs, %Service{git: %{ref: ref}} = svc}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref, Service.docs_path(svc)) do
-      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: store_cache(cache)}}
+      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
 
-  def handle_call(:refs, _, %State{cache: %Cache{heads: %{} = heads}} = state) do
-    refs = Map.keys(heads)
+  def handle_call(:refs, _, %State{cache: %Cache{} = cache} = state) do
+    refs = Cache.all_heads(cache)
     important = MapSet.new(~w(main master dev))
     {common, rest} = Enum.split_with(refs, &MapSet.member?(important, &1))
     {:reply, {:ok, common ++ Enum.sort(rest)}, state}
@@ -133,12 +142,12 @@ defmodule Console.Deployments.Git.Agent do
 
   def handle_call({:changes, sha1, sha2, folder}, _, %State{cache: cache} = state) do
     {cache, result} = Cache.cached_changes(cache, sha1, sha2, folder)
-    {:reply, result, %{state | cache: store_cache(cache)}}
+    {:reply, result, %{state | cache: cache}}
   end
 
   def handle_call({:digest, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref) do
-      {:ok, %Cache.Line{digest: sha}, cache} -> {:reply, {:ok, sha}, %{state | cache: store_cache(cache)}}
+      {:ok, %Cache.Line{digest: sha}, cache} -> {:reply, {:ok, sha}, %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
@@ -146,7 +155,7 @@ defmodule Console.Deployments.Git.Agent do
   def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
     with {:ok, %Cache.Line{file: f, digest: sha}, cache} <- Cache.fetch(cache, ref),
          {:ok, f} <- File.open(f) do
-      {:reply, {:ok, f, sha}, %{state | cache: store_cache(cache)}}
+      {:reply, {:ok, f, sha}, %{state | cache: cache}}
     else
       err -> {:reply, err, state}
     end
@@ -157,7 +166,7 @@ defmodule Console.Deployments.Git.Agent do
     with {:ok, %Cache.Line{file: f, digest: digest, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref),
          {:ok, _} <- Services.update_sha(svc, sha, msg),
          {:ok, f} <- File.open(f) do
-      {:reply, {:ok, f, digest}, %{state | cache: store_cache(cache)}}
+      {:reply, {:ok, f, digest}, %{state | cache: cache}}
     else
       err -> {:reply, err, state}
     end
@@ -171,7 +180,7 @@ defmodule Console.Deployments.Git.Agent do
          resp <- clone(git),
          cache <- Cache.refresh(cache),
          {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), %{cache | git: git}} do
-      {:noreply, %{state | git: git, cache: store_cache(%{cache | git: git})}}
+      {:noreply, %{state | git: git, cache: cache}}
     else
       {:git, nil} ->
         {:stop, {:shutdown, :normal}, state}
@@ -192,10 +201,10 @@ defmodule Console.Deployments.Git.Agent do
            res <- fetch(git),
            {:ok, git} <- save_status(res, git),
            cache <- refresh(git, cache) do
-        {:noreply, %State{git: git, cache: store_cache(%{cache | git: git}), last_pull: Timex.now()}}
+        {:noreply, %State{git: git, cache: %{cache | git: git}, last_pull: Timex.now()}}
       else
         {:git, nil} -> {:stop, {:shutdown, :normal}, state}
-        {:pullable, {_, git}} -> {:noreply, %{state | git: git, cache: store_cache(%{cache | git: git})}}
+        {:pullable, {_, git}} -> {:noreply, %{state | git: git, cache: %{cache | git: git}}}
         err ->
           Logger.info "unknown failure: #{inspect(err)}"
           {:noreply, state}
@@ -206,7 +215,7 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info({:touch, line}, %State{cache: cache} = state),
-    do: {:noreply, %{state | cache: store_cache(Cache.touch(cache, line))}}
+    do: {:noreply, %{state | cache: Cache.touch(cache, line)}}
 
   def handle_info(:move, %State{git: git} = state) do
     case Git.Discovery.local?(git) do
@@ -218,7 +227,7 @@ defmodule Console.Deployments.Git.Agent do
   def handle_info(_, state), do: {:noreply, state}
 
   def terminate(_, %State{git: git}) do
-    :ets.delete(:git_cache, self())
+    Supervisor.deregister(self())
     :telemetry.execute(metric_scope(:git_agent), %{count: 1}, %{url: git.url})
   end
   def terminate(_, _), do: :ok
@@ -239,15 +248,6 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
-  defp fetch_line(pid, %Service.Git{} = ref) do
-    with {:ok, cache} <- get_cache(pid),
-         {:ok, %Cache.Line{} = line} <- Cache.get(cache, ref) do
-      send pid, {:touch, line}
-      {:ok, line}
-    end
-  end
-  defp fetch_line(_, _), do: {:error, :not_found}
-
   defp refresh(%GitRepository{health: :pullable} = git, cache), do: Cache.refresh(%{cache | git: git})
   defp refresh(_, cache), do: cache
 
@@ -266,17 +266,5 @@ defmodule Console.Deployments.Git.Agent do
     seconds = :rand.uniform(@jitter)
               |> :timer.seconds()
     seconds - @jitter_offset
-  end
-
-  defp get_cache(pid) do
-    case :ets.lookup(:git_cache, pid) do
-      [{^pid, cache}] -> {:ok, cache}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  defp store_cache(pid \\ self(), cache) do
-    :ets.insert(:git_cache, {pid, cache})
-    cache
   end
 end

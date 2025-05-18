@@ -66,14 +66,14 @@ defmodule Console.Deployments.Local.Cache do
 
   @spec sweep(t) :: t
   def sweep(%__MODULE__{table: t} = cache) do
-    deleted = :ets.foldl(t, fn {k, l}, acc ->
+    deleted = :ets.foldl(fn {k, l}, acc ->
       case Line.expired?(l) do
         true ->
           :ets.delete(t, k)
           acc + 1
         _ -> acc
       end
-    end, 0)
+    end, 0, t)
     Logger.info("pruned #{deleted} expired files from local file server")
     cache
   end

@@ -2,7 +2,7 @@ defmodule Console.Deployments.Helm.Agent do
   use GenServer, restart: :transient
   alias Console.Repo
   alias Console.Deployments.{Git, Local.Server}
-  alias Console.Deployments.Helm.{AgentCache, Discovery}
+  alias Console.Deployments.Helm.{AgentCache, Discovery, Supervisor}
   alias Console.Schema.HelmRepository
   require Logger
 
@@ -16,7 +16,8 @@ defmodule Console.Deployments.Helm.Agent do
 
   @spec fetch(pid, binary, binary) :: {:ok, File.t(), binary} | {:error, term}
   def fetch(pid, chart, vsn) do
-    with {:ok, %AgentCache.Line{file: f, digest: d, internal_digest: i}} <- fetch_line(pid, chart, vsn),
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, %AgentCache.Line{file: f, digest: d, internal_digest: i}} <- AgentCache.get(tid, chart, vsn),
          {:ok, f} <- Server.open(f) do
       {:ok, f, d, i}
     else
@@ -26,17 +27,11 @@ defmodule Console.Deployments.Helm.Agent do
 
   @spec digest(pid, binary, binary) :: {:ok, binary} | {:error, term}
   def digest(pid, chart, vsn) do
-    case fetch_line(pid, chart, vsn) do
-      {:ok, %AgentCache.Line{internal_digest: d}} -> {:ok, d}
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, %AgentCache.Line{internal_digest: d}} <- AgentCache.get(tid, chart, vsn) do
+      {:ok, d}
+    else
       _ -> GenServer.call(pid, {:digest, chart, vsn}, @timeout)
-    end
-  end
-
-  defp fetch_line(pid, chart, vsn) do
-    with {:ok, cache} <- get_cache(pid),
-         {:ok, l} <- AgentCache.get(cache, chart, vsn) do
-      send pid, {:touch, l}
-      {:ok, l}
     end
   end
 
@@ -56,12 +51,14 @@ defmodule Console.Deployments.Helm.Agent do
     schedule_pull()
     :timer.send_interval(@poll, :move)
     send self(), :pull
-    {:ok, %State{repo: repo, cache: store_cache(AgentCache.new(repo))}}
+    table = :ets.new(:helm_cache_data, [:set, :protected, read_concurrency: true])
+    Supervisor.register(self(), table)
+    {:ok, %State{repo: repo, cache: AgentCache.new(repo, table)}}
   end
 
   def handle_call({:digest, c, v}, _, %State{cache: cache} = state) do
     case AgentCache.fetch(cache, c, v) do
-      {:ok, l, cache} -> {:reply, {:ok, l.internal_digest}, %{state | cache: store_cache(cache)}}
+      {:ok, l, cache} -> {:reply, {:ok, l.internal_digest}, %{state | cache: cache}}
       err -> handle_error(err, state)
     end
   end
@@ -69,7 +66,7 @@ defmodule Console.Deployments.Helm.Agent do
   def handle_call({:fetch, c, v}, _, %State{cache: cache} = state) do
     with {:ok, l, cache} <- AgentCache.fetch(cache, c, v),
          {:ok, f} <- File.open(l.file) do
-      {:reply, {:ok, f, l.digest, l.internal_digest}, %{state | cache: store_cache(cache)}}
+      {:reply, {:ok, f, l.digest, l.internal_digest}, %{state | cache: cache}}
     else
       err -> handle_error(err, state)
     end
@@ -81,7 +78,7 @@ defmodule Console.Deployments.Helm.Agent do
          {:refresh, {:ok, cache}, repo} <- {:refresh, AgentCache.refresh(cache), repo},
          {:ok, repo}  <- refresh(repo) do
       schedule_pull()
-      {:noreply, %{state | cache: store_cache(%{cache | repo: repo}), repo: repo}}
+      {:noreply, %{state | cache: cache, repo: repo}}
     else
       {:refresh, {:error, err}, repo} ->
         schedule_pull()
@@ -97,7 +94,7 @@ defmodule Console.Deployments.Helm.Agent do
 
   def handle_info({:refresh, c, v}, %State{cache: cache} = state) do
     case AgentCache.write(cache, c, v) do
-      {:ok, _, cache} -> {:noreply, %{state | cache: store_cache(cache)}}
+      {:ok, _, cache} -> {:noreply, %{state | cache: cache}}
       _ -> {:noreply, state}
     end
   end
@@ -110,11 +107,13 @@ defmodule Console.Deployments.Helm.Agent do
   end
 
   def handle_info({:touch, %AgentCache.Line{} = line}, %State{cache: c} = state),
-    do: {:noreply, %{state | cache: store_cache(AgentCache.touch(c, line))}}
+    do: {:noreply, %{state | cache: AgentCache.touch(c, line)}}
 
   def handle_info(_, state), do: {:noreply, state}
 
-  def terminate(_, _), do: :ets.delete(:helm_cache, self())
+  def terminate(_, _) do
+    Supervisor.deregister(self())
+  end
 
   defp refresh(%HelmRepository{} = repo) do
     HelmRepository.changeset(repo, %{pulled_at: Timex.now(), health: :pullable})
@@ -140,16 +139,4 @@ defmodule Console.Deployments.Helm.Agent do
   defp handle_error(err, state), do: {:reply, err, state}
 
   defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + :rand.uniform(@jitter))
-
-  defp get_cache(pid) do
-    case :ets.lookup(:helm_cache, pid) do
-      [{^pid, cache}] -> {:ok, cache}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  defp store_cache(pid \\ self(), cache) do
-    :ets.insert(:helm_cache, {pid, cache})
-    cache
-  end
 end

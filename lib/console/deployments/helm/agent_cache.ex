@@ -3,7 +3,15 @@ defmodule Console.Deployments.Helm.AgentCache do
   alias Console.Deployments.Helm.Utils
   require Logger
 
-  defstruct [:repo, :client, :index, :dir, cache: %{}]
+  @type t :: %__MODULE__{
+    repo: Console.Helm.Repository.t(),
+    client: Client.t(),
+    index: Client.Index.t(),
+    dir: binary,
+    table: :ets.tid()
+  }
+
+  defstruct [:repo, :client, :index, :dir, :table]
 
   defmodule Line do
     @expiry [minutes: -30]
@@ -31,9 +39,9 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
-  def new(repo) do
+  def new(repo, table) do
     {:ok, dir} = Briefly.create(directory: true)
-    %__MODULE__{repo: repo, client: Client.client(repo), dir: dir, cache: %{}}
+    %__MODULE__{repo: repo, client: Client.client(repo), dir: dir, table: table}
   end
 
   def new_client(cache, repo) do
@@ -47,10 +55,12 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
-  def get(%__MODULE__{cache: lines}, chart, vsn) do
-    case lines[{chart, vsn}] do
-      %Line{} = l -> {:ok, l}
-      nil -> {:error, :not_found}
+  def get(%__MODULE__{table: t}, chart, vsn),  do: get(t, chart, vsn)
+
+  def get(tid, chart, vsn) do
+    case :ets.lookup(tid, {:chart, chart, vsn}) do
+      [{{:chart, ^chart, ^vsn}, line}] -> {:ok, line}
+      _ -> {:error, :not_found}
     end
   end
 
@@ -59,15 +69,15 @@ defmodule Console.Deployments.Helm.AgentCache do
       do: fetch(cache, chart, vsn)
   end
 
-  def fetch(%__MODULE__{cache: lines} = cache, chart, vsn) do
-    case lines[{chart, vsn}] do
-      %Line{} = l -> {:ok, l, put_in(cache.cache[{chart, vsn}], Line.touch(l))}
-      nil -> write(cache, chart, vsn)
+  def fetch(%__MODULE__{} = cache, chart, vsn) do
+    case get(cache, chart, vsn) do
+      {:ok, %Line{} = l} -> {:ok, l, put(cache, Line.touch(l))}
+      _ -> write(cache, chart, vsn)
     end
   end
 
   def touch(%__MODULE__{} = cache, %Line{} = line),
-    do: put_in(cache.cache[{line.chart, line.vsn}], Line.touch(line))
+    do: put(cache, Line.touch(line))
 
   def write(%__MODULE__{client: client} = cache, chart, vsn) do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
@@ -79,7 +89,7 @@ defmodule Console.Deployments.Helm.AgentCache do
          line <- Line.new(path, chart, vsn, digest),
          :ok <- File.rm(tmp) do
       cache = %{cache | client: client}
-      {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
+      {:ok, line, put(cache, line)}
     else
       {:cache, {line, true}} ->
         File.rm(tmp)
@@ -90,17 +100,31 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
-  defp check_digest(%__MODULE__{cache: %{} = cache}, chart, vsn, digest) do
-    case cache[{chart, vsn}] do
-      %Line{digest: ^digest} = line -> {line, true}
-      l -> {l, false}
+  def put(%__MODULE__{table: t} = cache,  %Line{chart: c, vsn: vsn} = line) do
+    :ets.insert(t, {{:chart, c, vsn}, line})
+    cache
+  end
+
+  defp check_digest(%__MODULE__{table: t}, chart, vsn, digest) do
+    case get(t, chart, vsn) do
+      {:ok, %Line{digest: ^digest} = line} -> {line, true}
+      {:ok, l} -> {l, false}
+      _ -> {nil, false}
     end
   end
 
-  defp sweep(%__MODULE__{cache: lines} = cache) do
-    {keep, expire} = Enum.split_with(lines, fn {_, l} -> !Line.expired?(l) end)
-    Enum.each(expire, fn {_, l} -> Line.expire(l) end)
-    Enum.each(keep, fn {_, l} -> send(self(), {:refresh, l.chart, l.vsn}) end)
-    %{cache | cache: Map.new(keep)}
+  defp sweep(%__MODULE__{table: t, repo: repo} = cache) do
+    count = :ets.foldl(fn {_, l}, acc ->
+      case Line.expired?(l) do
+        true ->
+          Line.expire(l)
+          :ets.delete(t, {:chart, l.chart, l.vsn})
+          acc + 1
+        false -> acc
+      end
+    end, 0, t)
+
+    Logger.info "expired #{count} stale helm cache entries for #{repo.url}"
+    cache
   end
 end
