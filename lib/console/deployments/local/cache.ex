@@ -9,7 +9,7 @@ defmodule Console.Deployments.Local.Cache do
   defmodule Line do
     @type t :: %__MODULE__{}
 
-    @expiry [minutes: -5 * 60]
+    @expiry [minutes: -24 * 60]
     defstruct [:file, :digest, :touched]
 
     def new(file, digest) do

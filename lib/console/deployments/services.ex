@@ -3,7 +3,6 @@ defmodule Console.Deployments.Services do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
-  alias Console.Prom.Benchmark
   alias Console.PubSub
   alias Console.Deployments.{
     Secrets.Store,

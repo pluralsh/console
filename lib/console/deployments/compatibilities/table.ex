@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.Table do
 
   @table :addon_compatibilities
   @poll :timer.minutes(30)
-  @url "/pluralsh/console/master/static/compatibilities/"
+  @url "/pluralsh/console/master/static/compatibilities.yaml"
 
   defmodule State do
     defstruct [:table, :url, :static, :ready]
@@ -22,6 +22,7 @@ defmodule Console.Deployments.Compatibilities.Table do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
+    table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put!(&2, &1.name, &1))
     {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
 
@@ -48,12 +49,12 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   def handle_info(:poll, %State{table: table, url: url} = state) do
-    with [_ | _] = addons <- fetch_manifest(url) do
-      table = Enum.reduce(addons, table, fn name, table ->
-        case fetch_addon(url, name) do
-          {:ok, addon} -> KeyValueSet.put!(table, name, addon)
+    with [_ | _] = addons <- fetch_addons(url) do
+      Enum.reduce(addons, table, fn addon, table ->
+        case decode_addon(addon) do
+          {:ok, addon} -> KeyValueSet.put!(table, addon.name, addon)
           _ ->
-            Logger.warning "failed to fetch addon #{name}, will retry on next poll"
+            Logger.warning "failed to fetch addon #{addon.name}, will retry on next poll"
             table
         end
       end)
@@ -65,20 +66,20 @@ defmodule Console.Deployments.Compatibilities.Table do
     end
   end
 
-  defp fetch_manifest(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url <> "manifest.yaml"),
-         {:ok, %{"names" => addons}} <- YamlElixir.read_from_string(body),
+  defp fetch_addons(url) do
+    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+         {:ok, %{"addons" => addons}} <- YamlElixir.read_from_string(body),
       do: addons
   end
 
-  defp fetch_addon(url, addon) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url <> "#{addon}.yaml"),
-      do: decode_addon(addon, body)
+  defp decode_addon(raw) do
+    with {:ok, encoded} <- Jason.encode(raw),
+       do: Poison.decode(encoded, as: AddOn.spec())
   end
 
   defp decode_addon(name, yaml) do
-    with {:ok, res} <- YamlElixir.read_from_string(yaml),
-         {:ok, encoded} <- Jason.encode(res),
+    with {:ok, addon} <- YamlElixir.read_from_string(yaml),
+         {:ok, encoded} <- Jason.encode(addon),
          {:ok, addon} <- Poison.decode(encoded, as: AddOn.spec()),
       do: {:ok, %{addon | name: name}}
   end

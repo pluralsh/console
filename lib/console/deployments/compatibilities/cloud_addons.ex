@@ -22,6 +22,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
+    table = Enum.reduce(Static.cloud_addons(), table, &persist(&2, &1))
     {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
 
