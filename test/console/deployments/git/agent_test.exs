@@ -151,6 +151,7 @@ defmodule Console.Deployments.Git.AgentTest do
 
   defp fetch_and_extract(git, svc) do
     {:ok, f} = Discovery.fetch(git, svc)
+
     {:ok, tmp} = Briefly.create()
 
     {:ok, f} = SmartFile.new(f)

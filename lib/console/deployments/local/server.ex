@@ -25,6 +25,8 @@ defmodule Console.Deployments.Local.Server do
   @spec open(binary) :: {:ok, File.t} | error
   def open(path), do: GenServer.call(__MODULE__, {:open, path})
 
+  def opener(path), do: fn -> open(path) end
+
   def sweep(), do: GenServer.call(__MODULE__, :sweep)
 
   @spec proxy(binary, SmartFile.eligible) :: {:ok, SmartFile.t} | error

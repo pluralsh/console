@@ -7,8 +7,8 @@ defmodule Console.Deployments.Helm.Discovery do
 
   @spec fetch(binary, binary, binary) :: {:ok, SmartFile.t, binary} | error
   def fetch(url, chart, vsn) do
-    with {:ok, f, sha, digest} <- maybe_rpc(url, &Agent.fetch(&1, chart, vsn)),
-         {:ok, f} <- Server.proxy(digest, f),
+    with {:ok, opener, sha, digest} <- maybe_rpc(url, &Agent.fetch(&1, chart, vsn)),
+         {:ok, f} <- Server.fetch(digest, opener),
       do: {:ok, f, sha}
   end
 

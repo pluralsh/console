@@ -1,10 +1,9 @@
 defmodule Console.Cached.Kubernetes do
   use GenServer
   alias Kazan.Watcher
-  alias ETS.KeyValueSet
   require Logger
 
-  defmodule State, do: defstruct [:table, :model, :pid, :callback, :key]
+  defmodule State, do: defstruct [:table, :model, :pid, :callback, :key, :monitor]
 
   def start_link(name, request, model, callback \\ nil, key \\ & &1.metadata.name) do
     GenServer.start_link(__MODULE__, {request, name, model, callback, key}, name: name)
@@ -18,32 +17,34 @@ defmodule Console.Cached.Kubernetes do
     if Console.conf(:initialize) do
       send self(), {:start, request}
     end
-    Process.send_after(self(), :seppuku, :timer.minutes(30) + jitter())
-    {:ok, table} = KeyValueSet.new(name: name, read_concurrency: true, ordered: true)
+    table = :ets.new(name, [:ordered_set, :named_table, :protected, read_concurrency: true])
     {:ok, %State{table: table, model: model, callback: callback, key: key}}
   end
 
   def fetch(name) do
-    KeyValueSet.wrap_existing!(name)
-    |> KeyValueSet.to_list!()
+    :ets.tab2list(name)
     |> Enum.map(fn {_, v} -> v end)
   end
 
   def get(name, key) do
-    case KeyValueSet.wrap_existing(name) do
-      {:ok, set} -> set[key]
+    case :ets.lookup(name, key) do
+      [{^key, v}] -> v
       _ -> nil
     end
   end
 
   def handle_info(:seppuku, state), do: {:stop, {:shutdown, :restarting}, state}
 
-  def handle_info({:start, request}, %State{table: table, model: model, key: key} = state) do
+  def handle_info({:start, request}, %State{table: table, model: model, key: key, pid: old} = state) do
     Logger.info "starting #{model} watcher"
+
     with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
          {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
+      maybe_kill(old)
       :timer.send_interval(5000, :watcher_ping)
-      table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
+      Process.send_after(self(), {:start, request}, :timer.minutes(30) + jitter())
+      :ets.delete_all_objects(table)
+      :ets.insert(table, Enum.map(instances, &{key.(&1), &1}))
       {:noreply, %{state | pid: pid, table: table}}
     else
       _err ->
@@ -60,19 +61,27 @@ defmodule Console.Cached.Kubernetes do
 
   def handle_info(%Watcher.Event{object: o, type: :deleted} = e, %{table: table, key: key} = state) do
     callback(e, state)
-    {:noreply, %{state | table: KeyValueSet.delete!(table, key.(o))}}
+    :ets.delete(table, key.(o))
+    {:noreply, state}
   end
 
   def handle_info(%Watcher.Event{object: o, type: event} = e, %{table: table, key: key} = state) do
     Logger.info "found event #{event} for #{state.model}"
     callback(e, state)
-    {:noreply, %{state | table: KeyValueSet.put!(table, key.(o), o)}}
+    :ets.insert(table, {key.(o), o})
+    {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}
 
   defp callback(event, %State{callback: back}) when is_function(back), do: back.(event)
   defp callback(_, _), do: :ok
+
+  defp maybe_kill(pid) when is_pid(pid) do
+    Process.unlink(pid)
+    Process.exit(pid, :kill)
+  end
+  defp maybe_kill(_), do: :ok
 
   defp jitter(), do: :rand.uniform(:timer.seconds(120)) - :timer.seconds(60)
 end

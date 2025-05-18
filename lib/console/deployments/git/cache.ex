@@ -83,20 +83,20 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   def refresh(%__MODULE__{git: git, table: tid} = c) do
-    count = :ets.foldl(fn
-      {{:head, _} = key, _}, acc ->
+    {kept, expired} = :ets.foldl(fn
+      {{:head, _} = key, _}, {keep, expired} ->
         :ets.delete(tid, key)
-        acc
-      {key, l}, acc ->
+        {keep, expired}
+      {key, l}, {keep, expired} ->
         case maybe_expire?(l) do
           true ->
             :ets.delete(tid, key)
-            acc + 1
-          false -> acc
+            {keep, expired + 1}
+          false -> {keep, expired}
         end
-    end, 0, tid)
+    end, {0, 0}, tid)
 
-    Logger.info "Deleted #{count} expired entries for git cache #{git.url}"
+    Logger.info "Deleted #{expired} expired entries for git cache #{git.url}, kept #{kept}"
 
     tid = store_heads(tid, heads(git))
     %{c | table: tid}
@@ -143,6 +143,13 @@ defmodule Console.Deployments.Git.Cache do
       _ -> {:error, :not_found}
     end
   end
+
+  def touch?(%{touched: t}) when not is_nil(t) do
+    Timex.now()
+    |> Timex.shift(seconds: -1)
+    |> Timex.after?(t)
+  end
+  def touch?(_), do: true
 
   def touch(%__MODULE__{table: tid} = cache, %Line{} = line),
     do: %{cache | table: store(tid, Line.touch(line))}

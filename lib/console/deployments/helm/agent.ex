@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Helm.Agent do
   use GenServer, restart: :transient
   alias Console.Repo
-  alias Console.Deployments.{Git, Local.Server}
+  alias Console.Deployments.Git
   alias Console.Deployments.Helm.{AgentCache, Discovery, Supervisor}
   alias Console.Schema.HelmRepository
   require Logger
@@ -17,9 +17,9 @@ defmodule Console.Deployments.Helm.Agent do
   @spec fetch(pid, binary, binary) :: {:ok, File.t(), binary} | {:error, term}
   def fetch(pid, chart, vsn) do
     with {:ok, tid} <- Supervisor.table(pid),
-         {:ok, %AgentCache.Line{file: f, digest: d, internal_digest: i}} <- AgentCache.get(tid, chart, vsn),
-         {:ok, f} <- Server.open(f) do
-      {:ok, f, d, i}
+         {:ok, %AgentCache.Line{file: f, digest: d, internal_digest: i} = line} <- AgentCache.get(tid, chart, vsn),
+         _ <- touch(pid, line) do
+      {:ok, opener(pid, f), d, i}
     else
       _ -> GenServer.call(pid, {:fetch, chart, vsn}, @timeout)
     end
@@ -28,12 +28,15 @@ defmodule Console.Deployments.Helm.Agent do
   @spec digest(pid, binary, binary) :: {:ok, binary} | {:error, term}
   def digest(pid, chart, vsn) do
     with {:ok, tid} <- Supervisor.table(pid),
-         {:ok, %AgentCache.Line{internal_digest: d}} <- AgentCache.get(tid, chart, vsn) do
+         {:ok, %AgentCache.Line{internal_digest: d} = line} <- AgentCache.get(tid, chart, vsn),
+         _ <- touch(pid, line) do
       {:ok, d}
     else
       _ -> GenServer.call(pid, {:digest, chart, vsn}, @timeout)
     end
   end
+
+  def opener(pid, f), do: fn -> GenServer.call(pid, {:open, f}, @timeout) end
 
   def start(url) do
     GenServer.start(__MODULE__, url, name: via(url))
@@ -56,6 +59,8 @@ defmodule Console.Deployments.Helm.Agent do
     {:ok, %State{repo: repo, cache: AgentCache.new(repo, table)}}
   end
 
+  def handle_call({:open, f}, _, %State{} = state), do: {:reply, File.open(f), state}
+
   def handle_call({:digest, c, v}, _, %State{cache: cache} = state) do
     case AgentCache.fetch(cache, c, v) do
       {:ok, l, cache} -> {:reply, {:ok, l.internal_digest}, %{state | cache: cache}}
@@ -64,10 +69,9 @@ defmodule Console.Deployments.Helm.Agent do
   end
 
   def handle_call({:fetch, c, v}, _, %State{cache: cache} = state) do
-    with {:ok, l, cache} <- AgentCache.fetch(cache, c, v),
-         {:ok, f} <- File.open(l.file) do
-      {:reply, {:ok, f, l.digest, l.internal_digest}, %{state | cache: cache}}
-    else
+    case AgentCache.fetch(cache, c, v) do
+      {:ok, l, cache} ->
+        {:reply, {:ok, opener(self(), l.file), l.digest, l.internal_digest}, %{state | cache: cache}}
       err -> handle_error(err, state)
     end
   end
@@ -114,6 +118,8 @@ defmodule Console.Deployments.Helm.Agent do
   def terminate(_, _) do
     Supervisor.deregister(self())
   end
+
+  defp touch(pid, line), do: send(pid, {:touch, line})
 
   defp refresh(%HelmRepository{} = repo) do
     HelmRepository.changeset(repo, %{pulled_at: Timex.now(), health: :pullable})

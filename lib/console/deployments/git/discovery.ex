@@ -15,14 +15,14 @@ defmodule Console.Deployments.Git.Discovery do
   @spec fetch(Service.t) :: {:ok, SmartFile.t} | error
   def fetch(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
-    with {:ok, f, digest} <- maybe_rpc(repo, &Agent.fetch(&1, svc)),
-      do: Server.proxy(digest, f)
+    with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, svc)),
+      do: Server.fetch(digest, opener)
   end
 
   @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, SmartFile.t} | error
   def fetch(%GitRepository{} = repo, ref) do
-    with {:ok, f, digest} <- maybe_rpc(repo, &Agent.fetch(&1, ref)),
-      do: Server.proxy(digest, f)
+    with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, ref)),
+      do: Server.fetch(digest, opener)
   end
 
   @spec digest(GitRepository.t, Service.Git.t) :: {:ok, binary} | error

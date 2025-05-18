@@ -10,7 +10,7 @@ defmodule Console.Deployments.Git.Agent do
   import Console.Deployments.Git.Cmd
   import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Repo
-  alias Console.Deployments.{Git, Git, Services, Local.Server}
+  alias Console.Deployments.{Git, Services}
   alias Console.Deployments.Git.{Cache, Supervisor}
   alias Console.Schema.{GitRepository, Service}
 
@@ -29,10 +29,10 @@ defmodule Console.Deployments.Git.Agent do
 
   def fetch(pid, %Service{} = svc) do
     with {:ok, tid} <- Supervisor.table(pid),
-         {:ok, %Cache.Line{file: f, sha: sha, digest: digest, message: msg}} <- Cache.get(tid, svc.git),
-         {:ok, _} <- Services.update_sha(svc, sha, msg),
-         {:ok, f} <- Server.open(f) do
-      {:ok, f, digest}
+         {:ok, %Cache.Line{file: f, sha: sha, digest: digest, message: msg} = line} <- Cache.get(tid, svc.git),
+         _ <- touch(pid, line),
+         {:ok, _} <- Services.update_sha(svc, sha, msg) do
+      {:ok, opener(pid, f), digest}
     else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, svc}, @timeout) end)
     end
@@ -40,9 +40,9 @@ defmodule Console.Deployments.Git.Agent do
 
   def fetch(pid, %Service.Git{} = ref) do
     with {:ok, tid} <- Supervisor.table(pid),
-         {:ok, %Cache.Line{file: f, digest: digest}} <- Cache.get(tid, ref),
-         {:ok, f} <- Server.open(f) do
-      {:ok, f, digest}
+         {:ok, %Cache.Line{file: f, digest: digest} = line} <- Cache.get(tid, ref),
+         _ <- touch(pid, line) do
+      {:ok, opener(pid, f), digest}
     else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:fetch, ref}, @timeout) end)
     end
@@ -50,7 +50,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def digest(pid, %Service.Git{} = ref)  do
     with {:ok, tid} <- Supervisor.table(pid),
-         {:ok, %Cache.Line{digest: sha}} <- Cache.get(tid, ref) do
+         {:ok, %Cache.Line{digest: sha} = line} <- Cache.get(tid, ref),
+         _ <- touch(pid, line) do
       {:ok, sha}
     else
       _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:digest, ref}, @timeout) end)
@@ -68,8 +69,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def changes(pid, sha1, sha2, folder) do
     with {:ok, tid} <- Supervisor.table(pid),
-         %Cache.Change{result: result} = change <- Cache.get_change(tid, sha1, sha2, folder) do
-      send pid, {:touch, change}
+         %Cache.Change{result: result} = change <- Cache.get_change(tid, sha1, sha2, folder),
+         _ <- touch(pid, change) do
       result
     else
       _ -> rate_limited({:changes, pid}, fn ->
@@ -87,6 +88,8 @@ defmodule Console.Deployments.Git.Agent do
   def addons(pid), do: GenServer.call(pid, :addons, @timeout)
 
   def kick(pid), do: send(pid, :pull)
+
+  def opener(pid, f), do: fn -> GenServer.call(pid, {:open, f}, @timeout) end
 
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
@@ -113,6 +116,8 @@ defmodule Console.Deployments.Git.Agent do
 
     {:ok, %State{git: repo, cache: cache}}
   end
+
+  def handle_call({:open, f}, _, %State{} = state), do: {:reply, File.open(f), state}
 
   def handle_call(:addons, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, "main", "addons", &String.ends_with?(&1, "addon.yaml")) do
@@ -153,10 +158,9 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
-    with {:ok, %Cache.Line{file: f, digest: sha}, cache} <- Cache.fetch(cache, ref),
-         {:ok, f} <- File.open(f) do
-      {:reply, {:ok, f, sha}, %{state | cache: cache}}
-    else
+    case Cache.fetch(cache, ref) do
+      {:ok, %Cache.Line{file: f, digest: sha}, cache} ->
+        {:reply, {:ok, opener(self(), f), sha}, %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
@@ -164,9 +168,8 @@ defmodule Console.Deployments.Git.Agent do
   def handle_call({:fetch, %Service{git: %Service.Git{} = ref} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])
     with {:ok, %Cache.Line{file: f, digest: digest, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref),
-         {:ok, _} <- Services.update_sha(svc, sha, msg),
-         {:ok, f} <- File.open(f) do
-      {:reply, {:ok, f, digest}, %{state | cache: cache}}
+         {:ok, _} <- Services.update_sha(svc, sha, msg) do
+      {:reply, {:ok, opener(self(), f), digest}, %{state | cache: cache}}
     else
       err -> {:reply, err, state}
     end
@@ -238,6 +241,8 @@ defmodule Console.Deployments.Git.Agent do
          {:ok, git} <- refresh_key(git),
       do: git
   end
+
+  defp touch(pid, line), do: send(pid, {:touch, line})
 
   defp rate_limited(key, fun) when is_function(fun, 0) do
     :erlang.term_to_binary(key)

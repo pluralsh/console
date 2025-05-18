@@ -97,6 +97,7 @@ defmodule Console.Deployments.Helm.AgentTest do
   end
 
   defp stream_and_untar(f) do
+    {:ok, f} = f.()
     {:ok, tmp} = Briefly.create()
     IO.binstream(f, 1024)
     |> Enum.into(File.stream!(tmp))

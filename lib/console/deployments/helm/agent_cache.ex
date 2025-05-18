@@ -76,6 +76,13 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
+  def touch?(%{touched: t}) when not is_nil(t) do
+    Timex.now()
+    |> Timex.shift(seconds: -1)
+    |> Timex.after?(t)
+  end
+  def touch?(_), do: true
+
   def touch(%__MODULE__{} = cache, %Line{} = line),
     do: put(cache, Line.touch(line))
 
@@ -114,17 +121,17 @@ defmodule Console.Deployments.Helm.AgentCache do
   end
 
   defp sweep(%__MODULE__{table: t, repo: repo} = cache) do
-    count = :ets.foldl(fn {_, l}, acc ->
+    {kept, expired} = :ets.foldl(fn {_, l}, {keep, expired} ->
       case Line.expired?(l) do
         true ->
           Line.expire(l)
           :ets.delete(t, {:chart, l.chart, l.vsn})
-          acc + 1
-        false -> acc
+          {keep, expired + 1}
+        false -> {keep + 1, expired}
       end
-    end, 0, t)
+    end, {0, 0}, t)
 
-    Logger.info "expired #{count} stale helm cache entries for #{repo.url}"
+    Logger.info "expired #{expired} stale helm cache entries for #{repo.url}, kept #{kept}"
     cache
   end
 end

@@ -46,7 +46,7 @@ defmodule Console.Deployments.Helm.Charts do
       {:server, _} -> jit_create(ns, name, n, chart, vsn)
     end
   end
-  def get(_), do: {:error, "service does not reference a helm chart"}
+  def get(_), do: {:error, "service does not reference a flux helm chart"}
 
   defp jit_create(namespace, name, repo, chart, version) do
     Client.create_helm_chart(%HelmChart{
