@@ -1,0 +1,1681 @@
+addons:
+- icon: https://avatars.githubusercontent.com/u/30269780?s=200&v=4
+  git_url: https://github.com/argoproj/argo-rollouts
+  release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
+  helm_repository_url: https://argoproj.github.io/argo-helm
+  versions:
+  - version: 1.8.2
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.39.5
+  - version: 1.8.0
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.39.0
+  - version: 1.7.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.36.0
+  - version: 1.6.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.32.0
+  - version: 1.2.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.12.0
+  - version: 1.1.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.2.0
+  name: argo-rollouts
+- icon: https://kubernetes.io/images/blog-logging/2018-04-10-container-storage-interface-beta/csi-logo.png
+  git_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver
+  release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
+  helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+  versions:
+  - version: 1.43.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.43.0
+  - version: 1.42.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.42.0
+  - version: 1.41.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.41.0
+  - version: 1.40.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.40.0
+  - version: 1.39.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.39.0
+  - version: 1.38.1
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.38.1
+  - version: 1.37.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.37.0
+  - version: 1.36.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.36.0
+  - version: 1.35.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.35.0
+  - version: 1.34.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.34.0
+  - version: 1.33.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.33.0
+  - version: 1.32.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.32.0
+  - version: 1.31.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.31.0
+  - version: 1.30.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.30.0
+  - version: 1.29.1
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.29.1
+  - version: 1.29.0
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.29.0
+  - version: 1.28.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.28.0
+  - version: 1.26.1
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.26.1
+  - version: 1.23.1
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.23.1
+  name: aws-ebs-csi-driver
+- icon: https://cdn.worldvectorlogo.com/logos/amazon-elastic-file-system.svg
+  git_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver
+  release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
+  helm_repository_url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
+  versions:
+  - version: 2.1.8
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 2.1.1
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.1.1
+  - version: 2.0.2
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.0.3
+  - version: 2.0.0
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.0.0
+  - version: 1.7.4
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.5.4
+  name: aws-efs-csi-driver
+- icon: https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/e5d625f96415fd44e6399e9c75e2bd985f5a2288/docs/assets/images/aws_load_balancer_icon.svg
+  git_url: https://github.com/kubernetes-sigs/aws-load-balancer-controller
+  release_url: https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases/tag/v{vsn}
+  helm_repository_url: https://aws.github.io/eks-charts
+  versions:
+  - version: 2.9.9
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 2.9.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.9.0
+  - version: 2.8.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.8.0
+  - version: 2.7.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.7.0
+  - version: 2.6.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.6.0
+  - version: 2.5.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.5.0
+  - version: 2.4.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.4.0
+  - version: 2.3.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.3.1
+  - version: 2.2.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.2.0
+  - version: 2.1.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.1.0
+  - version: 2.0.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.1
+  name: aws-load-balancer-controller
+- icon: https://cdn2.iconfinder.com/data/icons/amazon-aws-stencils/100/Non-Service_Specific_copy_Virtual_Private_CLoud_-512.png
+  git_url: https://github.com/aws/amazon-vpc-cni-k8s
+  release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
+  helm_repository_url: https://aws.github.io/eks-charts
+  versions:
+  - version: 1.19.5
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.19.5
+  - version: 1.19.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.19.0
+  - version: 1.18.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.18.0
+  - version: 1.17.1
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.17.1
+  - version: 1.16.2
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.2
+  - version: 1.16.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.0
+  - version: 1.15.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.15.0
+  - version: 1.14.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 1.13.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.13.0
+  - version: 1.12.5
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.2.7
+  - version: 1.11.5
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.3
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.1.15
+  name: amazon-vpc-cni-k8s
+- icon: https://docs.tigera.io/img/calico-logo.webp
+  git_url: https://github.com/projectcalico/calico
+  release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
+  helm_repository_url: https://docs.tigera.io/calico/charts
+  versions:
+  - version: 3.30.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.30.0
+  - version: 3.29.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.29.0
+  - version: 3.28.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.28.0
+  - version: 3.27.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.27.0
+  - version: 3.26.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.26.0
+  - version: 3.25.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.25.0
+  - version: 3.24.1
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.24.1
+  - version: 3.23.4
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.23.4
+  - version: 3.22.5
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.22.5
+  - version: 3.20.6
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.20.6
+  name: calico
+- icon: https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png
+  git_url: https://github.com/cert-manager/cert-manager
+  release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
+  helm_repository_url: https://charts.jetstack.io
+  versions:
+  - version: 1.17.0
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.17.0
+  - version: 1.16.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.0
+  - version: 1.15.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.15.0
+  - version: 1.14.0
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 1.13.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.13.0
+  - version: 1.12.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.12.0
+  - version: 1.11.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.11.0
+  - version: 1.10.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.10.0
+  - version: 1.9.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.9.0
+  - version: 1.8.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.8.0
+  - version: 1.7.0
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.7.0
+  - version: 1.6.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.6.0
+  - version: 1.5.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.5.0
+  - version: 1.4.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.4.0
+  - version: 1.3.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.3.0
+  - version: 1.2.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.2.0
+  - version: 1.1.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.1.0
+  - version: 1.0.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.0.0
+  - version: 0.16.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.16.0
+  - version: 0.15.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.15.0
+  - version: 0.14.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.14.0
+  - version: 0.13.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.13.0
+  - version: 0.12.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.12.0
+  - version: 0.11.0
+    kube: ['1.9']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.11.0
+  name: cert-manager
+- icon: https://avatars.githubusercontent.com/u/21054566?s=48&v=4
+  release_url: https://github.com/cilium/cilium/releases/tag/{vsn}
+  helm_repository_url: https://helm.cilium.io/
+  versions:
+  - version: 1.17.0
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.17.0
+  - version: 1.16.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.0
+  - version: 1.15.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.15.0
+  - version: 1.14.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 1.13.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.13.0
+  - version: 1.12.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.12.0
+  - version: 1.11.0
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.11.0
+  - version: 1.10.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.10.0
+  - version: 1.9
+    kube: ['1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12']
+    requirements: []
+    incompatibilities: []
+  name: cilium
+- icon: https://raw.githubusercontent.com/projectcontour/contour/main/assets/logo.png
+  git_url: https://github.com/projectcontour/contour
+  release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
+  helm_repository_url: https://charts.bitnami.com/bitnami
+  versions:
+  - version: 1.31.1
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 20.0.3
+  - version: 1.31.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 20.0.1
+  - version: 1.30.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 19.0.0
+  - version: 1.29.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 18.0.0
+  - version: 1.28.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 1.27.0
+    kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 15.0.0
+  - version: 1.26.0
+    kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 13.0.0
+  - version: 1.25.0
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 12.0.0
+  - version: 1.24.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+  - version: 1.23.0
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 10.0.0
+  - version: 1.22.0
+    kube: ['1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.0.0
+  - version: 1.21.0
+    kube: ['1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 8.0.0
+  name: contour
+- icon: https://avatars.githubusercontent.com/u/21110084?s=200&v=4
+  release_url: https://github.com/coredns/coredns/releases/tag/{vsn}
+  helm_repository_url: https://coredns.github.io/helm
+  versions:
+  - version: 1.11.3
+    kube: ['1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.32.0
+  - version: 1.11.1
+    kube: ['1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.26.0
+  - version: 1.10.1
+    kube: ['1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.21.0
+  - version: 1.9.3
+    kube: ['1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.19.4
+  - version: 1.8.6
+    kube: ['1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.5
+  - version: 1.8.4
+    kube: ['1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.0
+  - version: 1.8.0
+    kube: ['1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 1.7.0
+    kube: ['1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.6.7
+    kube: ['1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.6.5
+    kube: ['1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 1.6.2
+    kube: ['1.16']
+    requirements: []
+    incompatibilities: []
+  - version: 1.3.1
+    kube: ['1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+  - version: 1.2.6
+    kube: ['1.13']
+    requirements: []
+    incompatibilities: []
+  - version: 1.2.2
+    kube: ['1.12']
+    requirements: []
+    incompatibilities: []
+  - version: 1.1.3
+    kube: ['1.11']
+    requirements: []
+    incompatibilities: []
+  - version: 1.0.6
+    kube: ['1.10']
+    requirements: []
+    incompatibilities: []
+  - version: 1.0.1
+    kube: ['1.09']
+    requirements: []
+    incompatibilities: []
+  name: coredns
+- icon: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/img/external-dns.png?raw=true
+  git_url: https://github.com/kubernetes-sigs/external-dns
+  release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
+  helm_repository_url: https://kubernetes-sigs.github.io/external-dns
+  versions:
+  - version: 0.16.1
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.1
+  - version: 0.15.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.15.0
+  - version: 0.14.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 0.12.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.10.0
+  - version: 0.11.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.9.0
+  - version: 0.10.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.3.0
+  - version: 0.9.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
+      '1.12', '1.11', '1.10']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.2.0
+  name: external-dns
+- icon: https://avatars.githubusercontent.com/u/52158677?s=200&v=4
+  git_url: https://github.com/fluxcd/flux2
+  release_url: https://github.com/fluxcd/flux2/releases/tag/v{vsn}
+  helm_repository_url: https://charts.fluxcd.io
+  versions:
+  - version: 2.3.0
+    kube: ['1.30', '1.29', 1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 2.2.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+  - version: 2.1.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+  - version: 2.0.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', 1.24']
+    requirements: []
+    incompatibilities: []
+  name: flux
+- icon: https://github.com/pluralsh/plural-artifacts/blob/main/ingress-nginx/plural/icons/nginx.png?raw=true
+  git_url: https://github.com/kubernetes/ingress-nginx
+  release_url: https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}
+  helm_repository_url: https://kubernetes.github.io/ingress-nginx
+  versions:
+  - version: 1.12.2
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.12.2
+  - version: 1.12.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.12.0
+  - version: 1.11.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.11.0
+  - version: 1.10.1
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.10.1
+  - version: 1.10.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.10.0
+  - version: 1.9.6
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.9.1
+  - version: 1.9.0
+    kube: ['1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.8.0
+  - version: 1.8.4
+    kube: ['1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.7.3
+  - version: 1.7.1
+    kube: ['1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.6.1
+  - version: 1.6.4
+    kube: ['1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.5.2
+  - version: 1.5.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.4.0
+  - version: 1.4.0
+    kube: ['1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.3.0
+  - version: 1.3.1
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 4.2.4
+  name: ingress-nginx
+- icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/istio/plural/icons/istio.png?raw=true
+  git_url: https://github.com/istio/istio
+  release_url: https://github.com/istio/istio/releases/tag/{vsn}
+  helm_repository_url: https://istio-release.storage.googleapis.com/charts
+  versions:
+  - version: 1.26.0
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.26.0
+  - version: 1.25.0
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.25.0
+  - version: 1.24.0
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.24.0
+  - version: 1.23.0
+    kube: ['1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.23.0
+  - version: 1.22.0
+    kube: ['1.30', '1.29', 1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.22.0
+  - version: 1.21.0
+    kube: ['1.29', 1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.21.0
+  - version: 1.20.0
+    kube: ['1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.20.0
+  - version: 1.18.0
+    kube: ['1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.18.0
+  - version: 1.17.0
+    kube: ['1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.17.0
+  - version: 1.16.0
+    kube: ['1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.16.0
+  - version: 1.14.0
+    kube: ['1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.14.0
+  - version: 1.13.0
+    kube: ['1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.13.0
+  - version: 1.12.0
+    kube: ['1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.12.0
+  - version: 1.11.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.9.0
+    kube: ['1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 1.8.0
+    kube: ['1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+  - version: 1.7.0
+    kube: ['1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+  - version: 1.1.0
+    kube: ['1.21', '1.20', '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  name: istio
+- icon: https://avatars.githubusercontent.com/u/28545596?s=200&v=4
+  git_url: https://github.com/jaegertracing/jaeger
+  release_url: https://github.com/jaegertracing/jaeger/releases/tag/v{vsn}
+  helm_repository_url: https://jaegertracing.github.io/helm-charts
+  versions:
+  - version: 1.62.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+      '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.61.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+      '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.60.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+      '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.59.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.57.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.56.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.55.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.54.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.53.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.74.1
+  - version: 1.52.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.51.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.72.0
+  - version: 1.50.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.49.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.48.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.47.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.46.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.45.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.71.0
+  - version: 1.44.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.43.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.42.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.69.0
+  - version: 1.41.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.40.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.39.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.65.2
+  - version: 1.38.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.37.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.58.0
+  - version: 1.36.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.57.0
+  - version: 1.35.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.34.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.33.0
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  name: jaeger
+- icon: https://d3g9o9u8re44ak.cloudfront.net/logo/55cad6f2-84cb-49a7-9d60-265f7e4ea91e/8a67fa7b-85bd-44e4-823c-d7d5690777b1.png
+  git_url: https://github.com/aws/karpenter-provider-aws
+  release_url: https://github.com/aws/karpenter-provider-aws/releases/tag/v{vsn}
+  helm_repository_url: https://charts.karpenter.sh
+  versions:
+  - version: 1.2.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.0.5
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.37.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+      '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.34.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.31.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.28.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.25.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  name: karpenter
+- icon: https://avatars.githubusercontent.com/u/49917779?s=48&v=4
+  git_url: https://github.com/kedacore/keda
+  release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
+  helm_repository_url: https://kedacore.github.io/charts
+  versions:
+  - version: 2.15.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.15.0
+  - version: 2.14.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.14.0
+  - version: 2.13.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.13.0
+  - version: 2.12.0
+    kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.12.0
+  - version: 2.11.0
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.11.0
+  - version: 2.10.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.10.0
+  - version: 2.9.0
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.9.0
+  - version: 2.8.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.8.0
+  - version: 2.7.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.7.0
+  name: keda
+- icon: https://github.com/pluralsh/plural-artifacts/blob/main/monitoring/plural/icons/monitoring.png?raw=true
+  git_url: https://github.com/prometheus-community/helm-charts
+  release_url: https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-{vsn}
+  readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/README.md
+  helm_repository_url: https://prometheus-community.github.io/helm-charts
+  versions:
+  - version: 54.0.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 50.0.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 27.0.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 15.2.2
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.0.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+  name: kube-prometheus-stack
+- icon: https://avatars.githubusercontent.com/u/68448710?s=48&v=4
+  git_url: https://github.com/kyverno/kyverno
+  release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
+  helm_repository_url: https://kyverno.github.io/kyverno/
+  versions:
+  - version: 1.13.0
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.3.0
+  - version: 1.12.0
+    kube: ['1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.2.0
+  - version: 1.11.0
+    kube: ['1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.1.0
+  - version: 1.10.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 3.0.0
+  - version: 1.9.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.7.0
+  - version: 1.8.0
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.6.0
+  - version: 1.7.0
+    kube: ['1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.4.0
+  - version: 1.6.0
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+    chart_version: 2.2.0
+  name: kyverno
+- icon: https://avatars.githubusercontent.com/u/25301026?s=200&v=4
+  git_url: https://github.com/linkerd/linkerd2
+  release_url: https://github.com/linkerd/linkerd2/releases/tag/{vsn}
+  helm_repository_url: https://helm.linkerd.io/stable
+  versions:
+  - version: 2.14
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+  - version: 2.13
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+  - version: 2.12
+    kube: ['1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+  - version: 2.11
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 2.1
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+  name: linkerd
+- icon: https://avatars.githubusercontent.com/u/49998002?s=48&v=4
+  git_url: https://github.com/open-telemetry/opentelemetry-operator
+  release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
+  versions:
+  - version: 0.102.0
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.101.0
+    kube: ['1.30', 1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.100.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.99.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.98.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.97.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.96.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.95.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.94.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.93.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.92.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.91.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.90.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.89.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.88.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.87.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.86.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 0.85.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.84.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.83.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.82.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.81.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 0.80.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  name: opentelemetry
+- icon: https://avatars.githubusercontent.com/u/22860722?s=48&v=4
+  git_url: https://github.com/rook/rook
+  release_url: https://github.com/rook/rook/releases/tag/v{vsn}
+  versions:
+  - version: 1.16.0
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 1.15.0
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+  - version: 1.14.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.25']
+    requirements: []
+    incompatibilities: []
+  - version: 1.13.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+  - version: 1.12.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+  - version: 1.11.0
+    kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.0
+    kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+  - version: 1.9.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+  - version: 1.8.0
+    kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.7.0
+    kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 1.6.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+    requirements: []
+    incompatibilities: []
+  - version: 1.5.0
+    kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+  - version: 1.4.0
+    kube: ['1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+  name: rook
+- icon: https://avatars.githubusercontent.com/u/34767428?s=48&v=4
+  git_url: https://github.com/strimzi/strimzi-kafka-operator
+  release_url: https://github.com/strimzi/strimzi-kafka-operator/releases/tag/{vsn}
+  versions:
+  - version: 0.41.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+  - version: 0.40.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+  - version: 0.39.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  - version: 0.38.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  - version: 0.37.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  - version: 0.36.1
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  - version: 0.36.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  - version: 0.35.1
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.35.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.34.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.33.2
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.33.1
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.33.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.32.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19']
+  - version: 0.31.1
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19', '1.18', '1.17', '1.16']
+  - version: 0.31.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19', '1.18', '1.17', '1.16']
+  - version: 0.30.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19', '1.18', '1.17', '1.16']
+  - version: 0.29.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+      '1.20', '1.19', '1.18', '1.17', '1.16']
+  name: strimzi-kafka
+- icon: https://github.com/traefik/traefik/raw/master/docs/content/assets/img/traefik.logo-dark.png
+  git_url: https://github.com/traefik/traefik
+  release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
+  helm_repository_url: https://traefik.github.io/charts
+  versions:
+  - version: 3.4.0
+    kube: ['1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.3.0
+    kube: ['1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.2.0
+    kube: ['1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 33.0.0
+  - version: 3.1.7
+    kube: ['1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.1.4
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 31.1.1
+  - version: 3.1.3
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 31.1.0
+  - version: 3.0.2
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 28.3.0
+  - version: 2.11.13
+    kube: ['1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 2.11.10
+    kube: ['1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 2.11.4
+    kube: ['1.31', '1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 2.10.3
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  name: traefik
+- icon: https://velero.io/img/Velero.svg
+  git_url: https://github.com/vmware-tanzu/velero
+  release_url: https://github.com/vmware-tanzu/velero/releases/tag/v{vsn}
+  versions:
+  - version: 1.14.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.13.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.12.3
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.12.2
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.12.1
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.12.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.11.1
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.11.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.3
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.2
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.1
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.10.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.9.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  - version: 1.8.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+      '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+  name: velero
+- icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
+  git_url: https://github.com/vitessio/vitess
+  release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
+  versions:
+  - version: 22.0.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 21.0.0
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 20.0.0
+    kube: ['1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+  - version: 19.0.0
+    kube: ['1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+  - version: 18.0.0
+    kube: ['1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+  - version: 17.0.0
+    kube: ['1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+  - version: 16.0.0
+    kube: ['1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+  - version: 15.0.0
+    kube: ['1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+  - version: 14.0.0
+    kube: ['1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+  - version: 13.0.0
+    kube: ['1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+  - version: 12.0.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    requirements: []
+    incompatibilities: []
+  - version: 10.0.0
+    kube: ['1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+  - version: 9.0.0
+    kube: ['1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+  - version: 8.0.0
+    kube: ['1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+  - version: 7.0.0
+    kube: ['1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+  - version: 6.0.0
+    kube: ['1.15', '1.14', '1.13']
+    requirements: []
+    incompatibilities: []
+  name: vitess
