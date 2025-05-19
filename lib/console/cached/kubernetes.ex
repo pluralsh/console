@@ -22,14 +22,27 @@ defmodule Console.Cached.Kubernetes do
   end
 
   def fetch(name) do
-    :ets.tab2list(name)
-    |> Enum.map(fn {_, v} -> v end)
+    case exists?(name) do
+      true ->
+        :ets.tab2list(name)
+        |> Enum.map(fn {_, v} -> v end)
+      false -> []
+    end
   end
 
   def get(name, key) do
-    case :ets.lookup(name, key) do
-      [{^key, v}] -> v
+    with true <- exists?(name),
+         [{^key, v}] <- :ets.lookup(name, key) do
+      v
+    else
       _ -> nil
+    end
+  end
+
+  defp exists?(name) do
+    case :ets.whereis(name) do
+      :undefined -> false
+      _ -> true
     end
   end
 

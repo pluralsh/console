@@ -10,12 +10,7 @@ defmodule Console.Services.VPN do
   @type peer_resp :: {:ok, WireguardPeer.t} | error
   @type server_resp :: {:ok, WireguardServer.t} | error
 
-  def enabled?() do
-    case Console.conf(:initialize) do
-      true -> server_installed?()
-      _ -> false
-    end
-  end
+  def enabled?(), do: false
 
   @spec get_server() :: server_resp
   def get_server() do
