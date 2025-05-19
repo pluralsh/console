@@ -17,9 +17,7 @@ fragment ClusterUpgrade on Cluster {
     id
   }
   upgradePlan {
-    compatibilities
-    deprecations
-    incompatibilities
+    ...ClusterUpgradePlan
   }
   deprecatedCustomResources {
     ...ClusterUpgradeDeprecatedCustomResource
