@@ -558,6 +558,7 @@ defmodule Console.AI.ChatSyncTest do
       assert tool.attributes.tool.name == "__plrl__logs"
     end
 
+    @tag prs: true
     test "it can chat with a prs tool call" do
       user = insert(:user)
       %{id: flow_id} = flow = insert(:flow)
@@ -613,6 +614,76 @@ defmodule Console.AI.ChatSyncTest do
       assert tool.content =~ "some patch"
       assert tool.attributes.tool.name == "__plrl__pull_requests"
       assert tool.attributes.tool.arguments == %{"query" => "error"}
+    end
+
+    test "it can chat with a plural alerts tool call" do
+      user = insert(:user)
+      flow = insert(:flow)
+      service = insert(:service, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      insert(:alert,
+        service: service,
+        title: "PagerDuty-Low-Severity-Firing",
+        message: "low severity pagerduty alert",
+        type: :pagerduty,
+        severity: :low,
+        state: :firing
+      )
+      insert(:alert,
+        service: service,
+        title: "PagerDuty-Critical-Severity-Firing",
+        message: "critical severity pagerduty alert",
+        type: :pagerduty,
+        severity: :critical,
+        state: :firing
+      )
+      insert(:alert,
+        service: service,
+        title: "PagerDuty-Critical-Severity-Resolved",
+        message: "critical severity pagerduty alert resolved",
+        type: :pagerduty,
+        severity: :critical,
+        state: :resolved
+      )
+      insert(:alert,
+        service: service,
+        title: "Grafana-Critical-Severity-Firing",
+        message: "critical severity grafana alert",
+        type: :grafana,
+        severity: :critical,
+        state: :firing
+      )
+
+      deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__alerts", arguments: %{"severities" => ["critical"], "types" => ["pagerduty"], "state" => "firing"}}]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+
+      assert tool.role == :user
+      assert tool.content =~ "PagerDuty-Critical-Severity-Firing"
+      refute tool.content =~ "PagerDuty-Critical-Severity-Resolved"
+      refute tool.content =~ "PagerDuty-Low-Severity-Firing"
+      refute tool.content =~ "Grafana-Critical-Severity-Firing"
+      assert tool.attributes.tool.name == "__plrl__alerts"
+      assert tool.attributes.tool.arguments == %{"severities" => ["critical"], "types" => ["pagerduty"], "state" => "firing"}
     end
   end
 

@@ -58,7 +58,8 @@ defmodule Console.Schema.Alert do
   def for_flow(query \\ __MODULE__, id) do
     from(a in query,
       join: s in assoc(a, :service),
-      where: s.flow_id == ^id
+      where: s.flow_id == ^id,
+      distinct: true
     )
   end
 
@@ -72,6 +73,18 @@ defmodule Console.Schema.Alert do
     from(a in query, order_by: [desc: coalesce(a.updated_at, a.inserted_at)])
   end
   def ordered(query, order), do: from(a in query, order_by: ^order)
+
+  def for_state(query \\ __MODULE__, state) do
+    from(a in query, where: a.state == ^state)
+  end
+
+  def for_types(query \\ __MODULE__, types) do
+    from(a in query, where: a.type in ^types)
+  end
+
+  def for_severities(query \\ __MODULE__, severities) do
+    from(a in query, where: a.severity in ^severities)
+  end
 
   @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id insight_id service_id)a
 
