@@ -1,4 +1,4 @@
-#!python3
+#!/usr/local/bin/python3
 import semver
 import subprocess
 
