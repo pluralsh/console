@@ -1,5 +1,6 @@
 defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
+  alias Console.SmartFile
   alias Console.Deployments.{Services, Stacks}
   alias Console.Schema.{Cluster, Service}
   alias Console.Deployments.Local.Server, as: FileServer
@@ -32,13 +33,15 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, run} <- Stacks.authorized(run_id, cluster),
          run <- Console.Repo.preload(run, [:repository]),
-         {{:ok, sha}, _} <- {Stacks.digest(run), run},
-         {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Stacks.tarstream(run) end), run} do
-      chunk_send_tar(conn, File.open!(path, [:raw]))
+         {:ok, f} <- Stacks.tarstream(run) do
+      chunk_send_tar(conn, f)
     else
+      {{:error, :rate_limited}, run} ->
+        Stacks.add_errors(run, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, run} ->
-        Stacks.add_errors(run, [%{source: "git", message: err}])
-        send_resp(conn, 402, err)
+        Stacks.add_errors(run, [%{source: "git", message: stringify(err)}])
+        send_resp(conn, 402, stringify(err))
       _err -> send_resp(conn, 403, "Forbidden")
     end
   end
@@ -47,13 +50,15 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision]),
-         {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {Services.digest(svc), svc} do
       send_resp(conn, 200, sha)
     else
+      {{:error, :rate_limited}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: err}])
-        send_resp(conn, 402, err)
+        Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
+        send_resp(conn, 402, stringify(err))
       _err -> send_resp(conn, 403, "Forbidden")
     end
   end
@@ -65,34 +70,43 @@ defmodule ConsoleWeb.GitController do
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {get_digest(params, svc), svc},
          {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Services.tarstream(svc) end), svc} do
-      chunk_send_tar(conn, File.open!(path, [:raw]))
+      chunk_send_tar(conn, path)
     else
+      {{:error, :rate_limited}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        send_resp(conn, 429, "Rate limited")
       {{:error, err}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: err}])
-        send_resp(conn, 402, err)
-      _err -> send_resp(conn, 403, "Forbidden")
+        Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
+        send_resp(conn, 402, stringify(err))
+      _ -> send_resp(conn, 403, "Forbidden")
     end
   end
+
+  defp stringify(err) when is_binary(err), do: err
+  defp stringify(err), do: inspect(err)
 
   defp get_digest(%{"digest" => digest}, _), do: {:ok, digest}
   defp get_digest(_, %Service{} = svc), do: Services.digest(svc)
 
   defp chunk_send_tar(conn, f) do
-    try do
-      conn =
-        conn
-        |> put_resp_content_type("application/gzip")
-        |> send_chunked(200)
+    smart = SmartFile.new(f)
+    with {:ok, f} <- SmartFile.convert(smart) do
+      try do
+        conn =
+          conn
+          |> put_resp_content_type("application/gzip")
+          |> send_chunked(200)
 
-      IO.binstream(f, Console.conf(:chunk_size))
-      |> Enum.reduce_while(conn, fn line, conn ->
-        case chunk(conn, line) do
-          {:ok, conn} -> {:cont, conn}
-          {:error, :closed} -> {:halt, conn}
-        end
-      end)
-    after
-      File.close(f)
+        IO.binstream(f, Console.conf(:chunk_size))
+        |> Enum.reduce_while(conn, fn line, conn ->
+          case chunk(conn, line) do
+            {:ok, conn} -> {:cont, conn}
+            {:error, :closed} -> {:halt, conn}
+          end
+        end)
+      after
+        File.close(f)
+      end
     end
   end
 

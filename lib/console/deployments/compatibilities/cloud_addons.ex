@@ -22,6 +22,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
+    table = Enum.reduce(Static.cloud_addons(), table, &persist(&2, &1))
     {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
 
@@ -70,8 +71,12 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   end
 
   defp fetch_platform(url, platform) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url <> "#{platform}.yaml"),
-      do: decode_cloud_addon(platform, body)
+    case HTTPoison.get(url <> "#{platform}.yaml") do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        decode_cloud_addon(platform, body)
+      _ ->
+        {:error, "failed to fetch platform #{platform}"}
+    end
   end
 
   defp decode_cloud_addon(name, yaml) do

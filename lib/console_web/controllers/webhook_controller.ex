@@ -3,8 +3,6 @@ defmodule ConsoleWeb.WebhookController do
   alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook}
   alias Console.Deployments.{Git, Clusters, Observability}
 
-  require Logger
-
   plug ConsoleWeb.Verifier when action == :webhook
 
   def cluster(conn, _) do
@@ -26,8 +24,7 @@ defmodule ConsoleWeb.WebhookController do
       json(conn, resp)
     else
       :reject -> send_resp(conn, 403, "Forbidden")
-      err ->
-        Logger.info "Did not process scm webhook, result: #{inspect(err)}"
+      _err ->
         json(conn, %{ignored: true})
     end
   end
@@ -40,8 +37,7 @@ defmodule ConsoleWeb.WebhookController do
       json(conn, %{ignored: false, message: "persisted alert"})
     else
       :reject -> send_resp(conn, 403, "Forbidden")
-      err ->
-        Logger.info "did not process observability webhook, result: #{inspect(err)}"
+      _err ->
         json(conn, %{ignored: true})
     end
   end

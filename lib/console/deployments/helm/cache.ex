@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Helm.Cache do
   require Logger
+  alias Console.SmartFile
   alias Kube.HelmChart
   alias Kube.HelmChart.Status
   alias Console.Deployments.{Helm.Utils, Tar}
@@ -43,8 +44,7 @@ defmodule Console.Deployments.Helm.Cache do
   def path(_, _), do: {:error, "chart not yet loaded"}
 
   defp open(%__MODULE__{touched: touched} = cache, path) do
-    with {:ok, f} <- File.open(path),
-      do: {:ok, f, put_in(cache.touched, Map.put(touched, path, Timex.now()))}
+    {:ok, SmartFile.new(path), put_in(cache.touched, Map.put(touched, path, Timex.now()))}
   end
 
   defp build_tarball(url, cache, path, chart) do

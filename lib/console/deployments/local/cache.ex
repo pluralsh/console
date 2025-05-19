@@ -1,12 +1,15 @@
 defmodule Console.Deployments.Local.Cache do
-  @type t :: %__MODULE__{cache: %{binary => Line.t}}
+  alias Console.SmartFile
+  require Logger
 
-  defstruct [:dir, cache: %{}]
+  @type t :: %__MODULE__{}
+
+  defstruct [:dir, :table]
 
   defmodule Line do
     @type t :: %__MODULE__{}
 
-    @expiry [minutes: -2 * 60]
+    @expiry [minutes: -24 * 60]
     defstruct [:file, :digest, :touched]
 
     def new(file, digest) do
@@ -28,17 +31,28 @@ defmodule Console.Deployments.Local.Cache do
     end
   end
 
-  @spec new() :: t
-  def new() do
+  @spec new(:ets.tab()) :: t
+  def new(table) do
     {:ok, dir} = Briefly.create(directory: true)
-    %__MODULE__{dir: dir, cache: %{}}
+    %__MODULE__{dir: dir, table: table}
   end
 
   @spec fetch(t, binary, function) :: {:ok, Line.t, t} | Console.error
-  def fetch(%__MODULE__{cache: lines} = cache, digest, reader) when is_function(reader, 0) do
-    case lines[digest] do
-      %Line{} = l -> {:ok, l, put_in(cache.cache[digest], Line.touch(l))}
+  def fetch(%__MODULE__{} = cache, digest, reader) when is_function(reader, 0) do
+    case find(cache, digest) do
+      %Line{} = l -> {:ok, l, store(cache, Line.touch(l))}
       nil -> write(cache, digest, reader)
+    end
+  end
+
+  @spec proxy(t, binary, pid) :: {:ok, Line.t, t} | Console.error
+  def proxy(%__MODULE__{} = cache, digest, file) do
+    with %Line{} = l <- find(cache, digest),
+         :ok <- SmartFile.close(file) do
+      {:ok, l, store(cache, Line.touch(l))}
+    else
+      nil -> write(cache, digest, fn -> {:ok, file} end)
+      err -> err
     end
   end
 
@@ -47,24 +61,51 @@ defmodule Console.Deployments.Local.Cache do
     path = Path.join(cache.dir, "#{digest}.tgz")
     with %File.Stream{} <- safe_copy(path, reader),
          line <- Line.new(path, digest),
-      do: {:ok, line, put_in(cache.cache[digest], line)}
+      do: {:ok, line, store(cache, line)}
   end
 
   @spec sweep(t) :: t
-  def sweep(%__MODULE__{cache: lines} = cache) do
-    {keep, expire} = Enum.split_with(lines, fn {_, l} -> !Line.expired?(l) end)
-    Enum.each(expire, fn {_, v} -> Line.expire(v) end)
-    %{cache | cache: Map.new(keep)}
+  def sweep(%__MODULE__{table: t} = cache) do
+    deleted = :ets.foldl(fn {k, l}, acc ->
+      case Line.expired?(l) do
+        true ->
+          Line.expire(l)
+          :ets.delete(t, k)
+          acc + 1
+        _ -> acc
+      end
+    end, 0, t)
+    Logger.info("pruned #{deleted} expired files from local file server")
+    cache
   end
 
   defp safe_copy(path, reader) when is_function(reader, 0) do
-    with {:ok, f} <- reader.() do
+    with {:ok, file} <- reader.(),
+         smart <- SmartFile.new(file),
+         {:ok, f} <- SmartFile.convert(smart) do
       try do
         IO.binstream(f, Console.conf(:chunk_size))
         |> Enum.into(File.stream!(path))
       after
         File.close(f)
+      rescue
+        err ->
+          Logger.error(Exception.format(:error, err, __STACKTRACE__))
+          {:error, :stream_aborted}
       end
     end
+  end
+
+  def find(%__MODULE__{table: table}, digest), do: find(table, digest)
+  def find(table, digest) do
+    case :ets.lookup(table, {:line, digest}) do
+      [{{:line, ^digest}, line}] -> line
+      _ -> nil
+    end
+  end
+
+  defp store(%__MODULE__{table: table} = cache, %Line{digest: digest} = line) do
+    :ets.insert(table, {{:line, digest}, line})
+    cache
   end
 end

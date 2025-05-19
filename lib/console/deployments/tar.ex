@@ -1,4 +1,5 @@
 defmodule Console.Deployments.Tar do
+  alias Console.SmartFile
   @type err :: Console.error
 
   @chunk Console.conf(:chunk_size)
@@ -20,7 +21,7 @@ defmodule Console.Deployments.Tar do
   def tarball(contents) do
     with {:ok, tmp} <- Briefly.create(),
          :ok <- tarball(tmp, contents),
-      do: File.open(tmp, [:raw])
+      do: {:ok, SmartFile.new(tmp)}
   end
 
   @spec tarball(binary, [{binary, binary}]) :: :ok | err
@@ -33,7 +34,7 @@ defmodule Console.Deployments.Tar do
   @doc """
   Takes a tar file and adds a set of additional files to it, then returns a new file handle to it
   """
-  @spec splice(File.t, map) :: {:ok, File.t} | err
+  @spec splice(File.t, map) :: {:ok, SmartFile.t} | err
   def splice(tar_file, additional) do
     with {:ok, contents} <- tar_stream(tar_file) do
       Map.new(contents)
@@ -46,16 +47,19 @@ defmodule Console.Deployments.Tar do
   @doc """
   Streams a tar from an open file and returns a list of file names/contents
   """
-  @spec tar_stream(File.t) :: {:ok, [{binary, binary}]} | err
+  @spec tar_stream(SmartFile.eligible) :: {:ok, [{binary, binary}]} | err
   def tar_stream(tar_file) do
-    try do
-      with {:ok, tmp} <- Briefly.create(),
-            _ <- IO.binstream(tar_file, @chunk) |> Enum.into(File.stream!(tmp)),
+    smart = SmartFile.new(tar_file)
+    with {:ok, f} <- SmartFile.convert(smart) do
+      try do
+        with {:ok, tmp} <- Briefly.create(),
+              _ <- IO.binstream(f, @chunk) |> Enum.into(File.stream!(tmp)),
            {:ok, res} <- :erl_tar.extract(tmp, [:compressed, :memory]),
            _ <- File.rm(tmp),
         do: {:ok, Enum.map(res, fn {name, content} -> {to_string(name), to_string(content)} end)}
-    after
-      File.close(tar_file)
+      after
+        File.close(f)
+      end
     end
   end
 end

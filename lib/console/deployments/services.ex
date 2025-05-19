@@ -152,7 +152,7 @@ defmodule Console.Deployments.Services do
   Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
   before sending it upstream to the given client.
   """
-  @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
+  @spec tarstream(Service.t) :: {:ok, SmartFile.t} | Console.error
   def tarstream(%Service{repository_id: id, helm: %Service.Helm{repository_id: rid, chart: c, values_files: [_ | _] = files} = helm} = svc)
       when is_binary(id) and (is_binary(c) or is_binary(rid)) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
