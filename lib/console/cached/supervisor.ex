@@ -10,7 +10,7 @@ defmodule Console.Cached.Supervisor do
     children = [
       Console.Cached.Namespace,
       Console.Cached.Pod,
-      Console.Cached.VPN,
+      # Console.Cached.VPN,
       Console.Cached.Node,
       Console.Cached.Cluster,
       Console.Cached.ClusterNodes,
