@@ -35,6 +35,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
     ...ServiceDeploymentBaseFragment
     components {
         id
+        uid
         name
         group
         kind

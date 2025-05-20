@@ -111,6 +111,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kind,       non_null(:string)
     field :namespace,  non_null(:string)
     field :name,       non_null(:string)
+    field :uid,        :string
     field :content,    :component_content_attributes
     field :children,   list_of(:component_child_attributes)
   end
@@ -342,6 +343,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kind,       non_null(:string), description: "api kind of this resource"
     field :namespace,  :string, description: "kubernetes namespace of this resource"
     field :name,       non_null(:string), description: "kubernetes name of this resource"
+    field :uid,        :string, description: "kubernetes uid of this resource"
 
     field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this component"
     field :content,          :component_content, resolve: dataloader(Deployments), description: "the live and desired states of this service component"

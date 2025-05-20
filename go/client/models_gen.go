@@ -1642,6 +1642,7 @@ type ComponentAttributes struct {
 	Kind      string                      `json:"kind"`
 	Namespace string                      `json:"namespace"`
 	Name      string                      `json:"name"`
+	UID       *string                     `json:"uid,omitempty"`
 	Content   *ComponentContentAttributes `json:"content,omitempty"`
 	Children  []*ComponentChildAttributes `json:"children,omitempty"`
 }
@@ -5354,6 +5355,8 @@ type ServiceComponent struct {
 	Namespace *string `json:"namespace,omitempty"`
 	// kubernetes name of this resource
 	Name string `json:"name"`
+	// kubernetes uid of this resource
+	UID *string `json:"uid,omitempty"`
 	// an insight explaining the state of this component
 	Insight *AiInsight `json:"insight,omitempty"`
 	// the live and desired states of this service component

@@ -4471,6 +4471,7 @@ input ComponentAttributes {
   kind: String!
   namespace: String!
   name: String!
+  uid: String
   content: ComponentContentAttributes
   children: [ComponentChildAttributes]
 }
@@ -4800,6 +4801,9 @@ type ServiceComponent {
 
   "kubernetes name of this resource"
   name: String!
+
+  "kubernetes uid of this resource"
+  uid: String
 
   "an insight explaining the state of this component"
   insight: AiInsight

@@ -2046,6 +2046,7 @@ export type ComponentAttributes = {
   namespace: Scalars['String']['input'];
   state?: InputMaybe<ComponentState>;
   synced: Scalars['Boolean']['input'];
+  uid?: InputMaybe<Scalars['String']['input']>;
   version: Scalars['String']['input'];
 };
 
@@ -9061,6 +9062,8 @@ export type ServiceComponent = {
   state?: Maybe<ComponentState>;
   /** whether this component has been applied to the k8s api */
   synced: Scalars['Boolean']['output'];
+  /** kubernetes uid of this resource */
+  uid?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** api version of this resource */
   version?: Maybe<Scalars['String']['output']>;
