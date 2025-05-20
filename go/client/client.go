@@ -5239,6 +5239,7 @@ func (t *ClusterRestoreFragment_Backup_ClusterBackupFragment_Cluster) GetID() st
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -5254,6 +5255,12 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -5335,6 +5342,7 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -5350,6 +5358,12 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) G
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -5922,6 +5936,7 @@ func (t *MCPServerFragment_Authentication) GetHeaders() []*MCPServerFragment_Aut
 
 type ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -5937,6 +5952,12 @@ func (t *ServiceDeploymentFragment_Components) GetID() string {
 		t = &ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -6036,6 +6057,7 @@ func (t *ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() st
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -6051,6 +6073,12 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID()
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -6194,6 +6222,7 @@ func (t *DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic) GetModel() 
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -6209,6 +6238,12 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -7701,6 +7736,7 @@ func (t *DeleteBootstrapToken_DeleteBootstrapToken) GetID() string {
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -7716,6 +7752,12 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -7941,6 +7983,7 @@ func (t *CreateCluster_CreateCluster) GetReadBindings() []*PolicyBindingFragment
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -7956,6 +7999,12 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8059,6 +8108,7 @@ func (t *DetachCluster_DetachCluster) GetID() string {
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8074,6 +8124,12 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8155,6 +8211,7 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8170,6 +8227,12 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8251,6 +8314,7 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8266,6 +8330,12 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8365,6 +8435,7 @@ func (t *PingCluster_PingCluster) GetName() string {
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8380,6 +8451,12 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8472,6 +8549,7 @@ func (t *ListClusters_Clusters) GetEdges() []*ClusterEdgeFragment {
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8487,6 +8565,12 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8586,6 +8670,7 @@ func (t *ListClustersWithParameters_Clusters) GetEdges() []*ClusterEdgeFragment 
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8601,6 +8686,12 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8693,6 +8784,7 @@ func (t *GetAgentUrl_Cluster) GetAgentURL() *string {
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8708,6 +8800,12 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -8933,6 +9031,7 @@ func (t *GetClusterWithToken_Cluster) GetDeployToken() *string {
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -8948,6 +9047,12 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9029,6 +9134,7 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9044,6 +9150,12 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9125,6 +9237,7 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9140,6 +9253,12 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9221,6 +9340,7 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9236,6 +9356,12 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9382,6 +9508,7 @@ func (t *MyCluster_MyCluster_) GetRestore() *ClusterRestoreFragment {
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9397,6 +9524,12 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9750,6 +9883,7 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9765,6 +9899,12 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9864,6 +10004,7 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9879,6 +10020,12 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -9960,6 +10107,7 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -9975,6 +10123,12 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10056,6 +10210,7 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10071,6 +10226,12 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10170,6 +10331,7 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10185,6 +10347,12 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10284,6 +10452,7 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10299,6 +10468,12 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10380,6 +10555,7 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10395,6 +10571,12 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Component
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10476,6 +10658,7 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Flow) Get
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10491,6 +10674,12 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10572,6 +10761,7 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10587,6 +10777,12 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) G
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10668,6 +10864,7 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Flow) GetID()
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10683,6 +10880,12 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10764,6 +10967,7 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10779,6 +10983,12 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Compo
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -10922,6 +11132,7 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revisi
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -10937,6 +11148,12 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -11336,6 +11553,7 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -11351,6 +11569,12 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -11856,6 +12080,7 @@ func (t *KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFrag
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -11871,6 +12096,12 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -11970,6 +12201,7 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_Revi
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -11985,6 +12217,12 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -12891,6 +13129,7 @@ func (t *ListProjects_Projects) GetEdges() []*ListProjects_Projects_Edges {
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Name      string                    "json:\"name\" graphql:\"name\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
@@ -12906,6 +13145,12 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.ID
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
 }
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
 	if t == nil {
@@ -18201,6 +18446,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -18410,6 +18656,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -18629,6 +18876,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -18748,6 +18996,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -18868,6 +19117,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -19083,6 +19333,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -19308,6 +19559,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -19522,6 +19774,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -19795,6 +20048,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -20005,6 +20259,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -20175,6 +20430,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -20294,6 +20550,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -20452,6 +20709,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -20659,6 +20917,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21157,6 +21416,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21346,6 +21606,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21435,6 +21696,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21531,6 +21793,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21727,6 +21990,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -21916,6 +22180,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22006,6 +22271,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22104,6 +22370,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22203,6 +22470,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22300,6 +22568,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22400,6 +22669,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -22765,6 +23035,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -23072,6 +23343,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -23875,6 +24147,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -24063,6 +24336,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
@@ -29078,6 +29352,7 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	... ServiceDeploymentBaseFragment
 	components {
 		id
+		uid
 		name
 		group
 		kind
