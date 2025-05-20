@@ -12,6 +12,7 @@ defmodule Console.Schema.ServiceComponent do
     field :kind,       :string
     field :namespace,  :string
     field :name,       :string
+    field :uid,        :string
 
     belongs_to :service, Service
     belongs_to :insight, AiInsight, on_replace: :update
@@ -54,7 +55,7 @@ defmodule Console.Schema.ServiceComponent do
 
   def for_name(query, name), do: from(sc in query, where: sc.name == ^name)
 
-  @valid ~w(state synced group version kind namespace name)a
+  @valid ~w(state synced group version kind namespace name uid)a
 
   def changeset(model, attrs \\ %{}) do
     model
