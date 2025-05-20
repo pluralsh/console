@@ -41,28 +41,22 @@ defmodule Console.Deployments.Policy do
   Upserts a list of vulnerability reports for a cluster
   """
   @spec upsert_vulnerabilities([map], Cluster.t) :: summary_resp
-  def upsert_vulnerabilities(vulns, %Cluster{id: id} = cluster) do
+  def upsert_vulnerabilities(vulns, %Cluster{id: id}) do
     svc_map = find_services(vulns)
     Enum.with_index(vulns)
-    |> Enum.reduce(clear_vulns(cluster), fn {attrs, ind}, xact ->
+    |> Enum.reduce(start_transaction(), fn {%{artifact_url: url} = attrs, ind}, xact ->
       add_operation(xact, {:vuln, ind}, fn _ ->
-        %VulnerabilityReport{cluster_id: id}
+        case Repo.get_by(VulnerabilityReport, cluster_id: id, artifact_url: url) do
+          %VulnerabilityReport{} = vuln ->
+            Repo.preload(vuln, [:vulnerabilities, :services, :namespaces])
+          _ -> %VulnerabilityReport{cluster_id: id, updated_at: DateTime.utc_now()}
+        end
         |> VulnerabilityReport.changeset(restitch_services(attrs, svc_map))
-        |> Repo.insert()
+        |> Repo.insert_or_update()
       end)
     end)
     |> execute()
-    |> when_ok(& map_size(&1) - 1)
-  end
-
-  defp clear_vulns(%Cluster{} = cluster) do
-    start_transaction()
-    |> add_operation(:wipe, fn _ ->
-      VulnerabilityReport.for_cluster(cluster.id)
-      |> Repo.delete_all()
-      |> elem(0)
-      |> ok()
-    end)
+    |> when_ok(&map_size/1)
   end
 
   defp find_services(vulns) do
@@ -92,19 +86,11 @@ defmodule Console.Deployments.Policy do
       add_operation(xact, name, fn _ ->
         case Repo.get_by(PolicyConstraint, cluster_id: id, name: name) do
           %PolicyConstraint{} = constraint -> Repo.preload(constraint, [:violations])
-          nil -> %PolicyConstraint{cluster_id: id}
+          nil -> %PolicyConstraint{cluster_id: id, updated_at: DateTime.utc_now()}
         end
         |> PolicyConstraint.changeset(constraint)
         |> Repo.insert_or_update()
       end)
-    end)
-    |> add_operation(:wipe, fn _ ->
-      names = Enum.map(constraints, &Map.get(&1, :name))
-              |> Enum.filter(& &1)
-      PolicyConstraint.for_cluster(id)
-      |> PolicyConstraint.without_names(names)
-      |> Repo.delete_all()
-      |> ok()
     end)
     |> execute()
     |> when_ok(&map_size/1)

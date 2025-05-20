@@ -49,6 +49,7 @@ defmodule Console.Deployments.PolicyTest do
       refute report.os.eosl
       assert report.os.family == "linux"
       assert report.os.name == "alpine"
+      assert report.updated_at
 
       assert report.summary.high_count == 1
 
@@ -71,7 +72,7 @@ defmodule Console.Deployments.PolicyTest do
     test "it can add constraints to the db for a cluster" do
       cluster = insert(:cluster)
 
-      {:ok, 3} = Policy.upsert_constraints([
+      {:ok, 2} = Policy.upsert_constraints([
         %{
           name: "some-constraint",
           ref: %{kind: "K8sSomePolicy", name: "some-constraint"},
@@ -91,6 +92,7 @@ defmodule Console.Deployments.PolicyTest do
                     |> Repo.preload([:violations])
 
       assert length(constraints) == 2
+      assert Enum.all?(constraints, & &1.updated_at)
       by_name = Map.new(constraints, & {&1.name, &1})
 
       assert length(by_name["other-constraint"].violations) == 1
@@ -111,7 +113,8 @@ defmodule Console.Deployments.PolicyTest do
         },
       ], cluster)
 
-      refute refetch(ignore)
+      assert refetch(ignore).updated_at == ignore.updated_at
+
       keep = refetch(keep)
       assert keep.ref.kind == "K8sSomePolicy"
       assert keep.ref.name == "some-constraint"
