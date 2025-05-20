@@ -148,6 +148,23 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   }
 }
 
+fragment ServiceDeploymentComponentWithChildren on ServiceComponent {
+  ...ServiceDeploymentComponent
+  children {
+    id
+    group
+    kind
+    version
+    name
+    namespace
+    parentUid
+    uid
+    state
+    insertedAt
+    updatedAt
+  }
+}
+
 fragment ServiceDeploymentRevisions on ServiceDeployment {
   revision {
     ...ServiceDeploymentRevision
@@ -311,6 +328,21 @@ query ServiceDeploymentComponents($id: ID!) {
     }
     components {
       ...ServiceDeploymentComponent
+    }
+  }
+}
+
+query ServiceDeploymentComponentsWithChildren($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    name
+    cluster {
+      id
+      name
+      handle
+    }
+    components {
+      ...ServiceDeploymentComponentWithChildren
     }
   }
 }
