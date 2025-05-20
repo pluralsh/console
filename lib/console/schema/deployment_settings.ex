@@ -4,7 +4,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Piazza.Ecto.EncryptedString
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
-  defenum LogDriver, victoria: 0, elastic: 1
+  defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
   defenum VectorStore, elastic: 0, opensearch: 1
 
   defmodule Connection do
@@ -139,6 +139,7 @@ defmodule Console.Schema.DeploymentSettings do
 
       embeds_one :victoria, Connection, on_replace: :update
       embeds_one :elastic,  Elastic, on_replace: :update
+      embeds_one :opensearch, Opensearch, on_replace: :update
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -365,6 +366,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(enabled driver)a)
     |> cast_embed(:victoria)
     |> cast_embed(:elastic)
+    |> cast_embed(:opensearch)
   end
 
   defp set_initialized(changeset) do

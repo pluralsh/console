@@ -7882,18 +7882,20 @@ func (e ListMerge) MarshalGQL(w io.Writer) {
 type LogDriver string
 
 const (
-	LogDriverVictoria LogDriver = "VICTORIA"
-	LogDriverElastic  LogDriver = "ELASTIC"
+	LogDriverVictoria   LogDriver = "VICTORIA"
+	LogDriverElastic    LogDriver = "ELASTIC"
+	LogDriverOpensearch LogDriver = "OPENSEARCH"
 )
 
 var AllLogDriver = []LogDriver{
 	LogDriverVictoria,
 	LogDriverElastic,
+	LogDriverOpensearch,
 }
 
 func (e LogDriver) IsValid() bool {
 	switch e {
-	case LogDriverVictoria, LogDriverElastic:
+	case LogDriverVictoria, LogDriverElastic, LogDriverOpensearch:
 		return true
 	}
 	return false
