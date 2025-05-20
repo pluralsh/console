@@ -190,6 +190,10 @@ fragment StackConfigurationFragment on StackConfiguration {
     version
     tag
     hooks {...StackHookFragment}
+    terraform {
+        parallelism
+        refresh
+    }
 }
 
 fragment StackHookFragment on StackHook {

@@ -4932,10 +4932,11 @@ func (t *RunStepFragment) GetIndex() int64 {
 }
 
 type StackConfigurationFragment struct {
-	Image   *string              "json:\"image,omitempty\" graphql:\"image\""
-	Version *string              "json:\"version,omitempty\" graphql:\"version\""
-	Tag     *string              "json:\"tag,omitempty\" graphql:\"tag\""
-	Hooks   []*StackHookFragment "json:\"hooks,omitempty\" graphql:\"hooks\""
+	Image     *string                               "json:\"image,omitempty\" graphql:\"image\""
+	Version   *string                               "json:\"version,omitempty\" graphql:\"version\""
+	Tag       *string                               "json:\"tag,omitempty\" graphql:\"tag\""
+	Hooks     []*StackHookFragment                  "json:\"hooks,omitempty\" graphql:\"hooks\""
+	Terraform *StackConfigurationFragment_Terraform "json:\"terraform,omitempty\" graphql:\"terraform\""
 }
 
 func (t *StackConfigurationFragment) GetImage() *string {
@@ -4961,6 +4962,12 @@ func (t *StackConfigurationFragment) GetHooks() []*StackHookFragment {
 		t = &StackConfigurationFragment{}
 	}
 	return t.Hooks
+}
+func (t *StackConfigurationFragment) GetTerraform() *StackConfigurationFragment_Terraform {
+	if t == nil {
+		t = &StackConfigurationFragment{}
+	}
+	return t.Terraform
 }
 
 type StackHookFragment struct {
@@ -7024,6 +7031,24 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpe
 	return t.Secret
 }
 
+type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
 	Address *string "json:\"address,omitempty\" graphql:\"address\""
 	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
@@ -7114,6 +7139,24 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_I
 	return t.Secret
 }
 
+type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7148,6 +7191,24 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -7186,6 +7247,24 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpe
 	return t.Secret
 }
 
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7220,6 +7299,24 @@ func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_Containe
 		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -7312,6 +7409,24 @@ func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment
 	return t.Secret
 }
 
+type StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7348,6 +7463,24 @@ func (t *StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Container
 	return t.Secret
 }
 
+type StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7382,6 +7515,24 @@ func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpe
 		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type StackRunBaseFragment_StateUrls_Terraform struct {
@@ -7474,6 +7625,24 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecF
 	return t.Secret
 }
 
+type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7508,6 +7677,42 @@ func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFr
 		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type CustomStackRunFragment_Stack struct {
@@ -13410,6 +13615,24 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	return t.Secret
 }
 
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -13444,6 +13667,24 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type ListClusterStacks_ClusterStackRuns struct {
@@ -13518,6 +13759,24 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	return t.Secret
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type ListClusterMinimalStacks_ClusterStackRuns struct {
 	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*MinimalStackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
@@ -13572,6 +13831,24 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	return t.Secret
 }
 
+type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type ListInfrastructureStacks_InfrastructureStacks struct {
 	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*InfrastructureStackEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
@@ -13624,6 +13901,24 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFrag
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -13716,6 +14011,24 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_Infras
 	return t.Secret
 }
 
+type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -13750,6 +14063,24 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobS
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -13842,6 +14173,24 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 	return t.Secret
 }
 
+type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -13876,6 +14225,24 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_C
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -13968,6 +14335,24 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 	return t.Secret
 }
 
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14002,6 +14387,24 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragm
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -14040,6 +14443,24 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 	return t.Secret
 }
 
+type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14076,6 +14497,24 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 	return t.Secret
 }
 
+type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14110,6 +14549,24 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type AddStackRunLogs_AddRunLogs struct {
@@ -14257,6 +14714,24 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 	return t.Secret
 }
 
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14291,6 +14766,24 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges struct {
@@ -14423,6 +14916,24 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 	return t.Secret
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
 type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -14457,6 +14968,24 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Cont
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Parallelism
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
 }
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
@@ -29813,6 +30342,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -30075,6 +30608,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -30218,6 +30755,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -30385,6 +30926,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -30588,6 +31133,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -30897,6 +31446,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -31205,6 +31758,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -31471,6 +32028,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -31671,6 +32232,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -31927,6 +32492,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -32604,6 +33173,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	hooks {
 		... StackHookFragment
 	}
+	terraform {
+		parallelism
+		refresh
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -32915,6 +33488,10 @@ fragment StackConfigurationFragment on StackConfiguration {
 	tag
 	hooks {
 		... StackHookFragment
+	}
+	terraform {
+		parallelism
+		refresh
 	}
 }
 fragment StackHookFragment on StackHook {
