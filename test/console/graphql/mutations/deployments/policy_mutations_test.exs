@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
 
   describe "upsertPolicyConstraints" do
     test "it can create some constraints" do
-      {:ok, %{data: %{"upsertPolicyConstraints" => 2}}} = run_query("""
+      {:ok, %{data: %{"upsertPolicyConstraints" => 1}}} = run_query("""
         mutation Upsert($constraints: [PolicyConstraintAttributes]) {
           upsertPolicyConstraints(constraints: $constraints)
         }

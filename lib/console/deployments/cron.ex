@@ -20,7 +20,9 @@ defmodule Console.Deployments.Cron do
     AppNotification,
     Observer,
     Alert,
-    ClusterAuditLog
+    ClusterAuditLog,
+    PolicyConstraint,
+    VulnerabilityReport
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -327,6 +329,16 @@ defmodule Console.Deployments.Cron do
     |> Repo.stream(method: :keyset)
     |> Task.async_stream(&Console.Deployments.Observer.Discovery.runner/1, max_concurrency: 50)
     |> Stream.run()
+  end
+
+  def prune_policy() do
+    PolicyConstraint.expired()
+    |> Repo.delete_all()
+  end
+
+  def prune_vuln_reports() do
+    VulnerabilityReport.expired()
+    |> Repo.delete_all()
   end
 
   def add_ignore_crds(search) do

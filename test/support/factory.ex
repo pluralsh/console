@@ -756,7 +756,7 @@ defmodule Console.Factory do
 
   def vulnerability_report_factory do
     %Schema.VulnerabilityReport{
-      artifact_url: "nginx:latest",
+      artifact_url: sequence(:artifact_url, & "nginx:latest-#{&1}"),
       cluster: build(:cluster)
     }
   end

@@ -83,6 +83,11 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
+  def expired(query \\ __MODULE__) do
+    expired_at = DateTime.add(DateTime.utc_now(), -30, :minute)
+    from(vr in query, where: vr.updated_at < ^expired_at)
+  end
+
   def search(query \\ __MODULE__, q) do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end
