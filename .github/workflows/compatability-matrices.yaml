@@ -1,0 +1,49 @@
+name: Sync Compatibility Matrices to S3
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'static/addons/**'
+      - 'static/compatibilities/**'
+      - 'static/compatibilities.yaml'
+      - 'static/versions.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  sync-to-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::332124921534:role/github-actions/console-actions
+          aws-region: us-east-2
+
+      - name: Sync static/addons to S3
+        run: |
+          aws s3 sync ./static/addons s3://plural-www-assets/matrices/compatability/static/addons
+        if: hashFiles('static/addons/**') != ''
+
+
+      - name: Sync static/compatibilities directory to S3
+        run: |
+          aws s3 sync ./static/compatibilities s3://plural-www-assets/matrices/compatability/static/compatibilities
+        if: hashFiles('static/compatibilities/**') != ''
+
+      - name: Upload static/compatibilities.yaml to S3
+        run: |
+          aws s3 cp ./static/compatibilities.yaml s3://plural-www-assets/matrices/compatability/static/compatibilities.yaml
+        if: hashFiles('static/compatibilities.yaml') != ''
+
+      - name: Upload static/versions.yaml to S3
+        run: |
+          aws s3 cp ./static/versions.yaml s3://plural-www-assets/matrices/compatability/static/versions.yaml
+        if: hashFiles('static/versions.yaml') != ''
