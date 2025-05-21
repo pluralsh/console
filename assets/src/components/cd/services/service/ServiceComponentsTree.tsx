@@ -3,6 +3,8 @@ import {
   Button,
   Chip,
   ChipSeverity,
+  CodeEditor,
+  Divider,
   IconFrame,
   InfoIcon,
   InfoOutlineIcon,
@@ -10,6 +12,7 @@ import {
 } from '@pluralsh/design-system'
 import { Node, NodeProps, ReactFlowProvider } from '@xyflow/react'
 import { LayoutOptions } from 'elkjs'
+import { dump } from 'js-yaml'
 import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -18,9 +21,11 @@ import {
   ServiceComponent,
   ServiceComponentChild,
   useServiceDeploymentComponentsWithChildrenQuery,
+  useUnstructuredResourceQuery,
 } from '../../../../generated/graphql.ts'
 import { getServiceComponentPath } from '../../../../routes/cdRoutesConsts.tsx'
 import {
+  coreGroups,
   getKubernetesCustomResourceDetailsPath,
   getKubernetesResourcePath,
 } from '../../../../routes/kubernetesRoutesConsts.tsx'
@@ -30,6 +35,7 @@ import { ModalMountTransition } from '../../../utils/ModalMountTransition.tsx'
 import { NodeBase } from '../../../utils/reactflow/nodes.tsx'
 import { ReactFlowGraph } from '../../../utils/reactflow/ReactFlowGraph.tsx'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
+import { OverlineH1 } from '../../../utils/typography/Text.tsx'
 import { ModalProp } from '../ServicesTreeDiagramNodes.tsx'
 import { ComponentIcon } from './component/misc.tsx'
 
@@ -345,6 +351,7 @@ function ServiceComponentModal({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { serviceId } = useParams()
 
   const isChild = component.__typename === 'ServiceComponentChild'
 
@@ -416,8 +423,80 @@ function ServiceComponentModal({
             </Chip>
           </ModalProp>
         </div>
+        <Divider
+          backgroundColor="border"
+          marginTop="xlarge"
+          marginBottom="xlarge"
+        />
+        <div>
+          <OverlineH1
+            css={{
+              color: theme.colors['text-xlight'],
+              marginBottom: theme.spacing.large,
+            }}
+          >
+            Raw YAML
+          </OverlineH1>
+          <ServiceComponentRaw
+            serviceId={serviceId ?? ''}
+            name={component.name}
+            namespace={component.namespace ?? ''}
+            group={component.group ?? ''}
+            kind={component.kind}
+            version={component.version ?? 'v1'}
+          />
+        </div>
       </Modal>
     </ModalMountTransition>
+  )
+}
+
+function ServiceComponentRaw({
+  serviceId,
+  group,
+  kind,
+  version,
+  name,
+  namespace,
+}: {
+  serviceId: string
+  group: string
+  kind: string
+  version: string
+  name: string
+  namespace: string
+}) {
+  const { data, loading, error } = useUnstructuredResourceQuery({
+    variables: {
+      serviceId,
+      group,
+      kind,
+      version,
+      name,
+      namespace,
+    },
+  })
+
+  const current = dump(data?.unstructuredResource?.raw)
+
+  if (!current && !error) return <LoadingIndicator />
+
+  if (!data?.unstructuredResource?.raw && !loading)
+    return <GqlError error="Could not fetch resource" />
+
+  return (
+    <div
+      css={{
+        maxHeight: '400px',
+        height: '100%',
+      }}
+    >
+      <CodeEditor
+        language="yaml"
+        value={current}
+        options={{ lineNumbers: false, minimap: { enabled: false } }}
+      />
+    </div>
   )
 }
 

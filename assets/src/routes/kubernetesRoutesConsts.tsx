@@ -201,3 +201,8 @@ export function getKubernetesCustomResourceDetailsPath({
     ? undefined
     : getCustomResourceDetailsAbsPath(clusterId, gk, name, namespace)
 }
+
+// This is only an approximation, but it's good enough for now.
+export function isCRD(group: string): boolean {
+  return !coreGroups.has(group)
+}
