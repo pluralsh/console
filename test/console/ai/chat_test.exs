@@ -558,7 +558,6 @@ defmodule Console.AI.ChatSyncTest do
       assert tool.attributes.tool.name == "__plrl__logs"
     end
 
-    @tag prs: true
     test "it can chat with a prs tool call" do
       user = insert(:user)
       %{id: flow_id} = flow = insert(:flow)
@@ -684,6 +683,69 @@ defmodule Console.AI.ChatSyncTest do
       refute tool.content =~ "Grafana-Critical-Severity-Firing"
       assert tool.attributes.tool.name == "__plrl__alerts"
       assert tool.attributes.tool.arguments == %{"severities" => ["critical"], "types" => ["pagerduty"], "state" => "firing"}
+    end
+
+    test "it can call a plural alerts tool call" do
+      user = insert(:user)
+      flow = insert(:flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+      service = insert(:service, flow: flow)
+      alert = insert(:alert,
+        service: service,
+        title: "PagerDuty-Critical-Severity-Resolved",
+        message: "critical severity pagerduty alert resolved",
+        type: :pagerduty,
+        severity: :critical
+      )
+      alert_resolution = insert(:alert_resolution,
+        alert: alert,
+        resolution: "Resolution details for the alert."
+      )
+      deployment_settings(ai:
+        %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: ElasticsearchUtils.es_vector_settings(),
+          },
+        }
+      )
+      ElasticsearchUtils.drop_index(ElasticsearchUtils.vector_index())
+
+      # Mock embeddings for 2 calls, once for alert resolution and once for query
+      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text ->
+        {:ok, [{text, ElasticsearchUtils.vector()}]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
+        {:ok, "openai toolcall", [%Tool{name: "__plrl__alerts_resolutions", arguments: %{"query" => "query"}}]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _], _ ->
+        {:ok, "openai completion"}
+      end)
+
+      reloaded_resolution = Repo.preload(alert_resolution, [alert: :service])
+      mini_alert_resolution = Console.Schema.AlertResolution.Mini.new(reloaded_resolution)
+
+      Console.AI.VectorStore.insert(mini_alert_resolution, filters: [flow_id: flow.id])
+      ElasticsearchUtils.refresh(ElasticsearchUtils.vector_index())
+
+      {:ok, [next, tool | _]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai toolcall"
+
+      assert tool.content =~ "PagerDuty-Critical-Severity-Resolved"
+      assert tool.content =~ "Resolution details for the alert."
+      assert tool.attributes.tool.name == "__plrl__alerts_resolutions"
+      assert tool.attributes.tool.arguments == %{"query" => "query"}
     end
   end
 
