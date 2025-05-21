@@ -4828,15 +4828,28 @@ type ServiceComponent {
 "a kubernetes object that was created as a descendent of this service component"
 type ServiceComponentChild {
   id: ID!
+
   uid: String!
+
   state: ComponentState
+
   parentUid: String
+
   name: String!
+
   namespace: String
+
   group: String
+
   version: String!
+
   kind: String!
+
+  "an insight explaining the state of this component"
+  insight: AiInsight
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

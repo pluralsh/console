@@ -9075,6 +9075,8 @@ export type ServiceComponentChild = {
   group?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this component */
+  insight?: Maybe<AiInsight>;
   kind: Scalars['String']['output'];
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;

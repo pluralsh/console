@@ -10,7 +10,7 @@ defmodule Console.Schema.ClusterInsightComponent do
     field :name,      :string
 
     belongs_to :cluster, Cluster
-    belongs_to :insight, AiInsight
+    belongs_to :insight, AiInsight, on_replace: :update
 
     timestamps()
   end

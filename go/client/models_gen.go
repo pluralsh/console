@@ -5373,17 +5373,19 @@ type ServiceComponent struct {
 
 // a kubernetes object that was created as a descendent of this service component
 type ServiceComponentChild struct {
-	ID         string          `json:"id"`
-	UID        string          `json:"uid"`
-	State      *ComponentState `json:"state,omitempty"`
-	ParentUID  *string         `json:"parentUid,omitempty"`
-	Name       string          `json:"name"`
-	Namespace  *string         `json:"namespace,omitempty"`
-	Group      *string         `json:"group,omitempty"`
-	Version    string          `json:"version"`
-	Kind       string          `json:"kind"`
-	InsertedAt *string         `json:"insertedAt,omitempty"`
-	UpdatedAt  *string         `json:"updatedAt,omitempty"`
+	ID        string          `json:"id"`
+	UID       string          `json:"uid"`
+	State     *ComponentState `json:"state,omitempty"`
+	ParentUID *string         `json:"parentUid,omitempty"`
+	Name      string          `json:"name"`
+	Namespace *string         `json:"namespace,omitempty"`
+	Group     *string         `json:"group,omitempty"`
+	Version   string          `json:"version"`
+	Kind      string          `json:"kind"`
+	// an insight explaining the state of this component
+	Insight    *AiInsight `json:"insight,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
 }
 
 type ServiceComponentMetrics struct {

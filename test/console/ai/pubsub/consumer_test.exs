@@ -6,7 +6,11 @@ defmodule Console.AI.PubSub.ConsumerTest do
   alias Console.PubSub
 
   setup do
-    {:ok, settings: deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})}
+    {:ok, settings: deployment_settings(ai: %{
+      enabled: true,
+      provider: :openai,
+      openai: %{access_token: "key"}
+    })}
   end
 
   describe "ServiceUpdated" do
