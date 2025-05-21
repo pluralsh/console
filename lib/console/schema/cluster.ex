@@ -123,7 +123,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :object_store,   ObjectStore
     belongs_to :restore,        ClusterRestore
     belongs_to :project,        Project
-    belongs_to :insight,        AiInsight
+    belongs_to :insight,        AiInsight, on_replace: :update
     belongs_to :parent_cluster, __MODULE__
 
     has_one :operational_layout, OperationalLayout, on_replace: :update

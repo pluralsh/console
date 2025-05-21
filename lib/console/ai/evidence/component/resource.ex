@@ -10,35 +10,34 @@ defmodule Console.AI.Evidence.Component.Resource do
     Raw,
     Certificate
   }
-  alias Console.Schema.ServiceComponent
 
-  def resource(%ServiceComponent{group: "apps", version: "v1", kind: "Deployment"} = c, _) do
+  def resource(%{group: "apps", version: "v1", kind: "Deployment"} = c, _) do
     AppsV1.read_namespaced_deployment!(c.namespace, c.name)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "apps", version: "v1", kind: "StatefulSet"} = c, _) do
+  def resource(%{group: "apps", version: "v1", kind: "StatefulSet"} = c, _) do
     AppsV1.read_namespaced_stateful_set!(c.namespace, c.name)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "apps", version: "v1", kind: "DaemonSet"} = c, _) do
+  def resource(%{group: "apps", version: "v1", kind: "DaemonSet"} = c, _) do
     AppsV1.read_namespaced_daemon_set!(c.namespace, c.name)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "networking.k8s.io", version: "v1", kind: "Ingress", namespace: ns, name: n}, _) do
+  def resource(%{group: "networking.k8s.io", version: "v1", kind: "Ingress", namespace: ns, name: n}, _) do
     NetworkingV1.read_namespaced_ingress!(ns, n)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "batch", version: "v1", kind: "CronJob", namespace: ns, name: n}, _) do
+  def resource(%{group: "batch", version: "v1", kind: "CronJob", namespace: ns, name: n}, _) do
     BatchV1.read_namespaced_cron_job!(ns, n)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "batch", version: "v1", kind: "Job", namespace: ns, name: n}, _) do
+  def resource(%{group: "batch", version: "v1", kind: "Job", namespace: ns, name: n}, _) do
     BatchV1.read_namespaced_job!(ns, n)
     |> Kube.Utils.run()
   end
-  def resource(%ServiceComponent{group: "cert-manager.io", version: "v1", kind: "Certificate"} = c, _),
+  def resource(%{group: "cert-manager.io", version: "v1", kind: "Certificate"} = c, _),
     do: Kube.Client.get_certificate(c.namespace, c.name)
-  def resource(%ServiceComponent{group: g, version: v, kind: k} = comp, cluster) do
+  def resource(%{group: g, version: v, kind: k} = comp, cluster) do
     kind = get_kind(cluster, g, v, k)
     Kube.Client.Base.path(g, v, kind, comp.namespace, comp.name)
     |> Kube.Client.raw()
@@ -88,6 +87,15 @@ defmodule Console.AI.Evidence.Component.Resource do
     {g, v, k, namespace, name} = Kube.Utils.identifier(resource)
     "#{g}/#{v} #{k}#{ns(namespace)} with name #{name}"
   end
+
+  def custom?(%AppsV1.Deployment{}), do: false
+  def custom?(%AppsV1.StatefulSet{}), do: false
+  def custom?(%AppsV1.DaemonSet{}), do: false
+  def custom?(%NetworkingV1.Ingress{}), do: false
+  def custom?(%BatchV1.CronJob{}), do: false
+  def custom?(%BatchV1.Job{}), do: false
+  def custom?(%Kube.Certificate{}), do: false
+  def custom?(_), do: true
 
   defp do_hydrate(%AppsV1.Deployment{} = dep), do: Deployment.hydrate(dep)
   defp do_hydrate(%AppsV1.StatefulSet{} = ss), do: StatefulSet.hydrate(ss)
