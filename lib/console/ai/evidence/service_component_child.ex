@@ -1,8 +1,8 @@
-defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
+defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponentChild do
   use Console.AI.Evidence.Base
   alias Console.AI.Worker
   alias Console.AI.Evidence.Component.Resource
-  alias Console.Schema.{ServiceComponent, ServiceComponentChild, AiInsight}
+  alias Console.Schema.{ServiceComponentChild, AiInsight}
 
   require Logger
 
@@ -10,8 +10,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
 
   def custom(_), do: false
 
-  def generate(%ServiceComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
-  def generate(%ServiceComponent{service: %{cluster: cluster}} = comp) do
+  def generate(%ServiceComponentChild{kind: kind}) when kind in @blacklist, do: {:ok, []}
+  def generate(%ServiceComponentChild{component: %{service: %{cluster: cluster}}} = comp) do
     save_kubeconfig(cluster)
     with {:ok, resource} <- Resource.resource(comp, cluster),
          {:ok, events} <- Resource.events(resource),
@@ -48,8 +48,9 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
   end
   defp tpl_hydration(_), do: []
 
-  defp traverse_children(%ServiceComponent{id: id}, true) do
-    ServiceComponentChild.for_component(id)
+  defp traverse_children(%ServiceComponentChild{uid: uid, component_id: comp_id}, true) do
+    ServiceComponentChild.for_parent(uid)
+    |> ServiceComponentChild.for_component(comp_id)
     |> ServiceComponentChild.for_states([:failed, :pending])
     |> Console.Repo.all()
     |> Console.Repo.preload([:insight, component: [service: :cluster]])
@@ -64,17 +65,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
     |> Enum.filter(& &1)
     |> Enum.map(fn {c, insight} ->
       {:user, """
-      #{description(c)} (uid is #{c.uid}, parent uid is #{c.parent_uid}) is in #{c.state} state, meaning #{meaning(c.state)} (parent uid is #{c.parent_uid}).  Here's a brief summary of the current status:
+#{description(c)} (uid is #{c.uid}, parent uid is #{c.parent_uid}) is in #{c.state} state, meaning #{meaning(c.state)}.  Here's a brief summary of the current status:
 
-      #{insight.text}
+#{insight.text}
       """}
     end)
-    |> prepend({:user, "this component owns a number of kubernetes objects (potentially recursively) that are currently in an indeterminate state as well, here's a rundown of them"})
+    |> prepend({:user, "this component owns a number of kubernetes objects that are currently in an indeterminate state as well, here's a rundown of them"})
   end
   defp traverse_children(_, _), do: []
 
-  defp description(%ServiceComponent{} = comp),
-    do: "#{comp.group}/#{comp.version} #{comp.kind}#{ns(comp.namespace)} with name #{comp.name}"
   defp description(%ServiceComponentChild{} = comp),
     do: "#{comp.group}/#{comp.version} #{comp.kind}#{ns(comp.namespace)} with name #{comp.name}"
 end

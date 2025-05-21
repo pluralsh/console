@@ -366,6 +366,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :version,    non_null(:string)
     field :kind,       non_null(:string)
 
+    field :insight, :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this component"
+
     timestamps()
   end
 
