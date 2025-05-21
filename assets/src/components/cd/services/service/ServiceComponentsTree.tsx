@@ -25,7 +25,6 @@ import {
 } from '../../../../generated/graphql.ts'
 import { getServiceComponentPath } from '../../../../routes/cdRoutesConsts.tsx'
 import {
-  coreGroups,
   getKubernetesCustomResourceDetailsPath,
   getKubernetesResourcePath,
 } from '../../../../routes/kubernetesRoutesConsts.tsx'
