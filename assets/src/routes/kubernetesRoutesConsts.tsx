@@ -150,6 +150,16 @@ const supportedGVKs = new Set([
   'v1/namespace',
 ])
 
+const coreGroups = new Set([
+  '', // core
+  'apps',
+  'batch',
+  'policy',
+  'rbac.authorization.k8s.io',
+  'storage.k8s.io',
+  'networking.k8s.io',
+])
+
 export function getKubernetesResourcePath({
   clusterId,
   group,
@@ -170,4 +180,24 @@ export function getKubernetesResourcePath({
   return supportedGVKs.has(gvk)
     ? getResourceDetailsAbsPath(clusterId, kind, name, namespace)
     : undefined
+}
+
+export function getKubernetesCustomResourceDetailsPath({
+  clusterId,
+  group,
+  kind,
+  name,
+  namespace,
+}: {
+  clusterId: string
+  group: string
+  kind: string
+  name: string
+  namespace?: Nullable<string>
+}) {
+  const gk = `${pluralize(kind)}.${group}`.toLowerCase()
+
+  return coreGroups.has(group)
+    ? undefined
+    : getCustomResourceDetailsAbsPath(clusterId, gk, name, namespace)
 }

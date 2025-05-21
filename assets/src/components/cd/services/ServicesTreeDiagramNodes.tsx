@@ -451,7 +451,7 @@ export const columns = [
   }),
 ]
 
-function ModalProp({
+export function ModalProp({
   title,
   children,
 }: {

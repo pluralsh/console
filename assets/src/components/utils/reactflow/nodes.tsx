@@ -48,7 +48,6 @@ export function NodeBase({
   return (
     <>
       <NodeBaseCardSC
-        {...props}
         css={{
           flexDirection: 'column',
           gap: theme.spacing.small,
@@ -56,6 +55,7 @@ export function NodeBase({
           position: 'relative',
           padding: theme.spacing.small,
         }}
+        {...props}
       >
         <NodeHandleSC
           type="target"
