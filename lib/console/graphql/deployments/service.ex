@@ -205,6 +205,14 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.service_logs/3
     end
 
+    @desc "authorizes the given component or nested child id and returns the raw kubernetes resource it points to"
+    field :raw_resource, :kubernetes_unstructured do
+      arg :component_id, :id
+      arg :child_id,     :id
+
+      resolve &Deployments.raw_resource/3
+    end
+
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 

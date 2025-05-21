@@ -137,7 +137,7 @@ if get_env("POSTGRES_URL") do
     url: get_env("POSTGRES_URL"),
     ssl: String.to_existing_atom(get_env("DBSSL") || "true"),
     ssl_opts: ssl_opts,
-    pool_size: 10
+    pool_size: 20
 else
   config :console, Console.Repo,
     database: "console",
@@ -146,7 +146,7 @@ else
     hostname: get_env("DBHOST") || "console-postgresql",
     ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
     ssl_opts: [verify: :verify_none],
-    pool_size: 10
+    pool_size: 20
 end
 
 git_url = get_env("GIT_URL")

@@ -61,6 +61,8 @@ defmodule Console.Deployments.Services do
 
   def get_service_component!(id), do: Repo.get!(ServiceComponent, id)
 
+  def get_component_child!(id), do: Repo.get!(ServiceComponentChild, id)
+
   def get_context_by_name!(name), do: Console.Repo.get_by!(ServiceContext, name: name)
   def get_context_by_name(name), do: Console.Repo.get_by(ServiceContext, name: name)
 
@@ -298,6 +300,25 @@ defmodule Console.Deployments.Services do
     |> authorized(actor)
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
+
+  @doc """
+  Determines if a service component or child is parented by the given service, and if it's a Secret,
+  ensure the user has write access to the service to view it.
+  """
+  @spec authorized(Service.t, ServiceComponent.t | ServiceComponentChild.t, User.t) :: service_resp
+  def authorized(svc, %{kind: "Secret"} = component, user) do
+    with {:ok, svc} <- allow(svc, user, :write),
+      do: authorized(svc, %{component | kind: :ignore}, user)
+  end
+  def authorized(%Service{id: id} = svc, %ServiceComponent{service_id: id}, _), do: {:ok, Repo.preload(svc, [:cluster])}
+  def authorized(%Service{id: id} = svc, %ServiceComponentChild{} = child, _) do
+    case Repo.preload(child, [:component]) do
+      %ServiceComponentChild{component: %ServiceComponent{service_id: ^id}} ->
+        {:ok, Repo.preload(svc, [:cluster])}
+      _ -> {:error, "could not find component for child"}
+    end
+  end
+  def authorized(_, _, _), do: {:error, "you cannot access this resource"}
 
   def post_validate(%Service{} = service, %User{} = user) do
     case Repo.preload(service, [imports: [:service, :stack]]) do

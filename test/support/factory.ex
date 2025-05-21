@@ -205,6 +205,18 @@ defmodule Console.Factory do
     }
   end
 
+  def service_component_child_factory do
+    %Schema.ServiceComponentChild{
+      group: "networking.k8s.io",
+      version: "v1",
+      kind: "ingress",
+      namespace: "name",
+      name: "name",
+      state: :running,
+      component: build(:service_component)
+    }
+  end
+
   def access_token_factory do
     %Schema.AccessToken{
       token: sequence(:access_token, & "console-#{&1}"),

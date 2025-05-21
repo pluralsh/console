@@ -21,7 +21,7 @@ import {
   ServiceComponent,
   ServiceComponentChild,
   useServiceDeploymentComponentsWithChildrenQuery,
-  useUnstructuredResourceQuery,
+  useServiceComponentRawQuery,
 } from '../../../../generated/graphql.ts'
 import { getServiceComponentPath } from '../../../../routes/cdRoutesConsts.tsx'
 import {
@@ -353,7 +353,6 @@ function ServiceComponentModal({
   const { serviceId } = useParams()
 
   const isChild = component.__typename === 'ServiceComponentChild'
-
   return (
     <ModalMountTransition open={open}>
       <Modal
@@ -438,11 +437,8 @@ function ServiceComponentModal({
           </OverlineH1>
           <ServiceComponentRaw
             serviceId={serviceId ?? ''}
-            name={component.name}
-            namespace={component.namespace ?? ''}
-            group={component.group ?? ''}
-            kind={component.kind}
-            version={component.version ?? 'v1'}
+            componentId={isChild ? undefined : component.id}
+            childId={isChild ? component.id : undefined}
           />
         </div>
       </Modal>
@@ -452,35 +448,26 @@ function ServiceComponentModal({
 
 function ServiceComponentRaw({
   serviceId,
-  group,
-  kind,
-  version,
-  name,
-  namespace,
+  componentId,
+  childId,
 }: {
   serviceId: string
-  group: string
-  kind: string
-  version: string
-  name: string
-  namespace: string
+  componentId?: string
+  childId?: string
 }) {
-  const { data, loading, error } = useUnstructuredResourceQuery({
+  const { data, loading, error } = useServiceComponentRawQuery({
     variables: {
       serviceId,
-      group,
-      kind,
-      version,
-      name,
-      namespace,
+      componentId,
+      childId,
     },
   })
 
-  const current = dump(data?.unstructuredResource?.raw)
+  const current = dump(data?.serviceDeployment?.rawResource?.raw)
 
   if (!current && !error) return <LoadingIndicator />
 
-  if (!data?.unstructuredResource?.raw && !loading)
+  if (!data?.serviceDeployment?.rawResource?.raw && !loading)
     return <GqlError error="Could not fetch resource" />
 
   return (

@@ -5478,6 +5478,8 @@ type ServiceDeployment struct {
 	HelmRepository *FluxHelmRepository `json:"helmRepository,omitempty"`
 	// Queries logs for a service out of loki
 	Logs []*LogStream `json:"logs,omitempty"`
+	// authorizes the given component or nested child id and returns the raw kubernetes resource it points to
+	RawResource *KubernetesUnstructured `json:"rawResource,omitempty"`
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service

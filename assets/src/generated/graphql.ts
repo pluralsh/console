@@ -9201,6 +9201,8 @@ export type ServiceDeployment = {
   promotion?: Maybe<ServicePromotion>;
   /** if true, deletion of this service is not allowed */
   protect?: Maybe<Scalars['Boolean']['output']>;
+  /** authorizes the given component or nested child id and returns the raw kubernetes resource it points to */
+  rawResource?: Maybe<KubernetesUnstructured>;
   /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repo of this service */
@@ -9266,6 +9268,13 @@ export type ServiceDeploymentLogsArgs = {
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeploymentNetworkGraphArgs = {
   time?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentRawResourceArgs = {
+  childId?: InputMaybe<Scalars['ID']['input']>;
+  componentId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -12176,6 +12185,15 @@ export type ServiceNetworkGraphQueryVariables = Exact<{
 
 
 export type ServiceNetworkGraphQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
+
+export type ServiceComponentRawQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  componentId?: InputMaybe<Scalars['ID']['input']>;
+  childId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ServiceComponentRawQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, rawResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null } | null };
 
 export type ComponentTreeFragment = { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
 
@@ -23950,6 +23968,51 @@ export type ServiceNetworkGraphQueryHookResult = ReturnType<typeof useServiceNet
 export type ServiceNetworkGraphLazyQueryHookResult = ReturnType<typeof useServiceNetworkGraphLazyQuery>;
 export type ServiceNetworkGraphSuspenseQueryHookResult = ReturnType<typeof useServiceNetworkGraphSuspenseQuery>;
 export type ServiceNetworkGraphQueryResult = Apollo.QueryResult<ServiceNetworkGraphQuery, ServiceNetworkGraphQueryVariables>;
+export const ServiceComponentRawDocument = gql`
+    query ServiceComponentRaw($serviceId: ID!, $componentId: ID, $childId: ID) {
+  serviceDeployment(id: $serviceId) {
+    id
+    rawResource(childId: $childId, componentId: $componentId) {
+      ...UnstructuredResource
+    }
+  }
+}
+    ${UnstructuredResourceFragmentDoc}`;
+
+/**
+ * __useServiceComponentRawQuery__
+ *
+ * To run a query within a React component, call `useServiceComponentRawQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceComponentRawQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceComponentRawQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      componentId: // value for 'componentId'
+ *      childId: // value for 'childId'
+ *   },
+ * });
+ */
+export function useServiceComponentRawQuery(baseOptions: Apollo.QueryHookOptions<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>(ServiceComponentRawDocument, options);
+      }
+export function useServiceComponentRawLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>(ServiceComponentRawDocument, options);
+        }
+export function useServiceComponentRawSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>(ServiceComponentRawDocument, options);
+        }
+export type ServiceComponentRawQueryHookResult = ReturnType<typeof useServiceComponentRawQuery>;
+export type ServiceComponentRawLazyQueryHookResult = ReturnType<typeof useServiceComponentRawLazyQuery>;
+export type ServiceComponentRawSuspenseQueryHookResult = ReturnType<typeof useServiceComponentRawSuspenseQuery>;
+export type ServiceComponentRawQueryResult = Apollo.QueryResult<ServiceComponentRawQuery, ServiceComponentRawQueryVariables>;
 export const ComponentTreeDocument = gql`
     query ComponentTree($id: ID!) {
   componentTree(id: $id) {
@@ -29852,6 +29915,7 @@ export const namedOperations = {
     ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     ServiceStatuses: 'ServiceStatuses',
     ServiceNetworkGraph: 'ServiceNetworkGraph',
+    ServiceComponentRaw: 'ServiceComponentRaw',
     ComponentTree: 'ComponentTree',
     ClusterUsages: 'ClusterUsages',
     ClusterUsageHistory: 'ClusterUsageHistory',

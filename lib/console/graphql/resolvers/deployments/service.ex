@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Service do
   use Console.GraphQl.Resolvers.Deployments.Base
+  alias Console.GraphQl.Resolvers.Kubernetes
   alias Console.Deployments.{Services, Clusters, Tree}
   alias Console.Schema.{
     Service,
@@ -198,6 +199,29 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     with :ok <- Services.save_manifests(mans, id, cluster),
       do: {:ok, true}
   end
+
+  def raw_resource(svc, args, %{context: %{current_user: user}}) do
+      with {:ok, component} <- fetch_component(args),
+           {:ok, %Service{cluster: cluster}} <- Services.authorized(svc, component, user),
+           %Kazan.Server{} = server <- Clusters.control_plane(cluster),
+           _ <- Kube.Utils.save_kubeconfig(server),
+           kind = Kubernetes.get_kind(cluster, component.group, component.version, component.kind),
+           path = Kube.Client.Base.path(component.group, component.version, kind, component.namespace, component.name),
+           {:ok, res} <- Kube.Client.raw(path) do
+        {:ok, %{
+          raw: res,
+          kind: kind,
+          version: component.version,
+          group: component.group,
+          metadata: Kube.Utils.raw_meta(res)
+        }}
+      end
+  end
+  def raw_resource(_, _, _), do: {:error, "forbidden"}
+
+  defp fetch_component(%{component_id: id}) when is_binary(id), do: {:ok, Services.get_service_component!(id)}
+  defp fetch_component(%{child_id: id}) when is_binary(id), do: {:ok, Services.get_component_child!(id)}
+  defp fetch_component(_), do: {:error, "didn't specify either a component or a child"}
 
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn

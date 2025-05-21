@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.Deployments.Clusters
 
   describe "serviceDeployments" do
     test "it can list services in the system" do
@@ -422,6 +423,61 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert found["id"] == service.id
       refute Enum.empty?(found["heatMap"]["cpu"])
       refute Enum.empty?(found["heatMap"]["memory"])
+    end
+
+    test "it can fetch a raw resource by component id" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true)
+      svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
+      component = insert(:service_component, group: nil, namespace: nil, service: svc, kind: "Namespace", name: "test", version: "v1")
+      expect(Clusters, :api_discovery, fn _ -> %{} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, fn
+        %{path: "/api/v1/namespaces/test"} ->
+          {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!, $componentId: ID) {
+          serviceDeployment(id: $id) {
+            id
+            rawResource(componentId: $componentId) {
+              raw
+            }
+          }
+        }
+      """, %{"id" => svc.id, "componentId" => component.id}, %{current_user: user})
+
+      assert found["id"] == svc.id
+      assert found["rawResource"]["raw"]
+    end
+
+    test "it can fetch a raw resource by component child id" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true)
+      svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
+      component = insert(:service_component, group: nil, namespace: nil, service: svc, kind: "Namespace", name: "test", version: "v1")
+      child = insert(:service_component_child, group: nil, namespace: nil, component: component, kind: "Namespace", name: "test", version: "v1")
+      expect(Clusters, :api_discovery, fn _ -> %{} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, fn
+        %{path: "/api/v1/namespaces/test"} ->
+          {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!, $componentId: ID, $childId: ID) {
+          serviceDeployment(id: $id) {
+            id
+            rawResource(componentId: $componentId, childId: $childId) {
+              raw
+            }
+          }
+        }
+      """, %{"id" => svc.id, "childId" => child.id}, %{current_user: user})
+
+      assert found["id"] == svc.id
+      assert found["rawResource"]["raw"]
     end
 
     test "it respects rbac" do
