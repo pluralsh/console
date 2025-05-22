@@ -1,6 +1,6 @@
 import { type Edge, type Node } from '@xyflow/react'
 import { StackState } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { isNonNullable } from '../../../utils/isNonNullable'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
@@ -9,6 +9,7 @@ import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
 import { LayoutOptions } from 'elkjs'
 import { StackStateGraphNode } from './StackStateGraphNode'
+import { Flex, Input, SearchIcon } from '@pluralsh/design-system'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
@@ -44,20 +45,36 @@ function getNodesAndEdges(state: StackState) {
 }
 
 export function StackStateGraph({ state }: { state: StackState }) {
+  const [query, setQuery] = useState('')
+
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
     () => getNodesAndEdges(state),
     [state]
   )
 
   return (
-    <ReactFlowGraph
-      allowFullscreen
-      baseNodes={baseNodes}
-      baseEdges={baseEdges}
-      elkOptions={options}
-      nodeTypes={nodeTypes}
-      minZoom={0.05}
-    />
+    <Flex
+      direction="column"
+      height="100%"
+      gap="medium"
+    >
+      <Input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search resources"
+        startIcon={<SearchIcon color="icon-light" />}
+      />
+      <div css={{ height: '100%' }}>
+        <ReactFlowGraph
+          allowFullscreen
+          baseNodes={baseNodes}
+          baseEdges={baseEdges}
+          elkOptions={options}
+          nodeTypes={nodeTypes}
+          minZoom={0.05}
+        />
+      </div>
+    </Flex>
   )
 }
 
