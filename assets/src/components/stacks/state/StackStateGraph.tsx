@@ -10,17 +10,36 @@ import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 import { LayoutOptions } from 'elkjs'
 import { StackStateGraphNode } from './StackStateGraphNode'
 import { Flex, Input, SearchIcon } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
 }
 
-function getNodesAndEdges(state: StackState) {
+const searchOptions = {
+  keys: [
+    'name',
+    {
+      name: 'configuration',
+      getFn: (r) => JSON.stringify(r?.configuration ?? {}),
+    },
+  ],
+  threshold: 0.25,
+}
+
+function getNodesAndEdges(state: StackState, query: string) {
   const nodes: Node[] = []
   const edges: Edge[] = []
-  const existingIds = new Set(state?.state?.map((ssr) => ssr?.identifier))
 
-  state?.state?.filter(isNonNullable).forEach((ssr) => {
+  const resources = state.state?.filter(isNonNullable) ?? []
+
+  const fuse = new Fuse(resources, searchOptions)
+  const filteredResources =
+    (query ? fuse.search(query).map(({ item }) => item) : resources) ?? []
+
+  const filteredIds = new Set(filteredResources.map((ssr) => ssr?.identifier))
+
+  filteredResources?.forEach((ssr) => {
     nodes.push({
       id: ssr.identifier,
       position: { x: 0, y: 0 },
@@ -30,7 +49,7 @@ function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(ssr.links ?? [])
-        .filter((link): link is string => !!link && existingIds.has(link))
+        .filter((link): link is string => !!link && filteredIds.has(link))
         .map((link) => ({
           type: EdgeType.Bezier,
           updatable: false,
@@ -48,8 +67,8 @@ export function StackStateGraph({ state }: { state: StackState }) {
   const [query, setQuery] = useState('')
 
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
-    () => getNodesAndEdges(state),
-    [state]
+    () => getNodesAndEdges(state, query),
+    [state, query]
   )
 
   return (
