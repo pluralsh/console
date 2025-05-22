@@ -11,6 +11,7 @@ import { LayoutOptions } from 'elkjs'
 import { StackStateGraphNode } from './StackStateGraphNode'
 import { Flex, Input, SearchIcon } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
+import { isEmpty } from 'lodash'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
@@ -28,37 +29,41 @@ const searchOptions = {
 }
 
 function getNodesAndEdges(state: StackState, query: string) {
-  const nodes: Node[] = []
-  const edges: Edge[] = []
-
   const resources = state.state?.filter(isNonNullable) ?? []
 
-  const fuse = new Fuse(resources, searchOptions)
-  const filteredResources =
-    (query ? fuse.search(query).map(({ item }) => item) : resources) ?? []
+  const filteredIds = isEmpty(query)
+    ? new Set(resources.map(({ identifier }) => identifier))
+    : new Set(
+        new Fuse(resources, searchOptions)
+          .search(query)
+          .map(({ item }) => [item.identifier, ...(item.links ?? [])])
+          .flat()
+      )
 
-  const filteredIds = new Set(filteredResources.map((ssr) => ssr?.identifier))
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+  resources
+    .filter((r) => filteredIds.has(r.identifier))
+    .forEach((ssr) => {
+      nodes.push({
+        id: ssr.identifier,
+        position: { x: 0, y: 0 },
+        type: NodeType.Stage,
+        data: { ...ssr },
+      })
 
-  filteredResources?.forEach((ssr) => {
-    nodes.push({
-      id: ssr.identifier,
-      position: { x: 0, y: 0 },
-      type: NodeType.Stage,
-      data: { ...ssr },
+      edges.push(
+        ...(ssr.links ?? [])
+          .filter((link): link is string => !!link && filteredIds.has(link))
+          .map((link) => ({
+            type: EdgeType.Bezier,
+            updatable: false,
+            id: `${ssr.identifier}${link}`,
+            source: ssr.identifier,
+            target: link,
+          }))
+      )
     })
-
-    edges.push(
-      ...(ssr.links ?? [])
-        .filter((link): link is string => !!link && filteredIds.has(link))
-        .map((link) => ({
-          type: EdgeType.Bezier,
-          updatable: false,
-          id: `${ssr.identifier}${link}`,
-          source: ssr.identifier,
-          target: link,
-        }))
-    )
-  })
 
   return { nodes, edges }
 }
