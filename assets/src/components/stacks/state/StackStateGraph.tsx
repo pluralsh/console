@@ -30,13 +30,18 @@ const searchOptions = {
 
 function getNodesAndEdges(state: StackState, query: string) {
   const resources = state.state?.filter(isNonNullable) ?? []
-
+  const resourceIds = new Set(resources.map(({ identifier }) => identifier))
   const filteredIds = isEmpty(query)
-    ? new Set(resources.map(({ identifier }) => identifier))
+    ? resourceIds
     : new Set(
         new Fuse(resources, searchOptions)
           .search(query)
-          .map(({ item }) => [item.identifier, ...(item.links ?? [])])
+          .map(({ item }) => [
+            item.identifier,
+            ...(item.links ?? []).filter(
+              (link) => !!link && resourceIds.has(link)
+            ),
+          ])
           .flat()
       )
 
