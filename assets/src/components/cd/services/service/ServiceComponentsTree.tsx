@@ -89,10 +89,12 @@ export function ComponentsTreeView(): ReactNode {
   )
 }
 const elkOptions: LayoutOptions = {
-  'elk.algorithm': 'mrtree',
+  'elk.algorithm': 'layered',
   'elk.direction': 'RIGHT',
   'elk.spacing.nodeNode': '30',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '200',
   'elk.separateConnectedComponents': 'false',
+  'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
 }
 
 function ServiceComponentTreeNodeBase({
