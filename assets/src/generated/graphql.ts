@@ -1105,6 +1105,8 @@ export type Cluster = {
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: Maybe<Scalars['String']['output']>;
+  /** The health score of the cluster */
+  healthScore?: Maybe<Scalars['Int']['output']>;
   /** Whether this cluster was recently pinged */
   healthy?: Maybe<Scalars['Boolean']['output']>;
   /** A pod-level set of utilization metrics for this cluster for rendering a heat map */
@@ -1423,6 +1425,7 @@ export type ClusterInsightComponent = {
   kind: Scalars['String']['output'];
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;
+  priority?: Maybe<InsightComponentPriority>;
   /** the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly */
   resource?: Maybe<KubernetesUnstructured>;
   version: Scalars['String']['output'];
@@ -1433,6 +1436,7 @@ export type ClusterInsightComponentAttributes = {
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
   namespace?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<InsightComponentPriority>;
   version: Scalars['String']['input'];
 };
 
@@ -1567,6 +1571,7 @@ export type ClusterNodeMetrics = {
 export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
   distro?: InputMaybe<ClusterDistro>;
+  healthScore?: InputMaybe<Scalars['Int']['input']>;
   /** scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval */
   insightComponents?: InputMaybe<Array<InputMaybe<ClusterInsightComponentAttributes>>>;
   kubeletVersion?: InputMaybe<Scalars['String']['input']>;
@@ -3519,6 +3524,13 @@ export type InsightClientInfoAttributes = {
   lastRequestAt?: InputMaybe<Scalars['DateTime']['input']>;
   userAgent?: InputMaybe<Scalars['String']['input']>;
 };
+
+export enum InsightComponentPriority {
+  Critical = 'CRITICAL',
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
 
 /** enumerable to describe the recency of this insight */
 export enum InsightFreshness {

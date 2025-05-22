@@ -63,7 +63,7 @@ RUN ls -al
 
 COPY --from=node /app/build ./priv/static
 
-RUN mix do agent.chart, release
+RUN mix do db.certs, agent.chart, release
 
 FROM alpine:3.21.3 as tools
 

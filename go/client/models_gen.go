@@ -887,6 +887,8 @@ type Cluster struct {
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 	// The lowest discovered kubelet version for all nodes in the cluster
 	KubeletVersion *string `json:"kubeletVersion,omitempty"`
+	// The health score of the cluster
+	HealthScore *int64 `json:"healthScore,omitempty"`
 	// a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name
 	Handle *string `json:"handle,omitempty"`
 	// whether the deploy operator has been registered for this cluster
@@ -1100,24 +1102,26 @@ type ClusterInfo struct {
 
 // A kubernetes object used in the course of generating a cluster insight
 type ClusterInsightComponent struct {
-	ID        string     `json:"id"`
-	Group     *string    `json:"group,omitempty"`
-	Version   string     `json:"version"`
-	Kind      string     `json:"kind"`
-	Namespace *string    `json:"namespace,omitempty"`
-	Name      string     `json:"name"`
-	Cluster   *Cluster   `json:"cluster,omitempty"`
-	Insight   *AiInsight `json:"insight,omitempty"`
+	ID        string                    `json:"id"`
+	Group     *string                   `json:"group,omitempty"`
+	Version   string                    `json:"version"`
+	Kind      string                    `json:"kind"`
+	Namespace *string                   `json:"namespace,omitempty"`
+	Name      string                    `json:"name"`
+	Priority  *InsightComponentPriority `json:"priority,omitempty"`
+	Cluster   *Cluster                  `json:"cluster,omitempty"`
+	Insight   *AiInsight                `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
 
 type ClusterInsightComponentAttributes struct {
-	Group     *string `json:"group,omitempty"`
-	Version   string  `json:"version"`
-	Kind      string  `json:"kind"`
-	Namespace *string `json:"namespace,omitempty"`
-	Name      string  `json:"name"`
+	Group     *string                   `json:"group,omitempty"`
+	Version   string                    `json:"version"`
+	Kind      string                    `json:"kind"`
+	Namespace *string                   `json:"namespace,omitempty"`
+	Name      string                    `json:"name"`
+	Priority  *InsightComponentPriority `json:"priority,omitempty"`
 }
 
 // A reference to a built ISO image to be used for flashing new edge clusters
@@ -1243,6 +1247,7 @@ type ClusterPing struct {
 	CurrentVersion string         `json:"currentVersion"`
 	KubeletVersion *string        `json:"kubeletVersion,omitempty"`
 	Distro         *ClusterDistro `json:"distro,omitempty"`
+	HealthScore    *int64         `json:"healthScore,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 }
@@ -7793,6 +7798,51 @@ func (e *HelmAuthProvider) UnmarshalGQL(v any) error {
 }
 
 func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type InsightComponentPriority string
+
+const (
+	InsightComponentPriorityLow      InsightComponentPriority = "LOW"
+	InsightComponentPriorityMedium   InsightComponentPriority = "MEDIUM"
+	InsightComponentPriorityHigh     InsightComponentPriority = "HIGH"
+	InsightComponentPriorityCritical InsightComponentPriority = "CRITICAL"
+)
+
+var AllInsightComponentPriority = []InsightComponentPriority{
+	InsightComponentPriorityLow,
+	InsightComponentPriorityMedium,
+	InsightComponentPriorityHigh,
+	InsightComponentPriorityCritical,
+}
+
+func (e InsightComponentPriority) IsValid() bool {
+	switch e {
+	case InsightComponentPriorityLow, InsightComponentPriorityMedium, InsightComponentPriorityHigh, InsightComponentPriorityCritical:
+		return true
+	}
+	return false
+}
+
+func (e InsightComponentPriority) String() string {
+	return string(e)
+}
+
+func (e *InsightComponentPriority) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InsightComponentPriority(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InsightComponentPriority", str)
+	}
+	return nil
+}
+
+func (e InsightComponentPriority) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   ecto_enum :upgrade_insight_status, Console.Schema.UpgradeInsight.Status
   ecto_enum :scaling_recommendation_type, Console.Schema.ClusterScalingRecommendation.Type
   ecto_enum :service_mesh, Console.Schema.OperationalLayout.ServiceMesh
+  ecto_enum :insight_component_priority, Console.Schema.ClusterInsightComponent.Priority
 
   enum :conjunction do
     value :and
@@ -57,6 +58,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :current_version,    non_null(:string)
     field :kubelet_version,    :string
     field :distro,             :cluster_distro
+    field :health_score,       :integer
     field :insight_components, list_of(:cluster_insight_component_attributes),
       description: "scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval"
   end
@@ -67,6 +69,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kind,      non_null(:string)
     field :namespace, :string
     field :name,      non_null(:string)
+    field :priority,  :insight_component_priority
   end
 
   input_object :cluster_update_attributes do
@@ -407,6 +410,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata,          :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
     field :current_version,   :string, description: "current k8s version as told to us by the deployment operator"
     field :kubelet_version,   :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
+    field :health_score,      :integer, description: "The health score of the cluster"
     field :handle,            :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,         :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
