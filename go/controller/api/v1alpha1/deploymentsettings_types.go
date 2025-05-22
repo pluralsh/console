@@ -123,7 +123,7 @@ type LoggingSettings struct {
 	Enabled *bool `json:"enabled,omitempty"`
 
 	// The type of log aggregation solution you wish to use
-	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC
+	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH
 	// +kubebuilder:default=VICTORIA
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
@@ -135,6 +135,10 @@ type LoggingSettings struct {
 	// Configures a connection to elasticsearch
 	// +kubebuilder:validation:Optional
 	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
+
+	// Configures a connection to opensearch
+	// +kubebuilder:validation:Optional
+	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
 }
 
 type ElasticsearchConnection struct {
@@ -166,12 +170,54 @@ func (r *ElasticsearchConnection) Attributes(ctx context.Context, c client.Clien
 		Index: r.Index,
 	}
 	if r.PasswordSecretRef != nil {
-		secret := &corev1.Secret{}
-		if err := c.Get(ctx, types.NamespacedName{Name: r.PasswordSecretRef.Name, Namespace: namespace}, secret); err != nil {
+		password, err := utils.GetSecretKey(ctx, c, r.PasswordSecretRef, namespace)
+		if err != nil {
 			return nil, err
 		}
-		password := secret.Data[r.PasswordSecretRef.Key]
-		attr.Password = lo.ToPtr(string(password))
+		attr.Password = lo.ToPtr(password)
+	}
+	return attr, nil
+}
+
+type OpensearchConnection struct {
+	// Host ...
+	//
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// Index to query in opensearch
+	//
+	// +kubebuilder:validation:Optional
+	Index string `json:"index"`
+
+	// AWS Access Key ID to use, can also use IRSA to acquire credentials
+	//
+	// +kubebuilder:validation:Optional
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+
+	// AWS Secret Access Key to use, can also use IRSA to acquire credentials
+	//
+	// +kubebuilder:validation:Optional
+	AwsSecretAccessKeySecretRef *corev1.SecretKeySelector `json:"awsSecretAccessKeySecretRef,omitempty"`
+
+	// AWS Region to use
+	//
+	// +kubebuilder:validation:Optional
+	AWSRegion *string `json:"awsRegion,omitempty"`
+}
+
+func (r *OpensearchConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpensearchConnectionAttributes, error) {
+	attr := &console.OpensearchConnectionAttributes{
+		Host:           r.Host,
+		Index:          r.Index,
+		AWSAccessKeyID: r.AWSAccessKeyID,
+	}
+	if r.AwsSecretAccessKeySecretRef != nil {
+		awsSecretAccessKeyValue, err := utils.GetSecretKey(ctx, c, r.AwsSecretAccessKeySecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.AWSSecretAccessKey = lo.ToPtr(awsSecretAccessKeyValue)
 	}
 	return attr, nil
 }
@@ -205,12 +251,11 @@ func (r *HTTPConnection) Attributes(ctx context.Context, c client.Client, namesp
 		Password: r.Password,
 	}
 	if r.PasswordSecretRef != nil {
-		secret := &corev1.Secret{}
-		if err := c.Get(ctx, types.NamespacedName{Name: r.PasswordSecretRef.Name, Namespace: namespace}, secret); err != nil {
+		password, err := utils.GetSecretKey(ctx, c, r.PasswordSecretRef, namespace)
+		if err != nil {
 			return nil, err
 		}
-		password := secret.Data[r.PasswordSecretRef.Key]
-		attr.Password = lo.ToPtr(string(password))
+		attr.Password = lo.ToPtr(password)
 	}
 	return attr, nil
 }
@@ -368,6 +413,13 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 		attr.Elastic = connection
 	}
 
+	if in.Opensearch != nil {
+		connection, err := in.Opensearch.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Opensearch = connection
+	}
 	return attr, nil
 }
 
@@ -706,12 +758,15 @@ type VectorStore struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
-	// +kubebuilder:validation:Enum=ELASTIC
+	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Elastic *ElasticsearchConnectionSettings `json:"elastic,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Opensearch *OpensearchConnectionSettings `json:"opensearch,omitempty"`
 }
 
 func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.VectorStoreAttributes, error) {
@@ -745,8 +800,24 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 			User:     in.Elastic.User,
 			Password: password,
 		}
-	}
+	case console.VectorStoreOpensearch:
+		if in.Opensearch == nil {
+			return nil, fmt.Errorf("must provide opensearch configuration to set the provider to OPENSEARCH")
+		}
 
+		awsSecretAccessKey, err := in.Opensearch.AwsSecretAccessKey(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Opensearch = &console.OpensearchConnectionAttributes{
+			Host:               in.Opensearch.Host,
+			Index:              in.Opensearch.Index,
+			AWSAccessKeyID:     in.Opensearch.AWSAccessKeyID,
+			AWSSecretAccessKey: awsSecretAccessKey,
+			AWSRegion:          in.Opensearch.AwsRegion,
+		}
+	}
 	return attr, nil
 }
 
@@ -774,5 +845,32 @@ func (in *ElasticsearchConnectionSettings) Password(ctx context.Context, c clien
 	}
 
 	res, err := utils.GetSecretKey(ctx, c, in.PasswordSecretRef, namespace)
+	return lo.ToPtr(res), err
+}
+
+type OpensearchConnectionSettings struct {
+	Host  string `json:"host"`
+	Index string `json:"index"`
+
+	// +kubebuilder:validation:Optional
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AWSSecretAccessKeyRef *corev1.SecretKeySelector `json:"awsSecretAccessKeyRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AwsRegion *string `json:"awsRegion,omitempty"`
+}
+
+func (in *OpensearchConnectionSettings) AwsSecretAccessKey(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured opensearch settings cannot be nil")
+	}
+
+	if in.AWSSecretAccessKeyRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.AWSSecretAccessKeyRef, namespace)
 	return lo.ToPtr(res), err
 }

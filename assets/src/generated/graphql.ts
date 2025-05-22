@@ -3670,6 +3670,7 @@ export type LoadBalancerStatus = {
 
 export enum LogDriver {
   Elastic = 'ELASTIC',
+  Opensearch = 'OPENSEARCH',
   Victoria = 'VICTORIA'
 }
 
