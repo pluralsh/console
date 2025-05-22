@@ -30,7 +30,12 @@ const searchOptions = {
 
 function getNodesAndEdges(state: StackState, query: string) {
   const resources = state.state?.filter(isNonNullable) ?? []
+
   const resourceIds = new Set(resources.map(({ identifier }) => identifier))
+
+  // If the query is defined, identifiers of resources found by fuzzy search
+  // plus resources linked directly to them (only these belonging to the state).
+  // Identifiers of all resources from the state otherwise.
   const filteredIds = isEmpty(query)
     ? resourceIds
     : new Set(
