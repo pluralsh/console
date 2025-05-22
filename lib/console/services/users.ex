@@ -372,6 +372,13 @@ defmodule Console.Services.Users do
     |> Repo.delete()
   end
 
+  def upsert_group(name) do
+    case get_group_by_name(name) do
+      %Group{} = group -> {:ok, group}
+      nil -> create_group(%{name: name, description: "set up for you by Plural"})
+    end
+  end
+
   @spec create_group(map) :: group_resp
   def create_group(attrs) do
     start_transaction()

@@ -90,4 +90,17 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
     end
   end
+
+  describe "#setup_groups/0" do
+    test "it will setup the sre group" do
+      user = insert(:user)
+
+      {:ok, member} = Init.setup_groups(user.email)
+
+      member = Console.Repo.preload(member, [:user, :group])
+
+      assert member.user_id == user.id
+      assert member.group.name == "sre"
+    end
+  end
 end

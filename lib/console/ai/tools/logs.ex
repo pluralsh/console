@@ -44,7 +44,7 @@ defmodule Console.AI.Tools.Logs do
   def name(), do: plrl_tool("logs")
   def description() do
     """
-    Lists at most #{@limit} logs for a given Plural Service Deployment and Plural Cluster.  If you need to find the name of the service and cluster,
+    Lists at most #{@limit} logs for a given Plural Service Deployment and Plural Cluster.  If you need to find the name of the service deployment and cluster,
     call the `servicedeployments` and `clusters` tools first to grab them.
     """
   end

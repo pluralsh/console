@@ -1,4 +1,6 @@
 [
+  "There are alerts firing, can you list and explain them?",
+  "Show me the logs associated with that alert.",
   "Query the error logs on the prod cluster.",
   "Can you describe the dev cluster's plural service?",
   "What are all the components of the prod cluster's service?",
