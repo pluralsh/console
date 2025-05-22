@@ -44,22 +44,22 @@ function getNodesAndEdges(state: StackState, query: string) {
   const edges: Edge[] = []
   resources
     .filter((r) => filteredIds.has(r.identifier))
-    .forEach((ssr) => {
+    .forEach((r) => {
       nodes.push({
-        id: ssr.identifier,
+        id: r.identifier,
         position: { x: 0, y: 0 },
         type: NodeType.Stage,
-        data: { ...ssr },
+        data: { ...r },
       })
 
       edges.push(
-        ...(ssr.links ?? [])
+        ...(r.links ?? [])
           .filter((link): link is string => !!link && filteredIds.has(link))
           .map((link) => ({
             type: EdgeType.Bezier,
             updatable: false,
-            id: `${ssr.identifier}${link}`,
-            source: ssr.identifier,
+            id: `${r.identifier}${link}`,
+            source: r.identifier,
             target: link,
           }))
       )
