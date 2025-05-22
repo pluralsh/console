@@ -1169,9 +1169,43 @@ defmodule Console.Deployments.ServicesTest do
       {:error, _} = Services.delete_context(ctx.id, insert(:user))
     end
   end
+
+  describe "#authorized/3" do
+    test "it can authorize a user with read access for non-secret components" do
+      user = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: user.id}])
+      component = insert(:service_component, service: service, kind: "ConfigMap")
+
+      {:ok, _}    = Services.authorized(service, component, user)
+      {:error, _} = Services.authorized(service, insert(:service_component), user)
+    end
+
+    test "it can authorize a user with read access for non-secret component children" do
+      user = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: user.id}])
+      component = insert(:service_component, service: service, kind: "ConfigMap")
+      child = insert(:service_component_child, component: component, kind: "ConfigMap")
+
+      {:ok, _}    = Services.authorized(service, child, user)
+      {:error, _} = Services.authorized(service, insert(:service_component_child), user)
+    end
+
+    test "only users with write access can access secrets" do
+      user = insert(:user)
+      reader = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: reader.id}], write_bindings: [%{user_id: user.id}])
+      component = insert(:service_component, service: service, kind: "Secret")
+      child = insert(:service_component_child, component: component, kind: "Secret")
+
+      {:ok, _}    = Services.authorized(service, component, user)
+      {:error, _} = Services.authorized(service, component, reader)
+      {:ok, _}    = Services.authorized(service, child, user)
+      {:error, _} = Services.authorized(service, child, reader)
+    end
+  end
 end
 
-defmodule Console.Deployments.ServicesAsyncTest do
+defmodule Console.Deployments.ServicesSyncTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.Deployments.{Services, Tar}

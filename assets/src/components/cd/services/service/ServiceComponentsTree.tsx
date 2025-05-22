@@ -3,20 +3,26 @@ import {
   Button,
   Chip,
   ChipSeverity,
+  CloseIcon,
+  CodeEditor,
+  Divider,
+  Flex,
   IconFrame,
-  InfoIcon,
   InfoOutlineIcon,
   Modal,
 } from '@pluralsh/design-system'
 import { Node, NodeProps, ReactFlowProvider } from '@xyflow/react'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { LayoutOptions } from 'elkjs'
+import { dump } from 'js-yaml'
 import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   ComponentState,
   ServiceComponent,
   ServiceComponentChild,
+  useServiceComponentRawQuery,
   useServiceDeploymentComponentsWithChildrenQuery,
 } from '../../../../generated/graphql.ts'
 import { getServiceComponentPath } from '../../../../routes/cdRoutesConsts.tsx'
@@ -30,7 +36,7 @@ import { ModalMountTransition } from '../../../utils/ModalMountTransition.tsx'
 import { NodeBase } from '../../../utils/reactflow/nodes.tsx'
 import { ReactFlowGraph } from '../../../utils/reactflow/ReactFlowGraph.tsx'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
-import { ModalProp } from '../ServicesTreeDiagramNodes.tsx'
+import { OverlineH1 } from '../../../utils/typography/Text.tsx'
 import { ComponentIcon } from './component/misc.tsx'
 
 type ServiceComponentNodeType = Node<
@@ -40,7 +46,7 @@ type ServiceComponentNodeType = Node<
 
 type ServiceComponentChildNodeType = Node<
   ServiceComponentChild,
-  typeof ServiceComponentNodeKey
+  typeof ServiceComponentChildNodeKey
 >
 
 const ServiceComponentNodeKey = 'plural-service-component-tree-node'
@@ -48,16 +54,11 @@ const ServiceComponentChildNodeKey = 'plural-service-component-child-tree-node'
 
 const nodeTypes = {
   [ServiceComponentNodeKey]: ServiceComponentTreeNode,
-  [ServiceComponentChildNodeKey]: ServiceComponentChildTreeNode,
+  [ServiceComponentChildNodeKey]: ServiceComponentTreeNode,
 }
 
-function ComponentsTreeView(): ReactNode {
+export function ComponentsTreeView(): ReactNode {
   const { serviceId } = useParams()
-  const options: LayoutOptions = {
-    'elk.algorithm': 'mrtree',
-    'elk.direction': 'RIGHT',
-    'elk.spacing.nodeNode': '60',
-  }
 
   const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
     variables: { id: serviceId || '' },
@@ -80,12 +81,20 @@ function ComponentsTreeView(): ReactNode {
         allowFullscreen
         baseNodes={baseNodes}
         baseEdges={baseEdges}
-        elkOptions={options}
+        elkOptions={elkOptions}
         minZoom={0.01}
         nodeTypes={nodeTypes}
       />
     </ReactFlowProvider>
   )
+}
+const elkOptions: LayoutOptions = {
+  'elk.algorithm': 'layered',
+  'elk.direction': 'RIGHT',
+  'elk.spacing.nodeNode': '30',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '200',
+  'elk.separateConnectedComponents': 'false',
+  'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
 }
 
 function ServiceComponentTreeNodeBase({
@@ -149,7 +158,6 @@ function ServiceComponentTreeNodeBase({
 }
 
 function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
-  const theme = useTheme()
   const stateToSeverity: { [key in ComponentState]: ChipSeverity } = {
     [ComponentState.Failed]: 'danger',
     [ComponentState.Pending]: 'warning',
@@ -158,20 +166,16 @@ function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
   }
 
   return (
-    <>
-      <div
-        css={{
-          display: 'flex',
-          gap: theme.spacing.xsmall,
-          minWidth: 50,
-        }}
-      >
-        <ComponentIcon kind={kind} />
-        <span css={{ ...TRUNCATE_LEFT }}>
-          {!group ? '' : `${group}.`}
-          {kind}
-        </span>
-      </div>
+    <Flex
+      gap="xsmall"
+      align="center"
+      width="100%"
+    >
+      <ComponentIcon kind={kind} />
+      <span css={{ ...TRUNCATE_LEFT, flex: 1 }}>
+        {!group ? '' : `${group}.`}
+        {kind}
+      </span>
       <Chip
         severity={stateToSeverity[state ?? ComponentState.Pending]}
         css={{ whiteSpace: 'nowrap' }}
@@ -179,43 +183,24 @@ function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
       >
         {state}
       </Chip>
-    </>
-  )
-}
-
-function ServiceComponentTreeNodeContent({ name, namespace }): ReactNode {
-  const theme = useTheme()
-
-  return (
-    <div css={{ flex: 1, minWidth: 50 }}>
-      <div css={{ ...TRUNCATE, ...theme.partials.text.body2Bold }}>{name}</div>
-      <div
-        css={{
-          ...TRUNCATE,
-          ...theme.partials.text.caption,
-          color: theme.colors['text-xlight'],
-        }}
-      >
-        {namespace}
-      </div>
-    </div>
+    </Flex>
   )
 }
 
 function ServiceComponentTreeNode({
   id,
   data,
-}: NodeProps<ServiceComponentNodeType>) {
+  type,
+}: NodeProps<ServiceComponentNodeType | ServiceComponentChildNodeType>) {
   const theme = useTheme()
   const { serviceId, clusterId, flowId } = useParams()
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
 
-  const componentDetailsUrl = getServiceComponentPath({
+  const componentDetailsUrl = getComponentDetailsUrl({
+    component: data,
     clusterId,
     serviceId,
     flowId,
-    componentId: data.id,
   })
 
   return (
@@ -230,78 +215,12 @@ function ServiceComponentTreeNode({
         />
       }
       content={
-        <ServiceComponentTreeNodeContent
-          name={data.name}
-          namespace={data.namespace}
-        />
-      }
-      actions={
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-          <IconFrame
-            clickable
-            onClick={() => navigate(componentDetailsUrl)}
-            icon={<ArrowTopRightIcon />}
-            type="secondary"
-          />
-          <IconFrame
-            clickable
-            onClick={() => setOpen(true)}
-            icon={<InfoOutlineIcon />}
-            type="secondary"
-          />
-          <ServiceComponentModal
-            component={data}
-            url={componentDetailsUrl}
-            open={open}
-            setOpen={setOpen}
-          />
-        </div>
-      }
-    />
-  )
-}
-
-function ServiceComponentChildTreeNode({
-  id,
-  data,
-}: NodeProps<ServiceComponentChildNodeType>) {
-  const theme = useTheme()
-  const { clusterId } = useParams()
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-
-  const componentDetailsUrl =
-    getKubernetesResourcePath({
-      clusterId: clusterId,
-      group: data.group,
-      version: data.version,
-      kind: data.kind?.toLowerCase(),
-      name: data.name,
-      namespace: data.namespace,
-    }) ??
-    getKubernetesCustomResourceDetailsPath({
-      clusterId: clusterId ?? '',
-      group: data.group ?? '',
-      kind: data.kind?.toLowerCase(),
-      name: data.name,
-      namespace: data.namespace,
-    })
-
-  return (
-    <ServiceComponentTreeNodeBase
-      id={id}
-      state={data.state}
-      header={
-        <ServiceComponentTreeNodeHeader
-          kind={data.kind}
-          group={data.group}
-          state={data.state}
-        />
-      }
-      content={
-        <ServiceComponentTreeNodeContent
-          name={data.name}
-          namespace={data.namespace}
+        <StackedText
+          truncate
+          first={data.name}
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second={data.namespace}
         />
       }
       actions={
@@ -309,9 +228,11 @@ function ServiceComponentChildTreeNode({
           {componentDetailsUrl && (
             <IconFrame
               clickable
-              onClick={() => navigate(componentDetailsUrl)}
+              as={Link}
+              to={componentDetailsUrl}
               icon={<ArrowTopRightIcon />}
               type="secondary"
+              tooltip={`Go to ${type === ServiceComponentNodeKey ? 'component' : 'resource'}`}
             />
           )}
           <IconFrame
@@ -319,6 +240,7 @@ function ServiceComponentChildTreeNode({
             onClick={() => setOpen(true)}
             icon={<InfoOutlineIcon />}
             type="secondary"
+            tooltip="View details"
           />
           <ServiceComponentModal
             component={data}
@@ -344,28 +266,26 @@ function ServiceComponentModal({
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
+  const { serviceId, clusterId, flowId } = useParams()
 
   const isChild = component.__typename === 'ServiceComponentChild'
+  const componentDetailsUrl = getComponentDetailsUrl({
+    component,
+    clusterId,
+    serviceId,
+    flowId,
+  })
 
   return (
     <ModalMountTransition open={open}>
       <Modal
         size="large"
         header={
-          <div
-            css={{
-              alignItems: 'start',
-              display: 'flex',
-              gap: theme.spacing.xsmall,
-            }}
-          >
-            <InfoIcon
-              color="icon-info"
-              size={12}
-            />
-            {component.name}
-          </div>
+          <ServiceComponentTreeNodeHeader
+            kind={component.kind}
+            group={component.group}
+            state={component.state}
+          />
         }
         actions={
           <>
@@ -378,7 +298,8 @@ function ServiceComponentModal({
             </Button>
             {url && (
               <Button
-                onClick={() => navigate(url)}
+                as={Link}
+                to={url}
                 marginLeft="medium"
                 flex={1}
               >
@@ -390,34 +311,93 @@ function ServiceComponentModal({
         open={open}
         onClose={() => setOpen(false)}
       >
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.xxsmall,
-          }}
-        >
-          <ModalProp title="name">{component.name}</ModalProp>
-          <ModalProp title="namespace">{component.namespace}</ModalProp>
-          <ModalProp title="group">{component.group ?? 'core'}</ModalProp>
-          <ModalProp title="version">{component.version}</ModalProp>
-          <ModalProp title="kind">{component.kind}</ModalProp>
-          <ModalProp title="uid">{component.uid}</ModalProp>
-          {isChild && (
-            <ModalProp title="parent uid">{component.parentUid}</ModalProp>
+        <Flex gap="xsmall">
+          <StackedText
+            truncate
+            first={component.name}
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second={component.namespace}
+            css={{ flex: 1 }}
+          />
+          {componentDetailsUrl && (
+            <IconFrame
+              clickable
+              as={Link}
+              to={componentDetailsUrl}
+              icon={<ArrowTopRightIcon />}
+              type="secondary"
+              tooltip={`Go to ${isChild ? 'resource' : 'component'}`}
+            />
           )}
-          <ModalProp title="state">
-            <Chip
-              severity={'info'}
-              css={{ whiteSpace: 'nowrap' }}
-              size="small"
-            >
-              {component.state}
-            </Chip>
-          </ModalProp>
+          <IconFrame
+            clickable
+            onClick={() => setOpen(false)}
+            icon={<CloseIcon />}
+            type="secondary"
+            tooltip="Close modal"
+          />
+        </Flex>
+        <Divider
+          backgroundColor="border"
+          marginTop="medium"
+          marginBottom="medium"
+        />
+        <div>
+          <OverlineH1
+            $color="text-xlight"
+            css={{ marginBottom: theme.spacing.small }}
+          >
+            Raw YAML
+          </OverlineH1>
+          <ServiceComponentRaw
+            serviceId={serviceId ?? ''}
+            componentId={isChild ? undefined : component.id}
+            childId={isChild ? component.id : undefined}
+          />
         </div>
       </Modal>
     </ModalMountTransition>
+  )
+}
+
+function ServiceComponentRaw({
+  serviceId,
+  componentId,
+  childId,
+}: {
+  serviceId: string
+  componentId?: string
+  childId?: string
+}) {
+  const { data, loading, error } = useServiceComponentRawQuery({
+    variables: {
+      serviceId,
+      componentId,
+      childId,
+    },
+  })
+
+  const current = dump(data?.serviceDeployment?.rawResource?.raw)
+
+  if (!current && !error) return <LoadingIndicator />
+
+  if (!data?.serviceDeployment?.rawResource?.raw && !loading)
+    return <GqlError error="Could not fetch resource" />
+
+  return (
+    <div
+      css={{
+        maxHeight: '400px',
+        height: '100%',
+      }}
+    >
+      <CodeEditor
+        language="yaml"
+        value={current}
+        options={{ lineNumbers: false, minimap: { enabled: false } }}
+      />
+    </div>
   )
 }
 
@@ -457,4 +437,42 @@ function getNodesAndEdges(components: Array<ServiceComponent>): {
   return { nodes, edges }
 }
 
-export { ComponentsTreeView }
+function getComponentDetailsUrl({
+  component,
+  clusterId,
+  serviceId,
+  flowId,
+}: {
+  component: ServiceComponent | ServiceComponentChild
+  clusterId?: string
+  serviceId?: string
+  flowId?: string
+}): string | undefined {
+  const { id, group, version, kind, name, namespace } = component
+  if (component.__typename === 'ServiceComponentChild')
+    return (
+      getKubernetesResourcePath({
+        clusterId: clusterId,
+        group: group,
+        version: version,
+        kind: kind?.toLowerCase(),
+        name: name,
+        namespace: namespace,
+      }) ??
+      getKubernetesCustomResourceDetailsPath({
+        clusterId: clusterId ?? '',
+        group: group ?? '',
+        kind: kind?.toLowerCase(),
+        name: name,
+        namespace: namespace,
+      })
+    )
+  else if (component.__typename === 'ServiceComponent')
+    return getServiceComponentPath({
+      clusterId,
+      serviceId,
+      flowId,
+      componentId: id,
+    })
+  else return undefined
+}

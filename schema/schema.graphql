@@ -4594,6 +4594,9 @@ type ServiceDeployment {
   "Queries logs for a service out of loki"
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
+  "authorizes the given component or nested child id and returns the raw kubernetes resource it points to"
+  rawResource(componentId: ID, childId: ID): KubernetesUnstructured
+
   "read policy for this service"
   readBindings: [PolicyBinding]
 

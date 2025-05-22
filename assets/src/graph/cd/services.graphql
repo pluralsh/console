@@ -469,3 +469,12 @@ query ServiceNetworkGraph($serviceId: ID!, $time: DateTime) {
     }
   }
 }
+
+query ServiceComponentRaw($serviceId: ID!, $componentId: ID, $childId: ID) {
+  serviceDeployment(id: $serviceId) {
+    id
+    rawResource(childId: $childId, componentId: $componentId) {
+      ...UnstructuredResource
+    }
+  }
+}

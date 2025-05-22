@@ -28,6 +28,7 @@ defmodule Console.AI.Tools.Alerts do
       %Flow{id: flow_id} ->
         Alert.for_flow(flow_id)
         |> apply_filters(%{severities: severities, state: state, types: types})
+        |> Alert.distinct()
         |> Console.Repo.all()
         |> model()
         |> Jason.encode()

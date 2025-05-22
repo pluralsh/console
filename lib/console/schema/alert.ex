@@ -58,9 +58,12 @@ defmodule Console.Schema.Alert do
   def for_flow(query \\ __MODULE__, id) do
     from(a in query,
       join: s in assoc(a, :service),
-      where: s.flow_id == ^id,
-      distinct: true
+      where: s.flow_id == ^id
     )
+  end
+
+  def distinct(query \\ __MODULE__) do
+    from(a in query, distinct: true)
   end
 
   def expired(query \\ __MODULE__) do
