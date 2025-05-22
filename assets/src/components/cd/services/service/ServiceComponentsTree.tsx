@@ -16,7 +16,7 @@ import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { LayoutOptions } from 'elkjs'
 import { dump } from 'js-yaml'
 import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   ComponentState,
@@ -46,7 +46,7 @@ type ServiceComponentNodeType = Node<
 
 type ServiceComponentChildNodeType = Node<
   ServiceComponentChild,
-  typeof ServiceComponentNodeKey
+  typeof ServiceComponentChildNodeKey
 >
 
 const ServiceComponentNodeKey = 'plural-service-component-tree-node'
@@ -54,7 +54,7 @@ const ServiceComponentChildNodeKey = 'plural-service-component-child-tree-node'
 
 const nodeTypes = {
   [ServiceComponentNodeKey]: ServiceComponentTreeNode,
-  [ServiceComponentChildNodeKey]: ServiceComponentChildTreeNode,
+  [ServiceComponentChildNodeKey]: ServiceComponentTreeNode,
 }
 
 export function ComponentsTreeView(): ReactNode {
@@ -89,9 +89,10 @@ export function ComponentsTreeView(): ReactNode {
   )
 }
 const elkOptions: LayoutOptions = {
-  'elk.algorithm': 'layered',
+  'elk.algorithm': 'mrtree',
   'elk.direction': 'RIGHT',
-  'elk.spacing.nodeNode': '60',
+  'elk.spacing.nodeNode': '30',
+  'elk.separateConnectedComponents': 'false',
 }
 
 function ServiceComponentTreeNodeBase({
@@ -187,7 +188,8 @@ function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
 function ServiceComponentTreeNode({
   id,
   data,
-}: NodeProps<ServiceComponentNodeType>) {
+  type,
+}: NodeProps<ServiceComponentNodeType | ServiceComponentChildNodeType>) {
   const theme = useTheme()
   const { serviceId, clusterId, flowId } = useParams()
   const [open, setOpen] = useState(false)
@@ -228,71 +230,7 @@ function ServiceComponentTreeNode({
               to={componentDetailsUrl}
               icon={<ArrowTopRightIcon />}
               type="secondary"
-              tooltip="Go to component"
-            />
-          )}
-          <IconFrame
-            clickable
-            onClick={() => setOpen(true)}
-            icon={<InfoOutlineIcon />}
-            type="secondary"
-            tooltip="View details"
-          />
-          <ServiceComponentModal
-            component={data}
-            url={componentDetailsUrl}
-            open={open}
-            setOpen={setOpen}
-          />
-        </div>
-      }
-    />
-  )
-}
-
-function ServiceComponentChildTreeNode({
-  id,
-  data,
-}: NodeProps<ServiceComponentChildNodeType>) {
-  const theme = useTheme()
-  const { clusterId } = useParams()
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-
-  const componentDetailsUrl = getComponentDetailsUrl({
-    component: data,
-    clusterId,
-  })
-
-  return (
-    <ServiceComponentTreeNodeBase
-      id={id}
-      state={data.state}
-      header={
-        <ServiceComponentTreeNodeHeader
-          kind={data.kind}
-          group={data.group}
-          state={data.state}
-        />
-      }
-      content={
-        <StackedText
-          truncate
-          first={data.name}
-          firstPartialType="body2Bold"
-          firstColor="text"
-          second={data.namespace}
-        />
-      }
-      actions={
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-          {componentDetailsUrl && (
-            <IconFrame
-              clickable
-              onClick={() => navigate(componentDetailsUrl)}
-              icon={<ArrowTopRightIcon />}
-              type="secondary"
-              tooltip="Go to resource"
+              tooltip={`Go to ${type === ServiceComponentNodeKey ? 'component' : 'resource'}`}
             />
           )}
           <IconFrame
