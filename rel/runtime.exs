@@ -132,12 +132,20 @@ ssl_opts = case get_env("PGROOTSSLCERT") do
   _ -> [verify: :verify_none]
 end
 
+pool_size =
+  with size when is_binary(size) and byte_size(size) > 0 <- get_env("DB_POOL_SIZE"),
+       {val, _} <- Integer.parse(size) do
+    val
+  else
+    _ -> 20
+  end
+
 if get_env("POSTGRES_URL") do
   config :console, Console.Repo,
     url: get_env("POSTGRES_URL"),
     ssl: String.to_existing_atom(get_env("DBSSL") || "true"),
     ssl_opts: ssl_opts,
-    pool_size: 20
+    pool_size: pool_size
 else
   config :console, Console.Repo,
     database: "console",
@@ -146,7 +154,7 @@ else
     hostname: get_env("DBHOST") || "console-postgresql",
     ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
     ssl_opts: [verify: :verify_none],
-    pool_size: 20
+    pool_size: pool_size
 end
 
 git_url = get_env("GIT_URL")
