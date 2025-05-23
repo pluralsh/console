@@ -2,7 +2,9 @@ import {
   Flex,
   SubTab,
   toFillLevel,
+  Tooltip,
   useFillLevel,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { Dispatch, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -58,19 +60,60 @@ export default function ButtonGroup({
   )
 }
 
-function ButtonLinkGroup({ directory, tab, toPath, ...props }): ReactNode {
+function ButtonLinkGroup({ directory, tab, toPath, ...props }) {
   const fillLevel = useFillLevel()
 
-  return directory.map(({ path, icon, label }, idx) => (
-    <LinkTabWrap
-      active={path === tab}
-      subTab
+  return directory.map(({ path, icon, label, tooltip }, idx) => (
+    <WrapWithIf
       key={path}
-      textValue={label}
-      to={toPath(path)}
+      condition={!!tooltip}
+      wrapper={
+        <Tooltip
+          key={path}
+          label={tooltip}
+          placement="top"
+        />
+      }
+    >
+      <LinkTabWrap
+        active={path === tab}
+        subTab
+        textValue={label}
+        to={toPath(path)}
+      >
+        <SubTabSC
+          key={path}
+          $tab={tab}
+          $label={label}
+          $idx={idx}
+          $directory={directory}
+          $path={path}
+          $fillLevel={fillLevel}
+          {...props}
+        >
+          {icon} {label}
+        </SubTabSC>
+      </LinkTabWrap>
+    </WrapWithIf>
+  ))
+}
+
+function ButtonSwitchGroup({ directory, tab, onClick, ...props }) {
+  const fillLevel = useFillLevel()
+
+  return directory.map(({ path, icon, label, tooltip }, idx) => (
+    <WrapWithIf
+      key={path}
+      condition={!!tooltip}
+      wrapper={
+        <Tooltip
+          label={tooltip}
+          placement="top"
+        />
+      }
     >
       <SubTabSC
-        key={path}
+        onClick={() => onClick(path)}
         $tab={tab}
         $label={label}
         $idx={idx}
@@ -81,27 +124,7 @@ function ButtonLinkGroup({ directory, tab, toPath, ...props }): ReactNode {
       >
         {icon} {label}
       </SubTabSC>
-    </LinkTabWrap>
-  ))
-}
-
-function ButtonSwitchGroup({ directory, tab, onClick, ...props }): ReactNode {
-  const fillLevel = useFillLevel()
-
-  return directory.map(({ path, icon, label }, idx) => (
-    <SubTabSC
-      key={path}
-      onClick={() => onClick(path)}
-      $tab={tab}
-      $label={label}
-      $idx={idx}
-      $directory={directory}
-      $path={path}
-      $fillLevel={fillLevel}
-      {...props}
-    >
-      {icon} {label}
-    </SubTabSC>
+    </WrapWithIf>
   ))
 }
 

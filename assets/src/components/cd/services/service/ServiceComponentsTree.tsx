@@ -57,7 +57,7 @@ const nodeTypes = {
   [ServiceComponentChildNodeKey]: ServiceComponentTreeNode,
 }
 
-export function ComponentsTreeView(): ReactNode {
+export function ComponentsTreeView() {
   const { serviceId } = useParams()
 
   const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
@@ -103,7 +103,13 @@ function ServiceComponentTreeNodeBase({
   actions,
   header,
   content,
-}): ReactNode {
+}: {
+  id: string
+  state: Nullable<ComponentState>
+  actions: ReactNode
+  header: ReactNode
+  content: ReactNode
+}) {
   const theme = useTheme()
 
   return (
@@ -157,7 +163,15 @@ function ServiceComponentTreeNodeBase({
   )
 }
 
-function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
+function ServiceComponentTreeNodeHeader({
+  kind,
+  group,
+  state,
+}: {
+  kind: Nullable<string>
+  group: Nullable<string>
+  state: Nullable<ComponentState>
+}) {
   const stateToSeverity: { [key in ComponentState]: ChipSeverity } = {
     [ComponentState.Failed]: 'danger',
     [ComponentState.Pending]: 'warning',
@@ -171,7 +185,7 @@ function ServiceComponentTreeNodeHeader({ kind, group, state }): ReactNode {
       align="center"
       width="100%"
     >
-      <ComponentIcon kind={kind} />
+      <ComponentIcon kind={kind ?? ''} />
       <span css={{ ...TRUNCATE_LEFT, flex: 1 }}>
         {!group ? '' : `${group}.`}
         {kind}
