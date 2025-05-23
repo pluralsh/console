@@ -59,6 +59,15 @@ func (s *ServiceContext) GetName() string {
 	return s.Name
 }
 
+func (s *ServiceContext) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(s.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
 func init() {
 	SchemeBuilder.Register(&ServiceContext{}, &ServiceContextList{})
 }
