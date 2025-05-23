@@ -164,6 +164,9 @@ type ConsoleClient interface {
 	GetComplianceReportGenerator(ctx context.Context, id, name *string) (*console.ComplianceReportGeneratorFragment, error)
 	UpsertComplianceReportGenerator(ctx context.Context, attr console.ComplianceReportGeneratorAttributes) (*console.ComplianceReportGeneratorFragment, error)
 	DeleteComplianceReportGenerator(ctx context.Context, id string) error
+	SaveServiceContext(name string, attributes console.ServiceContextAttributes) (*console.ServiceContextFragment, error)
+	DeleteServiceContext(id string) error
+	IsServiceContextExists(email string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {

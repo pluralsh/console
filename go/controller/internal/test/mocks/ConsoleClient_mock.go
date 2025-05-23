@@ -2373,6 +2373,52 @@ func (_c *ConsoleClientMock_DeleteServiceAccount_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// DeleteServiceContext provides a mock function with given fields: id
+func (_m *ConsoleClientMock) DeleteServiceContext(id string) error {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteServiceContext")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteServiceContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteServiceContext'
+type ConsoleClientMock_DeleteServiceContext_Call struct {
+	*mock.Call
+}
+
+// DeleteServiceContext is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteServiceContext(id interface{}) *ConsoleClientMock_DeleteServiceContext_Call {
+	return &ConsoleClientMock_DeleteServiceContext_Call{Call: _e.mock.On("DeleteServiceContext", id)}
+}
+
+func (_c *ConsoleClientMock_DeleteServiceContext_Call) Run(run func(id string)) *ConsoleClientMock_DeleteServiceContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteServiceContext_Call) Return(_a0 error) *ConsoleClientMock_DeleteServiceContext_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteServiceContext_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteServiceContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteStack provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) DeleteStack(ctx context.Context, id string) error {
 	ret := _m.Called(ctx, id)
@@ -5807,6 +5853,62 @@ func (_c *ConsoleClientMock_IsServiceAccountExists_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// IsServiceContextExists provides a mock function with given fields: email
+func (_m *ConsoleClientMock) IsServiceContextExists(email string) (bool, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsServiceContextExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (bool, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(email)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsServiceContextExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsServiceContextExists'
+type ConsoleClientMock_IsServiceContextExists_Call struct {
+	*mock.Call
+}
+
+// IsServiceContextExists is a helper method to define mock.On call
+//   - email string
+func (_e *ConsoleClientMock_Expecter) IsServiceContextExists(email interface{}) *ConsoleClientMock_IsServiceContextExists_Call {
+	return &ConsoleClientMock_IsServiceContextExists_Call{Call: _e.mock.On("IsServiceContextExists", email)}
+}
+
+func (_c *ConsoleClientMock_IsServiceContextExists_Call) Run(run func(email string)) *ConsoleClientMock_IsServiceContextExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceContextExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsServiceContextExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceContextExists_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsServiceContextExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsStackDefinitionExists provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) IsStackDefinitionExists(ctx context.Context, id string) (bool, error) {
 	ret := _m.Called(ctx, id)
@@ -6151,6 +6253,65 @@ func (_c *ConsoleClientMock_SavePipeline_Call) Return(_a0 *client.PipelineFragme
 }
 
 func (_c *ConsoleClientMock_SavePipeline_Call) RunAndReturn(run func(string, client.PipelineAttributes) (*client.PipelineFragmentMinimal, error)) *ConsoleClientMock_SavePipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SaveServiceContext provides a mock function with given fields: name, attributes
+func (_m *ConsoleClientMock) SaveServiceContext(name string, attributes client.ServiceContextAttributes) (*client.ServiceContextFragment, error) {
+	ret := _m.Called(name, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveServiceContext")
+	}
+
+	var r0 *client.ServiceContextFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, client.ServiceContextAttributes) (*client.ServiceContextFragment, error)); ok {
+		return rf(name, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(string, client.ServiceContextAttributes) *client.ServiceContextFragment); ok {
+		r0 = rf(name, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.ServiceContextFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, client.ServiceContextAttributes) error); ok {
+		r1 = rf(name, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_SaveServiceContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveServiceContext'
+type ConsoleClientMock_SaveServiceContext_Call struct {
+	*mock.Call
+}
+
+// SaveServiceContext is a helper method to define mock.On call
+//   - name string
+//   - attributes client.ServiceContextAttributes
+func (_e *ConsoleClientMock_Expecter) SaveServiceContext(name interface{}, attributes interface{}) *ConsoleClientMock_SaveServiceContext_Call {
+	return &ConsoleClientMock_SaveServiceContext_Call{Call: _e.mock.On("SaveServiceContext", name, attributes)}
+}
+
+func (_c *ConsoleClientMock_SaveServiceContext_Call) Run(run func(name string, attributes client.ServiceContextAttributes)) *ConsoleClientMock_SaveServiceContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(client.ServiceContextAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_SaveServiceContext_Call) Return(_a0 *client.ServiceContextFragment, _a1 error) *ConsoleClientMock_SaveServiceContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_SaveServiceContext_Call) RunAndReturn(run func(string, client.ServiceContextAttributes) (*client.ServiceContextFragment, error)) *ConsoleClientMock_SaveServiceContext_Call {
 	_c.Call.Return(run)
 	return _c
 }
