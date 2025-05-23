@@ -1,5 +1,6 @@
 defmodule Console.AI.Chat.Engine do
   use Console.Services.Base
+  import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
   alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit}
   alias Console.AI.{Provider, Tool, Stream}
@@ -148,6 +149,8 @@ defmodule Console.AI.Chat.Engine do
         {:cont, [tool_msg(content, id, nil, name, args) | acc]}
       else
         :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found"}}
+        {:error, %Ecto.Changeset{} = cs} ->
+          {:halt, {:error, "failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}"}}
         err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
       end
     end)

@@ -127,11 +127,6 @@ if provider != :gcp do
   config :goth, disabled: true
 end
 
-ssl_opts = case get_env("PGROOTSSLCERT") do
-  cert when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
-  _ -> [verify: :verify_none]
-end
-
 pool_size =
   with size when is_binary(size) and byte_size(size) > 0 <- get_env("DB_POOL_SIZE"),
        {val, _} <- Integer.parse(size) do
@@ -141,6 +136,13 @@ pool_size =
   end
 
 if get_env("POSTGRES_URL") do
+  ssl_opts = case {get_env("PGROOTSSLCERT"), get_env("DB_CLOUD_PROVIDER")} do
+    {_, "aws"} -> Console.Repo.rds_ssl_opts(:aws, get_env("POSTGRES_URL"))
+    {_, "azure"} -> Console.Repo.rds_ssl_opts(:azure, get_env("POSTGRES_URL"))
+    {cert, _} when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
+    _ -> [verify: :verify_none]
+  end
+
   config :console, Console.Repo,
     url: get_env("POSTGRES_URL"),
     ssl: String.to_existing_atom(get_env("DBSSL") || "true"),

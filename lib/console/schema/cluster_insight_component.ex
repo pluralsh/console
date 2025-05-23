@@ -2,12 +2,15 @@ defmodule Console.Schema.ClusterInsightComponent do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, AiInsight}
 
+  defenum Priority, low: 1, medium: 2, high: 3, critical: 4
+
   schema "cluster_insight_components" do
     field :group,     :string
     field :version,   :string
     field :kind,      :string
     field :namespace, :string
     field :name,      :string
+    field :priority,  Priority
 
     belongs_to :cluster, Cluster
     belongs_to :insight, AiInsight, on_replace: :update
@@ -19,7 +22,7 @@ defmodule Console.Schema.ClusterInsightComponent do
     from(cic in query, where: cic.cluster_id == ^cluster_id)
   end
 
-  @valid ~w(group version kind namespace name cluster_id)a
+  @valid ~w(group version kind namespace name priority cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

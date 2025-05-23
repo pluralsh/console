@@ -206,6 +206,7 @@ defmodule Console.GraphQl.AI do
     field :kind,      non_null(:string)
     field :namespace, :string
     field :name,      non_null(:string)
+    field :priority,  :insight_component_priority
 
     field :cluster, :cluster,    resolve: dataloader(Deployments)
     field :insight, :ai_insight, resolve: dataloader(AI)

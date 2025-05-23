@@ -4,7 +4,7 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Schema.{AccessToken, Cluster}
+  alias Console.Schema.{AccessToken, Cluster, Group, User}
   alias Kube.Utils
   alias Console.Deployments.{Clusters, Git, Settings}
 
@@ -60,6 +60,14 @@ defmodule Console.Deployments.Init do
     |> add_operation(:secret, fn _ -> ensure_secret(Console.cloud?()) end)
     |> execute()
   end
+
+  def setup_groups(email) when is_binary(email) do
+    with %User{} = user <- Users.get_user_by_email(email),
+         {:ok, %Group{id: group_id}} <- Users.upsert_group("sre") do
+      Users.create_group_member(%{user_id: user.id}, group_id)
+    end
+  end
+  def setup_groups(_), do: :ok
 
   def ensure_secret(ignore \\ false)
   def ensure_secret(true), do: {:ok, %{}}

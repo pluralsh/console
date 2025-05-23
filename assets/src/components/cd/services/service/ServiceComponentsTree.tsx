@@ -82,8 +82,9 @@ export function ComponentsTreeView(): ReactNode {
         baseNodes={baseNodes}
         baseEdges={baseEdges}
         elkOptions={elkOptions}
-        minZoom={0.01}
+        minZoom={0.1}
         nodeTypes={nodeTypes}
+        maxZoom={1}
       />
     </ReactFlowProvider>
   )
