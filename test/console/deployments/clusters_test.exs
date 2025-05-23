@@ -1197,6 +1197,43 @@ defmodule Console.Deployments.ClustersTest do
 
       assert_receive {:event, %PubSub.ClusterPinged{item: ^pinged}}
     end
+
+    test "it can persist cluster insight components and node statistics" do
+      cluster = insert(:cluster)
+
+      {:ok, pinged} = Clusters.ping(%{
+        distro: :eks,
+        current_version: "1.25.1",
+        node_statistics: [
+          %{name: "node-1", pending_pods: 1, health: :healthy},
+          %{name: "node-2", pending_pods: 2, health: :failed}
+        ],
+        insight_components: [
+          %{group: "apps", version: "v1", kind: "Deployment", name: "test"}
+        ]
+      }, cluster)
+
+      assert pinged.current_version == "1.25.1"
+      assert pinged.distro == :eks
+
+      [first, second] = pinged.node_statistics
+
+      assert first.name == "node-1"
+      assert first.pending_pods == 1
+      assert first.health == :healthy
+      assert second.name == "node-2"
+      assert second.pending_pods == 2
+      assert second.health == :failed
+
+      [insight] = pinged.insight_components
+
+      assert insight.group == "apps"
+      assert insight.version == "v1"
+      assert insight.kind == "Deployment"
+      assert insight.name == "test"
+
+      assert_receive {:event, %PubSub.ClusterPinged{item: ^pinged}}
+    end
   end
 
   describe "#install/1" do

@@ -1137,6 +1137,8 @@ export type Cluster = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   /** list of node pool specs managed by CAPI */
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  /** a list of node healthstatistics for this cluster */
+  nodeStatistics?: Maybe<Array<Maybe<NodeStatistic>>>;
   /** list cached nodes for a cluster, this can be stale up to 5m */
   nodes?: Maybe<Array<Maybe<Node>>>;
   /** the object store connection bound to this cluster for backup/restore */
@@ -1575,6 +1577,7 @@ export type ClusterPing = {
   /** scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval */
   insightComponents?: InputMaybe<Array<InputMaybe<ClusterInsightComponentAttributes>>>;
   kubeletVersion?: InputMaybe<Scalars['String']['input']>;
+  nodeStatistics?: InputMaybe<Array<InputMaybe<NodeStatisticAttributes>>>;
 };
 
 /** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
@@ -4172,6 +4175,30 @@ export type NodeSpec = {
   providerId?: Maybe<Scalars['String']['output']>;
   unschedulable?: Maybe<Scalars['Boolean']['output']>;
 };
+
+/** A representation of node health within a cluster */
+export type NodeStatistic = {
+  __typename?: 'NodeStatistic';
+  cluster?: Maybe<Cluster>;
+  health?: Maybe<NodeStatisticHealth>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  pendingPods?: Maybe<Scalars['Int']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NodeStatisticAttributes = {
+  health?: InputMaybe<NodeStatisticHealth>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  pendingPods?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export enum NodeStatisticHealth {
+  Failed = 'FAILED',
+  Healthy = 'HEALTHY',
+  Warning = 'WARNING'
+}
 
 export type NodeStatus = {
   __typename?: 'NodeStatus';

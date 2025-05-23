@@ -372,7 +372,7 @@ defmodule Console.Deployments.Clusters do
     |> Repo.all()
   end
 
-  @decorate cacheable(cache: @cache_adapter, key: {:deploy_token, token}, opts: [ttl: :timer.hours(1)])
+  @decorate cacheable(cache: @local_adapter, key: {:deploy_token, token}, opts: [ttl: :timer.hours(1)])
   @spec get_by_deploy_token(binary) :: Cluster.t | nil
   def get_by_deploy_token(token) do
     with nil <- Repo.get_by(Cluster, deploy_token: token),
@@ -621,11 +621,14 @@ defmodule Console.Deployments.Clusters do
   @spec ping(map, Cluster.t) :: cluster_resp
   def ping(attrs, %Cluster{id: id}) do
     cluster = get_cluster(id)
-              |> Repo.preload([:insight_components, :operational_layout])
+              |> Repo.preload([:node_statistics, :insight_components, :operational_layout])
     attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
 
     cluster
-    |> Cluster.ping_changeset(stabilize_insight_components(attrs, cluster))
+    |> Cluster.ping_changeset(
+      stabilize_insight_components(attrs, cluster)
+      |> stabilize_node_statistics(cluster)
+    )
     |> Repo.update()
     |> notify(:ping)
   end
@@ -640,6 +643,13 @@ defmodule Console.Deployments.Clusters do
     end)
   end
   defp stabilize_insight_components(attrs, _), do: attrs
+
+  defp stabilize_node_statistics(%{node_statistics: [_ | _] = new} = attrs, %Cluster{node_statistics: existing}) do
+    key = & &1.name
+    by_key = Map.new((if is_list(existing), do: existing, else: []), & {key.(&1), &1.id})
+    Map.put(attrs, :node_statistics, Enum.map(new, &Map.put(&1, :id, by_key[key.(&1)])))
+  end
+  defp stabilize_node_statistics(attrs, _), do: attrs
 
   @doc """
   Marks a cluster to be deleted, with hard deletes following a successful drain

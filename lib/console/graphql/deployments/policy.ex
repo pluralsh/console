@@ -46,11 +46,10 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   input_object :vulnerability_report_attributes do
-    field :artifact_url, :string
-    field :os,           :vuln_os_attributes
-    field :summary,      :vuln_summary_attributes
-    field :artifact,     :vuln_artifact_attributes
-
+    field :artifact_url,    :string
+    field :os,              :vuln_os_attributes
+    field :summary,         :vuln_summary_attributes
+    field :artifact,        :vuln_artifact_attributes
     field :vulnerabilities, list_of(:vulnerability_attributes)
     field :services,        list_of(:service_vuln_attributes)
     field :namespaces,      list_of(:namespace_vuln_attributes)
@@ -204,6 +203,14 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :eosl,   :boolean
     field :family, :string
     field :name,   :string
+  end
+
+  object :kubernetes_reference do
+    field :group,     :string
+    field :version,   :string
+    field :kind,      :string
+    field :name,      :string
+    field :namespace, :string
   end
 
   object :vuln_summary do

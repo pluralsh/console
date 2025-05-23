@@ -289,6 +289,10 @@ defmodule Console.Schema.Service do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
+  def select(query \\ __MODULE__, fields \\ []) do
+    from(s in query, select: ^fields)
+  end
+
   def stats(query \\ __MODULE__) do
     from(s in query,
       left_join: e in assoc(s, :errors),
