@@ -60,7 +60,7 @@ export function ServiceComponents() {
     [searchParams]
   )
 
-  const { kindSelector, selectedKinds, setSelectedKinds, allKinds } =
+  const { kindSelector, selectedKinds, setSelectedKinds } =
     useComponentKindSelect(components, {
       width: 320,
     })
@@ -116,12 +116,18 @@ export function ServiceComponents() {
         <ComponentsListView
           setComponents={setComponents}
           selectedKinds={selectedKinds}
-          allKinds={allKinds}
           selectedState={selectedState}
           searchQuery={searchQuery}
         />
       )}
-      {view === 'tree' && <ComponentsTreeView />}
+      {view === 'tree' && (
+        <ComponentsTreeView
+          setComponents={setComponents}
+          selectedKinds={selectedKinds}
+          selectedState={selectedState}
+          searchQuery={searchQuery}
+        />
+      )}
     </ScrollablePage>
   )
 }
@@ -148,13 +154,11 @@ function ComponentsViewSwitch({ tab, setTab }): ReactNode {
 
 function ComponentsListView({
   selectedKinds,
-  allKinds,
   selectedState,
   setComponents,
   searchQuery,
 }: {
   selectedKinds: Set<string>
-  allKinds: Set<string>
   selectedState: Key | null
   setComponents: (components: ServiceDeploymentComponentFragment[]) => void
   searchQuery: string
@@ -219,7 +223,7 @@ function ComponentsListView({
               : undefined
           }
           components={components}
-          selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
+          selectedKinds={selectedKinds}
           selectedState={selectedState as ComponentState | null}
           searchQuery={throttledSearchQuery}
         />

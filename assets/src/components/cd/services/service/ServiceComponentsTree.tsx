@@ -6,22 +6,35 @@ import {
   CloseIcon,
   CodeEditor,
   Divider,
+  EmptyState,
   Flex,
   IconFrame,
   InfoOutlineIcon,
   Modal,
 } from '@pluralsh/design-system'
+import { Key } from '@react-types/shared'
 import { Node, NodeProps, ReactFlowProvider } from '@xyflow/react'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { LayoutOptions } from 'elkjs'
+import Fuse from 'fuse.js'
 import { dump } from 'js-yaml'
-import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
+import { isEmpty } from 'lodash'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
   ComponentState,
   ServiceComponent,
   ServiceComponentChild,
+  ServiceDeploymentComponentWithChildrenFragment,
   useServiceComponentRawQuery,
   useServiceDeploymentComponentsWithChildrenQuery,
 } from '../../../../generated/graphql.ts'
@@ -57,23 +70,82 @@ const nodeTypes = {
   [ServiceComponentChildNodeKey]: ServiceComponentTreeNode,
 }
 
-export function ComponentsTreeView() {
+const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentWithChildrenFragment> =
+  {
+    keys: [
+      'name',
+      'kind',
+      'namespace',
+      'children.name',
+      'children.kind',
+      'children.namespace',
+    ],
+    threshold: 0.25,
+    ignoreLocation: true,
+  }
+
+export function ComponentsTreeView({
+  setComponents,
+  selectedKinds,
+  selectedState,
+  searchQuery,
+}: {
+  setComponents: (
+    components: ServiceDeploymentComponentWithChildrenFragment[]
+  ) => void
+  selectedKinds: Set<string>
+  selectedState: Key | null
+  searchQuery: string
+}) {
   const { serviceId } = useParams()
 
   const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
     variables: { id: serviceId || '' },
   })
 
+  const components = useMemo(() => {
+    const unfilteredComponents =
+      data?.serviceDeployment?.components?.filter(isNonNullable) ?? []
+
+    const filteredComponents = unfilteredComponents.filter((c) => {
+      const children = c.children?.filter(isNonNullable) ?? []
+      return (
+        // filter by kind
+        (isEmpty(selectedKinds) ||
+          selectedKinds.has(c.kind) ||
+          children.some((child) => selectedKinds.has(child.kind))) &&
+        // filter by state
+        componentStateMatches(c, selectedState)
+      )
+    })
+
+    if (!searchQuery) return filteredComponents
+
+    // filter by search q
+    const fuse = new Fuse(filteredComponents, searchOptions)
+    return fuse.search(searchQuery).map(({ item }) => item)
+  }, [
+    data?.serviceDeployment?.components,
+    searchQuery,
+    selectedKinds,
+    selectedState,
+  ])
+
+  // needed for the kinds filter to know which options to show
+  useEffect(() => {
+    setComponents(
+      data?.serviceDeployment?.components?.filter(isNonNullable) ?? []
+    )
+  }, [setComponents, data?.serviceDeployment?.components])
+
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
-    () =>
-      getNodesAndEdges(
-        (data?.serviceDeployment?.components as Array<ServiceComponent>) ?? []
-      ),
-    [data?.serviceDeployment?.components]
+    () => getNodesAndEdges(components),
+    [components]
   )
 
   if (error) return <GqlError error={error} />
   if (!data) return <LoadingIndicator />
+  if (isEmpty(components)) return <EmptyState message="No components found." />
 
   return (
     <ReactFlowProvider>
@@ -415,7 +487,9 @@ function ServiceComponentRaw({
   )
 }
 
-function getNodesAndEdges(components: Array<ServiceComponent>): {
+function getNodesAndEdges(
+  components: ServiceDeploymentComponentWithChildrenFragment[]
+): {
   nodes: Array<any>
   edges: Array<any>
 } {
@@ -489,4 +563,21 @@ function getComponentDetailsUrl({
       componentId: id,
     })
   else return undefined
+}
+
+const componentStateMatches = (
+  c: ServiceDeploymentComponentWithChildrenFragment,
+  selectedState: Key | null
+) => {
+  const children = c.children?.filter(isNonNullable) ?? []
+  if (!selectedState) return true
+  if (
+    selectedState === ComponentState.Running &&
+    (!c.state || children.some((child) => !child.state))
+  )
+    return true
+  return (
+    c.state === selectedState ||
+    children.some((child) => child.state === selectedState)
+  )
 }

@@ -102,7 +102,6 @@ export function useComponentKindSelect(
 ): {
   selectedKinds: Set<string>
   setSelectedKinds: (kinds: Set<string>) => void
-  allKinds: Set<string>
   kindSelector: ReactElement<any>
 } {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
@@ -114,7 +113,6 @@ export function useComponentKindSelect(
     () => ({
       selectedKinds,
       setSelectedKinds,
-      allKinds: new Set(kinds),
       kindSelector: (
         <ComponentKindSelect
           {...config}
