@@ -2,14 +2,14 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.11.17
-version: 0.3.94
+appVersion: 0.11.18
+version: 0.3.95
 dependencies:
   - name: kas
     version: 0.3.0
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.122
+    version: 0.0.123
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
