@@ -7,7 +7,7 @@ defmodule Console.Deployments.Deprecations.Table do
 
   @table :api_deprecations
   @poll :timer.minutes(60)
-  @url "/pluralsh/console/master/static/versions.yml"
+  @url "/matrices/compatability/static/versions.yml"
 
 
   defmodule State do
@@ -29,7 +29,7 @@ defmodule Console.Deployments.Deprecations.Table do
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     table = Enum.reduce(Static.deprecations(), table, &KeyValueSet.put!(&2, name(&1), &1))
-    {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
+    {:ok, %State{table: table, url: Console.plrl_assets_url(@url), static: Console.conf(:airgap)}}
   end
 
   def fetch(%ServiceComponent{} = component) do

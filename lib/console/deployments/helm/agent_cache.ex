@@ -127,7 +127,9 @@ defmodule Console.Deployments.Helm.AgentCache do
           Line.expire(l)
           :ets.delete(t, {:chart, l.chart, l.vsn})
           {keep, expired + 1}
-        false -> {keep + 1, expired}
+        false ->
+          send self(), {:refresh, l.chart, l.vsn}
+          {keep + 1, expired}
       end
     end, {0, 0}, t)
 
