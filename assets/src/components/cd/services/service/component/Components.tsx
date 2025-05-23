@@ -10,7 +10,10 @@ import { ReactElement, useMemo, useState } from 'react'
 import { type Key } from '@react-types/shared'
 import styled from 'styled-components'
 
-import { ComponentState } from 'generated/graphql'
+import {
+  ComponentState,
+  ServiceDeploymentComponentFragment,
+} from 'generated/graphql'
 import { ComponentIcon, ComponentStateChip } from './misc'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
@@ -88,16 +91,17 @@ export function compareComponents<
   return (n1 || '')?.localeCompare(n2 || '')
 }
 
+type ComponentKindSelectArray = Pick<
+  ServiceDeploymentComponentFragment,
+  'kind'
+>[]
+
 export function useComponentKindSelect(
-  components:
-    | ({ kind: string | null | undefined } | null | undefined)[]
-    | null
-    | undefined,
+  components: Nullable<ComponentKindSelectArray>,
   config?: { width?: number }
 ): {
   selectedKinds: Set<string>
   setSelectedKinds: (kinds: Set<string>) => void
-  allKinds: Set<string>
   kindSelector: ReactElement<any>
 } {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
@@ -109,7 +113,6 @@ export function useComponentKindSelect(
     () => ({
       selectedKinds,
       setSelectedKinds,
-      allKinds: new Set(kinds),
       kindSelector: (
         <ComponentKindSelect
           {...config}
@@ -125,9 +128,7 @@ export function useComponentKindSelect(
   )
 }
 
-function getUniqueKinds(
-  components: ({ kind: string | null | undefined } | null | undefined)[]
-) {
+function getUniqueKinds(components: Nullable<ComponentKindSelectArray>) {
   return Array.from(
     (components || []).reduce((kinds, component) => {
       if (component?.kind) {

@@ -76,8 +76,8 @@ export type ServicesContextT = {
 }
 
 const directory = [
-  { path: '', icon: <ListIcon /> },
-  { path: 'tree', icon: <NetworkInterfaceIcon /> },
+  { path: '', icon: <ListIcon />, tooltip: 'List view' },
+  { path: 'tree', icon: <NetworkInterfaceIcon />, tooltip: 'Tree view' },
 ]
 
 export default function Services() {
