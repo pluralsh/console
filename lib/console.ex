@@ -45,6 +45,8 @@ defmodule Console do
 
   def provider(), do: Console.conf(:provider)
 
+  def plrl_assets_url(url), do: "#{Console.conf(:plrl_assets_url)}#{url}"
+
   def github_raw_url(url), do: "#{Console.conf(:github_raw_url)}#{url}"
 
   def cloud?(), do: !!Console.conf(:cloud)

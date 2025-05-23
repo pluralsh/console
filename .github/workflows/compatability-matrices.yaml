@@ -43,7 +43,7 @@ jobs:
           aws s3 cp ./static/compatibilities.yaml s3://plural-www-assets/matrices/compatability/static/compatibilities.yaml
         if: hashFiles('static/compatibilities.yaml') != ''
 
-      - name: Upload static/versions.yaml to S3
+      - name: Upload static/versions.yml to S3
         run: |
-          aws s3 cp ./static/versions.yaml s3://plural-www-assets/matrices/compatability/static/versions.yaml
-        if: hashFiles('static/versions.yaml') != ''
+          aws s3 cp ./static/versions.yml s3://plural-www-assets/matrices/compatability/static/versions.yml
+        if: hashFiles('static/versions.yml') != ''

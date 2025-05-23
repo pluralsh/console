@@ -28,6 +28,7 @@ defmodule Console.Deployments.Deprecations.Table do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
+    table = Enum.reduce(Static.deprecations(), table, &KeyValueSet.put!(&2, name(&1), &1))
     {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
 
