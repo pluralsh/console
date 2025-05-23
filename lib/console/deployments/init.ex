@@ -6,7 +6,7 @@ defmodule Console.Deployments.Init do
   alias Console.Services.Users
   alias Console.Schema.{AccessToken, Cluster, Group, User}
   alias Kube.Utils
-  alias Console.Deployments.{Clusters, Git, Settings}
+  alias Console.Deployments.{Clusters, Git, Settings, Global}
 
   @secret_name "console-auth-token"
 
@@ -51,12 +51,15 @@ defmodule Console.Deployments.Init do
       %{provider: provider} -> {:ok, provider}
     end)
     |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
-      Settings.create(maybe_ai(%{
+      maybe_ai(%{
         name: "global",
         artifact_repository_id: arepo.id,
         deployer_repository_id: drepo.id,
-      }))
+      })
+      |> maybe_es()
+      |> Settings.create()
     end)
+    |> add_operation(:logstash, fn %{artifacts_repo: arepo} -> maybe_setup_logstash(arepo, bot) end)
     |> add_operation(:secret, fn _ -> ensure_secret(Console.cloud?()) end)
     |> execute()
   end
@@ -106,6 +109,52 @@ defmodule Console.Deployments.Init do
           openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
         })
       _ -> attrs
+    end
+  end
+
+  defp maybe_es(attrs) do
+    with true <- Console.cloud?(),
+         inst when is_binary(inst) <- Console.cloud_instance(),
+         {:ok, url, pass} <- Console.es_creds() do
+        es_creds = %{
+          host: url,
+          user: "plrl-#{inst}",
+          password: pass,
+          index: "plrl-logs-#{inst}-*"
+        }
+
+        attrs
+        |> Map.put(:logging, %{
+          enabled: true,
+          driver: :elastic,
+          elastic: es_creds
+        })
+        |> put_in([:ai, :vector_store], %{enabled: true, vector_store: :elastic, elastic: es_creds})
+    else
+      _ -> attrs
+    end
+  end
+
+  defp maybe_setup_logstash(repo, bot) do
+    with true <- Console.cloud?(),
+         inst when is_binary(inst) <- Console.cloud_instance(),
+         {:ok, url, pass} <- Console.es_creds() do
+      Global.create(%{
+        name: "logstash",
+        template: %{
+          name: "logstash",
+          namespace: "elastic",
+          configuration: [
+            %{name: "username", value: "plrl-#{inst}"},
+            %{name: "password", value: pass},
+            %{name: "esUrl", value: url}
+          ],
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "cloud/logstash"}
+        }
+      }, bot)
+    else
+      _ -> {:ok, %{}}
     end
   end
 end
