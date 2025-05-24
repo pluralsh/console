@@ -54,7 +54,7 @@ defmodule Console.Cached.Kubernetes do
     with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
          {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
       maybe_kill(old)
-      :timer.send_interval(5000, :watcher_ping)
+      :timer.send_interval(:timer.seconds(5), :watcher_ping)
       Process.send_after(self(), {:start, request}, :timer.minutes(30) + jitter())
       :ets.delete_all_objects(table)
       :ets.insert(table, Enum.map(instances, &{key.(&1), &1}))

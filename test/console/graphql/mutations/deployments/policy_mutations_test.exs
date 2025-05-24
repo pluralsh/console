@@ -41,6 +41,26 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
           "links" =>             []
         }]
       }]}, %{cluster: cluster})
+
+      {:ok, %{data: %{"upsertVulnerabilities" => 1}}} = run_query("""
+        mutation Upsert($vulnerabilities: [VulnerabilityReportAttributes]) {
+          upsertVulnerabilities(vulnerabilities: $vulnerabilities)
+        }
+      """, %{"vulnerabilities" => [%{
+        "artifact_url" => "nginx:latest",
+        "vulnerabilities" => [%{
+          "resource" =>          "blah",
+          "fixed_version" =>     "1.2.0",
+          "installed_version" => "1.1.0",
+          "severity" =>          "HIGH",
+          "score" =>             8.0,
+          "title" =>             "blah",
+          "description" =>       "blah",
+          "cvss_source" =>       "nvidia",
+          "primary_link" =>      "example.com",
+          "links" =>             []
+        }]
+      }]}, %{cluster: cluster})
     end
   end
 
