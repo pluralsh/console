@@ -58,6 +58,7 @@ rules:
   - providers
   - scmconnections
   - serviceaccounts
+  - servicecontexts
   - servicedeployments
   - stackdefinitions
   verbs:
@@ -103,6 +104,7 @@ rules:
   - providers/finalizers
   - scmconnections/finalizers
   - serviceaccounts/finalizers
+  - servicecontexts/finalizers
   - servicedeployments/finalizers
   - stackdefinitions/finalizers
   verbs:
@@ -142,6 +144,7 @@ rules:
   - providers/status
   - scmconnections/status
   - serviceaccounts/status
+  - servicecontexts/status
   - servicedeployments/status
   - stackdefinitions/status
   verbs:
