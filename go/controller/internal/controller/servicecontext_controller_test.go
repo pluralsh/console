@@ -156,6 +156,8 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			}
 			sc := &v1alpha1.ServiceContext{}
 			err := k8sClient.Get(ctx, typeNamespacedName, sc)
+			Expect(err).NotTo(HaveOccurred())
+
 			Expect(common.MaybePatch(k8sClient, sc, func(object *v1alpha1.ServiceContext) {
 				object.Status = v1alpha1.Status{}
 			})).To(Succeed())
@@ -179,7 +181,6 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 
 			f := &v1alpha1.ServiceContext{}
 			err = k8sClient.Get(ctx, typeNamespacedName, f)
-
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
