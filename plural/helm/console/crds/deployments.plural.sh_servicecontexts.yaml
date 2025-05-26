@@ -53,21 +53,6 @@ spec:
                 description: the name of this service, if not provided ServiceContext's
                   own name from ServiceContext.ObjectMeta will be used.
                 type: string
-              secretsRef:
-                description: SecretsRef is a secret reference which should contain
-                  service context secrets.
-                properties:
-                  name:
-                    default: ""
-                    description: |-
-                      Name of the referent.
-                      This field is effectively required, but due to backwards compatibility is
-                      allowed to be empty. Instances of this type with an empty value here are
-                      almost certainly wrong.
-                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                    type: string
-                type: object
-                x-kubernetes-map-type: atomic
             type: object
           status:
             properties:

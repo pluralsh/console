@@ -8,10 +8,8 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -116,28 +114,6 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 	if sc.Spec.Configuration.Raw != nil {
 		attributes.Configuration = lo.ToPtr(string(sc.Spec.Configuration.Raw))
 	}
-	if sc.Spec.SecretsRef != nil {
-		secret := &corev1.Secret{}
-		err := r.Client.Get(ctx, types.NamespacedName{Name: sc.Spec.SecretsRef.Name, Namespace: sc.Namespace}, secret)
-		if err != nil {
-			return nil, err
-		}
-
-		attributes.Secrets = make([]*console.ConfigAttributes, 0, len(secret.Data))
-		for k, v := range secret.Data {
-			attributes.Secrets = append(attributes.Secrets, &console.ConfigAttributes{
-				Name:  k,
-				Value: lo.ToPtr(string(v)),
-			})
-		}
-		if err = controllerutil.SetControllerReference(sc, secret, r.Scheme); err != nil {
-			return nil, err
-		}
-		err = r.Client.Update(ctx, secret)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	return r.ConsoleClient.SaveServiceContext(sc.GetName(), attributes)
 }
@@ -240,6 +216,5 @@ func (r *ServiceContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ServiceContext{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

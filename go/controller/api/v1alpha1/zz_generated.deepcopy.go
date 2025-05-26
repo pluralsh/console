@@ -5742,11 +5742,6 @@ func (in *ServiceContextSpec) DeepCopyInto(out *ServiceContextSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.SecretsRef != nil {
-		in, out := &in.SecretsRef, &out.SecretsRef
-		*out = new(v1.LocalObjectReference)
-		**out = **in
-	}
 	in.Configuration.DeepCopyInto(&out.Configuration)
 }
 

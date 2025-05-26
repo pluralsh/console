@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,10 +11,6 @@ type ServiceContextSpec struct {
 	// the name of this service, if not provided ServiceContext's own name from ServiceContext.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
-
-	// SecretsRef is a secret reference which should contain service context secrets.
-	// +kubebuilder:validation:Optional
-	SecretsRef *corev1.LocalObjectReference `json:"secretsRef,omitempty"`
 
 	// A reusable configuration context, useful for plumbing data from external tools like terraform, pulumi, etc.
 	Configuration runtime.RawExtension `json:"configuration,omitempty"`
