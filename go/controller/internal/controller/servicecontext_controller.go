@@ -104,6 +104,9 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	serviceContext.Status.ID = &apiServiceContext.ID
 	serviceContext.Status.SHA = &sha
 
+	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
 	return ctrl.Result{}, nil
 }
 
