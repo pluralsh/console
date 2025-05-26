@@ -92,7 +92,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	apiServiceContext, err := r.sync(ctx, serviceContext)
+	apiServiceContext, err := r.sync(serviceContext)
 	if err != nil {
 		logger.Error(err, "unable to create or update sa")
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -108,7 +108,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	return ctrl.Result{}, nil
 }
 
-func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.ServiceContext) (*console.ServiceContextFragment, error) {
+func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext) (*console.ServiceContextFragment, error) {
 	attributes := console.ServiceContextAttributes{}
 	attributes.Configuration = lo.ToPtr("{}")
 	if sc.Spec.Configuration.Raw != nil {
