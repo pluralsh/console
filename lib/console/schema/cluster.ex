@@ -96,6 +96,7 @@ defmodule Console.Schema.Cluster do
     field :virtual,         :boolean, default: false
     field :distro,          Distro, default: :generic
     field :metadata,        :map
+    field :health_score,    :integer
 
     field :version,         :string
     field :current_version, :string
@@ -432,7 +433,7 @@ defmodule Console.Schema.Cluster do
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at distro kubelet_version current_version installed)a)
+    |> cast(attrs, ~w(pinged_at distro health_score kubelet_version current_version installed)a)
     |> cast_assoc(:insight_components)
     |> change_markers(distro: :distro_changed)
     |> update_vsn()

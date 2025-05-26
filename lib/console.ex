@@ -45,9 +45,20 @@ defmodule Console do
 
   def provider(), do: Console.conf(:provider)
 
+  def plrl_assets_url(url), do: "#{Console.conf(:plrl_assets_url)}#{url}"
+
   def github_raw_url(url), do: "#{Console.conf(:github_raw_url)}#{url}"
 
   def cloud?(), do: !!Console.conf(:cloud)
+
+  def cloud_instance(), do: Console.conf(:cloud_instance)
+
+  def es_creds() do
+    case {Console.conf(:es_url), Console.conf(:es_password)} do
+      {url, pass} when is_binary(url) and is_binary(pass) -> {:ok, url, pass}
+      _ -> :error
+    end
+  end
 
   def truncate(str, len) when byte_size(str) > len,
     do: "#{String.slice(str, 0, len - 3)}..."

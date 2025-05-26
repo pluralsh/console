@@ -41,8 +41,8 @@ import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 const directory = [
-  { path: 'list', icon: <ListIcon /> },
-  { path: 'tree', icon: <NetworkInterfaceIcon /> },
+  { path: 'list', icon: <ListIcon />, tooltip: 'List view' },
+  { path: 'tree', icon: <NetworkInterfaceIcon />, tooltip: 'Tree view' },
 ]
 
 const defaultView = 'list'
@@ -51,14 +51,16 @@ export function ServiceComponents() {
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
-  const [components, setComponents] = useState()
+  const [components, setComponents] = useState<
+    ServiceDeploymentComponentFragment[]
+  >([])
 
   const view = useMemo(
     () => searchParams.get('view') || defaultView,
     [searchParams]
   )
 
-  const { kindSelector, selectedKinds, setSelectedKinds, allKinds } =
+  const { kindSelector, selectedKinds, setSelectedKinds } =
     useComponentKindSelect(components, {
       width: 320,
     })
@@ -70,46 +72,42 @@ export function ServiceComponents() {
       headingContent={
         <ArrowScroll>
           <FiltersWrapperSC>
-            {view === 'list' && (
-              <>
-                <IconExpander
-                  tooltip="Search components"
-                  icon={<SearchIcon />}
-                  active={!!searchQuery}
-                  onClear={() => setSearchQuery('')}
-                >
-                  <ExpandedInput
-                    width={320}
-                    inputValue={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Search components"
-                  />
-                </IconExpander>
-                <IconExpander
-                  tooltip="Filter by component kind"
-                  icon={<ComponentsIcon />}
-                  active={!!selectedKinds.size}
-                  onClear={() => setSelectedKinds(new Set())}
-                >
-                  {kindSelector}
-                </IconExpander>
-                <IconExpander
-                  tooltip="Filter by component state"
-                  icon={<UpdatesIcon />}
-                  active={!!selectedState}
-                  onClear={() => setSelectedState(null)}
-                >
-                  <ComponentStateFilter
-                    selectedState={selectedState}
-                    setSelectedState={setSelectedState}
-                  />
-                </IconExpander>
-              </>
-            )}
+            <IconExpander
+              tooltip="Search components"
+              icon={<SearchIcon />}
+              active={!!searchQuery}
+              onClear={() => setSearchQuery('')}
+            >
+              <ExpandedInput
+                width={320}
+                inputValue={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search components"
+              />
+            </IconExpander>
+            <IconExpander
+              tooltip="Filter by component kind"
+              icon={<ComponentsIcon />}
+              active={!!selectedKinds.size}
+              onClear={() => setSelectedKinds(new Set())}
+            >
+              {kindSelector}
+            </IconExpander>
+            <IconExpander
+              tooltip="Filter by component state"
+              icon={<UpdatesIcon />}
+              active={!!selectedState}
+              onClear={() => setSelectedState(null)}
+            >
+              <ComponentStateFilter
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
+              />
+            </IconExpander>
             <ComponentsViewSwitch
               tab={view}
               setTab={(view: string) => setSearchParams({ view })}
-            ></ComponentsViewSwitch>
+            />
           </FiltersWrapperSC>
         </ArrowScroll>
       }
@@ -118,12 +116,18 @@ export function ServiceComponents() {
         <ComponentsListView
           setComponents={setComponents}
           selectedKinds={selectedKinds}
-          allKinds={allKinds}
           selectedState={selectedState}
           searchQuery={searchQuery}
-        ></ComponentsListView>
+        />
       )}
-      {view === 'tree' && <ComponentsTreeView />}
+      {view === 'tree' && (
+        <ComponentsTreeView
+          setComponents={setComponents}
+          selectedKinds={selectedKinds}
+          selectedState={selectedState}
+          searchQuery={searchQuery}
+        />
+      )}
     </ScrollablePage>
   )
 }
@@ -143,18 +147,22 @@ function ComponentsViewSwitch({ tab, setTab }): ReactNode {
         directory={directory}
         tab={tab}
         onClick={setTab}
-      ></ButtonGroup>
+      />
     </FillLevelProvider>
   )
 }
 
 function ComponentsListView({
   selectedKinds,
-  allKinds,
   selectedState,
   setComponents,
   searchQuery,
-}): ReactNode {
+}: {
+  selectedKinds: Set<string>
+  selectedState: Key | null
+  setComponents: (components: ServiceDeploymentComponentFragment[]) => void
+  searchQuery: string
+}) {
   const { serviceId, clusterId, flowId } = useParams()
   const throttledSearchQuery = useThrottle(searchQuery, 250)
   const [showDeprecations, setShowDeprecations] = useState(false)
@@ -215,7 +223,7 @@ function ComponentsListView({
               : undefined
           }
           components={components}
-          selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
+          selectedKinds={selectedKinds}
           selectedState={selectedState as ComponentState | null}
           searchQuery={throttledSearchQuery}
         />

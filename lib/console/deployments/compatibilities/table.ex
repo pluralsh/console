@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.Table do
 
   @table :addon_compatibilities
   @poll :timer.minutes(30)
-  @url "/pluralsh/console/master/static/compatibilities.yaml"
+  @url "/matrices/compatability/static/compatibilities.yaml"
 
   defmodule State do
     defstruct [:table, :url, :static, :ready]
@@ -23,7 +23,7 @@ defmodule Console.Deployments.Compatibilities.Table do
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put!(&2, &1.name, &1))
-    {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
+    {:ok, %State{table: table, url: Console.plrl_assets_url(@url), static: Console.conf(:airgap)}}
   end
 
   def ping(), do: GenServer.call(__MODULE__, :ping)

@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
 
   @table :clouds_addons
   @poll :timer.minutes(30)
-  @url "/pluralsh/console/master/static/addons/"
+  @url "/matrices/compatability/static/addons/"
 
   defmodule State do
     defstruct [:table, :url, :static, ready: false]
@@ -23,7 +23,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     table = Enum.reduce(Static.cloud_addons(), table, &persist(&2, &1))
-    {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
+    {:ok, %State{table: table, url: Console.plrl_assets_url(@url), static: Console.conf(:airgap)}}
   end
 
   def ping(), do: GenServer.call(__MODULE__, :ping)

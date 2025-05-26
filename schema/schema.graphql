@@ -5023,6 +5023,13 @@ enum ServiceMesh {
   EBPF
 }
 
+enum InsightComponentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 enum Conjunction {
   AND
   OR
@@ -5093,6 +5100,8 @@ input ClusterPing {
 
   distro: ClusterDistro
 
+  healthScore: Int
+
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
 }
@@ -5103,6 +5112,7 @@ input ClusterInsightComponentAttributes {
   kind: String!
   namespace: String
   name: String!
+  priority: InsightComponentPriority
 }
 
 input ClusterUpdateAttributes {
@@ -5591,6 +5601,9 @@ type Cluster {
 
   "The lowest discovered kubelet version for all nodes in the cluster"
   kubeletVersion: String
+
+  "The health score of the cluster"
+  healthScore: Int
 
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
   handle: String
@@ -7851,6 +7864,8 @@ type ClusterInsightComponent {
   namespace: String
 
   name: String!
+
+  priority: InsightComponentPriority
 
   cluster: Cluster
 

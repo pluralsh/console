@@ -33,7 +33,7 @@ export function ComponentList({
   const theme = useTheme()
   const filteredComponents = useMemo(() => {
     const filtered = components
-      .filter((comp) => selectedKinds.has(comp.kind))
+      .filter((comp) => isEmpty(selectedKinds) || selectedKinds.has(comp.kind))
       .filter(
         (comp) =>
           !selectedState ||
@@ -41,7 +41,7 @@ export function ComponentList({
           selectedState === comp.state
       )
 
-    if (!filtered.length) return []
+    if (isEmpty(filtered)) return []
 
     if (!searchQuery) return filtered.sort(compareComponents)
 

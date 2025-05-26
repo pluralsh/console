@@ -25,6 +25,8 @@ defmodule Console.Deployments.Global do
 
   def get!(id), do: Repo.get!(GlobalService, id)
 
+  def get_by_name!(name), do: Repo.get_by!(GlobalService, name: name)
+
   def get_namespace!(id), do: Repo.get!(ManagedNamespace, id)
 
   def get_namespace_by_name!(name), do: Repo.get_by!(ManagedNamespace, name: name)

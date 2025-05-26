@@ -11,7 +11,7 @@ defmodule Console.AI.MCP.Agent do
   alias Console.AI.MCP.{State, ClientSupervisor, Tool}
   require Logger
 
-  @sep "__sep__"
+  @sep "__"
 
   @poll :timer.minutes(5)
 

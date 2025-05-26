@@ -63,12 +63,12 @@ RUN ls -al
 
 COPY --from=node /app/build ./priv/static
 
-RUN mix do agent.chart, release
+RUN mix do db.certs, agent.chart, release
 
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.3
+ENV CLI_VERSION=v0.12.4
 
 COPY AGENT_VERSION AGENT_VERSION
 
