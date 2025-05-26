@@ -1,3 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: servicecontext-sample-secret
+  namespace: default
+data:
+  secret: dGVzdA==
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: ServiceContext
 metadata:
@@ -8,5 +16,12 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
   name: servicecontext-sample
+  namespace: default
 spec:
-  # TODO(user): Add fields here
+  secretsRef:
+    name: servicecontext-sample-secret
+  configuration:
+    test:
+      a: b
+      c: d
+    secret: "abc"

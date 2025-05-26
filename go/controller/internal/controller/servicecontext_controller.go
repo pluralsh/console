@@ -120,7 +120,7 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 			return nil, err
 		}
 
-		attributes.Secrets = make([]*console.ConfigAttributes, len(secret.Data))
+		attributes.Secrets = make([]*console.ConfigAttributes, 0, len(secret.Data))
 		for k, v := range secret.Data {
 			attributes.Secrets = append(attributes.Secrets, &console.ConfigAttributes{
 				Name:  k,
@@ -203,14 +203,14 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 	if !serviceContext.Status.HasID() {
 		// stop reconciliation as there is no console ID available to delete the resource
 		controllerutil.RemoveFinalizer(serviceContext, ServiceContextProtectionFinalizerName)
-		return nil
+		return &ctrl.Result{}
 	}
 
 	_, err := r.ConsoleClient.GetServiceContext(serviceContext.GetName())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			controllerutil.RemoveFinalizer(serviceContext, ServiceContextProtectionFinalizerName)
-			return nil
+			return &ctrl.Result{}
 		}
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return &waitForResources
@@ -229,7 +229,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 	// stop reconciliation as the item has been deleted
 	controllerutil.RemoveFinalizer(serviceContext, ServiceContextProtectionFinalizerName)
 
-	return nil
+	return &ctrl.Result{}
 }
 
 // SetupWithManager sets up the controller with the Manager.

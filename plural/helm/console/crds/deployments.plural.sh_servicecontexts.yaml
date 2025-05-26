@@ -14,7 +14,12 @@ spec:
     singular: servicecontext
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Console ID
+      jsonPath: .status.id
+      name: Id
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: ServiceContext is the Schema for the servicecontexts API

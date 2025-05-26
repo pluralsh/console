@@ -23,6 +23,9 @@ type ServiceContextSpec struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Namespaced
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 
 // ServiceContext is the Schema for the servicecontexts API
 type ServiceContext struct {
