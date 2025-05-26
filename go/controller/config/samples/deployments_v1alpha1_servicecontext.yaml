@@ -1,0 +1,17 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceContext
+metadata:
+  labels:
+    app.kubernetes.io/name: servicecontext
+    app.kubernetes.io/instance: servicecontext-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: servicecontext-sample
+  namespace: default
+spec:
+  configuration:
+    test:
+      a: b
+      c: d
+    secret: "abc"

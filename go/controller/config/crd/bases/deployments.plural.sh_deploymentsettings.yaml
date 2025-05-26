@@ -414,9 +414,48 @@ spec:
                       enabled:
                         default: false
                         type: boolean
+                      opensearch:
+                        properties:
+                          awsAccessKeyId:
+                            type: string
+                          awsRegion:
+                            type: string
+                          awsSecretAccessKeyRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          host:
+                            type: string
+                          index:
+                            type: string
+                        required:
+                        - host
+                        - index
+                        type: object
                       vectorStore:
                         enum:
                         - ELASTIC
+                        - OPENSEARCH
                         type: string
                     type: object
                   vertex:
@@ -579,6 +618,7 @@ spec:
                     enum:
                     - VICTORIA
                     - ELASTIC
+                    - OPENSEARCH
                     type: string
                   elastic:
                     description: Configures a connection to elasticsearch
@@ -622,6 +662,50 @@ spec:
                     type: object
                   enabled:
                     type: boolean
+                  opensearch:
+                    description: Configures a connection to opensearch
+                    properties:
+                      awsAccessKeyId:
+                        description: AWS Access Key ID to use, can also use IRSA to
+                          acquire credentials
+                        type: string
+                      awsRegion:
+                        description: AWS Region to use
+                        type: string
+                      awsSecretAccessKeySecretRef:
+                        description: AWS Secret Access Key to use, can also use IRSA
+                          to acquire credentials
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      host:
+                        description: Host ...
+                        type: string
+                      index:
+                        description: Index to query in opensearch
+                        type: string
+                    required:
+                    - host
+                    type: object
                   victoria:
                     description: Configures a connection to victoria metrics
                     properties:
