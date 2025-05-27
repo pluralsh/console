@@ -2137,11 +2137,14 @@ export enum ConfigurationType {
   Domain = 'DOMAIN',
   Enum = 'ENUM',
   File = 'FILE',
+  Flow = 'FLOW',
   Function = 'FUNCTION',
+  Group = 'GROUP',
   Int = 'INT',
   Password = 'PASSWORD',
   Project = 'PROJECT',
-  String = 'STRING'
+  String = 'STRING',
+  User = 'USER'
 }
 
 /** Validations to apply to this configuration entry prior to PR creation */
@@ -3062,6 +3065,8 @@ export type GlobalService = {
   /** internal id of this global service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether to include management clusters in the target set */
+  mgmt?: Maybe<Scalars['Boolean']['output']>;
   /** a human readable name for this global service */
   name: Scalars['String']['output'];
   /** the service which created this global service */
@@ -3100,6 +3105,8 @@ export type GlobalServiceAttributes = {
   context?: InputMaybe<TemplateContextAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
+  /** whether to include management clusters in the target set */
+  mgmt?: InputMaybe<Scalars['Boolean']['input']>;
   /** name for this global service */
   name: Scalars['String']['input'];
   /** the id of the service creating this */

@@ -75,6 +75,10 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
+	// Whether to include management clusters in the target set
+	// +kubebuilder:validation:Optional
+	Mgmt *bool `json:"mgmt,omitempty"`
+
 	// ServiceRef to replicate across clusters
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
@@ -131,6 +135,7 @@ func (gs *GlobalService) Attributes(providerId, projectId *string) console.Globa
 		Distro:     gs.Spec.Distro,
 		ProviderID: providerId,
 		ProjectID:  projectId,
+		Mgmt:       gs.Spec.Mgmt,
 		Reparent:   gs.Spec.Reparent,
 		Cascade:    gs.Spec.Cascade.Attributes(),
 		Tags:       gs.Spec.TagsAttribute(),

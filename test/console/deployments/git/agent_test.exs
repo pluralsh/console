@@ -10,11 +10,11 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, pid} = Discovery.start(git)
 
-      fetch_and_check(git, svc)
+      fetch_and_check(svc)
 
       send pid, :pull
 
-      fetch_and_check(git, svc)
+      fetch_and_check(svc)
 
       git = refetch(git)
       assert git.health == :pullable
@@ -33,7 +33,7 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, pid} = Discovery.start(git)
 
-      files = fetch_and_extract(git, svc)
+      files = fetch_and_extract(svc)
       for f <- ~w(.git-askpass .ssh-askpass ssh-add),
         do: assert files[f] == File.read!(Path.join("bin", f))
 
@@ -149,8 +149,8 @@ defmodule Console.Deployments.Git.AgentTest do
     end
   end
 
-  defp fetch_and_extract(git, svc) do
-    {:ok, f} = Discovery.fetch(git, svc)
+  defp fetch_and_extract(svc) do
+    {:ok, f} = Discovery.fetch(svc)
 
     {:ok, tmp} = Briefly.create()
 
@@ -164,8 +164,8 @@ defmodule Console.Deployments.Git.AgentTest do
     Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
   end
 
-  defp fetch_and_check(git, svc) do
-    {:ok, f} = Discovery.fetch(git, svc)
+  defp fetch_and_check(svc) do
+    {:ok, f} = Discovery.fetch(svc)
     {:ok, tmp} = Briefly.create()
 
     {:ok, f} = SmartFile.new(f)

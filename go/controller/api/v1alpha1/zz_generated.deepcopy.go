@@ -2364,6 +2364,11 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 		*out = new(client.ClusterDistro)
 		**out = **in
 	}
+	if in.Mgmt != nil {
+		in, out := &in.Mgmt, &out.Mgmt
+		*out = new(bool)
+		**out = **in
+	}
 	if in.ServiceRef != nil {
 		in, out := &in.ServiceRef, &out.ServiceRef
 		*out = new(v1.ObjectReference)

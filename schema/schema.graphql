@@ -2830,6 +2830,9 @@ input GlobalServiceAttributes {
   "kubernetes distribution to target"
   distro: ClusterDistro
 
+  "whether to include management clusters in the target set"
+  mgmt: Boolean
+
   "cluster api provider to target"
   providerId: ID
 
@@ -2956,6 +2959,9 @@ type GlobalService {
 
   "the kubernetes distribution to target with this global service"
   distro: ClusterDistro
+
+  "whether to include management clusters in the target set"
+  mgmt: Boolean
 
   "whether you want to reparent existing plural services under this global service"
   reparent: Boolean
@@ -6608,6 +6614,9 @@ enum ConfigurationType {
   ENUM
   CLUSTER
   PROJECT
+  GROUP
+  USER
+  FLOW
 }
 
 enum Operation {

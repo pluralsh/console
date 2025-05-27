@@ -2476,6 +2476,8 @@ type GlobalService struct {
 	Tags []*Tag `json:"tags,omitempty"`
 	// the kubernetes distribution to target with this global service
 	Distro *ClusterDistro `json:"distro,omitempty"`
+	// whether to include management clusters in the target set
+	Mgmt *bool `json:"mgmt,omitempty"`
 	// whether you want to reparent existing plural services under this global service
 	Reparent *bool `json:"reparent,omitempty"`
 	// behavior for all owned resources when this global service is deleted
@@ -2505,6 +2507,8 @@ type GlobalServiceAttributes struct {
 	Tags []*TagAttributes `json:"tags,omitempty"`
 	// kubernetes distribution to target
 	Distro *ClusterDistro `json:"distro,omitempty"`
+	// whether to include management clusters in the target set
+	Mgmt *bool `json:"mgmt,omitempty"`
 	// cluster api provider to target
 	ProviderID *string `json:"providerId,omitempty"`
 	// a project this global service will sync across
@@ -7302,6 +7306,9 @@ const (
 	ConfigurationTypeEnum     ConfigurationType = "ENUM"
 	ConfigurationTypeCluster  ConfigurationType = "CLUSTER"
 	ConfigurationTypeProject  ConfigurationType = "PROJECT"
+	ConfigurationTypeGroup    ConfigurationType = "GROUP"
+	ConfigurationTypeUser     ConfigurationType = "USER"
+	ConfigurationTypeFlow     ConfigurationType = "FLOW"
 )
 
 var AllConfigurationType = []ConfigurationType{
@@ -7316,11 +7323,14 @@ var AllConfigurationType = []ConfigurationType{
 	ConfigurationTypeEnum,
 	ConfigurationTypeCluster,
 	ConfigurationTypeProject,
+	ConfigurationTypeGroup,
+	ConfigurationTypeUser,
+	ConfigurationTypeFlow,
 }
 
 func (e ConfigurationType) IsValid() bool {
 	switch e {
-	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum, ConfigurationTypeCluster, ConfigurationTypeProject:
+	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum, ConfigurationTypeCluster, ConfigurationTypeProject, ConfigurationTypeGroup, ConfigurationTypeUser, ConfigurationTypeFlow:
 		return true
 	}
 	return false

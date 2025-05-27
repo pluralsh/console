@@ -13,17 +13,19 @@ defmodule Console.Deployments.Git.Discovery do
   def start(%GitRepository{} = git), do: start_and_run(git, fn pid -> {:ok, pid} end)
 
   @spec fetch(Service.t) :: {:ok, SmartFile.t} | error
-  def fetch(%Service{} = svc) do
+  def fetch(%Service{git: %Service.Git{}} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
     with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, svc)),
       do: Server.fetch(digest, opener)
   end
+  def fetch(_), do: {:error, "no git spec provided for this service"}
 
   @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, SmartFile.t} | error
-  def fetch(%GitRepository{} = repo, ref) do
+  def fetch(%GitRepository{} = repo, %Service.Git{} = ref) do
     with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, ref)),
       do: Server.fetch(digest, opener)
   end
+  def fetch(_, _), do: {:error, "no git spec provided for this service"}
 
   @spec digest(GitRepository.t, Service.Git.t) :: {:ok, binary} | error
   def digest(%GitRepository{} = repo, ref), do: maybe_rpc(repo, &Agent.digest(&1, ref))

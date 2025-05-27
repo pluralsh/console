@@ -220,14 +220,13 @@ spec:
                       - STRING
                       - INT
                       - BOOL
-                      - DOMAIN
-                      - BUCKET
-                      - FILE
-                      - FUNCTION
                       - PASSWORD
                       - ENUM
                       - CLUSTER
                       - PROJECT
+                      - GROUP
+                      - USER
+                      - FLOW
                       type: string
                     validation:
                       description: Any additional validations you want to apply to
