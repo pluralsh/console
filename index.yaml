@@ -6671,6 +6671,17 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.1/controller-0.0.1.tgz
     version: 0.0.1
+  datastore:
+  - apiVersion: v2
+    appVersion: 0.11.18
+    created: "2025-05-27T14:27:04.131489079Z"
+    description: deploys the datastore operator for plural cd
+    digest: 4d88958c47e935236558b4021ef00eb29b23b8d8ffa36f37ad754d3a2324918e
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.1/datastore-0.0.1.tgz
+    version: 0.0.1
   network-observability-operator:
   - apiVersion: v2
     appVersion: 1.8.0-community
@@ -6839,4 +6850,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-23T23:40:37.157632591Z"
+generated: "2025-05-27T14:27:04.13203867Z"
