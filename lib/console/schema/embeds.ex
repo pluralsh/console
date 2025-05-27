@@ -100,7 +100,10 @@ defmodule Console.Schema.Configuration do
     password: 7,
     enum: 8,
     cluster: 9,
-    project: 10
+    project: 10,
+    group: 11,
+    user: 12,
+    flow: 13
 
   defenum UniqScope, project: 0, cluster: 1
 

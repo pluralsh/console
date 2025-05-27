@@ -213,16 +213,20 @@ defmodule Console.Schema.Cluster do
   end
 
   def target(query \\ __MODULE__, %{} = resource) do
-    Map.take(resource, [:provider_id, :project_id, :tags, :distro])
+    Map.take(resource, ~w(provider_id project_id tags distro mgmt)a)
     |> Enum.reduce(query, fn
       {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:project_id, proj_id}, q when is_binary(proj_id) -> for_project(q, proj_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       {:tags, %{} = tags}, q -> for_tags(q, tags)
+      {:mgmt, mgmt}, q when is_boolean(mgmt) -> allow_mgmt(q, mgmt)
       _, q -> q
     end)
   end
+
+  def allow_mgmt(query, false), do: from(c in query, where: not c.self or is_nil(c.self))
+  def allow_mgmt(query, _), do: query
 
   def or_ids(query \\ __MODULE__, ids)
   def or_ids(query, []), do: query

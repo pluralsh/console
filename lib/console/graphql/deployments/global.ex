@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :name,        non_null(:string), description: "name for this global service"
     field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
     field :distro,      :cluster_distro, description: "kubernetes distribution to target"
+    field :mgmt,        :boolean, description: "whether to include management clusters in the target set"
     field :provider_id, :id, description: "cluster api provider to target"
     field :project_id,  :id, description: "a project this global service will sync across"
     field :parent_id,   :id, description: "the id of the service creating this"
@@ -71,6 +72,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :name,     non_null(:string), description: "a human readable name for this global service"
     field :tags,     list_of(:tag), description: "a set of tags to select clusters for this global service"
     field :distro,   :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :mgmt,     :boolean, description: "whether to include management clusters in the target set"
     field :reparent, :boolean, description: "whether you want to reparent existing plural services under this global service"
     field :cascade,  :cascade, description: "behavior for all owned resources when this global service is deleted"
 

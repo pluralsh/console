@@ -75,6 +75,10 @@ spec:
                 - RKE
                 - K3S
                 type: string
+              mgmt:
+                description: Whether to include management clusters in the target
+                  set
+                type: boolean
               projectRef:
                 description: ProjectRef allows a global service to span a specific
                   project only

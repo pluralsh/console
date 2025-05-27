@@ -190,6 +190,7 @@ defmodule Console.Deployments.Global do
       {:field, global.provider_id, cluster.provider_id},
       {:field, global.project_id, cluster.project_id},
       {:tags, global.tags, cluster.tags},
+      {:mgmt, global.mgmt, cluster.self},
     ], &matcher/1)
   end
 
@@ -205,6 +206,8 @@ defmodule Console.Deployments.Global do
   defp matcher({:field, nil, _}), do: true
   defp matcher({:field, v, v}), do: true
   defp matcher({:field, _, _}), do: false
+  defp matcher({:mgmt, false, true}), do: false
+  defp matcher({:mgmt, _, _}), do: true
   defp matcher({:tags, %{} = tags, t2}) do
     Enum.map(tags, fn {k, v} -> %{name: k,  value: v} end)
     |> matches_tags?(t2)
