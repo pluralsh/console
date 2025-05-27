@@ -146,12 +146,12 @@ undeploy-kustomize: --tool manifests ## undeploy controller from the K8s cluster
 
 .PHONY: deploy-helm
 deploy-helm: NAMESPACE := console
-deploy-helm: RELEASE_NAME := controller-manager
+deploy-helm: RELEASE_NAME := datastore-manager
 deploy-helm: manifests ## deploy controller to the K8S cluster specified in ~/.kube/config via helm
 	@$(HELM) upgrade --install --create-namespace --namespace $(NAMESPACE) --set consoleUrl=$(PLURAL_CONSOLE_URL) $(RELEASE_NAME) --set controllerManager.manager.image.tag=$(IMG_TAG) $(DATASTORE_CHART_DIR)
 
 .PHONY: undeploy-helm
 undeploy-helm: NAMESPACE := console
-undeploy-helm: RELEASE_NAME := controller-manager
+undeploy-helm: RELEASE_NAME := datastore-manager
 undeploy-helm: manifests ## undeploy controller from the K8S cluster specified in ~/.kube/config via helm
 	@$(HELM) uninstall --namespace $(NAMESPACE) $(RELEASE_NAME)
