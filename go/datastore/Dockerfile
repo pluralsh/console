@@ -13,12 +13,12 @@ WORKDIR /workspace/controller
 # Retrieve application dependencies.
 # This allows the container build to reuse cached dependencies.
 # Expecting to copy go.mod and if present go.sum.
-COPY controller/go.* ./
+COPY datastore/go.* ./
 RUN go mod download
 
-COPY controller/api ./api
-COPY controller/cmd ./cmd
-COPY controller/internal ./internal
+COPY datastore/api ./api
+COPY datastore/cmd ./cmd
+COPY datastore/internal ./internal
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
