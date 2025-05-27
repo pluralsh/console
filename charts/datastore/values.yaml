@@ -1,0 +1,50 @@
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
+disableAdditionalVolumes: false
+
+securityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+consoleUrl: ~
+fullnameOverride: datastore-operator
+
+tokenSecretRef:
+  create: false
+  name: console-auth-token
+  key: access-token
+  token: CHANGEME
+
+controllerManager:
+  podLabels: {}
+  podAnnotations: {}
+
+  manager:
+    args:
+    - --health-probe-bind-address=:8081
+    - --metrics-bind-address=127.0.0.1:8080
+    - --leader-elect
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    image:
+      repository: ghcr.io/pluralsh/datastore-controller
+      tag: ~
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 200Mi
+  replicas: 1
+  serviceAccount:
+    annotations: {}
+imagePullSecrets: []
+kubernetesClusterDomain: cluster.local

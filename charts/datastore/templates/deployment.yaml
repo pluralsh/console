@@ -1,0 +1,95 @@
+{{ $consoleUrl := .Values.consoleUrl | default (printf "http://console.%s:4000" .Release.Namespace) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "controller.fullname" . }}-controller
+  labels:
+    app.kubernetes.io/component: manager
+    app.kubernetes.io/part-of: plural-datastore-controller
+  {{- include "controller.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.controllerManager.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: helm
+      app.kubernetes.io/part-of: plural-datastore-controller
+    {{- include "controller.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: manager
+        app.kubernetes.io/managed-by: helm
+        app.kubernetes.io/part-of: plural-datastore-controller
+      {{- include "controller.selectorLabels" . | nindent 8 }}
+      {{ with .Values.controllerManager.podLabels }}
+        {{ toYaml . | nindent 8 }}
+      {{ end }}
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      {{ with .Values.controllerManager.podAnnotations }}
+        {{ toYaml . | nindent 8 }}
+      {{ end }}
+    spec:
+      containers:
+      - args:
+        {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+        - --console-url={{ $consoleUrl }}/gql
+        - --console-token=$(CONSOLE_TOKEN)
+        command:
+        - /manager
+        env:
+        - name: CONSOLE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.tokenSecretRef.name }}
+              key: {{ .Values.tokenSecretRef.key }}
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default (printf "v%s" .Chart.AppVersion) }}
+        imagePullPolicy: {{ .Values.controllerManager.manager.imagePullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        {{ if not .Values.disableAdditionalVolumes }}
+        {{ if .Values.global.additionalVolumeMounts }}
+        volumeMounts:
+        {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
+        {{ end }}
+        resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 10
+          }}
+        securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
+          | nindent 10 }}
+      imagePullSecrets: {{ .Values.imagePullSecrets | default list | toJson }}
+      {{ if  .Values.securityContext}}
+      securityContext:
+      {{ toYaml .Values.securityContext | nindent 8 }}
+      {{ end }}
+      serviceAccountName: {{ include "controller.fullname" . }}-controller-manager
+      terminationGracePeriodSeconds: 10
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if .Values.global.additionalVolumes }}
+      volumes:
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{ end }}

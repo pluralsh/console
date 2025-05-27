@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- dbs_v1alpha1_elasticsearchcredentials.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples
