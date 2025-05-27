@@ -159,6 +159,7 @@ defmodule Console.Schema.PolicyConstraint do
     |> cast_assoc(:violations)
     |> foreign_key_constraint(:cluster_id)
     |> validate_required([:name, :ref])
+    |> put_change(:updated_at, DateTime.utc_now())
   end
 
   @ref_valid ~w(kind name)a

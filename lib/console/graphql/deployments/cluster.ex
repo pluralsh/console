@@ -9,7 +9,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   ecto_enum :scaling_recommendation_type, Console.Schema.ClusterScalingRecommendation.Type
   ecto_enum :service_mesh, Console.Schema.OperationalLayout.ServiceMesh
   ecto_enum :insight_component_priority, Console.Schema.ClusterInsightComponent.Priority
-
+  ecto_enum :node_statistic_health, Console.Schema.NodeStatistic.Health
   enum :conjunction do
     value :and
     value :or
@@ -61,6 +61,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :health_score,       :integer
     field :insight_components, list_of(:cluster_insight_component_attributes),
       description: "scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval"
+    field :node_statistics,    list_of(:node_statistic_attributes)
   end
 
   input_object :cluster_insight_component_attributes do
@@ -70,6 +71,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :namespace, :string
     field :name,      non_null(:string)
     field :priority,  :insight_component_priority
+  end
+
+  input_object :node_statistic_attributes do
+    field :name,         :string
+    field :pending_pods, :integer
+    field :health,       :node_statistic_health
   end
 
   input_object :cluster_update_attributes do
@@ -538,6 +545,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.network_graph/3
     end
+
+    field :node_statistics, list_of(:node_statistic),
+      resolve: dataloader(Deployments),
+      description: "a list of node healthstatistics for this cluster"
 
     @desc "A pod-level set of utilization metrics for this cluster for rendering a heat map"
     field :heat_map, :utilization_heat_map do
@@ -1079,6 +1090,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
   @desc "a high level description of the setup of common resources in a cluster"
   object :operational_layout do
     field :service_mesh, :service_mesh
+  end
+
+  @desc "A representation of node health within a cluster"
+  object :node_statistic do
+    field :id,           non_null(:id)
+    field :name,         non_null(:string)
+    field :pending_pods, :integer
+    field :health,       :node_statistic_health
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   connection node_type: :cluster

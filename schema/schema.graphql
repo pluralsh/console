@@ -5030,6 +5030,12 @@ enum InsightComponentPriority {
   CRITICAL
 }
 
+enum NodeStatisticHealth {
+  HEALTHY
+  WARNING
+  FAILED
+}
+
 enum Conjunction {
   AND
   OR
@@ -5104,6 +5110,8 @@ input ClusterPing {
 
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
+
+  nodeStatistics: [NodeStatisticAttributes]
 }
 
 input ClusterInsightComponentAttributes {
@@ -5113,6 +5121,12 @@ input ClusterInsightComponentAttributes {
   namespace: String
   name: String!
   priority: InsightComponentPriority
+}
+
+input NodeStatisticAttributes {
+  name: String
+  pendingPods: Int
+  health: NodeStatisticHealth
 }
 
 input ClusterUpdateAttributes {
@@ -5750,6 +5764,9 @@ type Cluster {
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
+
+  "a list of node healthstatistics for this cluster"
+  nodeStatistics: [NodeStatistic]
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
   heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
@@ -6456,6 +6473,17 @@ type NetworkMeshEdge {
 "a high level description of the setup of common resources in a cluster"
 type OperationalLayout {
   serviceMesh: ServiceMesh
+}
+
+"A representation of node health within a cluster"
+type NodeStatistic {
+  id: ID!
+  name: String!
+  pendingPods: Int
+  health: NodeStatisticHealth
+  cluster: Cluster
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ClusterConnection {

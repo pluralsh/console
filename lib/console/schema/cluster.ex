@@ -21,7 +21,8 @@ defmodule Console.Schema.Cluster do
     ClusterInsightComponent,
     CloudAddon,
     OperationalLayout,
-    DeprecatedCustomResource
+    DeprecatedCustomResource,
+    NodeStatistic
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -138,6 +139,7 @@ defmodule Console.Schema.Cluster do
     has_many :api_deprecations, through: [:services, :api_deprecations]
     has_many :insight_components, ClusterInsightComponent, on_replace: :delete
     has_many :deprecated_custom_resources, DeprecatedCustomResource, on_replace: :delete
+    has_many :node_statistics, NodeStatistic, on_replace: :delete
 
     has_many :pr_automations, PrAutomation, on_replace: :delete
     has_many :read_bindings, PolicyBinding,
@@ -435,6 +437,7 @@ defmodule Console.Schema.Cluster do
     model
     |> cast(attrs, ~w(pinged_at distro health_score kubelet_version current_version installed)a)
     |> cast_assoc(:insight_components)
+    |> cast_assoc(:node_statistics)
     |> change_markers(distro: :distro_changed)
     |> update_vsn()
   end

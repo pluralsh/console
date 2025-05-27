@@ -972,6 +972,8 @@ type Cluster struct {
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
 	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
 	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	// a list of node healthstatistics for this cluster
+	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
@@ -1250,6 +1252,7 @@ type ClusterPing struct {
 	HealthScore    *int64         `json:"healthScore,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
+	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
 }
 
 // a CAPI provider for a cluster, cloud is inferred from name if not provided manually
@@ -3401,6 +3404,23 @@ type NodeSpec struct {
 	PodCidr       *string `json:"podCidr,omitempty"`
 	ProviderID    *string `json:"providerId,omitempty"`
 	Unschedulable *bool   `json:"unschedulable,omitempty"`
+}
+
+// A representation of node health within a cluster
+type NodeStatistic struct {
+	ID          string               `json:"id"`
+	Name        string               `json:"name"`
+	PendingPods *int64               `json:"pendingPods,omitempty"`
+	Health      *NodeStatisticHealth `json:"health,omitempty"`
+	Cluster     *Cluster             `json:"cluster,omitempty"`
+	InsertedAt  *string              `json:"insertedAt,omitempty"`
+	UpdatedAt   *string              `json:"updatedAt,omitempty"`
+}
+
+type NodeStatisticAttributes struct {
+	Name        *string              `json:"name,omitempty"`
+	PendingPods *int64               `json:"pendingPods,omitempty"`
+	Health      *NodeStatisticHealth `json:"health,omitempty"`
 }
 
 type NodeStatus struct {
@@ -8014,6 +8034,49 @@ func (e *MatchStrategy) UnmarshalGQL(v any) error {
 }
 
 func (e MatchStrategy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type NodeStatisticHealth string
+
+const (
+	NodeStatisticHealthHealthy NodeStatisticHealth = "HEALTHY"
+	NodeStatisticHealthWarning NodeStatisticHealth = "WARNING"
+	NodeStatisticHealthFailed  NodeStatisticHealth = "FAILED"
+)
+
+var AllNodeStatisticHealth = []NodeStatisticHealth{
+	NodeStatisticHealthHealthy,
+	NodeStatisticHealthWarning,
+	NodeStatisticHealthFailed,
+}
+
+func (e NodeStatisticHealth) IsValid() bool {
+	switch e {
+	case NodeStatisticHealthHealthy, NodeStatisticHealthWarning, NodeStatisticHealthFailed:
+		return true
+	}
+	return false
+}
+
+func (e NodeStatisticHealth) String() string {
+	return string(e)
+}
+
+func (e *NodeStatisticHealth) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NodeStatisticHealth(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NodeStatisticHealth", str)
+	}
+	return nil
+}
+
+func (e NodeStatisticHealth) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -10,7 +10,7 @@ defmodule Console.AI.Evidence.Logs do
 
   @type parent :: Service.t | ClusterInsightComponent.t | Cluster.t
 
-  @base [query: "error fatal exception fail failed failure warning warn", limit: 10]
+  @base [query: "error fatal exception fail failed failure warning warn", limit: 5]
 
   @logs_preface "I've found some relevant log data, which I'll list below alongside some potentially useful contextual logs before and after:"
 
