@@ -1,4 +1,5 @@
 # Paths
+DATASTORE_CHART_DIR := $(ROOT_DIRECTORY)/charts/datastore
 CONTROLLER_CHART_DIR := $(ROOT_DIRECTORY)/charts/controller
 PLURAL_CONSOLE_CHART_DIR := $(ROOT_DIRECTORY)/plural/helm/console
 WORKSPACES_DIR := $(ROOT_DIRECTORY)/go

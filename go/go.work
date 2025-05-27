@@ -1,11 +1,12 @@
-go 1.24.0
+go 1.24.2
 
-toolchain go1.24.2
+toolchain go1.24.3
 
 use (
 	./ai-proxy
 	./client // github.com/pluralsh/console/go/client
 	./controller // github.com/pluralsh/console/go/controller
+	./datastore // github.com/pluralsh/console/go/datastore
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils

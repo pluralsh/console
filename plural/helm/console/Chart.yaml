@@ -11,6 +11,9 @@ dependencies:
   - name: controller
     version: 0.0.123
     repository: file://../../../charts/controller
+  - name: datastore
+    version: 0.0.1
+    repository: file://../../../charts/datastore
   - name: kubernetes-dashboard
     version: 7.12.0
     alias: dashboard

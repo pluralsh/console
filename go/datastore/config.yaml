@@ -1,0 +1,22 @@
+processor:
+  ignoreTypes:
+    - ".*List$"
+  ignoreFields:
+    - "status$"
+    - "TypeMeta$"
+
+render:
+  kubernetesVersion: 1.29
+  knownTypes:
+    - name: SecretObjectReference
+      package: sigs.k8s.io/gateway-api/apis/v1beta1
+      link: https://gateway-api.sigs.k8s.io/references/spec/#gateway.networking.k8s.io/v1beta1.SecretObjectReference
+    - name: ObjectReference
+      package: k8s.io/api/core/v1
+      link: https://pkg.go.dev/k8s.io/api/core/v1#ObjectReference
+    - name: ObjectMeta
+      package: k8s.io/apimachinery/pkg/apis/meta/v1
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#ObjectMeta
+    - name: RawExtension
+      package: k8s.io/apimachinery/pkg/runtime
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension

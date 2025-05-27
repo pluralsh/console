@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - dbs.plural.sh
+  resources:
+  - elasticsearchcredentials
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dbs.plural.sh
+  resources:
+  - elasticsearchcredentials/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dbs.plural.sh
+  resources:
+  - elasticsearchcredentials/status
+  verbs:
+  - get
+  - patch
+  - update
