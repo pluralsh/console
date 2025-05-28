@@ -1,7 +1,9 @@
 import {
+  Button,
   Card,
   Chip,
   ChipList,
+  Flex,
   SidecarItem,
   Table,
   useSetBreadcrumbs,
@@ -47,9 +49,11 @@ import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { Kind } from '../common/types'
 
 import { filesize } from 'filesize'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useEventsColumns } from './Events'
 import { getBreadcrumbs } from './Nodes'
+import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
+import { name } from 'anser'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -63,6 +67,8 @@ const directory: Array<TabEntry> = [
 export default function Node() {
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
+  const [open, setOpen] = useState(false)
+
   const { data, loading } = useNodeQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -93,23 +99,42 @@ export default function Node() {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar resource={node}>
-          <SidecarItem heading="Ready">
-            {/* TODO: Fix on the API side? It works in the list view. */}
-            <ResourceReadyChip ready={node?.ready} />
-          </SidecarItem>
-          <SidecarItem heading="Unschedulable">
-            <Chip
-              size="small"
-              severity={node?.unschedulable ? 'danger' : 'success'}
-            >
-              {node?.unschedulable ? 'True' : 'False'}
-            </Chip>
-          </SidecarItem>
-          {node.podCIDR && (
-            <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
-          )}
-        </MetadataSidecar>
+        <Flex
+          direction={'column'}
+          gap={'medium'}
+        >
+          <Button
+            destructive
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(true)
+            }}
+          >
+            Drain node
+          </Button>
+          <DrainNodeModal
+            name={name}
+            open={open}
+            setOpen={setOpen}
+          />
+          <MetadataSidecar resource={node}>
+            <SidecarItem heading="Ready">
+              {/* TODO: Fix on the API side? It works in the list view. */}
+              <ResourceReadyChip ready={node?.ready} />
+            </SidecarItem>
+            <SidecarItem heading="Unschedulable">
+              <Chip
+                size="small"
+                severity={node?.unschedulable ? 'danger' : 'success'}
+              >
+                {node?.unschedulable ? 'True' : 'False'}
+              </Chip>
+            </SidecarItem>
+            {node.podCIDR && (
+              <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
+            )}
+          </MetadataSidecar>
+        </Flex>
       }
     >
       <Outlet context={node} />

@@ -3,7 +3,6 @@ import { Pod } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { PhaseT, podStatusToReadiness } from 'utils/status'
 
-import { getNodeDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import { PhaseChip, StatusChip } from '../../../cluster/TableElements.tsx'
 import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
