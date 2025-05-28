@@ -1,0 +1,12 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticSearchUser
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchuser
+    app.kubernetes.io/instance: elasticsearchuser-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchuser-sample
+spec:
+  # TODO(user): Add fields here
