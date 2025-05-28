@@ -4509,7 +4509,11 @@ input ServiceErrorAttributes {
 
 "A reusable configuration context, useful for plumbing data from external tools like terraform\/pulumi\/etc"
 input ServiceContextAttributes {
+  "the project this context belongs to"
+  projectId: ID
+
   configuration: Json
+
   secrets: [ConfigAttributes]
 }
 
@@ -4936,10 +4940,18 @@ type NamespaceMetadata {
 "A reusable bundle of configuration designed to make it easy to communicate between tools like tf\/pulumi and k8s"
 type ServiceContext {
   id: ID!
+
   name: String!
+
   configuration: Map
+
   secrets: [ServiceConfiguration]
+
+  "the project this context belongs to"
+  project: Project
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

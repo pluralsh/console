@@ -5436,12 +5436,16 @@ type ServiceContext struct {
 	Name          string                  `json:"name"`
 	Configuration map[string]any          `json:"configuration,omitempty"`
 	Secrets       []*ServiceConfiguration `json:"secrets,omitempty"`
-	InsertedAt    *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
+	// the project this context belongs to
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
 }
 
 // A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc
 type ServiceContextAttributes struct {
+	// the project this context belongs to
+	ProjectID     *string             `json:"projectId,omitempty"`
 	Configuration *string             `json:"configuration,omitempty"`
 	Secrets       []*ConfigAttributes `json:"secrets,omitempty"`
 }

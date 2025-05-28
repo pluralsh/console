@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc"
   input_object :service_context_attributes do
+    field :project_id,    :id, description: "the project this context belongs to"
     field :configuration, :json
     field :secrets,       list_of(:config_attributes)
   end
@@ -437,6 +438,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,          non_null(:string)
     field :configuration, :map
     field :secrets,       list_of(:service_configuration)
+    field :project,       :project,
+      resolve: dataloader(Deployments),
+      description: "the project this context belongs to"
 
     timestamps()
   end

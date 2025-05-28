@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -14,6 +15,11 @@ type ServiceContextSpec struct {
 
 	// A reusable configuration context, useful for plumbing data from external tools like terraform, pulumi, etc.
 	Configuration runtime.RawExtension `json:"configuration,omitempty"`
+
+	// ProjectRef references project this service context belongs to.
+	// If not provided, it will use the default project.
+	// +kubebuilder:validation:Optional
+	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -55,6 +61,18 @@ func (s *ServiceContext) GetName() string {
 	}
 
 	return s.Name
+}
+
+func (p *ServiceContext) ProjectName() string {
+	if p.Spec.ProjectRef == nil {
+		return ""
+	}
+
+	return p.Spec.ProjectRef.Name
+}
+
+func (p *ServiceContext) HasProjectRef() bool {
+	return p.Spec.ProjectRef != nil
 }
 
 func (s *ServiceContext) Diff(hasher Hasher) (changed bool, sha string, err error) {

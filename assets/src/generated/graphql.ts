@@ -9156,6 +9156,8 @@ export type ServiceContext = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** the project this context belongs to */
+  project?: Maybe<Project>;
   secrets?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -9163,6 +9165,8 @@ export type ServiceContext = {
 /** A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc */
 export type ServiceContextAttributes = {
   configuration?: InputMaybe<Scalars['Json']['input']>;
+  /** the project this context belongs to */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   secrets?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
 };
 

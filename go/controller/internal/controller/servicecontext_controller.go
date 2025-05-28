@@ -92,7 +92,13 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	apiServiceContext, err := r.sync(serviceContext)
+
+	project, result, err := GetProject(ctx, r.Client, r.Scheme, serviceContext)
+	if result != nil || err != nil {
+		return handleRequeue(result, err, serviceContext.SetCondition)
+	}
+
+	apiServiceContext, err := r.sync(serviceContext, project)
 	if err != nil {
 		logger.Error(err, "unable to create or update sa")
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -108,11 +114,15 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	return ctrl.Result{}, nil
 }
 
-func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext) (*console.ServiceContextFragment, error) {
+func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1alpha1.Project) (*console.ServiceContextFragment, error) {
 	attributes := console.ServiceContextAttributes{}
 	attributes.Configuration = lo.ToPtr("{}")
 	if sc.Spec.Configuration.Raw != nil {
 		attributes.Configuration = lo.ToPtr(string(sc.Spec.Configuration.Raw))
+	}
+
+	if project != nil {
+		attributes.ProjectID = project.Status.ID
 	}
 
 	return r.ConsoleClient.SaveServiceContext(sc.GetName(), attributes)
