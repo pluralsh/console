@@ -45,40 +45,30 @@ export function Logs({
     DEFAULT_LOG_FLYOVER_FILTERS
   )
 
-  const [live, setLiveState] = useState(true)
+  const [live, setLive] = useState(true)
 
-  const { data, loading, error, fetchMore, startPolling, stopPolling } =
-    useLogAggregationQuery({
-      variables: {
-        clusterId,
-        query: throttledQ,
-        limit: filters.queryLength || DEFAULT_LOG_QUERY_LENGTH,
-        serviceId,
-        time: {
-          before: live ? undefined : toISOStringOrUndef(filters.date, true),
-          duration: secondsToDuration(filters.sinceSeconds),
-          reverse: false,
-        },
-        facets: labels,
+  const { data, loading, error, fetchMore } = useLogAggregationQuery({
+    variables: {
+      clusterId,
+      serviceId,
+      query: throttledQ,
+      limit: filters.queryLength || DEFAULT_LOG_QUERY_LENGTH,
+      time: {
+        before: live ? undefined : toISOStringOrUndef(filters.date, true),
+        duration: secondsToDuration(filters.sinceSeconds),
+        reverse: false,
       },
-      fetchPolicy: 'cache-and-network',
-      notifyOnNetworkStatusChange: true,
-      pollInterval: POLL_INTERVAL,
-      skip: !(clusterId || serviceId),
-    })
+      facets: labels,
+    },
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
+    pollInterval: live ? POLL_INTERVAL : 0,
+    skip: !(clusterId || serviceId),
+  })
 
   const logs = useMemo(
     () => data?.logAggregation?.filter(isNonNullable) ?? [],
     [data]
-  )
-
-  const setLive = useCallback(
-    (newVal: boolean) => {
-      if (!newVal) stopPolling()
-      else startPolling(POLL_INTERVAL)
-      setLiveState(newVal)
-    },
-    [startPolling, stopPolling]
   )
 
   const addLabel = useCallback(

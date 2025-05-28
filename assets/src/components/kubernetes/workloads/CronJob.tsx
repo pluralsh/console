@@ -6,7 +6,6 @@ import {
   Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ApolloError } from 'apollo-boost'
 import { ReactElement, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
@@ -45,6 +44,7 @@ import { NAMESPACE_PARAM } from '../Navigation'
 
 import { Kind } from '../common/types'
 
+import { ApolloError } from '@apollo/client'
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
 

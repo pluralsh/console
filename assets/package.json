@@ -32,7 +32,7 @@
   "packageManager": "yarn@3.6.0",
   "dependencies": {
     "@absinthe/socket": "0.2.1",
-    "@apollo/client": "3.10.3",
+    "@apollo/client": "3.13.8",
     "@dagrejs/dagre": "1.0.4",
     "@docsearch/js": "3.5.2",
     "@docsearch/react": "3.5.2",

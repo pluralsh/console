@@ -1,7 +1,6 @@
 import styled, { useTheme } from 'styled-components'
 import { Button, CloseIcon, Toast, Tooltip } from '@pluralsh/design-system'
 import { useState } from 'react'
-import { ApolloError } from 'apollo-boost'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -14,6 +13,7 @@ import { Maybe } from '../../../generated/graphql-kubernetes'
 import { useRefetch } from '../Cluster'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { Kind } from '../common/types'
+import { ApolloError } from '@apollo/client'
 
 const DeleteIcon = styled(CloseIcon)(({ theme }) => ({
   marginLeft: theme.spacing.xxsmall,

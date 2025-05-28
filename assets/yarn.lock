@@ -245,9 +245,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.10.3":
-  version: 3.10.3
-  resolution: "@apollo/client@npm:3.10.3"
+"@apollo/client@npm:3.13.8":
+  version: 3.13.8
+  resolution: "@apollo/client@npm:3.13.8"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     "@wry/caches": ^1.0.0
@@ -258,16 +258,15 @@ __metadata:
     optimism: ^0.18.0
     prop-types: ^15.7.2
     rehackt: ^0.1.0
-    response-iterator: ^0.2.6
     symbol-observable: ^4.0.0
     ts-invariant: ^0.10.3
     tslib: ^2.3.0
     zen-observable-ts: ^1.2.5
   peerDependencies:
     graphql: ^15.0.0 || ^16.0.0
-    graphql-ws: ^5.5.5
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    graphql-ws: ^5.5.5 || ^6.0.3
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc
     subscriptions-transport-ws: ^0.9.0 || ^0.11.0
   peerDependenciesMeta:
     graphql-ws:
@@ -278,7 +277,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 7ec2565ee7c48db2f6a6bd7d141d5529b8e4b82f2bc59e50ecc71d9ad9364bb27ed1fb0ddaf549815cacc7faf10cafc19c1af8046d20d9bab3fed9ff7819fc8c
+  checksum: 39f058c2681aaa1f95275d8e856976fb1e15f30bdac33758d3cf3c8dc08f111c1cdfa3a30a777ad1088b950cb94336197a81d136a43faa7470cbf2c9746f53ce
   languageName: node
   linkType: hard
 
@@ -10099,7 +10098,7 @@ __metadata:
   resolution: "console@workspace:."
   dependencies:
     "@absinthe/socket": 0.2.1
-    "@apollo/client": 3.10.3
+    "@apollo/client": 3.13.8
     "@apollo/sandbox": 2.7.0
     "@cypress/webpack-preprocessor": 5.17.1
     "@dagrejs/dagre": 1.0.4
@@ -18648,13 +18647,6 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: 064d09c1808d0c51b3d90b5d27e198e6d0c5dad0eb57065fd40803d6a20553e5398b07f76739d69cbabc12547058bec6b32106ea66622375fb0d7e8fca6a846c
-  languageName: node
-  linkType: hard
-
-"response-iterator@npm:^0.2.6":
-  version: 0.2.20
-  resolution: "response-iterator@npm:0.2.20"
-  checksum: b881baa3da91351a5dd46c7e57db4b74212d62065aaa6bac9c6059efdff50406ea3d197ead3fa1c69e96f75af99f169254721e356f80bc875d05aba5efa0cc47
   languageName: node
   linkType: hard
 

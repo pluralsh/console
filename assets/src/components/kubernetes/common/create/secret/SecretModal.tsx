@@ -1,4 +1,5 @@
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { FetchResult } from '@apollo/client'
+import { OperationVariables } from '@apollo/client/core'
 import {
   Button,
   FormField,
@@ -7,24 +8,21 @@ import {
   Modal,
   Select,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
-import { SecretType, ToSecretYaml } from './common'
+import { useNamespaces } from 'components/kubernetes/Cluster'
+import { GqlError } from 'components/utils/Alert'
 import {
   DeployFromInputMutation,
   useDeployFromInputMutation,
 } from 'generated/graphql-kubernetes'
-import { useParams } from 'react-router-dom'
-import { useNamespaces } from 'components/kubernetes/Cluster'
 import { KubernetesClient } from 'helpers/kubernetes.client'
-import { FetchResult } from '@apollo/client'
-import { GqlError } from 'components/utils/Alert'
-import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
-import { GraphQLError } from 'graphql'
-import { SecretSSHForm } from './type/SSH'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
+import { SecretType, ToSecretYaml } from './common'
+import { SecretBasicAuthForm } from './type/BasicAuth.tsx'
 import { SecretOpaqueForm } from './type/Opaque'
 import { SecretServiceAccountForm } from './type/ServiceAccount'
-import { OperationVariables } from '@apollo/client/core'
-import { SecretBasicAuthForm } from './type/BasicAuth.tsx'
+import { SecretSSHForm } from './type/SSH'
 
 const FormContainer = styled.div`
   display: flex;
@@ -364,13 +362,7 @@ function ErrorContainer({
       }}
     >
       <GqlError
-        error={
-          {
-            graphQLErrors: [
-              { message: errorMessage } as GraphQLError,
-            ] as GraphQLErrors,
-          } as ApolloError
-        }
+        error={errorMessage}
         header={errorHeader}
       />
     </div>
