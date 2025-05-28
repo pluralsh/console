@@ -884,17 +884,26 @@ defmodule Console.Deployments.Services do
   end
 
   @doc """
-  Saves a service context for the given name, will update if its already present
+  Saves a service context for the given name, will update if its already present.
+
+  Requires project write access as the minimum permission.
   """
   @spec save_context(map, binary, User.t) :: context_resp
   def save_context(attrs, name, %User{} = user) do
-    case get_context_by_name(name) do
-      %ServiceContext{} = ctx -> ctx
-      nil -> %ServiceContext{name: name}
-    end
-    |> ServiceContext.changeset(attrs)
-    |> allow(user, :create)
-    |> when_ok(&Repo.insert_or_update/1)
+    start_transaction()
+    |> add_operation(:context, fn _ ->
+      case get_context_by_name(name) do
+        %ServiceContext{} = ctx -> allow(ctx, user, :write) # validate have access to prior project in event of it changing
+        nil -> {:ok, %ServiceContext{name: name}}
+      end
+    end)
+    |> add_operation(:upsert, fn %{context: context} ->
+      context
+      |> ServiceContext.changeset(Settings.add_project_id(attrs))
+      |> allow(user, :write)
+      |> when_ok(&Repo.insert_or_update/1)
+    end)
+    |> execute(extract: :upsert)
   end
 
   @doc """

@@ -1,5 +1,6 @@
 defmodule Console.Schema.ServiceContext do
   use Piazza.Ecto.Schema
+  alias Console.Schema.Project
 
   schema "service_contexts" do
     field :name,          :string
@@ -10,15 +11,18 @@ defmodule Console.Schema.ServiceContext do
       field :value, Piazza.Ecto.EncryptedString
     end
 
+    belongs_to :project, Project
+
     timestamps()
   end
 
-  @valid ~w(name configuration)a
+  @valid ~w(name configuration project_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:secrets, with: &secret_changeset/2)
+    |> foreign_key_constraint(:project_id)
     |> validate_required([:name])
   end
 
