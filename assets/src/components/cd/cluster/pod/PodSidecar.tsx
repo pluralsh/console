@@ -3,11 +3,12 @@ import { Pod } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { PhaseT, podStatusToReadiness } from 'utils/status'
 
-import { getNodeDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import { PhaseChip, StatusChip } from '../../../cluster/TableElements.tsx'
 import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
 import { useTheme } from 'styled-components'
+import { getResourceDetailsAbsPath } from '../../../../routes/kubernetesRoutesConsts.tsx'
+import { Kind } from '../../../kubernetes/common/types.ts'
 
 export default function PodSidecar({
   pod,
@@ -31,7 +32,11 @@ export default function PodSidecar({
         {clusterId ? (
           <Link
             css={theme.partials.text.inlineLink}
-            to={getNodeDetailsPath({ clusterId, name: pod.spec.nodeName })}
+            to={getResourceDetailsAbsPath(
+              clusterId,
+              Kind.Node,
+              pod.spec.nodeName
+            )}
           >
             {pod.spec.nodeName}
           </Link>
