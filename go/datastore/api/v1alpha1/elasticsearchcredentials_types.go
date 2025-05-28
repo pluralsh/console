@@ -2,11 +2,13 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ElasticSearchCredentialsSpec defines the desired state of ElasticSearchCredentials
 type ElasticSearchCredentialsSpec struct {
+	Insecure             *bool                    `json:"insecure,omitempty"`
 	URL                  string                   `json:"url"`
 	Username             string                   `json:"username"`
 	PasswordSecretKeyRef corev1.SecretKeySelector `json:"passwordSecretKeyRef"`
@@ -32,6 +34,10 @@ type ElasticSearchCredentialsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ElasticSearchCredentials `json:"items"`
+}
+
+func (s *ElasticSearchCredentials) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 func init() {
