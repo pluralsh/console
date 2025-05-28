@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	"net/http"
 	"strings"
 
@@ -59,12 +60,21 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		}
 	}()
 
-	password, err := utils.GetSecretKey(ctx, r.Client, &credentials.Spec.PasswordSecretKeyRef, credentials.Namespace)
+	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
 		logger.V(5).Error(err, "failed to get password")
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
-	password = strings.ReplaceAll(password, "\n", "")
+	key, exists := secret.Data[credentials.Spec.PasswordSecretKeyRef.Key]
+	if !exists {
+		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", credentials.Spec.PasswordSecretKeyRef.Name, credentials.Spec.PasswordSecretKeyRef.Key)
+	}
+	password := strings.ReplaceAll(string(key), "\n", "")
+
+	if err := utils.TryAddControllerRef(ctx, r.Client, credentials, secret, r.Scheme); err != nil {
+		logger.V(5).Error(err, "failed to add controller ref")
+		return ctrl.Result{}, err
+	}
 
 	esCfg := elastic.Config{
 		Addresses: []string{credentials.Spec.URL},
@@ -119,5 +129,6 @@ func (r *ElasticSearchCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) 
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ElasticSearchCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
