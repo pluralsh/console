@@ -1,9 +1,7 @@
-import { ReactNode, useState } from 'react'
 import { ApolloError } from '@apollo/client'
 import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
+import { ReactNode, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { GraphQLError } from 'graphql'
-import { GraphQLErrors } from '@apollo/client/errors'
 
 import { GqlError } from './Alert'
 
@@ -79,15 +77,7 @@ export function Confirm({
           }}
         >
           <GqlError
-            error={
-              errorMessage
-                ? ({
-                    graphQLErrors: [
-                      { message: errorMessage } as GraphQLError,
-                    ] as GraphQLErrors,
-                  } as ApolloError)
-                : error
-            }
+            error={errorMessage || error}
             header={errorHeader}
           />
         </div>

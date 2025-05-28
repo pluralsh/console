@@ -1,13 +1,9 @@
-import { ApolloError } from '@apollo/client'
 import { CodeEditor } from '@pluralsh/design-system'
 import { dump, load } from 'js-yaml'
 import pluralize from 'pluralize'
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-
-import { GraphQLErrors } from '@apollo/client/errors'
-import type { GraphQLError } from 'graphql'
 
 import {
   NamespacedResourceQueryVariables,
@@ -20,7 +16,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { hash } from '../../../utils/sha'
-import { GqlError } from '../../utils/Alert'
+import { GqlError, GqlErrorType } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 export default function Raw(): ReactElement<any> {
@@ -29,7 +25,7 @@ export default function Raw(): ReactElement<any> {
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
   const [current, setCurrent] = useState<string>()
   const [sha, setSHA] = useState<string>()
-  const [updateError, setUpdateError] = useState<ApolloError>()
+  const [updateError, setUpdateError] = useState<GqlErrorType>()
   const [updating, setUpdating] = useState(false)
   const kind = useMemo(
     () => crd ?? pluralize(pathMatch?.params?.kind || '', 1),
@@ -133,11 +129,7 @@ export default function Raw(): ReactElement<any> {
               },
             })
           } catch (e) {
-            setUpdateError({
-              graphQLErrors: [
-                { message: (e as any)?.message as string } as GraphQLError,
-              ] as GraphQLErrors,
-            } as ApolloError)
+            setUpdateError(e instanceof Error ? e.message : (e as any))
           }
         }}
       />
