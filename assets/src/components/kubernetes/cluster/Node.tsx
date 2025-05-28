@@ -53,7 +53,6 @@ import { useMemo, useState } from 'react'
 import { useEventsColumns } from './Events'
 import { getBreadcrumbs } from './Nodes'
 import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
-import { name } from 'anser'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
