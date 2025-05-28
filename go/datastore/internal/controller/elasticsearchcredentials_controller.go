@@ -5,9 +5,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	corev1 "k8s.io/api/core/v1"
 	"net/http"
 	"strings"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
