@@ -37,7 +37,8 @@ defmodule Console.Deployments.Policies.Rbac do
     McpServer,
     OIDCProvider,
     PreviewEnvironmentTemplate,
-    ComplianceReportGenerator
+    ComplianceReportGenerator,
+    ServiceContext
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -103,6 +104,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(mcp, user, action, & &1.project)
   def evaluate(%ComplianceReportGenerator{} = gen, user, action),
     do: recurse(gen, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%ServiceContext{} = ctx, user, action),
+    do: recurse(ctx, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -197,14 +200,15 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(comp, [cluster: @top_preloads])
   def preload(%VulnerabilityReport{} = comp),
     do: Repo.preload(comp, [cluster: @top_preloads])
-  def preload(%RunStep{} = pcr),
-    do: Repo.preload(pcr, run: [stack: @stack_preloads])
+  def preload(%RunStep{} = pcr), do: Repo.preload(pcr, run: [stack: @stack_preloads])
   def preload(%User{} = user), do: Repo.preload(user, [:assume_bindings])
   def preload(%SharedSecret{} = share), do: Repo.preload(share, [:notification_bindings])
   def preload(%PreviewEnvironmentTemplate{} = template),
     do: Repo.preload(template, [flow: @top_preloads])
   def preload(%ComplianceReportGenerator{} = gen),
     do: Repo.preload(gen, [:read_bindings])
+  def preload(%ServiceContext{} = ctx),
+    do: Repo.preload(ctx, [project: @bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

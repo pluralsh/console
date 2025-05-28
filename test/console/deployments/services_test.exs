@@ -1151,6 +1151,19 @@ defmodule Console.Deployments.ServicesTest do
       assert ctx.configuration["some"] == "config"
     end
 
+    test "project writers can save their own contexts" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, ctx} = Services.save_context(%{
+        configuration: %{"some" => "config"},
+        project_id: project.id
+      }, "my-context", user)
+
+      assert ctx.name == "my-context"
+      assert ctx.configuration["some"] == "config"
+    end
+
     test "nonadmins cannot save contexts" do
       {:error, _} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", insert(:user))
     end
