@@ -8,6 +8,7 @@ rules:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials
+  - elasticsearchusers
   verbs:
   - create
   - delete
@@ -20,12 +21,14 @@ rules:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials/finalizers
+  - elasticsearchusers/finalizers
   verbs:
   - update
 - apiGroups:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials/status
+  - elasticsearchusers/status
   verbs:
   - get
   - patch

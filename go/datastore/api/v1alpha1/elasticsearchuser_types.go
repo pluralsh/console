@@ -1,37 +1,46 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // ElasticSearchUserSpec defines the desired state of ElasticSearchUser
 type ElasticSearchUserSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of ElasticSearchUser. Edit elasticsearchuser_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
+	Definition     Definition                  `json:"definition"`
 }
 
-// ElasticSearchUserStatus defines the observed state of ElasticSearchUser
-type ElasticSearchUserStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+type Definition struct {
+	// User to add
+	User string `json:"user"`
+	// PasswordSecretKeyRef reference
+	PasswordSecretKeyRef corev1.SecretKeySelector `json:"passwordSecretKeyRef"`
+	// Role represents the structure and assignment of roles in Elasticsearch.
+	Role ElasticSearchRole `json:"role"`
+}
+
+type ElasticSearchRole struct {
+	ClusterPermissions []string          `json:"clusterPermissions,omitempty"`
+	IndexPermissions   []IndexPermission `json:"indexPermissions,omitempty"`
+}
+
+type IndexPermission struct {
+	Names      []string `json:"names"`
+	Privileges []string `json:"privileges"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Namespaced
 
 // ElasticSearchUser is the Schema for the elasticsearchusers API
 type ElasticSearchUser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ElasticSearchUserSpec   `json:"spec,omitempty"`
-	Status ElasticSearchUserStatus `json:"status,omitempty"`
+	Spec   ElasticSearchUserSpec `json:"spec,omitempty"`
+	Status Status                `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
