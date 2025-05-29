@@ -21,9 +21,13 @@ export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export const DEFAULT_PAGE_SIZE = 100
 
-type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
-  baseOptions: QueryHookOptions<TQueryType, TVariables>
-) => QueryResult<TQueryType, TVariables> & {
+export type GenericQueryHook<
+  TQueryType,
+  TVariables extends OperationVariables,
+> = (baseOptions: QueryHookOptions<TQueryType, TVariables>) => QueryResult<
+  TQueryType,
+  TVariables
+> & {
   fetchMore: (options: any) => Promise<any>
 }
 

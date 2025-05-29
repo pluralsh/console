@@ -1,9 +1,14 @@
 import { Input, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
-import { ClusterHandleSelector } from 'components/cd/utils/ClusterHandleSelector'
 import ProjectSelector from 'components/utils/ProjectSelector'
 import { ConfigurationType, PrConfiguration } from 'generated/graphql'
 
 import { parseToBool } from 'utils/parseToBool'
+import {
+  ClusterHandleSelector,
+  FlowSelector,
+  GroupSelector,
+  UserSelector,
+} from '../../cd/utils/Selectors.tsx'
 
 export function PrConfigurationInput({
   config,
@@ -62,6 +67,27 @@ export function PrConfigurationInput({
             />
           ))}
         </Select>
+      )
+    case ConfigurationType.Group:
+      return (
+        <GroupSelector
+          group={value}
+          setGroup={setValue}
+        />
+      )
+    case ConfigurationType.User:
+      return (
+        <UserSelector
+          user={value}
+          setUser={setValue}
+        />
+      )
+    case ConfigurationType.Flow:
+      return (
+        <FlowSelector
+          flow={value}
+          setFlow={setValue}
+        />
       )
     default:
       return (
