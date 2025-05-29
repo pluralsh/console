@@ -1,20 +1,15 @@
 import { ApolloError } from '@apollo/client'
 import {
   Button,
-  CheckIcon,
   Checkbox,
   Codeline,
-  CopyIcon,
   Flex,
-  Input,
   Modal,
-  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
+import { GenerateAccessToken } from 'components/utils/GenerateAccessToken'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { useCreateAccessTokenMutation } from 'generated/graphql'
-import CopyToClipboard from 'react-copy-to-clipboard'
 
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -79,72 +74,5 @@ export function CloudConsoleWelcomeModal() {
         </Checkbox>
       </Flex>
     </Modal>
-  )
-}
-
-function GenerateAccessToken({
-  setError,
-}: {
-  setError: (error?: ApolloError) => void
-}) {
-  const [token, setToken] = useState('')
-  const [copied, setCopied] = useState(false)
-  const [mutation, { loading }] = useCreateAccessTokenMutation({
-    onError: (e) => setError(e),
-    onCompleted: (data) => {
-      const token = data.createAccessToken?.token ?? ''
-
-      setToken(token)
-      setError(undefined)
-      navigator.clipboard
-        .writeText(token)
-        .then(() => showCopied())
-        .catch((e) => console.error("Couldn't copy URL to clipboard", e))
-    },
-  })
-  const showCopied = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 3000)
-  }
-
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-    >
-      <span>Start by generating and copying the access token.</span>
-      <Flex gap="medium">
-        <Input
-          css={{ flex: 1, caretColor: 'transparent' }}
-          placeholder="Access token"
-          value={token}
-        />
-        {token ? (
-          <WrapWithIf
-            condition={!copied}
-            wrapper={
-              <CopyToClipboard
-                text={token}
-                onCopy={showCopied}
-              />
-            }
-          >
-            <Button
-              secondary
-              startIcon={copied ? <CheckIcon /> : <CopyIcon />}
-            >
-              {copied ? 'Copied!' : 'Copy token'}
-            </Button>
-          </WrapWithIf>
-        ) : (
-          <Button
-            loading={loading}
-            onClick={() => mutation()}
-          >
-            Generate & copy
-          </Button>
-        )}
-      </Flex>
-    </Flex>
   )
 }
