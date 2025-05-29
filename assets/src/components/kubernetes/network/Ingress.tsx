@@ -1,5 +1,3 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   Card,
   ChipList,
@@ -7,37 +5,39 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { MetadataSidecar } from '../common/utils'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
-  V1_HttpIngressPath as HTTPIngressPathT,
+  Common_EventList as EventListT,
+  Ingress_IngressDetail as IngressT,
+  IngressEventsDocument,
   IngressEventsQuery,
   IngressEventsQueryVariables,
   IngressQueryVariables,
-  Ingress_IngressDetail as IngressT,
-  useIngressEventsQuery,
   useIngressQuery,
+  V1_HttpIngressPath as HTTPIngressPathT,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
-  INGRESSES_REL_PATH,
   getNetworkAbsPath,
   getResourceDetailsAbsPath,
+  INGRESSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { useEventsColumns } from '../cluster/Events'
-import { ResourceList } from '../common/ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
-import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { useCluster } from '../Cluster'
-import { Kind } from '../common/types'
+import { useEventsColumns } from '../cluster/Events'
+
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
+import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
@@ -285,7 +285,7 @@ export function IngressEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useIngressEventsQuery}
+      queryDocument={IngressEventsDocument}
       queryOptions={{
         variables: {
           namespace,

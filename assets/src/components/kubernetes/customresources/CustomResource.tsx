@@ -1,27 +1,27 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { MetadataSidecar } from '../common/utils'
 import {
+  Common_Event as EventT,
+  Common_EventList as EventListT,
+  CustomResourceEventsDocument,
   CustomResourceEventsQuery,
   CustomResourceEventsQueryVariables,
   CustomResourceQueryVariables,
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  useCustomResourceEventsQuery,
   useCustomResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceList } from '../common/ResourceList'
-import { NAMESPACE_PARAM } from '../Navigation'
 
 import { Kind } from '../common/types'
+
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
@@ -97,7 +97,7 @@ export function CustomResourceEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useCustomResourceEventsQuery}
+      queryDocument={CustomResourceEventsDocument}
       queryOptions={{
         variables: {
           name,

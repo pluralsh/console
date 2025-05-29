@@ -9,6 +9,7 @@ import {
   JobsQueryVariables,
   Maybe,
   useJobsQuery,
+  JobsDocument,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
@@ -96,7 +97,7 @@ export default function Jobs() {
     <ResourceList<JobListT, JobT, JobsQuery, JobsQueryVariables>
       namespaced
       columns={columns}
-      query={useJobsQuery}
+      queryDocument={JobsDocument}
       queryName="handleGetJobList"
       itemsKey="jobs"
     />

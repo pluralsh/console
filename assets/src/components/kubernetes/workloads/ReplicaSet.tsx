@@ -1,53 +1,53 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
 
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
-  Pod_PodList as PodListT,
+  Common_EventList as EventListT,
   Pod_Pod as PodT,
+  Pod_PodList as PodListT,
+  Replicaset_ReplicaSetDetail as ReplicaSetT,
+  ReplicaSetEventsDocument,
   ReplicaSetEventsQuery,
   ReplicaSetEventsQueryVariables,
+  ReplicaSetPodsDocument,
   ReplicaSetPodsQuery,
   ReplicaSetPodsQueryVariables,
   ReplicaSetQueryVariables,
+  ReplicaSetServicesDocument,
   ReplicaSetServicesQuery,
   ReplicaSetServicesQueryVariables,
-  Replicaset_ReplicaSetDetail as ReplicaSetT,
-  Service_ServiceList as ServiceListT,
   Service_Service as ServiceT,
-  useReplicaSetEventsQuery,
-  useReplicaSetPodsQuery,
+  Service_ServiceList as ServiceListT,
   useReplicaSetQuery,
-  useReplicaSetServicesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { MetadataSidecar } from '../common/utils'
-import { SubTitle } from '../../utils/SubTitle'
-import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
-import { PodInfo } from '../common/PodInfo'
-import { LabelSelector } from '../common/LabelSelector'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
-import { useServicesColumns } from '../network/Services'
 import {
-  REPLICA_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
+  REPLICA_SETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
+import { LabelSelector } from '../common/LabelSelector'
+import { PodInfo } from '../common/PodInfo'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { useServicesColumns } from '../network/Services'
+import { usePodsColumns } from './Pods'
 
 import { getBreadcrumbs } from './ReplicaSets'
-import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
@@ -161,7 +161,7 @@ export function ReplicaSetEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicaSetEventsQuery}
+      queryDocument={ReplicaSetEventsDocument}
       queryOptions={{
         variables: {
           namespace,
@@ -188,7 +188,7 @@ export function ReplicaSetPods(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicaSetPodsQuery}
+      queryDocument={ReplicaSetPodsDocument}
       queryOptions={{
         variables: { namespace, name } as ReplicaSetPodsQueryVariables,
       }}
@@ -211,7 +211,7 @@ export function ReplicaSetServices(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicaSetServicesQuery}
+      queryDocument={ReplicaSetServicesDocument}
       queryOptions={{
         variables: { namespace, name } as ReplicaSetServicesQueryVariables,
       }}

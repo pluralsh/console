@@ -1,28 +1,28 @@
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Persistentvolume_PersistentVolumeList as PersistentVolumeListT,
   Persistentvolume_PersistentVolume as PersistentVolumeT,
+  Persistentvolume_PersistentVolumeList as PersistentVolumeListT,
+  PersistentVolumesDocument,
   PersistentVolumesQuery,
   PersistentVolumesQueryVariables,
-  usePersistentVolumesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  PERSISTENT_VOLUMES_REL_PATH,
   getStorageAbsPath,
+  PERSISTENT_VOLUMES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { Kind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
+import { Kind } from '../common/types'
+import { useDefaultColumns } from '../common/utils'
+import { getStorageBreadcrumbs } from './Storage'
 
 import { PVStatusChip } from './utils'
-import { getStorageBreadcrumbs } from './Storage'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getStorageBreadcrumbs(cluster),
@@ -148,7 +148,7 @@ export default function PersistentVolumes() {
       PersistentVolumesQueryVariables
     >
       columns={columns}
-      query={usePersistentVolumesQuery}
+      queryDocument={PersistentVolumesDocument}
       queryName="handleGetPersistentVolumeList"
       itemsKey="items"
     />

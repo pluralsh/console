@@ -1,23 +1,23 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Serviceaccount_ServiceAccountList as ServiceAccountListT,
   Serviceaccount_ServiceAccount as ServiceAccountT,
+  Serviceaccount_ServiceAccountList as ServiceAccountListT,
+  ServiceAccountsDocument,
   ServiceAccountsQuery,
   ServiceAccountsQueryVariables,
-  useServiceAccountsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  SERVICE_ACCOUNTS_REL_PATH,
   getRbacAbsPath,
+  SERVICE_ACCOUNTS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
 
@@ -52,7 +52,7 @@ export default function ServiceAccounts() {
     >
       namespaced
       columns={columns}
-      query={useServiceAccountsQuery}
+      queryDocument={ServiceAccountsDocument}
       queryName="handleGetServiceAccountList"
       itemsKey="items"
     />

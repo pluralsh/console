@@ -1,31 +1,30 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Ingress_IngressList as IngressListT,
   Ingress_Ingress as IngressT,
+  Ingress_IngressList as IngressListT,
+  IngressesDocument,
   IngressesQuery,
   IngressesQueryVariables,
   Maybe,
-  useIngressesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
+import {
+  getNetworkAbsPath,
+  INGRESSES_REL_PATH,
+} from '../../../routes/kubernetesRoutesConsts'
 import { TableText } from '../../cluster/TableElements'
 
-import { KubernetesClusterFragment } from '../../../generated/graphql'
-import {
-  INGRESSES_REL_PATH,
-  getNetworkAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
+import { getNetworkBreadcrumbs } from './Network'
 
 import { TableEndpoints } from './utils'
-import { getNetworkBreadcrumbs } from './Network'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getNetworkBreadcrumbs(cluster),
@@ -89,7 +88,7 @@ export default function Ingresses() {
     >
       namespaced
       columns={columns}
-      query={useIngressesQuery}
+      queryDocument={IngressesDocument}
       queryName="handleGetIngressList"
       itemsKey="items"
     />

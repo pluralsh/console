@@ -1,11 +1,11 @@
 import { ReactElement } from 'react'
 
 import {
-  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
   Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,
+  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
+  HorizontalPodAutoscalersForResourceDocument,
   HorizontalPodAutoscalersForResourceQuery,
   HorizontalPodAutoscalersForResourceQueryVariables,
-  useHorizontalPodAutoscalersForResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useHorizontalPodAutoscalersColumns } from '../cluster/HorizontalPodAutoscalers'
 
@@ -34,7 +34,7 @@ export default function HorizontalPodAutoscalersForResource({
     >
       namespaced
       columns={columns}
-      query={useHorizontalPodAutoscalersForResourceQuery}
+      queryDocument={HorizontalPodAutoscalersForResourceDocument}
       queryOptions={{
         variables: {
           kind,

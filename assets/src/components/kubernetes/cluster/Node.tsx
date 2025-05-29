@@ -10,49 +10,49 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { filesize } from 'filesize'
+import { useMemo, useState } from 'react'
+
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
+  Common_EventList as EventListT,
+  Node_NodeDetail as NodeT,
+  NodeEventsDocument,
   NodeEventsQuery,
   NodeEventsQueryVariables,
+  NodePodsDocument,
   NodePodsQuery,
   NodePodsQueryVariables,
   NodeQueryVariables,
-  Node_NodeDetail as NodeT,
-  Pod_PodList as PodListT,
   Pod_Pod as PodT,
-  useNodeEventsQuery,
-  useNodePodsQuery,
+  Pod_PodList as PodListT,
   useNodeQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GaugeWrap } from '../../cluster/Gauges'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 import RadialBarChart from '../../utils/RadialBarChart'
 import { SubTitle } from '../../utils/SubTitle'
+
+import { useCluster } from '../Cluster'
 import Conditions from '../common/Conditions'
+import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { ResourceList } from '../common/ResourceList'
-import { usePodsColumns } from '../workloads/Pods'
-
-import { useCluster } from '../Cluster'
-
-import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 
 import { Kind } from '../common/types'
 
-import { filesize } from 'filesize'
-import { useMemo, useState } from 'react'
+import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
+import { usePodsColumns } from '../workloads/Pods'
 import { useEventsColumns } from './Events'
 import { getBreadcrumbs } from './Nodes'
-import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -329,7 +329,7 @@ export function NodePods() {
     <ResourceList<PodListT, PodT, NodePodsQuery, NodePodsQueryVariables>
       namespaced
       columns={columns}
-      query={useNodePodsQuery}
+      queryDocument={NodePodsDocument}
       queryOptions={{
         variables: { name } as NodePodsQueryVariables,
       }}
@@ -347,7 +347,7 @@ export function NodeEvents() {
     <ResourceList<EventListT, EventT, NodeEventsQuery, NodeEventsQueryVariables>
       namespaced
       columns={columns}
-      query={useNodeEventsQuery}
+      queryDocument={NodeEventsDocument}
       queryOptions={{
         variables: { name } as NodeEventsQueryVariables,
       }}

@@ -8,23 +8,23 @@ import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
 
 import {
+  Common_Event as EventT,
+  Common_EventList as EventListT,
+  Common_PodInfo as PodInfoT,
+  Deployment_DeploymentDetail as DeploymentT,
+  DeploymentEventsDocument,
   DeploymentEventsQuery,
   DeploymentEventsQueryVariables,
   DeploymentNewReplicaSetQueryVariables,
+  DeploymentOldReplicaSetsDocument,
   DeploymentOldReplicaSetsQuery,
   DeploymentOldReplicaSetsQueryVariables,
   DeploymentQueryVariables,
-  Deployment_DeploymentDetail as DeploymentT,
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  V1_LabelSelector as LabelSelectorT,
-  Common_PodInfo as PodInfoT,
-  Replicaset_ReplicaSetList as ReplicaSetListT,
   Replicaset_ReplicaSet as ReplicaSetT,
-  useDeploymentEventsQuery,
+  Replicaset_ReplicaSetList as ReplicaSetListT,
   useDeploymentNewReplicaSetQuery,
-  useDeploymentOldReplicaSetsQuery,
   useDeploymentQuery,
+  V1_LabelSelector as LabelSelectorT,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -47,7 +47,7 @@ import ResourceInfoCard, {
 } from '../common/ResourceInfoCard'
 import ResourceLink from '../common/ResourceLink'
 import { ResourceList } from '../common/ResourceList'
-import { Kind, Resource, fromResource } from '../common/types'
+import { fromResource, Kind, Resource } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 
@@ -159,7 +159,7 @@ export function DeploymentReplicaSets(): ReactElement<any> {
         >
           namespaced
           columns={columns}
-          query={useDeploymentOldReplicaSetsQuery}
+          queryDocument={DeploymentOldReplicaSetsDocument}
           queryOptions={{
             variables: {
               namespace,
@@ -253,7 +253,7 @@ export function DeploymentEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useDeploymentEventsQuery}
+      queryDocument={DeploymentEventsDocument}
       queryOptions={{
         variables: {
           namespace,

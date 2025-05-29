@@ -1,29 +1,28 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Service_ServiceList as ServiceListT,
   Service_Service as ServiceT,
+  Service_ServiceList as ServiceListT,
+  ServicesDocument,
   ServicesQuery,
   ServicesQueryVariables,
-  useServicesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  SERVICES_REL_PATH,
   getNetworkAbsPath,
+  SERVICES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useCluster } from '../Cluster'
-
-import { TableEndpoints, serviceTypeDisplayName } from './utils'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
+
+import { serviceTypeDisplayName, TableEndpoints } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getNetworkBreadcrumbs(cluster),
@@ -96,7 +95,7 @@ export default function Services() {
     <ResourceList<ServiceListT, ServiceT, ServicesQuery, ServicesQueryVariables>
       namespaced
       columns={columns}
-      query={useServicesQuery}
+      queryDocument={ServicesDocument}
       queryName="handleGetServiceList"
       itemsKey="services"
     />

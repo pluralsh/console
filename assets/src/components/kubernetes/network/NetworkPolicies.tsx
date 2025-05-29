@@ -1,25 +1,24 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
+  NetworkPoliciesDocument,
   NetworkPoliciesQuery,
   NetworkPoliciesQueryVariables,
-  Networkpolicy_NetworkPolicyList as NetworkPolicyListT,
   Networkpolicy_NetworkPolicy as NetworkPolicyT,
-  useNetworkPoliciesQuery,
+  Networkpolicy_NetworkPolicyList as NetworkPolicyListT,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  NETWORK_POLICIES_REL_PATH,
   getNetworkAbsPath,
+  NETWORK_POLICIES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getNetworkBreadcrumbs } from './Network'
 
@@ -54,7 +53,7 @@ export default function NetworkPolicies() {
     >
       namespaced
       columns={columns}
-      query={useNetworkPoliciesQuery}
+      queryDocument={NetworkPoliciesDocument}
       queryName="handleGetNetworkPolicyList"
       itemsKey="items"
     />

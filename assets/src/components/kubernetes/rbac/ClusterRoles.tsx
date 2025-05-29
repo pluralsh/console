@@ -1,24 +1,23 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Clusterrole_ClusterRoleList as ClusterRoleListT,
   Clusterrole_ClusterRole as ClusterRoleT,
+  Clusterrole_ClusterRoleList as ClusterRoleListT,
+  ClusterRolesDocument,
   ClusterRolesQuery,
   ClusterRolesQueryVariables,
   Maybe,
-  useClusterRolesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   CLUSTER_ROLES_REL_PATH,
   getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
 
@@ -52,7 +51,7 @@ export default function ClusterRoles() {
       ClusterRolesQueryVariables
     >
       columns={columns}
-      query={useClusterRolesQuery}
+      queryDocument={ClusterRolesDocument}
       queryName="handleGetClusterRoleList"
       itemsKey="items"
     />

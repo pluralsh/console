@@ -1,29 +1,28 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Namespace_NamespaceList as NamespaceListT,
   Namespace_Namespace as NamespaceT,
+  Namespace_NamespaceList as NamespaceListT,
+  NamespacesDocument,
   NamespacesQuery,
   NamespacesQueryVariables,
-  useNamespacesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  NAMESPACES_REL_PATH,
   getClusterAbsPath,
+  NAMESPACES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
+import { getClusterBreadcrumbs } from './Cluster'
 
 import { NamespacePhaseChip } from './utils'
-import { getClusterBreadcrumbs } from './Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -61,7 +60,7 @@ export default function Namespaces() {
       NamespacesQueryVariables
     >
       columns={columns}
-      query={useNamespacesQuery}
+      queryDocument={NamespacesDocument}
       queryName="handleGetNamespaces"
       itemsKey="namespaces"
     />

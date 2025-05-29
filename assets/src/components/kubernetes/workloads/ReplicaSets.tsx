@@ -1,24 +1,24 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Replicaset_ReplicaSetList as ReplicaSetListT,
   Replicaset_ReplicaSet as ReplicaSetT,
+  Replicaset_ReplicaSetList as ReplicaSetListT,
+  ReplicaSetsDocument,
   ReplicaSetsQuery,
   ReplicaSetsQueryVariables,
-  useReplicaSetsQuery,
 } from '../../../generated/graphql-kubernetes'
+import {
+  getWorkloadsAbsPath,
+  REPLICA_SETS_REL_PATH,
+} from '../../../routes/kubernetesRoutesConsts'
+import { UsageText } from '../../cluster/TableElements'
+import { useCluster } from '../Cluster'
 import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
-import { UsageText } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
-import {
-  REPLICA_SETS_REL_PATH,
-  getWorkloadsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -101,7 +101,7 @@ export default function ReplicaSets() {
     >
       namespaced
       columns={columns}
-      query={useReplicaSetsQuery}
+      queryDocument={ReplicaSetsDocument}
       queryName="handleGetReplicaSets"
       itemsKey="replicaSets"
     />

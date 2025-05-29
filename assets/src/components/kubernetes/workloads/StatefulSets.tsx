@@ -1,24 +1,24 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Statefulset_StatefulSetList as StatefulSetListT,
   Statefulset_StatefulSet as StatefulSetT,
+  Statefulset_StatefulSetList as StatefulSetListT,
+  StatefulSetsDocument,
   StatefulSetsQuery,
   StatefulSetsQueryVariables,
-  useStatefulSetsQuery,
 } from '../../../generated/graphql-kubernetes'
+import {
+  getWorkloadsAbsPath,
+  STATEFUL_SETS_REL_PATH,
+} from '../../../routes/kubernetesRoutesConsts'
+import { UsageText } from '../../cluster/TableElements'
+import { useCluster } from '../Cluster'
 import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
-import { UsageText } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
-import {
-  STATEFUL_SETS_REL_PATH,
-  getWorkloadsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -97,7 +97,7 @@ export default function StatefulSets() {
     >
       namespaced
       columns={columns}
-      query={useStatefulSetsQuery}
+      queryDocument={StatefulSetsDocument}
       queryName="handleGetStatefulSetList"
       itemsKey="statefulSets"
     />

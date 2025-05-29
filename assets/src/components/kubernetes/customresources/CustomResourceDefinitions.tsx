@@ -1,26 +1,26 @@
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Types_CustomResourceDefinition as CustomResourceDefinitionT,
+  CustomResourceDefinitionsDocument,
   CustomResourceDefinitionsQuery,
   CustomResourceDefinitionsQueryVariables,
-  Types_CustomResourceDefinitionList as CustomResourceListT,
   Maybe,
-  useCustomResourceDefinitionsQuery,
+  Types_CustomResourceDefinition as CustomResourceDefinitionT,
+  Types_CustomResourceDefinitionList as CustomResourceListT,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { useCluster, usePinnedResources } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-
-import { CRDEstablishedChip } from './utils'
+import { useCluster, usePinnedResources } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import PinCustomResourceDefinition from './PinCustomResourceDefinition'
 import PinnedCustomResourceDefinitions from './PinnedCustomResourceDefinitions'
+
+import { CRDEstablishedChip } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -161,7 +161,7 @@ export default function CustomResourceDefinitions() {
           CustomResourceDefinitionsQueryVariables
         >
           columns={columns}
-          query={useCustomResourceDefinitionsQuery}
+          queryDocument={CustomResourceDefinitionsDocument}
           queryName="handleGetCustomResourceDefinitionList"
           itemsKey="items"
         />

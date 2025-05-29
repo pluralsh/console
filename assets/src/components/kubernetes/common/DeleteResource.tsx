@@ -1,4 +1,10 @@
-import { ReactNode, useMemo, useState } from 'react'
+import {
+  ApolloError,
+  FetchResult,
+  LazyQueryExecFunction,
+  ServerError,
+  useMutation,
+} from '@apollo/client'
 import {
   Checkbox,
   FormField,
@@ -7,25 +13,22 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { ReactNode, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { useTheme } from 'styled-components'
-import { ApolloError, FetchResult, ServerError } from '@apollo/client'
-
-import { Confirm, ConfirmProps } from '../../utils/Confirm'
 import {
-  useNamespacedResourceDeleteMutation,
-  useResourceDeleteMutation,
+  NamespacedResourceDeleteDocument,
+  ResourceDeleteDocument,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
+
+import { Confirm, ConfirmProps } from '../../utils/Confirm'
 
 import { Kind, Resource } from './types'
 
 interface DeleteResourceProps {
   resource: Resource
-  refetch?: Nullable<
-    (variables?: Partial<QueryHookOptions>) => Promise<unknown> | void
-  >
+  refetch?: LazyQueryExecFunction<any, any>
   customResource?: boolean
 }
 
@@ -96,9 +99,7 @@ interface DeleteResourceModalProps
   open: boolean
   setOpen: (open: boolean) => void
   resource: Resource
-  refetch?: Nullable<
-    (variables?: Partial<QueryHookOptions>) => Promise<unknown> | void
-  >
+  refetch?: LazyQueryExecFunction<any, any>
 }
 
 function DeleteResourceModal({
@@ -119,15 +120,13 @@ function DeleteResourceModal({
   const name = resource?.objectMeta?.name ?? ''
   const namespace = resource?.objectMeta?.namespace ?? ''
   const kind = resource?.typeMeta?.kind ?? ''
-  const deleteMutation = useMemo(
+  const deleteDocument = useMemo(
     () =>
-      namespace
-        ? useNamespacedResourceDeleteMutation
-        : useResourceDeleteMutation,
+      namespace ? NamespacedResourceDeleteDocument : ResourceDeleteDocument,
     [namespace]
   )
 
-  const [deleteResource, { error }] = deleteMutation({
+  const [deleteResource, { error }] = useMutation(deleteDocument, {
     client: KubernetesClient(clusterId ?? ''),
     variables: {
       name,
@@ -140,7 +139,11 @@ function DeleteResourceModal({
     onCompleted: () =>
       refetch
         ? refetch({
-            fetchPolicy: 'no-cache',
+            context: {
+              headers: {
+                'Cache-Control': 'no-cache',
+              },
+            },
           })!
             .then(() => setOpen(false))
             .finally(() => setDeleting(false))

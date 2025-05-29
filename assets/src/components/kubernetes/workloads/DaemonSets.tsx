@@ -1,28 +1,27 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Daemonset_DaemonSetList as DaemonSetListT,
   Daemonset_DaemonSet as DaemonSetT,
+  Daemonset_DaemonSetList as DaemonSetListT,
+  DaemonSetsDocument,
   DaemonSetsQuery,
   DaemonSetsQueryVariables,
   Maybe,
-  useDaemonSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-
-import { UsageText } from '../../cluster/TableElements'
-
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   DAEMON_SETS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
+import { UsageText } from '../../cluster/TableElements'
+
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -101,7 +100,7 @@ export default function CronJobs() {
     >
       namespaced
       columns={columns}
-      query={useDaemonSetsQuery}
+      queryDocument={DaemonSetsDocument}
       queryName="handleGetDaemonSetList"
       itemsKey="daemonSets"
     />

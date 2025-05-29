@@ -6,16 +6,18 @@ import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   Maybe,
-  Pod_PodList as PodListT,
   Pod_Pod as PodT,
+  Pod_PodList as PodListT,
+  PodsDocument,
   PodsQuery,
   PodsQueryVariables,
-  usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
 import {
-  PODS_REL_PATH,
   getWorkloadsAbsPath,
+  PODS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
+
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
@@ -23,9 +25,7 @@ import ResourceLink from '../common/ResourceLink'
 import { ResourceList } from '../common/ResourceList'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
-
-import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
-import { WorkloadImages, toReadiness } from './utils'
+import { toReadiness, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
@@ -172,7 +172,7 @@ export default function Pods() {
     <ResourceList<PodListT, PodT, PodsQuery, PodsQueryVariables>
       namespaced
       columns={columns}
-      query={usePodsQuery}
+      queryDocument={PodsDocument}
       queryName="handleGetPods"
       itemsKey="pods"
     />

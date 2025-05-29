@@ -1,4 +1,3 @@
-import { ReactElement, useMemo } from 'react'
 import {
   Card,
   ChipList,
@@ -6,55 +5,56 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { createColumnHelper } from '@tanstack/react-table'
 
 import {
-  Endpoint_Endpoint as EndpointT,
-  Common_EventList as EventListT,
   Common_Event as EventT,
-  Ingress_IngressList as IngressListT,
+  Common_EventList as EventListT,
+  Endpoint_Endpoint as EndpointT,
   Ingress_Ingress as IngressT,
-  Pod_PodList as PodListT,
+  Ingress_IngressList as IngressListT,
   Pod_Pod as PodT,
+  Pod_PodList as PodListT,
+  Service_ServiceDetail as ServiceT,
+  ServiceEventsDocument,
   ServiceEventsQuery,
   ServiceEventsQueryVariables,
+  ServiceIngressesDocument,
   ServiceIngressesQuery,
   ServiceIngressesQueryVariables,
+  ServicePodsDocument,
   ServicePodsQuery,
   ServicePodsQueryVariables,
   ServiceQueryVariables,
-  Service_ServiceDetail as ServiceT,
-  useServiceEventsQuery,
-  useServiceIngressesQuery,
-  useServicePodsQuery,
   useServiceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
-import { NAMESPACE_PARAM } from '../Navigation'
 import {
-  SERVICES_REL_PATH,
   getNetworkAbsPath,
   getResourceDetailsAbsPath,
+  SERVICES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { usePodsColumns } from '../workloads/Pods'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../utils/SubTitle'
 
-import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { usePodsColumns } from '../workloads/Pods'
+import { useIngressesColumns } from './Ingresses'
 
 import { getBreadcrumbs } from './Services'
 import { Endpoints, serviceTypeDisplayName } from './utils'
-import { useIngressesColumns } from './Ingresses'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -215,7 +215,7 @@ export function ServiceIngresses(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useServiceIngressesQuery}
+      queryDocument={ServiceIngressesDocument}
       queryOptions={{
         variables: { namespace, name } as ServiceIngressesQueryVariables,
       }}
@@ -233,7 +233,7 @@ export function ServicePods(): ReactElement<any> {
     <ResourceList<PodListT, PodT, ServicePodsQuery, ServicePodsQueryVariables>
       namespaced
       columns={columns}
-      query={useServicePodsQuery}
+      queryDocument={ServicePodsDocument}
       queryOptions={{
         variables: { namespace, name } as ServicePodsQueryVariables,
       }}
@@ -256,7 +256,7 @@ export function ServiceEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useServiceEventsQuery}
+      queryDocument={ServiceEventsDocument}
       queryOptions={{
         variables: {
           namespace,
