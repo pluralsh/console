@@ -152,17 +152,24 @@ fragment ServiceDeploymentComponent on ServiceComponent {
 fragment ServiceDeploymentComponentWithChildren on ServiceComponent {
   ...ServiceDeploymentComponent
   children {
-    id
-    group
-    kind
-    version
-    name
-    namespace
-    parentUid
-    uid
-    state
-    insertedAt
-    updatedAt
+    ...ServiceComponentChild
+  }
+}
+
+fragment ServiceComponentChild on ServiceComponentChild {
+  id
+  group
+  kind
+  version
+  name
+  namespace
+  parentUid
+  uid
+  state
+  insertedAt
+  updatedAt
+  insight {
+    ...AiInsight
   }
 }
 

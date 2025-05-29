@@ -5,12 +5,13 @@ import {
   ChipSeverity,
   CloseIcon,
   CodeEditor,
-  Divider,
   EmptyState,
   Flex,
   IconFrame,
   InfoOutlineIcon,
   Modal,
+  SubTab,
+  TabList,
 } from '@pluralsh/design-system'
 import { Key } from '@react-types/shared'
 import { Node, NodeProps, ReactFlowProvider } from '@xyflow/react'
@@ -25,12 +26,14 @@ import {
   SetStateAction,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
+  AiInsight,
   ComponentState,
   ServiceComponent,
   ServiceComponentChild,
@@ -49,8 +52,9 @@ import { ModalMountTransition } from '../../../utils/ModalMountTransition.tsx'
 import { NodeBase } from '../../../utils/reactflow/nodes.tsx'
 import { ReactFlowGraph } from '../../../utils/reactflow/ReactFlowGraph.tsx'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
-import { OverlineH1 } from '../../../utils/typography/Text.tsx'
 import { ComponentIcon } from './component/misc.tsx'
+import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 
 type ServiceComponentNodeType = Node<
   ServiceComponent,
@@ -240,10 +244,12 @@ function ServiceComponentTreeNodeHeader({
   kind,
   group,
   state,
+  insight,
 }: {
   kind: Nullable<string>
   group: Nullable<string>
   state: Nullable<ComponentState>
+  insight?: Nullable<AiInsight>
 }) {
   const stateToSeverity: { [key in ComponentState]: ChipSeverity } = {
     [ComponentState.Failed]: 'danger',
@@ -263,6 +269,7 @@ function ServiceComponentTreeNodeHeader({
         {!group ? '' : `${group}.`}
         {kind}
       </span>
+      <AiInsightSummaryIcon insight={insight}></AiInsightSummaryIcon>
       <Chip
         severity={stateToSeverity[state ?? ComponentState.Pending]}
         css={{ whiteSpace: 'nowrap' }}
@@ -299,6 +306,7 @@ function ServiceComponentTreeNode({
           kind={data.kind}
           group={data.group}
           state={data.state}
+          insight={data.insight}
         />
       }
       content={
@@ -354,6 +362,8 @@ function ServiceComponentModal({
 }) {
   const theme = useTheme()
   const { serviceId, clusterId, flowId } = useParams()
+  const tabStateRef = useRef<any>(null)
+  const [activeTab, setActiveTab] = useState<Key>('yaml')
 
   const isChild = component.__typename === 'ServiceComponentChild'
   const componentDetailsUrl = getComponentDetailsUrl({
@@ -425,23 +435,46 @@ function ServiceComponentModal({
             tooltip="Close modal"
           />
         </Flex>
-        <Divider
-          backgroundColor="border"
-          marginTop="medium"
-          marginBottom="medium"
-        />
+
         <div>
-          <OverlineH1
-            $color="text-xlight"
-            css={{ marginBottom: theme.spacing.small }}
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: activeTab,
+              onSelectionChange: setActiveTab,
+            }}
+            css={{
+              marginBottom: theme.spacing.small,
+              marginTop: theme.spacing.large,
+            }}
           >
-            Raw YAML
-          </OverlineH1>
-          <ServiceComponentRaw
-            serviceId={serviceId ?? ''}
-            componentId={isChild ? undefined : component.id}
-            childId={isChild ? component.id : undefined}
-          />
+            <SubTab key="yaml">Raw YAML</SubTab>
+            <SubTab key="insights">Insights</SubTab>
+          </TabList>
+          {activeTab === 'yaml' && (
+            <ServiceComponentRaw
+              serviceId={serviceId ?? ''}
+              componentId={isChild ? undefined : component.id}
+              childId={isChild ? component.id : undefined}
+            />
+          )}
+          {activeTab === 'insights' && (
+            <Flex
+              direction="column"
+              gap="small"
+              css={{ maxHeight: '400px', overflowY: 'auto' }}
+            >
+              {component.insight ? (
+                <InsightDisplay
+                  insight={component.insight}
+                  kind={component.kind}
+                />
+              ) : (
+                <EmptyState message="No insights available." />
+              )}
+            </Flex>
+          )}
         </div>
       </Modal>
     </ModalMountTransition>
