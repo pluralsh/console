@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	elastic "github.com/elastic/go-elasticsearch/v8"
+	elastic "github.com/elastic/go-elasticsearch/v9"
 	corev1 "k8s.io/api/core/v1"
 	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"

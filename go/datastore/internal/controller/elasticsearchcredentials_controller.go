@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	elastic "github.com/elastic/go-elasticsearch/v8"
+	elastic "github.com/elastic/go-elasticsearch/v9"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/internal/utils"

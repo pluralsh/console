@@ -10,7 +10,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"

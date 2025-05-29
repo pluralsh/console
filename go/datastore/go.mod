@@ -5,7 +5,7 @@ go 1.24.2
 replace github.com/pluralsh/console/go/client => ../client
 
 require (
-	github.com/elastic/go-elasticsearch/v8 v8.18.0
+	github.com/elastic/go-elasticsearch/v9 v9.0.0
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/pluralsh/console/go/client v0.0.0-00010101000000-000000000000
@@ -63,9 +63,9 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.22 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/otel v1.33.0 // indirect
-	go.opentelemetry.io/otel/metric v1.33.0 // indirect
-	go.opentelemetry.io/otel/trace v1.33.0 // indirect
+	go.opentelemetry.io/otel v1.35.0 // indirect
+	go.opentelemetry.io/otel/metric v1.35.0 // indirect
+	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
