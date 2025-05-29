@@ -76,14 +76,14 @@ func (r *ILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
 
-	es, err := createElasticSearchClient(ctx, r.Client, *credentials)
+	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
 	if err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	if err := put(ctx, es, user); err != nil {
+	if err := sync(ctx, es, user); err != nil {
 		logger.Error(err, "failed to create user")
 		return ctrl.Result{}, err
 	}
@@ -94,13 +94,13 @@ func (r *ILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-func put(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ILMPolicy) error {
+func sync(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ILMPolicy) error {
 	body, err := json.Marshal(ilmPolicy.Spec.Definition.Policy)
 	if err != nil {
 		return err
 	}
 
-	res, err := es.ILM.PutLifecycle("user", es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
+	res, err := es.ILM.PutLifecycle(ilmPolicy.Name, es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
 	if err != nil {
 		return err
 	}

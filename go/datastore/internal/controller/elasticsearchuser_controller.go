@@ -89,7 +89,7 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
-	es, err := createElasticSearchClient(ctx, r.Client, *credentials)
+	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
 	if err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

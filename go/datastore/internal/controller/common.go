@@ -4,13 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	elastic "github.com/elastic/go-elasticsearch/v9"
-	corev1 "k8s.io/api/core/v1"
 	"net/http"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"time"
+
+	elastic "github.com/elastic/go-elasticsearch/v9"
+	corev1 "k8s.io/api/core/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -59,7 +60,7 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	return defaultMessage
 }
 
-func createElasticSearchClient(ctx context.Context, client client.Client, credentials v1alpha1.ElasticSearchCredentials) (*elastic.Client, error) {
+func createElasticsearchClient(ctx context.Context, client client.Client, credentials v1alpha1.ElasticSearchCredentials) (*elastic.Client, error) {
 	secret, err := utils.GetSecret(ctx, client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
 		return nil, err
