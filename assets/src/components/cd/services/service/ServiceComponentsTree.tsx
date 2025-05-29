@@ -31,6 +31,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
+  AiInsight,
   ComponentState,
   ServiceComponent,
   ServiceComponentChild,
@@ -51,6 +52,7 @@ import { ReactFlowGraph } from '../../../utils/reactflow/ReactFlowGraph.tsx'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
 import { OverlineH1 } from '../../../utils/typography/Text.tsx'
 import { ComponentIcon } from './component/misc.tsx'
+import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 
 type ServiceComponentNodeType = Node<
   ServiceComponent,
@@ -240,10 +242,12 @@ function ServiceComponentTreeNodeHeader({
   kind,
   group,
   state,
+  insight,
 }: {
   kind: Nullable<string>
   group: Nullable<string>
   state: Nullable<ComponentState>
+  insight?: Nullable<AiInsight>
 }) {
   const stateToSeverity: { [key in ComponentState]: ChipSeverity } = {
     [ComponentState.Failed]: 'danger',
@@ -263,6 +267,7 @@ function ServiceComponentTreeNodeHeader({
         {!group ? '' : `${group}.`}
         {kind}
       </span>
+      <AiInsightSummaryIcon insight={insight}></AiInsightSummaryIcon>
       <Chip
         severity={stateToSeverity[state ?? ComponentState.Pending]}
         css={{ whiteSpace: 'nowrap' }}
@@ -299,6 +304,7 @@ function ServiceComponentTreeNode({
           kind={data.kind}
           group={data.group}
           state={data.state}
+          insight={data.insight}
         />
       }
       content={
@@ -372,6 +378,7 @@ function ServiceComponentModal({
             kind={component.kind}
             group={component.group}
             state={component.state}
+            insight={component.insight}
           />
         }
         actions={
