@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -21,6 +22,7 @@ type Definition struct {
 }
 
 type ElasticSearchRole struct {
+	Name               string            `json:"name"`
 	ClusterPermissions []string          `json:"clusterPermissions,omitempty"`
 	IndexPermissions   []IndexPermission `json:"indexPermissions,omitempty"`
 }
@@ -50,6 +52,10 @@ type ElasticSearchUserList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ElasticSearchUser `json:"items"`
+}
+
+func (s *ElasticSearchUser) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 func init() {

@@ -1,7 +1,15 @@
 package controller
 
 import (
+	"context"
+	"crypto/tls"
+	"fmt"
+	elastic "github.com/elastic/go-elasticsearch/v8"
+	corev1 "k8s.io/api/core/v1"
+	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
 	"time"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
@@ -49,4 +57,29 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	}
 
 	return defaultMessage
+}
+
+func createElasticSearchClient(ctx context.Context, client client.Client, credentials v1alpha1.ElasticSearchCredentials) (*elastic.Client, error) {
+	secret, err := utils.GetSecret(ctx, client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
+	if err != nil {
+		return nil, err
+	}
+	key, exists := secret.Data[credentials.Spec.PasswordSecretKeyRef.Key]
+	if !exists {
+		return nil, fmt.Errorf("secret %s does not contain key %s", credentials.Spec.PasswordSecretKeyRef.Name, credentials.Spec.PasswordSecretKeyRef.Key)
+	}
+	password := strings.ReplaceAll(string(key), "\n", "")
+	esCfg := elastic.Config{
+		Addresses: []string{credentials.Spec.URL},
+		Username:  credentials.Spec.Username,
+		Password:  password,
+	}
+	if credentials.Spec.Insecure != nil && *credentials.Spec.Insecure {
+		esCfg.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	}
+	return elastic.NewClient(esCfg)
 }

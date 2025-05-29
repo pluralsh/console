@@ -2,12 +2,8 @@ package controller
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
-	"net/http"
-	"strings"
-
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -20,7 +16,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 )
 
@@ -61,40 +56,10 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		}
 	}()
 
-	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
-	if err != nil {
-		logger.V(5).Error(err, "failed to get password")
-		return handleRequeue(nil, err, credentials.SetCondition)
-	}
-	key, exists := secret.Data[credentials.Spec.PasswordSecretKeyRef.Key]
-	if !exists {
-		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", credentials.Spec.PasswordSecretKeyRef.Name, credentials.Spec.PasswordSecretKeyRef.Key)
-	}
-	password := strings.ReplaceAll(string(key), "\n", "")
-
-	if err := utils.TryAddControllerRef(ctx, r.Client, credentials, secret, r.Scheme); err != nil {
-		logger.V(5).Error(err, "failed to add controller ref")
-		return ctrl.Result{}, err
-	}
-
-	esCfg := elastic.Config{
-		Addresses: []string{credentials.Spec.URL},
-		Username:  credentials.Spec.Username,
-		Password:  password,
-	}
-	if credentials.Spec.Insecure != nil && *credentials.Spec.Insecure {
-		esCfg.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		}
-	}
-
-	es, err := elastic.NewClient(esCfg)
+	es, err := createElasticSearchClient(ctx, r.Client, *credentials)
 	if err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
-		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, credentials.SetCondition)
 	}
 
 	// Ping or check cluster health to verify connection

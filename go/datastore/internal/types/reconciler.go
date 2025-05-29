@@ -13,10 +13,12 @@ type Reconciler string
 
 const (
 	ElasticSearchCredentialsReconciler Reconciler = "elasticSearchCredentials"
+	ElasticSearchUserReconciler        Reconciler = "elasticSearchUser"
 )
 
 var validReconcilers = map[string]Reconciler{
 	"ElasticSearchCredentialsReconciler": ElasticSearchCredentialsReconciler,
+	"ElasticSearchUserReconciler":        ElasticSearchUserReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller
@@ -24,6 +26,12 @@ type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient
 var controllerFactories = map[Reconciler]ControllerFactory{
 	ElasticSearchCredentialsReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
 		return &controller.ElasticSearchCredentialsReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+	},
+	ElasticSearchUserReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
+		return &controller.ElasticSearchUserReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}
@@ -56,6 +64,7 @@ type ReconcilerList []Reconciler
 func Reconcilers() ReconcilerList {
 	return []Reconciler{
 		ElasticSearchCredentialsReconciler,
+		ElasticSearchUserReconciler,
 	}
 }
 

@@ -105,6 +105,10 @@ spec:
                           - privileges
                           type: object
                         type: array
+                      name:
+                        type: string
+                    required:
+                    - name
                     type: object
                   user:
                     description: User to add
