@@ -88,7 +88,7 @@ export function ResourceList<
     meta: { cluster, ...tableOptions },
   })
 
-  const pollInterval = 10_000 // 30 seconds
+  const pollInterval = 30_000 // 30 seconds
   const [fetch, { data, loading, fetchMore }] = useLazyQuery<
     TQuery,
     TVariables
