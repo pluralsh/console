@@ -1,0 +1,12 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticSearchIndexTemplate
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchindextemplate
+    app.kubernetes.io/instance: elasticsearchindextemplate-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchindextemplate-sample
+spec:
+  # TODO(user): Add fields here
