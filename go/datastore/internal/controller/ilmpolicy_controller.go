@@ -9,7 +9,6 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -64,10 +63,7 @@ func (r *ILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	credentials := new(v1alpha1.ElasticSearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
-		if apierrors.IsNotFound(err) {
-			return handleRequeue(nil, err, credentials.SetCondition)
-		}
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, credentials.SetCondition)
 	}
 
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
