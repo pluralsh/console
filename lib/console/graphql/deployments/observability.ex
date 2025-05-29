@@ -104,6 +104,12 @@ defmodule Console.GraphQl.Deployments.Observability do
     timestamps()
   end
 
+  @desc "A representation of the metrics to render a utilization heat map"
+  object :utilization_heat_map do
+    field :cpu,    list_of(:metric_point_response)
+    field :memory, list_of(:metric_point_response)
+  end
+
   connection node_type: :observability_provider
   connection node_type: :observability_webhook
   connection node_type: :alert

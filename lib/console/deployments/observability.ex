@@ -22,6 +22,8 @@ defmodule Console.Deployments.Observability do
   @cache Console.conf(:cache_adapter)
   @ttl :timer.minutes(30)
 
+  @noisy_threshold 3
+
   require Logger
 
   @type error :: Console.error
@@ -188,6 +190,22 @@ defmodule Console.Deployments.Observability do
   end
 
   def heat_map(_, flavor), do: {:error, "cannot aggregate utilization by #{flavor} for that resource"}
+
+  @doc """
+  Queries memory usage by pod for a given cluster and filters those that don't exceed a significant threshold
+  """
+  @spec noisy_neighbors(Cluster.t) :: {:ok, map} | error
+  def noisy_neighbors(%Cluster{handle: cluster}) do
+    queries(:noisy)
+    |> bulk_query(%{cluster: cluster})
+    |> case do
+      {:ok, %{cpu: %Prometheus.Data{result: cpu} = cpu_res, memory: %Prometheus.Data{result: memory} = mem_res}} ->
+        cpu    = Enum.filter(cpu, & &1.value > @noisy_threshold)
+        memory = Enum.filter(memory, & &1.value > @noisy_threshold)
+        {:ok, %{cpu: %{cpu_res | result: cpu}, memory: %{mem_res | result: memory}}}
+      err -> err
+    end
+  end
 
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes

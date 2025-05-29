@@ -57,6 +57,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def heat_map(%Cluster{} = cluster, args, _), do: Observability.heat_map(cluster, args[:flavor])
   def heat_map(%Service{} = service, args, _), do: Observability.heat_map(service, args[:flavor])
 
+  def noisy_neighbors(%Cluster{} = cluster, _args, _), do: Observability.noisy_neighbors(cluster)
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

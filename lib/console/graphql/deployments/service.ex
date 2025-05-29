@@ -270,12 +270,6 @@ defmodule Console.GraphQl.Deployments.Service do
     timestamps()
   end
 
-  @desc "A representation of the metrics to render a utilization heat map"
-  object :utilization_heat_map do
-    field :cpu,    list_of(:metric_point_response)
-    field :memory, list_of(:metric_point_response)
-  end
-
   object :service_component_metrics do
     field :cpu, list_of(:metric_response)
     field :mem, list_of(:metric_response)

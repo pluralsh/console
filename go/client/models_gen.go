@@ -976,6 +976,8 @@ type Cluster struct {
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
+	// A pod-level set of utilization metrics exceeding our noisy threshold
+	NoisyNeighbors *UtilizationHeatMap `json:"noisyNeighbors,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// fetches the discovered custom resources with new versions to be used

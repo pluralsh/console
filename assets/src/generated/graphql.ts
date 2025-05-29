@@ -1141,6 +1141,8 @@ export type Cluster = {
   nodeStatistics?: Maybe<Array<Maybe<NodeStatistic>>>;
   /** list cached nodes for a cluster, this can be stale up to 5m */
   nodes?: Maybe<Array<Maybe<Node>>>;
+  /** A pod-level set of utilization metrics exceeding our noisy threshold */
+  noisyNeighbors?: Maybe<UtilizationHeatMap>;
   /** the object store connection bound to this cluster for backup/restore */
   objectStore?: Maybe<ObjectStore>;
   /** a high level description of the setup of common resources in a cluster */

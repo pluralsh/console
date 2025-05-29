@@ -2047,6 +2047,12 @@ type AlertResolution {
   updatedAt: DateTime
 }
 
+"A representation of the metrics to render a utilization heat map"
+type UtilizationHeatMap {
+  cpu: [MetricPointResponse]
+  memory: [MetricPointResponse]
+}
+
 type ObservabilityProviderConnection {
   pageInfo: PageInfo!
   edges: [ObservabilityProviderEdge]
@@ -4679,12 +4685,6 @@ type ServiceDeployment {
   updatedAt: DateTime
 }
 
-"A representation of the metrics to render a utilization heat map"
-type UtilizationHeatMap {
-  cpu: [MetricPointResponse]
-  memory: [MetricPointResponse]
-}
-
 type ServiceComponentMetrics {
   cpu: [MetricResponse]
   mem: [MetricResponse]
@@ -5788,6 +5788,9 @@ type Cluster {
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
   heatMap(flavor: HeatMapFlavor): UtilizationHeatMap
+
+  "A pod-level set of utilization metrics exceeding our noisy threshold"
+  noisyNeighbors: UtilizationHeatMap
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
