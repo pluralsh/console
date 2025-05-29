@@ -1,25 +1,24 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Job_JobList as JobListT,
   Job_Job as JobT,
+  Job_JobList as JobListT,
+  JobsDocument,
   JobsQuery,
   JobsQueryVariables,
   Maybe,
-  useJobsQuery,
-  JobsDocument,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { UsageText } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  JOBS_REL_PATH,
   getWorkloadsAbsPath,
+  JOBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
+import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
