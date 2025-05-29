@@ -378,7 +378,6 @@ function ServiceComponentModal({
             kind={component.kind}
             group={component.group}
             state={component.state}
-            insight={component.insight}
           />
         }
         actions={
