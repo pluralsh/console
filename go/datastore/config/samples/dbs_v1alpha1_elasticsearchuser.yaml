@@ -40,9 +40,14 @@ spec:
   credentialsRef:
     name: elasticsearchcredentials-sample
   definition:
-    user: lukasz
+    user: lukasz-monitor
     passwordSecretKeyRef:
       name: elastic-secret
       key: password
     role:
-      name: lukasz
+      name: lukasz-monitor
+      clusterPermissions:
+        - monitor
+      indexPermissions:
+      - names: ["logs-*"]
+        privileges: ["read", "view_index_metadata"]

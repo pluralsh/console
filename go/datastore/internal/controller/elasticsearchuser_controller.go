@@ -1,11 +1,16 @@
 package controller
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"strings"
+
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -59,6 +64,17 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	}()
 
+	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: user.Spec.Definition.PasswordSecretKeyRef.Name, Namespace: user.Namespace})
+	if err != nil {
+		logger.V(5).Error(err, "failed to get password")
+		return handleRequeue(nil, err, user.SetCondition)
+	}
+	key, exists := secret.Data[user.Spec.Definition.PasswordSecretKeyRef.Key]
+	if !exists {
+		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", user.Spec.Definition.PasswordSecretKeyRef.Name, user.Spec.Definition.PasswordSecretKeyRef.Key)
+	}
+	password := strings.ReplaceAll(string(key), "\n", "")
+
 	credentials := new(v1alpha1.ElasticSearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
@@ -80,34 +96,81 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
-	roles, err := listAllRoles(es)
-	if err != nil {
-		logger.Error(err, "failed to list roles for Elasticsearch")
+	if err := createRole(ctx, es, user.Spec.Definition.Role); err != nil {
+		logger.Error(err, "failed to create role")
 		return ctrl.Result{}, err
 	}
-	fmt.Println(roles)
+
+	if err := createUser(ctx, es, user.Spec.Definition.User, password, user.Spec.Definition.Role.Name); err != nil {
+		logger.Error(err, "failed to create user")
+		return ctrl.Result{}, err
+	}
+
+	utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(user.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
 }
 
-func listAllRoles(es *elasticsearch.Client) (map[string]interface{}, error) {
-	req := esapi.SecurityGetRoleRequest{} // No name = fetch all
-	res, err := req.Do(context.Background(), es)
+func createUser(ctx context.Context, es *elasticsearch.Client, user, password, role string) error {
+	userDef := map[string]interface{}{
+		"password":  password,
+		"roles":     []string{role}, // Adjust as needed
+		"full_name": fmt.Sprintf("User %s", user),
+	}
+	body, err := json.Marshal(userDef)
 	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
+		return err
 	}
-	defer res.Body.Close()
-
+	res, err := es.Security.PutUser(user, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+		}
+	}(res.Body)
 	if res.IsError() {
-		return nil, fmt.Errorf("error fetching roles: %s", res.String())
+		return fmt.Errorf("failed to create user: %s", res.String())
 	}
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("error decoding response: %w", err)
+	return nil
+}
+
+func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.ElasticSearchRole) error {
+	roleBody := map[string]interface{}{
+		"cluster": role.ClusterPermissions,
+		"indices": []map[string]interface{}{},
 	}
 
-	return result, nil
+	for _, indexPerm := range role.IndexPermissions {
+		roleBody["indices"] = append(roleBody["indices"].([]map[string]interface{}), map[string]interface{}{
+			"names":      indexPerm.Names,
+			"privileges": indexPerm.Privileges,
+		})
+	}
+
+	body, err := json.Marshal(roleBody)
+	if err != nil {
+		return err
+	}
+	res, err := es.Security.PutRole(role.Name, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+		}
+	}(res.Body)
+	if res.IsError() {
+		return fmt.Errorf("failed to create role: %s", res.String())
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
