@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import {
   Button,
   CheckIcon,
@@ -12,11 +11,12 @@ import { useCreateAccessTokenMutation } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
 
 import { useState } from 'react'
+import { GqlErrorType } from './Alert'
 
 export function GenerateAccessToken({
   setError,
 }: {
-  setError: (error?: ApolloError) => void
+  setError: (error?: GqlErrorType) => void
 }) {
   const [token, setToken] = useState('')
   const [copied, setCopied] = useState(false)
@@ -56,7 +56,7 @@ export function GenerateAccessToken({
           }
         >
           <Button
-            secondary
+            floating
             startIcon={copied ? <CheckIcon /> : <CopyIcon />}
           >
             {copied ? 'Copied!' : 'Copy token'}
