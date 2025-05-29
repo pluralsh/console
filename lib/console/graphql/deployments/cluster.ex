@@ -556,6 +556,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.heat_map/3
     end
 
+    @desc "A pod-level set of utilization metrics exceeding our noisy threshold"
+    field :noisy_neighbors, :utilization_heat_map do
+      resolve &Deployments.noisy_neighbors/3
+    end
+
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 

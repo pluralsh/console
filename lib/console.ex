@@ -60,6 +60,13 @@ defmodule Console do
     end
   end
 
+  def vmetrics_creds() do
+    case {Console.conf(:vmetrics_url), Console.conf(:vmetrics_tenant)} do
+      {url, tenant} when is_binary(url) and is_binary(tenant) -> {:ok, url, tenant}
+      _ -> :error
+    end
+  end
+
   def truncate(str, len) when byte_size(str) > len,
     do: "#{String.slice(str, 0, len - 3)}..."
   def truncate(str, _), do: str

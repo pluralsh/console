@@ -6,7 +6,7 @@ defmodule Console.Deployments.Init do
   alias Console.Services.Users
   alias Console.Schema.{AccessToken, Cluster, Group, User}
   alias Kube.Utils
-  alias Console.Deployments.{Clusters, Git, Settings, Global}
+  alias Console.Deployments.{Clusters, Git, Settings, Services}
 
   @secret_name "console-auth-token"
 
@@ -56,10 +56,10 @@ defmodule Console.Deployments.Init do
         artifact_repository_id: arepo.id,
         deployer_repository_id: drepo.id,
       })
-      |> maybe_es()
+      |> maybe_observability()
       |> Settings.create()
     end)
-    |> add_operation(:logstash, fn %{artifacts_repo: arepo} -> maybe_setup_logstash(arepo, bot) end)
+    |> add_operation(:context, fn _ -> maybe_setup_context(bot) end)
     |> add_operation(:secret, fn _ -> ensure_secret(Console.cloud?()) end)
     |> execute()
   end
@@ -112,10 +112,11 @@ defmodule Console.Deployments.Init do
     end
   end
 
-  defp maybe_es(attrs) do
+  defp maybe_observability(attrs) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
-         {:ok, url, pass} <- Console.es_creds() do
+         {:ok, url, pass} <- Console.es_creds(),
+         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
         es_creds = %{
           host: url,
           user: "plrl-#{inst}",
@@ -129,30 +130,32 @@ defmodule Console.Deployments.Init do
           driver: :elastic,
           elastic: es_creds
         })
-        |> put_in([:ai, :vector_store], %{enabled: true, vector_store: :elastic, elastic: es_creds})
+        |> Map.put(:prometheus_connection, %{
+          host: "#{vurl}/select/#{vtenant}/prometheus",
+          user: "plrl-#{inst}",
+          password: pass
+        })
+        |> put_in([:ai, :vector_store], %{
+          enabled: true,
+          vector_store: :elastic,
+          elastic: es_creds
+        })
     else
       _ -> attrs
     end
   end
 
-  defp maybe_setup_logstash(repo, bot) do
+  defp maybe_setup_context(bot) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
-         {:ok, url, pass} <- Console.es_creds() do
-      Global.create(%{
-        name: "logstash",
-        template: %{
-          name: "logstash",
-          namespace: "elastic",
-          configuration: [
-            %{name: "username", value: "plrl-#{inst}"},
-            %{name: "password", value: pass},
-            %{name: "esUrl", value: url}
-          ],
-          repository_id: repo.id,
-          git: %{ref: "main", folder: "cloud/logstash"}
+         {:ok, url, pass} <- Console.es_creds(),
+         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+      Services.save_context(%{
+        configuration: %{
+          elastic: %{url: url, user: "plrl-#{inst}", password: pass},
+          vmetrics: %{url: "#{vurl}/insert/#{vtenant}/prometheus/api/v1/write", user: "plrl-#{inst}", password: pass}
         }
-      }, bot)
+      }, "plrl/cloud/observability", bot)
     else
       _ -> {:ok, %{}}
     end

@@ -976,6 +976,8 @@ type Cluster struct {
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
+	// A pod-level set of utilization metrics exceeding our noisy threshold
+	NoisyNeighbors *UtilizationHeatMap `json:"noisyNeighbors,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// fetches the discovered custom resources with new versions to be used
@@ -5436,12 +5438,16 @@ type ServiceContext struct {
 	Name          string                  `json:"name"`
 	Configuration map[string]any          `json:"configuration,omitempty"`
 	Secrets       []*ServiceConfiguration `json:"secrets,omitempty"`
-	InsertedAt    *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
+	// the project this context belongs to
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
 }
 
 // A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc
 type ServiceContextAttributes struct {
+	// the project this context belongs to
+	ProjectID     *string             `json:"projectId,omitempty"`
 	Configuration *string             `json:"configuration,omitempty"`
 	Secrets       []*ConfigAttributes `json:"secrets,omitempty"`
 }

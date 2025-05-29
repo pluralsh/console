@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc"
   input_object :service_context_attributes do
+    field :project_id,    :id, description: "the project this context belongs to"
     field :configuration, :json
     field :secrets,       list_of(:config_attributes)
   end
@@ -267,12 +268,6 @@ defmodule Console.GraphQl.Deployments.Service do
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether this service is editable"
 
     timestamps()
-  end
-
-  @desc "A representation of the metrics to render a utilization heat map"
-  object :utilization_heat_map do
-    field :cpu,    list_of(:metric_point_response)
-    field :memory, list_of(:metric_point_response)
   end
 
   object :service_component_metrics do
@@ -437,6 +432,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,          non_null(:string)
     field :configuration, :map
     field :secrets,       list_of(:service_configuration)
+    field :project,       :project,
+      resolve: dataloader(Deployments),
+      description: "the project this context belongs to"
 
     timestamps()
   end

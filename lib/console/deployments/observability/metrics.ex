@@ -45,9 +45,16 @@ defmodule Console.Deployments.Observability.Metrics do
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""$filter}) by (node)|
   ])
 
+  @noisy post_process([
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[5m])) / sum(kube_pod_container_resource_requests_cpu_cores{cluster="$cluster") by (pod)|,
+    memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="$cluster"}) by (pod)|
+  ])
+
   def queries(:cluster), do: @cluster
   def queries(:node), do: @node
   def queries(:component), do: @component
+  def queries(:noisy), do: @noisy
+
   def queries(:heat, :pod), do: @heat
   def queries(:heat, :namespace), do: @heat_ns
   def queries(:heat, :node), do: @heat_node

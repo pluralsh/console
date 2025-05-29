@@ -1,7 +1,7 @@
 defmodule Console.Deployments.InitTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.Deployments.{Init, Git, Global}
+  alias Console.Deployments.{Init, Git, Services}
 
   describe "#setup/0" do
     test "it will setup some initial resources" do
@@ -95,6 +95,7 @@ defmodule Console.Deployments.InitTest do
       expect(Console, :cloud?, 5, fn -> true end)
       expect(Console, :cloud_instance, 2, fn -> "test" end)
       expect(Console, :es_creds, 2, fn -> {:ok, "http://test.es.com", "test"} end)
+      expect(Console, :vmetrics_creds, 2, fn -> {:ok, "http://vmetrics.vmetrics.com", "test"} end)
       insert(:user, bot_name: "console", roles: %{admin: true})
       {:ok, res} = Init.setup()
 
@@ -117,25 +118,28 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.git_policy_id
       assert res.settings.create_policy_id
 
+      assert res.settings.prometheus_connection.host == "http://vmetrics.vmetrics.com/select/test/prometheus"
+      assert res.settings.prometheus_connection.user == "plrl-test"
+      assert res.settings.prometheus_connection.password == "test"
+
+      assert res.settings.logging.enabled
+      assert res.settings.logging.driver == :elastic
+      assert res.settings.logging.elastic.host == "http://test.es.com"
+      assert res.settings.logging.elastic.user == "plrl-test"
+      assert res.settings.logging.elastic.password == "test"
+      assert res.settings.logging.elastic.index == "plrl-logs-test-*"
+
       assert res.settings.ai.enabled
       assert res.settings.ai.provider == :openai
       assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
 
-      global = Global.get_by_name!("logstash") |> Repo.preload([:template])
-
-      assert global.name == "logstash"
-      assert global.template.name == "logstash"
-      assert global.template.namespace == "elastic"
-      assert global.template.repository_id == res.artifacts_repo.id
-      assert global.template.git.ref == "main"
-      assert global.template.git.folder == "cloud/logstash"
-
-      attrs = Console.Schema.ServiceTemplate.attributes(global.template)
-
-      secrets = Map.new(attrs.configuration, & {&1.name, &1.value})
-      assert secrets["username"] == "plrl-test"
-      assert secrets["password"] == "test"
-      assert secrets["esUrl"] == "http://test.es.com"
+      context = Services.get_context_by_name!("plrl/cloud/observability")
+      assert context.configuration["elastic"]["url"] == "http://test.es.com"
+      assert context.configuration["elastic"]["user"] == "plrl-test"
+      assert context.configuration["elastic"]["password"] == "test"
+      assert context.configuration["vmetrics"]["url"] == "http://vmetrics.vmetrics.com/insert/test/prometheus/api/v1/write"
+      assert context.configuration["vmetrics"]["user"] == "plrl-test"
+      assert context.configuration["vmetrics"]["password"] == "test"
     end
   end
 
