@@ -4,6 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func init() {
@@ -42,6 +43,8 @@ type ILMPolicySpec struct {
 	Definition     ILMPolicyDefinition         `json:"definition"`
 }
 
-// TODO: Representation of a elasticsearch ilm policy, just imitate our one for logstash for now
+// ILMPolicyDefinition is a representation of the elasticsearch ILM policy.
+// See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle
 type ILMPolicyDefinition struct {
+	Policy runtime.RawExtension `json:"policy"`
 }

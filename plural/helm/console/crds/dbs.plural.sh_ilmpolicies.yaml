@@ -56,6 +56,15 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               definition:
+                description: |-
+                  ILMPolicyDefinition is a representation of the elasticsearch ILM policy.
+                  See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle
+                properties:
+                  policy:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                required:
+                - policy
                 type: object
             required:
             - credentialsRef
