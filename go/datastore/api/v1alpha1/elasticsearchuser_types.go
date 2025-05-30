@@ -9,10 +9,10 @@ import (
 // ElasticSearchUserSpec defines the desired state of ElasticSearchUser
 type ElasticSearchUserSpec struct {
 	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
-	Definition     Definition                  `json:"definition"`
+	Definition     ElasticSearchUserDefinition `json:"definition"`
 }
 
-type Definition struct {
+type ElasticSearchUserDefinition struct {
 	// User to add
 	User string `json:"user"`
 	// PasswordSecretKeyRef reference
