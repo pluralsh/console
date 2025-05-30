@@ -124,6 +124,12 @@ query ScmConnections($first: Int = 100, $after: String) {
   }
 }
 
+query ScmConnection($id: ID, $name: String) {
+  scmConnection(id: $id, name: $name) {
+    ...ScmConnection
+  }
+}
+
 mutation CreateScmConnection($attributes: ScmConnectionAttributes!) {
   createScmConnection(attributes: $attributes) {
     ...ScmConnection
@@ -196,5 +202,11 @@ mutation DeleteScmWebhook($id: ID!) {
 mutation CreateScmWebhookPointer($attributes: ScmWebhookAttributes!) {
   createScmWebhookPointer(attributes: $attributes) {
     ...ScmWebhook
+  }
+}
+
+mutation RegisterGitHubApp($installationId: String!, $name: String!) {
+  registerGithubApp(installationId: $installationId, name: $name) {
+    id
   }
 }

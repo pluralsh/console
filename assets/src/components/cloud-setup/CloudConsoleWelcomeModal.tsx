@@ -8,9 +8,10 @@ import {
   TerminalIcon,
 } from '@pluralsh/design-system'
 
-import { createContext, ReactNode, useMemo, useState } from 'react'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { createContext, ReactNode, Suspense, useMemo, useState } from 'react'
 import { AuthenticateStep } from './steps/AuthenticateStep'
-import { GitHubSetupStep } from './steps/GitHubSetupStep'
+import { GitHubSetupStep } from './steps/scm-setup/GitHubSetupStep'
 import { LearnStep } from './steps/LearnStep'
 
 export enum CloudWelcomeStep {
@@ -48,21 +49,23 @@ export function CloudConsoleWelcomeModal() {
       open={open}
       actions={modalActions}
     >
-      <Flex
-        direction="column"
-        gap="large"
-      >
-        <Stepper
-          compact
-          stepIndex={stepIndex}
-          steps={steps}
-        />
-        <CloudWelcomeCtx value={ctx}>
-          {step === CloudWelcomeStep.GitHubSetup && <GitHubSetupStep />}
-          {step === CloudWelcomeStep.Authenticate && <AuthenticateStep />}
-          {step === CloudWelcomeStep.Learn && <LearnStep />}
-        </CloudWelcomeCtx>
-      </Flex>
+      <Suspense fallback={<LoadingIndicator />}>
+        <Flex
+          direction="column"
+          gap="large"
+        >
+          <Stepper
+            compact
+            stepIndex={stepIndex}
+            steps={steps}
+          />
+          <CloudWelcomeCtx value={ctx}>
+            {step === CloudWelcomeStep.GitHubSetup && <GitHubSetupStep />}
+            {step === CloudWelcomeStep.Authenticate && <AuthenticateStep />}
+            {step === CloudWelcomeStep.Learn && <LearnStep />}
+          </CloudWelcomeCtx>
+        </Flex>
+      </Suspense>
     </Modal>
   )
 }

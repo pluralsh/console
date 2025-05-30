@@ -11079,6 +11079,14 @@ export type ScmConnectionsQueryVariables = Exact<{
 
 export type ScmConnectionsQuery = { __typename?: 'RootQueryType', scmConnections?: { __typename?: 'ScmConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmConnectionEdge', node?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null } | null> | null } | null };
 
+export type ScmConnectionQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ScmConnectionQuery = { __typename?: 'RootQueryType', scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+
 export type CreateScmConnectionMutationVariables = Exact<{
   attributes: ScmConnectionAttributes;
 }>;
@@ -11144,6 +11152,14 @@ export type CreateScmWebhookPointerMutationVariables = Exact<{
 
 
 export type CreateScmWebhookPointerMutation = { __typename?: 'RootMutationType', createScmWebhookPointer?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type RegisterGitHubAppMutationVariables = Exact<{
+  installationId: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type RegisterGitHubAppMutation = { __typename?: 'RootMutationType', registerGithubApp?: { __typename?: 'ScmConnection', id: string } | null };
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
@@ -19058,6 +19074,47 @@ export type ScmConnectionsQueryHookResult = ReturnType<typeof useScmConnectionsQ
 export type ScmConnectionsLazyQueryHookResult = ReturnType<typeof useScmConnectionsLazyQuery>;
 export type ScmConnectionsSuspenseQueryHookResult = ReturnType<typeof useScmConnectionsSuspenseQuery>;
 export type ScmConnectionsQueryResult = Apollo.QueryResult<ScmConnectionsQuery, ScmConnectionsQueryVariables>;
+export const ScmConnectionDocument = gql`
+    query ScmConnection($id: ID, $name: String) {
+  scmConnection(id: $id, name: $name) {
+    ...ScmConnection
+  }
+}
+    ${ScmConnectionFragmentDoc}`;
+
+/**
+ * __useScmConnectionQuery__
+ *
+ * To run a query within a React component, call `useScmConnectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useScmConnectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useScmConnectionQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useScmConnectionQuery(baseOptions?: Apollo.QueryHookOptions<ScmConnectionQuery, ScmConnectionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ScmConnectionQuery, ScmConnectionQueryVariables>(ScmConnectionDocument, options);
+      }
+export function useScmConnectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ScmConnectionQuery, ScmConnectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ScmConnectionQuery, ScmConnectionQueryVariables>(ScmConnectionDocument, options);
+        }
+export function useScmConnectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ScmConnectionQuery, ScmConnectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ScmConnectionQuery, ScmConnectionQueryVariables>(ScmConnectionDocument, options);
+        }
+export type ScmConnectionQueryHookResult = ReturnType<typeof useScmConnectionQuery>;
+export type ScmConnectionLazyQueryHookResult = ReturnType<typeof useScmConnectionLazyQuery>;
+export type ScmConnectionSuspenseQueryHookResult = ReturnType<typeof useScmConnectionSuspenseQuery>;
+export type ScmConnectionQueryResult = Apollo.QueryResult<ScmConnectionQuery, ScmConnectionQueryVariables>;
 export const CreateScmConnectionDocument = gql`
     mutation CreateScmConnection($attributes: ScmConnectionAttributes!) {
   createScmConnection(attributes: $attributes) {
@@ -19350,6 +19407,40 @@ export function useCreateScmWebhookPointerMutation(baseOptions?: Apollo.Mutation
 export type CreateScmWebhookPointerMutationHookResult = ReturnType<typeof useCreateScmWebhookPointerMutation>;
 export type CreateScmWebhookPointerMutationResult = Apollo.MutationResult<CreateScmWebhookPointerMutation>;
 export type CreateScmWebhookPointerMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookPointerMutation, CreateScmWebhookPointerMutationVariables>;
+export const RegisterGitHubAppDocument = gql`
+    mutation RegisterGitHubApp($installationId: String!, $name: String!) {
+  registerGithubApp(installationId: $installationId, name: $name) {
+    id
+  }
+}
+    `;
+export type RegisterGitHubAppMutationFn = Apollo.MutationFunction<RegisterGitHubAppMutation, RegisterGitHubAppMutationVariables>;
+
+/**
+ * __useRegisterGitHubAppMutation__
+ *
+ * To run a mutation, you first call `useRegisterGitHubAppMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRegisterGitHubAppMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [registerGitHubAppMutation, { data, loading, error }] = useRegisterGitHubAppMutation({
+ *   variables: {
+ *      installationId: // value for 'installationId'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useRegisterGitHubAppMutation(baseOptions?: Apollo.MutationHookOptions<RegisterGitHubAppMutation, RegisterGitHubAppMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterGitHubAppMutation, RegisterGitHubAppMutationVariables>(RegisterGitHubAppDocument, options);
+      }
+export type RegisterGitHubAppMutationHookResult = ReturnType<typeof useRegisterGitHubAppMutation>;
+export type RegisterGitHubAppMutationResult = Apollo.MutationResult<RegisterGitHubAppMutation>;
+export type RegisterGitHubAppMutationOptions = Apollo.BaseMutationOptions<RegisterGitHubAppMutation, RegisterGitHubAppMutationVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -29912,6 +30003,7 @@ export const namedOperations = {
     AuditMetrics: 'AuditMetrics',
     PrAutomations: 'PrAutomations',
     ScmConnections: 'ScmConnections',
+    ScmConnection: 'ScmConnection',
     ScmWebhooks: 'ScmWebhooks',
     ObjectStores: 'ObjectStores',
     ClustersObjectStores: 'ClustersObjectStores',
@@ -30093,6 +30185,7 @@ export const namedOperations = {
     CreateScmWebhook: 'CreateScmWebhook',
     DeleteScmWebhook: 'DeleteScmWebhook',
     CreateScmWebhookPointer: 'CreateScmWebhookPointer',
+    RegisterGitHubApp: 'RegisterGitHubApp',
     CreateObjectStore: 'CreateObjectStore',
     UpdateObjectStore: 'UpdateObjectStore',
     DeleteObjectStore: 'DeleteObjectStore',

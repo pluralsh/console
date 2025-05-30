@@ -1,5 +1,5 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useIsManager } from 'components/contexts'
+import { useCloudSetupUnfinished, useIsManager } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { useTheme } from 'styled-components'
 import { AiThreads } from './AiThreads.tsx'
@@ -17,12 +17,14 @@ export default function Home() {
   const theme = useTheme()
   const isManager = useIsManager()
   const onboarded = useOnboarded()
+  // we don't want a double popup, and this one would come first
+  const isCloudSetupUnfinished = useCloudSetupUnfinished()
 
   useSetBreadcrumbs(breadcrumbs)
 
   return (
     <>
-      {!onboarded && <GettingStartedPopup />}
+      {!onboarded && !isCloudSetupUnfinished && <GettingStartedPopup />}
       <ResponsivePageFullWidth maxContentWidth={1440}>
         <div
           css={{

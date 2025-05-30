@@ -17,8 +17,8 @@ function GitProviderSelect({
 }: {
   selectedKey: ScmType | undefined
   updateSelectedKey: (key: ScmType | undefined) => void
-  ghAppAuth: boolean
-  setGhAppAuth: (ghAppAuth: boolean) => void
+  ghAppAuth?: boolean
+  setGhAppAuth?: (ghAppAuth: boolean) => void
 }) {
   return (
     <FormField
@@ -38,7 +38,7 @@ function GitProviderSelect({
             label="Select provider type"
             onSelectionChange={(key) => {
               updateSelectedKey(key as ScmType)
-              if (key !== ScmType.Github) setGhAppAuth(false)
+              if (key !== ScmType.Github) setGhAppAuth?.(false)
             }}
           >
             {[ScmType.Github, ScmType.Gitlab, ScmType.Bitbucket].map((type) => (
@@ -50,7 +50,7 @@ function GitProviderSelect({
             ))}
           </Select>
         </div>
-        {selectedKey === ScmType.Github && (
+        {selectedKey === ScmType.Github && setGhAppAuth && (
           <Switch
             checked={ghAppAuth}
             onChange={setGhAppAuth}

@@ -28,7 +28,7 @@ import { ApolloError } from '@apollo/client'
 
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 
-import { DEFAULT_ATTRIBUTES } from './CreateScmConnection'
+import { DEFAULT_SCM_ATTRIBUTES } from './CreateScmConnection'
 import GitProviderSelect from './GitProviderSelect'
 
 function EditScmConnectionModalBase({
@@ -136,11 +136,13 @@ export function ScmConnectionForm({
   formState,
   updateFormState,
   error,
+  readOnlyName,
 }: {
   type: 'update' | 'create'
   formState: Partial<ScmConnectionAttributes>
   updateFormState: (update: Partial<ScmConnectionAttributes>) => void
   error: ApolloError | undefined
+  readOnlyName?: boolean
 }) {
   const { colors } = useTheme()
   const [ghAppAuth, setGhAppAuthState] = useState(!!formState.github?.appId)
@@ -148,8 +150,8 @@ export function ScmConnectionForm({
   const setGhAppAuth = (isToggled: boolean) => {
     setGhAppAuthState(isToggled)
     updateFormState({
-      token: !isToggled ? undefined : DEFAULT_ATTRIBUTES.token,
-      github: isToggled ? DEFAULT_ATTRIBUTES.github : undefined,
+      token: !isToggled ? undefined : DEFAULT_SCM_ATTRIBUTES.token,
+      github: isToggled ? DEFAULT_SCM_ATTRIBUTES.github : undefined,
     })
   }
 
@@ -179,6 +181,7 @@ export function ScmConnectionForm({
           required
         >
           <Input2
+            disabled={readOnlyName}
             css={{ background: colors['fill-two'] }}
             placeholder="Enter name"
             value={formState.name}
