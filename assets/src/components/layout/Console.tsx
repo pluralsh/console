@@ -10,7 +10,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
 
-import { useLogin } from 'components/contexts'
+import { useCloudSetupUnfinished } from 'components/contexts'
 
 import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
@@ -21,14 +21,14 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
 import { AIContextProvider } from 'components/ai/AIContext'
-import { CloudConsoleWelcomeModal } from './CloudConsoleWelcomeModal'
+import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
+import { useTheme } from 'styled-components'
+import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import Header from './Header'
 import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
-import { useTheme } from 'styled-components'
-import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 
 export default function Console() {
   return (
@@ -63,7 +63,7 @@ export default function Console() {
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
   const theme = useTheme()
-  const { configuration } = useLogin()
+  const isCloudSetupUnfinished = useCloudSetupUnfinished()
 
   return (
     <Flex
@@ -100,9 +100,7 @@ function ConsoleContent() {
           )}
         </WithApplicationUpdate>
       )}
-      {configuration?.cloud && !configuration?.installed && (
-        <CloudConsoleWelcomeModal />
-      )}
+      {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
       <Header />
       <Flex
         width="100%"

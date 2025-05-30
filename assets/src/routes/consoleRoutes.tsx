@@ -19,6 +19,7 @@ import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { edgeRoutes } from './edgeRoutes.tsx'
 import { flowRoutes } from './flowRoutes.tsx'
+import { GitHubSetup } from 'components/cloud-setup/GitHubSetup.tsx'
 
 const profileRoutes = [
   <Route
@@ -85,6 +86,10 @@ export const consoleRoutes: RouteObject[] = [
   {
     path: 'home',
     element: <Home />,
+  },
+  {
+    path: 'github/setup',
+    element: <GitHubSetup />,
   },
   ...secretsRoutes,
   ...prRoutes,

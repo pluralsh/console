@@ -52,6 +52,11 @@ export const useIsManager = () => {
   )
 }
 
+export function useCloudSetupUnfinished() {
+  const { configuration } = useLogin()
+  return !!configuration?.cloud && !configuration?.installed
+}
+
 function completeLogout() {
   wipeToken()
   wipeRefreshToken()

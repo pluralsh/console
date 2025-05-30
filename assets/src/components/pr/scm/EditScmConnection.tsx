@@ -2,13 +2,13 @@ import {
   Accordion,
   AccordionItem,
   Button,
+  Flex,
   FormField,
   Input2,
   Modal,
-  Switch,
 } from '@pluralsh/design-system'
 import pick from 'lodash/pick'
-import { type ComponentProps, useCallback, useState } from 'react'
+import { type ComponentProps, ReactNode, useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import {
@@ -28,7 +28,7 @@ import { ApolloError } from '@apollo/client'
 
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 
-import { DEFAULT_ATTRIBUTES } from './CreateScmConnection'
+import { DEFAULT_SCM_ATTRIBUTES } from './CreateScmConnection'
 import GitProviderSelect from './GitProviderSelect'
 
 function EditScmConnectionModalBase({
@@ -96,6 +96,7 @@ function EditScmConnectionModalBase({
       open={open}
       onClose={onClose || undefined}
       asForm
+      size="large"
       onSubmit={onSubmit}
       header={`Update connection - ${scmConnection.name}`}
       actions={
@@ -135,20 +136,22 @@ export function ScmConnectionForm({
   formState,
   updateFormState,
   error,
+  readOnlyName,
 }: {
   type: 'update' | 'create'
   formState: Partial<ScmConnectionAttributes>
   updateFormState: (update: Partial<ScmConnectionAttributes>) => void
   error: ApolloError | undefined
+  readOnlyName?: boolean
 }) {
-  const theme = useTheme()
-  const [ghAppAuth, setGhAppAuth] = useState(!!formState.github?.appId)
+  const { colors } = useTheme()
+  const [ghAppAuth, setGhAppAuthState] = useState(!!formState.github?.appId)
 
-  const toggleGhAppAuth = (isToggled: boolean) => {
-    setGhAppAuth(isToggled)
+  const setGhAppAuth = (isToggled: boolean) => {
+    setGhAppAuthState(isToggled)
     updateFormState({
-      token: !isToggled ? undefined : DEFAULT_ATTRIBUTES.token,
-      github: isToggled ? DEFAULT_ATTRIBUTES.github : undefined,
+      token: !isToggled ? undefined : DEFAULT_SCM_ATTRIBUTES.token,
+      github: isToggled ? DEFAULT_SCM_ATTRIBUTES.github : undefined,
     })
   }
 
@@ -162,102 +165,113 @@ export function ScmConnectionForm({
   }
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.medium,
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
     >
       <GitProviderSelect
         selectedKey={formState.type}
         updateSelectedKey={(type) => updateFormState({ type })}
+        ghAppAuth={ghAppAuth}
+        setGhAppAuth={setGhAppAuth}
       />
-      <FormField
-        label="Name"
-        required
-      >
-        <Input2
-          value={formState.name}
-          onChange={(e) => updateFormState({ name: e.target.value })}
-        />
-      </FormField>
-      {ghAppAuth ? (
+      <StretchedInputRow>
+        <FormField
+          label="Name"
+          required
+        >
+          <Input2
+            disabled={readOnlyName}
+            css={{ background: colors['fill-two'] }}
+            placeholder="Enter name"
+            value={formState.name}
+            onChange={(e) => updateFormState({ name: e.target.value })}
+          />
+        </FormField>
+        {!ghAppAuth && (
+          <FormField
+            label="Token"
+            required={type === 'create'}
+          >
+            <InputRevealer
+              css={{ background: colors['fill-two'] }}
+              placeholder="Enter access token"
+              defaultRevealed={false}
+              value={formState.token || ''}
+              onChange={(e) => updateFormState({ token: e.target.value })}
+            />
+          </FormField>
+        )}
+      </StretchedInputRow>
+      {ghAppAuth && (
         <>
-          <FormField
-            label="App ID"
-            required
-          >
-            <Input2
-              value={formState.github?.appId}
-              onChange={(e) => updateGhFormField('appId', e.target.value)}
-            />
-          </FormField>
-          <FormField
-            label="Installation ID"
-            required
-          >
-            <Input2
-              value={formState.github?.installationId}
-              onChange={(e) =>
-                updateGhFormField('installationId', e.target.value)
-              }
-            />
-          </FormField>
+          <StretchedInputRow>
+            <FormField
+              label="App ID"
+              required
+            >
+              <Input2
+                css={{ background: colors['fill-two'] }}
+                placeholder="Enter app ID"
+                value={formState.github?.appId}
+                onChange={(e) => updateGhFormField('appId', e.target.value)}
+              />
+            </FormField>
+            <FormField
+              label="Installation ID"
+              required
+            >
+              <Input2
+                css={{ background: colors['fill-two'] }}
+                placeholder="Enter installation ID"
+                value={formState.github?.installationId}
+                onChange={(e) =>
+                  updateGhFormField('installationId', e.target.value)
+                }
+              />
+            </FormField>
+          </StretchedInputRow>
           <SshKeyUpload
+            fillLevel={2}
             privateKey={formState.github?.privateKey}
             setPrivateKey={(key) => updateGhFormField('privateKey', key)}
           />
         </>
-      ) : (
-        <FormField
-          label="Token"
-          required={type === 'create'}
-        >
-          <InputRevealer
-            defaultRevealed={false}
-            value={formState.token || ''}
-            onChange={(e) => updateFormState({ token: e.target.value })}
-          />
-        </FormField>
-      )}
-      {formState.type === ScmType.Github && (
-        <Switch
-          checked={ghAppAuth}
-          onChange={toggleGhAppAuth}
-          css={{ alignSelf: 'flex-end' }}
-        >
-          Use GitHub App Auth
-        </Switch>
       )}
       <Accordion type="single">
         <AccordionItem trigger="Advanced configuration">
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.medium,
-            }}
+          <Flex
+            direction="column"
+            gap="medium"
           >
-            <FormField label="Base url">
+            <StretchedInputRow>
+              <FormField label="Base URL">
+                <Input2
+                  css={{ background: colors['fill-three'] }}
+                  placeholder="Enter base URL"
+                  value={formState.baseUrl ?? ''}
+                  onChange={(e) => updateFormState({ baseUrl: e.target.value })}
+                />
+              </FormField>
+              <FormField label="API URL">
+                <Input2
+                  css={{ background: colors['fill-three'] }}
+                  placeholder="Enter API URL"
+                  value={formState.apiUrl ?? ''}
+                  onChange={(e) => updateFormState({ apiUrl: e.target.value })}
+                />
+              </FormField>
+            </StretchedInputRow>
+            <FormField label="Username">
               <Input2
-                value={formState.baseUrl ?? ''}
-                onChange={(e) => updateFormState({ baseUrl: e.target.value })}
-              />
-            </FormField>
-            <FormField label="API url">
-              <Input2
-                value={formState.apiUrl ?? ''}
-                onChange={(e) => updateFormState({ apiUrl: e.target.value })}
-              />
-            </FormField>
-            <FormField label="User name">
-              <Input2
+                css={{ background: colors['fill-three'] }}
+                placeholder="Enter username"
                 value={formState.username ?? ''}
                 onChange={(e) => updateFormState({ username: e.target.value })}
               />
             </FormField>
             <SshKeyUpload
+              fillLevel={2}
               label="Signing private key"
               required={false}
               privateKey={formState.signingPrivateKey ?? ''}
@@ -265,11 +279,11 @@ export function ScmConnectionForm({
                 updateFormState({ signingPrivateKey: key })
               }
             />
-          </div>
+          </Flex>
         </AccordionItem>
       </Accordion>
       {error && <GqlError error={error} />}
-    </div>
+    </Flex>
   )
 }
 
@@ -280,5 +294,17 @@ export function EditScmConnectionModal(
     <ModalMountTransition open={props.open}>
       <EditScmConnectionModalBase {...props} />
     </ModalMountTransition>
+  )
+}
+
+function StretchedInputRow({ children }: { children: ReactNode }) {
+  return (
+    <Flex
+      gap="medium"
+      width="100%"
+      {...{ '& > *': { flex: 1 } }}
+    >
+      {children}
+    </Flex>
   )
 }

@@ -15,7 +15,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ScmConnectionForm } from './EditScmConnection'
 
-export const DEFAULT_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
+export const DEFAULT_SCM_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
   apiUrl: '',
   baseUrl: '',
   name: '',
@@ -40,8 +40,9 @@ export function CreateScmConnectionModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const { state: formState, update: updateFormState } =
-    useUpdateState<Partial<ScmConnectionAttributes>>(DEFAULT_ATTRIBUTES)
+  const { state: formState, update: updateFormState } = useUpdateState<
+    Partial<ScmConnectionAttributes>
+  >(DEFAULT_SCM_ATTRIBUTES)
 
   const [mutation, { loading, error }] = useCreateScmConnectionMutation({
     update: (cache, { data }) =>
@@ -56,41 +57,22 @@ export function CreateScmConnectionModal({
       refetch?.()
     },
   })
+
   const { name, token, github, type } = formState
   const allowSubmit =
     name &&
     type &&
     (token || (github?.appId && github?.privateKey && github?.installationId))
+
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
-
-      if (allowSubmit) {
-        const attributes: ScmConnectionAttributes = {
-          name,
-          type,
-          ...(token === '' && type === ScmType.Github ? { github } : { token }),
-          apiUrl: formState.apiUrl || null,
-          baseUrl: formState.baseUrl || null,
-          username: formState.username || null,
-          signingPrivateKey: formState.signingPrivateKey || null,
-        }
-
-        mutation({ variables: { attributes } })
-      }
+      if (allowSubmit)
+        mutation({
+          variables: { attributes: sanitizeScmAttributes(formState) },
+        })
     },
-    [
-      allowSubmit,
-      formState.apiUrl,
-      formState.baseUrl,
-      formState.signingPrivateKey,
-      formState.username,
-      github,
-      mutation,
-      name,
-      token,
-      type,
-    ]
+    [allowSubmit, formState, mutation]
   )
 
   return (
@@ -98,6 +80,7 @@ export function CreateScmConnectionModal({
       open={open}
       onClose={onClose || undefined}
       asForm
+      size="large"
       onSubmit={onSubmit}
       header="Create a new connection"
       actions={
@@ -156,4 +139,20 @@ export function CreateScmConnection({
       </ModalMountTransition>
     </>
   )
+}
+
+export const sanitizeScmAttributes = (
+  formState: Partial<ScmConnectionAttributes>
+): ScmConnectionAttributes => {
+  const { name, token, type, github } = formState
+
+  return {
+    name: name ?? '',
+    type: type ?? ScmType.Github,
+    ...(token === '' && type === ScmType.Github ? { github } : { token }),
+    apiUrl: formState.apiUrl || null,
+    baseUrl: formState.baseUrl || null,
+    username: formState.username || null,
+    signingPrivateKey: formState.signingPrivateKey || null,
+  }
 }
