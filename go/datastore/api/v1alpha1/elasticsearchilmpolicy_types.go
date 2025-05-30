@@ -39,12 +39,10 @@ func (s *ElasticsearchILMPolicy) SetCondition(condition metav1.Condition) {
 
 // ElasticsearchILMPolicySpec defines the desired state of ILMPolicy.
 type ElasticsearchILMPolicySpec struct {
-	CredentialsRef corev1.LocalObjectReference      `json:"credentialsRef"`
-	Definition     ElasticsearchILMPolicyDefinition `json:"definition"`
-}
+	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
 
-// ElasticsearchILMPolicyDefinition is a representation of the elasticsearch ILM policy.
-// See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle
-type ElasticsearchILMPolicyDefinition struct {
-	Policy runtime.RawExtension `json:"policy"`
+	// Definition of the Elasticsearch ILM policy.
+	// See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle
+	// +kubebuilder:validation:Required
+	Definition runtime.RawExtension `json:"definition"`
 }

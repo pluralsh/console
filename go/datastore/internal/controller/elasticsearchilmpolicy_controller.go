@@ -126,7 +126,7 @@ func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elast
 }
 
 func (r *ElasticsearchILMPolicyReconciler) sync(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
-	body, err := json.Marshal(policy.Spec.Definition.Policy)
+	body, err := json.Marshal(policy.Spec.Definition)
 	if err != nil {
 		return err
 	}
