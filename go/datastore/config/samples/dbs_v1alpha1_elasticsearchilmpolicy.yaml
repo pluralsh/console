@@ -1,0 +1,9 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchILMPolicy
+metadata:
+  labels:
+    app.kubernetes.io/name: datastore
+    app.kubernetes.io/managed-by: kustomize
+  name: elasticsearchilmpolicy-sample
+spec:
+  # TODO(user): Add fields here

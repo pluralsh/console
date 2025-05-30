@@ -33,9 +33,9 @@ type ElasticsearchILMPolicyReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchusers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchusers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchusers/finalizers,verbs=update
+// +kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchilmpolicies,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchilmpolicies/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchilmpolicies/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -86,10 +86,10 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 
 	if !policy.GetDeletionTimestamp().IsZero() {
 		logger.Error(err, "failed to delete ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
-		return ctrl.Result{}, delete(ctx, es, policy)
+		return ctrl.Result{}, r.delete(ctx, es, policy)
 	}
 
-	if err := sync(ctx, es, policy); err != nil {
+	if err = r.sync(ctx, es, policy); err != nil {
 		logger.Error(err, "failed to sync ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
 		return ctrl.Result{}, err
 	}
@@ -104,7 +104,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	return ctrl.Result{}, nil
 }
 
-func delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
+func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
 	if controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
 		res, err := es.ILM.DeleteLifecycle(policy.Name)
 		if err != nil {
@@ -125,7 +125,7 @@ func delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.Elas
 	return nil
 }
 
-func sync(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
+func (r *ElasticsearchILMPolicyReconciler) sync(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
 	body, err := json.Marshal(policy.Spec.Definition.Policy)
 	if err != nil {
 		return err

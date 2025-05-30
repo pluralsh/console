@@ -5,6 +5,7 @@ resources:
 - bases/dbs.plural.sh_elasticsearchcredentials.yaml
 - bases/dbs.plural.sh_elasticsearchusers.yaml
 - bases/dbs.plural.sh_elasticsearchindextemplates.yaml
+- bases/dbs.plural.sh_elasticsearchilmpolicies.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:

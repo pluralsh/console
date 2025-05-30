@@ -8,6 +8,7 @@ rules:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials
+  - elasticsearchilmpolicies
   - elasticsearchindextemplates
   - elasticsearchusers
   verbs:
@@ -22,6 +23,7 @@ rules:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials/finalizers
+  - elasticsearchilmpolicies/finalizers
   - elasticsearchindextemplates/finalizers
   - elasticsearchusers/finalizers
   verbs:
@@ -30,6 +32,7 @@ rules:
   - dbs.plural.sh
   resources:
   - elasticsearchcredentials/status
+  - elasticsearchilmpolicies/status
   - elasticsearchindextemplates/status
   - elasticsearchusers/status
   verbs:
