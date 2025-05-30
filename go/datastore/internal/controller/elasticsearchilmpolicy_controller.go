@@ -69,13 +69,13 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: policy.Spec.CredentialsRef.Name, Namespace: policy.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, policy.SetCondition)
 	}
 
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, policy.SetCondition)
 	}
 
 	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
