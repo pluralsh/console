@@ -75,7 +75,6 @@ spec:
             required:
             - credentialsRef
             - definition
-            - name
             type: object
           status:
             properties:
