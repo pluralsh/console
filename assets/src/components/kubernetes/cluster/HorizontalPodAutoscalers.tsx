@@ -1,16 +1,16 @@
-import { ReactElement, useMemo } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import { ResourceList } from '../common/ResourceList'
+import { ReactElement, useMemo } from 'react'
 import {
-  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
   Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,
+  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
+  HorizontalPodAutoscalersDocument,
   HorizontalPodAutoscalersQuery,
   HorizontalPodAutoscalersQueryVariables,
-  useHorizontalPodAutoscalersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { toKind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
+
+import { ResourceList } from '../common/ResourceList'
+import { toKind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 
 const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
@@ -84,7 +84,7 @@ export default function HorizontalPodAutoscalers(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useHorizontalPodAutoscalersQuery}
+      queryDocument={HorizontalPodAutoscalersDocument}
       queryName="handleGetHorizontalPodAutoscalerList"
       itemsKey="horizontalpodautoscalers"
       disableOnRowClick

@@ -1,54 +1,54 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
 
 import {
-  DeploymentQueryVariables,
-  Common_EventList as EventListT,
   Common_Event as EventT,
-  V1_LabelSelector as LabelSelectorT,
-  Pod_PodList as PodListT,
+  Common_EventList as EventListT,
+  DeploymentQueryVariables,
   Pod_Pod as PodT,
+  Pod_PodList as PodListT,
+  Replicationcontroller_ReplicationControllerDetail as ReplicationControllerT,
+  ReplicationControllerEventsDocument,
   ReplicationControllerEventsQuery,
   ReplicationControllerEventsQueryVariables,
+  ReplicationControllerPodsDocument,
   ReplicationControllerPodsQuery,
   ReplicationControllerPodsQueryVariables,
+  ReplicationControllerServicesDocument,
   ReplicationControllerServicesQuery,
   ReplicationControllerServicesQueryVariables,
-  Replicationcontroller_ReplicationControllerDetail as ReplicationControllerT,
-  Service_ServiceList as ServiceListT,
   Service_Service as ServiceT,
-  useReplicationControllerEventsQuery,
-  useReplicationControllerPodsQuery,
+  Service_ServiceList as ServiceListT,
   useReplicationControllerQuery,
-  useReplicationControllerServicesQuery,
+  V1_LabelSelector as LabelSelectorT,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
-  REPLICATION_CONTROLLERS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
+  REPLICATION_CONTROLLERS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { PodInfo } from '../common/PodInfo'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
-import { useServicesColumns } from '../network/Services'
-import { LabelSelector } from '../common/LabelSelector'
 
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import { LabelSelector } from '../common/LabelSelector'
+import { PodInfo } from '../common/PodInfo'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { useServicesColumns } from '../network/Services'
+import { usePodsColumns } from './Pods'
 
 import { getBreadcrumbs } from './ReplicationControllers'
-import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
@@ -151,7 +151,7 @@ export function ReplicationControllerPods(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicationControllerPodsQuery}
+      queryDocument={ReplicationControllerPodsDocument}
       queryOptions={{
         variables: {
           namespace,
@@ -177,7 +177,7 @@ export function ReplicationControllerServices(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicationControllerServicesQuery}
+      queryDocument={ReplicationControllerServicesDocument}
       queryOptions={{
         variables: {
           namespace,
@@ -203,7 +203,7 @@ export function ReplicationControllerEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useReplicationControllerEventsQuery}
+      queryDocument={ReplicationControllerEventsDocument}
       queryOptions={{
         variables: {
           namespace,

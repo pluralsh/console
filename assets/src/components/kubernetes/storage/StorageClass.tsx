@@ -1,31 +1,29 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   ConfigMapQueryVariables,
+  Storageclass_StorageClass as StorageClassT,
   Storageclass_StorageClassList as StorageClassListT,
+  StorageClassPersistentVolumesDocument,
   StorageClassPersistentVolumesQuery,
   StorageClassPersistentVolumesQueryVariables,
-  Storageclass_StorageClass as StorageClassT,
-  useStorageClassPersistentVolumesQuery,
   useStorageClassQuery,
 } from '../../../generated/graphql-kubernetes'
-import { MetadataSidecar, useDefaultColumns } from '../common/utils'
+
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceList } from '../common/ResourceList'
-import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
-
-import { getBreadcrumbs } from './StorageClasses'
+import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
   colAccessModes,
   colCapacity,
@@ -34,6 +32,8 @@ import {
   colReclaimPolicy,
   colStatus,
 } from './PersistentVolumes'
+
+import { getBreadcrumbs } from './StorageClasses'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Persistent Volumes' },
@@ -121,7 +121,7 @@ export function StorageClassPersistentVolumes(): ReactElement<any> {
         StorageClassPersistentVolumesQueryVariables
       >
         columns={columns}
-        query={useStorageClassPersistentVolumesQuery}
+        queryDocument={StorageClassPersistentVolumesDocument}
         queryOptions={{
           variables: {
             name: sc?.objectMeta.name,

@@ -1,11 +1,20 @@
-import { Dispatch, ReactElement, useCallback, useEffect, useMemo } from 'react'
-import type {
-  QueryHookOptions,
-  QueryResult,
-} from '@apollo/client/react/types/types'
+import {
+  DocumentNode,
+  LazyQueryExecFunction,
+  useLazyQuery,
+} from '@apollo/client'
+import type { QueryHookOptions } from '@apollo/client/react/types/types'
 import { Table } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router-dom'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
+import {
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -15,6 +24,7 @@ import {
 import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
+import { ErrorToast } from './errors'
 import {
   QueryName,
   Resource as ResourceT,
@@ -23,7 +33,6 @@ import {
   ResourceVariables,
   toKind,
 } from './types'
-import { ErrorToast } from './errors'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -39,9 +48,7 @@ interface ResourceListProps<
 > {
   columns: Array<object>
   initialSort?: SortingState
-  query: (
-    baseOptions: QueryHookOptions<TQuery, TVariables>
-  ) => QueryResult<TQuery, TVariables>
+  queryDocument: DocumentNode
   queryOptions?: QueryHookOptions<TQuery, TVariables>
   queryName: QueryName<TQuery>
   itemsKey: ResourceListItemsKey<TResourceList>
@@ -50,7 +57,9 @@ interface ResourceListProps<
   disableOnRowClick?: boolean
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
-  setRefetch?: Dispatch<Dispatch<(variables?: Partial<TVariables>) => unknown>>
+  setRefetch?: Dispatch<
+    SetStateAction<Dispatch<LazyQueryExecFunction<TQuery, TVariables>>>
+  >
 }
 
 export function ResourceList<
@@ -61,7 +70,7 @@ export function ResourceList<
 >({
   columns,
   initialSort,
-  query,
+  queryDocument,
   queryOptions,
   namespaced = false,
   customResource = false,
@@ -70,6 +79,7 @@ export function ResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
+
   setRefetch,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement<any> {
   const navigate = useNavigate()
@@ -79,10 +89,12 @@ export function ResourceList<
     meta: { cluster, ...tableOptions },
   })
 
-  const { data, loading, fetchMore, refetch } = query({
+  const pollInterval = 30_000 // 30 seconds
+  const [fetch, { data, loading, fetchMore }] = useLazyQuery<
+    TQuery,
+    TVariables
+  >(queryDocument!, {
     client: KubernetesClient(cluster?.id ?? ''),
-    skip: !cluster,
-    pollInterval: 30_000,
     fetchPolicy: 'cache-and-network',
     variables: {
       filterBy: `name,${filter}`,
@@ -111,12 +123,18 @@ export function ResourceList<
   }, [fetchMore, hasNextPage, page, queryName, itemsKey])
 
   useEffect(() => {
-    setRefetch?.(() => refetch)
-  }, [refetch, setRefetch])
+    setRefetch?.(() => fetch)
+    setNamespaced(namespaced)
+  }, [fetch, namespaced, setNamespaced, setRefetch])
 
   useEffect(() => {
-    setNamespaced(namespaced)
-  }, [setNamespaced, namespaced])
+    // Initial fetch when component mounts
+    fetch()
+
+    // Set up polling to refetch data every pollInterval milliseconds
+    const interval = setInterval(() => fetch({ context: {} }), pollInterval)
+    return () => clearInterval(interval)
+  }, [fetch])
 
   return (
     <>
@@ -131,7 +149,9 @@ export function ResourceList<
         isFetchingNextPage={loading}
         reactTableOptions={{
           ...reactTableOptions,
-          ...{ meta: { ...reactTableOptions.meta, refetch, customResource } },
+          ...{
+            meta: { ...reactTableOptions.meta, refetch: fetch, customResource },
+          },
         }}
         virtualizeRows
         onRowClick={

@@ -1,23 +1,23 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Role_RoleList as RoleListT,
   Role_Role as RoleT,
+  Role_RoleList as RoleListT,
+  RolesDocument,
   RolesQuery,
   RolesQueryVariables,
-  useRolesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  ROLES_REL_PATH,
   getRbacAbsPath,
+  ROLES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
 
@@ -47,7 +47,7 @@ export default function Roles() {
     <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
       namespaced
       columns={columns}
-      query={useRolesQuery}
+      queryDocument={RolesDocument}
       queryName="handleGetRoleList"
       itemsKey="items"
     />

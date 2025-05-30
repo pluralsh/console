@@ -1,13 +1,23 @@
-import { useState } from 'react'
+import { LazyQueryExecFunction } from '@apollo/client'
 import { Button, Toast } from '@pluralsh/design-system'
-import { CreateSecretModal } from './SecretModal.tsx'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition.tsx'
-import { useTheme } from 'styled-components'
-import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
+import { useTheme } from 'styled-components'
+import {
+  SecretsQuery,
+  SecretsQueryVariables,
+} from '../../../../../generated/graphql-kubernetes.ts'
 import { Kind } from '../../types.ts'
+import { CreateSecretModal } from './SecretModal.tsx'
 
-export function CreateSecretButton({ text, refetch }) {
+interface CreateSecretButtonProps {
+  text: string
+  refetch: LazyQueryExecFunction<SecretsQuery, SecretsQueryVariables>
+}
+
+export function CreateSecretButton({ text, refetch }: CreateSecretButtonProps) {
   const theme = useTheme()
   const { clusterId } = useParams()
 

@@ -1,41 +1,41 @@
-import { ReactElement, useMemo } from 'react'
 import {
   Code,
   SidecarItem,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
+  Common_EventList as EventListT,
   Limitrange_LimitRangeItem as LimitRangeT,
+  Namespace_NamespaceDetail as NamespaceT,
+  NamespaceEventsDocument,
   NamespaceEventsQuery,
   NamespaceEventsQueryVariables,
   NamespaceQueryVariables,
-  Namespace_NamespaceDetail as NamespaceT,
   Resourcequota_ResourceQuotaDetail as ResourceQuotaT,
-  useNamespaceEventsQuery,
   useNamespaceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../utils/SubTitle'
 
 import { useCluster } from '../Cluster'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { useEventsColumns } from './Events'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
-import { useEventsColumns } from './Events'
 
 const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
@@ -180,7 +180,7 @@ export function NamespaceEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useNamespaceEventsQuery}
+      queryDocument={NamespaceEventsDocument}
       queryOptions={{
         variables: { name } as NamespaceEventsQueryVariables,
       }}

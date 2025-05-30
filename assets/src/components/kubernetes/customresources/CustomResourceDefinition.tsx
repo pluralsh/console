@@ -1,3 +1,10 @@
+import {
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { isEmpty } from 'lodash'
 import { ReactElement, useEffect, useMemo } from 'react'
 import {
   Outlet,
@@ -6,36 +13,29 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import {
-  ChipList,
-  SidecarItem,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
-import { isEmpty } from 'lodash'
-
-import { MetadataSidecar, useDefaultColumns } from '../common/utils'
-import {
   CustomResourceDefinitionQueryVariables,
-  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
-  Types_CustomResourceObjectList as CustomResourceListT,
-  Types_CustomResourceObjectDetail as CustomResourceT,
+  CustomResourcesDocument,
   CustomResourcesQuery,
   CustomResourcesQueryVariables,
+  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
+  Types_CustomResourceObjectDetail as CustomResourceT,
+  Types_CustomResourceObjectList as CustomResourceListT,
   useCustomResourceDefinitionQuery,
-  useCustomResourcesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import Conditions from '../common/Conditions'
-import { ResourceList } from '../common/ResourceList'
-import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { useCluster } from '../Cluster'
+import Conditions from '../common/Conditions'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
-import { NAMESPACE_PARAM } from '../Navigation'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+
+import { MetadataSidecar, useDefaultColumns } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -168,7 +168,7 @@ export function CustomResourceDefinitionObjects(): ReactElement<any> {
       namespaced={namespaced}
       customResource
       columns={columns}
-      query={useCustomResourcesQuery}
+      queryDocument={CustomResourcesDocument}
       queryOptions={{
         variables: {
           filterBy: `name,${dataSelect.filter}`,

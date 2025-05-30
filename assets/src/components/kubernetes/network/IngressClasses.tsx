@@ -1,24 +1,23 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Ingressclass_IngressClassList as IngressClassListT,
   Ingressclass_IngressClass as IngressClassT,
+  Ingressclass_IngressClassList as IngressClassListT,
+  IngressClassesDocument,
   IngressClassesQuery,
   IngressClassesQueryVariables,
   Maybe,
-  useIngressClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  INGRESS_CLASSES_REL_PATH,
   getNetworkAbsPath,
+  INGRESS_CLASSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getNetworkBreadcrumbs } from './Network'
 
@@ -61,7 +60,7 @@ export default function IngressClasses() {
       IngressClassesQueryVariables
     >
       columns={columns}
-      query={useIngressClassesQuery}
+      queryDocument={IngressClassesDocument}
       queryName="handleGetIngressClassList"
       itemsKey="items"
     />

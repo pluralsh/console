@@ -1,33 +1,33 @@
-import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
-import { filesize } from 'filesize'
 import {
   IconFrame,
   SortDescIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { filesize } from 'filesize'
+import { useMemo, useState } from 'react'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Node_NodeList as NodeListT,
   Node_Node as NodeT,
+  Node_NodeList as NodeListT,
+  NodesDocument,
   NodesQuery,
   NodesQueryVariables,
-  useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { Usage } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  NODES_REL_PATH,
   getClusterAbsPath,
+  NODES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
+import { Usage } from '../../cluster/TableElements'
+import { UsageBar } from '../../utils/UsageBar.tsx'
 import { useCluster } from '../Cluster'
+import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
+import { ResourceList } from '../common/ResourceList'
+import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 
 import { getClusterBreadcrumbs } from './Cluster'
-import { UsageBar } from '../../utils/UsageBar.tsx'
-import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -169,7 +169,7 @@ export default function Nodes() {
   return (
     <ResourceList<NodeListT, NodeT, NodesQuery, NodesQueryVariables>
       columns={columns}
-      query={useNodesQuery}
+      queryDocument={NodesDocument}
       queryName="handleGetNodeList"
       itemsKey="nodes"
     />

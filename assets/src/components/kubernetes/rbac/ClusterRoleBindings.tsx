@@ -1,24 +1,23 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Clusterrolebinding_ClusterRoleBindingList as ClusterRoleBindingListT,
   Clusterrolebinding_ClusterRoleBinding as ClusterRoleBindingT,
+  Clusterrolebinding_ClusterRoleBindingList as ClusterRoleBindingListT,
+  ClusterRoleBindingsDocument,
   ClusterRoleBindingsQuery,
   ClusterRoleBindingsQueryVariables,
   Maybe,
-  useClusterRoleBindingsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   CLUSTER_ROLE_BINDINGS_REL_PATH,
   getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
 
@@ -52,7 +51,7 @@ export default function ClusterRoleBindings() {
       ClusterRoleBindingsQueryVariables
     >
       columns={columns}
-      query={useClusterRoleBindingsQuery}
+      queryDocument={ClusterRoleBindingsDocument}
       queryName="handleGetClusterRoleBindingList"
       itemsKey="items"
     />

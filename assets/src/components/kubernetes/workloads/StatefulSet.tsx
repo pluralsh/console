@@ -1,46 +1,46 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
 
 import {
-  DeploymentQueryVariables,
-  Common_EventList as EventListT,
   Common_Event as EventT,
-  Pod_PodList as PodListT,
+  Common_EventList as EventListT,
+  DeploymentQueryVariables,
   Pod_Pod as PodT,
+  Pod_PodList as PodListT,
+  Statefulset_StatefulSetDetail as StatefulSetT,
+  StatefulSetEventsDocument,
   StatefulSetEventsQuery,
   StatefulSetEventsQueryVariables,
+  StatefulSetPodsDocument,
   StatefulSetPodsQuery,
   StatefulSetPodsQueryVariables,
-  Statefulset_StatefulSetDetail as StatefulSetT,
-  useStatefulSetEventsQuery,
-  useStatefulSetPodsQuery,
   useStatefulSetQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
-  STATEFUL_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
+  STATEFUL_SETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { useEventsColumns } from '../cluster/Events'
-import { ResourceList } from '../common/ResourceList'
-import { PodInfo } from '../common/PodInfo'
 
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import { PodInfo } from '../common/PodInfo'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { usePodsColumns } from './Pods'
 
 import { getBreadcrumbs } from './StatefulSets'
-import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
@@ -136,7 +136,7 @@ export function StatefulSetPods(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useStatefulSetPodsQuery}
+      queryDocument={StatefulSetPodsDocument}
       queryOptions={{
         variables: { namespace, name } as StatefulSetPodsQueryVariables,
       }}
@@ -159,7 +159,7 @@ export function StatefulSetEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useStatefulSetEventsQuery}
+      queryDocument={StatefulSetEventsDocument}
       queryOptions={{
         variables: { namespace, name } as StatefulSetEventsQueryVariables,
       }}

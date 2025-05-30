@@ -1,25 +1,24 @@
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { useMemo } from 'react'
-
-import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Storageclass_StorageClassList as StorageClassListT,
   Storageclass_StorageClass as StorageClassT,
+  Storageclass_StorageClassList as StorageClassListT,
+  StorageClassesDocument,
   StorageClassesQuery,
   StorageClassesQueryVariables,
-  useStorageClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  STORAGE_CLASSES_REL_PATH,
   getStorageAbsPath,
+  STORAGE_CLASSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { getStorageBreadcrumbs } from './Storage'
 
@@ -86,7 +85,7 @@ export default function StorageClasses() {
       StorageClassesQueryVariables
     >
       columns={columns}
-      query={useStorageClassesQuery}
+      queryDocument={StorageClassesDocument}
       queryName="handleGetStorageClassList"
       itemsKey="items"
     />

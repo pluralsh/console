@@ -1,11 +1,3 @@
-import { ReactElement, useMemo, useRef, useState } from 'react'
-import {
-  Outlet,
-  useNavigate,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
 import {
   FormField,
   ListBoxItem,
@@ -15,8 +7,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Key } from '@react-types/shared'
-
-import { useTheme } from 'styled-components'
 
 import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
 
@@ -28,48 +18,58 @@ import {
 import { GqlError } from 'components/utils/Alert'
 
 import { reverse } from 'lodash'
-
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { ReactElement, useMemo, useRef, useState } from 'react'
 import {
-  Common_EventList as EventListT,
+  Outlet,
+  useNavigate,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
+import {
   Common_Event as EventT,
+  Common_EventList as EventListT,
+  Pod_PodDetail as PodT,
+  PodEventsDocument,
   PodEventsQuery,
   PodEventsQueryVariables,
   PodQueryVariables,
-  Pod_PodDetail as PodT,
-  usePodEventsQuery,
   usePodLogsQuery,
   usePodQuery,
 } from '../../../generated/graphql-kubernetes'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { SubTitle } from '../../utils/SubTitle'
-import Containers from '../common/Containers'
-import Conditions from '../common/Conditions'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { MetadataSidecar } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
-import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
+
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
-  PODS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
+  PODS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceOwner from '../common/ResourceOwner'
-import { NAMESPACE_PARAM } from '../Navigation'
-import { ContainerStatuses } from '../../cluster/ContainerStatuses'
-import { useCluster } from '../Cluster'
-import ImagePullSecrets from '../common/ImagePullSecrets'
-import { Kind } from '../common/types'
-import ResourceLink from '../common/ResourceLink'
-
-import { ShellContext, TerminalActions } from '../../terminal/Terminal'
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 import { ShellWithContext } from '../../cluster/containers/ContainerShell'
+import { ContainerStatuses } from '../../cluster/ContainerStatuses'
+
+import { ShellContext, TerminalActions } from '../../terminal/Terminal'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { SubTitle } from '../../utils/SubTitle'
+import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import Conditions from '../common/Conditions'
+import Containers from '../common/Containers'
+import ImagePullSecrets from '../common/ImagePullSecrets'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
+import ResourceOwner from '../common/ResourceOwner'
+import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
-import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -341,7 +341,7 @@ export function PodEvents(): ReactElement<any> {
     <ResourceList<EventListT, EventT, PodEventsQuery, PodEventsQueryVariables>
       namespaced
       columns={columns}
-      query={usePodEventsQuery}
+      queryDocument={PodEventsDocument}
       queryOptions={{
         variables: { namespace, name } as PodEventsQueryVariables,
       }}

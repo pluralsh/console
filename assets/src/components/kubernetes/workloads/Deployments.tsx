@@ -1,25 +1,25 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Deployment_DeploymentList as DeploymentListT,
   Deployment_Deployment as DeploymentT,
+  Deployment_DeploymentList as DeploymentListT,
+  DeploymentsDocument,
   DeploymentsQuery,
   DeploymentsQueryVariables,
   Maybe,
-  useDeploymentsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../common/ResourceList'
-import { useDefaultColumns } from '../common/utils'
-import { UsageText } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -98,7 +98,7 @@ export default function Deployments() {
     >
       namespaced
       columns={columns}
-      query={useDeploymentsQuery}
+      queryDocument={DeploymentsDocument}
       queryName="handleGetDeployments"
       itemsKey="deployments"
     />

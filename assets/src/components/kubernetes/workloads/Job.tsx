@@ -1,44 +1,44 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
+  Common_EventList as EventListT,
+  Job_JobDetail as JobT,
+  JobEventsDocument,
   JobEventsQuery,
   JobEventsQueryVariables,
+  JobPodsDocument,
   JobPodsQuery,
   JobPodsQueryVariables,
   JobQueryVariables,
-  Job_JobDetail as JobT,
-  Pod_PodList as PodListT,
   Pod_Pod as PodT,
-  useJobEventsQuery,
-  useJobPodsQuery,
+  Pod_PodList as PodListT,
   useJobQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
-  JOBS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
+  JOBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../common/ResourceList'
-import { useEventsColumns } from '../cluster/Events'
-import Conditions from '../common/Conditions'
 import { ReadinessT } from '../../../utils/status'
 import { StatusChip } from '../../cluster/TableElements'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
+import { useEventsColumns } from '../cluster/Events'
+import Conditions from '../common/Conditions'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
@@ -133,7 +133,7 @@ export function JobPods(): ReactElement<any> {
     <ResourceList<PodListT, PodT, JobPodsQuery, JobPodsQueryVariables>
       namespaced
       columns={columns}
-      query={useJobPodsQuery}
+      queryDocument={JobPodsDocument}
       queryOptions={{
         variables: { namespace, name } as JobPodsQueryVariables,
       }}
@@ -151,7 +151,7 @@ export function JobEvents(): ReactElement<any> {
     <ResourceList<EventListT, EventT, JobEventsQuery, JobEventsQueryVariables>
       namespaced
       columns={columns}
-      query={useJobEventsQuery}
+      queryDocument={JobEventsDocument}
       queryOptions={{
         variables: { namespace, name } as JobEventsQueryVariables,
       }}

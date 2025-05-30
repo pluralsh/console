@@ -1,28 +1,28 @@
-import { createColumnHelper } from '@tanstack/react-table'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Common_EventList as EventListT,
   Common_Event as EventT,
+  Common_EventList as EventListT,
+  EventsDocument,
   EventsQuery,
   EventsQueryVariables,
   Maybe,
-  useEventsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../common/ResourceList'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   EVENTS_REL_PATH,
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { useCluster } from '../Cluster'
-import { Kind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
+import { ResourceList } from '../common/ResourceList'
+import { Kind } from '../common/types'
+import { getClusterBreadcrumbs } from './Cluster'
 
 import { EventTypeChip } from './utils'
-import { getClusterBreadcrumbs } from './Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -134,7 +134,7 @@ export default function Events() {
     <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
       namespaced
       columns={columns}
-      query={useEventsQuery}
+      queryDocument={EventsDocument}
       queryName="handleGetEventList"
       itemsKey="events"
       disableOnRowClick

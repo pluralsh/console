@@ -1,25 +1,24 @@
-import { useMemo } from 'react'
-
-import { createColumnHelper } from '@tanstack/react-table'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
+import { createColumnHelper } from '@tanstack/react-table'
+import { useMemo } from 'react'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  Configmap_ConfigMapList as ConfigMapListT,
   Configmap_ConfigMap as ConfigMapT,
+  Configmap_ConfigMapList as ConfigMapListT,
+  ConfigMapsDocument,
   ConfigMapsQuery,
   ConfigMapsQueryVariables,
   Maybe,
-  useConfigMapsQuery,
 } from '../../../generated/graphql-kubernetes'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+
+import { useDefaultColumns } from '../common/utils'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
 
@@ -54,7 +53,7 @@ export default function ConfigMaps() {
     >
       namespaced
       columns={columns}
-      query={useConfigMapsQuery}
+      queryDocument={ConfigMapsDocument}
       queryName="handleGetConfigMapList"
       itemsKey="items"
     />

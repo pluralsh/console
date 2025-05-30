@@ -1,27 +1,26 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Cronjob_CronJobList as CronJobListT,
   Cronjob_CronJob as CronJobT,
+  Cronjob_CronJobList as CronJobListT,
+  CronJobsDocument,
   CronJobsQuery,
   CronJobsQueryVariables,
   Maybe,
-  useCronJobsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
-
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   CRON_JOBS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -93,7 +92,7 @@ export default function CronJobs() {
     <ResourceList<CronJobListT, CronJobT, CronJobsQuery, CronJobsQueryVariables>
       namespaced
       columns={columns}
-      query={useCronJobsQuery}
+      queryDocument={CronJobsDocument}
       queryName="handleGetCronJobList"
       itemsKey="items"
     />

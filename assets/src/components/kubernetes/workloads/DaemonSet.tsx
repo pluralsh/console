@@ -1,49 +1,49 @@
-import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
 
 import {
+  Common_Event as EventT,
+  Common_EventList as EventListT,
+  Daemonset_DaemonSetDetail as DaemonSetT,
+  DaemonSetEventsDocument,
   DaemonSetEventsQuery,
   DaemonSetEventsQueryVariables,
+  DaemonSetPodsDocument,
   DaemonSetPodsQuery,
   DaemonSetPodsQueryVariables,
   DaemonSetQueryVariables,
+  DaemonSetServicesDocument,
   DaemonSetServicesQuery,
   DaemonSetServicesQueryVariables,
-  Daemonset_DaemonSetDetail as DaemonSetT,
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  Pod_PodList as PodListT,
   Pod_Pod as PodT,
-  Service_ServiceList as ServiceListT,
+  Pod_PodList as PodListT,
   Service_Service as ServiceT,
-  useDaemonSetEventsQuery,
-  useDaemonSetPodsQuery,
+  Service_ServiceList as ServiceListT,
   useDaemonSetQuery,
-  useDaemonSetServicesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar } from '../common/utils'
-import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   DAEMON_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../common/ResourceList'
+import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
-import { useServicesColumns } from '../network/Services'
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
-import { useCluster } from '../Cluster'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
+import { useServicesColumns } from '../network/Services'
 
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
@@ -142,7 +142,7 @@ export function DaemonSetPods(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useDaemonSetPodsQuery}
+      queryDocument={DaemonSetPodsDocument}
       queryOptions={{
         variables: { namespace, name } as DaemonSetPodsQueryVariables,
       }}
@@ -165,7 +165,7 @@ export function DaemonSetServices(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useDaemonSetServicesQuery}
+      queryDocument={DaemonSetServicesDocument}
       queryOptions={{
         variables: { namespace, name } as DaemonSetServicesQueryVariables,
       }}
@@ -188,7 +188,7 @@ export function DaemonSetEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useDaemonSetEventsQuery}
+      queryDocument={DaemonSetEventsDocument}
       queryOptions={{
         variables: { namespace, name } as DaemonSetEventsQueryVariables,
       }}

@@ -1,5 +1,4 @@
-import { FetchResult } from '@apollo/client'
-import { OperationVariables } from '@apollo/client/core'
+import { ApolloError, FetchResult, LazyQueryExecFunction } from '@apollo/client'
 import {
   Button,
   FormField,
@@ -12,6 +11,8 @@ import { useNamespaces } from 'components/kubernetes/Cluster'
 import { GqlError } from 'components/utils/Alert'
 import {
   DeployFromInputMutation,
+  SecretsQuery,
+  SecretsQueryVariables,
   useDeployFromInputMutation,
 } from 'generated/graphql-kubernetes'
 import { KubernetesClient } from 'helpers/kubernetes.client'
@@ -35,7 +36,7 @@ const FormContainer = styled.div`
 interface CreateSecretModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  refetch?: (variables?: Partial<OperationVariables>) => Promise<unknown>
+  refetch?: LazyQueryExecFunction<SecretsQuery, SecretsQueryVariables>
   onCreate?: (name: string, namespace: string) => void
 }
 
@@ -76,10 +77,12 @@ export function CreateSecretModal({
     },
   })
 
-  const onComplete = (data: FetchResult<DeployFromInputMutation>) => {
-    const error = data.data?.handleDeployFromFile?.error
-    if (error) {
-      setError(error)
+  const onComplete = (result: FetchResult<DeployFromInputMutation>) => {
+    const apolloError = result?.errors as unknown as ApolloError
+    const responseError =
+      apolloError?.cause?.['result'] ?? result.data?.handleDeployFromFile?.error
+    if (responseError) {
+      setError(responseError)
       setCreating(false)
       return
     }
@@ -91,7 +94,13 @@ export function CreateSecretModal({
       return
     }
 
-    refetch({ fetchPolicy: 'no-cache' })
+    refetch({
+      context: {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      },
+    })
       .then(() => {
         onCreate?.(name, namespace)
         setOpen(false)
@@ -128,7 +137,7 @@ export function CreateSecretModal({
           setOpen={setOpen}
           valid={valid}
           submit={() => {
-            deploy().then(onComplete)
+            deploy().then(onComplete, console.log)
           }}
         />
       }

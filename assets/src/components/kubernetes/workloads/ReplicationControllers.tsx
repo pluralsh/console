@@ -1,24 +1,24 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
   Maybe,
-  Replicationcontroller_ReplicationControllerList as ReplicationControllerListT,
   Replicationcontroller_ReplicationController as ReplicationControllerT,
+  Replicationcontroller_ReplicationControllerList as ReplicationControllerListT,
+  ReplicationControllersDocument,
   ReplicationControllersQuery,
   ReplicationControllersQueryVariables,
-  useReplicationControllersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../common/utils'
-import { ResourceList } from '../common/ResourceList'
-import { UsageText } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  REPLICATION_CONTROLLERS_REL_PATH,
   getWorkloadsAbsPath,
+  REPLICATION_CONTROLLERS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
+import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
+import { ResourceList } from '../common/ResourceList'
+import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -99,7 +99,7 @@ export default function ReplicationControllers() {
     >
       namespaced
       columns={columns}
-      query={useReplicationControllersQuery}
+      queryDocument={ReplicationControllersDocument}
       queryName="handleGetReplicationControllerList"
       itemsKey="replicationControllers"
     />

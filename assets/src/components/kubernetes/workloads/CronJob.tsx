@@ -1,3 +1,4 @@
+import { ApolloError } from '@apollo/client'
 import {
   Button,
   ChipList,
@@ -11,19 +12,19 @@ import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
 
 import {
+  Common_Event as EventT,
+  Common_EventList as EventListT,
+  Cronjob_CronJobDetail as CronJobT,
+  CronJobEventsDocument,
   CronJobEventsQuery,
   CronJobEventsQueryVariables,
+  CronJobJobsDocument,
   CronJobJobsQuery,
   CronJobJobsQueryVariables,
   CronJobQueryVariables,
-  Cronjob_CronJobDetail as CronJobT,
   CronJobTriggerMutationVariables,
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  Job_JobList as JobListT,
   Job_Job as JobT,
-  useCronJobEventsQuery,
-  useCronJobJobsQuery,
+  Job_JobList as JobListT,
   useCronJobQuery,
   useCronJobTriggerMutation,
 } from '../../../generated/graphql-kubernetes'
@@ -39,12 +40,10 @@ import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceList } from '../common/ResourceList'
-import { MetadataSidecar } from '../common/utils'
-import { NAMESPACE_PARAM } from '../Navigation'
 
 import { Kind } from '../common/types'
-
-import { ApolloError } from '@apollo/client'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
 
@@ -194,7 +193,7 @@ export function CronJobJobs(): ReactElement<any> {
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
-          query={useCronJobJobsQuery}
+          queryDocument={CronJobJobsDocument}
           queryOptions={{
             variables: {
               namespace,
@@ -217,7 +216,7 @@ export function CronJobJobs(): ReactElement<any> {
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
-          query={useCronJobJobsQuery}
+          queryDocument={CronJobJobsDocument}
           queryOptions={{
             variables: {
               namespace,
@@ -247,7 +246,7 @@ export function CronJobEvents(): ReactElement<any> {
     >
       namespaced
       columns={columns}
-      query={useCronJobEventsQuery}
+      queryDocument={CronJobEventsDocument}
       queryOptions={{
         variables: { namespace, name } as CronJobEventsQueryVariables,
       }}
