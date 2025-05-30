@@ -168,6 +168,11 @@ func (in *ElasticsearchILMPolicyList) DeepCopyObject() runtime.Object {
 func (in *ElasticsearchILMPolicySpec) DeepCopyInto(out *ElasticsearchILMPolicySpec) {
 	*out = *in
 	out.CredentialsRef = in.CredentialsRef
+	if in.Name != nil {
+		in, out := &in.Name, &out.Name
+		*out = new(string)
+		**out = **in
+	}
 	in.Definition.DeepCopyInto(&out.Definition)
 }
 

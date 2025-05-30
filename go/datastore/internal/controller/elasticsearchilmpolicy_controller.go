@@ -107,7 +107,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 
 func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
 	if controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
-		res, err := es.ILM.DeleteLifecycle(policy.Name)
+		res, err := es.ILM.DeleteLifecycle(policy.ResourceName())
 		if err != nil {
 			return err
 		}
@@ -132,7 +132,7 @@ func (r *ElasticsearchILMPolicyReconciler) sync(ctx context.Context, es *elastic
 		return err
 	}
 
-	res, err := es.ILM.PutLifecycle(policy.Name, es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
+	res, err := es.ILM.PutLifecycle(policy.ResourceName(), es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
 	if err != nil {
 		return err
 	}

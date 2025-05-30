@@ -33,13 +33,24 @@ type ElasticsearchILMPolicy struct {
 	Status Status                     `json:"status,omitempty"`
 }
 
-func (s *ElasticsearchILMPolicy) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&s.Status.Conditions, condition)
+func (in *ElasticsearchILMPolicy) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
+func (in *ElasticsearchILMPolicy) ResourceName() string {
+	if in.Spec.Name != nil {
+		return *in.Spec.Name
+	}
+
+	return in.Name
 }
 
 // ElasticsearchILMPolicySpec defines the desired state of ILMPolicy.
 type ElasticsearchILMPolicySpec struct {
 	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
+
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
 
 	// Definition of the Elasticsearch ILM policy.
 	// See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle

@@ -61,6 +61,8 @@ spec:
                   See: https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
+              name:
+                type: string
             required:
             - credentialsRef
             - definition
