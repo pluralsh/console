@@ -98,6 +98,7 @@ export function CreateScmConnectionModal({
       open={open}
       onClose={onClose || undefined}
       asForm
+      size="large"
       onSubmit={onSubmit}
       header="Create a new connection"
       actions={

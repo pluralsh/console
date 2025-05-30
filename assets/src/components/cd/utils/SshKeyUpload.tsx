@@ -1,22 +1,30 @@
 import { useCallback, useEffect, useState } from 'react'
-import { FormField, Input, usePrevious } from '@pluralsh/design-system'
+import {
+  FillLevel,
+  FormField,
+  Input,
+  usePrevious,
+} from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { DropzoneOptions } from 'react-dropzone'
 
 import { isEmpty } from 'lodash'
+import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 
 function SshKeyUpload({
   privateKey,
   setPrivateKey,
   label,
   required = true,
+  fillLevel = 1,
 }: {
   privateKey?: Nullable<string>
   setPrivateKey: (value: Nullable<string>) => void
   label?: string
   required?: boolean
+  fillLevel?: FillLevel
 }) {
   const [fileName, setFileName] = useState<string | undefined>()
   const [fileError, setFileError] = useState<Nullable<string>>()
@@ -84,25 +92,27 @@ function SshKeyUpload({
           }}
         />
       ) : (
-        <FileDrop
-          onDrop={readFile}
-          messages={{
-            default: 'Drop your private key file here',
-          }}
-          error={!!fileError}
-          files={
-            !!fileName && [
-              <FileDropFile
-                key="file"
-                label={fileName}
-                onClear={() => {
-                  setFileName(undefined)
-                  setFileError(undefined)
-                }}
-              />,
-            ]
-          }
-        />
+        <FillLevelDiv fillLevel={fillLevel}>
+          <FileDrop
+            onDrop={readFile}
+            messages={{
+              default: 'Drop your private key file here',
+            }}
+            error={!!fileError}
+            files={
+              !!fileName && [
+                <FileDropFile
+                  key="file"
+                  label={fileName}
+                  onClear={() => {
+                    setFileName(undefined)
+                    setFileError(undefined)
+                  }}
+                />,
+              ]
+            }
+          />
+        </FillLevelDiv>
       )}
     </FormField>
   )
