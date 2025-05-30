@@ -14,6 +14,7 @@ type ElasticSearchIndexTemplateDefinition struct {
 
 // ElasticSearchIndexTemplateSpec defines the desired state of ElasticSearchIndexTemplate
 type ElasticSearchIndexTemplateSpec struct {
+	Name           string                               `json:"name"`
 	CredentialsRef corev1.LocalObjectReference          `json:"credentialsRef"`
 	Definition     ElasticSearchIndexTemplateDefinition `json:"definition"`
 }

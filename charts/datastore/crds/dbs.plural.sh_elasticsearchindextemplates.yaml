@@ -70,9 +70,12 @@ spec:
                 - indexPatterns
                 - template
                 type: object
+              name:
+                type: string
             required:
             - credentialsRef
             - definition
+            - name
             type: object
           status:
             properties:
