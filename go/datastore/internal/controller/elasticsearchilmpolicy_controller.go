@@ -22,8 +22,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ILMPolicyReconciler reconciles a ILMPolicy object
-type ILMPolicyReconciler struct {
+// ElasticsearchILMPolicyReconciler reconciles an ElasticsearchILMPolicy object
+type ElasticsearchILMPolicyReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
@@ -37,10 +37,10 @@ type ILMPolicyReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *ILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
-	user := new(v1alpha1.ILMPolicy)
+	user := new(v1alpha1.ElasticsearchILMPolicy)
 	if err := r.Get(ctx, req.NamespacedName, user); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -90,7 +90,7 @@ func (r *ILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-func sync(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ILMPolicy) error {
+func sync(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ElasticsearchILMPolicy) error {
 	body, err := json.Marshal(ilmPolicy.Spec.Definition.Policy)
 	if err != nil {
 		return err
@@ -114,9 +114,9 @@ func sync(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ILM
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ILMPolicyReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ElasticsearchILMPolicyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.ILMPolicy{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.ElasticsearchILMPolicy{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
