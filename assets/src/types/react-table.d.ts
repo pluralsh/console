@@ -1,7 +1,6 @@
 import '@tanstack/react-table'
 import { LazyQueryExecFunction } from '@apollo/client'
 import type { OperationVariables } from '@apollo/client/core'
-import { Dispatch } from 'react'
 
 declare module '@tanstack/table-core' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
