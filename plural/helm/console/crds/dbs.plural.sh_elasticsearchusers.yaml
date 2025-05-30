@@ -4,21 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.3
-  name: elasticsearchcredentials.dbs.plural.sh
+  name: elasticsearchusers.dbs.plural.sh
 spec:
   group: dbs.plural.sh
   names:
-    kind: ElasticsearchCredentials
-    listKind: ElasticsearchCredentialsList
-    plural: elasticsearchcredentials
-    singular: elasticsearchcredentials
+    kind: ElasticsearchUser
+    listKind: ElasticsearchUserList
+    plural: elasticsearchusers
+    singular: elasticsearchuser
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ElasticsearchCredentials is the Schema for the elasticsearchcredentials
-          API
+        description: ElasticsearchUser is the Schema for the elasticsearchusers API
         properties:
           apiVersion:
             description: |-
@@ -38,18 +37,13 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElasticsearchCredentialsSpec defines the desired state of
-              ElasticsearchCredentials
+            description: ElasticsearchUserSpec defines the desired state of ElasticsearchUser
             properties:
-              insecure:
-                type: boolean
-              passwordSecretKeyRef:
-                description: SecretKeySelector selects a key of a Secret.
+              credentialsRef:
+                description: |-
+                  LocalObjectReference contains enough information to let you locate the
+                  referenced object inside the same namespace.
                 properties:
-                  key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
-                    type: string
                   name:
                     default: ""
                     description: |-
@@ -59,21 +53,74 @@ spec:
                       almost certainly wrong.
                       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                     type: string
-                  optional:
-                    description: Specify whether the Secret or its key must be defined
-                    type: boolean
-                required:
-                - key
                 type: object
                 x-kubernetes-map-type: atomic
-              url:
-                type: string
-              username:
-                type: string
+              definition:
+                properties:
+                  passwordSecretKeyRef:
+                    description: PasswordSecretKeyRef reference
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must be
+                          a valid secret key.
+                        type: string
+                      name:
+                        default: ""
+                        description: |-
+                          Name of the referent.
+                          This field is effectively required, but due to backwards compatibility is
+                          allowed to be empty. Instances of this type with an empty value here are
+                          almost certainly wrong.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must be
+                          defined
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  role:
+                    description: Role represents the structure and assignment of roles
+                      in Elasticsearch.
+                    properties:
+                      clusterPermissions:
+                        items:
+                          type: string
+                        type: array
+                      indexPermissions:
+                        items:
+                          properties:
+                            names:
+                              items:
+                                type: string
+                              type: array
+                            privileges:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - names
+                          - privileges
+                          type: object
+                        type: array
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  user:
+                    description: User to add
+                    type: string
+                required:
+                - passwordSecretKeyRef
+                - role
+                - user
+                type: object
             required:
-            - passwordSecretKeyRef
-            - url
-            - username
+            - credentialsRef
+            - definition
             type: object
           status:
             properties:

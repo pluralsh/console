@@ -3,7 +3,6 @@ package types
 import (
 	"fmt"
 
-	"github.com/pluralsh/console/go/datastore/internal/client"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -12,18 +11,42 @@ import (
 type Reconciler string
 
 const (
-	ElasticSearchCredentialsReconciler Reconciler = "elasticSearchCredentials"
+	ElasticsearchCredentialsReconciler   Reconciler = "elasticsearchCredentials"
+	ElasticsearchUserReconciler          Reconciler = "elasticsearchUser"
+	ElasticsearchIndexTemplateReconciler Reconciler = "elasticsearchIndexTemplate"
+	ElasticsearchILMPolicyReconciler     Reconciler = "elasticsearchILMPolicy"
 )
 
 var validReconcilers = map[string]Reconciler{
-	"ElasticSearchCredentialsReconciler": ElasticSearchCredentialsReconciler,
+	"ElasticsearchCredentialsReconciler":   ElasticsearchCredentialsReconciler,
+	"ElasticsearchUserReconciler":          ElasticsearchUserReconciler,
+	"ElasticsearchIndexTemplateReconciler": ElasticsearchIndexTemplateReconciler,
+	"ElasticsearchILMPolicy":               ElasticsearchILMPolicyReconciler,
 }
 
-type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller
+type ControllerFactory func(mgr ctrl.Manager) Controller
 
 var controllerFactories = map[Reconciler]ControllerFactory{
-	ElasticSearchCredentialsReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
+	ElasticsearchCredentialsReconciler: func(mgr ctrl.Manager) Controller {
 		return &controller.ElasticSearchCredentialsReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+	},
+	ElasticsearchUserReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.ElasticSearchUserReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+	},
+	ElasticsearchIndexTemplateReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.ElasticSearchIndexTemplateReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+	},
+	ElasticsearchILMPolicyReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.ElasticsearchILMPolicyReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}
@@ -31,10 +54,10 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
-func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient) (Controller, error) {
+func (sc Reconciler) ToController(mgr ctrl.Manager) (Controller, error) {
 
 	if factory, exists := controllerFactories[sc]; exists {
-		return factory(mgr, consoleClient), nil
+		return factory(mgr), nil
 	}
 	return nil, fmt.Errorf("reconciler %q is not supported", sc)
 }
@@ -55,15 +78,18 @@ type ReconcilerList []Reconciler
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
 	return []Reconciler{
-		ElasticSearchCredentialsReconciler,
+		ElasticsearchCredentialsReconciler,
+		ElasticsearchUserReconciler,
+		ElasticsearchIndexTemplateReconciler,
+		ElasticsearchILMPolicyReconciler,
 	}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string) ([]Controller, error) {
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
-		toController, err := r.ToController(mgr, client.New(url, token))
+		toController, err := r.ToController(mgr)
 		if err != nil {
 			return nil, err
 		}

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/pluralsh/console/go/datastore/internal/types"
 
@@ -62,12 +61,8 @@ type controllerRunOptions struct {
 	enableLeaderElection bool
 	metricsAddr          string
 	probeAddr            string
-	consoleUrl           string
-	consoleToken         string
 	reconcilers          types.ReconcilerList
 }
-
-const defaultWipeCacheInterval = time.Minute * 30
 
 func main() {
 	klog.InitFlags(nil)
@@ -84,8 +79,6 @@ func main() {
 	flag.BoolVar(&opt.enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&opt.consoleUrl, "console-url", "", "The url of the console api to fetch services from")
-	flag.StringVar(&opt.consoleToken, "console-token", "", "The console token to auth to console api with")
 	flag.Func("reconcilers", reconcilersUsage, func(reconcilersStr string) (err error) {
 		opt.reconcilers, err = parseReconcilers(reconcilersStr)
 		return err
@@ -98,10 +91,6 @@ func main() {
 	}
 
 	ctrl.SetLogger(ctrlruntimezap.New(ctrlruntimezap.UseFlagOptions(&opts)))
-
-	if opt.consoleToken == "" {
-		opt.consoleToken = os.Getenv("CONSOLE_TOKEN")
-	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -135,8 +124,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	controllers, err := opt.reconcilers.ToControllers(
-		mgr, opt.consoleUrl, opt.consoleToken)
+	controllers, err := opt.reconcilers.ToControllers(mgr)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

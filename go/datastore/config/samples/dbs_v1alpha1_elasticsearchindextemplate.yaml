@@ -24,3 +24,26 @@ spec:
   passwordSecretKeyRef:
     name: elastic-secret
     key: password
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchIndexTemplate
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchindextemplate
+    app.kubernetes.io/instance: elasticsearchindextemplate-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchindextemplate-sample
+spec:
+  name: plrl-logs
+  credentialsRef:
+    name: elasticsearchcredentials-sample
+  definition:
+    indexPatterns:
+      - "plrl-logs*"
+    template:
+      settings:
+        lifecycle:
+          name: string
+

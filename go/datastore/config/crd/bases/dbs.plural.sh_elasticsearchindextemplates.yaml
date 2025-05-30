@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.3
-  name: elasticsearchcredentials.dbs.plural.sh
+  name: elasticsearchindextemplates.dbs.plural.sh
 spec:
   group: dbs.plural.sh
   names:
-    kind: ElasticsearchCredentials
-    listKind: ElasticsearchCredentialsList
-    plural: elasticsearchcredentials
-    singular: elasticsearchcredentials
+    kind: ElasticsearchIndexTemplate
+    listKind: ElasticsearchIndexTemplateList
+    plural: elasticsearchindextemplates
+    singular: elasticsearchindextemplate
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ElasticsearchCredentials is the Schema for the elasticsearchcredentials
+        description: ElasticsearchIndexTemplate is the Schema for the elasticsearchindextemplates
           API
         properties:
           apiVersion:
@@ -38,18 +38,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElasticsearchCredentialsSpec defines the desired state of
-              ElasticsearchCredentials
+            description: ElasticsearchIndexTemplateSpec defines the desired state
+              of ElasticsearchIndexTemplate
             properties:
-              insecure:
-                type: boolean
-              passwordSecretKeyRef:
-                description: SecretKeySelector selects a key of a Secret.
+              credentialsRef:
+                description: |-
+                  LocalObjectReference contains enough information to let you locate the
+                  referenced object inside the same namespace.
                 properties:
-                  key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
-                    type: string
                   name:
                     default: ""
                     description: |-
@@ -59,21 +55,26 @@ spec:
                       almost certainly wrong.
                       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                     type: string
-                  optional:
-                    description: Specify whether the Secret or its key must be defined
-                    type: boolean
-                required:
-                - key
                 type: object
                 x-kubernetes-map-type: atomic
-              url:
-                type: string
-              username:
+              definition:
+                properties:
+                  indexPatterns:
+                    items:
+                      type: string
+                    type: array
+                  template:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                required:
+                - indexPatterns
+                - template
+                type: object
+              name:
                 type: string
             required:
-            - passwordSecretKeyRef
-            - url
-            - username
+            - credentialsRef
+            - definition
             type: object
           status:
             properties:

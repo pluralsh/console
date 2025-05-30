@@ -9,14 +9,7 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-consoleUrl: ~
 fullnameOverride: datastore-operator
-
-tokenSecretRef:
-  create: false
-  name: console-auth-token
-  key: access-token
-  token: CHANGEME
 
 controllerManager:
   podLabels: {}
