@@ -82,13 +82,13 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, user.SetCondition)
 	}
 
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, user.SetCondition)
 	}
 	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
 	if err != nil {
@@ -103,12 +103,14 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	if err := createRole(ctx, es, user.Spec.Definition.Role); err != nil {
-		logger.Error(err, "failed to create role")
+		logger.V(5).Error(err, "failed to create role")
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	if err := createUser(ctx, es, user.Spec.Definition.User, password, user.Spec.Definition.Role.Name); err != nil {
-		logger.Error(err, "failed to create user")
+		logger.V(5).Error(err, "failed to create user")
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 

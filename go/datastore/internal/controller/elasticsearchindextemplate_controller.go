@@ -71,13 +71,13 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: index.Spec.CredentialsRef.Name, Namespace: index.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, index.SetCondition)
 	}
 
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, credentials.SetCondition)
+		return handleRequeue(nil, err, index.SetCondition)
 	}
 	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
 	if err != nil {
@@ -93,6 +93,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 
 	if err := createTemplateIndex(ctx, es, *index); err != nil {
 		logger.Error(err, "failed to create template index")
+		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
