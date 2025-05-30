@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -116,7 +117,7 @@ func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elast
 				ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
 			}
 		}(res.Body)
-		if res.IsError() {
+		if res.StatusCode != http.StatusNotFound && res.IsError() {
 			return fmt.Errorf("failed to delete ILM policy: %s", res.String())
 		}
 		controllerutil.RemoveFinalizer(policy, PolicyFinalizer)

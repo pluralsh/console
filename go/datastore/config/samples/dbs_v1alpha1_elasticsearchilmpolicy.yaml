@@ -1,3 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elastic-secret
+  namespace: default
+data:
+  password: QnY3MTk0azE1SEc5eThLa0ZocTcxZ2xYCg==
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchCredentials
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchcredentials
+    app.kubernetes.io/instance: elasticsearchcredentials-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchcredentials-sample
+  namespace: default
+spec:
+  url: https://localhost:9222
+  username: elastic
+  insecure: true
+  passwordSecretKeyRef:
+    name: elastic-secret
+    key: password
+---
 apiVersion: dbs.plural.sh/v1alpha1
 kind: ElasticsearchILMPolicy
 metadata:
@@ -6,4 +33,17 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: elasticsearchilmpolicy-sample
 spec:
-  # TODO(user): Add fields here
+  credentialsRef:
+    name: elasticsearchcredentials-sample
+  definition:
+    policy:
+      phases:
+        warm:
+          actions:
+            forcemerge:
+              max_num_segments: 1
+            min_age: 10d
+        delete:
+          min_age: 30d
+          actions:
+            delete: {}
