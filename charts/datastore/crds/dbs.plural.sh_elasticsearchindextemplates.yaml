@@ -8,8 +8,8 @@ metadata:
 spec:
   group: dbs.plural.sh
   names:
-    kind: ElasticSearchIndexTemplate
-    listKind: ElasticSearchIndexTemplateList
+    kind: ElasticsearchIndexTemplate
+    listKind: ElasticsearchIndexTemplateList
     plural: elasticsearchindextemplates
     singular: elasticsearchindextemplate
   scope: Namespaced
@@ -17,7 +17,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ElasticSearchIndexTemplate is the Schema for the elasticsearchindextemplates
+        description: ElasticsearchIndexTemplate is the Schema for the elasticsearchindextemplates
           API
         properties:
           apiVersion:
@@ -38,8 +38,8 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElasticSearchIndexTemplateSpec defines the desired state
-              of ElasticSearchIndexTemplate
+            description: ElasticsearchIndexTemplateSpec defines the desired state
+              of ElasticsearchIndexTemplate
             properties:
               credentialsRef:
                 description: |-

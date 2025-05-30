@@ -24,7 +24,7 @@ import (
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 )
 
-// ElasticSearchCredentialsReconciler reconciles a ElasticSearchCredentials object
+// ElasticSearchCredentialsReconciler reconciles a ElasticsearchCredentials object
 type ElasticSearchCredentialsReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -42,7 +42,7 @@ type ElasticSearchCredentialsReconciler struct {
 func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
-	credentials := new(v1alpha1.ElasticSearchCredentials)
+	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, req.NamespacedName, credentials); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -129,7 +129,7 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 func (r *ElasticSearchCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.ElasticSearchCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.ElasticsearchCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

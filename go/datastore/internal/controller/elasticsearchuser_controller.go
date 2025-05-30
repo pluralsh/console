@@ -30,7 +30,7 @@ const (
 	ElasticSearchUserProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-user-protection"
 )
 
-// ElasticSearchUserReconciler reconciles a ElasticSearchUser object
+// ElasticSearchUserReconciler reconciles a ElasticsearchUser object
 type ElasticSearchUserReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -48,7 +48,7 @@ type ElasticSearchUserReconciler struct {
 func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
-	user := new(v1alpha1.ElasticSearchUser)
+	user := new(v1alpha1.ElasticsearchUser)
 	if err := r.Get(ctx, req.NamespacedName, user); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -79,7 +79,7 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 	password := strings.ReplaceAll(string(key), "\n", "")
 
-	credentials := new(v1alpha1.ElasticSearchCredentials)
+	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, credentials.SetCondition)
@@ -145,7 +145,7 @@ func createUser(ctx context.Context, es *elasticsearch.Client, user, password, r
 	return nil
 }
 
-func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.ElasticSearchRole) error {
+func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.ElasticsearchRole) error {
 	roleBody := map[string]interface{}{
 		"cluster": role.ClusterPermissions,
 		"indices": []map[string]interface{}{},
@@ -237,11 +237,11 @@ func deleteUser(ctx context.Context, es *elasticsearch.Client, username string) 
 func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.ElasticSearchUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.ElasticsearchUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
 
-func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, user *v1alpha1.ElasticSearchUser) *ctrl.Result {
+func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, user *v1alpha1.ElasticsearchUser) *ctrl.Result {
 	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, ElasticSearchUserProtectionFinalizerName)
 	}

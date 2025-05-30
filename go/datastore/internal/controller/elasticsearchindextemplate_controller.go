@@ -23,7 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ElasticSearchIndexTemplateReconciler reconciles a ElasticSearchIndexTemplate object
+// ElasticSearchIndexTemplateReconciler reconciles a ElasticsearchIndexTemplate object
 type ElasticSearchIndexTemplateReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -41,7 +41,7 @@ type ElasticSearchIndexTemplateReconciler struct {
 func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
-	index := new(v1alpha1.ElasticSearchIndexTemplate)
+	index := new(v1alpha1.ElasticsearchIndexTemplate)
 	if err := r.Get(ctx, req.NamespacedName, index); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -61,7 +61,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		}
 	}()
 
-	credentials := new(v1alpha1.ElasticSearchCredentials)
+	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: index.Spec.CredentialsRef.Name, Namespace: index.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, credentials.SetCondition)
@@ -89,7 +89,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 	return ctrl.Result{}, nil
 }
 
-func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1alpha1.ElasticSearchIndexTemplateSpec) error {
+func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1alpha1.ElasticsearchIndexTemplateSpec) error {
 	indexTemplate := map[string]interface{}{
 		"index_patterns": index.Definition.IndexPatterns,
 		"template":       index.Definition.Template,
@@ -122,6 +122,6 @@ func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1
 func (r *ElasticSearchIndexTemplateReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.ElasticSearchIndexTemplate{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.ElasticsearchIndexTemplate{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
