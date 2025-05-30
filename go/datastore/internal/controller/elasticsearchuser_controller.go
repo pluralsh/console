@@ -6,23 +6,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/esapi"
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+)
+
+const (
+	ElasticSearchUserProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-user-protection"
 )
 
 // ElasticSearchUserReconciler reconciles a ElasticSearchUser object
@@ -90,6 +95,11 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
+	}
+
+	result := r.addOrRemoveFinalizer(ctx, es, user)
+	if result != nil {
+		return *result, retErr
 	}
 
 	if err := createRole(ctx, es, user.Spec.Definition.Role); err != nil {
@@ -169,10 +179,90 @@ func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.Ela
 	return nil
 }
 
+func deleteRole(ctx context.Context, es *elasticsearch.Client, roleName string) error {
+	req := esapi.SecurityDeleteRoleRequest{
+		Name: roleName,
+	}
+
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		return fmt.Errorf("delete role request failed: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+		}
+	}(res.Body)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil
+	}
+
+	if res.IsError() {
+		return fmt.Errorf("error deleting role: %s", res.String())
+	}
+
+	return nil
+}
+
+func deleteUser(ctx context.Context, es *elasticsearch.Client, username string) error {
+	req := esapi.SecurityDeleteUserRequest{
+		Username: username,
+	}
+
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		return fmt.Errorf("delete user request failed: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+		}
+	}(res.Body)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil
+	}
+
+	if res.IsError() {
+		return fmt.Errorf("error deleting user: %s", res.String())
+	}
+
+	return nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ElasticSearchUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
+}
+
+func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, user *v1alpha1.ElasticSearchUser) *ctrl.Result {
+	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
+		controllerutil.AddFinalizer(user, ElasticSearchUserProtectionFinalizerName)
+	}
+
+	// If object is not being deleted, do nothing
+	if user.GetDeletionTimestamp().IsZero() {
+		return nil
+	}
+
+	if err := deleteRole(ctx, es, user.Spec.Definition.Role.Name); err != nil {
+		ctrl.LoggerFrom(ctx).Error(err, "failed to delete role")
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return &requeue
+	}
+
+	if err := deleteUser(ctx, es, user.Spec.Definition.User); err != nil {
+		ctrl.LoggerFrom(ctx).Error(err, "failed to delete user")
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return &requeue
+	}
+
+	controllerutil.RemoveFinalizer(user, ElasticSearchUserProtectionFinalizerName)
+	return &ctrl.Result{}
 }
