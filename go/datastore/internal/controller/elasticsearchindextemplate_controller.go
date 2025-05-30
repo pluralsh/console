@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -21,6 +24,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	ElasticsearchIndexTemplateProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-template-protection"
 )
 
 // ElasticSearchIndexTemplateReconciler reconciles a ElasticsearchIndexTemplate object
@@ -79,6 +86,11 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		return ctrl.Result{}, err
 	}
 
+	result := r.addOrRemoveFinalizer(ctx, es, index)
+	if result != nil {
+		return *result, retErr
+	}
+
 	if err := createTemplateIndex(ctx, es, index.Spec); err != nil {
 		logger.Error(err, "failed to create template index")
 		return ctrl.Result{}, err
@@ -116,6 +128,50 @@ func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1
 	}
 
 	return nil
+}
+
+func deleteTemplateIndex(ctx context.Context, es *elasticsearch.Client, templateName string) error {
+	res, err := es.Indices.DeleteIndexTemplate(templateName, es.Indices.DeleteIndexTemplate.WithContext(ctx))
+	if err != nil {
+		return fmt.Errorf("delete user request failed: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+		}
+	}(res.Body)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil
+	}
+
+	if res.IsError() {
+		return fmt.Errorf("error deleting template index: %s", res.String())
+	}
+
+	return nil
+}
+
+func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, index *v1alpha1.ElasticsearchIndexTemplate) *ctrl.Result {
+	if index.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName) {
+		controllerutil.AddFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
+	}
+
+	// If object is not being deleted, do nothing
+	if index.GetDeletionTimestamp().IsZero() {
+		return nil
+	}
+
+	err := deleteTemplateIndex(ctx, es, index.Spec.Name)
+	if err != nil {
+		ctrl.LoggerFrom(ctx).Error(err, "failed to delete index template")
+		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return &requeue
+	}
+
+	controllerutil.RemoveFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
+	return &ctrl.Result{}
 }
 
 // SetupWithManager sets up the controller with the Manager.
