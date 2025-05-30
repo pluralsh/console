@@ -8,8 +8,8 @@ metadata:
 spec:
   group: dbs.plural.sh
   names:
-    kind: ElasticSearchUser
-    listKind: ElasticSearchUserList
+    kind: ElasticsearchUser
+    listKind: ElasticsearchUserList
     plural: elasticsearchusers
     singular: elasticsearchuser
   scope: Namespaced
@@ -17,7 +17,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ElasticSearchUser is the Schema for the elasticsearchusers API
+        description: ElasticsearchUser is the Schema for the elasticsearchusers API
         properties:
           apiVersion:
             description: |-
@@ -37,7 +37,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElasticSearchUserSpec defines the desired state of ElasticSearchUser
+            description: ElasticsearchUserSpec defines the desired state of ElasticsearchUser
             properties:
               credentialsRef:
                 description: |-

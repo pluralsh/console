@@ -60,7 +60,7 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	return defaultMessage
 }
 
-func createElasticsearchClient(ctx context.Context, client client.Client, credentials v1alpha1.ElasticSearchCredentials) (*elastic.Client, error) {
+func createElasticsearchClient(ctx context.Context, client client.Client, credentials v1alpha1.ElasticsearchCredentials) (*elastic.Client, error) {
 	secret, err := utils.GetSecret(ctx, client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
 		return nil, err

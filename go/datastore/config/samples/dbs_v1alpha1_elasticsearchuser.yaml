@@ -7,7 +7,7 @@ data:
   password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
 ---
 apiVersion: dbs.plural.sh/v1alpha1
-kind: ElasticSearchCredentials
+kind: ElasticsearchCredentials
 metadata:
   labels:
     app.kubernetes.io/name: elasticsearchcredentials
@@ -26,7 +26,7 @@ spec:
     key: password
 ---
 apiVersion: dbs.plural.sh/v1alpha1
-kind: ElasticSearchUser
+kind: ElasticsearchUser
 metadata:
   labels:
     app.kubernetes.io/name: elasticsearchuser

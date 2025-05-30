@@ -12,33 +12,33 @@ import (
 type Reconciler string
 
 const (
-	ElasticSearchCredentialsReconciler   Reconciler = "elasticSearchCredentials"
-	ElasticSearchUserReconciler          Reconciler = "elasticSearchUser"
-	ElasticSearchIndexTemplateReconciler Reconciler = "elasticSearchIndexTemplate"
+	ElasticsearchCredentialsReconciler   Reconciler = "elasticsearchCredentials"
+	ElasticsearchUserReconciler          Reconciler = "elasticsearchUser"
+	ElasticsearchIndexTemplateReconciler Reconciler = "elasticsearchIndexTemplate"
 )
 
 var validReconcilers = map[string]Reconciler{
-	"ElasticSearchCredentialsReconciler":   ElasticSearchCredentialsReconciler,
-	"ElasticSearchUserReconciler":          ElasticSearchUserReconciler,
-	"ElasticSearchIndexTemplateReconciler": ElasticSearchIndexTemplateReconciler,
+	"ElasticsearchCredentialsReconciler":   ElasticsearchCredentialsReconciler,
+	"ElasticsearchUserReconciler":          ElasticsearchUserReconciler,
+	"ElasticsearchIndexTemplateReconciler": ElasticsearchIndexTemplateReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller
 
 var controllerFactories = map[Reconciler]ControllerFactory{
-	ElasticSearchCredentialsReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
+	ElasticsearchCredentialsReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
 		return &controller.ElasticSearchCredentialsReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}
 	},
-	ElasticSearchUserReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
+	ElasticsearchUserReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
 		return &controller.ElasticSearchUserReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}
 	},
-	ElasticSearchIndexTemplateReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
+	ElasticsearchIndexTemplateReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient) Controller {
 		return &controller.ElasticSearchIndexTemplateReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
@@ -71,9 +71,9 @@ type ReconcilerList []Reconciler
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
 	return []Reconciler{
-		ElasticSearchCredentialsReconciler,
-		ElasticSearchUserReconciler,
-		ElasticSearchIndexTemplateReconciler,
+		ElasticsearchCredentialsReconciler,
+		ElasticsearchUserReconciler,
+		ElasticsearchIndexTemplateReconciler,
 	}
 }
 

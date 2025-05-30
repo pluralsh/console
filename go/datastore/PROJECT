@@ -14,7 +14,7 @@ resources:
   controller: true
   domain: plural.sh
   group: dbs
-  kind: ElasticSearchCredentials
+  kind: ElasticsearchCredentials
   path: github.com/pluralsh/console/go/datastore/api/v1alpha1
   version: v1alpha1
 - api:
@@ -23,7 +23,7 @@ resources:
   controller: true
   domain: plural.sh
   group: dbs
-  kind: ElasticSearchUser
+  kind: ElasticsearchUser
   path: github.com/pluralsh/console/go/datastore/api/v1alpha1
   version: v1alpha1
 - api:
@@ -32,7 +32,7 @@ resources:
   controller: true
   domain: plural.sh
   group: dbs
-  kind: ElasticSearchIndexTemplate
+  kind: ElasticsearchIndexTemplate
   path: github.com/pluralsh/console/go/datastore/api/v1alpha1
   version: v1alpha1
 - api:

@@ -6,22 +6,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ElasticSearchUserSpec defines the desired state of ElasticSearchUser
-type ElasticSearchUserSpec struct {
+// ElasticsearchUserSpec defines the desired state of ElasticsearchUser
+type ElasticsearchUserSpec struct {
 	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
-	Definition     ElasticSearchUserDefinition `json:"definition"`
+	Definition     ElasticsearchUserDefinition `json:"definition"`
 }
 
-type ElasticSearchUserDefinition struct {
+type ElasticsearchUserDefinition struct {
 	// User to add
 	User string `json:"user"`
 	// PasswordSecretKeyRef reference
 	PasswordSecretKeyRef corev1.SecretKeySelector `json:"passwordSecretKeyRef"`
 	// Role represents the structure and assignment of roles in Elasticsearch.
-	Role ElasticSearchRole `json:"role"`
+	Role ElasticsearchRole `json:"role"`
 }
 
-type ElasticSearchRole struct {
+type ElasticsearchRole struct {
 	Name               string            `json:"name"`
 	ClusterPermissions []string          `json:"clusterPermissions,omitempty"`
 	IndexPermissions   []IndexPermission `json:"indexPermissions,omitempty"`
@@ -36,28 +36,28 @@ type IndexPermission struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Namespaced
 
-// ElasticSearchUser is the Schema for the elasticsearchusers API
-type ElasticSearchUser struct {
+// ElasticsearchUser is the Schema for the elasticsearchusers API
+type ElasticsearchUser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ElasticSearchUserSpec `json:"spec,omitempty"`
+	Spec   ElasticsearchUserSpec `json:"spec,omitempty"`
 	Status Status                `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ElasticSearchUserList contains a list of ElasticSearchUser
-type ElasticSearchUserList struct {
+// ElasticsearchUserList contains a list of ElasticsearchUser
+type ElasticsearchUserList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ElasticSearchUser `json:"items"`
+	Items           []ElasticsearchUser `json:"items"`
 }
 
-func (s *ElasticSearchUser) SetCondition(condition metav1.Condition) {
+func (s *ElasticsearchUser) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 func init() {
-	SchemeBuilder.Register(&ElasticSearchUser{}, &ElasticSearchUserList{})
+	SchemeBuilder.Register(&ElasticsearchUser{}, &ElasticsearchUserList{})
 }

@@ -65,7 +65,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}()
 
-	credentials := new(v1alpha1.ElasticSearchCredentials)
+	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: policy.Spec.CredentialsRef.Name, Namespace: policy.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, credentials.SetCondition)

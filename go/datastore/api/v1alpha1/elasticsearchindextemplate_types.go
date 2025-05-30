@@ -7,43 +7,43 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-type ElasticSearchIndexTemplateDefinition struct {
+type ElasticsearchIndexTemplateDefinition struct {
 	IndexPatterns []string             `json:"indexPatterns"`
 	Template      runtime.RawExtension `json:"template"`
 }
 
-// ElasticSearchIndexTemplateSpec defines the desired state of ElasticSearchIndexTemplate
-type ElasticSearchIndexTemplateSpec struct {
+// ElasticsearchIndexTemplateSpec defines the desired state of ElasticsearchIndexTemplate
+type ElasticsearchIndexTemplateSpec struct {
 	Name           string                               `json:"name"`
 	CredentialsRef corev1.LocalObjectReference          `json:"credentialsRef"`
-	Definition     ElasticSearchIndexTemplateDefinition `json:"definition"`
+	Definition     ElasticsearchIndexTemplateDefinition `json:"definition"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// ElasticSearchIndexTemplate is the Schema for the elasticsearchindextemplates API
-type ElasticSearchIndexTemplate struct {
+// ElasticsearchIndexTemplate is the Schema for the elasticsearchindextemplates API
+type ElasticsearchIndexTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ElasticSearchIndexTemplateSpec `json:"spec,omitempty"`
+	Spec   ElasticsearchIndexTemplateSpec `json:"spec,omitempty"`
 	Status Status                         `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ElasticSearchIndexTemplateList contains a list of ElasticSearchIndexTemplate
-type ElasticSearchIndexTemplateList struct {
+// ElasticsearchIndexTemplateList contains a list of ElasticsearchIndexTemplate
+type ElasticsearchIndexTemplateList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ElasticSearchIndexTemplate `json:"items"`
+	Items           []ElasticsearchIndexTemplate `json:"items"`
 }
 
-func (s *ElasticSearchIndexTemplate) SetCondition(condition metav1.Condition) {
+func (s *ElasticsearchIndexTemplate) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 func init() {
-	SchemeBuilder.Register(&ElasticSearchIndexTemplate{}, &ElasticSearchIndexTemplateList{})
+	SchemeBuilder.Register(&ElasticsearchIndexTemplate{}, &ElasticsearchIndexTemplateList{})
 }
