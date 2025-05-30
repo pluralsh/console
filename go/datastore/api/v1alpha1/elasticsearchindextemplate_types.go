@@ -1,25 +1,22 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type ElasticSearchIndexTemplateDefinition struct {
+	IndexPatterns []string             `json:"indexPatterns"`
+	Template      runtime.RawExtension `json:"template"`
+}
 
 // ElasticSearchIndexTemplateSpec defines the desired state of ElasticSearchIndexTemplate
 type ElasticSearchIndexTemplateSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of ElasticSearchIndexTemplate. Edit elasticsearchindextemplate_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
-}
-
-// ElasticSearchIndexTemplateStatus defines the observed state of ElasticSearchIndexTemplate
-type ElasticSearchIndexTemplateStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Name           string                               `json:"name"`
+	CredentialsRef corev1.LocalObjectReference          `json:"credentialsRef"`
+	Definition     ElasticSearchIndexTemplateDefinition `json:"definition"`
 }
 
 //+kubebuilder:object:root=true
@@ -30,8 +27,8 @@ type ElasticSearchIndexTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ElasticSearchIndexTemplateSpec   `json:"spec,omitempty"`
-	Status ElasticSearchIndexTemplateStatus `json:"status,omitempty"`
+	Spec   ElasticSearchIndexTemplateSpec `json:"spec,omitempty"`
+	Status Status                         `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -41,6 +38,10 @@ type ElasticSearchIndexTemplateList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ElasticSearchIndexTemplate `json:"items"`
+}
+
+func (s *ElasticSearchIndexTemplate) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 func init() {
