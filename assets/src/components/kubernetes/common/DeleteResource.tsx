@@ -28,7 +28,7 @@ import { Kind, Resource } from './types'
 
 interface DeleteResourceProps {
   resource: Resource
-  refetch?: LazyQueryExecFunction<any, any>
+  refetch?: Nullable<LazyQueryExecFunction<any, any>>
   customResource?: boolean
 }
 
@@ -99,7 +99,7 @@ interface DeleteResourceModalProps
   open: boolean
   setOpen: (open: boolean) => void
   resource: Resource
-  refetch?: LazyQueryExecFunction<any, any>
+  refetch?: Nullable<LazyQueryExecFunction<any, any>>
 }
 
 function DeleteResourceModal({

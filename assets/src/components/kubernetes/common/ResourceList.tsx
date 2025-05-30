@@ -79,6 +79,7 @@ export function ResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
+
   setRefetch,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement<any> {
   const navigate = useNavigate()
