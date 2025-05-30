@@ -14,7 +14,7 @@ type ElasticsearchIndexTemplateDefinition struct {
 
 // ElasticsearchIndexTemplateSpec defines the desired state of ElasticsearchIndexTemplate
 type ElasticsearchIndexTemplateSpec struct {
-	Name           string                               `json:"name"`
+	Name           *string                              `json:"name,omitempty"`
 	CredentialsRef corev1.LocalObjectReference          `json:"credentialsRef"`
 	Definition     ElasticsearchIndexTemplateDefinition `json:"definition"`
 }
@@ -42,6 +42,13 @@ type ElasticsearchIndexTemplateList struct {
 
 func (s *ElasticsearchIndexTemplate) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
+func (s *ElasticsearchIndexTemplate) GetName() string {
+	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
+		return *s.Spec.Name
+	}
+	return s.Name
 }
 
 func init() {
