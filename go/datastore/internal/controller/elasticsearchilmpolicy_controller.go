@@ -14,12 +14,17 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	PolicyFinalizer = "deployments.plural.sh/ilmpolicy-protection"
 )
 
 // ElasticsearchILMPolicyReconciler reconciles an ElasticsearchILMPolicy object
@@ -40,16 +45,16 @@ type ElasticsearchILMPolicyReconciler struct {
 func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
-	user := new(v1alpha1.ElasticsearchILMPolicy)
-	if err := r.Get(ctx, req.NamespacedName, user); err != nil {
+	policy := new(v1alpha1.ElasticsearchILMPolicy)
+	if err := r.Get(ctx, req.NamespacedName, policy); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(user.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(policy.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, user)
+	scope, err := NewDefaultScope(ctx, r.Client, policy)
 	if err != nil {
 		logger.V(5).Info(err.Error())
-		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -61,7 +66,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	}()
 
 	credentials := new(v1alpha1.ElasticSearchCredentials)
-	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
+	if err := r.Get(ctx, types.NamespacedName{Name: policy.Spec.CredentialsRef.Name, Namespace: policy.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
@@ -75,28 +80,58 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
 	if err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
-		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	if err := sync(ctx, es, user); err != nil {
-		logger.Error(err, "failed to create user")
+	if !policy.GetDeletionTimestamp().IsZero() {
+		logger.Error(err, "failed to delete ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
+		return ctrl.Result{}, delete(ctx, es, policy)
+	}
+
+	if err := sync(ctx, es, policy); err != nil {
+		logger.Error(err, "failed to sync ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
 		return ctrl.Result{}, err
 	}
 
-	utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(user.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	if !controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
+		controllerutil.AddFinalizer(policy, PolicyFinalizer)
+	}
+
+	utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(policy.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
 }
 
-func sync(ctx context.Context, es *elasticsearch.Client, ilmPolicy *v1alpha1.ElasticsearchILMPolicy) error {
-	body, err := json.Marshal(ilmPolicy.Spec.Definition.Policy)
+func delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
+	if controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
+		res, err := es.ILM.DeleteLifecycle(policy.Name)
+		if err != nil {
+			return err
+		}
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				ctrl.LoggerFrom(ctx).Error(err, "failed to close body")
+			}
+		}(res.Body)
+		if res.IsError() {
+			return fmt.Errorf("failed to delete ILM policy: %s", res.String())
+		}
+		controllerutil.RemoveFinalizer(policy, PolicyFinalizer)
+	}
+
+	return nil
+}
+
+func sync(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
+	body, err := json.Marshal(policy.Spec.Definition.Policy)
 	if err != nil {
 		return err
 	}
 
-	res, err := es.ILM.PutLifecycle(ilmPolicy.Name, es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
+	res, err := es.ILM.PutLifecycle(policy.Name, es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
 	if err != nil {
 		return err
 	}
