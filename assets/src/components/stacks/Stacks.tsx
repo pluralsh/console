@@ -188,6 +188,7 @@ export default function Stacks() {
   } = useStackQuery({
     variables: { id: stackId },
     fetchPolicy: 'cache-and-network',
+    errorPolicy: 'all',
     pollInterval,
   })
 
@@ -357,7 +358,7 @@ export default function Stacks() {
             )}
         </div>
       </div>
-      {stackError ? (
+      {stackError && !fullStack ? (
         <StackDeletedEmptyState />
       ) : (
         <div
