@@ -27,7 +27,6 @@ import {
   CLUSTER_INSIGHTS_SUMMARY_PATH,
 } from '../../../routes/cdRoutesConsts.tsx'
 import { AIPinButton } from '../../ai/AIPinButton.tsx'
-import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -163,7 +162,6 @@ export function ClusterInsightsSummary(): ReactNode {
             insightId={cluster?.insight?.id}
             messages={[insightMessage(cluster?.insight)]}
           />
-          <AISuggestFix insight={cluster?.insight} />
         </>
       ),
       [cluster?.insight, clusterLoading, refetch]
