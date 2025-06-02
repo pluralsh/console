@@ -32,6 +32,7 @@ var (
 // wait for resources.
 //
 // It is important that at least one from a result or an error have to be non-nil.
+// nolint:unparam
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
 	if err != nil && apierrors.IsNotFound(err) {
 		result = &waitForResources
