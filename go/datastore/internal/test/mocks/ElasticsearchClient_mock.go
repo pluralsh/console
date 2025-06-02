@@ -11,6 +11,8 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
+	runtime "k8s.io/apimachinery/pkg/runtime"
+
 	v1alpha1 "github.com/pluralsh/console/go/datastore/api/v1alpha1"
 )
 
@@ -84,7 +86,360 @@ func (_c *ElasticsearchClientMock_ClusterHealth_Call) RunAndReturn(run func() (*
 	return _c
 }
 
-// UseCredentials provides a mock function with given fields: ctx, _a1, credentials
+// CreateRole provides a mock function with given fields: role, def
+func (_m *ElasticsearchClientMock) CreateRole(role string, def []byte) (*esapi.Response, error) {
+	ret := _m.Called(role, def)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRole")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, []byte) (*esapi.Response, error)); ok {
+		return rf(role, def)
+	}
+	if rf, ok := ret.Get(0).(func(string, []byte) *esapi.Response); ok {
+		r0 = rf(role, def)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, []byte) error); ok {
+		r1 = rf(role, def)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_CreateRole_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateRole'
+type ElasticsearchClientMock_CreateRole_Call struct {
+	*mock.Call
+}
+
+// CreateRole is a helper method to define mock.On call
+//   - role string
+//   - def []byte
+func (_e *ElasticsearchClientMock_Expecter) CreateRole(role interface{}, def interface{}) *ElasticsearchClientMock_CreateRole_Call {
+	return &ElasticsearchClientMock_CreateRole_Call{Call: _e.mock.On("CreateRole", role, def)}
+}
+
+func (_c *ElasticsearchClientMock_CreateRole_Call) Run(run func(role string, def []byte)) *ElasticsearchClientMock_CreateRole_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].([]byte))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_CreateRole_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_CreateRole_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_CreateRole_Call) RunAndReturn(run func(string, []byte) (*esapi.Response, error)) *ElasticsearchClientMock_CreateRole_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateUser provides a mock function with given fields: username, def
+func (_m *ElasticsearchClientMock) CreateUser(username string, def []byte) (*esapi.Response, error) {
+	ret := _m.Called(username, def)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateUser")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, []byte) (*esapi.Response, error)); ok {
+		return rf(username, def)
+	}
+	if rf, ok := ret.Get(0).(func(string, []byte) *esapi.Response); ok {
+		r0 = rf(username, def)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, []byte) error); ok {
+		r1 = rf(username, def)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_CreateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateUser'
+type ElasticsearchClientMock_CreateUser_Call struct {
+	*mock.Call
+}
+
+// CreateUser is a helper method to define mock.On call
+//   - username string
+//   - def []byte
+func (_e *ElasticsearchClientMock_Expecter) CreateUser(username interface{}, def interface{}) *ElasticsearchClientMock_CreateUser_Call {
+	return &ElasticsearchClientMock_CreateUser_Call{Call: _e.mock.On("CreateUser", username, def)}
+}
+
+func (_c *ElasticsearchClientMock_CreateUser_Call) Run(run func(username string, def []byte)) *ElasticsearchClientMock_CreateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].([]byte))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_CreateUser_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_CreateUser_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_CreateUser_Call) RunAndReturn(run func(string, []byte) (*esapi.Response, error)) *ElasticsearchClientMock_CreateUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteILMPolicy provides a mock function with given fields: policy
+func (_m *ElasticsearchClientMock) DeleteILMPolicy(policy string) (*esapi.Response, error) {
+	ret := _m.Called(policy)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteILMPolicy")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*esapi.Response, error)); ok {
+		return rf(policy)
+	}
+	if rf, ok := ret.Get(0).(func(string) *esapi.Response); ok {
+		r0 = rf(policy)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(policy)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_DeleteILMPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteILMPolicy'
+type ElasticsearchClientMock_DeleteILMPolicy_Call struct {
+	*mock.Call
+}
+
+// DeleteILMPolicy is a helper method to define mock.On call
+//   - policy string
+func (_e *ElasticsearchClientMock_Expecter) DeleteILMPolicy(policy interface{}) *ElasticsearchClientMock_DeleteILMPolicy_Call {
+	return &ElasticsearchClientMock_DeleteILMPolicy_Call{Call: _e.mock.On("DeleteILMPolicy", policy)}
+}
+
+func (_c *ElasticsearchClientMock_DeleteILMPolicy_Call) Run(run func(policy string)) *ElasticsearchClientMock_DeleteILMPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteILMPolicy_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_DeleteILMPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteILMPolicy_Call) RunAndReturn(run func(string) (*esapi.Response, error)) *ElasticsearchClientMock_DeleteILMPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteIndexTemplate provides a mock function with given fields: ctx, name
+func (_m *ElasticsearchClientMock) DeleteIndexTemplate(ctx context.Context, name string) (*esapi.Response, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteIndexTemplate")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*esapi.Response, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *esapi.Response); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_DeleteIndexTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteIndexTemplate'
+type ElasticsearchClientMock_DeleteIndexTemplate_Call struct {
+	*mock.Call
+}
+
+// DeleteIndexTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ElasticsearchClientMock_Expecter) DeleteIndexTemplate(ctx interface{}, name interface{}) *ElasticsearchClientMock_DeleteIndexTemplate_Call {
+	return &ElasticsearchClientMock_DeleteIndexTemplate_Call{Call: _e.mock.On("DeleteIndexTemplate", ctx, name)}
+}
+
+func (_c *ElasticsearchClientMock_DeleteIndexTemplate_Call) Run(run func(ctx context.Context, name string)) *ElasticsearchClientMock_DeleteIndexTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteIndexTemplate_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_DeleteIndexTemplate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteIndexTemplate_Call) RunAndReturn(run func(context.Context, string) (*esapi.Response, error)) *ElasticsearchClientMock_DeleteIndexTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteUser provides a mock function with given fields: ctx, username
+func (_m *ElasticsearchClientMock) DeleteUser(ctx context.Context, username string) (*esapi.Response, error) {
+	ret := _m.Called(ctx, username)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteUser")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*esapi.Response, error)); ok {
+		return rf(ctx, username)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *esapi.Response); ok {
+		r0 = rf(ctx, username)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, username)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_DeleteUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteUser'
+type ElasticsearchClientMock_DeleteUser_Call struct {
+	*mock.Call
+}
+
+// DeleteUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - username string
+func (_e *ElasticsearchClientMock_Expecter) DeleteUser(ctx interface{}, username interface{}) *ElasticsearchClientMock_DeleteUser_Call {
+	return &ElasticsearchClientMock_DeleteUser_Call{Call: _e.mock.On("DeleteUser", ctx, username)}
+}
+
+func (_c *ElasticsearchClientMock_DeleteUser_Call) Run(run func(ctx context.Context, username string)) *ElasticsearchClientMock_DeleteUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteUser_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_DeleteUser_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteUser_Call) RunAndReturn(run func(context.Context, string) (*esapi.Response, error)) *ElasticsearchClientMock_DeleteUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteUserRole provides a mock function with given fields: ctx, roleName
+func (_m *ElasticsearchClientMock) DeleteUserRole(ctx context.Context, roleName string) (*esapi.Response, error) {
+	ret := _m.Called(ctx, roleName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteUserRole")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*esapi.Response, error)); ok {
+		return rf(ctx, roleName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *esapi.Response); ok {
+		r0 = rf(ctx, roleName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, roleName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_DeleteUserRole_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteUserRole'
+type ElasticsearchClientMock_DeleteUserRole_Call struct {
+	*mock.Call
+}
+
+// DeleteUserRole is a helper method to define mock.On call
+//   - ctx context.Context
+//   - roleName string
+func (_e *ElasticsearchClientMock_Expecter) DeleteUserRole(ctx interface{}, roleName interface{}) *ElasticsearchClientMock_DeleteUserRole_Call {
+	return &ElasticsearchClientMock_DeleteUserRole_Call{Call: _e.mock.On("DeleteUserRole", ctx, roleName)}
+}
+
+func (_c *ElasticsearchClientMock_DeleteUserRole_Call) Run(run func(ctx context.Context, roleName string)) *ElasticsearchClientMock_DeleteUserRole_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteUserRole_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_DeleteUserRole_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_DeleteUserRole_Call) RunAndReturn(run func(context.Context, string) (*esapi.Response, error)) *ElasticsearchClientMock_DeleteUserRole_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Init provides a mock function with given fields: ctx, _a1, credentials
 func (_m *ElasticsearchClientMock) Init(ctx context.Context, _a1 client.Client, credentials *v1alpha1.ElasticsearchCredentials) error {
 	ret := _m.Called(ctx, _a1, credentials)
 
@@ -102,32 +457,150 @@ func (_m *ElasticsearchClientMock) Init(ctx context.Context, _a1 client.Client, 
 	return r0
 }
 
-// ElasticsearchClientMock_UseCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Init'
-type ElasticsearchClientMock_UseCredentials_Call struct {
+// ElasticsearchClientMock_Init_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Init'
+type ElasticsearchClientMock_Init_Call struct {
 	*mock.Call
 }
 
-// UseCredentials is a helper method to define mock.On call
+// Init is a helper method to define mock.On call
 //   - ctx context.Context
 //   - _a1 client.Client
 //   - credentials *v1alpha1.ElasticsearchCredentials
-func (_e *ElasticsearchClientMock_Expecter) UseCredentials(ctx interface{}, _a1 interface{}, credentials interface{}) *ElasticsearchClientMock_UseCredentials_Call {
-	return &ElasticsearchClientMock_UseCredentials_Call{Call: _e.mock.On("Init", ctx, _a1, credentials)}
+func (_e *ElasticsearchClientMock_Expecter) Init(ctx interface{}, _a1 interface{}, credentials interface{}) *ElasticsearchClientMock_Init_Call {
+	return &ElasticsearchClientMock_Init_Call{Call: _e.mock.On("Init", ctx, _a1, credentials)}
 }
 
-func (_c *ElasticsearchClientMock_UseCredentials_Call) Run(run func(ctx context.Context, _a1 client.Client, credentials *v1alpha1.ElasticsearchCredentials)) *ElasticsearchClientMock_UseCredentials_Call {
+func (_c *ElasticsearchClientMock_Init_Call) Run(run func(ctx context.Context, _a1 client.Client, credentials *v1alpha1.ElasticsearchCredentials)) *ElasticsearchClientMock_Init_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(client.Client), args[2].(*v1alpha1.ElasticsearchCredentials))
 	})
 	return _c
 }
 
-func (_c *ElasticsearchClientMock_UseCredentials_Call) Return(_a0 error) *ElasticsearchClientMock_UseCredentials_Call {
+func (_c *ElasticsearchClientMock_Init_Call) Return(_a0 error) *ElasticsearchClientMock_Init_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *ElasticsearchClientMock_UseCredentials_Call) RunAndReturn(run func(context.Context, client.Client, *v1alpha1.ElasticsearchCredentials) error) *ElasticsearchClientMock_UseCredentials_Call {
+func (_c *ElasticsearchClientMock_Init_Call) RunAndReturn(run func(context.Context, client.Client, *v1alpha1.ElasticsearchCredentials) error) *ElasticsearchClientMock_Init_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PutILMPolicy provides a mock function with given fields: policy, definition
+func (_m *ElasticsearchClientMock) PutILMPolicy(policy string, definition runtime.RawExtension) (*esapi.Response, error) {
+	ret := _m.Called(policy, definition)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutILMPolicy")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, runtime.RawExtension) (*esapi.Response, error)); ok {
+		return rf(policy, definition)
+	}
+	if rf, ok := ret.Get(0).(func(string, runtime.RawExtension) *esapi.Response); ok {
+		r0 = rf(policy, definition)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, runtime.RawExtension) error); ok {
+		r1 = rf(policy, definition)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_PutILMPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PutILMPolicy'
+type ElasticsearchClientMock_PutILMPolicy_Call struct {
+	*mock.Call
+}
+
+// PutILMPolicy is a helper method to define mock.On call
+//   - policy string
+//   - definition runtime.RawExtension
+func (_e *ElasticsearchClientMock_Expecter) PutILMPolicy(policy interface{}, definition interface{}) *ElasticsearchClientMock_PutILMPolicy_Call {
+	return &ElasticsearchClientMock_PutILMPolicy_Call{Call: _e.mock.On("PutILMPolicy", policy, definition)}
+}
+
+func (_c *ElasticsearchClientMock_PutILMPolicy_Call) Run(run func(policy string, definition runtime.RawExtension)) *ElasticsearchClientMock_PutILMPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(runtime.RawExtension))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_PutILMPolicy_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_PutILMPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_PutILMPolicy_Call) RunAndReturn(run func(string, runtime.RawExtension) (*esapi.Response, error)) *ElasticsearchClientMock_PutILMPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PutIndexTemplate provides a mock function with given fields: name, def
+func (_m *ElasticsearchClientMock) PutIndexTemplate(name string, def []byte) (*esapi.Response, error) {
+	ret := _m.Called(name, def)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutIndexTemplate")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, []byte) (*esapi.Response, error)); ok {
+		return rf(name, def)
+	}
+	if rf, ok := ret.Get(0).(func(string, []byte) *esapi.Response); ok {
+		r0 = rf(name, def)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, []byte) error); ok {
+		r1 = rf(name, def)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_PutIndexTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PutIndexTemplate'
+type ElasticsearchClientMock_PutIndexTemplate_Call struct {
+	*mock.Call
+}
+
+// PutIndexTemplate is a helper method to define mock.On call
+//   - name string
+//   - def []byte
+func (_e *ElasticsearchClientMock_Expecter) PutIndexTemplate(name interface{}, def interface{}) *ElasticsearchClientMock_PutIndexTemplate_Call {
+	return &ElasticsearchClientMock_PutIndexTemplate_Call{Call: _e.mock.On("PutIndexTemplate", name, def)}
+}
+
+func (_c *ElasticsearchClientMock_PutIndexTemplate_Call) Run(run func(name string, def []byte)) *ElasticsearchClientMock_PutIndexTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].([]byte))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_PutIndexTemplate_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_PutIndexTemplate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_PutIndexTemplate_Call) RunAndReturn(run func(string, []byte) (*esapi.Response, error)) *ElasticsearchClientMock_PutIndexTemplate_Call {
 	_c.Call.Return(run)
 	return _c
 }
