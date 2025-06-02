@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -29,26 +30,30 @@ type ControllerFactory func(mgr ctrl.Manager) Controller
 var controllerFactories = map[Reconciler]ControllerFactory{
 	ElasticsearchCredentialsReconciler: func(mgr ctrl.Manager) Controller {
 		return &controller.ElasticSearchCredentialsReconciler{
-			Client: mgr.GetClient(),
-			Scheme: mgr.GetScheme(),
+			Client:              mgr.GetClient(),
+			Scheme:              mgr.GetScheme(),
+			ElasticsearchClient: elasticsearch.New(),
 		}
 	},
 	ElasticsearchUserReconciler: func(mgr ctrl.Manager) Controller {
 		return &controller.ElasticSearchUserReconciler{
-			Client: mgr.GetClient(),
-			Scheme: mgr.GetScheme(),
+			Client:              mgr.GetClient(),
+			Scheme:              mgr.GetScheme(),
+			ElasticsearchClient: elasticsearch.New(),
 		}
 	},
 	ElasticsearchIndexTemplateReconciler: func(mgr ctrl.Manager) Controller {
 		return &controller.ElasticSearchIndexTemplateReconciler{
-			Client: mgr.GetClient(),
-			Scheme: mgr.GetScheme(),
+			Client:              mgr.GetClient(),
+			Scheme:              mgr.GetScheme(),
+			ElasticsearchClient: elasticsearch.New(),
 		}
 	},
 	ElasticsearchILMPolicyReconciler: func(mgr ctrl.Manager) Controller {
 		return &controller.ElasticsearchILMPolicyReconciler{
-			Client: mgr.GetClient(),
-			Scheme: mgr.GetScheme(),
+			Client:              mgr.GetClient(),
+			Scheme:              mgr.GetScheme(),
+			ElasticsearchClient: elasticsearch.New(),
 		}
 	},
 }

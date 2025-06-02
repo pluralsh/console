@@ -72,6 +72,12 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		logger.V(5).Error(err, "failed to get password")
 		return handleRequeue(nil, err, user.SetCondition)
 	}
+
+	if err := utils.TryAddControllerRef(ctx, r.Client, user, secret, r.Scheme); err != nil {
+		logger.V(5).Error(err, "failed to add controller ref")
+		return ctrl.Result{}, err
+	}
+
 	key, exists := secret.Data[user.Spec.Definition.PasswordSecretKeyRef.Key]
 	if !exists {
 		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", user.Spec.Definition.PasswordSecretKeyRef.Name, user.Spec.Definition.PasswordSecretKeyRef.Key)

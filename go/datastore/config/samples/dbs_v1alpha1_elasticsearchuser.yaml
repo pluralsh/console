@@ -25,6 +25,15 @@ spec:
     name: elastic-secret
     key: password
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elastic-user
+  namespace: default
+data:
+  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
+---
+---
 apiVersion: dbs.plural.sh/v1alpha1
 kind: ElasticsearchUser
 metadata:
@@ -42,7 +51,7 @@ spec:
   definition:
     user: lukasz-monitor
     passwordSecretKeyRef:
-      name: elastic-secret
+      name: elastic-user
       key: password
     role:
       name: lukasz-monitor
