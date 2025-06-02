@@ -26,7 +26,8 @@ import (
 // ElasticSearchCredentialsReconciler reconciles a ElasticsearchCredentials object
 type ElasticSearchCredentialsReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	ElasticsearchClient elasticsearch.ElasticsearchClient
 }
 
 //+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchcredentials,verbs=get;list;watch;create;update;patch;delete
@@ -76,15 +77,18 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, err
 	}
 
-	es, err := elasticsearch.New(ctx, credentials.Spec.URL, credentials.Spec.Username, password, credentials.Spec.Insecure)
-	if err != nil {
-		logger.Error(err, "failed to create Elasticsearch client")
-		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+	if r.ElasticsearchClient == nil {
+		var err error
+		r.ElasticsearchClient, err = elasticsearch.New(ctx, credentials.Spec.URL, credentials.Spec.Username, password, credentials.Spec.Insecure)
+		if err != nil {
+			logger.Error(err, "failed to create Elasticsearch client")
+			utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
 	}
 
 	// Ping or check cluster health to verify connection
-	res, err := es.ClusterHealth()
+	res, err := r.ElasticsearchClient.ClusterHealth()
 	if err != nil {
 		logger.Error(err, "failed to connect to Elasticsearch")
 		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

@@ -1,12 +1,17 @@
 package controller_test
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"net/http"
 
-	corev1 "k8s.io/api/core/v1"
-
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/datastore/internal/test/common"
+	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -20,16 +25,27 @@ import (
 var _ = Describe("ElasticsearchCredentials Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
+		const namespace = "default"
 
 		ctx := context.Background()
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: namespace,
 		}
-		elasticsearCredential := &dbsv1alpha1.ElasticsearchCredentials{}
 
 		BeforeEach(func() {
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      resourceName,
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"password": []byte("mock"),
+				},
+			}, nil)).To(Succeed())
+
+			elasticsearCredential := &dbsv1alpha1.ElasticsearchCredentials{}
 			By("creating the custom resource for the Kind ElasticsearchCredentials")
 			err := k8sClient.Get(ctx, typeNamespacedName, elasticsearCredential)
 			if err != nil && errors.IsNotFound(err) {
@@ -44,7 +60,7 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 						Username: "test",
 						PasswordSecretKeyRef: corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "test",
+								Name: resourceName,
 							},
 							Key: "password",
 						},
@@ -64,17 +80,23 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
+
+			fakeConsoleClient := mocks.NewElasticsearchClientMock(mocks.TestingT)
+			fakeConsoleClient.On("ClusterHealth").Return(&esapi.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewBuffer([]byte{})),
+			}, nil)
+
 			controllerReconciler := &controller.ElasticSearchCredentialsReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
+				Client:              k8sClient,
+				Scheme:              k8sClient.Scheme(),
+				ElasticsearchClient: fakeConsoleClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
 	})
 })
