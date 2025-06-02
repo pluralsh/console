@@ -37,6 +37,10 @@ type ElasticsearchClient interface {
 	DeleteIndexTemplate(ctx context.Context, name string) (*esapi.Response, error)
 }
 
+func New() ElasticsearchClient {
+	return &client{}
+}
+
 func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.ElasticsearchCredentials) error {
 	secret, err := utils.GetSecret(ctx, client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
