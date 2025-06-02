@@ -2,13 +2,12 @@ package controller
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 
-	elastic "github.com/elastic/go-elasticsearch/v9"
+	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -77,20 +76,7 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, err
 	}
 
-	esCfg := elastic.Config{
-		Addresses: []string{credentials.Spec.URL},
-		Username:  credentials.Spec.Username,
-		Password:  password,
-	}
-	if credentials.Spec.Insecure != nil && *credentials.Spec.Insecure {
-		esCfg.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		}
-	}
-
-	es, err := elastic.NewClient(esCfg)
+	es, err := elasticsearch.New(ctx, credentials.Spec.URL, credentials.Spec.Username, password, credentials.Spec.Insecure)
 	if err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -98,7 +84,7 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 	}
 
 	// Ping or check cluster health to verify connection
-	res, err := es.Cluster.Health()
+	res, err := es.ClusterHealth()
 	if err != nil {
 		logger.Error(err, "failed to connect to Elasticsearch")
 		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

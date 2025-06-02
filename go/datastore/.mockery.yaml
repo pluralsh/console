@@ -3,6 +3,7 @@ dir: "internal/test/mocks"
 mockname: "{{.InterfaceName}}Mock"
 outpkg: "mocks"
 packages:
-  github.com/pluralsh/console/go/datastore/internal/client:
+  github.com/pluralsh/console/go/datastore/internal/client/elasticsearch:
     interfaces:
-      ConsoleClient:
+      ElasticsearchClient:
+
