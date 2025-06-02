@@ -1,0 +1,69 @@
+name: CI / Datastore
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/datastore.yaml"
+      - "go/datastore/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/datastore.yaml"
+      - "go/datastore/**"
+permissions:
+  contents: read
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/datastore
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/datastore/go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make build
+  unit-test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/datastore
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go/datastore/go.mod
+          cache: true
+      - name: Test
+        run: PATH=$PATH:$GOPATH/bin make test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/datastore/go.mod
+          check-latest: true
+      - uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v3.7.1
+        with:
+          version: v1.64.5
+          working-directory: go/datastore
+          args: --timeout=30m
