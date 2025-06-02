@@ -3,6 +3,7 @@ package controller_test
 import (
 	"bytes"
 	"context"
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"io"
 	"net/http"
 
@@ -81,6 +82,22 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
 
+			expectedStatus := v1alpha1.Status{
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  v1alpha1.ReadyConditionReason.String(),
+						Message: "",
+					},
+					{
+						Type:   v1alpha1.SynchronizedConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
+					},
+				},
+			}
+
 			fakeConsoleClient := mocks.NewElasticsearchClientMock(mocks.TestingT)
 			fakeConsoleClient.On("ClusterHealth").Return(&esapi.Response{
 				StatusCode: http.StatusOK,
@@ -97,6 +114,11 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
+			cred := &v1alpha1.ElasticsearchCredentials{}
+			err = k8sClient.Get(ctx, typeNamespacedName, cred)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(cred.Status)).To(Equal(common.SanitizeStatusConditions(expectedStatus)))
 		})
 	})
 })

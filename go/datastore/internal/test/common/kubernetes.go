@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 )
 
 type Patcher[PatchObject client.Object] func(object PatchObject)
