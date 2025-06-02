@@ -67,23 +67,6 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		}
 	}()
 
-	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: user.Spec.Definition.PasswordSecretKeyRef.Name, Namespace: user.Namespace})
-	if err != nil {
-		logger.V(5).Error(err, "failed to get password")
-		return handleRequeue(nil, err, user.SetCondition)
-	}
-
-	if err := utils.TryAddControllerRef(ctx, r.Client, user, secret, r.Scheme); err != nil {
-		logger.V(5).Error(err, "failed to add controller ref")
-		return ctrl.Result{}, err
-	}
-
-	key, exists := secret.Data[user.Spec.Definition.PasswordSecretKeyRef.Key]
-	if !exists {
-		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", user.Spec.Definition.PasswordSecretKeyRef.Name, user.Spec.Definition.PasswordSecretKeyRef.Key)
-	}
-	password := strings.ReplaceAll(string(key), "\n", "")
-
 	credentials := new(v1alpha1.ElasticsearchCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
@@ -106,6 +89,23 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	if result != nil {
 		return *result, retErr
 	}
+
+	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: user.Spec.Definition.PasswordSecretKeyRef.Name, Namespace: user.Namespace})
+	if err != nil {
+		logger.V(5).Error(err, "failed to get password")
+		return handleRequeue(nil, err, user.SetCondition)
+	}
+
+	if err := utils.TryAddControllerRef(ctx, r.Client, user, secret, r.Scheme); err != nil {
+		logger.V(5).Error(err, "failed to add controller ref")
+		return ctrl.Result{}, err
+	}
+
+	key, exists := secret.Data[user.Spec.Definition.PasswordSecretKeyRef.Key]
+	if !exists {
+		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", user.Spec.Definition.PasswordSecretKeyRef.Name, user.Spec.Definition.PasswordSecretKeyRef.Key)
+	}
+	password := strings.ReplaceAll(string(key), "\n", "")
 
 	if err := r.createRole(ctx, user.Spec.Definition.Role); err != nil {
 		logger.V(5).Error(err, "failed to create role")
@@ -237,6 +237,7 @@ func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ElasticsearchUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
 
