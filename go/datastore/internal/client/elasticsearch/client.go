@@ -29,6 +29,12 @@ type ElasticsearchClient interface {
 	ClusterHealth() (*esapi.Response, error)
 	PutILMPolicy(policy string, definition runtime.RawExtension) (*esapi.Response, error)
 	DeleteILMPolicy(policy string) (*esapi.Response, error)
+	DeleteUserRole(ctx context.Context, roleName string) (*esapi.Response, error)
+	DeleteUser(ctx context.Context, username string) (*esapi.Response, error)
+	CreateUser(username string, def []byte) (*esapi.Response, error)
+	CreateRole(role string, def []byte) (*esapi.Response, error)
+	PutIndexTemplate(name string, def []byte) (*esapi.Response, error)
+	DeleteIndexTemplate(ctx context.Context, name string) (*esapi.Response, error)
 }
 
 func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.ElasticsearchCredentials) error {
@@ -64,7 +70,7 @@ func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials 
 	}
 
 	c.elasticsearch = elasticClient
-
+	c.ctx = ctx
 	return nil
 }
 
@@ -83,4 +89,36 @@ func (c client) PutILMPolicy(policy string, definition runtime.RawExtension) (*e
 
 func (c client) DeleteILMPolicy(policy string) (*esapi.Response, error) {
 	return c.elasticsearch.ILM.DeleteLifecycle(policy)
+}
+
+func (c client) DeleteUserRole(ctx context.Context, roleName string) (*esapi.Response, error) {
+	req := esapi.SecurityDeleteRoleRequest{
+		Name: roleName,
+	}
+
+	return req.Do(ctx, c.elasticsearch)
+}
+
+func (c client) DeleteUser(ctx context.Context, username string) (*esapi.Response, error) {
+	req := esapi.SecurityDeleteUserRequest{
+		Username: username,
+	}
+
+	return req.Do(ctx, c.elasticsearch)
+}
+
+func (c client) CreateUser(username string, def []byte) (*esapi.Response, error) {
+	return c.elasticsearch.Security.PutUser(username, bytes.NewReader(def))
+}
+
+func (c client) CreateRole(role string, def []byte) (*esapi.Response, error) {
+	return c.elasticsearch.Security.PutRole(role, bytes.NewReader(def))
+}
+
+func (c client) PutIndexTemplate(name string, def []byte) (*esapi.Response, error) {
+	return c.elasticsearch.Indices.PutIndexTemplate(name, bytes.NewReader(def))
+}
+
+func (c client) DeleteIndexTemplate(ctx context.Context, name string) (*esapi.Response, error) {
+	return c.elasticsearch.Indices.DeleteIndexTemplate(name, c.elasticsearch.Indices.DeleteIndexTemplate.WithContext(ctx))
 }

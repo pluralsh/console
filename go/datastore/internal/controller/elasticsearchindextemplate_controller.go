@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,7 +14,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -93,7 +91,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		return *result, retErr
 	}
 
-	if err := createTemplateIndex(ctx, *index); err != nil {
+	if err := r.createTemplateIndex(ctx, *index); err != nil {
 		logger.Error(err, "failed to create template index")
 		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -104,7 +102,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 	return ctrl.Result{}, nil
 }
 
-func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1alpha1.ElasticsearchIndexTemplate) error {
+func (r *ElasticSearchIndexTemplateReconciler) createTemplateIndex(ctx context.Context, index v1alpha1.ElasticsearchIndexTemplate) error {
 	indexTemplate := map[string]interface{}{
 		"index_patterns": index.Spec.Definition.IndexPatterns,
 		"template":       index.Spec.Definition.Template,
@@ -114,7 +112,7 @@ func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1
 	if err != nil {
 		return err
 	}
-	res, err := es.Indices.PutIndexTemplate(index.GetName(), bytes.NewReader(body))
+	res, err := r.ElasticsearchClient.PutIndexTemplate(index.GetName(), body)
 	if err != nil {
 		return err
 	}
@@ -133,8 +131,8 @@ func createTemplateIndex(ctx context.Context, es *elasticsearch.Client, index v1
 	return nil
 }
 
-func deleteTemplateIndex(ctx context.Context, es *elasticsearch.Client, templateName string) error {
-	res, err := es.Indices.DeleteIndexTemplate(templateName, es.Indices.DeleteIndexTemplate.WithContext(ctx))
+func (r *ElasticSearchIndexTemplateReconciler) deleteTemplateIndex(ctx context.Context, templateName string) error {
+	res, err := r.ElasticsearchClient.DeleteIndexTemplate(ctx, templateName)
 	if err != nil {
 		return fmt.Errorf("delete user request failed: %w", err)
 	}
@@ -166,7 +164,7 @@ func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.
 		return nil
 	}
 
-	err := deleteTemplateIndex(ctx, es, index.GetName())
+	err := r.deleteTemplateIndex(ctx, index.GetName())
 	if err != nil {
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete index template")
 		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

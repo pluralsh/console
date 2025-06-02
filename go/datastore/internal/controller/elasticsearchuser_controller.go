@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,8 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/elastic/go-elasticsearch/v9"
-	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	e "github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -99,18 +96,18 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
-	result := r.addOrRemoveFinalizer(ctx, es, user)
+	result := r.addOrRemoveFinalizer(ctx, user)
 	if result != nil {
 		return *result, retErr
 	}
 
-	if err := createRole(ctx, es, user.Spec.Definition.Role); err != nil {
+	if err := r.createRole(ctx, user.Spec.Definition.Role); err != nil {
 		logger.V(5).Error(err, "failed to create role")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	if err := createUser(ctx, es, user.Spec.Definition.User, password, user.Spec.Definition.Role.Name); err != nil {
+	if err := r.createUser(ctx, user.Spec.Definition.User, password, user.Spec.Definition.Role.Name); err != nil {
 		logger.V(5).Error(err, "failed to create user")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -122,7 +119,7 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	return ctrl.Result{}, nil
 }
 
-func createUser(ctx context.Context, es *elasticsearch.Client, user, password, role string) error {
+func (r *ElasticSearchUserReconciler) createUser(ctx context.Context, user, password, role string) error {
 	userDef := map[string]interface{}{
 		"password":  password,
 		"roles":     []string{role}, // Adjust as needed
@@ -132,7 +129,7 @@ func createUser(ctx context.Context, es *elasticsearch.Client, user, password, r
 	if err != nil {
 		return err
 	}
-	res, err := es.Security.PutUser(user, bytes.NewReader(body))
+	res, err := r.ElasticsearchClient.CreateUser(user, body)
 	if err != nil {
 		return err
 	}
@@ -149,7 +146,7 @@ func createUser(ctx context.Context, es *elasticsearch.Client, user, password, r
 	return nil
 }
 
-func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.ElasticsearchRole) error {
+func (r *ElasticSearchUserReconciler) createRole(ctx context.Context, role v1alpha1.ElasticsearchRole) error {
 	roleBody := map[string]interface{}{
 		"cluster": role.ClusterPermissions,
 		"indices": []map[string]interface{}{},
@@ -166,7 +163,7 @@ func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.Ela
 	if err != nil {
 		return err
 	}
-	res, err := es.Security.PutRole(role.Name, bytes.NewReader(body))
+	res, err := r.ElasticsearchClient.CreateRole(role.Name, body)
 	if err != nil {
 		return err
 	}
@@ -183,12 +180,8 @@ func createRole(ctx context.Context, es *elasticsearch.Client, role v1alpha1.Ela
 	return nil
 }
 
-func deleteRole(ctx context.Context, es *elasticsearch.Client, roleName string) error {
-	req := esapi.SecurityDeleteRoleRequest{
-		Name: roleName,
-	}
-
-	res, err := req.Do(context.Background(), es)
+func (r *ElasticSearchUserReconciler) deleteRole(ctx context.Context, roleName string) error {
+	res, err := r.ElasticsearchClient.DeleteUserRole(ctx, roleName)
 	if err != nil {
 		return fmt.Errorf("delete role request failed: %w", err)
 	}
@@ -210,12 +203,8 @@ func deleteRole(ctx context.Context, es *elasticsearch.Client, roleName string) 
 	return nil
 }
 
-func deleteUser(ctx context.Context, es *elasticsearch.Client, username string) error {
-	req := esapi.SecurityDeleteUserRequest{
-		Username: username,
-	}
-
-	res, err := req.Do(context.Background(), es)
+func (r *ElasticSearchUserReconciler) deleteUser(ctx context.Context, username string) error {
+	res, err := r.ElasticsearchClient.DeleteUser(ctx, username)
 	if err != nil {
 		return fmt.Errorf("delete user request failed: %w", err)
 	}
@@ -245,7 +234,7 @@ func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, user *v1alpha1.ElasticsearchUser) *ctrl.Result {
+func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.ElasticsearchUser) *ctrl.Result {
 	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, ElasticSearchUserProtectionFinalizerName)
 	}
@@ -255,13 +244,13 @@ func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, 
 		return nil
 	}
 
-	if err := deleteRole(ctx, es, user.Spec.Definition.Role.Name); err != nil {
+	if err := r.deleteRole(ctx, user.Spec.Definition.Role.Name); err != nil {
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete role")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return &requeue
 	}
 
-	if err := deleteUser(ctx, es, user.Spec.Definition.User); err != nil {
+	if err := r.deleteUser(ctx, user.Spec.Definition.User); err != nil {
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete user")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return &requeue
