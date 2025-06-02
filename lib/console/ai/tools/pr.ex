@@ -33,8 +33,18 @@ defmodule Console.AI.Tools.Pr do
     |> cast(attrs, @valid)
     |> cast_embed(:file_updates, with: &file_update_changeset/2)
     |> cast_embed(:confidence, with: &confidence_changeset/2)
+    |> infer_title()
     |> validate_required(@valid -- [:patch])
     |> ensure_confident()
+  end
+
+  defp infer_title(cs) do
+    with {nil, msg} when is_binary(msg) <- {get_field(cs, :pr_title), get_field(cs, :commit_message)},
+         [l | _] <- String.split(msg, "\n") do
+      put_change(cs, :pr_title, String.slice(l, 0, 50))
+    else
+      _ -> cs
+    end
   end
 
   @json_schema Console.priv_file!("tools/pr.json") |> Jason.decode!()

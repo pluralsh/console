@@ -82,6 +82,11 @@ type ServiceHelm struct {
 	// whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster)
 	// +kubebuilder:validation:Optional
 	IgnoreCrds *bool `json:"ignoreCrds,omitempty"`
+
+	// a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
+	// based on git state or other metadata
+	// +kubebuilder:validation:Optional
+	LuaScript *string `json:"luaScript,omitempty"`
 }
 
 type ServiceDependency struct {

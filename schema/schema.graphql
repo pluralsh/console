@@ -2910,8 +2910,8 @@ input ServiceTemplateAttributes {
   "the id of a repository to source manifests for this service"
   repositoryId: ID
 
-  "a list of context ids to add to this service"
-  contexts: [ID]
+  "a list of context names to add to this service"
+  contexts: [String]
 
   "a list of secure configuration that will be added to any services created by this template"
   configuration: [ConfigAttributes]
@@ -3060,8 +3060,8 @@ type ServiceTemplate {
   "the id of a repository to source manifests for this service"
   repositoryId: ID
 
-  "a list of context ids to add to this service"
-  contexts: [ID]
+  "a list of context names to add to this service"
+  contexts: [String]
 
   repository: GitRepository
 
@@ -4399,6 +4399,8 @@ input HelmConfigAttributes {
 
   ignoreCrds: Boolean
 
+  luaScript: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -4767,6 +4769,9 @@ type HelmSpec {
 
   "a list of relative paths to values files to use for helm applies"
   valuesFiles: [String]
+
+  "a lua script to use for helm applies"
+  luaScript: String
 }
 
 "a configuration item k\/v pair"

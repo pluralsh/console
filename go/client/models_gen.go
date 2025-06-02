@@ -2640,6 +2640,7 @@ type HelmConfigAttributes struct {
 	URL         *string              `json:"url,omitempty"`
 	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
 	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
+	LuaScript   *string              `json:"luaScript,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2713,6 +2714,8 @@ type HelmSpec struct {
 	Set []*HelmValue `json:"set,omitempty"`
 	// a list of relative paths to values files to use for helm applies
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	// a lua script to use for helm applies
+	LuaScript *string `json:"luaScript,omitempty"`
 }
 
 // a (possibly nested) helm value pair
@@ -5657,7 +5660,7 @@ type ServiceTemplate struct {
 	Templated *bool   `json:"templated,omitempty"`
 	// the id of a repository to source manifests for this service
 	RepositoryID *string `json:"repositoryId,omitempty"`
-	// a list of context ids to add to this service
+	// a list of context names to add to this service
 	Contexts     []*string            `json:"contexts,omitempty"`
 	Repository   *GitRepository       `json:"repository,omitempty"`
 	Dependencies []*ServiceDependency `json:"dependencies,omitempty"`
@@ -5684,7 +5687,7 @@ type ServiceTemplateAttributes struct {
 	Protect *bool `json:"protect,omitempty"`
 	// the id of a repository to source manifests for this service
 	RepositoryID *string `json:"repositoryId,omitempty"`
-	// a list of context ids to add to this service
+	// a list of context names to add to this service
 	Contexts []*string `json:"contexts,omitempty"`
 	// a list of secure configuration that will be added to any services created by this template
 	Configuration []*ConfigAttributes `json:"configuration,omitempty"`

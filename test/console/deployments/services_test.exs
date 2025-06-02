@@ -1339,6 +1339,27 @@ defmodule Console.Deployments.ServicesSyncTest do
 
       assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
     end
+
+    test "it can support multiple git sources" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "master", folder: "test-apps/helm-values"},
+        helm: %{
+          repository_id: git.id,
+          git: %{ref: "master", folder: "charts/console"},
+          values_files: ["values-podinfo.yaml"]
+        }
+      )
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content)
+
+      assert content["Chart.yaml"] =~ "console"
+      assert content["values.yaml"]
+      assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
+    end
   end
 
   describe "#digest/1" do

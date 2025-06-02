@@ -83,7 +83,7 @@ type ServiceTemplate struct {
 	// +kubebuilder:validation:Optional
 	Protect *bool `json:"protect,omitempty"`
 
-	// a list of context ids to add to this service
+	// a list of context names to add to this service
 	// +kubebuilder:validation:Optional
 	Contexts []string `json:"contexts,omitempty"`
 	// Git settings to configure git for a service

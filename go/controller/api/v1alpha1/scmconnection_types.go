@@ -24,7 +24,7 @@ type ScmConnectionList struct {
 	Items []ScmConnection `json:"items"`
 }
 
-// ScmConnection ...
+// ScmConnection is a container for credentials to a scm provider.  You can also reference a SCM connection created in the Plural UI via the provider + name, leaving all other fields blank.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
@@ -105,7 +105,7 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum:=GITHUB;GITLAB;BITBUCKET
 	Type console.ScmType `json:"type"`
-	// Token ...
+	// A secret containing this access token you will use, stored in the `token` data field.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
 	// Username ...

@@ -14,6 +14,7 @@ defmodule Console.Deployments.Global do
     ManagedNamespace,
     NamespaceInstance,
     ServiceTemplate,
+    ServiceContext,
     ServiceDependency,
     Revision,
     TemplateContext
@@ -32,6 +33,12 @@ defmodule Console.Deployments.Global do
   def get_namespace_by_name!(name), do: Repo.get_by!(ManagedNamespace, name: name)
 
   def get_service(%GlobalService{} = svc, cluster_id), do: Services.get_service_by_name(cluster_id, svc_name(svc))
+
+  def fetch_contexts([_ | _] = ctxs) do
+    ServiceContext.for_names(ctxs)
+    |> Repo.all()
+  end
+  def fetch_contexts(_), do: []
 
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
@@ -227,10 +234,12 @@ defmodule Console.Deployments.Global do
       {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
       {%GlobalService{reparent: true}, %Service{} = svc} -> sync_service(global, svc, user)
       {%GlobalService{id: gid, template: %ServiceTemplate{} = tpl}, nil} ->
-        ServiceTemplate.attributes(tpl)
+        tpl
+        |> dynamic_template(cluster, global)
+        |> ServiceTemplate.load_contexts()
+        |> ServiceTemplate.attributes()
         |> Map.put(:owner_id, gid)
         |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
-        |> dynamic_template(cluster, global)
         |> Services.create_service(cid, user)
       {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
         Services.clone_service(%{owner_id: gid}, sid, cid, user)
@@ -464,11 +473,11 @@ defmodule Console.Deployments.Global do
     Logger.info "Attempting to resync service #{dest.id}"
     dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
     tpl = Repo.preload(tpl, [:dependencies])
+    tpl = dynamic_template(tpl, dest.cluster, global)
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
               |> Map.put(:owner_id, id)
-              |> dynamic_template(dest.cluster, global)
               |> Services.update_service(dest.id, user)
       false ->
         Logger.debug "did not update service due to no differences"
@@ -516,11 +525,13 @@ defmodule Console.Deployments.Global do
 
   def load_configuration(%GlobalService{template: %ServiceTemplate{} = tpl} = global) do
     tpl = ServiceTemplate.load_configuration(tpl)
+    tpl = ServiceTemplate.load_contexts(tpl)
     put_in(global.template, tpl)
   end
 
   def load_configuration(%ManagedNamespace{service: %ServiceTemplate{} = tpl} = ns) do
     tpl = ServiceTemplate.load_configuration(tpl)
+    tpl = ServiceTemplate.load_contexts(tpl)
     put_in(ns.service, tpl)
   end
 
@@ -545,7 +556,7 @@ defmodule Console.Deployments.Global do
 
   def diff?(%Service{} = source, %Service{} = dest) do
     source = Repo.preload(source, [:dependencies])
-    dest = Repo.preload(dest, [:dependencies])
+    dest   = Repo.preload(dest, [:dependencies])
     with {:ok, source_secrets} <- Services.configuration(source),
          {:ok, dest_secrets} <- Services.configuration(dest),
       do: diff?(source, dest, source_secrets, dest_secrets)
@@ -627,14 +638,17 @@ defmodule Console.Deployments.Global do
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
-    Enum.reduce([
+    Enum.map([
       ~w(helm version)a,
       ~w(helm chart)a,
       ~w(helm values_files)a,
+      ~w(contexts)a,
       ~w(helm values)a,
+      ~w(lua_script)a,
       ~w(git ref)a,
       ~w(git folder)a
-    ], attrs, fn path, attrs ->
+    ], fn keys -> Enum.map(keys, &Access.key/1) end)
+    |> Enum.reduce(attrs, fn path, attrs ->
       case get_in(attrs, path) do
         str when is_binary(str) -> put_in(attrs, path, render_solid_raw(str, cluster, ctx))
         [v | _] = vals when is_binary(v) ->

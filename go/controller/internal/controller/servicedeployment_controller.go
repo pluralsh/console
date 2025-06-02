@@ -316,6 +316,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			URL:         service.Spec.Helm.URL,
 			IgnoreHooks: service.Spec.Helm.IgnoreHooks,
 			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
+			LuaScript:   service.Spec.Helm.LuaScript,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
 		if service.Spec.Helm.Repository != nil {
@@ -325,8 +326,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 		}
 
-		if service.Spec.RepositoryRef != nil {
-			ref := service.Spec.RepositoryRef
+		if service.Spec.Helm.RepositoryRef != nil {
+			ref := service.Spec.Helm.RepositoryRef
 			var repo v1alpha1.GitRepository
 			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
 				return nil, &requeue, fmt.Errorf("error while getting repository: %s", err.Error())

@@ -3258,6 +3258,7 @@ export type HelmConfigAttributes = {
   git?: InputMaybe<GitRefAttributes>;
   ignoreCrds?: InputMaybe<Scalars['Boolean']['input']>;
   ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
+  luaScript?: InputMaybe<Scalars['String']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
   /** pointer to a Plural GitRepository */
@@ -3326,6 +3327,8 @@ export type HelmSpec = {
   git?: Maybe<GitRef>;
   ignoreCrds?: Maybe<Scalars['Boolean']['output']>;
   ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
+  /** a lua script to use for helm applies */
+  luaScript?: Maybe<Scalars['String']['output']>;
   release?: Maybe<Scalars['String']['output']>;
   /** pointer to the flux helm repository resource used for this chart */
   repository?: Maybe<ObjectReference>;
@@ -9459,8 +9462,8 @@ export type ServiceTemplate = {
   __typename?: 'ServiceTemplate';
   /** possibly secret configuration for all spawned services, don't query this in list endpoints */
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
-  /** a list of context ids to add to this service */
-  contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
+  /** a list of context names to add to this service */
+  contexts?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   dependencies?: Maybe<Array<Maybe<ServiceDependency>>>;
   /** settings to configure git for a service */
   git?: Maybe<GitRef>;
@@ -9484,8 +9487,8 @@ export type ServiceTemplate = {
 export type ServiceTemplateAttributes = {
   /** a list of secure configuration that will be added to any services created by this template */
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
-  /** a list of context ids to add to this service */
-  contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  /** a list of context names to add to this service */
+  contexts?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** dependencies for the service to be spawned */
   dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   /** settings to configure git for a service */

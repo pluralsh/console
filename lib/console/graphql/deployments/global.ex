@@ -39,7 +39,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :templated,     :boolean
     field :protect,       :boolean, description: "whether to protect this templated service from deletion"
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
-    field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
+    field :contexts,      list_of(:string), description: "a list of context names to add to this service"
     field :configuration, list_of(:config_attributes), description: "a list of secure configuration that will be added to any services created by this template"
     field :dependencies,  list_of(:service_dependency_attributes), description: "dependencies for the service to be spawned"
 
@@ -131,7 +131,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :namespace,     :string, description: "the namespace for this service (optional for managed namespaces)"
     field :templated,     :boolean
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
-    field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
+    field :contexts,      list_of(:string), description: "a list of context names to add to this service"
 
     field :repository,   :git_repository, resolve: dataloader(Deployments)
     field :dependencies, list_of(:service_dependency), resolve: dataloader(Deployments)

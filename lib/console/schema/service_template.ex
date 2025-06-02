@@ -3,13 +3,16 @@ defmodule Console.Schema.ServiceTemplate do
   alias Console.Schema.{GitRepository, Service, Revision, ServiceDependency}
 
   schema "service_templates" do
-    field :name,          :string
-    field :namespace,     :string
-    field :templated,     :boolean, default: true
-    field :protect,       :boolean, default: false
-    field :contexts,      {:array, :string}
-    field :configuration, {:array, :map}, virtual: true
-    field :ignore_sync,   :boolean, virtual: true
+    field :name,              :string
+    field :namespace,         :string
+    field :templated,         :boolean, default: true
+    field :protect,           :boolean, default: false
+    field :contexts,          {:array, :string}
+    field :configuration,     {:array, :map}, virtual: true
+    field :ignore_sync,       :boolean, virtual: true
+    field :loaded,            :boolean, virtual: true, default: false
+    field :prev_contexts,     {:array, :string}, virtual: true
+    field :inferred_contexts, {:array, :string}, virtual: true
 
     embeds_one :git,         Service.Git,        on_replace: :update
     embeds_one :helm,        Service.Helm,       on_replace: :update
@@ -32,7 +35,7 @@ defmodule Console.Schema.ServiceTemplate do
 
     Map.new([:configuration | __schema__(:fields)] -- [:id], & {&1, Map.get(tpl, &1) |> Console.mapify()})
     |> Console.remove_ids()
-    |> Map.put(:context_bindings, Enum.map(tpl.contexts || [], & %{context_id: &1}))
+    |> Map.put(:context_bindings, Enum.map(tpl.inferred_contexts || [], & %{context_id: &1}))
     |> Map.drop(~w(updated_at inserted_at revision_id id)a)
   end
 
@@ -44,7 +47,7 @@ defmodule Console.Schema.ServiceTemplate do
     |> Map.put(:name, name)
   end
 
-  def load_configuration(%__MODULE__{configuration: conf} = tpl) when is_list(conf), do: tpl
+  def load_configuration(%__MODULE__{loaded: true} = tpl), do: tpl
   def load_configuration(tpl) do
     case Console.Deployments.Global.configuration(tpl) do
       {:ok, secrets} ->
@@ -52,6 +55,14 @@ defmodule Console.Schema.ServiceTemplate do
         Map.put(tpl, :configuration, secrets)
       _ -> Map.put(tpl, :configuration, [])
     end
+    |> Map.put(:loaded, true)
+  end
+
+  def load_contexts(%{contexts: names, prev_contexts: names} = tpl), do: tpl
+  def load_contexts(%{contexts: names} = tpl) do
+    ctxs = Console.Deployments.Global.fetch_contexts(names)
+    Map.put(tpl, :inferred_contexts, Enum.map(ctxs, & &1.id))
+    |> Map.put(:prev_contexts, names)
   end
 
   @valid ~w(name protect namespace templated repository_id contexts revision_id)a

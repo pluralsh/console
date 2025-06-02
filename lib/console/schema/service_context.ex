@@ -16,6 +16,10 @@ defmodule Console.Schema.ServiceContext do
     timestamps()
   end
 
+  def for_names(query \\ __MODULE__, names) do
+    from(c in query, where: c.name in ^names)
+  end
+
   @valid ~w(name configuration project_id)a
 
   def changeset(model, attrs \\ %{}) do
