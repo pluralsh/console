@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
-import { isEmpty } from 'lodash'
 
 import { useUpdateStackMutation } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
@@ -21,7 +20,6 @@ export default function StackConfiguration() {
   const changed =
     image !== stack.configuration.image ||
     version !== stack.configuration.version
-  const valid = !isEmpty(version)
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
@@ -91,7 +89,7 @@ export default function StackConfiguration() {
       >
         {changed && 'Unsaved changes'}
         <Button
-          disabled={!valid || !changed}
+          disabled={!changed}
           onClick={() => mutation()}
           loading={loading}
         >
