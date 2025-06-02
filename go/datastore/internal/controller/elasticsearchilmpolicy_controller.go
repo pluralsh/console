@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/elastic/go-elasticsearch/v9"
+	e "github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +29,8 @@ const (
 // ElasticsearchILMPolicyReconciler reconciles an ElasticsearchILMPolicy object
 type ElasticsearchILMPolicyReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	ElasticsearchClient e.ElasticsearchClient
 }
 
 // +kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchilmpolicies,verbs=get;list;watch;create;update;patch;delete
@@ -78,8 +77,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 		return handleRequeue(nil, err, policy.SetCondition)
 	}
 
-	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
-	if err != nil {
+	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -87,10 +85,10 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 
 	if !policy.GetDeletionTimestamp().IsZero() {
 		logger.Error(err, "failed to delete ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
-		return ctrl.Result{}, r.delete(ctx, es, policy)
+		return ctrl.Result{}, r.delete(ctx, policy)
 	}
 
-	if err = r.sync(ctx, es, policy); err != nil {
+	if err = r.sync(ctx, policy); err != nil {
 		logger.Error(err, "failed to sync ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
 		return ctrl.Result{}, err
 	}
@@ -105,9 +103,9 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	return ctrl.Result{}, nil
 }
 
-func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
+func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, policy *v1alpha1.ElasticsearchILMPolicy) error {
 	if controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
-		res, err := es.ILM.DeleteLifecycle(policy.ResourceName())
+		res, err := r.ElasticsearchClient.DeleteILMPolicy(policy.ResourceName())
 		if err != nil {
 			return err
 		}
@@ -126,13 +124,8 @@ func (r *ElasticsearchILMPolicyReconciler) delete(ctx context.Context, es *elast
 	return nil
 }
 
-func (r *ElasticsearchILMPolicyReconciler) sync(ctx context.Context, es *elasticsearch.Client, policy *v1alpha1.ElasticsearchILMPolicy) error {
-	body, err := json.Marshal(policy.Spec.Definition)
-	if err != nil {
-		return err
-	}
-
-	res, err := es.ILM.PutLifecycle(policy.ResourceName(), es.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
+func (r *ElasticsearchILMPolicyReconciler) sync(ctx context.Context, policy *v1alpha1.ElasticsearchILMPolicy) error {
+	res, err := r.ElasticsearchClient.PutILMPolicy(policy.ResourceName(), policy.Spec.Definition)
 	if err != nil {
 		return err
 	}

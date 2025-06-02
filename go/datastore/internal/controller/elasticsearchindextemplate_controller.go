@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	e "github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -33,7 +34,8 @@ const (
 // ElasticSearchIndexTemplateReconciler reconciles a ElasticsearchIndexTemplate object
 type ElasticSearchIndexTemplateReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	ElasticsearchClient e.ElasticsearchClient
 }
 
 //+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchindextemplates,verbs=get;list;watch;create;update;patch;delete
@@ -79,19 +81,19 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, index.SetCondition)
 	}
-	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
-	if err != nil {
+
+	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	result := r.addOrRemoveFinalizer(ctx, es, index)
+	result := r.addOrRemoveFinalizer(ctx, index)
 	if result != nil {
 		return *result, retErr
 	}
 
-	if err := createTemplateIndex(ctx, es, *index); err != nil {
+	if err := createTemplateIndex(ctx, *index); err != nil {
 		logger.Error(err, "failed to create template index")
 		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -154,7 +156,7 @@ func deleteTemplateIndex(ctx context.Context, es *elasticsearch.Client, template
 	return nil
 }
 
-func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, es *elasticsearch.Client, index *v1alpha1.ElasticsearchIndexTemplate) *ctrl.Result {
+func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, index *v1alpha1.ElasticsearchIndexTemplate) *ctrl.Result {
 	if index.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName) {
 		controllerutil.AddFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
 	}

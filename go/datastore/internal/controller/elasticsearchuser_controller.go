@@ -12,6 +12,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
+	e "github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -33,7 +34,8 @@ const (
 // ElasticSearchUserReconciler reconciles a ElasticsearchUser object
 type ElasticSearchUserReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	ElasticsearchClient e.ElasticsearchClient
 }
 
 //+kubebuilder:rbac:groups=dbs.plural.sh,resources=elasticsearchusers,verbs=get;list;watch;create;update;patch;delete
@@ -90,8 +92,8 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		logger.V(5).Info(err.Error())
 		return handleRequeue(nil, err, user.SetCondition)
 	}
-	es, err := createElasticsearchClient(ctx, r.Client, *credentials)
-	if err != nil {
+
+	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
 		logger.Error(err, "failed to create Elasticsearch client")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

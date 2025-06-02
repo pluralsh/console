@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 
@@ -66,25 +65,17 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		logger.V(5).Error(err, "failed to get password")
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
-	key, exists := secret.Data[credentials.Spec.PasswordSecretKeyRef.Key]
-	if !exists {
-		return ctrl.Result{}, fmt.Errorf("secret %s does not contain key %s", credentials.Spec.PasswordSecretKeyRef.Name, credentials.Spec.PasswordSecretKeyRef.Key)
-	}
-	password := strings.ReplaceAll(string(key), "\n", "")
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, credentials, secret, r.Scheme); err != nil {
 		logger.V(5).Error(err, "failed to add controller ref")
 		return ctrl.Result{}, err
 	}
 
-	if r.ElasticsearchClient == nil {
-		var err error
-		r.ElasticsearchClient, err = elasticsearch.New(ctx, credentials.Spec.URL, credentials.Spec.Username, password, credentials.Spec.Insecure)
-		if err != nil {
-			logger.Error(err, "failed to create Elasticsearch client")
-			utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
+	err = r.ElasticsearchClient.Init(ctx, r.Client, credentials)
+	if err != nil {
+		logger.Error(err, "failed to create Elasticsearch client")
+		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
 	}
 
 	// Ping or check cluster health to verify connection

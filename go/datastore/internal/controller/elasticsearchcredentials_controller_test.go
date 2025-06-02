@@ -3,9 +3,11 @@ package controller_test
 import (
 	"bytes"
 	"context"
-	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"io"
 	"net/http"
+
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	. "github.com/onsi/ginkgo/v2"
@@ -99,6 +101,7 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 			}
 
 			fakeConsoleClient := mocks.NewElasticsearchClientMock(mocks.TestingT)
+			fakeConsoleClient.On("Init", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			fakeConsoleClient.On("ClusterHealth").Return(&esapi.Response{
 				StatusCode: http.StatusOK,
 				Body:       io.NopCloser(bytes.NewBuffer([]byte{})),
