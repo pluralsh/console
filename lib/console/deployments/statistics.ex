@@ -1,6 +1,14 @@
 defmodule Console.Deployments.Statistics do
   import Console.Prom.Plugin, only: [metric_scope: 1]
+  alias Console.Repo
   alias Console.Schema.{Cluster, Service, Stack}
+
+  def info() do
+    %{
+      clusters: Repo.aggregate(Cluster, :count, :id),
+      services: Repo.aggregate(Service, :count, :id)
+    }
+  end
 
   def compile() do
     cluster_stats()
