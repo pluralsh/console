@@ -1,23 +1,11 @@
 defmodule Console.Watchers.Upgrade do
   use Console.Watchers.Base, state: [:upgrades, :queue_id, :target, :last]
-  # import Console.Services.Base, only: [
-  #   start_transaction: 0,
-  #   add_operation: 3,
-  #   execute: 1
-  # ]
-  alias Console.Clustering.Info
-  alias Console.Deployments.Services
+  alias Console.Deployments.Statistics
   alias Console.Plural.{Upgrades, Socket}
   alias Console.Watchers.Plural
 
   @poll_interval 60 * 1000
   @resource_interval :timer.minutes(60)
-
-  def record_usage() do
-    with pid when is_pid(pid) <- Process.whereis(__MODULE__),
-         true <- Process.alive?(pid),
-      do: GenServer.call(__MODULE__, :usage)
-  end
 
   def handle_call(:state, _, state), do: {:reply, state, state}
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
@@ -74,48 +62,10 @@ defmodule Console.Watchers.Upgrade do
     end
   end
 
-  # def handle_info(:next, %{upgrades: upgrades} = state) do
-  #   with {:ok, %{"id" => id} = result} <- Socket.do_push(upgrades, "next", %{}),
-  #        true <- Console.Bootstrapper.git_enabled?() do
-  #     start_transaction()
-  #     |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
-  #     |> add_operation(:ack, fn _ -> Socket.do_push(upgrades, "ack", %{"id" => id}) end)
-  #     |> execute()
-  #     |> case do
-  #       {:ok, _} -> {:noreply, %{state | last: id}}
-  #       _ -> {:noreply, state} # add some retry logic?
-  #     end
-  #   else
-  #     error ->
-  #       Logger.info "Failed to deliver upgrade: #{inspect(error)}"
-  #       {:noreply, state}
-  #   end
-  # end
-
   def handle_info(:svcs, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:svcs, %{upgrades: upgrades} = state) do
-    with {:ok, summary} <- Info.fetch() do
-      svcs = Services.count()
-      Socket.do_push(upgrades, "usage", Map.put(summary, :services, svcs))
-      {:noreply, state}
-    else
-      err ->
-        Logger.info "Did not report usage because of #{inspect(err)}"
-        {:noreply, state}
-    end
-  end
-
-  def handle_info(:usage, %{upgrades: nil} = state), do: {:noreply, state}
-  def handle_info(:usage, %{upgrades: upgrades} = state) do
-    Logger.info "Collecting resource usage"
-    with {:ok, summary} <- Info.fetch() do
-      Socket.do_push(upgrades, "usage", summary)
-      {:noreply, state}
-    else
-      err ->
-        Logger.info "Did not report usage because of #{inspect(err)}"
-        {:noreply, state}
-    end
+    Socket.do_push(upgrades, "usage", Statistics.info())
+    {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}

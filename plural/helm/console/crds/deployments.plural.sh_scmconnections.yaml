@@ -26,7 +26,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ScmConnection ...
+        description: ScmConnection is a container for credentials to a scm provider.  You
+          can also reference a SCM connection created in the Plural UI via the provider
+          + name, leaving all other fields blank.
         properties:
           apiVersion:
             description: |-
@@ -95,7 +97,8 @@ spec:
                 description: Name is a human-readable name of the ScmConnection.
                 type: string
               tokenSecretRef:
-                description: Token ...
+                description: A secret containing this access token you will use, stored
+                  in the `token` data field.
                 properties:
                   name:
                     description: name is unique within a namespace to reference a

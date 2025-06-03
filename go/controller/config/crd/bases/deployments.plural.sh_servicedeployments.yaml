@@ -260,6 +260,11 @@ spec:
                     description: whether you want to completely ignore any helm hooks
                       when actualizing this service
                     type: boolean
+                  luaScript:
+                    description: |-
+                      a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
+                      based on git state or other metadata
+                    type: string
                   release:
                     description: name of the helm release to use when applying
                     type: string

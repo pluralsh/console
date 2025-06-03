@@ -4,8 +4,9 @@ defmodule Console.Cost.Ingester do
   alias Console.Repo
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, Cluster, ClusterUsage, ClusterNamespaceUsage, ClusterScalingRecommendation}
+  require Logger
 
-  def ingest(attrs, %Cluster{id: id}) do
+  def ingest(attrs, %Cluster{id: id, handle: handle}) do
     settings = Settings.cached()
     start_transaction()
     |> add_operation(:cluster, fn _ ->
@@ -34,7 +35,10 @@ defmodule Console.Cost.Ingester do
       |> ok()
     end)
     |> add_operation(:scaling, fn _ ->
-      (Map.get(attrs, :recommendations) || [])
+      recs = Map.get(attrs, :recommendations) || []
+      Logger.info "Found #{length(recs)} recommendations for #{handle}"
+
+      recs
       |> Stream.map(&cluster_timestamped(&1, id))
       |> Stream.map(&infer_recommendation(&1, settings))
       |> Stream.map(&filter_threshold(&1, settings))

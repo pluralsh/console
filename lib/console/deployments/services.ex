@@ -140,8 +140,8 @@ defmodule Console.Deployments.Services do
     when is_binary(ns) and is_binary(n), do: false
   defp digest_filter(ref, _), do: ref
 
-  defp subdigests(%Service{helm: %Service.Helm{values_files: f, values: v}}) do
-    combined_sha((f || []) ++ Enum.filter([v], & &1))
+  defp subdigests(%Service{helm: %Service.Helm{values_files: f, values: v, lua_script: s}}) do
+    combined_sha((f || []) ++ Enum.filter([v, s], & &1))
   end
   defp subdigests(_), do: ""
 
@@ -155,6 +155,16 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, SmartFile.t} | Console.error
+  def tarstream(%Service{repository_id: id, helm: %Service.Helm{repository_id: rid, chart: c, lua_script: s} = helm} = svc)
+      when is_binary(id) and (is_binary(c) or is_binary(rid)) and is_binary(s) do
+    with {:ok, f} <- Git.Discovery.fetch(svc),
+         {:ok, contents} <- Tar.tar_stream(f),
+         contents = Map.new(contents),
+         {:ok, chart} <- tarfile(%{svc | norevise: true}),
+         splice <- maybe_values(contents, helm),
+      do: Tar.splice(chart, splice)
+  end
+
   def tarstream(%Service{repository_id: id, helm: %Service.Helm{repository_id: rid, chart: c, values_files: [_ | _] = files} = helm} = svc)
       when is_binary(id) and (is_binary(c) or is_binary(rid)) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
@@ -172,7 +182,7 @@ defmodule Console.Deployments.Services do
 
   def tarstream(%Service{} = svc), do: tarfile(svc)
 
-  defp tarfile(%Service{helm: %Service.Helm{repository_id: id, git: %{} = git}}) when is_binary(id) do
+  defp tarfile(%Service{helm: %Service.Helm{repository_id: id, git: %Service.Git{} = git}}) when is_binary(id) do
     Git.get_repository!(id)
     |> Git.Discovery.fetch(git)
   end
@@ -538,7 +548,10 @@ defmodule Console.Deployments.Services do
       svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings, :imports])
       attrs = Map.put(attrs, :status, :stale)
       svc
-      |> Service.changeset(stabilize_deps(attrs, svc))
+      |> Service.changeset(
+        stabilize_deps(attrs, svc)
+        |> stabilize_contexts(svc)
+      )
       |> Service.update_changeset()
       |> Console.Repo.update()
     end)
@@ -710,6 +723,13 @@ defmodule Console.Deployments.Services do
     Map.put(attrs, :dependencies, deps)
   end
   def stabilize_deps(attrs, _), do: attrs
+
+  def stabilize_contexts(%{context_bindings: deps} = attrs, %Service{context_bindings: old_deps}) when is_list(old_deps) do
+    by_name = Map.new(old_deps, & {&1.context_id, &1})
+    deps = Enum.map(deps, &Map.put(&1, :id, by_name[&1.context_id]))
+    Map.put(attrs, :context_bindings, deps)
+  end
+  def stabilize_contexts(attrs, _), do: attrs
 
   def stabilize(%{components: new_components} = attrs, %{components: components}) do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
