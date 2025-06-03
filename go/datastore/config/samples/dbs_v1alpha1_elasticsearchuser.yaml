@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elastic-secret
+  namespace: default
+data:
+  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchCredentials
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchcredentials
+    app.kubernetes.io/instance: elasticsearchcredentials-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchcredentials-sample
+  namespace: default
+spec:
+  url: https://localhost:9222
+  username: elastic
+  insecure: true
+  passwordSecretKeyRef:
+    name: elastic-secret
+    key: password
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elastic-user
+  namespace: default
+data:
+  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
+---
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchUser
+metadata:
+  labels:
+    app.kubernetes.io/name: elasticsearchuser
+    app.kubernetes.io/instance: elasticsearchuser-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: elasticsearchuser-sample
+  namespace: default
+spec:
+  credentialsRef:
+    name: elasticsearchcredentials-sample
+  definition:
+    user: lukasz-monitor
+    passwordSecretKeyRef:
+      name: elastic-user
+      key: password
+    role:
+      name: lukasz-monitor
+      clusterPermissions:
+        - monitor
+      indexPermissions:
+      - names: ["logs-*"]
+        privileges: ["read", "view_index_metadata"]

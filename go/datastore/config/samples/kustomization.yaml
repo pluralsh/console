@@ -1,4 +1,7 @@
 ## Append samples of your project ##
 resources:
 - dbs_v1alpha1_elasticsearchcredentials.yaml
+- dbs_v1alpha1_elasticsearchuser.yaml
+- dbs_v1alpha1_elasticsearchindextemplate.yaml
+- dbs_v1alpha1_elasticsearchilmpolicy.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

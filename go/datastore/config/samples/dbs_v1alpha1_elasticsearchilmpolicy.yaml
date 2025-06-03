@@ -4,7 +4,7 @@ metadata:
   name: elastic-secret
   namespace: default
 data:
-  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
+  password: QnY3MTk0azE1SEc5eThLa0ZocTcxZ2xYCg==
 ---
 apiVersion: dbs.plural.sh/v1alpha1
 kind: ElasticsearchCredentials
@@ -24,3 +24,26 @@ spec:
   passwordSecretKeyRef:
     name: elastic-secret
     key: password
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchILMPolicy
+metadata:
+  labels:
+    app.kubernetes.io/name: datastore
+    app.kubernetes.io/managed-by: kustomize
+  name: elasticsearchilmpolicy-sample
+spec:
+  credentialsRef:
+    name: elasticsearchcredentials-sample
+  definition:
+    policy:
+      phases:
+        warm:
+          min_age: 10d
+          actions:
+            forcemerge:
+              max_num_segments: 1
+        delete:
+          min_age: 30d
+          actions:
+            delete: {}
