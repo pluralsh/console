@@ -1,6 +1,5 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import {
-  ServiceDeploymentDetailsFragment,
   useFlowServicesQuery,
   useServiceDeploymentsTinyQuery,
 } from 'generated/graphql'
@@ -15,26 +14,24 @@ import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 
-export function ServiceSelector({
-  currentService,
-}: {
-  currentService: Nullable<ServiceDeploymentDetailsFragment>
-}) {
+export function ServiceSelector() {
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { flowId } = useParams()
+  const { flowId, serviceId, clusterId } = useParams()
   const referrer = !!flowId ? 'flow' : 'cd'
 
   const { data: clusterServices } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId: currentService?.cluster?.id },
-    skip: !currentService?.cluster?.id || referrer !== 'cd',
+    variables: { clusterId: clusterId ?? '' },
+    skip: referrer !== 'cd',
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
   const { data: flowServices } = useFlowServicesQuery({
     variables: { id: flowId ?? '' },
     skip: referrer !== 'flow',
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
 
   const serviceList = useMemo(
@@ -58,7 +55,7 @@ export function ServiceSelector({
 
   const switchService = useCallback(
     (newKey: Key) => {
-      if (typeof newKey === 'string' && newKey !== currentService?.id) {
+      if (typeof newKey === 'string' && newKey !== serviceId) {
         const service = serviceList.find(
           (deployment) => deployment.id === newKey
         )
@@ -71,13 +68,13 @@ export function ServiceSelector({
         )
       }
     },
-    [currentService?.id, flowId, navigate, serviceList, urlSuffix]
+    [flowId, navigate, serviceId, serviceList, urlSuffix]
   )
 
   return (
     <Select
       aria-label="app"
-      selectedKey={currentService?.id}
+      selectedKey={serviceId}
       onSelectionChange={switchService}
     >
       {serviceList.map((service) => (

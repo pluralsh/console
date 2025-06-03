@@ -1,19 +1,16 @@
 import { Button, Card, Flex, usePrevious } from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert'
-import {
-  ServiceUpdateAttributes,
-  useUpdateServiceDeploymentMutation,
-} from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
-import { useUpdateState } from 'components/hooks/useUpdateState'
-import styled from 'styled-components'
-import { ChartUpdate } from '../../ServiceSettings'
 import { Overline } from 'components/cd/utils/PermissionsModal'
+import { useLogin } from 'components/contexts'
+import { useUpdateState } from 'components/hooks/useUpdateState'
+import { GqlError } from 'components/utils/Alert'
+import { useUpdateServiceDeploymentMutation } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+import { useEffect, useMemo, useState } from 'react'
+import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { ChartForm } from '../../deployModal/DeployServiceSettingsHelm'
 import { ServiceSettingsHelmValues } from '../../deployModal/DeployServiceSettingsHelmValues'
 import { useServiceContext } from '../ServiceDetails'
-import { useLogin } from 'components/contexts'
 
 export function ServiceHelmSettings() {
   const { me } = useLogin()
@@ -30,6 +27,7 @@ export function ServiceHelmSettings() {
     hasUpdates,
     reset,
   } = useUpdateState({
+    ...(service.helm?.url ? { helmUrl: service.helm?.url } : {}),
     helmChart: service.helm?.chart,
     helmVersion: service.helm?.version,
     helmValues: service?.helm?.values,
@@ -41,20 +39,17 @@ export function ServiceHelmSettings() {
   }, [prevServiceId, reset, service.id])
 
   const attributes = useMemo(() => {
-    const helm =
-      state.helmChart && state.helmVersion
-        ? {
+    return state.helmChart && state.helmVersion
+      ? {
+          helm: {
+            ...(state.helmUrl ? { url: state.helmUrl } : {}),
             chart: state.helmChart,
             version: state.helmVersion,
             values: state.helmValues ?? '',
             valuesFiles: state.helmValuesFiles?.filter(isNonNullable) ?? [],
-          }
-        : null
-    let attributes: ServiceUpdateAttributes = {}
-
-    if (helm) attributes = { helm, ...attributes }
-
-    return attributes
+          },
+        }
+      : {}
   }, [state])
 
   const [mutation, { loading, error }] = useUpdateServiceDeploymentMutation({
@@ -65,6 +60,7 @@ export function ServiceHelmSettings() {
     onCompleted: ({ updateServiceDeployment }) => {
       const { helm } = updateServiceDeployment ?? {}
       updateState({
+        ...(state.helmUrl ? { url: state.helmUrl } : {}),
         helmChart: helm?.chart,
         helmVersion: helm?.version,
         helmValues: helm?.values,
@@ -105,10 +101,13 @@ export function ServiceHelmSettings() {
           >
             <Overline>helm settings</Overline>
           </Flex>
-          <ChartUpdate
-            repo={service.helm?.repository}
-            state={state}
-            updateState={updateState}
+          <ChartForm
+            url={state.helmUrl}
+            setUrl={(url) => updateState({ helmUrl: url })}
+            chart={state.helmChart ?? ''}
+            setChart={(chart) => updateState({ helmChart: chart })}
+            version={state.helmVersion ?? ''}
+            setVersion={(vsn) => updateState({ helmVersion: vsn })}
           />
           {isAdmin && (
             <ServiceSettingsHelmValues
@@ -154,7 +153,7 @@ export function ServiceHelmSettings() {
             primary
             type="submit"
             loading={loading}
-            disabled={!hasUpdates || !formIsValid || helmValueErrors}
+            disabled={!hasUpdates || !formIsValid}
           >
             Save
           </Button>

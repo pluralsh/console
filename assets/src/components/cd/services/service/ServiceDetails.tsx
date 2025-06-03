@@ -301,7 +301,7 @@ function ServiceDetailsBase() {
             maxHeight: '100%',
           }}
         >
-          <ServiceSelector currentService={serviceDeployment} />
+          <ServiceSelector />
           <div
             css={{
               overflowY: 'auto',
