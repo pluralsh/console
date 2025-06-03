@@ -1,13 +1,12 @@
 import { Button, Switch } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
 import {
   ServiceDeploymentsRowFragment,
   ServiceUpdateAttributes,
-  useFluxHelmRepositoryQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
-import { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react'
-import { GqlError } from 'components/utils/Alert'
+import { useTheme } from 'styled-components'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
@@ -44,29 +43,6 @@ export function ServiceSettings({
   )
 }
 
-export function ChartUpdate({ repo, state, updateState }) {
-  const useFluxHelmData = !!repo?.name && !!repo?.namespace
-  const { data, loading } = useFluxHelmRepositoryQuery({
-    variables: {
-      name: repo?.name || '',
-      namespace: repo?.namespace || '',
-    },
-    skip: !useFluxHelmData,
-  })
-
-  return (
-    <ChartForm
-      charts={data?.fluxHelmRepository?.charts || []}
-      chart={state.helmChart}
-      setChart={(chart) => updateState({ helmChart: chart })}
-      version={state.helmVersion}
-      setVersion={(vsn) => updateState({ helmVersion: vsn })}
-      loading={loading}
-      dropdownEnabled={useFluxHelmData}
-    />
-  )
-}
-
 export function ModalForm({
   serviceDeployment,
   open,
@@ -87,6 +63,7 @@ export function ModalForm({
   } = useUpdateState({
     gitRef: serviceDeployment.git?.ref ?? '',
     gitFolder: serviceDeployment.git?.folder ?? '',
+    helmUrl: serviceDeployment.helm?.url,
     helmChart: serviceDeployment.helm?.chart ?? '',
     helmVersion: serviceDeployment.helm?.version ?? '',
     protect: !!serviceDeployment.protect,
@@ -99,7 +76,11 @@ export function ModalForm({
         : null
     const helm =
       state.helmChart && state.helmVersion
-        ? { chart: state.helmChart, version: state.helmVersion }
+        ? {
+            ...(state.helmUrl ? { url: state.helmUrl } : {}),
+            chart: state.helmChart,
+            version: state.helmVersion,
+          }
         : null
     let attributes: ServiceUpdateAttributes = { protect: state.protect }
 
@@ -195,10 +176,13 @@ export function ModalForm({
           </>
         )}
         {serviceDeployment.helm?.chart && (
-          <ChartUpdate
-            repo={serviceDeployment.helm?.repository}
-            state={state}
-            updateState={updateState}
+          <ChartForm
+            url={state.helmUrl}
+            setUrl={(url) => updateState({ helmUrl: url })}
+            chart={state.helmChart}
+            setChart={(chart) => updateState({ helmChart: chart })}
+            version={state.helmVersion}
+            setVersion={(vsn) => updateState({ helmVersion: vsn })}
           />
         )}
         <Switch

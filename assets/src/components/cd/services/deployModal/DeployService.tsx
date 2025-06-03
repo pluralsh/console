@@ -1,5 +1,6 @@
 import {
   Button,
+  Flex,
   GearTrainIcon,
   GitHubIcon,
   ListIcon,
@@ -7,32 +8,32 @@ import {
   Stepper,
 } from '@pluralsh/design-system'
 
-import {
-  ClusterTinyFragment,
-  NamespacedName,
-  useCreateServiceDeploymentMutation,
-  useGitRepositoriesQuery,
-} from 'generated/graphql'
-import styled, { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useState } from 'react'
-import { mapExistingNodes } from 'utils/graphql'
-import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import ModalAlt from 'components/cd/ModalAlt'
 import {
   RepoKind,
   RepoKindSelector,
 } from 'components/cd/utils/RepoKindSelector'
-import ModalAlt from 'components/cd/ModalAlt'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import {
+  ClusterTinyFragment,
+  useCreateServiceDeploymentMutation,
+  useGitRepositoriesQuery,
+} from 'generated/graphql'
+import { FormEvent, useCallback, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
 
-import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
+import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
+
+import { ChartForm } from './DeployServiceSettingsHelm'
+import { ServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
 import {
   DeployServiceSettingsSecrets,
   Secret,
 } from './DeployServiceSettingsSecrets'
-import DeployServiceSettingsHelm from './DeployServiceSettingsHelm'
-import { ServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
 
 enum FormState {
   Initial = 'initial',
@@ -110,9 +111,7 @@ export function DeployServiceModal({
   )
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
-  const [helmRepository, setHelmRepository] = useState<NamespacedName | null>(
-    null
-  )
+  const [helmUrl, setHelmUrl] = useState('')
   const [chart, setChart] = useState('')
   const [version, setVersion] = useState('')
   const [gitFolder, setGitFolder] = useState('')
@@ -127,16 +126,16 @@ export function DeployServiceModal({
 
   const initialFormValid = !!(name && namespace && clusterId)
   const allowGoToRepo = formState === FormState.Initial && initialFormValid
-  const hasHelmRepo = !!helmRepository
+  const hasHelmRepo = !!helmUrl || !!chart || !!version
   const hasGitRepo = !!repositoryId
 
-  const gitSettingsValid = hasGitRepo
-    ? !!(repositoryId && gitFolder && gitRef)
-    : hasHelmRepo
-  const helmSettingsValid = hasHelmRepo
-    ? !!(chart && version && helmRepository)
-    : hasGitRepo
-  const repoSettingsValid = helmSettingsValid && gitSettingsValid
+  const gitSettingsValid = !!(repositoryId && gitFolder && gitRef)
+  const helmSettingsValid = !!(chart && version)
+
+  const repoSettingsValid =
+    (hasHelmRepo || hasGitRepo) &&
+    (hasHelmRepo ? helmSettingsValid : true) &&
+    (hasGitRepo ? gitSettingsValid : true)
 
   const allowGoToHelmValues =
     formState === FormState.Repository &&
@@ -171,7 +170,7 @@ export function DeployServiceModal({
     const helm =
       hasHelmRepo && helmSettingsValid
         ? {
-            repository: helmRepository,
+            ...(helmUrl ? { url: helmUrl } : {}),
             chart,
             version,
             values: helmValues || null,
@@ -204,8 +203,8 @@ export function DeployServiceModal({
     gitSettingsValid,
     hasGitRepo,
     hasHelmRepo,
-    helmRepository,
     helmSettingsValid,
+    helmUrl,
     helmValues,
     helmValuesFiles,
     mutation,
@@ -253,7 +252,8 @@ export function DeployServiceModal({
 
   return (
     <ModalAlt
-      css={{ '&& .form': { gap: 0 } }}
+      css={{ '&& .form': { gap: 0 }, minWidth: 708 }}
+      size="custom"
       header={`Deploy service${clusterProp ? ` to ${clusterProp.name}` : ''}`}
       open={open}
       onClose={onClose}
@@ -356,6 +356,7 @@ export function DeployServiceModal({
       <div
         css={{
           display: 'flex',
+          textWrap: 'nowrap',
           paddingBottom:
             formState === FormState.Repository ? 0 : theme.spacing.medium,
         }}
@@ -391,25 +392,29 @@ export function DeployServiceModal({
           />
         ) : formState === FormState.Repository ? (
           <RepoKindSelector
-            onKindChange={setRepoTab}
+            onKindChange={(kind) => {
+              setRepoTab(kind)
+              if (kind !== RepoKind.Helm && !helmSettingsValid) {
+                setHelmUrl('')
+                setChart('')
+                setVersion('')
+              }
+            }}
             selectedKind={repoTab}
             validKinds={{
               [RepoKind.Git]: hasGitRepo && gitSettingsValid,
               [RepoKind.Helm]: hasHelmRepo && helmSettingsValid,
             }}
           >
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.medium,
-              }}
+            <Flex
+              direction="column"
+              gap="medium"
             >
               {repoTab === RepoKind.Helm ? (
-                <DeployServiceSettingsHelm
+                <ChartForm
                   {...{
-                    repository: helmRepository,
-                    setRepository: setHelmRepository,
+                    url: helmUrl,
+                    setUrl: setHelmUrl,
                     chart,
                     setChart,
                     version,
@@ -429,7 +434,7 @@ export function DeployServiceModal({
                   }}
                 />
               )}
-            </div>
+            </Flex>
           </RepoKindSelector>
         ) : formState === FormState.HelmValues ? (
           <ServiceSettingsHelmValues
