@@ -68,9 +68,12 @@ defmodule Console.Deployments.Init do
     with %User{} = user <- Users.get_user_by_email(email),
          {:ok, %Group{id: group_id}} <- Users.upsert_group("sre") do
       Users.create_group_member(%{user_id: user.id}, group_id)
+    else
+      _ -> {:ok, %{}}
     end
   end
-  def setup_groups(_), do: :ok
+  def setup_groups(_), do: {:ok, %{}}
+
 
   def ensure_secret(ignore \\ false)
   def ensure_secret(true), do: {:ok, %{}}
@@ -121,7 +124,7 @@ defmodule Console.Deployments.Init do
           host: url,
           user: "plrl-#{inst}",
           password: pass,
-          index: "plrl-logs-#{inst}-*"
+          index: "plrl-#{inst}-logs-*"
         }
 
         attrs
@@ -138,7 +141,7 @@ defmodule Console.Deployments.Init do
         |> put_in([:ai, :vector_store], %{
           enabled: true,
           vector_store: :elastic,
-          elastic: es_creds
+          elastic: Map.put(es_creds, :index, "plrl-#{inst}-vectors")
         })
     else
       _ -> attrs

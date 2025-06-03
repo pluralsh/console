@@ -9,8 +9,15 @@ global:
 
 cloud: 
   enabled: false
+  o11y:
+    enabled: false
   # If set to a truthy value, mounts a volume for the certs
   pgRootCert: ~
+  elasticNamespace: elastic
+  instanceName: ~
+  vmPassword: ~
+  esPassword: ~
+  vmTenant: ~
 
 # disableAdditionalVolumes is the flag for global.additionalVolumes
 disableAdditionalVolumes: false
