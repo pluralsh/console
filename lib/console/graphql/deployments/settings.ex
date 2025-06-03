@@ -333,12 +333,14 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :settings_queries do
     field :deployment_settings, :deployment_settings do
       middleware Authenticated, :cluster
+      middleware Scope, api: "deploymentSettings"
 
       resolve &Deployments.settings/2
     end
 
     connection field :projects, node_type: :project do
       middleware Authenticated
+      middleware Scope, api: "projects"
       arg :q, :string
 
       resolve &Deployments.list_projects/2
@@ -346,6 +348,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :project, :project do
       middleware Authenticated
+      middleware Scope, api: "project"
       arg :id,   :id
       arg :name, :string
 

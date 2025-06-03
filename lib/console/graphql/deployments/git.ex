@@ -988,6 +988,7 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :create_pull_request, :pull_request do
       middleware Authenticated
+      middleware Scope, api: "createPullRequest"
       arg :id,         non_null(:id), description: "the id of the PR automation instance to use"
       arg :identifier, :string
       arg :branch,     :string
