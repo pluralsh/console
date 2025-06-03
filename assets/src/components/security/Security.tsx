@@ -1,5 +1,6 @@
 import { Flex, SubTab } from '@pluralsh/design-system'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
+import { LinkTabWrap } from 'components/utils/Tabs'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -29,16 +30,21 @@ export function Security() {
         <HeaderWrapperSC>
           <Flex>
             {directory.map(({ path, label }) => (
-              <SubTab
-                css={{ width: 'max-content' }}
+              <LinkTabWrap
                 key={path}
+                to={path}
+                textValue={label}
                 active={route?.includes(path)}
-                onClick={() => {
-                  if (!route?.includes(path)) navigate(`${path}`)
-                }}
               >
-                {label}
-              </SubTab>
+                <SubTab
+                  css={{ width: 'max-content' }}
+                  onClick={() => {
+                    if (!route?.includes(path)) navigate(`${path}`)
+                  }}
+                >
+                  {label}
+                </SubTab>
+              </LinkTabWrap>
             ))}
           </Flex>
           {headerContent}
