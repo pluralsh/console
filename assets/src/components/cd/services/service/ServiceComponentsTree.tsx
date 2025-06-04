@@ -105,6 +105,8 @@ export function ComponentsTreeView({
 
   const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
     variables: { id: serviceId || '' },
+    pollInterval: 15_000, // 15 seconds
+    fetchPolicy: 'cache-and-network',
   })
 
   const components = useMemo(() => {

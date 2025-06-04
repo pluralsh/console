@@ -169,6 +169,8 @@ function ComponentsListView({
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
+    pollInterval: 15_000, // 15 seconds
+    fetchPolicy: 'cache-and-network',
   })
 
   const deprecationCount = useMemo(
