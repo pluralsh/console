@@ -44,8 +44,7 @@ build: manifests generate fmt vet ## build manager binary
 
 .PHONY: run
 run: manifests generate fmt vet ## run a controller from your host
-	go run ./cmd/main.go \
-		--console-url=${PLURAL_CONSOLE_URL}/gql
+	go run ./cmd/main.go
 
 .PHONY: release
 release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.

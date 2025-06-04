@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/meta"
+
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	e "github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -76,7 +77,8 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, user.SetCondition)
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
 	}
 
 	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
@@ -85,9 +87,17 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
-	result := r.addOrRemoveFinalizer(ctx, user)
-	if result != nil {
-		return *result, retErr
+	if err := r.addOrRemoveFinalizer(ctx, user, credentials); err != nil {
+		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !user.DeletionTimestamp.IsZero() {
+		err = r.handleDelete(ctx, user)
+		if err != nil {
+			utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
 	}
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: user.Spec.Definition.PasswordSecretKeyRef.Name, Namespace: user.Namespace})
@@ -98,6 +108,10 @@ func (r *ElasticSearchUserReconciler) Reconcile(ctx context.Context, req ctrl.Re
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, user, secret, r.Scheme); err != nil {
 		logger.V(5).Error(err, "failed to add controller ref")
+		return ctrl.Result{}, err
+	}
+	if err := utils.TryAddFinalizer(ctx, r.Client, secret, ElasticSearchSecretProtectionFinalizerName); err != nil {
+		logger.V(5).Error(err, "failed to add finalizer")
 		return ctrl.Result{}, err
 	}
 
@@ -241,28 +255,30 @@ func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.ElasticsearchUser) *ctrl.Result {
+func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.ElasticsearchUser, credentials *v1alpha1.ElasticsearchCredentials) error {
 	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, ElasticSearchUserProtectionFinalizerName)
+		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, ElasticSearchUserProtectionFinalizerName); err != nil {
+			return err
+		}
 	}
 
-	// If object is not being deleted, do nothing
-	if user.GetDeletionTimestamp().IsZero() {
-		return nil
-	}
+	return nil
+}
 
+func (r *ElasticSearchUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.ElasticsearchUser) error {
 	if err := r.deleteRole(ctx, user.Spec.Definition.Role.Name); err != nil {
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete role")
-		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return err
 	}
 
 	if err := r.deleteUser(ctx, user.Spec.Definition.User); err != nil {
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete user")
-		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return err
 	}
-
+	if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.Definition.PasswordSecretKeyRef.Name); err != nil {
+		return err
+	}
 	controllerutil.RemoveFinalizer(user, ElasticSearchUserProtectionFinalizerName)
-	return &ctrl.Result{}
+	return nil
 }

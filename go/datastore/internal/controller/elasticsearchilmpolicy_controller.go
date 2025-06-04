@@ -74,7 +74,8 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, policy.SetCondition)
+		utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
 	}
 
 	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
@@ -84,7 +85,6 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	if !policy.GetDeletionTimestamp().IsZero() {
-		logger.Error(err, "failed to delete ILM policy", "policy", policy.Name, "namespace", policy.Namespace)
 		return ctrl.Result{}, r.delete(ctx, policy)
 	}
 
@@ -95,6 +95,9 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 
 	if !controllerutil.ContainsFinalizer(policy, PolicyFinalizer) {
 		controllerutil.AddFinalizer(policy, PolicyFinalizer)
+		if err := utils.TryAddFinalizer(ctx, r.Client, policy, PolicyFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")

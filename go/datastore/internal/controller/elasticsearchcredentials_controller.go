@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 
@@ -20,6 +23,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
+)
+
+const (
+	ElasticSearchCredentialsProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-credentials-protection"
 )
 
 // ElasticSearchCredentialsReconciler reconciles a ElasticsearchCredentials object
@@ -60,6 +67,10 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		}
 	}()
 
+	if !credentials.DeletionTimestamp.IsZero() {
+		return r.handleDelete(ctx, credentials)
+	}
+
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
 		logger.V(5).Error(err, "failed to get password")
@@ -70,6 +81,11 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 		logger.V(5).Error(err, "failed to add controller ref")
 		return ctrl.Result{}, err
 	}
+	if err := utils.TryAddFinalizer(ctx, r.Client, secret, ElasticSearchSecretProtectionFinalizerName); err != nil {
+		logger.V(5).Error(err, "failed to add finalizer")
+		return ctrl.Result{}, err
+	}
+	utils.AddFinalizer(credentials, ElasticSearchCredentialsProtectionFinalizerName)
 
 	err = r.ElasticsearchClient.Init(ctx, r.Client, credentials)
 	if err != nil {
@@ -113,4 +129,57 @@ func (r *ElasticSearchCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) 
 		For(&v1alpha1.ElasticsearchCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.ElasticsearchCredentials) (ctrl.Result, error) {
+	if controllerutil.ContainsFinalizer(credentials, ElasticSearchUserProtectionFinalizerName) {
+		userList := &v1alpha1.ElasticsearchUserList{}
+		if err := r.List(ctx, userList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		for _, user := range userList.Items {
+			if strings.EqualFold(user.Spec.CredentialsRef.Name, credentials.Name) {
+				if err := r.Client.Delete(ctx, &user); err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+		utils.RemoveFinalizer(credentials, ElasticSearchUserProtectionFinalizerName)
+	}
+
+	if controllerutil.ContainsFinalizer(credentials, ElasticsearchIndexTemplateProtectionFinalizerName) {
+		indexTemplateList := &v1alpha1.ElasticsearchIndexTemplateList{}
+		if err := r.List(ctx, indexTemplateList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		for _, indexTemplate := range indexTemplateList.Items {
+			if strings.EqualFold(indexTemplate.Spec.CredentialsRef.Name, credentials.Name) {
+				if err := r.Client.Delete(ctx, &indexTemplate); err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+		utils.RemoveFinalizer(credentials, ElasticsearchIndexTemplateProtectionFinalizerName)
+	}
+	if controllerutil.ContainsFinalizer(credentials, PolicyFinalizer) {
+		policyList := &v1alpha1.ElasticsearchILMPolicyList{}
+		if err := r.List(ctx, policyList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		for _, policy := range policyList.Items {
+			if strings.EqualFold(policy.Spec.CredentialsRef.Name, credentials.Name) {
+				if err := r.Client.Delete(ctx, &policy); err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+		utils.RemoveFinalizer(credentials, PolicyFinalizer)
+	}
+
+	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name); err != nil {
+		return ctrl.Result{}, err
+	}
+	utils.RemoveFinalizer(credentials, ElasticSearchCredentialsProtectionFinalizerName)
+	return ctrl.Result{}, nil
+
 }
