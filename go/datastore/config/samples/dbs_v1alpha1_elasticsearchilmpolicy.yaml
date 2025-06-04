@@ -4,7 +4,7 @@ metadata:
   name: elastic-secret
   namespace: default
 data:
-  password: QnY3MTk0azE1SEc5eThLa0ZocTcxZ2xYCg==
+  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==
 ---
 apiVersion: dbs.plural.sh/v1alpha1
 kind: ElasticsearchCredentials

@@ -44,7 +44,7 @@ func (s *ElasticsearchIndexTemplate) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
-func (s *ElasticsearchIndexTemplate) GetName() string {
+func (s *ElasticsearchIndexTemplate) GetIndexName() string {
 	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
 		return *s.Spec.Name
 	}

@@ -1,20 +1,24 @@
 package controller
 
 import (
+	"context"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
-	requeueDefault          = 30 * time.Second
-	requeueWaitForResources = 5 * time.Second
+	requeueDefault                             = 30 * time.Second
+	requeueWaitForResources                    = 5 * time.Second
+	ElasticSearchSecretProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-secret-protection"
 )
 
 var (
@@ -50,4 +54,26 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	}
 
 	return defaultMessage
+}
+
+func deleteRefSecret(ctx context.Context, k8sclient client.Client, namespace, name string) error {
+	credentialSecret := &corev1.Secret{}
+	if err := k8sclient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, credentialSecret); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	if err := k8sclient.Delete(ctx, credentialSecret); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	if err := utils.TryRemoveFinalizer(ctx, k8sclient, credentialSecret, ElasticSearchSecretProtectionFinalizerName); err != nil {
+		return err
+	}
+
+	return nil
 }

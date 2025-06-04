@@ -77,7 +77,8 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
-		return handleRequeue(nil, err, index.SetCondition)
+		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
 	}
 
 	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
@@ -86,9 +87,18 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		return ctrl.Result{}, err
 	}
 
-	result := r.addOrRemoveFinalizer(ctx, index)
-	if result != nil {
-		return *result, retErr
+	if err := r.addOrRemoveFinalizer(ctx, index, credentials); err != nil {
+		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	if !index.DeletionTimestamp.IsZero() {
+		err = r.handleDelete(ctx, index)
+		if err != nil {
+			utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
 	}
 
 	if err := r.createTemplateIndex(ctx, *index); err != nil {
@@ -112,7 +122,7 @@ func (r *ElasticSearchIndexTemplateReconciler) createTemplateIndex(ctx context.C
 	if err != nil {
 		return err
 	}
-	res, err := r.ElasticsearchClient.PutIndexTemplate(index.GetName(), body)
+	res, err := r.ElasticsearchClient.PutIndexTemplate(index.GetIndexName(), body)
 	if err != nil {
 		return err
 	}
@@ -154,25 +164,24 @@ func (r *ElasticSearchIndexTemplateReconciler) deleteTemplateIndex(ctx context.C
 	return nil
 }
 
-func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, index *v1alpha1.ElasticsearchIndexTemplate) *ctrl.Result {
+func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, index *v1alpha1.ElasticsearchIndexTemplate, credentials *v1alpha1.ElasticsearchCredentials) error {
 	if index.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName) {
 		controllerutil.AddFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
+		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, ElasticsearchIndexTemplateProtectionFinalizerName); err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	// If object is not being deleted, do nothing
-	if index.GetDeletionTimestamp().IsZero() {
-		return nil
-	}
-
-	err := r.deleteTemplateIndex(ctx, index.GetName())
+func (r *ElasticSearchIndexTemplateReconciler) handleDelete(ctx context.Context, index *v1alpha1.ElasticsearchIndexTemplate) error {
+	err := r.deleteTemplateIndex(ctx, index.GetIndexName())
 	if err != nil {
-		ctrl.LoggerFrom(ctx).Error(err, "failed to delete index template")
-		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return err
 	}
 
 	controllerutil.RemoveFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
-	return &ctrl.Result{}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
