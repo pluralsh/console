@@ -68,7 +68,7 @@ func (r *ElasticSearchCredentialsReconciler) Reconcile(ctx context.Context, req 
 	}()
 
 	if !credentials.DeletionTimestamp.IsZero() {
-		return r.handleDelete(ctx, credentials)
+		return ctrl.Result{}, r.handleDelete(ctx, credentials)
 	}
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
@@ -131,16 +131,16 @@ func (r *ElasticSearchCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) 
 		Complete(r)
 }
 
-func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.ElasticsearchCredentials) (ctrl.Result, error) {
+func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.ElasticsearchCredentials) error {
 	if controllerutil.ContainsFinalizer(credentials, ElasticSearchUserProtectionFinalizerName) {
 		userList := &v1alpha1.ElasticsearchUserList{}
 		if err := r.List(ctx, userList, client.InNamespace(credentials.Namespace)); err != nil {
-			return ctrl.Result{}, err
+			return err
 		}
 		for _, user := range userList.Items {
 			if strings.EqualFold(user.Spec.CredentialsRef.Name, credentials.Name) {
 				if err := r.Client.Delete(ctx, &user); err != nil {
-					return ctrl.Result{}, err
+					return err
 				}
 			}
 		}
@@ -150,12 +150,12 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 	if controllerutil.ContainsFinalizer(credentials, ElasticsearchIndexTemplateProtectionFinalizerName) {
 		indexTemplateList := &v1alpha1.ElasticsearchIndexTemplateList{}
 		if err := r.List(ctx, indexTemplateList, client.InNamespace(credentials.Namespace)); err != nil {
-			return ctrl.Result{}, err
+			return err
 		}
 		for _, indexTemplate := range indexTemplateList.Items {
 			if strings.EqualFold(indexTemplate.Spec.CredentialsRef.Name, credentials.Name) {
 				if err := r.Client.Delete(ctx, &indexTemplate); err != nil {
-					return ctrl.Result{}, err
+					return err
 				}
 			}
 		}
@@ -164,12 +164,12 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 	if controllerutil.ContainsFinalizer(credentials, PolicyFinalizer) {
 		policyList := &v1alpha1.ElasticsearchILMPolicyList{}
 		if err := r.List(ctx, policyList, client.InNamespace(credentials.Namespace)); err != nil {
-			return ctrl.Result{}, err
+			return err
 		}
 		for _, policy := range policyList.Items {
 			if strings.EqualFold(policy.Spec.CredentialsRef.Name, credentials.Name) {
 				if err := r.Client.Delete(ctx, &policy); err != nil {
-					return ctrl.Result{}, err
+					return err
 				}
 			}
 		}
@@ -177,9 +177,9 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 	}
 
 	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 	utils.RemoveFinalizer(credentials, ElasticSearchCredentialsProtectionFinalizerName)
-	return ctrl.Result{}, nil
+	return nil
 
 }
