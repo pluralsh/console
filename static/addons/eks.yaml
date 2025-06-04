@@ -2276,6 +2276,18 @@
     - '1.26'
     - '1.25'
   publisher: eks
+- name: aws-privateca-connector-for-kubernetes
+  versions:
+  - version: v1.6.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+  publisher: aws-privateca
 - name: calyptia_fluent-bit
   versions:
   - version: v22.10.5-eksbuild.0
@@ -3272,6 +3284,7 @@
     - '1.33'
   - version: v1.32.3-eksbuild.7
     compatibilities:
+    - '1.33'
     - '1.32'
   - version: v1.32.3-eksbuild.2
     compatibilities:
