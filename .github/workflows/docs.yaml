@@ -21,8 +21,11 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           cache: true
-      - name: Regenerate docs
+      - name: Regenerate console controller docs
         working-directory: go/controller
+        run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
+      - name: Regenerate datastore controller docs
+        working-directory: go/datastore
         run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
       - name: Save date
         id: date
@@ -32,7 +35,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           title: "chore: API documentation sync"
-          body: Automated pull request to regenerate API docs for the Console controller.
+          body: Automated pull request to regenerate API docs for the Console and datastore controllers.
           commit-message: Update docs for Console controller
           branch: docs-${{steps.date.outputs.date}}
           labels: documentation
