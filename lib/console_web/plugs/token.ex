@@ -31,6 +31,7 @@ defmodule ConsoleWeb.Plugs.Token do
       broadcast(token)
       conn
       |> Guardian.Plug.put_current_token(token.token, key: key)
+      |> Guardian.Plug.put_current_resource(Console.Services.Rbac.preload(user))
       |> Guardian.Plug.put_current_claims(%{"sub" => "user:#{user.id}"}, key: key)
     end
   end

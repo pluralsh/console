@@ -608,7 +608,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_service_deployment, :service_deployment do
       middleware Authenticated
       middleware Feature, :cd
-      middleware Scope, api: "createAerviceDeployment"
+      middleware Scope, api: "createServiceDeployment"
 
       arg :cluster_id, :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
