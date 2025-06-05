@@ -190,7 +190,7 @@ defmodule Console.Services.Users do
 
   defp sanitize_email(email) do
     case Console.conf(:org_email_suffix) do
-      suffix when is_binary(suffix) and suffix != "" ->
+      suffix when is_binary(suffix) and byte_size(suffix) > 0 ->
         String.replace(email, suffix, "")
       _ ->
         email
