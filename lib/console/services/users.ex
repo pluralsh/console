@@ -161,24 +161,24 @@ defmodule Console.Services.Users do
 
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
-    email = sanitize_email(email)
-
-    attrs = token_attrs(attrs)
-            |> Map.put("email", email)
-    groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
-             |> group_attrs()
-    start_transaction()
-    |> add_operation(:user, fn _ ->
-      case get_user_by_email(email) do
-        %User{} = u ->
-          User.changeset(u, attrs)
-          |> Repo.update()
-        _ -> create_user(attrs)
-      end
-    end)
-    |> hydrate_groups(groups)
-    |> add_refresh_token()
-    |> execute(extract: :hydrated)
+    with {:ok, sanitized_email} <- sanitize_email(email) do
+      attrs = token_attrs(attrs)
+              |> Map.put("email", sanitized_email)
+      groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
+               |> group_attrs()
+      start_transaction()
+      |> add_operation(:user, fn _ ->
+        case get_user_by_email(sanitized_email) do
+          %User{} = u ->
+            User.changeset(u, attrs)
+            |> Repo.update()
+          _ -> create_user(attrs)
+        end
+      end)
+      |> hydrate_groups(groups)
+      |> add_refresh_token()
+      |> execute(extract: :hydrated)
+    end
   end
 
   def bootstrap_user(%{"emails" => [email | _]} = attrs) do
@@ -189,7 +189,11 @@ defmodule Console.Services.Users do
   def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   defp sanitize_email(email) do
-    String.replace(email, "+mottmac", "")
+    case Application.get_env(:console, :org_email_suffix) do
+      "" -> {:error, "ORG_EMAIL_SUFFIX environment variable must be set"}
+      nil -> {:error, "ORG_EMAIL_SUFFIX environment variable must be set"}
+      suffix -> {:ok, String.replace(email, suffix, "")}
+    end
   end
 
   def backfill_chats() do
@@ -412,7 +416,7 @@ defmodule Console.Services.Users do
     |> Repo.update()
   end
 
-  @spec create_group_member(map, binary) :: group_member_resp
+  @spec create_group_member(map, binary | Invite.t) :: group_member_resp
   def create_group_member(%{user_id: user_id} = attrs, group_id) do
     case get_group_member(group_id, user_id) do
       nil -> %GroupMember{group_id: group_id, user_id: user_id}
