@@ -2419,9 +2419,17 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.11.3-eksbuild.3
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.3-eksbuild.2
     compatibilities:
     - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -3238,6 +3246,16 @@
   publisher: groundcover
 - name: guance_datakit
   versions:
+  - version: v1.0.6-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
   - version: v1.0.5-eksbuild.1
     compatibilities:
     - '1.30'
@@ -5030,6 +5048,7 @@
   - version: v1.18.6-eksbuild.1
     compatibilities:
     - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5140,6 +5159,7 @@
   - version: v1.17.1-eksbuild.1
     compatibilities:
     - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
