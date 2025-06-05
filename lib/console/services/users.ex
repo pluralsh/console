@@ -190,9 +190,10 @@ defmodule Console.Services.Users do
 
   defp sanitize_email(email) do
     case Application.get_env(:console, :org_email_suffix) do
-      "" -> {:error, "ORG_EMAIL_SUFFIX environment variable must be set"}
-      nil -> {:error, "ORG_EMAIL_SUFFIX environment variable must be set"}
-      suffix -> {:ok, String.replace(email, suffix, "")}
+      suffix when is_binary(suffix) and suffix != "" ->
+        {:ok, String.replace(email, suffix, "")}
+      _ ->
+        {:ok, email}  # If no suffix configured, return email unchanged
     end
   end
 
