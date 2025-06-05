@@ -177,19 +177,18 @@ func (in *ProjectReconciler) isAlreadyExists(ctx context.Context, project *v1alp
 func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project *v1alpha1.Project) (ctrl.Result, error) {
 	exists, err := in.ConsoleClient.IsProjectExists(ctx, project.ConsoleName())
 	if err != nil {
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, project.SetCondition)
 	}
 
 	if !exists {
 		project.Status.ID = nil
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
+		return waitForResources, nil
 	}
 
 	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if err != nil {
-		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID

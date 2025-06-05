@@ -296,14 +296,11 @@ func (r *NotificationRouterReconciler) handleExisting(ctx context.Context, route
 	logger := log.FromContext(ctx)
 	logger.Info("handle existing notification router", "name", *router.Spec.Name)
 	existing, err := r.ConsoleClient.GetNotificationRouterByName(ctx, *router.Spec.Name)
-	if errors.IsNotFound(err) {
-		router.Status.ID = nil
-		utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find NotificationSink in Console API")
-		return ctrl.Result{}, nil
-	}
 	if err != nil {
-		utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			router.Status.ID = nil
+		}
+		return handleRequeue(nil, err, router.SetCondition)
 	}
 	router.Status.ID = &existing.ID
 	utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")

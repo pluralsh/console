@@ -131,19 +131,17 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
 	if err != nil {
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, scm.SetCondition)
 	}
-
 	if !exists {
 		scm.Status.ID = nil
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
+		return waitForResources, nil
 	}
 
 	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, scm.SetCondition)
 	}
 
 	// Default field should also be editable even if the resource is in the read-only mode.
@@ -153,7 +151,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 			Type:    scm.Spec.Type,
 			Default: scm.Spec.Default,
 		}); err != nil {
-			return reconcile.Result{}, err
+			return handleRequeue(nil, err, scm.SetCondition)
 		}
 	}
 

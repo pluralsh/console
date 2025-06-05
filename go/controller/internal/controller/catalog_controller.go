@@ -128,19 +128,17 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {
 	exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 	if err != nil {
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, catalog.SetCondition)
 	}
-
 	if !exists {
 		catalog.Status.ID = nil
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
+		return waitForResources, nil
 	}
 
 	apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 	if err != nil {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, catalog.SetCondition)
 	}
 
 	catalog.Status.ID = &apiCatalog.ID

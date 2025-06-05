@@ -159,15 +159,13 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 	logger := log.FromContext(ctx)
 	logger.Info("handle existing notification sink", "name", *notificationSink.Spec.Name)
 	existing, err := r.ConsoleClient.GetNotificationSinkByName(ctx, *notificationSink.Spec.Name)
-	if errors.IsNotFound(err) {
-		notificationSink.Status.ID = nil
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find NotificationSink in Console API")
-		return ctrl.Result{}, nil
-	}
 	if err != nil {
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			notificationSink.Status.ID = nil
+		}
+		return handleRequeue(nil, err, notificationSink.SetCondition)
 	}
+
 	notificationSink.Spec.Type = existing.Type
 	notificationSink.Spec.Configuration = v1alpha1.SinkConfiguration{}
 	if existing.Configuration.Slack != nil {

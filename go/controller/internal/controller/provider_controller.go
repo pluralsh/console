@@ -127,14 +127,11 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.Provider) (reconcile.Result, error) {
 	apiProvider, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
-	if errors.IsNotFound(err) {
-		provider.Status.ID = nil
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Provider in Console API")
-		return ctrl.Result{}, nil
-	}
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			provider.Status.ID = nil
+		}
+		return handleRequeue(nil, err, provider.SetCondition)
 	}
 
 	provider.Status.ID = &apiProvider.ID

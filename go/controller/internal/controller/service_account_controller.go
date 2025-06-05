@@ -132,19 +132,18 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, sa.SetCondition)
 	}
 
 	if !exists {
 		sa.Status.ID = nil
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
+		return waitForResources, nil
 	}
 
 	apiServiceAccount, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
-		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, sa.SetCondition)
 	}
 
 	sa.Status.ID = &apiServiceAccount.ID
