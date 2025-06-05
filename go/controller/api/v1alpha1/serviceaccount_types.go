@@ -1,11 +1,12 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -78,7 +79,49 @@ type ServiceAccountSpec struct {
 	// +kubebuilder:example:=some@email.com
 	Email string `json:"email"`
 
+	// Scopes defines the scope of this service account.
+	// It can be used to limit the access of this service account to specific Console APIs or identifiers.
+	// +kubebuilder:validation:Optional
+	Scopes []ServiceAccountScope `json:"scopes,omitempty"`
+
 	// TokenSecretRef is a secret reference that should contain token.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
+}
+
+func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttributes) {
+	for _, scope := range in.Scopes {
+		result = append(result, scope.Attributes())
+	}
+
+	return result
+}
+
+type ServiceAccountScope struct {
+	// API is a name of the Console API that this service account should be scoped to.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:example:=updateServiceDeployment
+	API *string `json:"api,omitempty"`
+
+	// Apis is a list of Console APIs that this service account should be scoped to.
+	// +kubebuilder:validation:Optional
+	Apis []string `json:"apis,omitempty"`
+
+	// Identifier is a resource ID in the Console API that this service account should be scoped to.
+	// Leave blank or use `*` to scope to all resources in the API.
+	// +kubebuilder:validation:Optional
+	Identifier *string `json:"identifier,omitempty"`
+
+	// Ids is a list of Console API IDs that this service account should be scoped to.
+	// +kubebuilder:validation:Optional
+	Ids []string `json:"ids,omitempty"`
+}
+
+func (in *ServiceAccountScope) Attributes() *console.ScopeAttributes {
+	return &console.ScopeAttributes{
+		API:        in.API,
+		Apis:       in.Apis,
+		Identifier: in.Identifier,
+		Ids:        in.Ids,
+	}
 }

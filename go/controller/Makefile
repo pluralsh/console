@@ -83,7 +83,8 @@ e2e: ## run e2e tests
 ##@ Codegen
 
 .PHONY: codegen
-codegen: manifests generate genmock codegen-helm codegen-crd-docs ## runs all codegen-related targets
+codegen: TOOL = controller-gen mockery kustomize helmify crd-ref-docs
+codegen: --tool manifests generate genmock codegen-helm codegen-crd-docs ## runs all codegen-related targets
 
 .PHONY: manifests
 manifests: TOOL = controller-gen
@@ -98,7 +99,7 @@ generate: --tool ## generate code containing DeepCopy, DeepCopyInto, and DeepCop
 
 .PHONY: genmock
 genmock: TOOL = mockery
-genmock: ## generates mocks before running tests
+genmock: --tool ## generates mocks before running tests
 	$(MOCKERY)
 
 .PHONY: codegen-helm

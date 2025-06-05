@@ -41,6 +41,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Provider](#provider)
 - [ScmConnection](#scmconnection)
 - [ServiceAccount](#serviceaccount)
+- [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
 
@@ -1220,6 +1221,7 @@ _Appears in:_
 | `cascade` _[Cascade](#cascade)_ | Cascade deletion options for this global service |  | Optional: {} <br /> |
 | `context` _[TemplateContext](#templatecontext)_ | Context to be used for dynamic template overrides of things like helm chart, version or values files |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro of kubernetes this cluster is running |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: {} <br /> |
+| `mgmt` _boolean_ | Whether to include management clusters in the target set |  | Optional: {} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef to replicate across clusters |  | Optional: {} <br /> |
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to span a specific project only |  | Optional: {} <br /> |
@@ -1491,9 +1493,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ |  |  | Optional: {} <br /> |
-| `driver` _[LogDriver](#logdriver)_ | The type of log aggregation solution you wish to use | VICTORIA | Enum: [VICTORIA ELASTIC] <br />Optional: {} <br /> |
+| `driver` _[LogDriver](#logdriver)_ | The type of log aggregation solution you wish to use | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH] <br />Optional: {} <br /> |
 | `victoria` _[HTTPConnection](#httpconnection)_ | Configures a connection to victoria metrics |  | Optional: {} <br /> |
 | `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Configures a connection to elasticsearch |  | Optional: {} <br /> |
+| `opensearch` _[OpensearchConnection](#opensearchconnection)_ | Configures a connection to opensearch |  | Optional: {} <br /> |
 
 
 #### MCPServer
@@ -2093,6 +2096,46 @@ _Appears in:_
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header<br />to send to your ollama api in case authorization is required (eg for an instance hosted on a public network) |  | Optional: {} <br /> |
 
 
+#### OpensearchConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [LoggingSettings](#loggingsettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host ... |  | Required: {} <br /> |
+| `index` _string_ | Index to query in opensearch |  | Optional: {} <br /> |
+| `awsAccessKeyId` _string_ | AWS Access Key ID to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
+| `awsSecretAccessKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
+| `awsRegion` _string_ | AWS Region to use |  | Optional: {} <br /> |
+
+
+#### OpensearchConnectionSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [VectorStore](#vectorstore)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ |  |  |  |
+| `index` _string_ |  |  |  |
+| `awsAccessKeyId` _string_ |  |  | Optional: {} <br /> |
+| `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
+| `awsRegion` _string_ |  |  | Optional: {} <br /> |
+
+
 #### Pipeline
 
 
@@ -2345,7 +2388,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ |  |  | Required: {} <br /> |
-| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL DOMAIN BUCKET FILE FUNCTION PASSWORD ENUM CLUSTER PROJECT] <br />Required: {} <br /> |
+| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL PASSWORD ENUM CLUSTER PROJECT GROUP USER FLOW] <br />Required: {} <br /> |
 | `condition` _[Condition](#condition)_ |  |  | Optional: {} <br /> |
 | `default` _string_ |  |  | Optional: {} <br /> |
 | `documentation` _string_ |  |  | Optional: {} <br /> |
@@ -2728,7 +2771,7 @@ _Appears in:_
 
 
 
-ScmConnection ...
+ScmConnection is a container for credentials to a scm provider.  You can also reference a SCM connection created in the Plural UI via the provider + name, leaving all other fields blank.
 
 
 
@@ -2757,7 +2800,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a human-readable name of the ScmConnection. |  | Required: {} <br /> |
 | `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB BITBUCKET] <br />Required: {} <br />Type: string <br /> |
-| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Token ... |  | Optional: {} <br /> |
+| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | A secret containing this access token you will use, stored in the `token` data field. |  | Optional: {} <br /> |
 | `username` _string_ | Username ... |  | Optional: {} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
@@ -2801,6 +2844,25 @@ ServiceAccount is a type of non-human account that provides distinct identity.
 | `spec` _[ServiceAccountSpec](#serviceaccountspec)_ | Spec reflects a Console API service account spec. |  | Required: {} <br /> |
 
 
+#### ServiceAccountScope
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceAccountSpec](#serviceaccountspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `api` _string_ | API is a name of the Console API that this service account should be scoped to. |  | Optional: {} <br /> |
+| `apis` _string array_ | Apis is a list of Console APIs that this service account should be scoped to. |  | Optional: {} <br /> |
+| `identifier` _string_ | Identifier is a resource ID in the Console API that this service account should be scoped to.<br />Leave blank or use `*` to scope to all resources in the API. |  | Optional: {} <br /> |
+| `ids` _string array_ | Ids is a list of Console API IDs that this service account should be scoped to. |  | Optional: {} <br /> |
+
+
 #### ServiceAccountSpec
 
 
@@ -2815,6 +2877,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `email` _string_ | Email address to that will be bound to this service account. |  | Required: {} <br />Type: string <br /> |
+| `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes defines the scope of this service account.<br />It can be used to limit the access of this service account to specific Console APIs or identifiers. |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef is a secret reference that should contain token. |  | Optional: {} <br /> |
 
 
@@ -2839,6 +2902,42 @@ _Appears in:_
 | `state` _[ComponentState](#componentstate)_ | State specifies the component state |  | Enum: [RUNNING PENDING FAILED] <br />Optional: {} <br /> |
 | `synced` _boolean_ |  |  |  |
 | `version` _string_ |  |  | Optional: {} <br /> |
+
+
+#### ServiceContext
+
+
+
+ServiceContext is the Schema for the servicecontexts API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ServiceContext` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ServiceContextSpec](#servicecontextspec)_ |  |  |  |
+
+
+#### ServiceContextSpec
+
+
+
+ServiceContextSpec defines the desired state of ServiceContext
+
+
+
+_Appears in:_
+- [ServiceContext](#servicecontext)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | the name of this service, if not provided ServiceContext's own name from ServiceContext.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `configuration` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | A reusable configuration context, useful for plumbing data from external tools like terraform, pulumi, etc. |  |  |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this service context belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
 
 
 #### ServiceDependency
@@ -2919,6 +3018,7 @@ _Appears in:_
 | `git` _[GitRef](#gitref)_ | A reference to a git folder/ref |  | Optional: {} <br /> |
 | `ignoreHooks` _boolean_ | whether you want to completely ignore any helm hooks when actualizing this service |  | Optional: {} <br /> |
 | `ignoreCrds` _boolean_ | whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster) |  | Optional: {} <br /> |
+| `luaScript` _string_ | a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
 
 
 #### ServiceImport
@@ -3012,7 +3112,7 @@ _Appears in:_
 | `templated` _boolean_ |  |  | Optional: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `protect` _boolean_ | Whether to protect this service from deletion.  Protected services are also not drained on cluster deletion. |  | Optional: {} <br /> |
-| `contexts` _string array_ | a list of context ids to add to this service |  | Optional: {} <br /> |
+| `contexts` _string array_ | a list of context names to add to this service |  | Optional: {} <br /> |
 | `git` _[GitRef](#gitref)_ | Git settings to configure git for a service |  | Optional: {} <br /> |
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm settings to configure helm for a service |  | Optional: {} <br /> |
 | `kustomize` _[ServiceKustomize](#servicekustomize)_ | Kustomize settings for service kustomization |  | Optional: {} <br /> |
@@ -3099,6 +3199,7 @@ _Appears in:_
 | `version` _string_ | Version the semver of the tool you wish to use |  | Optional: {} <br /> |
 | `tag` _string_ | Tag is the docker image tag you wish to use<br />if you're customizing the version |  | Optional: {} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
+| `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: {} <br /> |
 
 
 #### StackCron
@@ -3314,6 +3415,23 @@ _Appears in:_
 | `raw` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | A raw yaml map to use for service template context |  | Optional: {} <br /> |
 
 
+#### TerraformConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `parallelism` _integer_ | Parallelism is the number of concurrent operations to run, equivalent to the -parallelism flag in terraform |  | Optional: {} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack, equivalent to the -refresh flag in terraform |  | Optional: {} <br /> |
+
+
 #### Tools
 
 
@@ -3344,8 +3462,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ |  | false | Optional: {} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Enum: [ELASTIC] <br />Optional: {} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Enum: [ELASTIC OPENSEARCH] <br />Optional: {} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ |  |  | Optional: {} <br /> |
+| `opensearch` _[OpensearchConnectionSettings](#opensearchconnectionsettings)_ |  |  | Optional: {} <br /> |
 
 
 #### VertexSettings
