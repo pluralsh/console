@@ -189,7 +189,12 @@ defmodule Console.Services.Users do
   def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   defp sanitize_email(email) do
-    String.replace(email, "+mottmac", "")
+    case Console.conf(:org_email_suffix) do
+      suffix when is_binary(suffix) and byte_size(suffix) > 0 ->
+        String.replace(email, suffix, "")
+      _ ->
+        email
+    end
   end
 
   def backfill_chats() do

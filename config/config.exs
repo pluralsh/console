@@ -4,7 +4,6 @@ config :console,
   ecto_repos: [Console.Repo],
   socket: :forge_socket
 
-
 config :piazza_core,
   repos: [Console.Repo]
 

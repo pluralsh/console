@@ -52,6 +52,34 @@ defmodule Console.Services.UsersTest do
   end
 
   describe "#bootstrap_user/2" do
+    setup do
+      on_exit(fn ->
+        Application.put_env(:console, :org_email_suffix, "")
+      end)
+    end
+
+    test "keeps email unchanged when no suffix is configured" do
+      Application.put_env(:console, :org_email_suffix, "")
+
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "someone@example.com",
+        "name" => "Some User"
+      })
+
+      assert user.email == "someone@example.com"
+    end
+
+    test "removes org suffix from email when ORG_EMAIL_SUFFIX is set" do
+      Application.put_env(:console, :org_email_suffix, "+testorg")
+
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "someone+testorg@example.com",
+        "name" => "Some User"
+      })
+
+      assert user.email == "someone@example.com"
+    end
+
     test "if the user doesn't exist, it will create one" do
       {:ok, user} = Users.bootstrap_user(%{
         "email" => "someone@example.com",
@@ -128,10 +156,10 @@ defmodule Console.Services.UsersTest do
     end
 
     test "If the user already exists, they will be returned" do
-      user = insert(:user)
+      user = insert(:user, email: "existing@example.com")
 
       {:ok, found} = Users.bootstrap_user(%{
-        "email" => user.email,
+        "email" => "existing@example.com",
         "name" => user.name,
         "profile" => "some.profile.com",
         "plural_id" => "abcdef-123456789-ghijkl"

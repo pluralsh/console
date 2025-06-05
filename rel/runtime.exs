@@ -221,6 +221,9 @@ if is_set("CONSOLE_ADMIN_EMAILS") do
     admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
 end
 
+config :console,
+  org_email_suffix: get_env("ORG_EMAIL_SUFFIX", "")
+
 if is_set("CONSOLE_DEPLOY_OPERATOR_URL") do
   config :console,
     deploy_url: get_env("CONSOLE_DEPLOY_OPERATOR_URL")
