@@ -39,6 +39,8 @@ affinity: {}
 
 tolerations: []
 
+initContainers: []
+
 resources:
   limits:
     cpu: 500m

@@ -41,6 +41,9 @@ spec:
       priorityClassName: {{ . }}
       {{- end }}
       serviceAccountName: {{ include "kas.serviceAccountName" . }}
+      {{ if .Values.initContainers }}
+      {{ toYaml .Values.initContainers | nindent 6 }}
+      {{ end }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
