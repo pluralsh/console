@@ -161,24 +161,24 @@ defmodule Console.Services.Users do
 
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
-    with {:ok, sanitized_email} <- sanitize_email(email) do
-      attrs = token_attrs(attrs)
-              |> Map.put("email", sanitized_email)
-      groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
-               |> group_attrs()
-      start_transaction()
-      |> add_operation(:user, fn _ ->
-        case get_user_by_email(sanitized_email) do
-          %User{} = u ->
-            User.changeset(u, attrs)
-            |> Repo.update()
-          _ -> create_user(attrs)
-        end
-      end)
-      |> hydrate_groups(groups)
-      |> add_refresh_token()
-      |> execute(extract: :hydrated)
-    end
+    email = sanitize_email(email)
+
+    attrs = token_attrs(attrs)
+            |> Map.put("email", email)
+    groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
+             |> group_attrs()
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      case get_user_by_email(email) do
+        %User{} = u ->
+          User.changeset(u, attrs)
+          |> Repo.update()
+        _ -> create_user(attrs)
+      end
+    end)
+    |> hydrate_groups(groups)
+    |> add_refresh_token()
+    |> execute(extract: :hydrated)
   end
 
   def bootstrap_user(%{"emails" => [email | _]} = attrs) do
@@ -189,11 +189,11 @@ defmodule Console.Services.Users do
   def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   defp sanitize_email(email) do
-    case Application.get_env(:console, :org_email_suffix) do
+    case Console.conf(:org_email_suffix) do
       suffix when is_binary(suffix) and suffix != "" ->
-        {:ok, String.replace(email, suffix, "")}
+        String.replace(email, suffix, "")
       _ ->
-        {:ok, email}
+        email
     end
   end
 

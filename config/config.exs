@@ -2,9 +2,7 @@ import Config
 
 config :console,
   ecto_repos: [Console.Repo],
-  socket: :forge_socket,
-  org_email_suffix: System.get_env("ORG_EMAIL_SUFFIX", "")
-
+  socket: :forge_socket
 
 config :piazza_core,
   repos: [Console.Repo]
