@@ -193,7 +193,7 @@ defmodule Console.Services.Users do
       suffix when is_binary(suffix) and suffix != "" ->
         {:ok, String.replace(email, suffix, "")}
       _ ->
-        {:ok, email}  # If no suffix configured, return email unchanged
+        {:ok, email}
     end
   end
 
@@ -417,7 +417,7 @@ defmodule Console.Services.Users do
     |> Repo.update()
   end
 
-  @spec create_group_member(map, binary | Invite.t) :: group_member_resp
+  @spec create_group_member(map, binary) :: group_member_resp
   def create_group_member(%{user_id: user_id} = attrs, group_id) do
     case get_group_member(group_id, user_id) do
       nil -> %GroupMember{group_id: group_id, user_id: user_id}
