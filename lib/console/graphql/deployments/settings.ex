@@ -2,11 +2,12 @@ defmodule Console.GraphQl.Deployments.Settings do
   use Console.GraphQl.Schema.Base
   alias Console.Deployments.Settings
   alias Console.GraphQl.Resolvers.{Deployments}
-  alias Console.Schema.DeploymentSettings
+  alias Console.Schema.{DeploymentSettings, CloudConnection}
 
   ecto_enum :ai_provider, DeploymentSettings.AIProvider
   ecto_enum :log_driver, DeploymentSettings.LogDriver
   ecto_enum :vector_store, DeploymentSettings.VectorStore
+  ecto_enum :provider, CloudConnection.Provider
 
   input_object :project_attributes do
     field :name,          non_null(:string)
@@ -164,6 +165,37 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :user,     non_null(:string)
     field :password, non_null(:string)
     field :ssl,      non_null(:boolean)
+  end
+
+  input_object :cloud_connection_attributes do
+    field :name,          non_null(:string)
+    field :provider,      non_null(:provider)
+    field :configuration, non_null(:cloud_connection_configuration_attributes)
+    field :read_bindings, list_of(:policy_binding_attributes)
+  end
+
+  input_object :cloud_connection_configuration_attributes do
+    field :aws,   :aws_cloud_connection_attributes
+    field :gcp,   :gcp_cloud_connection_attributes
+    field :azure, :azure_cloud_connection_attributes
+  end
+
+  input_object :aws_cloud_connection_attributes do
+    field :access_key_id,     non_null(:string)
+    field :secret_access_key, non_null(:string)
+    field :region,            non_null(:string)
+  end
+
+  input_object :gcp_cloud_connection_attributes do
+    field :service_account_key, non_null(:string)
+    field :project_id,          non_null(:string)
+  end
+
+  input_object :azure_cloud_connection_attributes do
+    field :subscription_id, non_null(:string)
+    field :tenant_id,       non_null(:string)
+    field :client_id,       non_null(:string)
+    field :client_secret,   non_null(:string)
   end
 
   @desc "A unit of organization to control permissions for a set of objects within your Console instance"
@@ -328,7 +360,47 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws_region,        :string
   end
 
+  @desc "A read-only connection to a cloud provider"
+  object :cloud_connection do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string), description: "the name of the cloud connection"
+    field :provider,      non_null(:provider), description: "the provider of the cloud connection"
+    field :configuration, non_null(:cloud_connection_configuration), description: "the configuration for the cloud connection"
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy across this cloud connection"
+
+    timestamps()
+  end
+
+  @desc "The configuration for a cloud provider"
+  object :cloud_connection_configuration do
+    field :aws,   :aws_connection_attributes, description: "the credentials for aws"
+    field :gcp,   :gcp_connection_attributes, description: "the credentials for gcp"
+    field :azure, :azure_connection_attributes, description: "the credentials for azure"
+  end
+
+  @desc "The configuration for a cloud provider"
+  object :aws_connection_attributes do
+    field :access_key_id,     non_null(:string), description: "the access key id for aws"
+    field :secret_access_key, non_null(:string), description: "the secret access key for aws"
+    field :region,            non_null(:string), description: "the region for aws"
+  end
+
+  @desc "The configuration for a cloud provider"
+  object :gcp_connection_attributes do
+    field :service_account_key, non_null(:string), description: "the service account key for gcp"
+    field :project_id,          non_null(:string), description: "the project id for gcp"
+  end
+
+  @desc "The configuration for a cloud provider"
+  object :azure_connection_attributes do
+    field :subscription_id, non_null(:string), description: "the subscription id for azure"
+    field :tenant_id,       non_null(:string), description: "the tenant id for azure"
+    field :client_id,       non_null(:string), description: "the client id for azure"
+    field :client_secret,   non_null(:string), description: "the client secret for azure"
+  end
+
   connection node_type: :project
+  connection node_type: :cloud_connection
 
   object :settings_queries do
     field :deployment_settings, :deployment_settings do
@@ -353,6 +425,22 @@ defmodule Console.GraphQl.Deployments.Settings do
       arg :name, :string
 
       resolve &Deployments.get_project/2
+    end
+
+    field :cloud_connection, :cloud_connection do
+      middleware Authenticated
+      middleware Scope, api: "cloudConnection"
+      arg :id,   :id
+      arg :name, :string
+
+      resolve &Deployments.get_cloud_connection/2
+    end
+
+    connection field :cloud_connections, node_type: :cloud_connection do
+      middleware Authenticated
+      middleware Scope, api: "cloudConnections"
+
+      resolve &Deployments.list_cloud_connections/2
     end
   end
 
@@ -390,6 +478,22 @@ defmodule Console.GraphQl.Deployments.Settings do
       arg :id,         non_null(:id)
 
       resolve &Deployments.delete_project/2
+    end
+
+    field :upsert_cloud_connection, :cloud_connection do
+      middleware Authenticated
+      middleware Scope, api: "upsertCloudConnection"
+      arg :attributes, non_null(:cloud_connection_attributes)
+
+      resolve &Deployments.upsert_cloud_connection/2
+    end
+
+    field :delete_cloud_connection, :cloud_connection do
+      middleware Authenticated
+      middleware Scope, api: "deleteCloudConnection"
+      arg :id,   non_null(:id)
+
+      resolve &Deployments.delete_cloud_connection/2
     end
 
     field :dismiss_onboarding, :deployment_settings do

@@ -66,4 +66,82 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
       assert refetch(settings).onboarded
     end
   end
+
+  describe "upsertCloudConnections" do
+    test "admins can upsert a cloud connection" do
+      group = insert(:group)
+
+      {:ok, %{data: %{"upsertCloudConnection" => upserted}}} = run_query("""
+        mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {
+          upsertCloudConnection(attributes: $attrs) {
+            id
+            name
+            provider
+            readBindings { group { name } }
+            configuration { aws { accessKeyId } }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "test",
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+          "readBindings" => [%{"groupId" => group.id}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert upserted["id"]
+      assert upserted["name"] == "test"
+      assert upserted["provider"] == "AWS"
+      assert upserted["configuration"]["aws"]["accessKeyId"] == "test"
+
+      [binding] = upserted["readBindings"]
+      assert binding["group"]["name"] == group.name
+    end
+
+    test "nonadmins cannot upsert a cloud connection" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {
+          upsertCloudConnection(attributes: $attrs) {
+            id
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "test",
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+        }
+      }, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "deleteCloudConnection" do
+    test "admins can delete a cloud connection" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{data: %{"deleteCloudConnection" => deleted}}} = run_query("""
+        mutation deleteCloudConnection($id: ID!) {
+          deleteCloudConnection(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => conn.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == conn.id
+      refute refetch(conn)
+    end
+
+    test "nonadmins cannot delete a cloud connection" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation deleteCloudConnection($id: ID!) {
+          deleteCloudConnection(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => conn.id}, %{current_user: insert(:user)})
+    end
+  end
 end
