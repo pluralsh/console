@@ -131,19 +131,18 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceContextExists(sc.GetName())
 	if err != nil {
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, sc.SetCondition)
 	}
 
 	if !exists {
 		sc.Status.ID = nil
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return ctrl.Result{}, nil
+		return waitForResources, nil
 	}
 
 	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())
 	if err != nil {
-		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, sc.SetCondition)
 	}
 
 	sc.Status.ID = &apiServiceContext.ID
