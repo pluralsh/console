@@ -11,7 +11,6 @@ import type {
   ElkPort,
   LayoutOptions,
 } from 'elkjs'
-import { produce } from 'immer'
 import { useEffect } from 'react'
 
 import ELK from 'elkjs/lib/elk.bundled.js'
@@ -56,19 +55,21 @@ async function getLayoutedElements(
   for (const node of elkGraph.children ?? []) nodeIdToElkNode.set(node.id, node)
   for (const edge of elkGraph.edges ?? []) edgeIdToElkEdge.set(edge.id, edge)
 
-  const layoutedNodes = produce(nodes, (draftNodes) => {
-    for (const node of draftNodes) {
-      const elkNode = nodeIdToElkNode.get(node.id)
-      node.position = { x: elkNode?.x ?? 0, y: elkNode?.y ?? 0 }
-    }
+  const layoutedNodes = nodes.map((node) => {
+    const elkNode = nodeIdToElkNode.get(node.id)
+    return { ...node, position: { x: elkNode?.x ?? 0, y: elkNode?.y ?? 0 } }
   })
-  const layoutedEdges = produce(edges, (draftEdges) => {
-    for (const edge of draftEdges)
-      edge.data = {
+
+  const layoutedEdges = edges.map((edge) => {
+    const elkEdge = edgeIdToElkEdge.get(edge.id)
+    return {
+      ...edge,
+      data: {
         ...edge.data,
-        elkPathData: edgeIdToElkEdge.get(edge.id)?.sections,
-        elkLabels: edgeIdToElkEdge.get(edge.id)?.labels,
-      }
+        elkPathData: elkEdge?.sections,
+        elkLabels: elkEdge?.labels,
+      },
+    }
   })
 
   return { nodes: layoutedNodes, edges: layoutedEdges }
