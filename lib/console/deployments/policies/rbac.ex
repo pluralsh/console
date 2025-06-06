@@ -38,7 +38,8 @@ defmodule Console.Deployments.Policies.Rbac do
     OIDCProvider,
     PreviewEnvironmentTemplate,
     ComplianceReportGenerator,
-    ServiceContext
+    ServiceContext,
+    CloudConnection
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -142,6 +143,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(catalog, user, action, & &1.project)
   def evaluate(%User{} = sa, %User{} = user, :assume), do: recurse(sa, user, :assume)
   def evaluate(%SharedSecret{} = share, %User{} = user, :consume), do: recurse(share, user, :notify)
+  def evaluate(%CloudConnection{} = conn, %User{} = user, action),
+    do: recurse(conn, user, action, fn _ -> Settings.fetch() end)
   def evaluate(l, user, action) when is_list(l), do: Enum.any?(l, &evaluate(&1, user, action))
   def evaluate(_, _, _), do: false
 
@@ -209,6 +212,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(gen, [:read_bindings])
   def preload(%ServiceContext{} = ctx),
     do: Repo.preload(ctx, [project: @bindings])
+  def preload(%CloudConnection{} = conn),
+    do: Repo.preload(conn, [:read_bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

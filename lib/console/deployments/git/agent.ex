@@ -268,7 +268,7 @@ defmodule Console.Deployments.Git.Agent do
 
   defp should_pull?(%State{last_pull: nil}), do: true
   defp should_pull?(%State{last_pull: last_pull}) do
-    Timex.shift(Timex.now(), seconds: -60)
+    Timex.shift(Timex.now(), seconds: -5)
     |> Timex.after?(last_pull)
   end
 

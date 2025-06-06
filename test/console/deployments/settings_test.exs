@@ -146,4 +146,83 @@ defmodule Console.Deployments.SettingsTest do
       {:error, _} = Settings.delete_project(proj.id, insert(:user))
     end
   end
+
+  describe "#upsert_cloud_connection/2" do
+    test "admins can create a cloud connection" do
+      {:ok, updated} = Settings.upsert_cloud_connection(%{
+        provider: :aws,
+        name: "test",
+        configuration: %{
+          aws: %{
+            access_key_id: "access-key-id",
+            secret_access_key: "secret-access-key",
+            region: "us-east-1"
+          }
+        }
+      }, admin_user())
+
+      assert updated.name == "test"
+      assert updated.provider == :aws
+      assert updated.configuration.aws.access_key_id == "access-key-id"
+      assert updated.configuration.aws.secret_access_key == "secret-access-key"
+      assert updated.configuration.aws.region == "us-east-1"
+    end
+
+    test "admins can update a cloud connection" do
+      conn = insert(:cloud_connection)
+
+      {:ok, updated} = Settings.upsert_cloud_connection(%{
+        name: conn.name,
+        configuration: %{
+          aws: %{
+            access_key_id: "access-key-id",
+            secret_access_key: "new-secret-access-key",
+            region: "us-east-1"
+          }
+        }
+      }, admin_user())
+
+      assert updated.id == conn.id
+      assert updated.name == conn.name
+      assert updated.provider == :aws
+      assert updated.configuration.aws.access_key_id == "access-key-id"
+      assert updated.configuration.aws.secret_access_key == "new-secret-access-key"
+      assert updated.configuration.aws.region == "us-east-1"
+    end
+
+    test "nonadmins cannot upsert cloud connections" do
+      conn = insert(:cloud_connection)
+
+      {:error, _} = Settings.upsert_cloud_connection(%{
+        id: conn.id,
+        name: "test",
+        configuration: %{
+          aws: %{
+            access_key_id: "access-key-id",
+            secret_access_key: "new-secret-access-key",
+            region: "us-east-1"
+          }
+        }
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_cloud_connection/2" do
+    test "admins can delete a cloud connection" do
+      conn = insert(:cloud_connection)
+
+      {:ok, deleted} = Settings.delete_cloud_connection(conn.id, admin_user())
+
+      assert deleted.id == conn.id
+      assert deleted.name == conn.name
+
+      refute refetch(deleted)
+    end
+
+    test "nonadmins cannot delete cloud connections" do
+      conn = insert(:cloud_connection)
+
+      {:error, _} = Settings.delete_cloud_connection(conn.id, insert(:user))
+    end
+  end
 end

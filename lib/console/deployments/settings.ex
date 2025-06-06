@@ -6,7 +6,7 @@ defmodule Console.Deployments.Settings do
   alias Console.Commands.Plural
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken}
+  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection}
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
@@ -16,6 +16,7 @@ defmodule Console.Deployments.Settings do
 
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
   @type project_resp :: {:ok, Project.t} | Console.error
+  @type cloud_connection_resp :: {:ok, CloudConnection.t} | Console.error
 
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
@@ -27,6 +28,15 @@ defmodule Console.Deployments.Settings do
 
   @spec get_project_by_name(binary) :: Project.t | nil
   def get_project_by_name(name), do: Repo.get_by(Project, name: name)
+
+  @spec get_cloud_connection!(binary) :: CloudConnection.t
+  def get_cloud_connection!(id), do: Repo.get!(CloudConnection, id)
+
+  @spec get_cloud_connection_by_name(binary) :: CloudConnection.t | nil
+  def get_cloud_connection_by_name(name), do: Repo.get_by(CloudConnection, name: name)
+
+  @spec get_cloud_connection_by_name!(binary) :: CloudConnection.t
+  def get_cloud_connection_by_name!(name), do: Repo.get_by!(CloudConnection, name: name)
 
   @doc """
   same as `fetch/0` but caches in the process dict
@@ -250,6 +260,30 @@ defmodule Console.Deployments.Settings do
     end)
     |> execute(extract: :update)
     |> notify(:update, user)
+  end
+
+  @doc """
+  Will upsert a cloud connection, fails if a user isn't an admin
+  """
+  @spec upsert_cloud_connection(map, User.t) :: cloud_connection_resp
+  def upsert_cloud_connection(%{name: name} = attrs, %User{} = user) do
+    case get_cloud_connection_by_name(name) do
+      %CloudConnection{} = conn -> conn
+      nil -> %CloudConnection{}
+    end
+    |> CloudConnection.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes a cloud connection, fails if a user isn't an admin
+  """
+  @spec delete_cloud_connection(binary, User.t) :: cloud_connection_resp
+  def delete_cloud_connection(id, %User{} = user) do
+    get_cloud_connection!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)

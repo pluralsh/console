@@ -598,10 +598,27 @@ export type AwsCloudAttributes = {
   region?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AwsCloudConnectionAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  region: Scalars['String']['input'];
+  secretAccessKey: Scalars['String']['input'];
+};
+
 /** aws specific cloud configuration */
 export type AwsCloudSettings = {
   __typename?: 'AwsCloudSettings';
   region?: Maybe<Scalars['String']['output']>;
+};
+
+/** The configuration for a cloud provider */
+export type AwsConnectionAttributes = {
+  __typename?: 'AwsConnectionAttributes';
+  /** the access key id for aws */
+  accessKeyId: Scalars['String']['output'];
+  /** the region for aws */
+  region: Scalars['String']['output'];
+  /** the secret access key for aws */
+  secretAccessKey: Scalars['String']['output'];
 };
 
 export type AwsNodeCloudAttributes = {
@@ -620,6 +637,13 @@ export type AzureCloudAttributes = {
   subscriptionId?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AzureCloudConnectionAttributes = {
+  clientId: Scalars['String']['input'];
+  clientSecret: Scalars['String']['input'];
+  subscriptionId: Scalars['String']['input'];
+  tenantId: Scalars['String']['input'];
+};
+
 /** azure-specific cluster cloud configuration */
 export type AzureCloudSettings = {
   __typename?: 'AzureCloudSettings';
@@ -627,6 +651,19 @@ export type AzureCloudSettings = {
   network?: Maybe<Scalars['String']['output']>;
   resourceGroup?: Maybe<Scalars['String']['output']>;
   subscriptionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** The configuration for a cloud provider */
+export type AzureConnectionAttributes = {
+  __typename?: 'AzureConnectionAttributes';
+  /** the client id for azure */
+  clientId: Scalars['String']['output'];
+  /** the client secret for azure */
+  clientSecret: Scalars['String']['output'];
+  /** the subscription id for azure */
+  subscriptionId: Scalars['String']['output'];
+  /** the tenant id for azure */
+  tenantId: Scalars['String']['output'];
 };
 
 export type AzureOpenaiAttributes = {
@@ -1051,6 +1088,58 @@ export type CloudAddonVersionInformation = {
 
 export type CloudAddonVersionInformationBlockingArgs = {
   kubeVersion: Scalars['String']['input'];
+};
+
+/** A read-only connection to a cloud provider */
+export type CloudConnection = {
+  __typename?: 'CloudConnection';
+  /** the configuration for the cloud connection */
+  configuration: CloudConnectionConfiguration;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the cloud connection */
+  name: Scalars['String']['output'];
+  /** the provider of the cloud connection */
+  provider: Provider;
+  /** read policy across this cloud connection */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type CloudConnectionAttributes = {
+  configuration: CloudConnectionConfigurationAttributes;
+  name: Scalars['String']['input'];
+  provider: Provider;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+/** The configuration for a cloud provider */
+export type CloudConnectionConfiguration = {
+  __typename?: 'CloudConnectionConfiguration';
+  /** the credentials for aws */
+  aws?: Maybe<AwsConnectionAttributes>;
+  /** the credentials for azure */
+  azure?: Maybe<AzureConnectionAttributes>;
+  /** the credentials for gcp */
+  gcp?: Maybe<GcpConnectionAttributes>;
+};
+
+export type CloudConnectionConfigurationAttributes = {
+  aws?: InputMaybe<AwsCloudConnectionAttributes>;
+  azure?: InputMaybe<AzureCloudConnectionAttributes>;
+  gcp?: InputMaybe<GcpCloudConnectionAttributes>;
+};
+
+export type CloudConnectionConnection = {
+  __typename?: 'CloudConnectionConnection';
+  edges?: Maybe<Array<Maybe<CloudConnectionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type CloudConnectionEdge = {
+  __typename?: 'CloudConnectionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<CloudConnection>;
 };
 
 export type CloudProviderSettingsAttributes = {
@@ -2924,12 +3013,26 @@ export type GcpCloudAttributes = {
   region?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GcpCloudConnectionAttributes = {
+  projectId: Scalars['String']['input'];
+  serviceAccountKey: Scalars['String']['input'];
+};
+
 /** gcp specific cluster cloud configuration */
 export type GcpCloudSettings = {
   __typename?: 'GcpCloudSettings';
   network?: Maybe<Scalars['String']['output']>;
   project?: Maybe<Scalars['String']['output']>;
   region?: Maybe<Scalars['String']['output']>;
+};
+
+/** The configuration for a cloud provider */
+export type GcpConnectionAttributes = {
+  __typename?: 'GcpConnectionAttributes';
+  /** the project id for gcp */
+  projectId: Scalars['String']['output'];
+  /** the service account key for gcp */
+  serviceAccountKey: Scalars['String']['output'];
 };
 
 export type GcpSettingsAttributes = {
@@ -5930,6 +6033,12 @@ export type PromotionService = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export enum Provider {
+  Aws = 'AWS',
+  Azure = 'AZURE',
+  Gcp = 'GCP'
+}
+
 /** a cloud credential that can be used while creating new clusters */
 export type ProviderCredential = {
   __typename?: 'ProviderCredential';
@@ -6299,6 +6408,7 @@ export type RootMutationType = {
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
   deleteChat?: Maybe<Chat>;
+  deleteCloudConnection?: Maybe<CloudConnection>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterIsoImage?: Maybe<ClusterIsoImage>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
@@ -6441,6 +6551,7 @@ export type RootMutationType = {
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   upsertCatalog?: Maybe<Catalog>;
+  upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
@@ -6783,6 +6894,11 @@ export type RootMutationTypeDeleteCatalogArgs = {
 
 
 export type RootMutationTypeDeleteChatArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteCloudConnectionArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7441,6 +7557,11 @@ export type RootMutationTypeUpsertCatalogArgs = {
 };
 
 
+export type RootMutationTypeUpsertCloudConnectionArgs = {
+  attributes: CloudConnectionAttributes;
+};
+
+
 export type RootMutationTypeUpsertComplianceReportGeneratorArgs = {
   attributes: ComplianceReportGeneratorAttributes;
 };
@@ -7538,6 +7659,8 @@ export type RootQueryType = {
   chatThreads?: Maybe<ChatThreadConnection>;
   /** gets the chat history from prior AI chat sessions */
   chats?: Maybe<ChatConnection>;
+  cloudConnection?: Maybe<CloudConnection>;
+  cloudConnections?: Maybe<CloudConnectionConnection>;
   /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
@@ -7829,6 +7952,20 @@ export type RootQueryTypeChatsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeCloudConnectionArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeCloudConnectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
