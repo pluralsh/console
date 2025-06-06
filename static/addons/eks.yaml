@@ -3314,6 +3314,7 @@
     - '1.32'
   - version: v1.31.7-eksbuild.7
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
   - version: v1.31.3-eksbuild.2
@@ -3338,6 +3339,7 @@
     - '1.31'
   - version: v1.30.11-eksbuild.5
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
