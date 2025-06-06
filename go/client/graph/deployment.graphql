@@ -150,6 +150,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
     helm {
         release
         valuesFiles
+        values
         ignoreHooks
         ignoreCrds
         luaScript

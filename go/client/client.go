@@ -5527,6 +5527,7 @@ func (t *ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
 type ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
@@ -5543,6 +5544,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.ValuesFiles
+}
+func (t *ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
 }
 func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
@@ -6414,6 +6421,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
@@ -6430,6 +6438,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.ValuesFiles
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
@@ -11565,6 +11579,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
@@ -11581,6 +11596,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.ValuesFiles
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
@@ -11986,6 +12007,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
@@ -12002,6 +12024,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.ValuesFiles
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
@@ -23733,6 +23761,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	helm {
 		release
 		valuesFiles
+		values
 		ignoreHooks
 		ignoreCrds
 		luaScript
@@ -24180,6 +24209,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	helm {
 		release
 		valuesFiles
+		values
 		ignoreHooks
 		ignoreCrds
 		luaScript
