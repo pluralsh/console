@@ -992,6 +992,21 @@ defmodule Console.Factory do
     }
   end
 
+  def cloud_connection_factory do
+    %Schema.CloudConnection{
+      name: sequence(:cloud_connection, & "cloud-connection-#{&1}"),
+      read_policy_id: Ecto.UUID.generate(),
+      provider: :aws,
+      configuration: %{
+        aws: %{
+          access_key_id: "access-key-id",
+          secret_access_key: "secret-access-key",
+          region: "us-east-1"
+        }
+      }
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

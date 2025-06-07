@@ -1256,6 +1256,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster"
     field :cluster, :cluster do
       middleware Authenticated, :cluster
+      middleware Scope, api: "cluster"
       arg :id, :id
       arg :handle, :string
 
@@ -1342,6 +1343,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :create_cluster, :cluster do
       middleware Authenticated
       middleware Feature, :cd
+      middleware Scope, api: "createCluster"
       arg :attributes, non_null(:cluster_attributes)
 
       safe_resolve &Deployments.create_cluster/2
@@ -1350,6 +1352,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :update_cluster, :cluster do
       middleware Authenticated
       middleware Feature, :cd
+      middleware Scope, api: "updateCluster"
       arg :id, non_null(:id)
       arg :attributes, non_null(:cluster_update_attributes)
 
@@ -1358,6 +1361,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :delete_cluster, :cluster do
       middleware Authenticated
+      middleware Scope, api: "deleteCluster"
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_cluster/2
@@ -1366,6 +1370,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects"
     field :detach_cluster, :cluster do
       middleware Authenticated
+      middleware Scope, api: "deleteCluster"
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_cluster/2

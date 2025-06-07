@@ -9,8 +9,15 @@ global:
 
 cloud: 
   enabled: false
+  o11y:
+    enabled: false
   # If set to a truthy value, mounts a volume for the certs
   pgRootCert: ~
+  elasticNamespace: elastic
+  instanceName: ~
+  vmPassword: ~
+  esPassword: ~
+  vmTenant: ~
 
 # disableAdditionalVolumes is the flag for global.additionalVolumes
 disableAdditionalVolumes: false
@@ -364,6 +371,9 @@ kas:
 
   # tolerations for kas deployment. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
   tolerations: []
+
+  # a list of init containers to apply to the kas deployments pod template 
+  initContainers: []
 
   # resources is used to set the resource requests and limits for the kas container
   resources:

@@ -127,7 +127,7 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.logging.elastic.host == "http://test.es.com"
       assert res.settings.logging.elastic.user == "plrl-test"
       assert res.settings.logging.elastic.password == "test"
-      assert res.settings.logging.elastic.index == "plrl-logs-test-*"
+      assert res.settings.logging.elastic.index == "plrl-test-logs-*"
 
       assert res.settings.ai.enabled
       assert res.settings.ai.provider == :openai

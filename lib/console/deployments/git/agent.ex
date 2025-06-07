@@ -87,7 +87,7 @@ defmodule Console.Deployments.Git.Agent do
 
   def addons(pid), do: GenServer.call(pid, :addons, @timeout)
 
-  def kick(pid), do: send(pid, :pull)
+  def kick(pid), do: GenServer.call(pid, :pull, @timeout)
 
   def opener(pid, f), do: fn -> GenServer.call(pid, {:open, f}, @timeout) end
 
@@ -178,6 +178,11 @@ defmodule Console.Deployments.Git.Agent do
   def handle_call(:tags, _, %State{cache: cache} = state),
     do: {:reply, Cache.tags(cache), state}
 
+  def handle_call(:pull, _, %State{} = state) do
+    {_, state} = handle_info(:pull, state)
+    {:reply, :ok, state}
+  end
+
   def handle_info(:clone, %State{git: git, cache: cache} = state) do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          resp <- clone(git),
@@ -263,7 +268,7 @@ defmodule Console.Deployments.Git.Agent do
 
   defp should_pull?(%State{last_pull: nil}), do: true
   defp should_pull?(%State{last_pull: last_pull}) do
-    Timex.shift(Timex.now(), seconds: -60)
+    Timex.shift(Timex.now(), seconds: -5)
     |> Timex.after?(last_pull)
   end
 

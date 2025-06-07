@@ -67,3 +67,18 @@ jobs:
           version: v1.64.5
           working-directory: go/controller
           args: --timeout=30m
+  check-docs:
+    name: verify controller docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.7
+      - name: Check docs
+        run: make codegen-crd-docs
+        working-directory: go/controller
+      - name: verify controller docs
+        working-directory: go/controller
+        run: |
+          git diff --exit-code -- docs/api.md || {
+            echo "::error docs were not generated. Please run 'make codegen-crd-docs' and commit the changes."
+            exit 1
+          }

@@ -232,6 +232,26 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
         "name" => service.name,
       }, %{current_user: %{user | scopes: [build(:scope, api: "updateServiceDeployment", identifier: insert(:service).id)]}})
 
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
+      }, %{current_user: %{user | scopes: [build(:scope, api: "cluster")]}})
+
       {:ok, %{data: %{"updateServiceDeployment" => updated}}} = run_query("""
         mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
           updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {

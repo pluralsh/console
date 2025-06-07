@@ -65,4 +65,78 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
              |> ids_equal([proj1, proj2])
     end
   end
+
+  describe "cloudConnection" do
+    test "it can fetch a cloud connection by id" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{data: %{"cloudConnection" => found}}} = run_query("""
+        query CloudConn($id: ID!) {
+          cloudConnection(id: $id) { id name }
+        }
+      """, %{"id" => conn.id}, %{current_user: admin_user()})
+
+      assert found["id"] == conn.id
+    end
+
+    test "it can respect rbac when fetching a cloud connection by id" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      conn = insert(:cloud_connection, read_bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"cloudConnection" => found}}} = run_query("""
+        query CloudConn($id: ID!) {
+          cloudConnection(id: $id) { id name }
+        }
+      """, %{"id" => conn.id}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      assert found["id"] == conn.id
+    end
+
+    test "non-readers cannot access" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query CloudConn($id: ID!) {
+          cloudConnection(id: $id) { id name }
+        }
+      """, %{"id" => conn.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "cloudConnections" do
+    test "it can list cloud connections" do
+      conns = insert_list(3, :cloud_connection)
+
+      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
+        query {
+          cloudConnections(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(conns)
+    end
+
+    test "it can respect rbac" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      conn1 = insert(:cloud_connection, read_bindings: [%{user_id: user.id}])
+      conn2 = insert(:cloud_connection, read_bindings: [%{group_id: group.id}])
+      insert(:cloud_connection)
+
+      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
+        query {
+          cloudConnections(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      assert from_connection(found)
+             |> ids_equal([conn1, conn2])
+    end
+  end
 end
