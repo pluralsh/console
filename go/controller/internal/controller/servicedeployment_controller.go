@@ -497,9 +497,9 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 }
 
 func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		log.Info("try to delete service")
+		logger.V(9).Info("trying to delete service", "service", service.ConsoleName())
 		cluster := &v1alpha1.Cluster{}
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 			if !apierrors.IsNotFound(err) {
@@ -508,7 +508,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 			}
 		}
 		if !cluster.Status.HasID() {
-			err := r.deleteService(service)
+			err := r.deleteService(service.Status.GetID(), service.Spec.Detach)
 			if errors.IsNotFound(err) || err == nil {
 				controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 				return ctrl.Result{}, nil
@@ -517,18 +517,23 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 			return ctrl.Result{}, err
 		}
 
-		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
-		if err != nil && !errors.IsNotFound(err) {
+		existingService, err := r.ConsoleClient.GetService(cluster.Status.GetID(), service.ConsoleName())
+		if errors.IsNotFound(err) {
+			logger.V(9).Info("service not found, removing finalizer", "service", service.ConsoleName())
+			controllerutil.RemoveFinalizer(service, ServiceFinalizer)
+			return ctrl.Result{}, nil
+		}
+		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
 		if existingService != nil && existingService.DeletedAt != nil {
-			log.Info("waiting for the console")
+			logger.V(9).Info("waiting for the console", "service", service.ConsoleName())
 			updateStatus(service, existingService, "")
 			return requeue, nil
 		}
 		if existingService != nil {
-			if err := r.deleteService(service); err != nil {
+			if err = r.deleteService(existingService.ID, service.Spec.Detach); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
@@ -539,14 +544,12 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 	return ctrl.Result{}, nil
 }
 
-func (r *ServiceReconciler) deleteService(service *v1alpha1.ServiceDeployment) error {
-	if service.Status.ID != nil {
-		if service.Spec.Detach {
-			return r.ConsoleClient.DetachService(*service.Status.ID)
-		}
-		return r.ConsoleClient.DeleteService(*service.Status.ID)
+func (r *ServiceReconciler) deleteService(id string, detach bool) error {
+	if detach {
+		return r.ConsoleClient.DetachService(id)
 	}
-	return nil
+	return r.ConsoleClient.DeleteService(id)
+
 }
 
 // ensureService makes sure that user-friendly input such as userEmail/groupName in
