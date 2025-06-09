@@ -442,9 +442,25 @@ type AWSCloudAttributes struct {
 	Region *string `json:"region,omitempty"`
 }
 
+type AWSCloudConnectionAttributes struct {
+	AccessKeyID     string `json:"accessKeyId"`
+	SecretAccessKey string `json:"secretAccessKey"`
+	Region          string `json:"region"`
+}
+
 // aws specific cloud configuration
 type AWSCloudSettings struct {
 	Region *string `json:"region,omitempty"`
+}
+
+// The configuration for a cloud provider
+type AWSConnectionAttributes struct {
+	// the access key id for aws
+	AccessKeyID string `json:"accessKeyId"`
+	// the secret access key for aws
+	SecretAccessKey string `json:"secretAccessKey"`
+	// the region for aws
+	Region string `json:"region"`
 }
 
 type AWSNodeCloudAttributes struct {
@@ -463,12 +479,31 @@ type AzureCloudAttributes struct {
 	Network        *string `json:"network,omitempty"`
 }
 
+type AzureCloudConnectionAttributes struct {
+	SubscriptionID string `json:"subscriptionId"`
+	TenantID       string `json:"tenantId"`
+	ClientID       string `json:"clientId"`
+	ClientSecret   string `json:"clientSecret"`
+}
+
 // azure-specific cluster cloud configuration
 type AzureCloudSettings struct {
 	Location       *string `json:"location,omitempty"`
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
 	ResourceGroup  *string `json:"resourceGroup,omitempty"`
 	Network        *string `json:"network,omitempty"`
+}
+
+// The configuration for a cloud provider
+type AzureConnectionAttributes struct {
+	// the subscription id for azure
+	SubscriptionID string `json:"subscriptionId"`
+	// the tenant id for azure
+	TenantID string `json:"tenantId"`
+	// the client id for azure
+	ClientID string `json:"clientId"`
+	// the client secret for azure
+	ClientSecret string `json:"clientSecret"`
 }
 
 type AzureOpenaiAttributes struct {
@@ -844,6 +879,54 @@ type CloudAddonVersionInformation struct {
 	Compatibilities []*string `json:"compatibilities,omitempty"`
 	// checks if this is blocking a specific kubernetes upgrade
 	Blocking *bool `json:"blocking,omitempty"`
+}
+
+// A read-only connection to a cloud provider
+type CloudConnection struct {
+	ID string `json:"id"`
+	// the name of the cloud connection
+	Name string `json:"name"`
+	// the provider of the cloud connection
+	Provider Provider `json:"provider"`
+	// the configuration for the cloud connection
+	Configuration CloudConnectionConfiguration `json:"configuration"`
+	// read policy across this cloud connection
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	InsertedAt   *string          `json:"insertedAt,omitempty"`
+	UpdatedAt    *string          `json:"updatedAt,omitempty"`
+}
+
+type CloudConnectionAttributes struct {
+	Name          string                                 `json:"name"`
+	Provider      Provider                               `json:"provider"`
+	Configuration CloudConnectionConfigurationAttributes `json:"configuration"`
+	ReadBindings  []*PolicyBindingAttributes             `json:"readBindings,omitempty"`
+}
+
+// The configuration for a cloud provider
+type CloudConnectionConfiguration struct {
+	// the credentials for aws
+	AWS *AWSConnectionAttributes `json:"aws,omitempty"`
+	// the credentials for gcp
+	GCP *GCPConnectionAttributes `json:"gcp,omitempty"`
+	// the credentials for azure
+	Azure *AzureConnectionAttributes `json:"azure,omitempty"`
+}
+
+type CloudConnectionConfigurationAttributes struct {
+	AWS   *AWSCloudConnectionAttributes   `json:"aws,omitempty"`
+	GCP   *GCPCloudConnectionAttributes   `json:"gcp,omitempty"`
+	Azure *AzureCloudConnectionAttributes `json:"azure,omitempty"`
+}
+
+type CloudConnectionConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*CloudConnectionEdge `json:"edges,omitempty"`
+}
+
+type CloudConnectionEdge struct {
+	Node   *CloudConnection `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
 }
 
 type CloudProviderSettingsAttributes struct {
@@ -2350,11 +2433,24 @@ type GCPCloudAttributes struct {
 	Region  *string `json:"region,omitempty"`
 }
 
+type GCPCloudConnectionAttributes struct {
+	ServiceAccountKey string `json:"serviceAccountKey"`
+	ProjectID         string `json:"projectId"`
+}
+
 // gcp specific cluster cloud configuration
 type GCPCloudSettings struct {
 	Project *string `json:"project,omitempty"`
 	Network *string `json:"network,omitempty"`
 	Region  *string `json:"region,omitempty"`
+}
+
+// The configuration for a cloud provider
+type GCPConnectionAttributes struct {
+	// the service account key for gcp
+	ServiceAccountKey string `json:"serviceAccountKey"`
+	// the project id for gcp
+	ProjectID string `json:"projectId"`
 }
 
 type GCPSettingsAttributes struct {
@@ -8831,6 +8927,49 @@ func (e *PrStatus) UnmarshalGQL(v any) error {
 }
 
 func (e PrStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Provider string
+
+const (
+	ProviderAWS   Provider = "AWS"
+	ProviderGCP   Provider = "GCP"
+	ProviderAzure Provider = "AZURE"
+)
+
+var AllProvider = []Provider{
+	ProviderAWS,
+	ProviderGCP,
+	ProviderAzure,
+}
+
+func (e Provider) IsValid() bool {
+	switch e {
+	case ProviderAWS, ProviderGCP, ProviderAzure:
+		return true
+	}
+	return false
+}
+
+func (e Provider) String() string {
+	return string(e)
+}
+
+func (e *Provider) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Provider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Provider", str)
+	}
+	return nil
+}
+
+func (e Provider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

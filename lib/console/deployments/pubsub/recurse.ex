@@ -104,6 +104,12 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
   alias Console.Deployments.{Stacks, Git.Discovery}
   alias Console.Deployments.Notifications.Utils
 
+  def process(%{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
+    with %PullRequest{stack: %Stack{} = stack} <- Console.Repo.preload(pr, [stack: :repository]),
+         _ <- Discovery.kick(stack.repository),
+      do: Stacks.poll(stack)
+  end
+
   def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
     Utils.deduplicate({:stack_pr, pr.id}, fn ->
       with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
@@ -111,6 +117,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
       do: Stacks.poll(pr)
     end, ttl: :timer.minutes(2))
   end
+
   def process(_), do: :ok
 end
 

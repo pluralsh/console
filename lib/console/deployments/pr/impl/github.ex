@@ -30,7 +30,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       Tentacat.Organizations.Hooks.create(client, owner, %{
         "name" => "web",
         "active" => true,
-        "events" => ["pull_request"],
+        "events" => ["*"],
         "config" => %{
           "url" => ScmWebhook.url(hook),
           "content_type" => "json",

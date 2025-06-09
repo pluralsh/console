@@ -403,6 +403,10 @@ type RootQueryType {
 
   project(id: ID, name: String): Project
 
+  cloudConnection(id: ID, name: String): CloudConnection
+
+  cloudConnections(after: String, first: Int, before: String, last: Int): CloudConnectionConnection
+
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
   flow(id: ID!): Flow
@@ -918,6 +922,10 @@ type RootMutationType {
 
   deleteProject(id: ID!): Project
 
+  upsertCloudConnection(attributes: CloudConnectionAttributes!): CloudConnection
+
+  deleteCloudConnection(id: ID!): CloudConnection
+
   dismissOnboarding: DeploymentSettings
 
   createOidcProvider(type: OidcProviderType!, attributes: OidcProviderAttributes!): OidcProvider
@@ -1379,6 +1387,12 @@ enum VectorStore {
   OPENSEARCH
 }
 
+enum Provider {
+  AWS
+  GCP
+  AZURE
+}
+
 input ProjectAttributes {
   name: String!
   description: String
@@ -1626,6 +1640,37 @@ input SmtpSettingsAttributes {
   user: String!
   password: String!
   ssl: Boolean!
+}
+
+input CloudConnectionAttributes {
+  name: String!
+  provider: Provider!
+  configuration: CloudConnectionConfigurationAttributes!
+  readBindings: [PolicyBindingAttributes]
+}
+
+input CloudConnectionConfigurationAttributes {
+  aws: AwsCloudConnectionAttributes
+  gcp: GcpCloudConnectionAttributes
+  azure: AzureCloudConnectionAttributes
+}
+
+input AwsCloudConnectionAttributes {
+  accessKeyId: String!
+  secretAccessKey: String!
+  region: String!
+}
+
+input GcpCloudConnectionAttributes {
+  serviceAccountKey: String!
+  projectId: String!
+}
+
+input AzureCloudConnectionAttributes {
+  subscriptionId: String!
+  tenantId: String!
+  clientId: String!
+  clientSecret: String!
 }
 
 "A unit of organization to control permissions for a set of objects within your Console instance"
@@ -1893,9 +1938,83 @@ type OpensearchConnection {
   awsRegion: String
 }
 
+"A read-only connection to a cloud provider"
+type CloudConnection {
+  id: ID!
+
+  "the name of the cloud connection"
+  name: String!
+
+  "the provider of the cloud connection"
+  provider: Provider!
+
+  "the configuration for the cloud connection"
+  configuration: CloudConnectionConfiguration!
+
+  "read policy across this cloud connection"
+  readBindings: [PolicyBinding]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"The configuration for a cloud provider"
+type CloudConnectionConfiguration {
+  "the credentials for aws"
+  aws: AwsConnectionAttributes
+
+  "the credentials for gcp"
+  gcp: GcpConnectionAttributes
+
+  "the credentials for azure"
+  azure: AzureConnectionAttributes
+}
+
+"The configuration for a cloud provider"
+type AwsConnectionAttributes {
+  "the access key id for aws"
+  accessKeyId: String!
+
+  "the secret access key for aws"
+  secretAccessKey: String!
+
+  "the region for aws"
+  region: String!
+}
+
+"The configuration for a cloud provider"
+type GcpConnectionAttributes {
+  "the service account key for gcp"
+  serviceAccountKey: String!
+
+  "the project id for gcp"
+  projectId: String!
+}
+
+"The configuration for a cloud provider"
+type AzureConnectionAttributes {
+  "the subscription id for azure"
+  subscriptionId: String!
+
+  "the tenant id for azure"
+  tenantId: String!
+
+  "the client id for azure"
+  clientId: String!
+
+  "the client secret for azure"
+  clientSecret: String!
+}
+
 type ProjectConnection {
   pageInfo: PageInfo!
   edges: [ProjectEdge]
+}
+
+type CloudConnectionConnection {
+  pageInfo: PageInfo!
+  edges: [CloudConnectionEdge]
 }
 
 enum ObservabilityProviderType {
@@ -9559,6 +9678,11 @@ type ObservabilityWebhookEdge {
 
 type ObservabilityProviderEdge {
   node: ObservabilityProvider
+  cursor: String
+}
+
+type CloudConnectionEdge {
+  node: CloudConnection
   cursor: String
 }
 
