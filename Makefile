@@ -70,8 +70,7 @@ helm-dependencies-rapid:
 	cd charts/console-rapid && helm dependency update
 
 helm-dependencies: ## updates helm deps for all key charts
-	cd charts/console && helm dependency update && \
-	cd ../../plural/helm/console && helm dependency update
+	cd charts/console && helm dependency update
 
 push: ## push to gcr
 	docker push gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN)
@@ -154,7 +153,7 @@ delete-tag:  ## deletes a tag from git locally and upstream
 	git push origin :$$tag
 
 latest-version: # finds latest release version
-	@utils/versions/main.py
+	git tag | tr - \~ | sort -V | tr \~ -
 
 install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
 	@git config --local core.hooksPath ${GIT_HOOKS_PATH}/
