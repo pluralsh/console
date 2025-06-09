@@ -22,6 +22,8 @@ spec:
       key: password
     role:
       name: plrl-{{ .Values.cloud.instanceName }}
+      clusterPermissions:
+      - "monitor"
       indexPermissions:
       - names: ["plrl-{{ .Values.cloud.instanceName }}*"]
         privileges: [ "read", "index", "write", "create", "create_index", "manage", "manage_ilm" ]
@@ -39,11 +41,11 @@ spec:
       name: vm-cluster
       namespace: monitoring
     paths: 
-    - "/insert/{{ .Values.cloud.vmTenant }}.*"
+    - "/insert/{{ .Values.cloud.vmTenant | quote }}/.*"
   - crd:
       kind: VMCluster/vmselect
       name: vm-cluster
       namespace: monitoring
     paths: 
-    - "/select/{{ .Values.cloud.vmTenant }}.*"
+    - "/select/{{ .Values.cloud.vmTenant | quote }}/.*"
 {{ end }}

@@ -601,7 +601,7 @@ defmodule Console.Deployments.Global do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp contexts_equal?(%ServiceTemplate{contexts: ctxs}, svc) do
+  defp contexts_equal?(%ServiceTemplate{inferred_contexts: ctxs}, svc) do
     MapSet.new(svc.context_bindings || [], & &1.context_id)
     |> MapSet.equal?(MapSet.new(ctxs || []))
   end
