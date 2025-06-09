@@ -122,38 +122,33 @@ export default function StackOutput() {
   const output = data?.infrastructureStack?.output
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        rowGap: theme.spacing.medium,
-        height: '100%',
-      }}
-    >
+    <div css={{ overflow: 'hidden' }}>
       <div
         css={{
           display: 'flex',
-          columnGap: theme.spacing.medium,
-          flexShrink: 0,
+          flexDirection: 'column',
+          rowGap: theme.spacing.medium,
+          height: '100%',
         }}
       >
-        <Input
-          placeholder="Search"
-          startIcon={<SearchIcon />}
-          value={filterString}
-          onChange={(e) => setFilterString(e.currentTarget.value)}
-          css={{ flexGrow: 1 }}
+        <div>
+          <Input
+            placeholder="Search"
+            startIcon={<SearchIcon />}
+            value={filterString}
+            onChange={(e) => setFilterString(e.currentTarget.value)}
+          />
+        </div>
+        <Table
+          fullHeightWrap
+          data={output || []}
+          columns={columns}
+          reactTableOptions={{
+            state: { globalFilter: debouncedFilterString },
+          }}
+          emptyStateProps={{ message: 'No outputs found.' }}
         />
       </div>
-      <Table
-        fullHeightWrap
-        data={output || []}
-        columns={columns}
-        reactTableOptions={{
-          state: { globalFilter: debouncedFilterString },
-        }}
-        emptyStateProps={{ message: 'No outputs found.' }}
-      />
     </div>
   )
 }
