@@ -41,11 +41,11 @@ spec:
       name: vm-cluster
       namespace: monitoring
     paths: 
-    - "/insert/{{ .Values.cloud.vmTenant | quote }}/.*"
+    - "/insert/{{ .Values.cloud.vmTenant }}/.*"
   - crd:
       kind: VMCluster/vmselect
       name: vm-cluster
       namespace: monitoring
     paths: 
-    - "/select/{{ .Values.cloud.vmTenant | quote }}/.*"
+    - "/select/{{ .Values.cloud.vmTenant }}/.*"
 {{ end }}
