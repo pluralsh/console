@@ -29,6 +29,9 @@ type ConsoleClient interface {
 	UpsertCatalog(ctx context.Context, attributes *CatalogAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCatalog, error)
 	DeleteCatalog(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCatalog, error)
 	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
+	UpsertCloudConnection(ctx context.Context, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCloudConnection, error)
+	DeleteCloudConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCloudConnection, error)
+	GetCloudConnection(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCloudConnection, error)
 	CreateCluster(ctx context.Context, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateCluster, error)
 	UpdateCluster(ctx context.Context, id string, attributes ClusterUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCluster, error)
 	DeleteCluster(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCluster, error)
@@ -489,6 +492,38 @@ func (t *CatalogFragment) GetUpdatedAt() *string {
 		t = &CatalogFragment{}
 	}
 	return t.UpdatedAt
+}
+
+type CloudConnectionFragment struct {
+	ID           string                   "json:\"id\" graphql:\"id\""
+	Name         string                   "json:\"name\" graphql:\"name\""
+	ReadBindings []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	Provider     Provider                 "json:\"provider\" graphql:\"provider\""
+}
+
+func (t *CloudConnectionFragment) GetID() string {
+	if t == nil {
+		t = &CloudConnectionFragment{}
+	}
+	return t.ID
+}
+func (t *CloudConnectionFragment) GetName() string {
+	if t == nil {
+		t = &CloudConnectionFragment{}
+	}
+	return t.Name
+}
+func (t *CloudConnectionFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CloudConnectionFragment{}
+	}
+	return t.ReadBindings
+}
+func (t *CloudConnectionFragment) GetProvider() *Provider {
+	if t == nil {
+		t = &CloudConnectionFragment{}
+	}
+	return &t.Provider
 }
 
 type ClusterFragment struct {
@@ -15904,6 +15939,39 @@ func (t *GetCatalog) GetCatalog() *CatalogFragment {
 	return t.Catalog
 }
 
+type UpsertCloudConnection struct {
+	UpsertCloudConnection *CloudConnectionFragment "json:\"upsertCloudConnection,omitempty\" graphql:\"upsertCloudConnection\""
+}
+
+func (t *UpsertCloudConnection) GetUpsertCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &UpsertCloudConnection{}
+	}
+	return t.UpsertCloudConnection
+}
+
+type DeleteCloudConnection struct {
+	DeleteCloudConnection *CloudConnectionFragment "json:\"deleteCloudConnection,omitempty\" graphql:\"deleteCloudConnection\""
+}
+
+func (t *DeleteCloudConnection) GetDeleteCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &DeleteCloudConnection{}
+	}
+	return t.DeleteCloudConnection
+}
+
+type GetCloudConnection struct {
+	CloudConnection *CloudConnectionFragment "json:\"cloudConnection,omitempty\" graphql:\"cloudConnection\""
+}
+
+func (t *GetCloudConnection) GetCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &GetCloudConnection{}
+	}
+	return t.CloudConnection
+}
+
 type CreateCluster struct {
 	CreateCluster *CreateCluster_CreateCluster "json:\"createCluster,omitempty\" graphql:\"createCluster\""
 }
@@ -18947,6 +19015,160 @@ func (c *Client) GetCatalog(ctx context.Context, id *string, name *string, inter
 
 	var res GetCatalog
 	if err := c.Client.Post(ctx, "GetCatalog", GetCatalogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertCloudConnectionDocument = `mutation UpsertCloudConnection ($attributes: CloudConnectionAttributes!) {
+	upsertCloudConnection(attributes: $attributes) {
+		... CloudConnectionFragment
+	}
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertCloudConnection(ctx context.Context, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCloudConnection, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertCloudConnection
+	if err := c.Client.Post(ctx, "UpsertCloudConnection", UpsertCloudConnectionDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteCloudConnectionDocument = `mutation DeleteCloudConnection ($id: ID!) {
+	deleteCloudConnection(id: $id) {
+		... CloudConnectionFragment
+	}
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) DeleteCloudConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCloudConnection, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteCloudConnection
+	if err := c.Client.Post(ctx, "DeleteCloudConnection", DeleteCloudConnectionDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetCloudConnectionDocument = `query GetCloudConnection ($id: ID, $name: String) {
+	cloudConnection(id: $id, name: $name) {
+		... CloudConnectionFragment
+	}
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetCloudConnection(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCloudConnection, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetCloudConnection
+	if err := c.Client.Post(ctx, "GetCloudConnection", GetCloudConnectionDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -34376,6 +34598,9 @@ var DocumentOperationNames = map[string]string{
 	UpsertCatalogDocument:                             "UpsertCatalog",
 	DeleteCatalogDocument:                             "DeleteCatalog",
 	GetCatalogDocument:                                "GetCatalog",
+	UpsertCloudConnectionDocument:                     "UpsertCloudConnection",
+	DeleteCloudConnectionDocument:                     "DeleteCloudConnection",
+	GetCloudConnectionDocument:                        "GetCloudConnection",
 	CreateClusterDocument:                             "CreateCluster",
 	UpdateClusterDocument:                             "UpdateCluster",
 	DeleteClusterDocument:                             "DeleteCluster",

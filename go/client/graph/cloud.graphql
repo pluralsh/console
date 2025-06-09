@@ -1,0 +1,26 @@
+fragment CloudConnectionFragment on CloudConnection {
+    id
+    name
+    readBindings {
+        ...PolicyBindingFragment
+    }
+    provider
+}
+
+mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {
+    upsertCloudConnection(attributes: $attributes) {
+        ...CloudConnectionFragment
+    }
+}
+
+mutation DeleteCloudConnection($id: ID!) {
+    deleteCloudConnection(id: $id) {
+        ...CloudConnectionFragment
+    }
+}
+
+query GetCloudConnection($id: ID, $name: String) {
+    cloudConnection(id: $id, name: $name) {
+        ...CloudConnectionFragment
+    }
+}

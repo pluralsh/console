@@ -167,6 +167,10 @@ type ConsoleClient interface {
 	SaveServiceContext(name string, attributes console.ServiceContextAttributes) (*console.ServiceContextFragment, error)
 	DeleteServiceContext(id string) error
 	IsServiceContextExists(email string) (bool, error)
+	UpsertCloudConnection(ctx context.Context, attributes console.CloudConnectionAttributes) (*console.CloudConnectionFragment, error)
+	GetCloudConnection(ctx context.Context, id, name *string) (*console.CloudConnectionFragment, error)
+	DeleteCloudConnection(ctx context.Context, id string) error
+	IsCloudConnection(ctx context.Context, name string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {
