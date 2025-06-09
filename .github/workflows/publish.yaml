@@ -209,6 +209,11 @@ jobs:
         with:
           path: ./charts/controller
           release: ${{github.ref_name}}
+      - name: push datastore chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./charts/datastore
+          release: ${{github.ref_name}}
       - name: controller version
         id: controller_vsn
         uses: mikefarah/yq@master
@@ -224,8 +229,6 @@ jobs:
           cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
       - name: helm-dependencies
         run: make helm-dependencies
-      - name: copy crds to plural chart
-        run: cp -a charts/controller/crds plural/helm/console
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
