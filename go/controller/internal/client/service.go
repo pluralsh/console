@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) GetServices() ([]*console.ServiceDeploymentBaseFragment, error) {
@@ -25,12 +28,44 @@ func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDepl
 }
 
 func (c *client) GetServiceById(id string) (*console.ServiceDeploymentExtended, error) {
-	resp, err := c.consoleClient.GetServiceDeployment(c.ctx, id)
-	if err != nil {
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
+
+	response, err := c.consoleClient.GetServiceDeployment(c.ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.ServiceDeployment == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
 		return nil, err
 	}
 
-	return resp.ServiceDeployment, nil
+	return response.ServiceDeployment, err
+}
+
+func (c *client) IsServiceExisting(id string) (bool, error) {
+	service, err := c.GetServiceById(id)
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return service != nil, nil
+}
+
+func (c *client) IsServiceDeleting(id string) bool {
+	service, err := c.GetServiceById(id)
+	if err != nil {
+		return false
+	}
+
+	return service != nil && service.DeletedAt != nil
 }
 
 func (c *client) CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error) {

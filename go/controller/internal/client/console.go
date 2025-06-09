@@ -52,6 +52,8 @@ type ConsoleClient interface {
 	DeleteProvider(ctx context.Context, id string) error
 	IsProviderExists(ctx context.Context, id string) (bool, error)
 	IsProviderDeleting(ctx context.Context, id string) bool
+	IsServiceExisting(id string) (bool, error)
+	IsServiceDeleting(id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
 	GetGlobalService(id string) (*console.GlobalServiceFragment, error)
