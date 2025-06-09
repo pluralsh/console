@@ -29,6 +29,7 @@ type client struct {
 type ConsoleClient interface {
 	GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
 	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
+	GetServiceById(id string) (*console.ServiceDeploymentExtended, error)
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
 	CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error)
 	ListRepositories() (*console.ListGitRepositories, error)

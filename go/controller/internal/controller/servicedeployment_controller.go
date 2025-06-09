@@ -500,24 +500,8 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		logger.V(9).Info("trying to delete service", "service", service.ConsoleName())
-		cluster := &v1alpha1.Cluster{}
-		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-			if !apierrors.IsNotFound(err) {
-				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
-		}
-		if !cluster.Status.HasID() {
-			err := r.deleteService(service.Status.GetID(), service.Spec.Detach)
-			if errors.IsNotFound(err) || err == nil {
-				controllerutil.RemoveFinalizer(service, ServiceFinalizer)
-				return ctrl.Result{}, nil
-			}
-			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
 
-		existingService, err := r.ConsoleClient.GetService(cluster.Status.GetID(), service.ConsoleName())
+		existingService, err := r.ConsoleClient.GetServiceById(service.Status.GetID())
 		if errors.IsNotFound(err) {
 			logger.V(9).Info("service not found, removing finalizer", "service", service.ConsoleName())
 			controllerutil.RemoveFinalizer(service, ServiceFinalizer)
