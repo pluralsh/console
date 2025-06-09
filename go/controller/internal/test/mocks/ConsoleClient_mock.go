@@ -1366,6 +1366,53 @@ func (_c *ConsoleClientMock_DeleteCatalog_Call) RunAndReturn(run func(context.Co
 	return _c
 }
 
+// DeleteCloudConnection provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteCloudConnection(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteCloudConnection")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteCloudConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteCloudConnection'
+type ConsoleClientMock_DeleteCloudConnection_Call struct {
+	*mock.Call
+}
+
+// DeleteCloudConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteCloudConnection(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteCloudConnection_Call {
+	return &ConsoleClientMock_DeleteCloudConnection_Call{Call: _e.mock.On("DeleteCloudConnection", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteCloudConnection_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteCloudConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCloudConnection_Call) Return(_a0 error) *ConsoleClientMock_DeleteCloudConnection_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCloudConnection_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteCloudConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteCluster provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeleteCluster(id string) (*client.DeleteCluster_DeleteCluster, error) {
 	ret := _m.Called(id)
@@ -2662,6 +2709,66 @@ func (_c *ConsoleClientMock_GetCatalog_Call) Return(_a0 *client.CatalogFragment,
 }
 
 func (_c *ConsoleClientMock_GetCatalog_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.CatalogFragment, error)) *ConsoleClientMock_GetCatalog_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetCloudConnection provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetCloudConnection(ctx context.Context, id *string, name *string) (*client.CloudConnectionFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetCloudConnection")
+	}
+
+	var r0 *client.CloudConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.CloudConnectionFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.CloudConnectionFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.CloudConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetCloudConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCloudConnection'
+type ConsoleClientMock_GetCloudConnection_Call struct {
+	*mock.Call
+}
+
+// GetCloudConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetCloudConnection(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetCloudConnection_Call {
+	return &ConsoleClientMock_GetCloudConnection_Call{Call: _e.mock.On("GetCloudConnection", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetCloudConnection_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetCloudConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetCloudConnection_Call) Return(_a0 *client.CloudConnectionFragment, _a1 error) *ConsoleClientMock_GetCloudConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetCloudConnection_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.CloudConnectionFragment, error)) *ConsoleClientMock_GetCloudConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5078,6 +5185,63 @@ func (_c *ConsoleClientMock_IsCatalogExists_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// IsCloudConnection provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) IsCloudConnection(ctx context.Context, name string) (bool, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsCloudConnection")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsCloudConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsCloudConnection'
+type ConsoleClientMock_IsCloudConnection_Call struct {
+	*mock.Call
+}
+
+// IsCloudConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) IsCloudConnection(ctx interface{}, name interface{}) *ConsoleClientMock_IsCloudConnection_Call {
+	return &ConsoleClientMock_IsCloudConnection_Call{Call: _e.mock.On("IsCloudConnection", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_IsCloudConnection_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_IsCloudConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsCloudConnection_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsCloudConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsCloudConnection_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsCloudConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsClusterDeleting provides a mock function with given fields: id
 func (_m *ConsoleClientMock) IsClusterDeleting(id *string) bool {
 	ret := _m.Called(id)
@@ -7315,6 +7479,65 @@ func (_c *ConsoleClientMock_UpsertCatalog_Call) Return(_a0 *client.CatalogFragme
 }
 
 func (_c *ConsoleClientMock_UpsertCatalog_Call) RunAndReturn(run func(context.Context, *client.CatalogAttributes) (*client.CatalogFragment, error)) *ConsoleClientMock_UpsertCatalog_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertCloudConnection provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertCloudConnection(ctx context.Context, attributes client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertCloudConnection")
+	}
+
+	var r0 *client.CloudConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.CloudConnectionAttributes) *client.CloudConnectionFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.CloudConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.CloudConnectionAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertCloudConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertCloudConnection'
+type ConsoleClientMock_UpsertCloudConnection_Call struct {
+	*mock.Call
+}
+
+// UpsertCloudConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.CloudConnectionAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertCloudConnection(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertCloudConnection_Call {
+	return &ConsoleClientMock_UpsertCloudConnection_Call{Call: _e.mock.On("UpsertCloudConnection", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertCloudConnection_Call) Run(run func(ctx context.Context, attributes client.CloudConnectionAttributes)) *ConsoleClientMock_UpsertCloudConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.CloudConnectionAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCloudConnection_Call) Return(_a0 *client.CloudConnectionFragment, _a1 error) *ConsoleClientMock_UpsertCloudConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCloudConnection_Call) RunAndReturn(run func(context.Context, client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error)) *ConsoleClientMock_UpsertCloudConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
