@@ -344,6 +344,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:parent_id, id}, q when is_binary(id) -> Cluster.for_parent(q, id)
       {:upgradeable, true}, q -> Cluster.upgradeable(q)
       {:upgradeable, false}, q -> Cluster.not_upgradeable(q)
+      {:compliance, c}, q when not is_nil(c) -> Cluster.with_version_compliance(q, c)
+      {:health_range, %{min: min, max: max}}, q when is_integer(min) and is_integer(max) ->
+        Cluster.for_health_range(q, min, max)
       _, q -> q
     end)
   end

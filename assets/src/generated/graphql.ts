@@ -3289,6 +3289,11 @@ export type GroupMemberEdge = {
   node?: Maybe<GroupMember>;
 };
 
+export type HealthRange = {
+  max?: InputMaybe<Scalars['Int']['input']>;
+  min?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export enum HeatMapFlavor {
   Namespace = 'NAMESPACE',
   Node = 'NODE',
@@ -8107,7 +8112,9 @@ export type RootQueryTypeClustersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   backups?: InputMaybe<Scalars['Boolean']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  compliance?: InputMaybe<VersionCompliance>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  healthRange?: InputMaybe<HealthRange>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   parentId?: InputMaybe<Scalars['ID']['input']>;
@@ -10556,6 +10563,12 @@ export type VectorStoreAttributes = {
   opensearch?: InputMaybe<OpensearchConnectionAttributes>;
   store?: InputMaybe<VectorStore>;
 };
+
+export enum VersionCompliance {
+  Compliant = 'COMPLIANT',
+  Latest = 'LATEST',
+  Outdated = 'OUTDATED'
+}
 
 /** a shortform reference to an addon by version */
 export type VersionReference = {

@@ -134,12 +134,13 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
 
       context = Services.get_context_by_name!("plrl/cloud/observability")
-      assert context.configuration["elastic"]["url"] == "http://test.es.com"
-      assert context.configuration["elastic"]["user"] == "plrl-test"
-      assert context.configuration["elastic"]["password"] == "test"
-      assert context.configuration["vmetrics"]["url"] == "http://vmetrics.vmetrics.com/insert/test/prometheus/api/v1/write"
+      assert context.configuration["vmetrics"]["url"] == "https://my.plural.console/ext/v1/ingest/prometheus"
+      assert context.configuration["vmetrics"]["query_url"] == "https://my.plural.console/ext/v1/query/prometheus"
       assert context.configuration["vmetrics"]["user"] == "plrl-test"
       assert context.configuration["vmetrics"]["password"] == "test"
+      assert context.configuration["elastic"]["url"] == "https://my.plural.console:443/ext/v1/ingest/elastic"
+      assert context.configuration["elastic"]["user"] == "plrl-test"
+      assert context.configuration["elastic"]["password"] == "test"
     end
   end
 

@@ -158,7 +158,7 @@ type RootQueryType {
 
   "a relay connection of all clusters visible to the current user"
   clusters(
-    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID, parentId: ID, upgradeable: Boolean
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID, parentId: ID, upgradeable: Boolean, compliance: VersionCompliance, healthRange: HealthRange
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
@@ -5194,6 +5194,12 @@ enum HeatMapFlavor {
   NODE
 }
 
+enum VersionCompliance {
+  LATEST
+  COMPLIANT
+  OUTDATED
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -5654,6 +5660,11 @@ input ClusterNamespacesAttributes {
   linkerd: String
   cilium: String
   ebsCsiDriver: String
+}
+
+input HealthRange {
+  min: Int
+  max: Int
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"

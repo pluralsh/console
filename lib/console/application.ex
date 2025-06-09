@@ -24,6 +24,7 @@ defmodule Console.Application do
       Console.Cron.Scheduler,
       Console.Buffers.ClusterAudit,
       Console.Deployments.Local.Server,
+      Console.Prom.Meter,
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
