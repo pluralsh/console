@@ -95,8 +95,8 @@ export function GitHubSetupStep() {
         >
           {webhookError && <GqlError error={webhookError} />}
           <Body1P>
-            Please provide the repository owner so Plural can create a webhook
-            to listen for updates.
+            Please provide the GitHub organization or repository slug so Plural
+            can create a webhook to listen for updates.
           </Body1P>
           <FormField
             required
@@ -104,7 +104,7 @@ export function GitHubSetupStep() {
             hint="should be a GitHub organization or repo slug"
           >
             <Input
-              placeholder="Enter repository owner"
+              placeholder="Enter webhook owner"
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
             />
@@ -133,8 +133,9 @@ export function GitHubSetupStep() {
       ) : (
         <>
           <Body1P>
-            Plural Console is best with a Git connection. You can either use the
-            pre-made Plural GitHub application or install your own.
+            The Plural Console works best with a connection to your source
+            control provider. You can either use the pre-made Plural GitHub
+            application or install your own.
           </Body1P>
           <TabList
             stateRef={tabStateRef}
