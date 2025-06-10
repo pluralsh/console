@@ -1,0 +1,12 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: CloudConnection
+metadata:
+  labels:
+    app.kubernetes.io/name: cloudconnection
+    app.kubernetes.io/instance: cloudconnection-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: cloudconnection-sample
+spec:
+  # TODO(user): Add fields here
