@@ -207,14 +207,18 @@ func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connect
 func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, connection *v1alpha1.CloudConnection) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if connection.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(connection, CloudConnectionProtectionFinalizerName) {
+	if connection.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(connection, CloudConnectionProtectionFinalizerName) {
 		controllerutil.AddFinalizer(connection, CloudConnectionProtectionFinalizerName)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !connection.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !connection.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCloudConnection(ctx, connection.CloudConnectionName())
 		if err != nil {
+			if errors.IsNotFound(err) {
+				controllerutil.RemoveFinalizer(connection, CloudConnectionProtectionFinalizerName)
+				return &ctrl.Result{}, nil
+			}
 			return &ctrl.Result{}, err
 		}
 
