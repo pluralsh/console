@@ -538,7 +538,7 @@ func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeploy
 		// If our finalizer is present, remove it.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 
-		// Stop reconciliation as the item is being deleted.
+		// Stop reconciliation as the item does no longer exist.
 		return &ctrl.Result{}
 	}
 
