@@ -75,7 +75,6 @@ function Template(args: any) {
               </Button>
               <Button
                 type="submit"
-                primary
                 destructive={!args.form}
                 marginLeft="medium"
               >

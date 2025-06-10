@@ -20,8 +20,6 @@ import { useTab, useTabList } from 'react-aria'
 import { type TabListState, useTabListState } from 'react-stately'
 import styled, { useTheme } from 'styled-components'
 
-import { type Nullable } from '../types'
-
 import ArrowScroll from './ArrowScroll'
 import { useItemWrappedChildren } from './ListBox'
 import WrapWithIf from './WrapWithIf'

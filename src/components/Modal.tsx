@@ -4,7 +4,7 @@ import { type ComponentPropsWithRef, type ReactNode, useCallback } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { type Nullable, type SeverityExt } from '../types'
+import { type SeverityExt } from '../types'
 
 import Card from './Card'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'

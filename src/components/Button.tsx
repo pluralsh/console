@@ -1,27 +1,325 @@
-import { Button as HonorableButton } from 'honorable'
-import type { ButtonProps as HonorableButtonProps } from 'honorable'
-import { keyframes } from '@emotion/react'
+import {
+  ComponentPropsWithRef,
+  ElementType,
+  memo,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
-export type ButtonProps = HonorableButtonProps & { pulse?: boolean }
+import { styled, useTheme } from 'styled-components'
+import { resolveSpacersAndSanitizeCss, SpacerProps } from '../theme/spacing'
+import { applyNodeToRefs } from '../utils/applyNodeToRefs'
+import Flex from './Flex'
+import { Spinner } from './Spinner'
 
-const pulseKeyframes = keyframes`
-  0% { box-shadow: 0 0 7px 2px #fff1; }
-  70% { box-shadow: 0 0 7px 4px #fff2; }
-  100% { box-shadow: 0 0 7px 2px #fff1; }
-`
+type ButtonSize = 'small' | 'medium' | 'large'
+type ButtonType =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'tertiaryNoPadding'
+  | 'floating'
+  | 'destructive'
 
-function Button({ pulse = false, ...props }: ButtonProps) {
-  return (
-    <HonorableButton
-      animationIterationCount="infinite"
-      animationDuration="4s"
-      animationName={pulse ? pulseKeyframes : undefined}
-      boxShadow={pulse ? '0 0 7px 2px #fff1' : undefined}
-      _hover={{ animationPlayState: 'paused' }}
-      type="button"
-      {...props}
-    />
-  )
-}
+export type ButtonProps = {
+  startIcon?: ReactNode
+  endIcon?: ReactNode
+  loading?: boolean
+  loadingIndicator?: ReactNode
+  children?: ReactNode
+  // flags- keeping this pattern instead of using "size" and "type" for backwards compatibility
+  small?: boolean
+  large?: boolean
+  secondary?: boolean
+  tertiary?: boolean
+  floating?: boolean
+  destructive?: boolean
+  // flexible typing for links
+  as?: ElementType
+  to?: string
+  href?: string
+  target?: string | '_blank' | '_self' | '_parent' | '_top'
+  rel?: string | 'noopener noreferrer' | 'noreferrer' | 'noopener'
+} & SpacerProps &
+  ComponentPropsWithRef<'button'>
+
+const Button = memo(
+  ({
+    ref,
+    startIcon,
+    endIcon,
+    loading,
+    loadingIndicator,
+    disabled,
+    children,
+    small,
+    large,
+    secondary,
+    tertiary,
+    destructive,
+    floating,
+    ...props
+  }: ButtonProps) => {
+    const theme = useTheme()
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const [height, setHeight] = useState<number | 'auto'>('auto')
+
+    const buttonSize = large ? 'large' : small ? 'small' : 'medium'
+    const buttonType = secondary
+      ? 'secondary'
+      : tertiary
+      ? 'tertiary'
+      : destructive
+      ? 'destructive'
+      : floating
+      ? 'floating'
+      : 'primary'
+
+    useEffect(() => {
+      if (!buttonRef.current) return
+
+      setHeight(buttonRef.current.offsetHeight)
+    }, [])
+
+    const { rest, css } = resolveSpacersAndSanitizeCss(props, theme)
+
+    return (
+      <ButtonBaseSC
+        ref={(node: HTMLButtonElement) =>
+          applyNodeToRefs([buttonRef, ref], node)
+        }
+        $size={buttonSize}
+        $type={buttonType}
+        $noPadding={props.padding === 'none'}
+        disabled={disabled}
+        css={css}
+        {...(loading && { inert: true })}
+        {...rest}
+      >
+        {!!startIcon && (
+          <IconSC
+            $position="start"
+            $size={buttonSize}
+            $loading={loading}
+          >
+            {startIcon}
+          </IconSC>
+        )}
+        {loading && (
+          <LoadingIndicatorWrapperSC>
+            {loadingIndicator || (
+              <Spinner
+                color={theme.colors.text}
+                size={typeof height === 'number' ? (height * 3) / 5 : 16}
+              />
+            )}
+          </LoadingIndicatorWrapperSC>
+        )}
+        <Flex
+          align="center"
+          justify="center"
+          visibility={loading ? 'hidden' : 'inherit'}
+        >
+          {children}
+        </Flex>
+        {!!endIcon && (
+          <IconSC
+            $position="end"
+            $size={buttonSize}
+            $loading={loading}
+          >
+            {endIcon}
+          </IconSC>
+        )}
+      </ButtonBaseSC>
+    )
+  }
+)
+
+const ButtonBaseSC = styled.button<{
+  $size: ButtonSize
+  $type: ButtonType
+  $noPadding: boolean
+}>(
+  ({
+    theme: { colors, spacing, partials, borderRadiuses, boxShadows },
+    $size,
+    $type,
+    $noPadding,
+  }) => ({
+    // default styles that were baked into honorable (and not already being overridden)
+    cursor: 'pointer',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    minHeight: 38,
+    userSelect: 'none',
+    textDecoration: 'none',
+    transition:
+      'color 150ms ease, background-color 150ms ease, border 150ms ease',
+    flexShrink: 0,
+    // primary/baseline styles
+    ...partials.text.buttonMedium,
+    borderRadius: borderRadiuses.medium,
+    color: colors['text-always-white'],
+    background: colors['action-primary'],
+    border: '1px solid transparent',
+    padding: `${spacing.xsmall - 1}px ${spacing.medium - 1}px`,
+    '&:focus': { outline: 'none' },
+    '&:focus-visible': {
+      outline: 'none',
+      borderColor: colors['border-outline-focused'],
+    },
+    '&:hover': { background: colors['action-primary-hover'] },
+    '&:active': { background: colors['action-primary'] },
+    '&:disabled': {
+      cursor: 'not-allowed',
+      color: colors['text-primary-disabled'],
+      '&:hover': { background: colors['action-primary-disabled'] },
+      background: colors['action-primary-disabled'],
+    },
+    // secondary styles
+    ...($type === 'secondary' && {
+      color: colors['text-light'],
+      background: 'transparent',
+      borderColor: colors['border-input'],
+      '&:hover': {
+        color: colors['text'],
+        background: colors['action-input-hover'],
+        borderColor: colors['border-input'],
+      },
+      '&:active': { color: colors['text'], background: 'transparent' },
+      '&:focus-visible': {
+        color: colors['text'],
+        background: colors['action-input-hover'],
+      },
+      '&:disabled': {
+        cursor: 'not-allowed',
+        color: colors['text-disabled'],
+        background: 'transparent',
+      },
+    }),
+    // tertiary styles
+    ...($type === 'tertiary' && {
+      color: colors['text-light'],
+      background: 'transparent',
+      borderColor: 'transparent',
+      '&:hover': {
+        color: colors['text'],
+        background: colors['action-input-hover'],
+      },
+      '&:active': { background: 'transparent', color: colors['text'] },
+      '&:focus-visible': {
+        color: colors['text'],
+        background: colors['action-input-hover'],
+      },
+      '&:disabled': {
+        cursor: 'not-allowed',
+        color: colors['text-disabled'],
+        background: 'transparent',
+      },
+      // tertiary no padding styles
+      ...($noPadding && {
+        paddingLeft: 0,
+        paddingRight: 0,
+        '&:active': { color: colors['text-light'] },
+        '&:hover, &:active, &:focus-visible': {
+          background: 'transparent',
+          textDecoration: 'underline',
+        },
+      }),
+    }),
+    // destructive styles
+    ...($type === 'destructive' && {
+      color: colors['text-danger'],
+      background: 'transparent',
+      borderColor: colors['border-danger'],
+      '&:hover': { background: colors['action-input-hover'] },
+      '&:focus-visible': { background: colors['action-input-hover'] },
+      '&:active': { background: 'transparent' },
+      '&:disabled': {
+        cursor: 'not-allowed',
+        color: colors['text-disabled'],
+        borderColor: colors['border-disabled'],
+        '&:hover': { background: 'transparent' },
+      },
+    }),
+    // floating styles
+    ...($type === 'floating' && {
+      color: colors['text-light'],
+      background: colors['fill-two'],
+      borderColor: colors['border-input'],
+      boxShadow: boxShadows.slight,
+      '&:hover': {
+        color: colors['text'],
+        background: colors['fill-two'],
+        borderColor: colors['border-input'],
+        boxShadow: boxShadows.moderate,
+      },
+      '&:active': {
+        color: colors['text'],
+        background: colors['fill-two-hover'],
+        borderColor: colors['border-input'],
+      },
+      '&:focus-visible': {
+        color: colors['text'],
+        background: colors['fill-two-selected'],
+      },
+      '&:disabled': {
+        cursor: 'not-allowed',
+        color: colors['text-disabled'],
+        borderColor: colors['border-input'],
+        background: 'transparent',
+        '&:hover': {
+          borderColor: colors['border-input'],
+          background: 'transparent',
+        },
+      },
+    }),
+    // sizes besides medium (default)
+    ...($size === 'large' && {
+      ...partials.text.buttonLarge,
+      padding: `${spacing.small - 1}px ${spacing.large - 1}px`,
+    }),
+    ...($size === 'small' && {
+      ...partials.text.buttonSmall,
+      padding: `${spacing.xxsmall - 1}px ${spacing.medium - 1}px`,
+      minHeight: 32,
+    }),
+  })
+)
+
+const IconSC = styled.span<{
+  $loading: boolean
+  $size: ButtonSize
+  $position: 'start' | 'end'
+}>(({ theme, $loading, $size, $position }) => {
+  const marginSize =
+    $size === 'large' ? theme.spacing.medium : theme.spacing.small
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    visibility: $loading ? 'hidden' : 'inherit',
+    // adapted from honorable theme styles
+    margin:
+      $position === 'start' ? `0 ${marginSize}px 0 0` : `0 0 0 ${marginSize}px`,
+  }
+})
+
+const LoadingIndicatorWrapperSC = styled.span({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  top: 0,
+  bottom: 0,
+})
 
 export default Button

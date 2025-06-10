@@ -456,11 +456,9 @@ function Table({
         {hover && scrollTop > scrollTopMargin && (
           <Button
             small
-            position="absolute"
-            right="24px"
-            bottom="24px"
-            width="140px"
             floating
+            width={140}
+            css={{ position: 'absolute', right: 24, bottom: 24 }}
             endIcon={<CaretUpIcon />}
             onClick={() =>
               tableContainerRef?.current?.scrollTo({

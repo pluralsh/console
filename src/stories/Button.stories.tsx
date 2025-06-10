@@ -1,6 +1,6 @@
-import { Flex, H1 } from 'honorable'
-
+import { useTheme } from 'styled-components'
 import Button from '../components/Button'
+import Flex from '../components/Flex'
 import DownloadIcon from '../components/icons/DownloadIcon'
 
 export default {
@@ -25,7 +25,6 @@ export default {
 function TemplateBase(args: any) {
   return (
     <Flex
-      direction="row"
       gap="medium"
       wrap="wrap"
       alignItems="center"
@@ -61,27 +60,30 @@ function TemplateBase(args: any) {
 }
 
 function Template(args: any) {
+  const theme = useTheme()
   return (
-    <>
-      <H1
-        subtitle2
-        marginBottom="small"
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <Flex
+        direction="column"
+        gap="small"
       >
-        Enabled
-      </H1>
-      <TemplateBase {...args} />
-      <H1
-        subtitle2
-        marginTop="large"
-        marginBottom="small"
+        <h1 css={{ ...theme.partials.text.subtitle2, margin: 0 }}>Enabled</h1>
+        <TemplateBase {...args} />
+      </Flex>
+      <Flex
+        direction="column"
+        gap="small"
       >
-        Disabled
-      </H1>
-      <TemplateBase
-        {...args}
-        disabled
-      />
-    </>
+        <h1 css={{ ...theme.partials.text.subtitle2, margin: 0 }}>Disabled</h1>
+        <TemplateBase
+          {...args}
+          disabled
+        />
+      </Flex>
+    </Flex>
   )
 }
 
@@ -90,7 +92,6 @@ export const Primary = Template.bind({})
 Primary.args = {
   disabled: false,
   loading: false,
-  pulse: false,
   children: 'Primary Button',
 }
 

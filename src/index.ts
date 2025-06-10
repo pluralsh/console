@@ -193,6 +193,7 @@ export {
 } from './theme'
 export { semanticColorCssVars, semanticColorKeys } from './theme/colors'
 export type { SemanticColorCssVar, SemanticColorKey } from './theme/colors'
+export type { SemanticSpacingKey } from './theme/spacing'
 
 // Utils
 export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'

@@ -57,8 +57,6 @@ export type SeverityExt = (typeof SEVERITIES)[number]
 
 export { type CSSObject } from 'styled-components'
 
-export type Nullable<T> = T | null | undefined
-
 export type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithRef<E>, keyof P> & {
     as?: E

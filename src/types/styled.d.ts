@@ -11,3 +11,10 @@ declare module 'react' {
 }
 
 type StyledTheme = typeof styledTheme
+
+// extend original module declarations
+declare module 'styled-components' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface DefaultTheme extends StyledTheme {}
+  export declare function useTheme(): DefaultTheme
+}

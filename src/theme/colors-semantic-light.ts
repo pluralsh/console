@@ -47,7 +47,7 @@ export const semanticColorsLight = {
   'action-link-inline-visited': purple[500],
   'action-link-inline-visited-hover': purple[350],
   // input
-  'action-input-hover': 'C3C3C419',
+  'action-input-hover': '#C3C3C419',
   // always white
   'action-always-white': semanticColorsDark['action-always-white'],
   'action-on-filled-bg': grey[25],

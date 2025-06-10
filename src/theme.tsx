@@ -1,17 +1,11 @@
 import { mergeTheme } from 'honorable'
-import defaultTheme from 'honorable-theme-default'
 import mapperRecipe from 'honorable-recipe-mapper'
+import defaultTheme from 'honorable-theme-default'
 
 import { useState } from 'react'
 
 import { useMutationObserver } from '@react-hooks-library/core'
 
-import { semanticColorsDark } from './theme/colors-semantic-dark'
-import { semanticColorsLight } from './theme/colors-semantic-light'
-import { baseColors } from './theme/colors-base'
-import { spacing } from './theme/spacing'
-import { fontFamilies } from './theme/fonts'
-import { textPartials } from './theme/text'
 import {
   borderRadiuses,
   borderStyles,
@@ -19,13 +13,19 @@ import {
   borders,
 } from './theme/borders'
 import { getBoxShadows } from './theme/boxShadows'
-import { scrollBar } from './theme/scrollBar'
-import { zIndexes } from './theme/zIndexes'
+import { baseColors } from './theme/colors-base'
+import { semanticColorsDark } from './theme/colors-semantic-dark'
+import { semanticColorsLight } from './theme/colors-semantic-light'
 import { getFocusPartials } from './theme/focus'
-import { resetPartials } from './theme/resets'
-import { marketingTextPartials } from './theme/marketingText'
+import { fontFamilies } from './theme/fonts'
 import gradients from './theme/gradients'
+import { marketingTextPartials } from './theme/marketingText'
+import { resetPartials } from './theme/resets'
+import { scrollBar } from './theme/scrollBar'
+import { spacing } from './theme/spacing'
+import { textPartials } from './theme/text'
 import { visuallyHidden } from './theme/visuallyHidden'
+import { zIndexes } from './theme/zIndexes'
 
 export const COLOR_THEME_KEY = 'theme-mode'
 
@@ -35,6 +35,7 @@ export const DEFAULT_COLOR_MODE: ColorMode = 'dark'
 
 export type StringObj = { [key: string]: string | StringObj }
 
+// old, phase this out once honorable is all removed
 const spacers = {
   margin: ['margin'],
   marginTop: ['marginTop'],
@@ -80,6 +81,8 @@ const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
     },
   }) as const
 
+// remove any unused themes as we transition off honorable
+// ultimately we'll be able to get rid of this entirely
 const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
   const boxShadows = getBoxShadows({ mode })
 
@@ -113,12 +116,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
               ])
             )
       ),
-      ({ fill }: any) =>
-        fill === true && {
-          // === true to prevent the `fill` css property to apply here
-          width: '100%',
-          height: '100%',
-        },
       /* Border radiuses */
       mapperRecipe('borderRadius', borderRadiuses),
       /* Shadows */
@@ -143,31 +140,8 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
       }),
       ({ caption }: any) => caption && textPartials.caption,
       ({ badgeLabel }: any) => badgeLabel && textPartials.badgeLabel,
-      ({ buttonMedium }: any) => buttonMedium && textPartials.buttonMedium,
-      ({ buttonLarge }: any) => buttonLarge && textPartials.buttonLarge,
-      ({ buttonSmall }: any) => buttonSmall && textPartials.buttonSmall,
       ({ overline }: any) => overline && textPartials.overline,
       ({ truncate }: any) => truncate && textPartials.truncate,
-      /* Deprecated */
-      ({ body0 }: any) =>
-        body0 && {
-          fontSize: 18,
-          lineHeight: '28px',
-        },
-      /* Deprecated */
-      ({ font }: any) =>
-        font === 'action' && {
-          fontFamily: 'Monument',
-          letterSpacing: 1,
-          fontWeight: 500,
-        },
-      /* deprecated in favor of _hover */
-      ({ hoverIndicator }: any) =>
-        hoverIndicator && {
-          '&:hover': {
-            backgroundColor: hoverIndicator,
-          },
-        },
     ],
     A: {
       Root: [
@@ -184,227 +158,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           borderRadius: 4, // TODO 3 or 6
           fontWeight: 400,
         },
-      ],
-    },
-    Button: {
-      Root: [
-        {
-          buttonMedium: true,
-          display: 'flex',
-          borderRadius: 'medium',
-          color: 'text-always-white',
-          backgroundColor: 'action-primary',
-          border: '1px solid action-primary',
-          paddingTop: spacing.xsmall - 1,
-          paddingBottom: spacing.xsmall - 1,
-          paddingRight: spacing.medium - 1,
-          paddingLeft: spacing.medium - 1,
-          '&:focus, &:focus-visible': {
-            outline: 'none',
-          },
-          _focusVisible: {
-            borderColor: 'border-outline-focused',
-            // ...focusPartials.button,
-          },
-          '&:hover': {
-            backgroundColor: 'action-primary-hover',
-            border: '1px solid action-primary-hover',
-          },
-          '&:active': {
-            backgroundColor: 'action-primary',
-            border: '1px solid action-primary',
-          },
-          '&:disabled': {
-            color: 'text-primary-disabled',
-            backgroundColor: 'action-primary-disabled',
-            border: '1px solid action-primary-disabled',
-            '&:hover': {
-              backgroundColor: 'action-primary-disabled',
-              border: '1px solid action-primary-disabled',
-            },
-          },
-        },
-        ({ secondary }: any) =>
-          secondary && {
-            color: 'text-light',
-            backgroundColor: 'transparent',
-            border: '1px solid border-input',
-            '&:hover': {
-              color: 'text',
-              backgroundColor: 'action-input-hover',
-              border: '1px solid border-input',
-            },
-            '&:active': {
-              color: 'text',
-              backgroundColor: 'transparent',
-              border: '1px solid border-input',
-            },
-            '&:focus-visible': {
-              color: 'text',
-              backgroundColor: 'action-input-hover',
-            },
-            '&:disabled': {
-              color: 'text-disabled',
-              backgroundColor: 'transparent',
-              border: '1px solid border-input',
-              '&:hover': {
-                backgroundColor: 'transparent',
-                border: '1px solid border-input',
-              },
-            },
-          },
-        ({ tertiary }: any) =>
-          tertiary && {
-            color: 'text-light',
-            backgroundColor: 'transparent',
-            border: '1px solid transparent',
-            '&:hover': {
-              color: 'text',
-              backgroundColor: 'action-input-hover',
-              border: '1px solid transparent',
-            },
-            '&:active': {
-              color: 'text',
-              backgroundColor: 'transparent',
-              border: '1px solid transparent',
-            },
-            '&:focus-visible': {
-              color: 'text',
-              backgroundColor: 'action-input-hover',
-            },
-            '&:disabled': {
-              color: 'text-disabled',
-              backgroundColor: 'transparent',
-              border: '1px solid transparent',
-              '&:hover': {
-                backgroundColor: 'transparent',
-                border: '1px solid transparent',
-              },
-            },
-          },
-        ({ tertiary, padding }: any) =>
-          tertiary &&
-          padding === 'none' && {
-            color: 'text-light',
-            backgroundColor: 'transparent',
-            border: '1px solid transparent',
-            paddingHorizontal: '0',
-            '&:hover': {
-              backgroundColor: 'transparent',
-              textDecoration: 'underline',
-            },
-            '&:active': {
-              textDecoration: 'underline',
-            },
-            '&:focus-visible': {
-              backgroundColor: 'transparent',
-              textDecoration: 'underline',
-            },
-          },
-        ({ destructive }: any) =>
-          destructive && {
-            color: 'text-danger',
-            backgroundColor: 'transparent',
-            border: '1px solid border-danger',
-            '&:hover': {
-              backgroundColor: 'action-input-hover',
-              border: '1px solid border-danger',
-            },
-            '&:active': {
-              backgroundColor: 'transparent',
-              border: '1px solid border-danger',
-            },
-            '&:focus-visible': {
-              backgroundColor: 'action-input-hover',
-            },
-            '&:disabled': {
-              color: 'text-disabled',
-              backgroundColor: 'transparent',
-              border: '1px solid border-disabled',
-              '&:hover': {
-                backgroundColor: 'transparent',
-                border: '1px solid border-disabled',
-              },
-            },
-          },
-        ({ floating }: any) =>
-          floating && {
-            color: 'text-light',
-            backgroundColor: 'fill-two',
-            border: '1px solid border-input',
-            // boxShadow isn't getting set when placed in the root here,
-            // but using the '&' prop gets around it
-            '&': {
-              boxShadow: boxShadows.slight,
-            },
-            '&:hover': {
-              color: 'text',
-              backgroundColor: 'fill-two',
-              border: '1px solid border-input',
-              boxShadow: boxShadows.moderate,
-            },
-            '&:active': {
-              color: 'text',
-              backgroundColor: 'fill-two-hover',
-              border: '1px solid border-input',
-            },
-            '&:focus-visible': {
-              color: 'text',
-              backgroundColor: 'fill-two-selected',
-            },
-            '&:disabled': {
-              color: 'text-disabled',
-              backgroundColor: 'transparent',
-              border: '1px solid border-input',
-              '&:hover': {
-                backgroundColor: 'transparent',
-                border: '1px solid border-input',
-              },
-            },
-          },
-        ({ large }: any) =>
-          large && {
-            buttonLarge: true,
-            paddingTop: spacing.small - 1,
-            paddingBottom: spacing.small - 1,
-            paddingRight: spacing.large - 1,
-            paddingLeft: spacing.large - 1,
-          },
-        ({ small }: any) =>
-          small && {
-            buttonSmall: true,
-            paddingTop: spacing.xxsmall - 1,
-            paddingBottom: spacing.xxsmall - 1,
-            paddingRight: spacing.medium - 1,
-            paddingLeft: spacing.medium - 1,
-            minHeight: 32,
-          },
-      ],
-      StartIcon: [
-        {
-          margin: '0 12px 0 0 !important',
-        },
-        ({ large }: any) =>
-          large && {
-            margin: '0 16px 0 0 !important',
-          },
-        ({ small }: any) =>
-          small && {
-            margin: '0 12px 0 0 !important',
-          },
-      ],
-      EndIcon: [
-        {
-          margin: '0 0 0 12px !important',
-        },
-        ({ large }: any) =>
-          large && {
-            margin: '0 0 0 16px !important',
-          },
-        ({ small }: any) =>
-          small && {
-            margin: '0 0 0 12px !important',
-          },
       ],
     },
     ButtonGroup: {
@@ -646,25 +399,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             backgroundColor: 'fill-two-hover',
             borderColor: 'fill-two-hover',
           },
-      ],
-    },
-    Modal: {
-      Root: [
-        {
-          backgroundColor: 'fill-one',
-          border: '1px solid border',
-          boxShadow: 'modal',
-          paddingTop: 0,
-          paddingRight: 0,
-          paddingBottom: 0,
-          paddingLeft: 0,
-        },
-      ],
-      Backdrop: [
-        {
-          backgroundColor: 'modal-backdrop',
-          zIndex: zIndexes.modal,
-        },
       ],
     },
     Select: {
