@@ -523,7 +523,7 @@ func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeploy
 
 		// Remove service from Console API if it exists and is not read-only.
 		if exists && !service.Status.IsReadonly() {
-			if err := r.ConsoleClient.DeleteService(*service.Status.ID); err != nil {
+			if err := r.deleteService(service.Status.GetID(), service.Spec.Detach); err != nil {
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
