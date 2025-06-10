@@ -498,14 +498,14 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 }
 
 func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
-	/// If the service is not being deleted and if it does not have our finalizer, then let's add it.
-	// This is equivalent to registering our finalizer.
+	// If the service is not being deleted and if it does not have the finalizer, then let's add it.
 	if service.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		controllerutil.AddFinalizer(service, ServiceFinalizer)
 	}
 
 	// If the service is being deleted, cleanup and remove the finalizer.
 	if !service.ObjectMeta.DeletionTimestamp.IsZero() {
+		// If the service does not have an ID, the finalizer can be removed.
 		if !service.Status.HasID() {
 			controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 			return &ctrl.Result{}
@@ -513,7 +513,7 @@ func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeploy
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
-			return &requeue
+			return &waitForResources
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
@@ -532,7 +532,7 @@ func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeploy
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue
+			return &waitForResources
 		}
 
 		// If our finalizer is present, remove it.
