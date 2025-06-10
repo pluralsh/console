@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+option go_package = "github.com/pluralsh/console/go/cloud-query/pkg/proto";
+
+package proto;
+
+message AwsCredentials {
+  string access_key_id = 1;
+  string secret_access_key = 2;
+}
+
+message AzureCredentials {
+  // Azure specific fields
+}
+
+message GcpCredentials {
+  // GCP specific fields
+}
+
+message Connection {
+  string provider = 1;
+  oneof credentials {
+    AwsCredentials aws = 2;
+    AzureCredentials azure = 3;
+    GcpCredentials gcp = 4;
+  }
+}
+
+message QueryInput {
+  Connection connection = 1;
+  string query = 2;
+}
+
+message SchemaInput {
+  Connection connection = 1;
+  optional string query = 2;
+}
+
+message ExtractInput {
+  Connection connection = 1;
+}
+
+message QueryOutput {
+  repeated string columns = 1;
+  map<string, string> result = 2;
+}
+
+message SchemaColumn {
+  string column = 1;
+  string type = 2;
+}
+
+message SchemaOutput {
+  string table = 1;
+  repeated SchemaColumn columns = 2;
+}
+
+message ExtractOutput {
+  string type = 1;
+  map<string, string> result = 2;
+  string id = 3;
+  repeated string links = 4;
+}
+
+service CloudQuery {
+  rpc Query(QueryInput) returns (stream QueryOutput) {}
+  rpc Schema(SchemaInput) returns (stream SchemaOutput) {}
+  rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
+}
