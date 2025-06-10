@@ -25,7 +25,7 @@ import (
 var _ = Describe("Global Service Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			serviceName  = "service-test"
+			serviceName  = "global-service-test"
 			clusterName  = "cluster-test"
 			repoName     = "repo-test"
 			namespace    = "default"
@@ -147,7 +147,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("XFWZ7AP5GMT74YUUGI4RKZ3VM6BHLQOX6IEDHD4PBGQCPDQ3NL5A===="),
+					SHA: lo.ToPtr("DXHTOG6LDUG754EBO4NWX7ROAXUWMHZGDZIDA3RQ4A7IQ6ZAI7FQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -203,7 +203,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("XFWZ7AP5GMT74YUUGI4RKZ3VM6BHLQOX6IEDHD4PBGQCPDQ3NL5A===="),
+					SHA: lo.ToPtr("DXHTOG6LDUG754EBO4NWX7ROAXUWMHZGDZIDA3RQ4A7IQ6ZAI7FQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -267,7 +267,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("XFWZ7AP5GMT74YUUGI4RKZ3VM6BHLQOX6IEDHD4PBGQCPDQ3NL5A===="),
+					SHA: lo.ToPtr("DXHTOG6LDUG754EBO4NWX7ROAXUWMHZGDZIDA3RQ4A7IQ6ZAI7FQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -377,7 +377,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			service := &v1alpha1.GlobalService{}
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 
-			Expect(err.Error()).To(Equal("globalservices.deployments.plural.sh \"service-test\" not found"))
+			Expect(err.Error()).To(Equal("globalservices.deployments.plural.sh \"global-service-test\" not found"))
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Create from template")

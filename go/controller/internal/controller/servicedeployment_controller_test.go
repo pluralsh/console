@@ -335,7 +335,9 @@ var _ = Describe("Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
+			fakeConsoleClient.On("IsServiceDeleting", mock.Anything).Return(false).Once()
+			fakeConsoleClient.On("IsServiceExisting", mock.Anything).Return(false, nil).Once()
+
 			serviceReconciler := &controller.ServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
@@ -360,11 +362,10 @@ var _ = Describe("Service Controller", Ordered, func() {
 var _ = Describe("Wait for resources", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			serviceName = "service-test"
+			serviceName = "wait-service-test"
 			clusterName = "cluster-test"
 			repoName    = "repo-test"
 			namespace   = "default"
-			sha         = "TO6UV6AVUGFXETYC4GY3ESV5KIW3P2Z23Y45K4YGAIKCBGTMJP7Q===="
 		)
 
 		ctx := context.Background()
