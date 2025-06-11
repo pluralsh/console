@@ -8,17 +8,13 @@ defmodule Console.Compliance.Datasource.ClusterUsers do
   @impl Console.Compliance.Datasource
   def stream do
     Cluster.stream()
-    |> Cluster.preloaded([:project, :owner, :read_bindings, :write_bindings])
+    |> Cluster.preloaded([:project, :read_bindings, :write_bindings])
     |> Console.Repo.stream(method: :keyset)
     |> Stream.map(fn c ->
       %{
         cluster: c.handle,
         project: c.project.name,
         version: c.current_version,
-        owner: %{
-          id: c.owner.id,
-          email: c.owner.email
-        },
         read_users: Enum.map(c.read_bindings, &extract_user/1),
         write_users: Enum.map(c.write_bindings, &extract_user/1)
       }
