@@ -26,8 +26,9 @@ func main() {
 	//}
 	//log.Printf("loaded modules: %v", modules)
 
-	_, err = pipe.Query("select vpc_id, cidr_block, state from aws_vpc")
+	result, err := pipe.Query("select vpc_id, cidr_block, state from aws_vpc")
 	if err != nil {
 		log.Fatalf("failed to load modules: %v", err)
 	}
+	log.Println(result)
 }

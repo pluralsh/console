@@ -1,6 +1,8 @@
 package steampipe
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func (in *steampipe) Query(q string) (string, error) {
 	rows, err := in.db.Query(q)
@@ -16,12 +18,17 @@ func (in *steampipe) Query(q string) (string, error) {
 
 	result := make([][]any, 0)
 	for rows.Next() {
-		row := make([]any, len(cols))
-		if err = rows.Scan(row); err != nil {
+		values := make([]any, len(cols))
+		pointers := make([]any, len(cols))
+		for i := range values {
+			pointers[i] = &values[i]
+		}
+
+		if err = rows.Scan(pointers...); err != nil {
 			return "", err
 		}
 
-		result = append(result, row)
+		result = append(result, values)
 	}
 
 	r, err := json.Marshal(result)
