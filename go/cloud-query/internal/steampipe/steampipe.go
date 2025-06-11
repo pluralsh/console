@@ -37,7 +37,7 @@ func (in *steampipe) init() (Steampipe, error) {
 	var authQuery string
 	switch in.provider {
 	case ProviderAWS:
-		authQuery = fmt.Sprintf("SELECT steampipe_configure_aws('access_key=\"%s\" secret_key=\"%s\"');",
+		authQuery = fmt.Sprintf("SELECT steampipe_configure_aws('access_key=%q secret_key=%q');",
 			in.credentials.AWS.AccessKeyId(), in.credentials.AWS.SecretAccessKey())
 	default:
 		return in, fmt.Errorf("unsupported provider: %s", in.provider)
