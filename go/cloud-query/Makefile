@@ -10,4 +10,4 @@ build-steampipe: ## run the steampipe server
 	docker build --no-cache -t steampipe -f steampipe.Dockerfile .
 
 run-steampipe: build-steampipe ## run the steampipe server
-	docker run --rm steampipe
+	docker run --rm -p 9193:9193 steampipe

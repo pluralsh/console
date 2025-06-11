@@ -27,4 +27,4 @@ RUN steampipe plugin install aws
 
 #RUN sqlite ".load ./steampipe_sqlite_extension_github.so"
 
-CMD ["steampipe", "service", "start", "--install-dir", "/home/steampipe/.steampipe"]
+CMD ["steampipe", "service", "start", "--install-dir", "--show-password", "/home/steampipe/.steampipe"]
