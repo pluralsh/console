@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -15,15 +14,20 @@ var (
 )
 
 func main() {
-	pipe, err := steampipe.NewSteampipe()
+	pipe, err := steampipe.NewSteampipe("aws", steampipe.NewAWSCredentials(nil, nil))
 	if err != nil {
 		log.Fatalf("failed to create Steampipe instance: %v", err)
 	}
 	defer pipe.Close()
 
-	modules, err := pipe.LoadedModules()
+	//modules, err := pipe.LoadedModules()
+	//if err != nil {
+	//	log.Fatalf("failed to load modules: %v", err)
+	//}
+	//log.Printf("loaded modules: %v", modules)
+
+	_, err = pipe.Query("select vpc_id, cidr_block, state from aws_vpc")
 	if err != nil {
 		log.Fatalf("failed to load modules: %v", err)
 	}
-	fmt.Println(modules)
 }

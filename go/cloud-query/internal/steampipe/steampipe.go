@@ -2,6 +2,7 @@ package steampipe
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 const (
@@ -12,12 +13,15 @@ const (
 )
 
 type Steampipe interface {
+	Query(q string) (string, error)
 	LoadedModules() ([]string, error)
 	Close() error
 }
 
 type steampipe struct {
-	db *sql.DB
+	db          *sql.DB
+	provider    Provider
+	credentials Credentials
 }
 
 func (in *steampipe) Close() error {
@@ -30,13 +34,25 @@ func (in *steampipe) init() (Steampipe, error) {
 		return in, err
 	}
 
+	var authQuery string
+	switch in.provider {
+	case ProviderAWS:
+		authQuery = fmt.Sprintf("SELECT steampipe_configure_aws('access_key=\"%s\" secret_key=\"%s\"');",
+			in.credentials.AWS.AccessKeyId(), in.credentials.AWS.SecretAccessKey())
+	default:
+		return in, fmt.Errorf("unsupported provider: %s", in.provider)
+	}
+	rows, err := db.Query(authQuery)
+	if err != nil {
+		return in, fmt.Errorf("failed to configure provider %s: %w", in.provider, err)
+	}
+	defer rows.Close()
+
 	in.db = db
 	return in, nil
 }
 
-// TODO: use singletone!
-func NewSteampipe() (Steampipe, error) {
-	// This function would typically initialize a new Steampipe instance.
-	// For now, we return nil and nil to satisfy the interface.
-	return (&steampipe{}).init()
+// TODO: Add cache.
+func NewSteampipe(provider Provider, credentials Credentials) (Steampipe, error) {
+	return (&steampipe{provider: provider, credentials: credentials}).init()
 }
