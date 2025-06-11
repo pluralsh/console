@@ -62,7 +62,6 @@ export function CreateStackModalFormEnvironment({
       <Button
         secondary
         small
-        size="tertiary"
         onClick={(e) => {
           e.preventDefault()
           setEnvironment((env) => [...env, { name: '', value: '' }])

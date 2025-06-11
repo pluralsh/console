@@ -124,7 +124,7 @@ function FixPr({
       ) : (
         <Button
           startIcon={<PrOpenIcon />}
-          onClick={mutation}
+          onClick={() => mutation()}
           loading={loading}
         >
           Create PR

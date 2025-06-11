@@ -247,7 +247,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {terminal && (
           <Button
             secondary
-            onClick={restart}
+            onClick={() => restart()}
             loading={restartLoading}
             startIcon={<ReloadIcon />}
           >
@@ -257,7 +257,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {!terminal && (
           <Button
             secondary
-            onClick={cancel}
+            onClick={() => cancel()}
             loading={cancelLoading}
           >
             Cancel
@@ -266,7 +266,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {stackRun.status === StackStatus.PendingApproval &&
           !stackRun.approvedAt && (
             <Button
-              onClick={mutation}
+              onClick={() => mutation()}
               loading={loading}
             >
               Approve

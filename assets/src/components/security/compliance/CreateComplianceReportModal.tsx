@@ -105,12 +105,7 @@ export function CreateComplianceReportButton() {
 
   return (
     <>
-      <Button
-        flexGrow={1}
-        onClick={() => setOpen(true)}
-      >
-        Create report
-      </Button>
+      <Button onClick={() => setOpen(true)}>Create report</Button>
       <ModalMountTransition open={open}>
         <CreateComplianceReportModal
           open={open}

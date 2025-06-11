@@ -20,7 +20,7 @@ export function ReturnToBeginning({ beginning }: any) {
         floating
         onClick={beginning}
         endIcon={<CaretUpIcon size={14} />}
-        pointerEvents="auto"
+        css={{ pointerEvents: 'auto' }}
       >
         Back to top
       </Button>

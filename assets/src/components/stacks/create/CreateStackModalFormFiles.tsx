@@ -70,7 +70,6 @@ export function CreateStackModalFormFiles({
       <Button
         secondary
         small
-        size="tertiary"
         disabled={loading}
         onClick={(e) => {
           e.preventDefault()
