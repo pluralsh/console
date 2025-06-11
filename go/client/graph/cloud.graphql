@@ -5,6 +5,7 @@ fragment CloudConnectionFragment on CloudConnection {
         ...PolicyBindingFragment
     }
     provider
+
 }
 
 mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {

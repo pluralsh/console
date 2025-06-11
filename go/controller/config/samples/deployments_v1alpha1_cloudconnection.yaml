@@ -1,0 +1,31 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: CloudConnection
+metadata:
+  labels:
+    app.kubernetes.io/name: cloudconnection
+    app.kubernetes.io/instance: cloudconnection-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: cloudconnection-sample
+  namespace: default
+spec:
+  name: cloudconnection-sample
+  provider: aws
+  readBindings:
+    - userEmail: lukasz@plural.sh
+  configuration:
+    aws:
+      accessKeyId: "123"
+      region: "eu-central-1"
+      secretAccessKey:
+        name: cloudconnection-secret
+        key: secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudconnection-secret
+  namespace: default
+data:
+  secret: dGVzdA==

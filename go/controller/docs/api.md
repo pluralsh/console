@@ -11,6 +11,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 ### Resource Types
 - [BootstrapToken](#bootstraptoken)
 - [Catalog](#catalog)
+- [CloudConnection](#cloudconnection)
 - [Cluster](#cluster)
 - [ClusterRestore](#clusterrestore)
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
@@ -94,6 +95,43 @@ _Appears in:_
 | `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Optional: {} <br /> |
 
 
+#### AWSCloudConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [CloudConnectionConfiguration](#cloudconnectionconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `accessKeyId` _string_ |  |  |  |
+| `secretAccessKey` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `region` _string_ |  |  |  |
+
+
+
+
+#### AzureCloudConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [CloudConnectionConfiguration](#cloudconnectionconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `subscriptionId` _string_ |  |  |  |
+| `tenantId` _string_ |  |  |  |
+| `clientId` _string_ |  |  |  |
+| `clientSecret` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
 
 
 #### AzureOpenAISettings
@@ -147,6 +185,7 @@ Binding ...
 _Appears in:_
 - [Bindings](#bindings)
 - [CatalogBindings](#catalogbindings)
+- [CloudConnectionSpec](#cloudconnectionspec)
 - [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
 - [DeploymentSettingsBindings](#deploymentsettingsbindings)
 - [NotificationSinkSpec](#notificationsinkspec)
@@ -317,6 +356,63 @@ _Appears in:_
 | `bindings` _[CatalogBindings](#catalogbindings)_ | Bindings contain read and write policies of this Catalog. |  | Optional: {} <br /> |
 
 
+#### CloudConnection
+
+
+
+CloudConnection is the Schema for the cloudconnections API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `CloudConnection` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[CloudConnectionSpec](#cloudconnectionspec)_ |  |  |  |
+
+
+#### CloudConnectionConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [CloudConnectionSpec](#cloudconnectionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `aws` _[AWSCloudConnection](#awscloudconnection)_ |  |  |  |
+| `gcp` _[GCPCloudConnection](#gcpcloudconnection)_ |  |  |  |
+| `azure` _[AzureCloudConnection](#azurecloudconnection)_ |  |  |  |
+
+
+
+
+#### CloudConnectionSpec
+
+
+
+CloudConnectionSpec defines the desired state of CloudConnection
+
+
+
+_Appears in:_
+- [CloudConnection](#cloudconnection)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this CloudConnection. If not provided CloudConnection's own name<br />from CloudConnection.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: {} <br />Type: string <br /> |
+| `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ |  |  |  |
+| `readBindings` _[Binding](#binding) array_ |  |  |  |
+
+
 #### CloudProvider
 
 _Underlying type:_ _string_
@@ -326,6 +422,7 @@ _Underlying type:_ _string_
 
 
 _Appears in:_
+- [CloudConnectionSpec](#cloudconnectionspec)
 - [ProviderSpec](#providerspec)
 
 
@@ -1039,6 +1136,23 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to span a specific project only |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow |  | Optional: {} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow. Can also be managed within the Plural Console UI securely. |  | Optional: {} <br /> |
+
+
+#### GCPCloudConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [CloudConnectionConfiguration](#cloudconnectionconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `serviceAccountKey` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `projectId` _string_ |  |  |  |
 
 
 #### GateSpec
