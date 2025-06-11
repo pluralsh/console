@@ -17,21 +17,31 @@ defmodule Console.Compliance.Datasource.Clusters do
         project: c.project.name,
         version: c.current_version,
         kubelet_version: c.kubelet_version,
-        read_users: Enum.map(c.read_bindings, &extract_user/1) |> Enum.reject(&is_nil/1),
-        write_users: Enum.map(c.write_bindings, &extract_user/1) |> Enum.reject(&is_nil/1)
+        read_users: format_users(c.read_bindings),
+        write_users: format_users(c.write_bindings)
       }
     end)
   end
 
+  defp format_users(bindings) do
+    bindings
+    |> Enum.map(&extract_user/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&format_user/1)
+    |> Enum.join(", ")
+  end
+
+  defp format_user(%{email: email}) when not is_nil(email), do: email
+  defp format_user(%{group_name: name}) when not is_nil(name), do: "group:#{name}"
+  defp format_user(_), do: nil
+
   defp extract_user(%PolicyBinding{user: user}) when not is_nil(user) do
     %{
-      id: user.id,
       email: user.email
     }
   end
   defp extract_user(%PolicyBinding{group: group}) when not is_nil(group) do
     %{
-      group_id: group.id,
       group_name: group.name
     }
   end
