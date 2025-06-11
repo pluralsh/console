@@ -26,6 +26,4 @@ func main() {
 		log.Fatalf("failed to load modules: %v", err)
 	}
 	fmt.Println(modules)
-
-	select {}
 }

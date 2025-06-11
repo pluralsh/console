@@ -7,22 +7,29 @@ import (
 )
 
 const (
-	// TODO: refactor extensions to a table, in order to load all provider extensions at once.
-	// extensionPath is the path to the Steampipe SQLite extension.
-	extensionPath = "./bin/steampipe_sqlite_aws.so"
-
 	// extensionEntryPoint is the entry point function for the Steampipe SQLite extension.
 	extensionEntryPoint = "sqlite3_extension_init"
 
-	// DriverName is the name of the Steampipe SQLite driver.
-	DriverName = "steampipe"
+	// driverName is the name of the Steampipe SQLite driver.
+	driverName = "steampipe"
+)
+
+var (
+	// extensionPaths are paths to the Steampipe SQLite extensions.
+	extensionPaths = []string{"./bin/steampipe_sqlite_aws.so"}
 )
 
 func init() {
-	sql.Register(DriverName,
+	sql.Register(driverName,
 		&sqlite3.SQLiteDriver{
 			ConnectHook: func(c *sqlite3.SQLiteConn) error {
-				return c.LoadExtension(extensionPath, extensionEntryPoint)
+				for _, path := range extensionPaths {
+					if err := c.LoadExtension(path, extensionEntryPoint); err != nil {
+						return err
+					}
+				}
+
+				return nil
 			},
 		},
 	)

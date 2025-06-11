@@ -25,7 +25,7 @@ func (in *steampipe) Close() error {
 }
 
 func (in *steampipe) init() (Steampipe, error) {
-	db, err := sql.Open(DriverName, dataSourceName)
+	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return in, err
 	}
