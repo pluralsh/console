@@ -28,6 +28,7 @@ rules:
   resources:
   - bootstraptokens
   - catalogs
+  - cloudconnections
   - clusterrestores
   - clusterrestoretriggers
   - clusters
@@ -74,6 +75,7 @@ rules:
   resources:
   - bootstraptokens/finalizers
   - catalogs/finalizers
+  - cloudconnections/finalizers
   - clusterrestores/finalizers
   - clusterrestoretriggers/finalizers
   - clusters/finalizers
@@ -114,6 +116,7 @@ rules:
   resources:
   - bootstraptokens/status
   - catalogs/status
+  - cloudconnections/status
   - clusterrestores/status
   - clusterrestoretriggers/status
   - clusters/status

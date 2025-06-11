@@ -1,0 +1,31 @@
+# permissions for end users to edit cloudconnections.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: cloudconnection-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: controller
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+  name: cloudconnection-editor-role
+rules:
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - cloudconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - cloudconnections/status
+  verbs:
+  - get
