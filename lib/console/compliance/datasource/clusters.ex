@@ -3,13 +3,12 @@ defmodule Console.Compliance.Datasource.Clusters do
   Datasource for compliance reports.
   """
   @behaviour Console.Compliance.Datasource
-  alias Console.Schema.{Cluster, PolicyBinding}
+  alias Console.Schema.{Cluster, PolicyBinding, User, Group}
 
   @impl Console.Compliance.Datasource
   def stream do
     Cluster.stream()
-    |> Cluster.with_users()
-    |> Cluster.preloaded([:project])
+    |> Cluster.preloaded([:project, read_bindings: [:group, :user], write_bindings: [:group, :user]])
     |> Console.Repo.stream(method: :keyset)
     |> Stream.map(fn c ->
       %{
@@ -35,15 +34,11 @@ defmodule Console.Compliance.Datasource.Clusters do
   defp format_user(%{group_name: name}) when not is_nil(name), do: "group:#{name}"
   defp format_user(_), do: nil
 
-  defp extract_user(%PolicyBinding{user: user}) when not is_nil(user) do
-    %{
-      email: user.email
-    }
+  defp extract_user(%PolicyBinding{user: %User{} = user}) do
+    %{email: user.email}
   end
-  defp extract_user(%PolicyBinding{group: group}) when not is_nil(group) do
-    %{
-      group_name: group.name
-    }
+  defp extract_user(%PolicyBinding{group: %Group{} = group}) do
+    %{group_name: group.name}
   end
   defp extract_user(_), do: nil
 end
