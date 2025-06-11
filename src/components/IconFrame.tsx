@@ -87,7 +87,7 @@ const sizeToFrameSize: Record<Size, number> = {
 
 type IconFrameBaseProps = {
   clickable?: boolean
-  disabled?: boolean
+  disabled?: Nullable<boolean>
   textValue?: string
   icon: ReactElement<any>
   size?: Size

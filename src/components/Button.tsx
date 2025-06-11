@@ -2,13 +2,14 @@ import {
   ComponentPropsWithRef,
   ElementType,
   memo,
+  MouseEventHandler,
   ReactNode,
   useEffect,
   useRef,
   useState,
 } from 'react'
 
-import { styled, useTheme } from 'styled-components'
+import { CSSProperties, styled, useTheme } from 'styled-components'
 import { resolveSpacersAndSanitizeCss, SpacerProps } from '../theme/spacing'
 import { applyNodeToRefs } from '../utils/applyNodeToRefs'
 import Flex from './Flex'
@@ -26,24 +27,33 @@ type ButtonType =
 export type ButtonProps = {
   startIcon?: ReactNode
   endIcon?: ReactNode
-  loading?: boolean
+  loading?: Nullable<boolean>
   loadingIndicator?: ReactNode
   children?: ReactNode
   // flags- keeping this pattern instead of using "size" and "type" for backwards compatibility
   small?: boolean
   large?: boolean
+  primary?: boolean
   secondary?: boolean
   tertiary?: boolean
   floating?: boolean
   destructive?: boolean
+  // type overrides that are more permissive but functionally the same
+  onClick?: Nullable<MouseEventHandler<HTMLButtonElement>>
+  disabled?: Nullable<boolean>
   // flexible typing for links
   as?: ElementType
   to?: string
   href?: string
-  target?: string | '_blank' | '_self' | '_parent' | '_top'
-  rel?: string | 'noopener noreferrer' | 'noreferrer' | 'noopener'
+  target?: string
+  rel?: string
 } & SpacerProps &
-  ComponentPropsWithRef<'button'>
+  Omit<ComponentPropsWithRef<'button'>, 'onClick' | 'disabled'> &
+  // a few commonly used css props for QOL
+  Pick<
+    CSSProperties,
+    'width' | 'minWidth' | 'height' | 'minHeight' | 'flex' | 'alignSelf'
+  >
 
 const Button = memo(
   ({
@@ -60,11 +70,20 @@ const Button = memo(
     tertiary,
     destructive,
     floating,
+    // common css props
+    height,
+    minHeight,
+    width,
+    minWidth,
+    flex,
+    alignSelf,
     ...props
   }: ButtonProps) => {
     const theme = useTheme()
     const buttonRef = useRef<HTMLButtonElement>(null)
-    const [height, setHeight] = useState<number | 'auto'>('auto')
+    const [measuredHeight, setMeasuredHeight] = useState<number | 'auto'>(
+      'auto'
+    )
 
     const buttonSize = large ? 'large' : small ? 'small' : 'medium'
     const buttonType = secondary
@@ -80,7 +99,7 @@ const Button = memo(
     useEffect(() => {
       if (!buttonRef.current) return
 
-      setHeight(buttonRef.current.offsetHeight)
+      setMeasuredHeight(buttonRef.current.offsetHeight)
     }, [])
 
     const { rest, css } = resolveSpacersAndSanitizeCss(props, theme)
@@ -94,7 +113,7 @@ const Button = memo(
         $type={buttonType}
         $noPadding={props.padding === 'none'}
         disabled={disabled}
-        css={css}
+        css={{ width, minWidth, height, minHeight, flex, alignSelf, ...css }}
         {...(loading && { inert: true })}
         {...rest}
       >
@@ -112,7 +131,11 @@ const Button = memo(
             {loadingIndicator || (
               <Spinner
                 color={theme.colors.text}
-                size={typeof height === 'number' ? (height * 3) / 5 : 16}
+                size={
+                  typeof measuredHeight === 'number'
+                    ? (measuredHeight * 3) / 5
+                    : 16
+                }
               />
             )}
           </LoadingIndicatorWrapperSC>
@@ -294,7 +317,7 @@ const ButtonBaseSC = styled.button<{
 )
 
 const IconSC = styled.span<{
-  $loading: boolean
+  $loading: Nullable<boolean>
   $size: ButtonSize
   $position: 'start' | 'end'
 }>(({ theme, $loading, $size, $position }) => {

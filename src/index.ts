@@ -12,16 +12,10 @@ export { default as Accordion, AccordionItem } from './components/Accordion'
 export type { AccordionProps } from './components/Accordion'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'
-export { AppList } from './components/AppList'
-export type {
-  AppListProps,
-  AppMenuAction,
-  AppProps,
-} from './components/AppList'
 export { default as ArrowScroll } from './components/ArrowScroll'
 export { default as Banner } from './components/Banner'
 export { Breadcrumbs } from './components/Breadcrumbs'
-export { default as Button } from './components/Button'
+export { default as Button, type ButtonProps } from './components/Button'
 export { default as Callout } from './components/Callout'
 export type { CalloutProps } from './components/Callout'
 export { default as Card } from './components/Card'
