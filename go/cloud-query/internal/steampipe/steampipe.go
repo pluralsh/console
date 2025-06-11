@@ -34,6 +34,7 @@ func (in *steampipe) init() (Steampipe, error) {
 	return in, nil
 }
 
+// TODO: use singletone!
 func NewSteampipe() (Steampipe, error) {
 	// This function would typically initialize a new Steampipe instance.
 	// For now, we return nil and nil to satisfy the interface.
