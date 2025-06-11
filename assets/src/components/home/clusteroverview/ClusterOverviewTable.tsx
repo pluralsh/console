@@ -11,16 +11,18 @@ import { ComponentProps } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
+import { ClustersRowFragment } from 'generated/graphql'
+import { Edge } from 'utils/graphql'
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 export function ClusterOverViewTable({
   refetch,
   data,
   ...props
 }: {
-  refetch?
-  data
+  data: Nullable<Edge<ClustersRowFragment>>[]
+  refetch: () => void
 } & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
@@ -30,17 +32,15 @@ export function ClusterOverViewTable({
   return (
     <Table
       loose
+      fullHeightWrap
+      virtualizeRows
       fillLevel={1}
       data={data}
       columns={clusterOverviewColumns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       reactTableOptions={reactTableOptions}
       onRowClick={(_e, { original }) =>
-        navigate(
-          getClusterDetailsPath({
-            clusterId: original.node?.id,
-          })
-        )
+        navigate(getClusterDetailsPath({ clusterId: original.node?.id }))
       }
       {...props}
     />

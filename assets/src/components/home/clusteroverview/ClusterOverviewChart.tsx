@@ -8,10 +8,8 @@ import { UpgradeStatisticsQuery } from 'generated/graphql'
 
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { ClusterIcon } from '@pluralsh/design-system'
-import { CustomLegend } from '../CustomLegend'
-import { HomeCard } from '../HomeCard.tsx'
 import { ApolloError } from '@apollo/client'
+import { EmptyState } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
 
 const CHART_SIZE = 240
@@ -32,37 +30,31 @@ export function ClusterOverviewChart({
     `Clusters`
   )
 
+  if (error) return <GqlError error={error} />
+  if (loading) return <ChartSkeleton scale={0.87} />
+  if (!data?.upgradeStatistics)
+    return <EmptyState message="Upgrade statistics not found." />
+
   return (
-    <HomeCard
-      icon={<ClusterIcon />}
-      title="Cluster Overview"
-      tooltip={<CustomLegend data={chartData.toReversed()} />}
-    >
-      {error && <GqlError error={error} />}
-      {data?.upgradeStatistics ? (
-        <RadialBar
-          colors={(item) => item.data.color}
-          endAngle={360}
-          cornerRadius={5}
-          padAngle={2}
-          padding={0.3}
-          innerRadius={0.35}
-          tooltip={(props) => (
-            <ChartTooltip
-              color={props.bar.color}
-              value={props.bar.formattedValue}
-              label={props.bar.category}
-            />
-          )}
-          layers={['bars', CenterLabel]}
-          data={chartData}
-          height={CHART_SIZE}
-          width={CHART_SIZE}
+    <RadialBar
+      colors={(item) => item.data.color}
+      endAngle={360}
+      cornerRadius={5}
+      padAngle={2}
+      padding={0.3}
+      innerRadius={0.35}
+      tooltip={(props) => (
+        <ChartTooltip
+          color={props.bar.color}
+          value={props.bar.formattedValue}
+          label={props.bar.category}
         />
-      ) : loading ? (
-        <ChartSkeleton scale={0.87} />
-      ) : null}
-    </HomeCard>
+      )}
+      layers={['bars', CenterLabel]}
+      data={chartData}
+      height={CHART_SIZE}
+      width={CHART_SIZE}
+    />
   )
 }
 

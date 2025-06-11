@@ -1,4 +1,4 @@
-import Home from 'components/home/Home'
+import { Home } from 'components/home/Home'
 import { AccessTokens } from 'components/profile/AccessTokens'
 import { EmailSettings } from 'components/profile/EmailSettings'
 import MyProfile from 'components/profile/MyProfile'
@@ -7,19 +7,19 @@ import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
 import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
+import { GitHubSetup } from 'components/cloud-setup/GitHubSetup.tsx'
 import { aiRoutes } from './aiRoutes.tsx'
 import { catalogRoutes } from './catalogRoutes.tsx'
 import { cdRoutes } from './cdRoutes'
 import { costManagementRoutes } from './costManagementRoutes.tsx'
+import { edgeRoutes } from './edgeRoutes.tsx'
+import { flowRoutes } from './flowRoutes.tsx'
 import { kubernetesRoutes } from './kubernetesRoute'
 import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
 import { securityRoutes } from './securityRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
-import { edgeRoutes } from './edgeRoutes.tsx'
-import { flowRoutes } from './flowRoutes.tsx'
-import { GitHubSetup } from 'components/cloud-setup/GitHubSetup.tsx'
 
 const profileRoutes = [
   <Route
