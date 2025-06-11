@@ -17,8 +17,8 @@ defmodule Console.Compliance.Datasource.Clusters do
         project: c.project.name,
         version: c.current_version,
         kubelet_version: c.kubelet_version,
-        read_users: Enum.map(c.read_bindings, &extract_user/1),
-        write_users: Enum.map(c.write_bindings, &extract_user/1)
+        read_users: Enum.map(c.read_bindings, &extract_user/1) |> Enum.reject(&is_nil/1),
+        write_users: Enum.map(c.write_bindings, &extract_user/1) |> Enum.reject(&is_nil/1)
       }
     end)
   end
