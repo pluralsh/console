@@ -393,6 +393,22 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
+  def with_users(query \\ __MODULE__) do
+    from(c in query,
+      left_join: rb in assoc(c, :read_bindings),
+      left_join: wb in assoc(c, :write_bindings),
+      left_join: ru in assoc(rb, :user),
+      left_join: wu in assoc(wb, :user),
+      left_join: rg in assoc(rb, :group),
+      left_join: wg in assoc(wb, :group),
+      preload: [
+        read_bindings: {rb, user: ru, group: rg},
+        write_bindings: {wb, user: wu, group: wg}
+      ],
+      distinct: true
+    )
+  end
+
   @valid ~w(provider_id distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
