@@ -13,28 +13,10 @@ var (
 )
 
 func main() {
-	//pool, err := sqlitex.NewPool("file::memory:?mode=memory&cache=shared", sqlitex.PoolOptions{
-	//	PoolSize: 50,
-	//})
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//conn, err := pool.Take(context.Background())
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer pool.Put(conn)
-	//
-	//err = sqlitex.Execute(conn, ".load ./bin/steampipe_sqlite_aws.so", nil)
-	//if err != nil {
-	//	panic(err)
-	//}
-
 	sql.Register("steampipe",
 		&sqlite3.SQLiteDriver{
 			ConnectHook: func(c *sqlite3.SQLiteConn) error {
-				return c.LoadExtension("./bin/steampipe_sqlite_aws.so", "")
+				return c.LoadExtension("./bin/steampipe_sqlite_aws.so", "sqlite3_extension_init")
 			},
 		},
 	)
@@ -42,18 +24,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
+	db.SetMaxOpenConns(1)
+
 	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
-
-	//db, err := sql.Open("sqlite3", ":memory:")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//_, err = db.Exec("SELECT load_extension('./bin/steampipe_sqlite_aws.so');")
-	//if err != nil {
-	//	panic(err)
-	//}
 }
