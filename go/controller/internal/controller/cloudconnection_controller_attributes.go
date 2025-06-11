@@ -45,6 +45,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionAzureSettingsAttributes(ctx
 		return nil, fmt.Errorf("%q key does not exist in referenced Azure secret", azure.ClientSecret.Key)
 	}
 	return &console.CloudConnectionAttributes{
+		Provider: console.ProviderAzure,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			Azure: &console.AzureCloudConnectionAttributes{
 				SubscriptionID: azure.SubscriptionId,
@@ -66,6 +67,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionGCPSettingsAttributes(ctx c
 		return nil, fmt.Errorf("%q key does not exist in referenced GCP secret", gcp.ServiceAccountKey.Key)
 	}
 	return &console.CloudConnectionAttributes{
+		Provider: console.ProviderGCP,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			GCP: &console.GCPCloudConnectionAttributes{
 				ServiceAccountKey: string(serviceAccountKey),
@@ -87,6 +89,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx c
 	}
 
 	return &console.CloudConnectionAttributes{
+		Provider: console.ProviderAWS,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			AWS: &console.AWSCloudConnectionAttributes{
 				AccessKeyID:     aws.AccessKeyId,

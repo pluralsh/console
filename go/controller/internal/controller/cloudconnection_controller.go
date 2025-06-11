@@ -118,6 +118,9 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	connection.Status.ID = &apiConnection.ID
 	connection.Status.SHA = &sha
 
+	utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
 	return ctrl.Result{}, nil
 }
 
@@ -233,7 +236,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return &waitForResources, nil
 		}
 
 		// Stop reconciliation as the item is being deleted
