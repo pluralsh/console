@@ -39,8 +39,8 @@ func (in *steampipe) init() (Steampipe, error) {
 	case ProviderAWS:
 		authQuery = fmt.Sprintf(`
 			SELECT steampipe_configure_aws('
-				access_key="%s"
-				secret_key="%s"
+				access_key=%q
+				secret_key=%q
 			');
 		`, in.credentials.AWS.AccessKeyId(), in.credentials.AWS.SecretAccessKey())
 	default:
