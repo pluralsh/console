@@ -388,6 +388,14 @@ const clusterDetailsRoutes = [
     >
       <Route
         index
+        element={
+          <Navigate
+            replace
+            to={CLUSTER_INSIGHTS_SUMMARY_PATH}
+          />
+        }
+      />
+      <Route
         path={CLUSTER_INSIGHTS_SUMMARY_PATH}
         element={<ClusterInsightsSummary />}
       />
