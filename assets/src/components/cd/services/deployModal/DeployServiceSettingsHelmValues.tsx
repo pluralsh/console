@@ -294,7 +294,6 @@ const HelmValuesFilesInput = memo(
             type="button"
             secondary
             small
-            size="tertiary"
             onClick={(e) => {
               e.preventDefault()
               setHelmValuesFiles((helmValues) => [...helmValues, ''])

@@ -103,7 +103,7 @@ export function NotificationsPanel({
           />
           <Button
             loading={loading}
-            onClick={mutation}
+            onClick={() => mutation()}
             small
             secondary
           >

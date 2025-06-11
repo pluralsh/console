@@ -1,6 +1,7 @@
 import {
   ArrowTopRightIcon,
   Button,
+  ButtonProps,
   ChatOutlineIcon,
   IconFrame,
   Spinner,
@@ -63,7 +64,7 @@ export function ChatWithAIButton({
   summaryText?: string
   bodyText?: string
   iconOnly?: boolean
-} & ComponentPropsWithRef<typeof Button>) {
+} & ButtonProps) {
   const {
     createNewThread,
     mutationLoading: loading,
@@ -98,8 +99,8 @@ export function ChatWithAIButton({
           })}
       tooltip
       textValue={bodyText}
-      type="secondary"
       {...props}
+      type="secondary"
     />
   ) : (
     <Button

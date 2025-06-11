@@ -161,7 +161,6 @@ export function ShellCommandEditor({
       {!isEditing && (
         <Button
           floating
-          size="medium"
           startIcon={<PencilIcon />}
           onClick={() => {
             setIsEditing(true)
@@ -173,7 +172,6 @@ export function ShellCommandEditor({
       {isEditing && (
         <Button
           floating
-          size="medium"
           startIcon={<CliIcon />}
           type="submit"
         >
@@ -183,7 +181,6 @@ export function ShellCommandEditor({
       {(isEditing || !isDefault) && (
         <Button
           secondary
-          size="medium"
           startIcon={<CloseIcon />}
           onClick={() => {
             setCommand(null)

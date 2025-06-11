@@ -123,7 +123,7 @@ export const ColTemplate = columnHelper.accessor(
             small
             floating
             startIcon={<DiffColumnIcon />}
-            maxWidth={200}
+            css={{ maxWidth: 200 }}
             onClick={(e) => {
               e.stopPropagation()
               options.meta?.setSelectedTemplateId?.(template?.id)
