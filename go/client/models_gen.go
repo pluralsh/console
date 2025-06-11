@@ -2676,6 +2676,11 @@ type GroupMemberEdge struct {
 	Cursor *string      `json:"cursor,omitempty"`
 }
 
+type HealthRange struct {
+	Min *int64 `json:"min,omitempty"`
+	Max *int64 `json:"max,omitempty"`
+}
+
 type HelmAuthAttributes struct {
 	Basic  *HelmBasicAuthAttributes  `json:"basic,omitempty"`
 	Bearer *HelmBearerAuthAttributes `json:"bearer,omitempty"`
@@ -9723,6 +9728,49 @@ func (e *VectorStore) UnmarshalGQL(v any) error {
 }
 
 func (e VectorStore) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VersionCompliance string
+
+const (
+	VersionComplianceLatest    VersionCompliance = "LATEST"
+	VersionComplianceCompliant VersionCompliance = "COMPLIANT"
+	VersionComplianceOutdated  VersionCompliance = "OUTDATED"
+)
+
+var AllVersionCompliance = []VersionCompliance{
+	VersionComplianceLatest,
+	VersionComplianceCompliant,
+	VersionComplianceOutdated,
+}
+
+func (e VersionCompliance) IsValid() bool {
+	switch e {
+	case VersionComplianceLatest, VersionComplianceCompliant, VersionComplianceOutdated:
+		return true
+	}
+	return false
+}
+
+func (e VersionCompliance) String() string {
+	return string(e)
+}
+
+func (e *VersionCompliance) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VersionCompliance(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VersionCompliance", str)
+	}
+	return nil
+}
+
+func (e VersionCompliance) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

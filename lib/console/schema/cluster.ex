@@ -317,6 +317,23 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def with_version_compliance(query \\ __MODULE__, compliance)
+  def with_version_compliance(query, :latest) do
+    from(c in query, where: c.current_version >= ^Settings.kube_vsn())
+  end
+
+  def with_version_compliance(query, :compliant) do
+    from(c in query, where: c.current_version >= ^Settings.compliant_vsn())
+  end
+
+  def with_version_compliance(query, :outdated) do
+    from(c in query, where: c.current_version < ^Settings.compliant_vsn())
+  end
+
+  def for_health_range(query \\ __MODULE__, min, max) do
+    from(c in query, where: c.health_score >= ^min and c.health_score <= ^max)
+  end
+
   def stats(query \\ __MODULE__) do
     unhealthy = Timex.now() |> Timex.shift(minutes: -4)
     from(c in query,

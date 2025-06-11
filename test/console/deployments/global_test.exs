@@ -637,6 +637,71 @@ defmodule Console.Deployments.GlobalSyncTest do
       refute svc.deleted_at
     end
 
+
+    test "it can sync template helm global services with dynamic template overrides" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+
+      sync = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+      another_sync = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster)
+      sync3 = insert(:cluster, tags: [%{name: "sync", value: "test2"}])
+
+      global = insert(:global_service,
+        template: build(:service_template,
+          repository_id: git.id,
+          name: "source",
+          namespace: "my-service",
+          git: %{ref: "main", folder: "helm"},
+          helm: %{chart: "test", version: "{{ context[cluster.handle].version | default: '0.2.0' }}", url: "oci://my.helm.registry/charts"},
+          configuration: [%{name: "name", value: "value"}]
+        ),
+        cascade: %{delete: true},
+        context: build(:template_context, raw: %{sync.handle => %{"version" => "0.1.0"}}),
+        tags: [%{name: "sync", value: "test"}]
+      )
+
+
+      :ok = Global.sync_clusters(refetch(global))
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "helm"
+      assert svc.namespace == "my-service"
+      assert svc.helm.chart == "test"
+      assert svc.helm.version == "0.1.0"
+      assert svc.helm.url == "oci://my.helm.registry/charts"
+      assert svc.owner_id == global.id
+
+      svc2 = Services.get_service_by_name(another_sync.id, "source")
+
+      assert svc2.git.ref == "main"
+      assert svc2.git.folder == "helm"
+      assert svc2.helm.chart == "test"
+      assert svc2.helm.version == "0.2.0"
+      assert svc2.helm.url == "oci://my.helm.registry/charts"
+      assert svc2.namespace == "my-service"
+      assert svc2.owner_id == global.id
+
+      for cluster <- [sync2, sync3] do
+        refute Services.get_service_by_name(cluster.id, "source")
+      end
+
+      :ok = Global.sync_clusters(refetch(global))
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "helm"
+      assert svc.namespace == "my-service"
+      assert svc.owner_id == global.id
+      assert svc.helm.chart == "test"
+      assert svc.helm.version == "0.1.0"
+      assert svc.helm.url == "oci://my.helm.registry/charts"
+      refute svc.deleted_at
+    end
+
     test "it can sync template global services with dynamic template overrides and contexts" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)
