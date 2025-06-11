@@ -1,59 +1,73 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useCloudSetupUnfinished, useIsManager } from 'components/contexts'
+import { useCloudSetupUnfinished } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { useTheme } from 'styled-components'
-import { AiThreads } from './AiThreads.tsx'
-import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
-import { DeploymentsCard } from './deployments/DeploymentsCard'
-import { PrCard } from './pullrequests/PrCard'
-import { ServiceCatalogs } from './ServiceCatalog.tsx'
-import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
-import { GettingStartedPopup } from './GettingStarted.tsx'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
+
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { useProjectId } from 'components/contexts/ProjectsContext.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
+import {
+  useClustersQuery,
+  useUpgradeStatisticsQuery,
+} from 'generated/graphql.ts'
+import { ClusterOverviewChart } from './clusteroverview/ClusterOverviewChart.tsx'
+import { ClusterOverViewTable } from './clusteroverview/ClusterOverviewTable.tsx'
+import { GettingStartedPopup } from './GettingStarted.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
-export default function Home() {
-  const theme = useTheme()
-  const isManager = useIsManager()
-  const onboarded = useOnboarded()
-  // we don't want a double popup, and this one would come first
-  const isCloudSetupUnfinished = useCloudSetupUnfinished()
-
+export function Home() {
   useSetBreadcrumbs(breadcrumbs)
+  // we don't want a double popup, and cloud setup would come first if relevant
+  const isCloudSetupUnfinished = useCloudSetupUnfinished()
+  const onboarded = useOnboarded()
+
+  const projectId = useProjectId()
+  const {
+    data: tableData,
+    loading: tableLoading,
+    error: tableError,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    { queryHook: useClustersQuery, keyPath: ['clusters'] },
+    { projectId }
+  )
+
+  const {
+    data: chartData,
+    loading: chartLoading,
+    error: chartError,
+  } = useUpgradeStatisticsQuery({
+    variables: { projectId },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
 
   return (
-    <>
+    <ResponsivePageFullWidth maxContentWidth={1440}>
       {!onboarded && !isCloudSetupUnfinished && <GettingStartedPopup />}
-      <ResponsivePageFullWidth maxContentWidth={1440}>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.large,
-            paddingBottom: theme.spacing.large,
-          }}
-        >
-          <ClusterOverviewCard />
-          <ServiceCatalogs />
-          <AiThreads />
-          {isManager && <ConstraintViolationsCard />}
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.large,
-
-              '@media (min-width: 1168px)': {
-                flexDirection: 'row',
-              },
-            }}
-          >
-            <PrCard />
-            <DeploymentsCard />
-          </div>
-        </div>
-      </ResponsivePageFullWidth>
-    </>
+      <ClusterOverviewChart
+        data={chartData}
+        loading={chartLoading}
+        error={chartError}
+      />
+      {tableError ? (
+        <GqlError error={tableError} />
+      ) : (
+        <ClusterOverViewTable
+          data={tableData?.clusters?.edges ?? []}
+          loading={!tableData && tableLoading}
+          refetch={refetch}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={tableLoading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+      )}
+    </ResponsivePageFullWidth>
   )
 }

@@ -1,5 +1,11 @@
 import { Table } from '@pluralsh/design-system'
-import { columns } from 'components/home/pullrequests/PrTable'
+import {
+  ColActions,
+  ColCreator,
+  ColInsertedAt,
+  ColStatus,
+  ColTitle,
+} from 'components/pr/queue/PrQueueColumns'
 
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -40,3 +46,5 @@ export function FlowPrs() {
     />
   )
 }
+
+const columns = [ColTitle, ColStatus, ColCreator, ColInsertedAt, ColActions]
