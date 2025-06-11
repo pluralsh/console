@@ -55,11 +55,6 @@ import ClusterPods from '../components/cd/cluster/ClusterPods'
 import ClusterPRs from '../components/cd/cluster/ClusterPRs'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 
-import Node from '../components/cd/cluster/node/Node'
-import NodeEvents from '../components/cd/cluster/node/NodeEvents'
-import NodeInfo from '../components/cd/cluster/node/NodeInfo'
-import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
-import NodeRaw from '../components/cd/cluster/node/NodeRaw'
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 
 import Pod from '../components/cd/cluster/pod/Pod'
@@ -141,7 +136,6 @@ import {
   NAMESPACE_SERVICES_PATH,
   NAMESPACES_PARAM_ID,
   NAMESPACES_REL_PATH,
-  NODE_REL_PATH,
   OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
   POD_PARAM_NAME,
@@ -484,30 +478,6 @@ const clusterDetailsRoutes = [
   />,
 ]
 
-const nodeDetailsRoutes = (
-  <Route
-    path={NODE_REL_PATH}
-    element={<Node />}
-  >
-    <Route
-      index
-      element={<NodeInfo />}
-    />
-    <Route
-      path="events"
-      element={<NodeEvents />}
-    />
-    <Route
-      path="raw"
-      element={<NodeRaw />}
-    />
-    <Route
-      path="metadata"
-      element={<NodeMetadata />}
-    />
-  </Route>
-)
-
 export const getPodDetailsRoutes = (type: 'service' | 'cluster' | 'flow') => (
   <Route
     path={getPodDetailsPath({
@@ -658,7 +628,6 @@ export const cdRoutes = [
     />
     {mainRoutes}
     {clusterDetailsRoutes}
-    {nodeDetailsRoutes}
     {getPodDetailsRoutes('cluster')}
     {getPodDetailsRoutes('service')}
     {getServiceDetailsRoutes('cd')}

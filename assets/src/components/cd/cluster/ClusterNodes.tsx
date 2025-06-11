@@ -13,7 +13,7 @@ import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
+import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { cpuParser, memoryParser } from '../../../utils/kubernetes.ts'
 import { rounded } from '../../../utils/number.ts'
 import {
@@ -74,11 +74,7 @@ export default function ClusterNodes() {
         nodes={data?.cluster?.nodes || []}
         nodeMetrics={data?.cluster?.nodeMetrics || []}
         columns={columns}
-        linkBasePath={getNodeDetailsPath({
-          clusterId: cluster?.id,
-          name: '',
-          isRelative: false,
-        })}
+        clusterId={cluster?.id}
       />
     </div>
   )
@@ -225,10 +221,7 @@ export const ColActions = (clusterId?: string) =>
     id: 'actions',
     cell: ({ row: { original } }) => (
       <TableCaretLink
-        to={getNodeDetailsPath({
-          clusterId,
-          name: original?.name,
-        })}
+        to={getResourceDetailsAbsPath(clusterId, 'node', original?.name)}
         textValue={`View node ${original?.name}`}
       />
     ),
@@ -239,12 +232,12 @@ function NodesList({
   nodes,
   nodeMetrics,
   columns,
-  linkBasePath = `/nodes/`,
+  clusterId,
 }: {
   nodes: (ClusterNodeFragment | null)[]
   nodeMetrics: (NodeMetricFragment | null)[]
   columns: ColumnDef<TableData, any>[]
-  linkBasePath?: string
+  clusterId?: string
 }) {
   const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =
@@ -305,7 +298,7 @@ function NodesList({
       data={tableData}
       columns={columns}
       onRowClick={(_e, { original }: Row<TableData>) =>
-        navigate(`${linkBasePath}${original?.name}`)
+        navigate(getResourceDetailsAbsPath(clusterId, 'node', original?.name))
       }
     />
   )

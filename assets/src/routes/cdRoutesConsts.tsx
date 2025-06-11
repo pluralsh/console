@@ -49,16 +49,6 @@ export const SERVICE_SETTINGS_REVISIONS_REL_PATH = 'revisions' as const
 export const NODE_PARAM_NAME = 'name' as const
 export const NODE_PARAM_CLUSTER = 'clusterId' as const
 
-export const NODE_REL_PATH = getNodeDetailsPath({
-  isRelative: true,
-  clusterId: `:${NODE_PARAM_CLUSTER}`,
-  name: `:${NODE_PARAM_NAME}`,
-})
-export const NODE_ABS_PATH = getNodeDetailsPath({
-  clusterId: `:${NODE_PARAM_CLUSTER}`,
-  name: `:${NODE_PARAM_NAME}`,
-})
-
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
 export const CD_SERVICE_REL_PATH = getServiceDetailsPath({
@@ -178,20 +168,6 @@ export function getServiceComponentPath({
   return `${getServiceDetailsPath({
     ...props,
   })}/${SERVICE_COMPONENTS_PATH}/${componentId}`
-}
-
-export function getNodeDetailsPath({
-  clusterId,
-  name,
-  isRelative = false,
-}: {
-  clusterId: string | null | undefined
-  name: string | null | undefined
-  isRelative?: boolean
-}) {
-  return `${
-    isRelative ? '' : `${CD_ABS_PATH}/`
-  }${CLUSTERS_REL_PATH}/${clusterId}/${CLUSTER_NODES_PATH}/${name}`
 }
 
 export function getPodDetailsPath({
