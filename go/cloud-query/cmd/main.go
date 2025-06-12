@@ -2,10 +2,9 @@ package main
 
 import (
 	_ "github.com/mattn/go-sqlite3"
-	"k8s.io/klog/v2"
-
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/steampipe"
+	"k8s.io/klog/v2"
 )
 
 func main() {

@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 )
 
 type GCPConfiguration struct {
@@ -24,6 +26,10 @@ func (c *GCPConfiguration) Query() string {
 				impersonate_access_token=%q
 			');
 		`, c.ImpersonateAccessToken())
+}
+
+func (c *GCPConfiguration) SHA() (string, error) {
+	return common.HashObject(c)
 }
 
 func WithImpersonateAccessToken(impersonateAccessToken string) func(*GCPConfiguration) {
