@@ -38,7 +38,8 @@ run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
 ##@ Codegen
 
 .PHONY: proto
-proto: TOOL = protoc-gen-go protoc-gen-go-grpc ## generate gRPC client and server code
+proto: TOOL = protoc-gen-go protoc-gen-go-grpc
+proto: --tool ## generate gRPC client and server code
 	protoc pkg/proto/*.proto \
         --go_out=. \
         --go_opt=paths=source_relative \
