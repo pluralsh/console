@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 option go_package = "github.com/pluralsh/console/go/cloud-query/pkg/proto";
 
 package proto;
@@ -45,7 +47,7 @@ message ExtractInput {
 
 message QueryOutput {
   repeated string columns = 1;
-  map<string, string> result = 2;
+  map<string, google.protobuf.Any> result = 2;
 }
 
 message SchemaColumn {
@@ -60,7 +62,7 @@ message SchemaOutput {
 
 message ExtractOutput {
   string type = 1;
-  map<string, string> result = 2;
+  map<string, google.protobuf.Any> result = 2;
   string id = 3;
   repeated string links = 4;
 }

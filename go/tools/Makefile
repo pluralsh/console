@@ -88,3 +88,11 @@ install-envtest: --tool ## Download and install setup-envtest in the $BINARIES_D
 .PHONY: install-ginkgo
 install-ginkgo: TOOL = ginkgo
 install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
+
+.PHONY: install-protoc-gen-go
+install-protoc-gen-go: TOOL = protoc-gen-go
+install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINARIES_DIR
+
+.PHONY: install-protoc-gen-go-grpc
+install-protoc-gen-go-grpc: TOOL = protoc-gen-go-grpc
+install-protoc-gen-go-grpc: --tool ## Download and install protoc-gen-go-grpc in the $BINARIES_DIR
