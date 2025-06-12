@@ -4719,6 +4719,64 @@ func (_c *ConsoleClientMock_GetServiceAccount_Call) RunAndReturn(run func(contex
 	return _c
 }
 
+// GetServiceById provides a mock function with given fields: id
+func (_m *ConsoleClientMock) GetServiceById(id string) (*client.ServiceDeploymentExtended, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceById")
+	}
+
+	var r0 *client.ServiceDeploymentExtended
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*client.ServiceDeploymentExtended, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) *client.ServiceDeploymentExtended); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.ServiceDeploymentExtended)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetServiceById_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceById'
+type ConsoleClientMock_GetServiceById_Call struct {
+	*mock.Call
+}
+
+// GetServiceById is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetServiceById(id interface{}) *ConsoleClientMock_GetServiceById_Call {
+	return &ConsoleClientMock_GetServiceById_Call{Call: _e.mock.On("GetServiceById", id)}
+}
+
+func (_c *ConsoleClientMock_GetServiceById_Call) Run(run func(id string)) *ConsoleClientMock_GetServiceById_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceById_Call) Return(_a0 *client.ServiceDeploymentExtended, _a1 error) *ConsoleClientMock_GetServiceById_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceById_Call) RunAndReturn(run func(string) (*client.ServiceDeploymentExtended, error)) *ConsoleClientMock_GetServiceById_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetServiceContext provides a mock function with given fields: name
 func (_m *ConsoleClientMock) GetServiceContext(name string) (*client.ServiceContextFragment, error) {
 	ret := _m.Called(name)
@@ -6069,6 +6127,108 @@ func (_c *ConsoleClientMock_IsServiceContextExists_Call) Return(_a0 bool, _a1 er
 }
 
 func (_c *ConsoleClientMock_IsServiceContextExists_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsServiceContextExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsServiceDeleting provides a mock function with given fields: id
+func (_m *ConsoleClientMock) IsServiceDeleting(id string) bool {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsServiceDeleting")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_IsServiceDeleting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsServiceDeleting'
+type ConsoleClientMock_IsServiceDeleting_Call struct {
+	*mock.Call
+}
+
+// IsServiceDeleting is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsServiceDeleting(id interface{}) *ConsoleClientMock_IsServiceDeleting_Call {
+	return &ConsoleClientMock_IsServiceDeleting_Call{Call: _e.mock.On("IsServiceDeleting", id)}
+}
+
+func (_c *ConsoleClientMock_IsServiceDeleting_Call) Run(run func(id string)) *ConsoleClientMock_IsServiceDeleting_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceDeleting_Call) Return(_a0 bool) *ConsoleClientMock_IsServiceDeleting_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceDeleting_Call) RunAndReturn(run func(string) bool) *ConsoleClientMock_IsServiceDeleting_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsServiceExisting provides a mock function with given fields: id
+func (_m *ConsoleClientMock) IsServiceExisting(id string) (bool, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsServiceExisting")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (bool, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsServiceExisting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsServiceExisting'
+type ConsoleClientMock_IsServiceExisting_Call struct {
+	*mock.Call
+}
+
+// IsServiceExisting is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsServiceExisting(id interface{}) *ConsoleClientMock_IsServiceExisting_Call {
+	return &ConsoleClientMock_IsServiceExisting_Call{Call: _e.mock.On("IsServiceExisting", id)}
+}
+
+func (_c *ConsoleClientMock_IsServiceExisting_Call) Run(run func(id string)) *ConsoleClientMock_IsServiceExisting_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceExisting_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsServiceExisting_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceExisting_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsServiceExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
