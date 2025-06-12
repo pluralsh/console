@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 
-option go_package = "github.com/pluralsh/console/go/cloud-query/pkg/proto";
+option go_package = "github.com/pluralsh/console/go/cloud-query/internal/proto";
 
 package proto;
 

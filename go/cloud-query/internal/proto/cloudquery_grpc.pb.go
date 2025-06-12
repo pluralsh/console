@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: pkg/proto/cloudquery.proto
+// source: internal/proto/cloudquery.proto
 
 package proto
 
@@ -200,5 +200,5 @@ var CloudQuery_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "pkg/proto/cloudquery.proto",
+	Metadata: "internal/proto/cloudquery.proto",
 }

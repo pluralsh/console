@@ -39,7 +39,7 @@ run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
 
 .PHONY: proto
 proto: TOOL = protoc-gen-go protoc-gen-go-grpc ## generate gRPC client and server code
-	protoc pkg/proto/*.proto \
+	protoc internal/proto/*.proto \
         --go_out=. \
         --go_opt=paths=source_relative \
         --go-grpc_out=require_unimplemented_servers=false:. \
