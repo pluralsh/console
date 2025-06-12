@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -30,6 +31,14 @@ func (c *GCPConfiguration) Query() string {
 
 func (c *GCPConfiguration) SHA() (string, error) {
 	return common.HashObject(c)
+}
+
+func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		ImpersonateAccessToken *string `json:"impersonateAccessToken,omitempty"`
+	}{
+		ImpersonateAccessToken: c.impersonateAccessToken,
+	})
 }
 
 func WithImpersonateAccessToken(impersonateAccessToken string) func(*GCPConfiguration) {

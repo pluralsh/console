@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -63,6 +64,20 @@ func (c *AzureConfiguration) Query() string {
 
 func (c *AzureConfiguration) SHA() (string, error) {
 	return common.HashObject(c)
+}
+
+func (c *AzureConfiguration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		SubscriptionId *string `json:"subscriptionId,omitempty"`
+		TenantId       *string `json:"tenantId,omitempty"`
+		ClientId       *string `json:"clientId,omitempty"`
+		ClientSecret   *string `json:"clientSecret,omitempty"`
+	}{
+		SubscriptionId: c.subscriptionId,
+		TenantId:       c.tenantId,
+		ClientId:       c.clientId,
+		ClientSecret:   c.clientSecret,
+	})
 }
 
 func WithSubscriptionId(subscriptionId string) func(*AzureConfiguration) {

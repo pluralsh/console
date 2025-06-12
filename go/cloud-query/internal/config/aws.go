@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -41,6 +42,16 @@ func (c *AWSConfiguration) Query() string {
 
 func (c *AWSConfiguration) SHA() (string, error) {
 	return common.HashObject(c)
+}
+
+func (c *AWSConfiguration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		AccessKeyId     *string `json:"accessKeyId,omitempty"`
+		SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	}{
+		AccessKeyId:     c.accessKeyId,
+		SecretAccessKey: c.secretAccessKey,
+	})
 }
 
 func WithAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
