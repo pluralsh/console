@@ -15,8 +15,12 @@ image: ## build the Docker image
 	@echo "Building cloud-query docker image..."
 	docker build -t cloud-query:latest .
 
+
+# run: Build (if BUILD=true) and run the cloud-query Docker image locally.
+# Usage: make run BUILD=true or BUILD=true make run
+# If BUILD=true is set, the Docker image will be built before running.
 .PHONY: run
-run: image ## run the Docker image
+run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
 	@echo "Running cloud-query server..."
 	docker run \
 		--rm \
