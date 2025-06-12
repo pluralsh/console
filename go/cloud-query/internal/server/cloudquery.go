@@ -6,21 +6,29 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 )
 
 // CloudQueryService implements the cloudquery.CloudQueryServer interface
 type CloudQueryService struct {
 	cloudquery.UnimplementedCloudQueryServer
+
+	// pool is the connection pool used by the CloudQuery service
+	pool *pool.ConnectionPool
 }
 
 // NewCloudQueryServer creates a new instance of the CloudQuery server
-func NewCloudQueryServer() Route {
-	return &CloudQueryService{}
+func NewCloudQueryServer(pool *pool.ConnectionPool) Route {
+	return &CloudQueryService{pool: pool}
 }
 
 // Install registers the CloudQuery service with the gRPC server
@@ -43,13 +51,13 @@ func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream grpc.Ser
 	// For demonstration purposes, we'll return different results based on the provider
 	switch strings.ToLower(provider) {
 	case "aws":
-		return handleAWSQuery(input, stream)
+		return in.handleAWSQuery(input, stream)
 	case "azure":
 		return handleAzureQuery(input, stream)
 	case "gcp":
 		return handleGCPQuery(input, stream)
 	default:
-		return handleDefaultQuery(input, stream)
+		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
 	}
 }
 
@@ -72,7 +80,7 @@ func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.S
 	case "gcp":
 		return handleGCPSchema(input, stream)
 	default:
-		return handleDefaultSchema(input, stream)
+		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
 	}
 }
 
@@ -95,95 +103,37 @@ func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc
 	case "gcp":
 		return handleGCPExtract(input, stream)
 	default:
-		return handleDefaultExtract(input, stream)
+		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
 	}
 }
 
 // AWS query handler
-func handleAWSQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	// Mock AWS query results
-	if strings.Contains(strings.ToLower(input.GetQuery()), "ec2") {
-		// EC2 instances mock data
-		output := &cloudquery.QueryOutput{
-			Columns: []string{"instance_id", "instance_type", "state", "region"},
-		}
-
-		// Create mock results map
-		result := make(map[string]*anypb.Any)
-
-		// First row
-		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
-		result["instance_id"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t2.micro"})
-		result["instance_type"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
-		result["state"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
-		result["region"] = anyVal
-
-		output.Result = result
-		if err := stream.Send(output); err != nil {
-			return err
-		}
-
-		// Second row with different data
-		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0987654321fedcba0"})
-		result["instance_id"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t3.small"})
-		result["instance_type"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "stopped"})
-		result["state"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-west-2"})
-		result["region"] = anyVal
-
-		output = &cloudquery.QueryOutput{
-			Columns: []string{"instance_id", "instance_type", "state", "region"},
-			Result:  result,
-		}
-
-		return stream.Send(output)
-	} else if strings.Contains(strings.ToLower(input.GetQuery()), "s3") {
-		// S3 buckets mock data
-		output := &cloudquery.QueryOutput{
-			Columns: []string{"bucket_name", "creation_date", "region"},
-		}
-
-		// Create mock results map
-		result := make(map[string]*anypb.Any)
-
-		// First row
-		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "my-app-logs"})
-		result["bucket_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2023-05-15"})
-		result["creation_date"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
-		result["region"] = anyVal
-
-		output.Result = result
-		if err := stream.Send(output); err != nil {
-			return err
-		}
-
-		// Second row with different data
-		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "customer-data-backup"})
-		result["bucket_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2024-02-20"})
-		result["creation_date"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "eu-west-1"})
-		result["region"] = anyVal
-
-		output = &cloudquery.QueryOutput{
-			Columns: []string{"bucket_name", "creation_date", "region"},
-			Result:  result,
-		}
-
-		return stream.Send(output)
+func (in *CloudQueryService) handleAWSQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
+	// TODO: pass auth info
+	c, err := in.pool.Connect(config.NewAWSConfiguration())
+	if err != nil {
+		klog.ErrorS(err, "failed to connect to AWS provider")
+		return status.Errorf(codes.Internal, "failed to connect to provider: %v", err)
 	}
 
-	// Generic AWS response
-	return sendGenericQueryResult(stream, "aws_resource")
+	res, err := c.Query(input.Query)
+	if err != nil {
+		klog.ErrorS(err, "failed to execute query", "query", input.Query)
+		return status.Errorf(codes.Internal, "failed to execute query '%s': %v", input.Query, err)
+	}
+
+	result := make(map[string]*anypb.Any)
+	strValue, _ := structpb.NewValue(res)
+	val, _ := anypb.New(strValue)
+
+	result["data"] = val
+
+	output := &cloudquery.QueryOutput{
+		Columns: []string{},
+		Result:  result,
+	}
+
+	return stream.Send(output)
 }
 
 // Azure query handler
@@ -282,11 +232,6 @@ func handleGCPQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingSer
 
 	// Generic GCP response
 	return sendGenericQueryResult(stream, "gcp_resource")
-}
-
-// Default query handler
-func handleDefaultQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	return sendGenericQueryResult(stream, "generic_resource")
 }
 
 // Helper function to send a generic query result

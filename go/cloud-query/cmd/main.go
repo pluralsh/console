@@ -6,12 +6,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	_ "github.com/pluralsh/console/go/cloud-query/cmd/args"
+	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/server"
 )
 
 func main() {
-	//p := pool.NewConnectionPool(args.ConnectionTTL())
+	p := pool.NewConnectionPool(args.ConnectionTTL())
 	//
 	//c, err := p.Connect(config.NewAWSConfiguration())
 	//if err != nil {
@@ -31,7 +33,7 @@ func main() {
 	//}
 	//klog.InfoS("query result", "result", result)
 
-	s, err := server.New(nil, server.NewCloudQueryServer())
+	s, err := server.New(nil, server.NewCloudQueryServer(p))
 	if err != nil {
 		klog.Fatalf("failed to create server: %v", err)
 	}

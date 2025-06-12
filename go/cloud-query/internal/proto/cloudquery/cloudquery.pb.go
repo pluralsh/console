@@ -4,6 +4,8 @@
 // 	protoc        v6.31.1
 // source: cloudquery.proto
 
+// Determines the package name for the generated code.
+
 package cloudquery
 
 import (
