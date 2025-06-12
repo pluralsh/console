@@ -13,24 +13,24 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 )
 
-// CloudQueryServer implements the proto.CloudQueryServer interface
-type CloudQueryServer struct {
+// CloudQueryService implements the proto.CloudQueryServer interface
+type CloudQueryService struct {
 	proto.UnimplementedCloudQueryServer
 }
 
 // NewCloudQueryServer creates a new instance of the CloudQuery server
 func NewCloudQueryServer() Route {
-	return &CloudQueryServer{}
+	return &CloudQueryService{}
 }
 
 // Install registers the CloudQuery service with the gRPC server
-func (in *CloudQueryServer) Install(server *grpc.Server) {
-	klog.V(log.LogLevelVerbose).InfoS("registering server", "server", "CloudQueryServer")
+func (in *CloudQueryService) Install(server *grpc.Server) {
+	klog.V(log.LogLevelVerbose).InfoS("registering service", "service", "CloudQueryService")
 	proto.RegisterCloudQueryServer(server, in)
 }
 
 // Query implements the proto.CloudQueryServer interface
-func (in *CloudQueryServer) Query(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+func (in *CloudQueryService) Query(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -54,7 +54,7 @@ func (in *CloudQueryServer) Query(input *proto.QueryInput, stream grpc.ServerStr
 }
 
 // Schema implements the proto.CloudQueryServer interface
-func (in *CloudQueryServer) Schema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+func (in *CloudQueryService) Schema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -77,7 +77,7 @@ func (in *CloudQueryServer) Schema(input *proto.SchemaInput, stream grpc.ServerS
 }
 
 // Extract implements the proto.CloudQueryServer interface
-func (in *CloudQueryServer) Extract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+func (in *CloudQueryService) Extract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
