@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"context"
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
@@ -12,18 +11,33 @@ import (
 type ConnectionPool struct {
 	pool cmap.ConcurrentMap[string, entry]
 	ttl  time.Duration
-	ctx  context.Context
 }
 
-func NewConnectionPool(ctx context.Context, ttl time.Duration) *ConnectionPool {
-	return &ConnectionPool{
+func NewConnectionPool(ttl time.Duration) *ConnectionPool {
+	pool := &ConnectionPool{
 		pool: cmap.New[entry](),
 		ttl:  ttl,
-		ctx:  ctx,
+	}
+
+	go pool.cleanupRoutine()
+
+	return pool
+}
+
+func (c *ConnectionPool) cleanupRoutine() {
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		for item := range c.pool.IterBuffered() {
+			if !item.Val.alive(c.ttl) {
+				c.pool.Remove(item.Key)
+			}
+		}
 	}
 }
 
-func (c *ConnectionPool) Connect(config config.Configuration) (*connection.Connection, error) {
+func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connection, error) {
 	sha, err := config.SHA()
 	if err != nil {
 		return nil, err
@@ -37,10 +51,10 @@ func (c *ConnectionPool) Connect(config config.Configuration) (*connection.Conne
 		}
 
 		c.pool.Set(sha, entry{connection: conn, ping: time.Now()})
-		return &conn, nil
+		return conn, nil
 	}
 
-	return &data.connection, nil
+	return data.connection, nil
 }
 
 func (c *ConnectionPool) Set(key string, value connection.Connection) {
