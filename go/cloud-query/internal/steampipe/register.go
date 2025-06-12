@@ -7,6 +7,7 @@ import (
 	"github.com/mattn/go-sqlite3"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
+	"github.com/pluralsh/console/go/cloud-query/internal/config"
 )
 
 const (
@@ -19,7 +20,11 @@ const (
 
 var (
 	// extensionPaths are paths to the Steampipe SQLite extensions.
-	extensionPaths = []string{extensionPath(ProviderAWS)}
+	extensionPaths = []string{
+		fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), config.ProviderAWS),
+		fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), config.ProviderAzure),
+		fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), config.ProviderGCP),
+	}
 )
 
 func init() {
@@ -37,13 +42,4 @@ func init() {
 			},
 		},
 	)
-}
-
-func extensionPath(provider Provider) string {
-	switch provider {
-	case ProviderAWS:
-		return fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), provider)
-	default:
-		return ""
-	}
 }
