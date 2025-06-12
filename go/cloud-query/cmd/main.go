@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	//p := pool.NewConnectionPool(15 * time.Minute)
+	//p := pool.NewConnectionPool(args.ConnectionTTL())
 	//
 	//c, err := p.Connect(config.NewAWSConfiguration())
 	//if err != nil {

@@ -50,7 +50,12 @@ proto: --tool install-protoc ## generate gRPC client and server code
         --proto_path=protos/internal \
         --proto_path=protos/third_party \
 
-##@ Tests and linters
+##@ Test and lint
+
+.PHONY: test
+test: ## run tests
+	@echo "Running tests..."
+	go test ./...
 
 .PHONY: fmt
 fmt: ## run go fmt against code
