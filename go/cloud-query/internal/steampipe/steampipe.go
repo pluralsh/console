@@ -3,6 +3,8 @@ package steampipe
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/config"
 )
 
 const (
@@ -19,44 +21,31 @@ type Steampipe interface {
 }
 
 type steampipe struct {
-	db          *sql.DB
-	provider    Provider
-	credentials Credentials
+	db     *sql.DB
+	config config.Configuration
 }
 
 func (in *steampipe) Close() error {
 	return in.db.Close()
 }
 
-func (in *steampipe) init() (Steampipe, error) {
+// TODO: Add cache.
+func NewSteampipe(config config.Configuration) (Steampipe, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
-		return in, err
+		return nil, err
 	}
 
-	var authQuery string
-	switch in.provider {
-	case ProviderAWS:
-		authQuery = fmt.Sprintf(`
-			SELECT steampipe_configure_aws('
-				access_key=%q
-				secret_key=%q
-			');
-		`, in.credentials.AWS.AccessKeyId(), in.credentials.AWS.SecretAccessKey())
-	default:
-		return in, fmt.Errorf("unsupported provider: %s", in.provider)
-	}
-	rows, err := db.Query(authQuery)
+	q, err := config.Query()
 	if err != nil {
-		return in, fmt.Errorf("failed to configure provider %s: %w", in.provider, err)
+		return nil, fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
+	}
+
+	rows, err := db.Query(q)
+	if err != nil {
+		return nil, fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}
 	defer rows.Close()
 
-	in.db = db
-	return in, nil
-}
-
-// TODO: Add cache.
-func NewSteampipe(provider Provider, credentials Credentials) (Steampipe, error) {
-	return (&steampipe{provider: provider, credentials: credentials}).init()
+	return &steampipe{db: db, config: config}, nil
 }

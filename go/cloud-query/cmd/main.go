@@ -5,7 +5,7 @@ import (
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
-
+	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/steampipe"
 )
 
@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	pipe, err := steampipe.NewSteampipe("aws", steampipe.NewAWSCredentials(nil, nil))
+	pipe, err := steampipe.NewSteampipe(config.NewAWSConfiguration(nil, nil))
 	if err != nil {
 		log.Fatalf("failed to create Steampipe instance: %v", err)
 	}
