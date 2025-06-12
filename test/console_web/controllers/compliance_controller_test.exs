@@ -14,33 +14,23 @@ defmodule ConsoleWeb.ComplianceControllerTest do
 
       insert(:policy_binding, policy_id: cluster.write_policy_id, user_id: user2.id)
 
-      response = conn
+      clusters_content = Console.Compliance.Datasource.Clusters.stream()
+      |> CSV.encode(headers: true)
+      |> Enum.to_list()
+      |> Enum.join()
+
+      assert clusters_content =~ "user1@example.com"
+      assert clusters_content =~ "group:compliance-group"
+      assert clusters_content =~ "user2@example.com"
+
+      conn
       |> add_auth_headers(admin_user())
       |> get("/v1/compliance/report?format=csv")
       |> response(200)
 
-      tmp_path = Path.join(System.tmp_dir!(), "compliance_test.zip")
-      File.write!(tmp_path, response)
-
-      tmp_dir = Path.join(System.tmp_dir!(), "compliance_test")
-      File.mkdir_p!(tmp_dir)
-
-      try do
-        {:ok, _files} = :zip.unzip(String.to_charlist(tmp_path), [{:cwd, String.to_charlist(tmp_dir)}])
-
-        csv_content = File.read!(Path.join(tmp_dir, "clusters.csv"))
-
-        assert csv_content =~ "user1@example.com"
-        assert csv_content =~ "group:compliance-group"
-        assert csv_content =~ "user2@example.com"
-
-        [report] = Console.Repo.all(Console.Schema.ComplianceReport)
-        assert report.name
-        assert is_binary(report.sha256)
-      after
-        File.rm!(tmp_path)
-        File.rm_rf!(tmp_dir)
-      end
+      [report] = Console.Repo.all(Console.Schema.ComplianceReport)
+      assert report.name
+      assert is_binary(report.sha256)
     end
 
     test "it will generate a compliance report for a permitted user", %{conn: conn} do
