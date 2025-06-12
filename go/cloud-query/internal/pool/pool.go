@@ -54,6 +54,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		return conn, nil
 	}
 
+	c.pool.Set(sha, entry{connection: data.connection, ping: time.Now()})
 	return data.connection, nil
 }
 
