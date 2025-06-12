@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 )
 
 type AWSConfiguration struct {
@@ -37,13 +39,17 @@ func (c *AWSConfiguration) Query() string {
 		`, c.AccessKeyId(), c.SecretAccessKey())
 }
 
-func WithAWSAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
+func (c *AWSConfiguration) SHA() (string, error) {
+	return common.HashObject(c)
+}
+
+func WithAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
 	return func(c *AWSConfiguration) {
 		c.accessKeyId = &accessKeyId
 	}
 }
 
-func WithAWSSecretAccessKey(secretAccessKey string) func(*AWSConfiguration) {
+func WithSecretAccessKey(secretAccessKey string) func(*AWSConfiguration) {
 	return func(c *AWSConfiguration) {
 		c.secretAccessKey = &secretAccessKey
 	}

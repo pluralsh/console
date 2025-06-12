@@ -1,4 +1,4 @@
-package steampipe
+package connection
 
 import (
 	"database/sql"
@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	// extensionEntryPoint is the entry point function for the Steampipe SQLite extension.
+	// extensionEntryPoint is the entry point function for the Connection SQLite extension.
 	extensionEntryPoint = "sqlite3_extension_init"
 
-	// driverName is the name of the Steampipe SQLite driver.
-	driverName = "steampipe"
+	// driverName is the name of the Connection SQLite driver.
+	driverName = "connection"
 )
 
 var (
-	// extensionPaths are paths to the Steampipe SQLite extensions.
+	// extensionPaths are paths to the Connection SQLite extensions.
 	extensionPaths = []string{
 		fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), config.ProviderAWS),
 		fmt.Sprintf("%s/steampipe_sqlite_%s.so", args.ExtensionsDir(), config.ProviderAzure),

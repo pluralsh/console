@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 )
 
 type AzureConfiguration struct {
@@ -59,25 +61,29 @@ func (c *AzureConfiguration) Query() string {
 		`, c.SubscriptionId(), c.TenantId(), c.ClientId(), c.ClientSecret())
 }
 
-func WithAzureSubscriptionId(subscriptionId string) func(*AzureConfiguration) {
+func (c *AzureConfiguration) SHA() (string, error) {
+	return common.HashObject(c)
+}
+
+func WithSubscriptionId(subscriptionId string) func(*AzureConfiguration) {
 	return func(c *AzureConfiguration) {
 		c.subscriptionId = &subscriptionId
 	}
 }
 
-func WithAzureTenantId(tenantId string) func(*AzureConfiguration) {
+func WithTenantId(tenantId string) func(*AzureConfiguration) {
 	return func(c *AzureConfiguration) {
 		c.tenantId = &tenantId
 	}
 }
 
-func WithAzureClientId(clientId string) func(*AzureConfiguration) {
+func WithClientId(clientId string) func(*AzureConfiguration) {
 	return func(c *AzureConfiguration) {
 		c.clientId = &clientId
 	}
 }
 
-func WithAzureClientSecret(clientSecret string) func(*AzureConfiguration) {
+func WithClientSecret(clientSecret string) func(*AzureConfiguration) {
 	return func(c *AzureConfiguration) {
 		c.clientSecret = &clientSecret
 	}

@@ -1,6 +1,6 @@
-package steampipe
+package connection
 
-func (in *steampipe) LoadedModules() ([]string, error) {
+func (in *connection) LoadedModules() ([]string, error) {
 	rows, err := in.db.Query("SELECT name FROM pragma_module_list;")
 	if err != nil {
 		return nil, err

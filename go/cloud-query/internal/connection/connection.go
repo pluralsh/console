@@ -1,4 +1,4 @@
-package steampipe
+package connection
 
 import (
 	"database/sql"
@@ -14,23 +14,22 @@ const (
 	dataSourceName = ":memory:"
 )
 
-type Steampipe interface {
+type Connection interface {
 	Query(q string) (string, error)
 	LoadedModules() ([]string, error)
 	Close() error
 }
 
-type steampipe struct {
+type connection struct {
 	db     *sql.DB
 	config config.Configuration
 }
 
-func (in *steampipe) Close() error {
+func (in *connection) Close() error {
 	return in.db.Close()
 }
 
-// TODO: Add cache.
-func NewSteampipe(config config.Configuration) (Steampipe, error) {
+func NewConnection(config config.Configuration) (Connection, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
@@ -47,5 +46,5 @@ func NewSteampipe(config config.Configuration) (Steampipe, error) {
 	}
 	defer rows.Close()
 
-	return &steampipe{db: db, config: config}, nil
+	return &connection{db: db, config: config}, nil
 }
