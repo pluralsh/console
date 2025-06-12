@@ -26,7 +26,7 @@ func (c *GCPConfiguration) Query() string {
 		`, c.ImpersonateAccessToken())
 }
 
-func WithGCPImpersonateAccessToken(impersonateAccessToken string) func(*GCPConfiguration) {
+func WithImpersonateAccessToken(impersonateAccessToken string) func(*GCPConfiguration) {
 	return func(c *GCPConfiguration) {
 		c.impersonateAccessToken = &impersonateAccessToken
 	}

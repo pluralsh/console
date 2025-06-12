@@ -37,13 +37,13 @@ func (c *AWSConfiguration) Query() string {
 		`, c.AccessKeyId(), c.SecretAccessKey())
 }
 
-func WithAWSAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
+func WithAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
 	return func(c *AWSConfiguration) {
 		c.accessKeyId = &accessKeyId
 	}
 }
 
-func WithAWSSecretAccessKey(secretAccessKey string) func(*AWSConfiguration) {
+func WithSecretAccessKey(secretAccessKey string) func(*AWSConfiguration) {
 	return func(c *AWSConfiguration) {
 		c.secretAccessKey = &secretAccessKey
 	}
