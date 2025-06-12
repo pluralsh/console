@@ -15,8 +15,8 @@ const (
 
 func NewAWSCredentials(accessKeyId, secretAccessKey *string) Credentials {
 	return Credentials{
-		Provider: ProviderAWS,
-		AWS: &AWSCredentials{
+		provider: ProviderAWS,
+		aws: &AWSCredentials{
 			accessKeyId:     accessKeyId,
 			secretAccessKey: secretAccessKey,
 		},
@@ -25,8 +25,8 @@ func NewAWSCredentials(accessKeyId, secretAccessKey *string) Credentials {
 
 func NewAzureCredentials(subscriptionId, tenantId, clientId, clientSecret *string) Credentials {
 	return Credentials{
-		Provider: ProviderAzure,
-		Azure: &AzureCredentials{
+		provider: ProviderAzure,
+		azure: &AzureCredentials{
 			subscriptionId: subscriptionId,
 			tenantId:       tenantId,
 			clientId:       clientId,
@@ -37,37 +37,41 @@ func NewAzureCredentials(subscriptionId, tenantId, clientId, clientSecret *strin
 
 func NewGCPCredentials(impersonateAccessToken *string) Credentials {
 	return Credentials{
-		Provider: ProviderGCP,
-		GCP: &GCPCredentials{
+		provider: ProviderGCP,
+		gcp: &GCPCredentials{
 			impersonateAccessToken: impersonateAccessToken,
 		},
 	}
 }
 
 type Credentials struct {
-	Provider Provider
-	AWS      *AWSCredentials
-	Azure    *AzureCredentials
-	GCP      *GCPCredentials
+	provider Provider
+	aws      *AWSCredentials
+	azure    *AzureCredentials
+	gcp      *GCPCredentials
+}
+
+func (c *Credentials) Provider() Provider {
+	return c.provider
 }
 
 func (c *Credentials) AuthQuery() (string, error) {
-	switch c.Provider {
+	switch c.provider {
 	case ProviderAWS:
-		if c.AWS == nil {
+		if c.aws == nil {
 			return "", fmt.Errorf("AWS credentials are not set")
 		}
-		return c.AWS.AuthQuery(), nil
+		return c.aws.AuthQuery(), nil
 	case ProviderAzure:
-		if c.Azure == nil {
+		if c.azure == nil {
 			return "", fmt.Errorf("Azure credentials are not set")
 		}
-		return c.Azure.AuthQuery(), nil
+		return c.azure.AuthQuery(), nil
 	case ProviderGCP:
-		if c.GCP == nil {
+		if c.gcp == nil {
 			return "", fmt.Errorf("GCP credentials are not set")
 		}
-		return c.GCP.AuthQuery(), nil
+		return c.gcp.AuthQuery(), nil
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", c.Provider)
 	}

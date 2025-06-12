@@ -20,7 +20,6 @@ type Steampipe interface {
 
 type steampipe struct {
 	db          *sql.DB
-	provider    Provider
 	credentials Credentials
 }
 
@@ -36,12 +35,12 @@ func (in *steampipe) init() (Steampipe, error) {
 
 	authQuery, err := in.credentials.AuthQuery()
 	if err != nil {
-		return in, fmt.Errorf("failed to get auth query for provider %s: %w", in.provider, err)
+		return in, fmt.Errorf("failed to get auth query for provider %s: %w", in.credentials.Provider(), err)
 	}
 
 	rows, err := db.Query(authQuery)
 	if err != nil {
-		return in, fmt.Errorf("failed to configure provider %s: %w", in.provider, err)
+		return in, fmt.Errorf("failed to configure provider %s: %w", in.credentials.Provider(), err)
 	}
 	defer rows.Close()
 
@@ -50,6 +49,6 @@ func (in *steampipe) init() (Steampipe, error) {
 }
 
 // TODO: Add cache.
-func NewSteampipe(provider Provider, credentials Credentials) (Steampipe, error) {
-	return (&steampipe{provider: provider, credentials: credentials}).init()
+func NewSteampipe(credentials Credentials) (Steampipe, error) {
+	return (&steampipe{credentials: credentials}).init()
 }

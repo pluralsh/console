@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	pipe, err := steampipe.NewSteampipe("aws", steampipe.NewAWSCredentials(nil, nil))
+	pipe, err := steampipe.NewSteampipe(steampipe.NewAWSCredentials(nil, nil))
 	if err != nil {
 		log.Fatalf("failed to create Steampipe instance: %v", err)
 	}
