@@ -25,7 +25,7 @@ func NewConnectionPool(ttl time.Duration) *ConnectionPool {
 }
 
 func (c *ConnectionPool) cleanupRoutine() {
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 
 	for range ticker.C {
