@@ -12,7 +12,7 @@ KUBEBUILDER_VERSION := 4.5.1
 
 .PHONY: tools
 tools: ## install required tools
-tools: --tool install-kubebuilder
+tools: --tool install-kubebuilder install-protoc
 
 .PHONY: --tool
 %--tool: TOOL = .*
@@ -96,3 +96,22 @@ install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINA
 .PHONY: install-protoc-gen-go-grpc
 install-protoc-gen-go-grpc: TOOL = protoc-gen-go-grpc
 install-protoc-gen-go-grpc: --tool ## Download and install protoc-gen-go-grpc in the $BINARIES_DIR
+
+.PHONY: install-protoc
+install-protoc: --ensure-binaries-dir ## Download and install protoc compiler in the $BINARIES_DIR
+	@if [ ! -f "$(BINARIES_DIR)/protoc" ]; then \
+		PROTOC_VERSION="31.1" && \
+		PROTOC_ARCH=$$(case "$(ARCH)" in \
+		   "amd64") echo "x86_64" ;; \
+		   "arm64") echo "aarch_64" ;; \
+		   "386") echo "x86_32" ;; \
+		   *) echo "$(ARCH)" ;; \
+		 esac) && \
+		PROTOC_ZIP="protoc-$${PROTOC_VERSION}-$(OS)-$${PROTOC_ARCH}.zip" && \
+		TEMP_DIR=$$(mktemp -d) && \
+		curl -sSL "https://github.com/protocolbuffers/protobuf/releases/download/v$${PROTOC_VERSION}/$${PROTOC_ZIP}" -o "$${TEMP_DIR}/$${PROTOC_ZIP}" && \
+		unzip -q "$${TEMP_DIR}/$${PROTOC_ZIP}" -d "$${TEMP_DIR}" && \
+		mv "$${TEMP_DIR}/bin/protoc" "$(BINARIES_DIR)/" && \
+		rm -rf "$${TEMP_DIR}" && \
+		@echo "Installed protoc in $(BINARIES_DIR)/protoc"; \
+	fi

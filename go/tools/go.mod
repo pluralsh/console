@@ -12,6 +12,8 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.0
 	github.com/vektra/mockery/v2 v2.53.2
 	golang.org/x/tools v0.30.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
+	google.golang.org/protobuf v1.36.6
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20240717190548-1ed345090869
 	sigs.k8s.io/controller-tools v0.16.3
 	sigs.k8s.io/kustomize/kustomize/v5 v5.4.3
@@ -249,7 +251,6 @@ require (
 	golang.org/x/term v0.29.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
