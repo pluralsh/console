@@ -1,10 +1,12 @@
 syntax = "proto3";
 
+// Determines the package name for the generated code.
+package cloudquery;
+
+// Configures where the generated code will be placed.
+option go_package = "internal/proto/cloudquery";
+
 import "google/protobuf/any.proto";
-
-option go_package = "github.com/pluralsh/console/go/cloud-query/internal/proto";
-
-package proto;
 
 message AwsCredentials {
   string access_key_id = 1;

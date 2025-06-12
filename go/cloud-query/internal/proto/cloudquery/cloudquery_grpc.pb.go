@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: cloudquery/cloudquery.proto
+// source: cloudquery.proto
 
-package proto
+package cloudquery
 
 import (
 	context "context"
@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CloudQuery_Query_FullMethodName   = "/proto.CloudQuery/Query"
-	CloudQuery_Schema_FullMethodName  = "/proto.CloudQuery/Schema"
-	CloudQuery_Extract_FullMethodName = "/proto.CloudQuery/Extract"
+	CloudQuery_Query_FullMethodName   = "/cloudquery.CloudQuery/Query"
+	CloudQuery_Schema_FullMethodName  = "/cloudquery.CloudQuery/Schema"
+	CloudQuery_Extract_FullMethodName = "/cloudquery.CloudQuery/Extract"
 )
 
 // CloudQueryClient is the client API for CloudQuery service.
@@ -182,7 +182,7 @@ type CloudQuery_ExtractServer = grpc.ServerStreamingServer[ExtractOutput]
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CloudQuery_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.CloudQuery",
+	ServiceName: "cloudquery.CloudQuery",
 	HandlerType: (*CloudQueryServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
@@ -202,5 +202,5 @@ var CloudQuery_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "cloudquery/cloudquery.proto",
+	Metadata: "cloudquery.proto",
 }

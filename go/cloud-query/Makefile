@@ -43,13 +43,11 @@ proto: --tool install-protoc ## generate gRPC client and server code
 	$(PROTOC) \
         --plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
         --plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
-        --go_out=internal/proto \
-        --go_opt=paths=source_relative \
-        --go-grpc_out=internal/proto \
-        --go-grpc_opt=paths=source_relative \
+		--go_out=. \
+		--go-grpc_out=. \
         --proto_path=api/proto \
         --proto_path=api/third_party \
-        api/proto/**/*.proto
+        api/proto/*.proto
 
 ##@ Test and lint
 

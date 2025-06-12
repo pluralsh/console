@@ -13,9 +13,9 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 )
 
-// CloudQueryService implements the proto.CloudQueryServer interface
+// CloudQueryService implements the cloudquery.CloudQueryServer interface
 type CloudQueryService struct {
-	proto.UnimplementedCloudQueryServer
+	cloudquery.UnimplementedCloudQueryServer
 }
 
 // NewCloudQueryServer creates a new instance of the CloudQuery server
@@ -26,11 +26,11 @@ func NewCloudQueryServer() Route {
 // Install registers the CloudQuery service with the gRPC server
 func (in *CloudQueryService) Install(server *grpc.Server) {
 	klog.V(log.LogLevelVerbose).InfoS("registering service", "service", "CloudQueryService")
-	proto.RegisterCloudQueryServer(server, in)
+	cloudquery.RegisterCloudQueryServer(server, in)
 }
 
-// Query implements the proto.CloudQueryServer interface
-func (in *CloudQueryService) Query(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+// Query implements the cloudquery.CloudQueryServer interface
+func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -53,8 +53,8 @@ func (in *CloudQueryService) Query(input *proto.QueryInput, stream grpc.ServerSt
 	}
 }
 
-// Schema implements the proto.CloudQueryServer interface
-func (in *CloudQueryService) Schema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+// Schema implements the cloudquery.CloudQueryServer interface
+func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -76,8 +76,8 @@ func (in *CloudQueryService) Schema(input *proto.SchemaInput, stream grpc.Server
 	}
 }
 
-// Extract implements the proto.CloudQueryServer interface
-func (in *CloudQueryService) Extract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+// Extract implements the cloudquery.CloudQueryServer interface
+func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -100,11 +100,11 @@ func (in *CloudQueryService) Extract(input *proto.ExtractInput, stream grpc.Serv
 }
 
 // AWS query handler
-func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+func handleAWSQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
 	// Mock AWS query results
 	if strings.Contains(strings.ToLower(input.GetQuery()), "ec2") {
 		// EC2 instances mock data
-		output := &proto.QueryOutput{
+		output := &cloudquery.QueryOutput{
 			Columns: []string{"instance_id", "instance_type", "state", "region"},
 		}
 
@@ -112,13 +112,13 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 		result := make(map[string]*anypb.Any)
 
 		// First row
-		anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
+		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
 		result["instance_id"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "t2.micro"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t2.micro"})
 		result["instance_type"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "running"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
 		result["state"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-east-1"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
 		result["region"] = anyVal
 
 		output.Result = result
@@ -128,16 +128,16 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 
 		// Second row with different data
 		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "i-0987654321fedcba0"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0987654321fedcba0"})
 		result["instance_id"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "t3.small"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t3.small"})
 		result["instance_type"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "stopped"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "stopped"})
 		result["state"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-west-2"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-west-2"})
 		result["region"] = anyVal
 
-		output = &proto.QueryOutput{
+		output = &cloudquery.QueryOutput{
 			Columns: []string{"instance_id", "instance_type", "state", "region"},
 			Result:  result,
 		}
@@ -145,7 +145,7 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 		return stream.Send(output)
 	} else if strings.Contains(strings.ToLower(input.GetQuery()), "s3") {
 		// S3 buckets mock data
-		output := &proto.QueryOutput{
+		output := &cloudquery.QueryOutput{
 			Columns: []string{"bucket_name", "creation_date", "region"},
 		}
 
@@ -153,11 +153,11 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 		result := make(map[string]*anypb.Any)
 
 		// First row
-		anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "my-app-logs"})
+		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "my-app-logs"})
 		result["bucket_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "2023-05-15"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2023-05-15"})
 		result["creation_date"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-east-1"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
 		result["region"] = anyVal
 
 		output.Result = result
@@ -167,14 +167,14 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 
 		// Second row with different data
 		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "customer-data-backup"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "customer-data-backup"})
 		result["bucket_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "2024-02-20"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2024-02-20"})
 		result["creation_date"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "eu-west-1"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "eu-west-1"})
 		result["region"] = anyVal
 
-		output = &proto.QueryOutput{
+		output = &cloudquery.QueryOutput{
 			Columns: []string{"bucket_name", "creation_date", "region"},
 			Result:  result,
 		}
@@ -187,10 +187,10 @@ func handleAWSQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 }
 
 // Azure query handler
-func handleAzureQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+func handleAzureQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
 	if strings.Contains(strings.ToLower(input.GetQuery()), "vm") {
 		// Azure VMs mock data
-		output := &proto.QueryOutput{
+		output := &cloudquery.QueryOutput{
 			Columns: []string{"vm_name", "vm_size", "status", "location"},
 		}
 
@@ -198,13 +198,13 @@ func handleAzureQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer
 		result := make(map[string]*anypb.Any)
 
 		// First row
-		anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "web-server-01"})
+		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "web-server-01"})
 		result["vm_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
 		result["vm_size"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "running"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
 		result["status"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "westeurope"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "westeurope"})
 		result["location"] = anyVal
 
 		output.Result = result
@@ -214,16 +214,16 @@ func handleAzureQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer
 
 		// Second row with different data
 		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "db-server-01"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "db-server-01"})
 		result["vm_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "Standard_E4s_v3"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_E4s_v3"})
 		result["vm_size"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "stopped"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "stopped"})
 		result["status"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "eastus"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "eastus"})
 		result["location"] = anyVal
 
-		output = &proto.QueryOutput{
+		output = &cloudquery.QueryOutput{
 			Columns: []string{"vm_name", "vm_size", "status", "location"},
 			Result:  result,
 		}
@@ -236,10 +236,10 @@ func handleAzureQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer
 }
 
 // GCP query handler
-func handleGCPQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+func handleGCPQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
 	if strings.Contains(strings.ToLower(input.GetQuery()), "instance") {
 		// GCP instances mock data
-		output := &proto.QueryOutput{
+		output := &cloudquery.QueryOutput{
 			Columns: []string{"instance_name", "machine_type", "status", "zone"},
 		}
 
@@ -247,13 +247,13 @@ func handleGCPQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 		result := make(map[string]*anypb.Any)
 
 		// First row
-		anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "app-server-1"})
+		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "app-server-1"})
 		result["instance_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "e2-standard-2"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-standard-2"})
 		result["machine_type"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "RUNNING"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "RUNNING"})
 		result["status"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-central1-a"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-central1-a"})
 		result["zone"] = anyVal
 
 		output.Result = result
@@ -263,16 +263,16 @@ func handleGCPQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 
 		// Second row with different data
 		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "batch-processor"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "batch-processor"})
 		result["instance_name"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "e2-highmem-4"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-highmem-4"})
 		result["machine_type"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "TERMINATED"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "TERMINATED"})
 		result["status"] = anyVal
-		anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "europe-west4-c"})
+		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "europe-west4-c"})
 		result["zone"] = anyVal
 
-		output = &proto.QueryOutput{
+		output = &cloudquery.QueryOutput{
 			Columns: []string{"instance_name", "machine_type", "status", "zone"},
 			Result:  result,
 		}
@@ -285,13 +285,13 @@ func handleGCPQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[p
 }
 
 // Default query handler
-func handleDefaultQuery(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
+func handleDefaultQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
 	return sendGenericQueryResult(stream, "generic_resource")
 }
 
 // Helper function to send a generic query result
-func sendGenericQueryResult(stream grpc.ServerStreamingServer[proto.QueryOutput], resourcePrefix string) error {
-	output := &proto.QueryOutput{
+func sendGenericQueryResult(stream grpc.ServerStreamingServer[cloudquery.QueryOutput], resourcePrefix string) error {
+	output := &cloudquery.QueryOutput{
 		Columns: []string{"id", "name", "type", "created_at"},
 	}
 
@@ -301,13 +301,13 @@ func sendGenericQueryResult(stream grpc.ServerStreamingServer[proto.QueryOutput]
 	// Generate a unique ID
 	resourceID := fmt.Sprintf("%s-%s", resourcePrefix, uuid.New().String()[:8])
 
-	anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: resourceID})
+	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: resourceID})
 	result["id"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock %s", resourceID)})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock %s", resourceID)})
 	result["name"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "mock-resource"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "mock-resource"})
 	result["type"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
 	result["created_at"] = anyVal
 
 	output.Result = result
@@ -316,11 +316,11 @@ func sendGenericQueryResult(stream grpc.ServerStreamingServer[proto.QueryOutput]
 }
 
 // AWS schema handler
-func handleAWSSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+func handleAWSSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// AWS EC2 instances table schema
-	ec2Schema := &proto.SchemaOutput{
+	ec2Schema := &cloudquery.SchemaOutput{
 		Table: "aws_ec2_instances",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "instance_id", Type: "string"},
 			{Column: "instance_type", Type: "string"},
 			{Column: "state", Type: "string"},
@@ -335,9 +335,9 @@ func handleAWSSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer
 	}
 
 	// AWS S3 buckets table schema
-	s3Schema := &proto.SchemaOutput{
+	s3Schema := &cloudquery.SchemaOutput{
 		Table: "aws_s3_buckets",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "bucket_name", Type: "string"},
 			{Column: "creation_date", Type: "date"},
 			{Column: "region", Type: "string"},
@@ -350,11 +350,11 @@ func handleAWSSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer
 }
 
 // Azure schema handler
-func handleAzureSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+func handleAzureSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// Azure VMs table schema
-	vmSchema := &proto.SchemaOutput{
+	vmSchema := &cloudquery.SchemaOutput{
 		Table: "azure_compute_virtual_machines",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "vm_name", Type: "string"},
 			{Column: "vm_size", Type: "string"},
 			{Column: "status", Type: "string"},
@@ -369,9 +369,9 @@ func handleAzureSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServ
 	}
 
 	// Azure Storage accounts table schema
-	storageSchema := &proto.SchemaOutput{
+	storageSchema := &cloudquery.SchemaOutput{
 		Table: "azure_storage_accounts",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "name", Type: "string"},
 			{Column: "location", Type: "string"},
 			{Column: "resource_group", Type: "string"},
@@ -384,11 +384,11 @@ func handleAzureSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServ
 }
 
 // GCP schema handler
-func handleGCPSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+func handleGCPSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// GCP Compute instances table schema
-	computeSchema := &proto.SchemaOutput{
+	computeSchema := &cloudquery.SchemaOutput{
 		Table: "gcp_compute_instances",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "instance_name", Type: "string"},
 			{Column: "machine_type", Type: "string"},
 			{Column: "status", Type: "string"},
@@ -403,9 +403,9 @@ func handleGCPSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer
 	}
 
 	// GCP Storage buckets table schema
-	storageSchema := &proto.SchemaOutput{
+	storageSchema := &cloudquery.SchemaOutput{
 		Table: "gcp_storage_buckets",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "name", Type: "string"},
 			{Column: "location", Type: "string"},
 			{Column: "storage_class", Type: "string"},
@@ -418,11 +418,11 @@ func handleGCPSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer
 }
 
 // Default schema handler
-func handleDefaultSchema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
+func handleDefaultSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// Generic resources table schema
-	genericSchema := &proto.SchemaOutput{
+	genericSchema := &cloudquery.SchemaOutput{
 		Table: "generic_resources",
-		Columns: []*proto.SchemaColumn{
+		Columns: []*cloudquery.SchemaColumn{
 			{Column: "id", Type: "string"},
 			{Column: "name", Type: "string"},
 			{Column: "type", Type: "string"},
@@ -435,10 +435,10 @@ func handleDefaultSchema(input *proto.SchemaInput, stream grpc.ServerStreamingSe
 }
 
 // AWS extract handler
-func handleAWSExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
 	// Mock AWS resources extraction
 	// EC2 instance extract
-	ec2Output := &proto.ExtractOutput{
+	ec2Output := &cloudquery.ExtractOutput{
 		Type: "aws_ec2_instance",
 		Id:   "i-0123456789abcdef0",
 	}
@@ -446,13 +446,13 @@ func handleAWSExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 	// Create mock results map
 	result := make(map[string]*anypb.Any)
 
-	anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
+	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
 	result["instance_id"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "t2.micro"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t2.micro"})
 	result["instance_type"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "running"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
 	result["state"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-east-1"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
 	result["region"] = anyVal
 
 	ec2Output.Result = result
@@ -463,7 +463,7 @@ func handleAWSExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 	}
 
 	// S3 bucket extract
-	s3Output := &proto.ExtractOutput{
+	s3Output := &cloudquery.ExtractOutput{
 		Type: "aws_s3_bucket",
 		Id:   "my-app-logs",
 	}
@@ -471,11 +471,11 @@ func handleAWSExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 	// Create mock results map
 	result = make(map[string]*anypb.Any)
 
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "my-app-logs"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "my-app-logs"})
 	result["bucket_name"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "2023-05-15"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2023-05-15"})
 	result["creation_date"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-east-1"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
 	result["region"] = anyVal
 
 	s3Output.Result = result
@@ -484,10 +484,10 @@ func handleAWSExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 }
 
 // Azure extract handler
-func handleAzureExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+func handleAzureExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
 	// Mock Azure resources extraction
 	// Virtual machine extract
-	vmOutput := &proto.ExtractOutput{
+	vmOutput := &cloudquery.ExtractOutput{
 		Type: "azure_vm",
 		Id:   "web-server-01",
 	}
@@ -495,13 +495,13 @@ func handleAzureExtract(input *proto.ExtractInput, stream grpc.ServerStreamingSe
 	// Create mock results map
 	result := make(map[string]*anypb.Any)
 
-	anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "web-server-01"})
+	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "web-server-01"})
 	result["vm_name"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
 	result["vm_size"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "running"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
 	result["status"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "westeurope"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "westeurope"})
 	result["location"] = anyVal
 
 	vmOutput.Result = result
@@ -511,10 +511,10 @@ func handleAzureExtract(input *proto.ExtractInput, stream grpc.ServerStreamingSe
 }
 
 // GCP extract handler
-func handleGCPExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+func handleGCPExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
 	// Mock GCP resources extraction
 	// Compute instance extract
-	instanceOutput := &proto.ExtractOutput{
+	instanceOutput := &cloudquery.ExtractOutput{
 		Type: "gcp_compute_instance",
 		Id:   "app-server-1",
 	}
@@ -522,13 +522,13 @@ func handleGCPExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 	// Create mock results map
 	result := make(map[string]*anypb.Any)
 
-	anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: "app-server-1"})
+	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "app-server-1"})
 	result["instance_name"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "e2-standard-2"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-standard-2"})
 	result["machine_type"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "RUNNING"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "RUNNING"})
 	result["status"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "us-central1-a"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-central1-a"})
 	result["zone"] = anyVal
 
 	instanceOutput.Result = result
@@ -538,9 +538,9 @@ func handleGCPExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServ
 }
 
 // Default extract handler
-func handleDefaultExtract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
+func handleDefaultExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
 	// Generic resource extraction
-	genericOutput := &proto.ExtractOutput{
+	genericOutput := &cloudquery.ExtractOutput{
 		Type: "generic_resource",
 		Id:   uuid.New().String(),
 	}
@@ -548,13 +548,13 @@ func handleDefaultExtract(input *proto.ExtractInput, stream grpc.ServerStreaming
 	// Create mock results map
 	result := make(map[string]*anypb.Any)
 
-	anyVal, _ := anypb.New(&proto.ExtractOutput{Type: "string", Id: genericOutput.Id})
+	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: genericOutput.Id})
 	result["id"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock Resource %s", genericOutput.Id[:8])})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock Resource %s", genericOutput.Id[:8])})
 	result["name"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "mock-resource"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "mock-resource"})
 	result["type"] = anyVal
-	anyVal, _ = anypb.New(&proto.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
+	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
 	result["created_at"] = anyVal
 
 	genericOutput.Result = result
