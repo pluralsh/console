@@ -1024,4 +1024,10 @@ defmodule Console.Factory do
   def bot(name) do
     insert(:user, bot_name: name, roles: %{admin: true})
   end
+
+  def policy_binding_factory do
+    %Console.Schema.PolicyBinding{
+      policy_id: Ecto.UUID.generate()
+    }
+  end
 end
