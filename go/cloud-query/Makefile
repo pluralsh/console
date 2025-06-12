@@ -1,4 +1,5 @@
-build-proto: ## generate gRPC client and server code
+.PHONY: build-proto ## generate gRPC client and server code
+build-proto:
 	protoc pkg/proto/*.proto \
         --go_out=. \
         --go_opt=paths=source_relative \
@@ -6,8 +7,17 @@ build-proto: ## generate gRPC client and server code
         --go-grpc_opt=paths=source_relative \
         --proto_path=.
 
-build-steampipe: ## run the steampipe server
-	docker build --no-cache -t steampipe -f steampipe.Dockerfile .
+.PHONY: build ## build cloud-query binary
+build:
+	@echo "Building cloud-query binary..."
+	CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -o bin/cloud-query cmd/*.go
 
-run-steampipe: build-steampipe ## run the steampipe server
-	docker run --rm -p 9193:9193 steampipe
+.PHONY: docker ## build cloud-query docker image
+docker:
+	@echo "Building cloud-query docker image..."
+	docker build -t cloud-query:latest .
+
+.PHONY: run ## run cloud-query server
+run: docker
+	@echo "Running cloud-query server..."
+	docker run --rm -p 9192:9192 cloud-query:latest
