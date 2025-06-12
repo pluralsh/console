@@ -10,11 +10,14 @@ message AwsCredentials {
 }
 
 message AzureCredentials {
-  // Azure specific fields
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
 }
 
 message GcpCredentials {
-  // GCP specific fields
+  string impersonation_token = 1;
 }
 
 message Connection {

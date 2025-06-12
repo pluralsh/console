@@ -74,9 +74,13 @@ func (x *AwsCredentials) GetSecretAccessKey() string {
 }
 
 type AzureCredentials struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	SubscriptionId string                 `protobuf:"bytes,1,opt,name=subscription_id,json=subscriptionId,proto3" json:"subscription_id,omitempty"`
+	TenantId       string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	ClientId       string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	ClientSecret   string                 `protobuf:"bytes,4,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *AzureCredentials) Reset() {
@@ -109,10 +113,39 @@ func (*AzureCredentials) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_cloudquery_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *AzureCredentials) GetSubscriptionId() string {
+	if x != nil {
+		return x.SubscriptionId
+	}
+	return ""
+}
+
+func (x *AzureCredentials) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *AzureCredentials) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *AzureCredentials) GetClientSecret() string {
+	if x != nil {
+		return x.ClientSecret
+	}
+	return ""
+}
+
 type GcpCredentials struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	ImpersonationToken string                 `protobuf:"bytes,1,opt,name=impersonation_token,json=impersonationToken,proto3" json:"impersonation_token,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *GcpCredentials) Reset() {
@@ -143,6 +176,13 @@ func (x *GcpCredentials) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GcpCredentials.ProtoReflect.Descriptor instead.
 func (*GcpCredentials) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_cloudquery_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GcpCredentials) GetImpersonationToken() string {
+	if x != nil {
+		return x.ImpersonationToken
+	}
+	return ""
 }
 
 type Connection struct {
@@ -630,9 +670,14 @@ const file_pkg_proto_cloudquery_proto_rawDesc = "" +
 	"\x1apkg/proto/cloudquery.proto\x12\x05proto\"`\n" +
 	"\x0eAwsCredentials\x12\"\n" +
 	"\raccess_key_id\x18\x01 \x01(\tR\vaccessKeyId\x12*\n" +
-	"\x11secret_access_key\x18\x02 \x01(\tR\x0fsecretAccessKey\"\x12\n" +
-	"\x10AzureCredentials\"\x10\n" +
-	"\x0eGcpCredentials\"\xbe\x01\n" +
+	"\x11secret_access_key\x18\x02 \x01(\tR\x0fsecretAccessKey\"\x9a\x01\n" +
+	"\x10AzureCredentials\x12'\n" +
+	"\x0fsubscription_id\x18\x01 \x01(\tR\x0esubscriptionId\x12\x1b\n" +
+	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12#\n" +
+	"\rclient_secret\x18\x04 \x01(\tR\fclientSecret\"A\n" +
+	"\x0eGcpCredentials\x12/\n" +
+	"\x13impersonation_token\x18\x01 \x01(\tR\x12impersonationToken\"\xbe\x01\n" +
 	"\n" +
 	"Connection\x12\x1a\n" +
 	"\bprovider\x18\x01 \x01(\tR\bprovider\x12)\n" +
