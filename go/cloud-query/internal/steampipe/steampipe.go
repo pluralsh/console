@@ -29,28 +29,23 @@ func (in *steampipe) Close() error {
 	return in.db.Close()
 }
 
-func (in *steampipe) init() (Steampipe, error) {
+// TODO: Add cache.
+func NewSteampipe(config config.Configuration) (Steampipe, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
-		return in, err
+		return nil, err
 	}
 
-	authQuery, err := in.config.Query()
+	q, err := config.Query()
 	if err != nil {
-		return in, fmt.Errorf("failed to get config query for provider %s: %w", in.config.Provider(), err)
+		return nil, fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
 	}
 
-	rows, err := db.Query(authQuery)
+	rows, err := db.Query(q)
 	if err != nil {
-		return in, fmt.Errorf("failed to configure provider %s: %w", in.config.Provider(), err)
+		return nil, fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}
 	defer rows.Close()
 
-	in.db = db
-	return in, nil
-}
-
-// TODO: Add cache.
-func NewSteampipe(config config.Configuration) (Steampipe, error) {
-	return (&steampipe{config: config}).init()
+	return &steampipe{db: db, config: config}, nil
 }
