@@ -3,14 +3,14 @@ package main
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
-	"github.com/pluralsh/console/go/cloud-query/internal/steampipe"
+	"github.com/pluralsh/console/go/cloud-query/internal/connection"
 	"k8s.io/klog/v2"
 )
 
 func main() {
-	pipe, err := steampipe.NewSteampipe(config.NewAWSConfiguration())
+	pipe, err := connection.NewConnection(config.NewAWSConfiguration())
 	if err != nil {
-		klog.Fatalf("failed to create Steampipe instance: %v", err)
+		klog.Fatalf("failed to create Connection instance: %v", err)
 	}
 	defer pipe.Close()
 

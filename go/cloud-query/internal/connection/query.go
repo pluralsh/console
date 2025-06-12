@@ -1,10 +1,10 @@
-package steampipe
+package connection
 
 import (
 	"encoding/json"
 )
 
-func (in *steampipe) Query(q string) (string, error) {
+func (in *connection) Query(q string) (string, error) {
 	rows, err := in.db.Query(q)
 	if err != nil {
 		return "", err
