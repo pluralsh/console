@@ -3,6 +3,8 @@ package steampipe
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/config"
 )
 
 const (
@@ -19,8 +21,8 @@ type Steampipe interface {
 }
 
 type steampipe struct {
-	db          *sql.DB
-	credentials Credentials
+	db     *sql.DB
+	config config.Configuration
 }
 
 func (in *steampipe) Close() error {
@@ -33,14 +35,14 @@ func (in *steampipe) init() (Steampipe, error) {
 		return in, err
 	}
 
-	authQuery, err := in.credentials.AuthQuery()
+	authQuery, err := in.config.Query()
 	if err != nil {
-		return in, fmt.Errorf("failed to get auth query for provider %s: %w", in.credentials.Provider(), err)
+		return in, fmt.Errorf("failed to get config query for provider %s: %w", in.config.Provider(), err)
 	}
 
 	rows, err := db.Query(authQuery)
 	if err != nil {
-		return in, fmt.Errorf("failed to configure provider %s: %w", in.credentials.Provider(), err)
+		return in, fmt.Errorf("failed to configure provider %s: %w", in.config.Provider(), err)
 	}
 	defer rows.Close()
 
@@ -49,6 +51,6 @@ func (in *steampipe) init() (Steampipe, error) {
 }
 
 // TODO: Add cache.
-func NewSteampipe(credentials Credentials) (Steampipe, error) {
-	return (&steampipe{credentials: credentials}).init()
+func NewSteampipe(config config.Configuration) (Steampipe, error) {
+	return (&steampipe{config: config}).init()
 }
