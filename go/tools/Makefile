@@ -2,7 +2,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
-include os.mk
+include $(ROOT_DIRECTORY)/go/tools/os.mk
 
 GO_INSTALL_TOOLS := $(shell cat $(TOOLS_DIR)/tools.go | grep _ | awk -F'"' '$$2 ~ /.*/ {print $$2}')
 TOOL_VERSIONS := $(shell awk '/require \(/{flag=1; next} flag&&/\)/{exit} flag' $(TOOLS_DIR)/go.mod | awk '{sub(/[ \t\r]+/, "");}1' | awk '{sub(/ /, "@");}1' | tr '\n' ' ')
