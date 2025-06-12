@@ -1,16 +1,15 @@
 package main
 
 import (
-	"time"
-
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"k8s.io/klog/v2"
 )
 
 func main() {
-	p := pool.NewConnectionPool(15 * time.Minute)
+	p := pool.NewConnectionPool(args.ConnectionTTL())
 
 	c, err := p.Connect(config.NewAWSConfiguration())
 	if err != nil {

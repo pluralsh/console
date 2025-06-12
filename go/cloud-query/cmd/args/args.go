@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
@@ -31,8 +32,13 @@ const (
 )
 
 var (
-	argExtensionsDir = pflag.String("extensions-dir", defaultExtensionsDir, "Directory where the SQLite extensions will be stored")
+	argConnectionTTL = pflag.Duration("connection-ttl", 15*time.Minute, "default TTL for connections in the pool, connections will be closed after this duration if not used")
+	argExtensionsDir = pflag.String("extensions-dir", defaultExtensionsDir, "directory where the SQLite extensions will be stored")
 )
+
+func ConnectionTTL() time.Duration {
+	return *argConnectionTTL
+}
 
 func ExtensionsDir() string {
 	if len(*argExtensionsDir) == 0 {
