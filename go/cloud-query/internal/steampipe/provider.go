@@ -5,11 +5,33 @@ import "os"
 type Provider string
 
 const (
-	ProviderAWS Provider = "aws"
+	ProviderAWS   Provider = "aws"
+	ProviderAzure Provider = "azure"
 )
 
 type Credentials struct {
-	AWS *AWSCredentials
+	AWS   *AWSCredentials
+	Azure *AzureCredentials
+}
+
+func NewAWSCredentials(accessKeyId, secretAccessKey *string) Credentials {
+	return Credentials{
+		AWS: &AWSCredentials{
+			accessKeyId:     accessKeyId,
+			secretAccessKey: secretAccessKey,
+		},
+	}
+}
+
+func NewAzureCredentials(subscriptionId, tenantId, clientId, clientSecret *string) Credentials {
+	return Credentials{
+		Azure: &AzureCredentials{
+			subscriptionId: subscriptionId,
+			tenantId:       tenantId,
+			clientId:       clientId,
+			clientSecret:   clientSecret,
+		},
+	}
 }
 
 type AWSCredentials struct {
@@ -35,11 +57,45 @@ func (c *AWSCredentials) SecretAccessKey() string {
 	return os.Getenv("AWS_SECRET_ACCESS_KEY")
 }
 
-func NewAWSCredentials(accessKeyId, secretAccessKey *string) Credentials {
-	return Credentials{
-		AWS: &AWSCredentials{
-			accessKeyId:     accessKeyId,
-			secretAccessKey: secretAccessKey,
-		},
+type AzureCredentials struct {
+	subscriptionId *string
+	tenantId       *string
+	clientId       *string
+	clientSecret   *string
+}
+
+func (c *AzureCredentials) SubscriptionId() string {
+	if c != nil && c.subscriptionId != nil && *c.subscriptionId != "" {
+		// Return the subscription ID if it is set.
+		return *c.subscriptionId
 	}
+
+	return os.Getenv("AZURE_SUBSCRIPTION_ID")
+}
+
+func (c *AzureCredentials) TenantId() string {
+	if c != nil && c.tenantId != nil && *c.tenantId != "" {
+		// Return the tenant ID if it is set.
+		return *c.tenantId
+	}
+
+	return os.Getenv("AZURE_TENANT_ID")
+}
+
+func (c *AzureCredentials) ClientId() string {
+	if c != nil && c.clientId != nil && *c.clientId != "" {
+		// Return the client ID if it is set.
+		return *c.clientId
+	}
+
+	return os.Getenv("AZURE_CLIENT_ID")
+}
+
+func (c *AzureCredentials) ClientSecret() string {
+	if c != nil && c.clientSecret != nil && *c.clientSecret != "" {
+		// Return the client secret if it is set.
+		return *c.clientSecret
+	}
+
+	return os.Getenv("AZURE_CLIENT_SECRET")
 }
