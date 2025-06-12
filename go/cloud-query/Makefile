@@ -1,3 +1,8 @@
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+
+include $(ROOT_DIRECTORY)/go/paths.mk
+include $(TOOLS_MAKEFILE)
+
 ##@ Build and run
 
 .PHONY: build ## build the cloud-query binary
