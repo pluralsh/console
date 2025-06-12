@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 )
 
 type Configuration struct {
@@ -37,6 +39,10 @@ func (c *Configuration) Query() (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", c.provider)
 	}
+}
+
+func (c *Configuration) SHA() (string, error) {
+	return common.HashObject(c)
 }
 
 func NewAWSConfiguration(options ...Option) Configuration {

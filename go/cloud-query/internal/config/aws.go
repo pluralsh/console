@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
-	"github.com/pluralsh/console/go/cloud-query/internal/common"
 )
 
 type AWSConfiguration struct {
@@ -38,10 +36,6 @@ func (c *AWSConfiguration) Query() string {
 				secret_key=%q
 			');
 		`, c.AccessKeyId(), c.SecretAccessKey())
-}
-
-func (c *AWSConfiguration) SHA() (string, error) {
-	return common.HashObject(c)
 }
 
 func (c *AWSConfiguration) MarshalJSON() ([]byte, error) {
