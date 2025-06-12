@@ -18,7 +18,13 @@ image: ## build the Docker image
 .PHONY: run
 run: image ## run the Docker image
 	@echo "Running cloud-query server..."
-	docker run --rm -p 9192:9192 cloud-query:latest
+	docker run \
+		--rm \
+		-p 9192:9192 \
+		-e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+		-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+		-e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+		cloud-query:latest
 
 ##@ Codegen
 
