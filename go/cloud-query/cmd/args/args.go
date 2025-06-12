@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/cloud-query/pkg/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 func init() {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
-	"github.com/pluralsh/console/go/cloud-query/pkg/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 const (
