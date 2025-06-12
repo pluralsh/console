@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/mattn/go-sqlite3"
+	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
+	"github.com/pluralsh/console/go/cloud-query/pkg/log"
 )
 
 const (
@@ -32,10 +34,11 @@ func init() {
 		&sqlite3.SQLiteDriver{
 			ConnectHook: func(c *sqlite3.SQLiteConn) error {
 				for _, path := range extensionPaths {
-					fmt.Printf("loading Steampipe extension: %s\n", path)
 					if err := c.LoadExtension(path, extensionEntryPoint); err != nil {
 						return err
 					}
+
+					klog.V(log.LogLevelDebug).InfoS("loading extension", "path", path)
 				}
 
 				return nil

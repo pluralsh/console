@@ -1,35 +1,29 @@
 package main
 
 import (
-	"flag"
-	"log"
-
 	_ "github.com/mattn/go-sqlite3"
+	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/steampipe"
 )
 
-var (
-	port = flag.Int("port", 50051, "the server port")
-)
-
 func main() {
-	pipe, err := steampipe.NewSteampipe(config.NewAWSConfiguration(nil, nil))
+	pipe, err := steampipe.NewSteampipe(config.NewAWSConfiguration())
 	if err != nil {
-		log.Fatalf("failed to create Steampipe instance: %v", err)
+		klog.Fatalf("failed to create Steampipe instance: %v", err)
 	}
 	defer pipe.Close()
 
-	//modules, err := pipe.LoadedModules()
-	//if err != nil {
-	//	log.Fatalf("failed to load modules: %v", err)
-	//}
-	//log.Printf("loaded modules: %v", modules)
+	modules, err := pipe.LoadedModules()
+	if err != nil {
+		klog.Fatalf("failed to load modules: %v", err)
+	}
+	klog.InfoS("loaded modules", "count", len(modules))
 
 	result, err := pipe.Query("select vpc_id, cidr_block, state from aws_vpc")
 	if err != nil {
-		log.Fatalf("failed to load modules: %v", err)
+		klog.Fatalf("failed to query: %v", err)
 	}
-	log.Println(result)
+	klog.InfoS("query result", "result", result)
 }

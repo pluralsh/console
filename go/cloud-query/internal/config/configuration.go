@@ -11,6 +11,8 @@ type Configuration struct {
 	gcp      *GCPConfiguration
 }
 
+type Option func(*Configuration)
+
 func (c *Configuration) Provider() Provider {
 	return c.provider
 }
@@ -37,33 +39,41 @@ func (c *Configuration) Query() (string, error) {
 	}
 }
 
-func NewAWSConfiguration(accessKeyId, secretAccessKey *string) Configuration {
-	return Configuration{
+func NewAWSConfiguration(options ...Option) Configuration {
+	c := Configuration{
 		provider: ProviderAWS,
-		aws: &AWSConfiguration{
-			accessKeyId:     accessKeyId,
-			secretAccessKey: secretAccessKey,
-		},
+		aws:      &AWSConfiguration{},
 	}
+
+	for _, opt := range options {
+		opt(&c)
+	}
+
+	return c
 }
 
-func NewAzureConfiguration(subscriptionId, tenantId, clientId, clientSecret *string) Configuration {
-	return Configuration{
+func NewAzureConfiguration(options ...Option) Configuration {
+	c := Configuration{
 		provider: ProviderAzure,
-		azure: &AzureConfiguration{
-			subscriptionId: subscriptionId,
-			tenantId:       tenantId,
-			clientId:       clientId,
-			clientSecret:   clientSecret,
-		},
+		azure:    &AzureConfiguration{},
 	}
+
+	for _, opt := range options {
+		opt(&c)
+	}
+
+	return c
 }
 
-func NewGCPConfiguration(impersonateAccessToken *string) Configuration {
-	return Configuration{
+func NewGCPConfiguration(options ...Option) Configuration {
+	c := Configuration{
 		provider: ProviderGCP,
-		gcp: &GCPConfiguration{
-			impersonateAccessToken: impersonateAccessToken,
-		},
+		gcp:      &GCPConfiguration{},
 	}
+
+	for _, opt := range options {
+		opt(&c)
+	}
+
+	return c
 }

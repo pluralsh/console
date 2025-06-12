@@ -7,6 +7,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
+	k8s.io/klog/v2 v2.130.1
 )
 
 require (
