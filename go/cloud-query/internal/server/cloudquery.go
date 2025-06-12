@@ -25,11 +25,11 @@ func NewCloudQueryServer() Route {
 
 // Install registers the CloudQuery service with the gRPC server
 func (in *CloudQueryServer) Install(server *grpc.Server) {
-	klog.V(log.LogLevelVerbose).InfoS("registering CloudQuery service", "service", "CloudQueryServer")
+	klog.V(log.LogLevelVerbose).InfoS("registering server", "server", "CloudQueryServer")
 	proto.RegisterCloudQueryServer(server, in)
 }
 
-// Query implements the Query method of the CloudQuery service
+// Query implements the proto.CloudQueryServer interface
 func (in *CloudQueryServer) Query(input *proto.QueryInput, stream grpc.ServerStreamingServer[proto.QueryOutput]) error {
 	// Log the request
 	provider := "unknown"
@@ -53,7 +53,7 @@ func (in *CloudQueryServer) Query(input *proto.QueryInput, stream grpc.ServerStr
 	}
 }
 
-// Schema implements the Schema method of the CloudQuery service
+// Schema implements the proto.CloudQueryServer interface
 func (in *CloudQueryServer) Schema(input *proto.SchemaInput, stream grpc.ServerStreamingServer[proto.SchemaOutput]) error {
 	// Log the request
 	provider := "unknown"
@@ -76,7 +76,7 @@ func (in *CloudQueryServer) Schema(input *proto.SchemaInput, stream grpc.ServerS
 	}
 }
 
-// Extract implements the Extract method of the CloudQuery service
+// Extract implements the proto.CloudQueryServer interface
 func (in *CloudQueryServer) Extract(input *proto.ExtractInput, stream grpc.ServerStreamingServer[proto.ExtractOutput]) error {
 	// Log the request
 	provider := "unknown"

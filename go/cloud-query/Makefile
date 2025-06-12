@@ -40,15 +40,16 @@ run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
 .PHONY: proto
 proto: TOOL = protoc-gen-go protoc-gen-go-grpc
 proto: --tool install-protoc ## generate gRPC client and server code
-	find protos/internal -name "*.proto" | xargs $(PROTOC) \
+	$(PROTOC) \
         --plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
         --plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
         --go_out=internal/proto \
         --go_opt=paths=source_relative \
         --go-grpc_out=internal/proto \
         --go-grpc_opt=paths=source_relative \
-        --proto_path=protos/internal \
-        --proto_path=protos/third_party \
+        --proto_path=api/proto \
+        --proto_path=api/third_party \
+        api/proto/**/*.proto
 
 ##@ Test and lint
 
