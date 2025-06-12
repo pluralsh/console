@@ -16,7 +16,11 @@ const (
 
 var (
 	// extensionPaths are paths to the Steampipe SQLite extensions.
-	extensionPaths = []string{"./bin/steampipe_sqlite_aws.so"}
+	extensionPaths = []string{
+		"./bin/steampipe_sqlite_aws.so",
+		"./bin/steampipe_sqlite_azure.so",
+		"./bin/steampipe_sqlite_gcp.so",
+	}
 )
 
 func init() {
