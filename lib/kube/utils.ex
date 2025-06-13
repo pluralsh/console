@@ -71,12 +71,13 @@ defmodule Kube.Utils do
   def api_version(nil, v), do: v
   def api_version(g, v), do: "#{g}/#{v}"
 
-  def group_version(api_version) do
+  def group_version(api_version) when is_binary(api_version) do
     case String.split(api_version, "/") do
       [g, v] -> {g, v}
       [v] -> {nil, v}
     end
   end
+  def group_version(_), do: {nil, nil}
 
   def save_kubeconfig(val), do: Process.put(@kubeconf, val)
   def kubeconfig(), do: Process.get(@kubeconf)

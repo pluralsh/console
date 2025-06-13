@@ -1,5 +1,6 @@
 defmodule Console.Prom.Plugin do
   use PromEx.Plugin
+  alias Console.Deployments.Statistics
 
   def metric_scope(:git_agent), do: ~w(console git agent)a
   def metric_scope(:cluster_count), do: ~w(console cluster count)a
@@ -10,6 +11,7 @@ defmodule Console.Prom.Plugin do
   def metric_scope(:failed_stack_count), do: ~w(console failed stack count)a
   def metric_scope(:file_count), do: ~w(console file count)a
   def metric_scope(:file_size), do: ~w(console file size)a
+  def metric_scope(:erlang_nodes), do: ~w(console erlang nodes count)a
 
   @impl true
   def event_metrics(_opts) do
@@ -33,7 +35,8 @@ defmodule Console.Prom.Plugin do
 
     [
       db_poller(poll_rate),
-      fs_poller(poll_rate)
+      fs_poller(poll_rate),
+      dist_poller(:timer.seconds(10))
     ]
   end
 
@@ -41,7 +44,7 @@ defmodule Console.Prom.Plugin do
     Polling.build(
       :console_poll_db,
       poll_rate,
-      {Console.Deployments.Statistics, :compile, []},
+      {Statistics, :compile, []},
       [
         last_value(
           [:cluster, :count],
@@ -87,7 +90,7 @@ defmodule Console.Prom.Plugin do
     Polling.build(
       :console_poll_fs,
       poll_rate,
-      {Console.Deployments.Git.Statistics, :disk, []},
+      {Statistics, :compile, []},
       [
         # Capture the total number of files and disk utilization from console file caches
         last_value(
@@ -100,6 +103,23 @@ defmodule Console.Prom.Plugin do
           [:local, :cache, :filesize],
           event_name: metric_scope(:file_size),
           description: "The total disk utilization from console file caches.",
+          measurement: :total
+        ),
+      ]
+    )
+  end
+
+  defp dist_poller(poll_rate) do
+    Polling.build(
+      :console_poll_fs,
+      poll_rate,
+      {Statistics, :compile_erlang, []},
+      [
+        # Capture the total number of files and disk utilization from console file caches
+        last_value(
+          [:erlang, :nodes, :count],
+          event_name: metric_scope(:erlang_nodes),
+          description: "The total number of erlang nodes.",
           measurement: :total
         ),
       ]
