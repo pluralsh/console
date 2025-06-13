@@ -23,17 +23,17 @@ func (c *Configuration) Query() (string, error) {
 	switch c.provider {
 	case ProviderAWS:
 		if c.aws == nil {
-			return "", fmt.Errorf("AWS configuration is not set")
+			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
 		return c.aws.Query(), nil
 	case ProviderAzure:
 		if c.azure == nil {
-			return "", fmt.Errorf("Azure configuration is not set")
+			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
 		return c.azure.Query(), nil
 	case ProviderGCP:
 		if c.gcp == nil {
-			return "", fmt.Errorf("GCP configuration is not set")
+			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
 		return c.gcp.Query(), nil
 	default:
