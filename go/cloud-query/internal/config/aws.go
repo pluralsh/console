@@ -48,14 +48,14 @@ func (c *AWSConfiguration) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func WithAccessKeyId(accessKeyId string) func(*AWSConfiguration) {
-	return func(c *AWSConfiguration) {
-		c.accessKeyId = &accessKeyId
+func WithAWSAccessKeyId(accessKeyId string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.aws.accessKeyId = &accessKeyId
 	}
 }
 
-func WithSecretAccessKey(secretAccessKey string) func(*AWSConfiguration) {
-	return func(c *AWSConfiguration) {
-		c.secretAccessKey = &secretAccessKey
+func WithAWSSecretAccessKey(secretAccessKey string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.aws.secretAccessKey = &secretAccessKey
 	}
 }

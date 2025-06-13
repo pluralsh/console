@@ -109,8 +109,12 @@ func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc
 
 // AWS query handler
 func (in *CloudQueryService) handleAWSQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	// TODO: pass auth info
-	c, err := in.pool.Connect(config.NewAWSConfiguration())
+	c, err := in.pool.Connect(
+		config.NewAWSConfiguration(
+			config.WithAWSAccessKeyId(input.GetConnection().GetAws().GetAccessKeyId()),
+			config.WithAWSSecretAccessKey(input.GetConnection().GetAws().GetSecretAccessKey()),
+		),
+	)
 	if err != nil {
 		klog.ErrorS(err, "failed to connect to AWS provider")
 		return status.Errorf(codes.Internal, "failed to connect to provider: %v", err)
@@ -133,6 +137,7 @@ func (in *CloudQueryService) handleAWSQuery(input *cloudquery.QueryInput, stream
 		Result:  result,
 	}
 
+	klog.V(log.LogLevelDebug).InfoS("sending query result", "query", input.Query, "result", res)
 	return stream.Send(output)
 }
 

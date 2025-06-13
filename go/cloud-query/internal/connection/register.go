@@ -35,10 +35,11 @@ func init() {
 			ConnectHook: func(c *sqlite3.SQLiteConn) error {
 				for _, path := range extensionPaths {
 					if err := c.LoadExtension(path, extensionEntryPoint); err != nil {
-						return err
+						klog.ErrorS(err, "failed to load extension", "extension", extensionEntryPoint)
+						continue
 					}
 
-					klog.V(log.LogLevelDebug).InfoS("loading extension", "path", path)
+					klog.V(log.LogLevelDebug).InfoS("loaded extension", "path", path)
 				}
 
 				return nil

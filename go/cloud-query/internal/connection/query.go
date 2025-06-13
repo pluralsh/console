@@ -2,9 +2,15 @@ package connection
 
 import (
 	"encoding/json"
+
+	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 func (in *connection) Query(q string) (string, error) {
+	klog.V(log.LogLevelDebug).InfoS("running query", "query", q)
+
 	rows, err := in.db.Query(q)
 	if err != nil {
 		return "", err
