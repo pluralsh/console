@@ -17,6 +17,10 @@ defmodule Console.Deployments.Statistics do
     stack_stats()
   end
 
+  def compile_erlang() do
+    :telemetry.execute(metric_scope(:erlang_nodes), %{total: length(Node.list()) + 1}, %{})
+  end
+
   defp cluster_stats() do
     Cluster.stats()
     |> Console.Repo.one()
