@@ -1,42 +1,38 @@
 package connection
 
 import (
-	"encoding/json"
-
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
-func (in *connection) Query(q string) (string, error) {
+func (in *connection) Query(q string) (columns []string, rows [][]any, err error) {
 	klog.V(log.LogLevelDebug).InfoS("running query", "query", q)
 
-	rows, err := in.db.Query(q)
+	qResponse, err := in.db.Query(q)
 	if err != nil {
-		return "", err
+		return columns, rows, err
 	}
-	defer rows.Close()
+	defer qResponse.Close()
 
-	cols, err := rows.Columns()
+	columns, err = qResponse.Columns()
 	if err != nil {
-		return "", err
+		return columns, rows, err
 	}
 
-	result := make([][]any, 0)
-	for rows.Next() {
-		values := make([]any, len(cols))
-		pointers := make([]any, len(cols))
+	for qResponse.Next() {
+		values := make([]any, len(columns))
+		pointers := make([]any, len(columns))
 		for i := range values {
 			pointers[i] = &values[i]
 		}
 
-		if err = rows.Scan(pointers...); err != nil {
-			return "", err
+		if err = qResponse.Scan(pointers...); err != nil {
+			return columns, rows, err
 		}
 
-		result = append(result, values)
+		rows = append(rows, values)
 	}
 
-	r, err := json.Marshal(result)
-	return string(r), err
+	return columns, rows, err
 }

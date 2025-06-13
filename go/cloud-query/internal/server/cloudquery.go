@@ -13,6 +13,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
+	"github.com/pluralsh/console/go/cloud-query/internal/connection"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
@@ -39,26 +40,36 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 
 // Query implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	// Log the request
-	provider := "unknown"
-	if input.Connection != nil {
-		provider = input.Connection.GetProvider()
+	provider, err := in.toProvider(input)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
+		return status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
 	}
 
-	klog.V(log.LogLevelDebug).InfoS("received query request", "provider", provider, "input", input)
-
-	// Generate some mock query results based on the input query
-	// For demonstration purposes, we'll return different results based on the provider
-	switch strings.ToLower(provider) {
-	case "aws":
-		return in.handleAWSQuery(input, stream)
-	case "azure":
-		return handleAzureQuery(input, stream)
-	case "gcp":
-		return handleGCPQuery(input, stream)
-	default:
-		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
+	configuration, err := in.toConnectionConfiguration(provider, input.Connection)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
+		return status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
 	}
+
+	c, err := in.pool.Connect(configuration)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to connect to provider", "provider", provider)
+		return status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
+	}
+
+	//q, err := configuration.Query()
+	//if err != nil {
+	//	return fmt.Errorf("failed to get config query for provider %s: %w", configuration.Provider(), err)
+	//}
+	//
+	//_, err = c.Exec(q)
+	//if err != nil {
+	//	return fmt.Errorf("failed to configure provider %s: %w", configuration.Provider(), err)
+	//}
+	//klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", configuration.Provider())
+
+	return in.handleQuery(c, input.GetQuery(), stream)
 }
 
 // Schema implements the cloudquery.CloudQueryServer interface
@@ -107,38 +118,86 @@ func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc
 	}
 }
 
-// AWS query handler
-func (in *CloudQueryService) handleAWSQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	c, err := in.pool.Connect(
-		config.NewAWSConfiguration(
-			config.WithAWSAccessKeyId(input.GetConnection().GetAws().GetAccessKeyId()),
-			config.WithAWSSecretAccessKey(input.GetConnection().GetAws().GetSecretAccessKey()),
-		),
-	)
-	if err != nil {
-		klog.ErrorS(err, "failed to connect to AWS provider")
-		return status.Errorf(codes.Internal, "failed to connect to provider: %v", err)
+func (in *CloudQueryService) toProvider(input *cloudquery.QueryInput) (config.Provider, error) {
+	if input.Connection == nil {
+		return config.ProviderUnknown, status.Errorf(codes.InvalidArgument, "connection is required")
 	}
 
-	res, err := c.Query(input.Query)
-	if err != nil {
-		klog.ErrorS(err, "failed to execute query", "query", input.Query)
-		return status.Errorf(codes.Internal, "failed to execute query '%s': %v", input.Query, err)
+	switch config.Provider(strings.ToLower(input.Connection.GetProvider())) {
+	case config.ProviderAWS:
+		return config.ProviderAWS, nil
+	case config.ProviderAzure:
+		return config.ProviderAzure, nil
+	case config.ProviderGCP:
+		return config.ProviderGCP, nil
+	default:
+		return config.ProviderUnknown, fmt.Errorf("unsupported provider: %s", input.GetConnection().GetProvider())
 	}
+}
 
-	result := make(map[string]*anypb.Any)
-	strValue, _ := structpb.NewValue(res)
-	val, _ := anypb.New(strValue)
+func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider, connection *cloudquery.Connection) (c config.Configuration, err error) {
+	switch provider {
+	case config.ProviderAWS:
+		return config.NewAWSConfiguration(
+			config.WithAWSAccessKeyId(connection.GetAws().GetAccessKeyId()),
+			config.WithAWSSecretAccessKey(connection.GetAws().GetSecretAccessKey()),
+		), nil
+	case config.ProviderAzure:
+		return config.NewAzureConfiguration(), nil
+	case config.ProviderGCP:
+		return config.NewGCPConfiguration(), nil
+	default:
+		return c, fmt.Errorf("unsupported provider: %s", provider)
+	}
+}
 
-	result["data"] = val
+func (in *CloudQueryService) handleQuery(c connection.Connection, query string, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
+	columns, rows, err := c.Query(query)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to execute query", "query", query)
+		return status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
+	}
+	klog.V(log.LogLevelDebug).InfoS("found query results", "rows", len(rows))
 
 	output := &cloudquery.QueryOutput{
-		Columns: []string{},
-		Result:  result,
+		Columns: columns,
 	}
 
-	klog.V(log.LogLevelDebug).InfoS("sending query result", "query", input.Query, "result", res)
-	return stream.Send(output)
+	if len(rows) == 0 {
+		return stream.Send(output)
+	}
+
+	for _, row := range rows {
+		result := make(map[string]*anypb.Any)
+		for i, col := range columns {
+			value, err := structpb.NewValue(row[i])
+			if err != nil {
+				klog.V(log.LogLevelVerbose).ErrorS(err, "failed to convert value to structpb", "column", col, "value", row[i])
+				return status.Errorf(codes.Internal, "failed to convert value for column '%s': %v", col, err)
+			}
+
+			anyVal, err := anypb.New(value)
+			if err != nil {
+				klog.V(log.LogLevelVerbose).ErrorS(err, "failed to convert value to anypb", "column", col, "value", row[i])
+				return status.Errorf(codes.Internal, "failed to convert value for column '%s': %v", col, err)
+			}
+
+			result[col] = anyVal
+		}
+
+		output = &cloudquery.QueryOutput{
+			Columns: columns,
+			Result:  result,
+		}
+
+		klog.V(log.LogLevelTrace).InfoS("sending query output", "output", output)
+		if err = stream.Send(output); err != nil {
+			klog.V(log.LogLevelVerbose).ErrorS(err, "failed to stream query output")
+			return status.Errorf(codes.Internal, "failed to send query output: %v", err)
+		}
+	}
+
+	return nil
 }
 
 // Azure query handler

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
+
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
 )
@@ -31,6 +32,7 @@ func (c *ConnectionPool) cleanupRoutine() {
 	for range ticker.C {
 		for item := range c.pool.IterBuffered() {
 			if !item.Val.alive(c.ttl) {
+				_ = item.Val.connection.Close()
 				c.pool.Remove(item.Key)
 			}
 		}
@@ -45,7 +47,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 
 	data, exists := c.pool.Get(sha)
 	if !exists || !data.alive(c.ttl) {
-		conn, err := connection.NewConnection(config)
+		conn, err := connection.NewConnection(sha, config)
 		if err != nil {
 			return nil, err
 		}

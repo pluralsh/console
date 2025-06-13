@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
@@ -11,6 +12,31 @@ type Configuration struct {
 	aws      *AWSConfiguration
 	azure    *AzureConfiguration
 	gcp      *GCPConfiguration
+}
+
+func (c *Configuration) MarshalJSON() ([]byte, error) {
+	var credentials []byte
+	var err error
+	switch c.provider {
+	case ProviderAWS:
+		credentials, err = c.aws.MarshalJSON()
+	case ProviderAzure:
+		credentials, err = c.azure.MarshalJSON()
+	case ProviderGCP:
+		credentials, err = c.gcp.MarshalJSON()
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal provider %s configuration: %w", c.provider, err)
+
+	}
+
+	parentMap := map[string]any{
+		"provider":    c.provider,
+		"credentials": string(credentials),
+	}
+
+	return json.Marshal(parentMap)
 }
 
 type Option func(*Configuration)

@@ -18,7 +18,8 @@ const (
 )
 
 type Connection interface {
-	Query(q string) (string, error)
+	Query(q string) (columns []string, rows [][]any, err error)
+	Exec(q string) (sql.Result, error)
 	Ping() error
 	LoadedModules() ([]string, error)
 	Close() error
@@ -33,11 +34,14 @@ func (in *connection) Close() error {
 	return in.db.Close()
 }
 
-func NewConnection(config config.Configuration) (Connection, error) {
+func NewConnection(driverName string, config config.Configuration) (Connection, error) {
+	registerDriver(driverName, config.Provider())
+
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
+	db.SetMaxOpenConns(1) // Limit to a single connection for the in-memory database
 
 	q, err := config.Query()
 	if err != nil {
@@ -51,4 +55,8 @@ func NewConnection(config config.Configuration) (Connection, error) {
 	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
 
 	return &connection{db: db, config: config}, nil
+}
+
+func (in *connection) Exec(q string) (sql.Result, error) {
+	return in.db.Exec(q)
 }

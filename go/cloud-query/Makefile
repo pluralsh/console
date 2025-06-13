@@ -8,7 +8,7 @@ include $(TOOLS_MAKEFILE)
 .PHONY: build ## build the cloud-query binary
 build:
 	@echo "Building cloud-query binary..."
-	CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -o bin/cloud-query cmd/*.go
+	CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -tags=trace -o bin/cloud-query cmd/*.go
 
 .PHONY: image
 image: ## build the Docker image
