@@ -7,20 +7,19 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
-	_ "github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/server"
 )
 
 func main() {
 	p := pool.NewConnectionPool(args.ConnectionTTL())
-	//
+
 	//c, err := p.Connect(config.NewAWSConfiguration())
 	//if err != nil {
 	//	klog.Fatalf("failed to create Connection instance: %v", err)
 	//}
 	//defer c.Close()
-
+	//
 	//modules, err := c.LoadedModules()
 	//if err != nil {
 	//	klog.Fatalf("failed to load modules: %v", err)
