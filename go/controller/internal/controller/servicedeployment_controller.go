@@ -86,9 +86,11 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	if !service.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, service)
+	// Handle resource deletion both in Kubernetes cluster and in Console API.
+	if result := r.addOrRemoveFinalizer(service); result != nil {
+		return *result, nil
 	}
+
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return handleRequeue(nil, err, service.SetCondition)
@@ -143,7 +145,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		controllerutil.AddFinalizer(service, ServiceFinalizer)
 		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -496,57 +497,59 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 	return nil
 }
 
-func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
-	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		log.Info("try to delete service")
-		cluster := &v1alpha1.Cluster{}
-		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-			if !apierrors.IsNotFound(err) {
-				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
-		}
-		if !cluster.Status.HasID() {
-			err := r.deleteService(service)
-			if errors.IsNotFound(err) || err == nil {
-				controllerutil.RemoveFinalizer(service, ServiceFinalizer)
-				return ctrl.Result{}, nil
-			}
-			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
+	// If the service is not being deleted and if it does not have the finalizer, then let's add it.
+	if service.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
+		controllerutil.AddFinalizer(service, ServiceFinalizer)
+	}
+
+	// If the service is being deleted, cleanup and remove the finalizer.
+	if !service.ObjectMeta.DeletionTimestamp.IsZero() {
+		// If the service does not have an ID, the finalizer can be removed.
+		if !service.Status.HasID() {
+			controllerutil.RemoveFinalizer(service, ServiceFinalizer)
+			return &ctrl.Result{}
 		}
 
-		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
-		if err != nil && !errors.IsNotFound(err) {
-			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+		// If the service is already being deleted from Console API, requeue.
+		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
+			return &waitForResources
 		}
-		if existingService != nil && existingService.DeletedAt != nil {
-			log.Info("waiting for the console")
-			updateStatus(service, existingService, "")
-			return requeue, nil
+
+		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
+		if err != nil {
+			return &requeue
 		}
-		if existingService != nil {
-			if err := r.deleteService(service); err != nil {
+
+		// Remove service from Console API if it exists and is not read-only.
+		if exists && !service.Status.IsReadonly() {
+			if err := r.deleteService(service.Status.GetID(), service.Spec.Detach); err != nil {
+				// If it fails to delete the external dependency here, return with the error
+				// so that it can be retried.
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
+				return &ctrl.Result{}
 			}
-			return requeue, nil
+
+			// If the deletion process started requeue so that we can make sure the service
+			// has been deleted from Console API before removing the finalizer.
+			return &waitForResources
 		}
+
+		// If our finalizer is present, remove it.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
+
+		// Stop reconciliation as the item does no longer exist.
+		return &ctrl.Result{}
 	}
-	return ctrl.Result{}, nil
+
+	return nil
 }
 
-func (r *ServiceReconciler) deleteService(service *v1alpha1.ServiceDeployment) error {
-	if service.Status.ID != nil {
-		if service.Spec.Detach {
-			return r.ConsoleClient.DetachService(*service.Status.ID)
-		}
-		return r.ConsoleClient.DeleteService(*service.Status.ID)
+func (r *ServiceReconciler) deleteService(id string, detach bool) error {
+	if detach {
+		return r.ConsoleClient.DetachService(id)
 	}
-	return nil
+	return r.ConsoleClient.DeleteService(id)
 }
 
 // ensureService makes sure that user-friendly input such as userEmail/groupName in

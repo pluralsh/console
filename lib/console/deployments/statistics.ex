@@ -6,7 +6,8 @@ defmodule Console.Deployments.Statistics do
   def info() do
     %{
       clusters: Repo.aggregate(Cluster, :count, :id),
-      services: Repo.aggregate(Service, :count, :id)
+      services: Repo.aggregate(Service, :count, :id),
+      bytes_ingested: Console.Prom.Meter.collect()
     }
   end
 

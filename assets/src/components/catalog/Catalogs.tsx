@@ -168,9 +168,11 @@ export function Catalogs() {
                   }
                   secondary
                   startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-                  backgroundColor={
-                    hasActiveFilters ? 'fill-zero-selected' : undefined
-                  }
+                  style={{
+                    borderColor: hasActiveFilters
+                      ? theme.colors['border-primary']
+                      : undefined,
+                  }}
                 >
                   {hasActiveFilters ? 'Reset filters' : 'Filters'}
                 </Button>

@@ -69,8 +69,9 @@ defmodule ConsoleWeb.GitController do
          svc <- Console.Repo.preload(svc, [:revision]),
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {get_digest(params, svc), svc},
-         {{:ok, path}, _} <- {FileServer.fetch(sha, fn -> Services.tarstream(svc) end), svc} do
-      chunk_send_tar(conn, path)
+         {{:ok, path, sha}, _} <- {FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end), svc} do
+      put_resp_header(conn, "x-plrl-digest", sha)
+      |> chunk_send_tar(path)
     else
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
@@ -80,6 +81,12 @@ defmodule ConsoleWeb.GitController do
         send_resp(conn, 402, stringify(err))
       _ -> send_resp(conn, 403, "Forbidden")
     end
+  end
+
+  defp svc_tarball(%Service{} = svc) do
+    with {:ok, sha} <- Services.digest(svc),
+         {:ok, f} <- Services.tarstream(svc),
+      do: {:ok, f, sha}
   end
 
   defp stringify(err) when is_binary(err), do: err

@@ -129,8 +129,6 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
         </Flex>
         <Button
           id="plrl-login"
-          fill="horizontal"
-          label=""
           onClick={() => {
             window.location = oidcUri
           }}
@@ -278,9 +276,6 @@ export default function Login() {
           </Flex>
           <Button
             type="submit"
-            fill="horizontal"
-            pad={{ vertical: '8px' }}
-            margin={{ top: 'xsmall' }}
             loading={loginMLoading}
             disabled={disabled}
           >

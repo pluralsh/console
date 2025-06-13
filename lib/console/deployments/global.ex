@@ -229,6 +229,7 @@ defmodule Console.Deployments.Global do
 
   @spec add_to_cluster(GlobalService.t, Cluster.t, User.t) :: Services.service_resp
   def add_to_cluster(%GlobalService{} = global, %Cluster{id: cid} = cluster, user) do
+    global = Repo.preload(global, [:context])
     global = load_configuration(global)
     case {global, Services.get_service_by_name(cid, svc_name(global))} do
       {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
@@ -244,6 +245,57 @@ defmodule Console.Deployments.Global do
       {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
         Services.clone_service(%{owner_id: gid}, sid, cid, user)
       {_, svc} -> {:error, {:already_exists, svc}}
+    end
+  end
+
+  @doc """
+  it can resync a service owned by a global service
+  """
+  @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
+  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id} = global, %Service{} = dest, %User{} = user) do
+    Logger.info "Attempting to resync service #{dest.id}"
+    global = Repo.preload(global, [:context])
+    dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
+    tpl = Repo.preload(tpl, [:dependencies])
+    tpl = dynamic_template(tpl, dest.cluster, global)
+    case diff?(tpl, dest) do
+      true -> ServiceTemplate.attributes(tpl)
+              |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
+              |> Map.put(:owner_id, id)
+              |> Services.update_service(dest.id, user)
+      false ->
+        Logger.debug "did not update service due to no differences"
+        dest
+    end
+  end
+
+  def sync_service(%GlobalService{service: %Service{} = source, id: id}, %Service{} = dest, %User{} = user),
+    do: sync_service(source, %{dest | owner_id: id}, user)
+
+  def sync_service(%Service{} = source, %Service{owner_id: owner_id} = dest, %User{} = user) do
+    Logger.info "attempting to resync service #{dest.id}"
+    source = Repo.preload(source, [:context_bindings, :dependencies])
+    dest = Repo.preload(dest, [:context_bindings, :dependencies])
+    with {:ok, source_secrets} <- Services.configuration(source),
+         {:ok, dest_secrets} <- Services.configuration(dest),
+         {:diff, true} <- {:diff, diff?(source, dest, source_secrets, dest_secrets)} do
+      Services.update_service(%{
+        templated: source.templated,
+        namespace: source.namespace,
+        owner_id: owner_id,
+        configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
+        repository_id: source.repository_id,
+        protect: source.protect,
+        sync_config: clean(source.sync_config),
+        git: clean(source.git),
+        helm: clean(source.helm),
+        kustomize: clean(source.kustomize),
+        dependencies: svc_deps(source.dependencies, dest.dependencies)
+      }, dest.id, user)
+    else
+      err ->
+        Logger.debug "did not sync service due to: #{inspect(err)}"
+        dest
     end
   end
 
@@ -466,56 +518,6 @@ defmodule Console.Deployments.Global do
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
   @doc """
-  it can resync a service owned by a global service
-  """
-  @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
-  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id} = global, %Service{} = dest, %User{} = user) do
-    Logger.info "Attempting to resync service #{dest.id}"
-    dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
-    tpl = Repo.preload(tpl, [:dependencies])
-    tpl = dynamic_template(tpl, dest.cluster, global)
-    case diff?(tpl, dest) do
-      true -> ServiceTemplate.attributes(tpl)
-              |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
-              |> Map.put(:owner_id, id)
-              |> Services.update_service(dest.id, user)
-      false ->
-        Logger.debug "did not update service due to no differences"
-        dest
-    end
-  end
-
-  def sync_service(%GlobalService{service: %Service{} = source, id: id}, %Service{} = dest, %User{} = user),
-    do: sync_service(source, %{dest | owner_id: id}, user)
-
-  def sync_service(%Service{} = source, %Service{owner_id: owner_id} = dest, %User{} = user) do
-    Logger.info "attempting to resync service #{dest.id}"
-    source = Repo.preload(source, [:context_bindings, :dependencies])
-    dest = Repo.preload(dest, [:context_bindings, :dependencies])
-    with {:ok, source_secrets} <- Services.configuration(source),
-         {:ok, dest_secrets} <- Services.configuration(dest),
-         {:diff, true} <- {:diff, diff?(source, dest, source_secrets, dest_secrets)} do
-      Services.update_service(%{
-        templated: source.templated,
-        namespace: source.namespace,
-        owner_id: owner_id,
-        configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
-        repository_id: source.repository_id,
-        protect: source.protect,
-        sync_config: clean(source.sync_config),
-        git: clean(source.git),
-        helm: clean(source.helm),
-        kustomize: clean(source.kustomize),
-        dependencies: svc_deps(source.dependencies, dest.dependencies)
-      }, dest.id, user)
-    else
-      err ->
-        Logger.debug "did not sync service due to: #{inspect(err)}"
-        dest
-    end
-  end
-
-  @doc """
   Fetches associated secure configuration of a service template
   """
   @spec configuration(ServiceTemplate.t) :: {:ok, map} | Console.error
@@ -643,7 +645,6 @@ defmodule Console.Deployments.Global do
       ~w(helm chart)a,
       ~w(helm values_files)a,
       ~w(contexts)a,
-      ~w(helm values)a,
       ~w(lua_script)a,
       ~w(git ref)a,
       ~w(git folder)a
@@ -666,7 +667,9 @@ defmodule Console.Deployments.Global do
          {:ok, res, _} <- Solid.render(tpl, %{"context" => ctx, "cluster" => cluster}, @solid_opts) do
       IO.iodata_to_binary(res)
     else
-      _ -> template
+      err ->
+        Logger.error("Error rendering template: #{inspect(err)}")
+        template
     end
   end
 

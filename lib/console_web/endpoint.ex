@@ -37,6 +37,8 @@ defmodule ConsoleWeb.Endpoint do
   plug ConsoleWeb.Plugs.AuditContext
   plug ConsoleWeb.Plugs.SecureHeaders
 
+  plug ConsoleWeb.ProxyRouter
+
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],

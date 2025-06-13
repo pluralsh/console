@@ -155,7 +155,6 @@ export function DeployServiceSettingsSecrets({
           type="button"
           secondary
           small
-          size="tertiary"
           onClick={(e) => {
             e.preventDefault()
             setSecrets((secrets) => [...secrets, { name: '', value: '' }])

@@ -135,14 +135,14 @@ pool_size =
     _ -> 20
   end
 
-if get_env("POSTGRES_URL") do
-  ssl_opts = case {get_env("PGROOTSSLCERT"), get_env("DB_CLOUD_PROVIDER")} do
-    {_, "aws"} -> Console.Repo.rds_ssl_opts(:aws, get_env("POSTGRES_URL"))
-    {_, "azure"} -> Console.Repo.rds_ssl_opts(:azure, get_env("POSTGRES_URL"))
-    {cert, _} when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
-    _ -> [verify: :verify_none]
-  end
+ssl_opts = case {get_env("PGROOTSSLCERT"), get_env("DB_CLOUD_PROVIDER")} do
+  {_, "aws"} -> Console.Repo.rds_ssl_opts(:aws, get_env("POSTGRES_URL"))
+  {_, "azure"} -> Console.Repo.rds_ssl_opts(:azure, get_env("POSTGRES_URL"))
+  {cert, _} when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
+  _ -> [verify: :verify_none]
+end
 
+if get_env("POSTGRES_URL") do
   config :console, Console.Repo,
     url: get_env("POSTGRES_URL"),
     ssl: String.to_existing_atom(get_env("DBSSL") || "true"),
@@ -150,12 +150,12 @@ if get_env("POSTGRES_URL") do
     pool_size: pool_size
 else
   config :console, Console.Repo,
-    database: "console",
-    username: "console",
+    database: get_env("POSTGRES_DB") || "console",
+    username: get_env("POSTGRES_USER") || "console",
     password: get_env("POSTGRES_PASSWORD"),
     hostname: get_env("DBHOST") || "console-postgresql",
     ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
-    ssl_opts: [verify: :verify_none],
+    ssl_opts: ssl_opts,
     pool_size: pool_size
 end
 

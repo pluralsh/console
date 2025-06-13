@@ -26,6 +26,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :node
   end
 
+  enum :version_compliance do
+    value :latest
+    value :compliant
+    value :outdated
+  end
+
   input_object :cluster_attributes do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
@@ -355,6 +361,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :linkerd,        :string
     field :cilium,         :string
     field :ebs_csi_driver, :string
+  end
+
+  input_object :health_range do
+    field :min, :integer
+    field :max, :integer
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -1196,14 +1207,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
-      arg :q,           :string
-      arg :healthy,     :boolean
-      arg :tag,         :tag_input
-      arg :tag_query,   :tag_query
-      arg :backups,     :boolean
-      arg :project_id,  :id
-      arg :parent_id,   :id
-      arg :upgradeable, :boolean
+      arg :q,            :string
+      arg :healthy,      :boolean
+      arg :tag,          :tag_input
+      arg :tag_query,    :tag_query
+      arg :backups,      :boolean
+      arg :project_id,   :id
+      arg :parent_id,    :id
+      arg :upgradeable,  :boolean
+      arg :compliance,   :version_compliance
+      arg :health_range, :health_range
 
       resolve &Deployments.list_clusters/2
     end

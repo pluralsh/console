@@ -36,7 +36,7 @@ export function ClusterUpgradePR({
     <Button
       type="button"
       secondary
-      onClick={mutation}
+      onClick={() => mutation()}
       loading={loading}
     >
       Upgrade Now

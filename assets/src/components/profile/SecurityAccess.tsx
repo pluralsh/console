@@ -37,9 +37,8 @@ export default function SecurityAccess() {
         </p>
         {!data?.temporaryToken && (
           <Button
-            alignSelf="start"
-            fontWeight={600}
             secondary
+            alignSelf="start"
             onClick={() => fetch()}
           >
             Generate temporary access token
