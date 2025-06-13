@@ -1,0 +1,65 @@
+name: CI / Cloud Query
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/cloud-query-ci.yaml"
+      - "go/cloud-query/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/cloud-query-ci.yaml"
+      - "go/cloud-query/**"
+permissions:
+  contents: read
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/cloud-query
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/cloud-query/go.mod
+          cache: true
+      - run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make build
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/cloud-query
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/cloud-query/go.mod
+          cache: true
+      - run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/cloud-query/go.mod
+          check-latest: true
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.1.2
+          working-directory: go/cloud-query

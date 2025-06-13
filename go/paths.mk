@@ -24,6 +24,7 @@ KUBEBUILDER ?= $(BINARIES_DIR)/kubebuilder
 KUSTOMIZE ?= $(BINARIES_DIR)/kustomize
 MOCKERY ?= $(BINARIES_DIR)/mockery
 GINKGO ?= $(BINARIES_DIR)/ginkgo
+PROTOC ?= $(BINARIES_DIR)/protoc
 
 # Global tool binaries
 HELM ?= $(shell which helm)
