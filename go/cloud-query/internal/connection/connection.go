@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	"k8s.io/klog/v2"
+
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 const (
@@ -16,6 +19,7 @@ const (
 
 type Connection interface {
 	Query(q string) (string, error)
+	Ping() error
 	LoadedModules() ([]string, error)
 	Close() error
 }
@@ -40,11 +44,11 @@ func NewConnection(config config.Configuration) (Connection, error) {
 		return nil, fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
 	}
 
-	rows, err := db.Query(q)
+	_, err = db.Exec(q)
 	if err != nil {
 		return nil, fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}
-	defer rows.Close()
+	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
 
 	return &connection{db: db, config: config}, nil
 }
