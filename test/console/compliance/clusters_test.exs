@@ -6,11 +6,7 @@ defmodule Console.Compliance.Datasource.ClustersTest do
     user2 = insert(:user, email: "user2@example.com")
     group = insert(:group, name: "compliance-group")
 
-    cluster = insert(:cluster)
-
-    insert(:policy_binding, policy_id: cluster.read_policy_id, user_id: user1.id)
-    insert(:policy_binding, policy_id: cluster.read_policy_id, group_id: group.id)
-    insert(:policy_binding, policy_id: cluster.write_policy_id, user_id: user2.id)
+    cluster = insert(:cluster, read_bindings: [%{user_id: user1.id}, %{group_id: group.id}], write_bindings: [%{user_id: user2.id}])
 
     clusters_content = Console.Compliance.Datasource.Clusters.stream()
     |> CSV.encode(headers: true)
