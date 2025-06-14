@@ -11,7 +11,6 @@ import {
   RamIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { HOME_CARD_MAX_HEIGHT } from 'components/home/HomeCard'
 import { GqlError } from 'components/utils/Alert'
 import { Body1P, Title1H1 } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
@@ -24,7 +23,10 @@ import {
 } from 'routes/costManagementRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { CMContextType } from './CostManagementDetails'
-import { CostTimeSeriesGraph } from './CostTimeSeriesGraph'
+import {
+  CostTimeSeriesGraph,
+  GRAPH_CARD_MAX_HEIGHT,
+} from './CostTimeSeriesGraph'
 
 const getBreadcrumbs = (clusterName: string) => [
   { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
@@ -88,7 +90,7 @@ export function CostManagementDetailsOverview() {
         />
       </Flex>
       <Card
-        css={{ height: 'calc(100% - 40px)', maxHeight: HOME_CARD_MAX_HEIGHT }} // hardcoded to size of header
+        css={{ height: 'calc(100% - 40px)', maxHeight: GRAPH_CARD_MAX_HEIGHT }} // hardcoded to size of header
         header={{
           outerProps: { style: { overflow: 'visible' } },
           content: (

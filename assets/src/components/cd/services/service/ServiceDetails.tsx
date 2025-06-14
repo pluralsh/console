@@ -1,6 +1,6 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import {
   Outlet,
   useLocation,
@@ -12,6 +12,7 @@ import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
+  ServiceDeploymentQuery,
   useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
@@ -53,11 +54,12 @@ import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+import { ApolloQueryResult } from '@apollo/client'
 
 type ServiceContextType = {
   service: ServiceDeploymentDetailsFragment
-  refetch: () => void
-  loading: boolean
+  refetch: () => Promise<ApolloQueryResult<ServiceDeploymentQuery>>
+  isRefetching: boolean
 }
 
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
@@ -224,6 +226,7 @@ function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const { serviceId, flowId } = useParams()
+  const [isRefetching, setIsRefetching] = useState(false)
   const { tab } =
     useMatch(
       `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
@@ -233,7 +236,6 @@ function ServiceDetailsBase() {
     data: serviceData,
     error: serviceError,
     refetch,
-    loading,
   } = useServiceDeploymentQuery({
     variables: { id: serviceId ?? '' },
     pollInterval: POLL_INTERVAL,
@@ -326,8 +328,11 @@ function ServiceDetailsBase() {
             context={
               {
                 service: serviceDeployment,
-                refetch,
-                loading,
+                refetch: () => {
+                  setIsRefetching(true)
+                  return refetch().finally(() => setIsRefetching(false))
+                },
+                isRefetching,
               } satisfies ServiceContextType
             }
           />

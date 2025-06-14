@@ -14,7 +14,7 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { RadialBar } from '@nivo/radial-bar'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { CustomLegend } from 'components/home/CustomLegend'
+import { CustomLegend } from 'components/utils/CustomLegend'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import {
   CHART_COLOR_MAP,
