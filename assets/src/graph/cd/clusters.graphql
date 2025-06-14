@@ -172,6 +172,7 @@ fragment ClustersRow on Cluster {
   id
   self
   healthy
+  healthScore
   protect
   name
   handle

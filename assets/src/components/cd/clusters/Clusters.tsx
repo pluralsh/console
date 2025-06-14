@@ -6,6 +6,8 @@ import {
   Table,
   useSetBreadcrumbs,
   WrapWithIf,
+  TableProps,
+  Flex,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
@@ -63,6 +65,11 @@ import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
 import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
+import {
+  ClusterInfoFlyover,
+  ClusterInfoFlyoverTab,
+} from './info-flyover/ClusterInfoFlyover.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -72,6 +79,13 @@ export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
 type TableWrapperSCProps = {
   $blurred: boolean
 }
+
+export type ClustersTableMeta = {
+  refetch: () => void
+  setFlyoverTab: (tab: ClusterInfoFlyoverTab) => void
+  setSelectedCluster: (cluster: ClustersRowFragment) => void
+}
+
 export const TableWrapperSC = styled.div<TableWrapperSCProps>(
   ({ theme, $blurred }) => ({
     display: 'flex',
@@ -138,10 +152,7 @@ export default function Clusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClustersQuery,
-      keyPath: ['clusters'],
-    },
+    { queryHook: useClustersQuery, keyPath: ['clusters'] },
     {
       q: debouncedSearchString,
       projectId,
@@ -203,28 +214,26 @@ export default function Clusters() {
   useSetPageHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
-  const clusterEdges = data?.clusters?.edges
+  const clusterEdges = useMemo(
+    () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
+    [data?.clusters?.edges]
+  )
   const hasStatFilters = !!debouncedSearchString || !!projectId
   const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
-  const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
+  const tableData: Edge<ClustersRowFragment>[] = isDemo
+    ? DEMO_CLUSTERS
+    : clusterEdges
 
   useSetPageScrollable(isDemo)
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data) return <LoadingIndicator />
 
   return !isDemo ? (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="small"
+      height="100%"
     >
       <ClustersFilters
         setQueryStatusFilter={setStatusFilter}
@@ -275,40 +284,54 @@ export default function Clusters() {
           )}
         </WrapWithIf>
       </TabPanel>
-    </div>
+    </Flex>
   ) : (
     <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
   )
 }
 
 export function ClustersTable({
-  refetch,
   data,
+  refetch,
+  columns = cdClustersColumns,
+  rowClickAction = 'navigate',
   ...props
 }: {
-  refetch?: () => void
-  data: any[]
-} & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
+  data: Edge<ClustersRowFragment>[]
+  refetch: () => void
+  columns?: TableProps['columns']
+  rowClickAction?: 'navigate' | 'flyover'
+} & Omit<TableProps, 'data' | 'columns'>) {
   const navigate = useNavigate()
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
-    meta: { refetch },
+  const [selectedCluster, setSelectedCluster] =
+    useState<Nullable<ClustersRowFragment>>(null)
+  const [flyoverTab, setFlyoverTab] = useState(ClusterInfoFlyoverTab.Upgrades)
+
+  const reactTableOptions: { meta: ClustersTableMeta } = {
+    meta: { refetch, setFlyoverTab, setSelectedCluster },
   }
 
   return (
-    <Table
-      loose
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-      data={data || []}
-      columns={cdClustersColumns}
-      reactTableOptions={reactTableOptions}
-      onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
-        navigate(
-          getClusterDetailsPath({
-            clusterId: original.node?.id,
-          })
-        )
-      }
-      {...props}
-    />
+    <>
+      <Table
+        loose
+        data={data || []}
+        columns={columns}
+        reactTableOptions={reactTableOptions}
+        onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
+          rowClickAction === 'navigate'
+            ? navigate(getClusterDetailsPath({ clusterId: original.node?.id }))
+            : setSelectedCluster(original.node)
+        }
+        {...props}
+      />
+      <ClusterInfoFlyover
+        open={isNonNullable(selectedCluster)}
+        onClose={() => setSelectedCluster(null)}
+        cluster={selectedCluster}
+        refetch={refetch}
+        initialTab={flyoverTab}
+      />
+    </>
   )
 }

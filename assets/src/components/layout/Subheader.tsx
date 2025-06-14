@@ -12,8 +12,7 @@ import ExplainWithAI from '../ai/explain/ExplainWithAI.tsx'
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  backgroundColor:
-    theme.mode === 'light' ? theme.colors['fill-one'] : theme.colors?.grey[950],
+  backgroundColor: theme.colors['fill-accent'],
   borderBottom: theme.borders.default,
   minHeight: 48,
   paddingLeft: theme.spacing.large,
