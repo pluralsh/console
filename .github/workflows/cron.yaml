@@ -81,7 +81,7 @@ jobs:
         cache: 'pip' # caching pip dependencies
 
     - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@97c66b881d8d3ed41d33c1607e37810cf2588afb
+      uses: aws-actions/configure-aws-credentials@a95656fcd9ec16a226c7099657b9fc91cc777601
       with:
         role-to-assume: arn:aws:iam::312272277431:role/github-actions/console-actions
         role-session-name: eks-addons
