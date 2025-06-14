@@ -7,6 +7,7 @@ import {
   SetStateAction,
   useDeferredValue,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -23,6 +24,7 @@ import {
 } from '../../utils/table/useFetchPaginatedData'
 import { ClustersTable } from '../clusters/Clusters'
 import { ClusterStatusTabKey, statusTabs } from '../services/ClustersFilters'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export default function VClusters(): ReactNode {
   const theme = useTheme()
@@ -55,13 +57,13 @@ export default function VClusters(): ReactNode {
         : {}),
     }
   )
+  const tableData = useMemo(
+    () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
+    [data]
+  )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
+  if (!data) return <LoadingIndicator />
 
   return (
     <div
@@ -79,7 +81,7 @@ export default function VClusters(): ReactNode {
       />
       <ClustersTable
         fullHeightWrap
-        data={data?.clusters?.edges ?? []}
+        data={tableData}
         refetch={refetch}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

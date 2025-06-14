@@ -12,8 +12,10 @@ import {
   useUpgradeStatisticsQuery,
 } from 'generated/graphql.ts'
 import { ClusterOverviewChart } from './clusteroverview/ClusterOverviewChart.tsx'
-import { ClusterOverViewTable } from './clusteroverview/ClusterOverviewTable.tsx'
 import { GettingStartedPopup } from './GettingStarted.tsx'
+import { ClustersTable } from 'components/cd/clusters/Clusters.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { homeClustersColumns } from 'components/cd/clusters/ClustersColumns.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -58,10 +60,12 @@ export function Home() {
       {tableError ? (
         <GqlError error={tableError} />
       ) : (
-        <ClusterOverViewTable
-          data={tableData?.clusters?.edges ?? []}
+        <ClustersTable
+          rowClickAction="flyover"
+          data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
           loading={!tableData && tableLoading}
           refetch={refetch}
+          columns={homeClustersColumns}
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={tableLoading}
