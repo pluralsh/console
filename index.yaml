@@ -63,6 +63,34 @@ entries:
     version: 0.1.0
   console:
   - apiVersion: v2
+    appVersion: 0.11.21
+    created: "2025-06-14T01:59:16.051215589Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.126
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: df1327f9e70179204a7a061bffcda4dacc3599d9da6bff1658db67c2eccfa5b4
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.98/console-0.3.98.tgz
+    version: 0.3.98
+  - apiVersion: v2
     appVersion: 0.11.20
     created: "2025-06-09T14:37:19.332027931Z"
     dependencies:
@@ -6894,6 +6922,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.21
+    created: "2025-06-14T01:59:16.146943668Z"
+    description: deploys the datastore operator for plural cd
+    digest: 0c36c9dc5826216f7fafbcd4c6c08d5d80df04bad8f6d2d8904b90bcc40c3bb8
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.4/datastore-0.0.4.tgz
+    version: 0.0.4
+  - apiVersion: v2
     appVersion: 0.11.20
     created: "2025-06-09T14:37:19.441551983Z"
     description: deploys the datastore operator for plural cd
@@ -7091,4 +7129,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-14T00:40:13.43159231Z"
+generated: "2025-06-14T01:59:16.148037216Z"
