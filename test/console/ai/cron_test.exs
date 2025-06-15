@@ -72,6 +72,7 @@ defmodule Console.AI.CronTest do
       assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
     end
 
+    @tag :non_pvc
     test "it will query log providers when applicable" do
       deployment_settings(
         logging: %{
@@ -187,6 +188,62 @@ defmodule Console.AI.CronTest do
 
       assert svc.insight.text
       assert svc.insight_id == insight.id
+    end
+
+    @tag :pvc
+    test "it will gather evidence from a statefulset and its pvcs" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])
+      insert(:service_component,
+        service: service,
+        state: :pending,
+        group: "apps",
+        version: "v1",
+        kind: "StatefulSet",
+        namespace: "ns",
+        name: "my-sts"
+      )
+
+      vct = volume_claim_template("my-vct", "my-sc")
+      sts = stateful_set("my-sts", "ns", 1, [vct])
+      pvc = persistent_volume_claim("my-vct-my-sts-0", "ns", "my-sc", "my-pv")
+      pv = persistent_volume("my-pv")
+      sc = storage_class("my-sc", "csi-driver.example.com")
+
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, 8, fn
+        %Kazan.Request{path: "/apis/apps/v1/namespaces/ns/statefulsets/my-sts"} -> {:ok, sts}
+        %Kazan.Request{path: "/api/v1/namespaces/ns/persistentvolumeclaims/my-vct-my-sts-0"} -> {:ok, pvc}
+        %Kazan.Request{path: "/api/v1/persistentvolumes/my-pv"} -> {:ok, pv}
+        %Kazan.Request{path: "/apis/storage.k8s.io/v1/storageclasses/my-sc"} -> {:ok, sc}
+        %Kazan.Request{path: "/api/v1/namespaces/kube-system/pods"} ->
+          {:ok, %{items: [%{metadata: %{name: "csi-driver-pod"}}]}}
+        %Kazan.Request{path: "/api/v1/namespaces/kube-system/pods/csi-driver-pod/log"} ->
+          {:ok, "2024-01-01 10:00:00 INFO: CSI driver started\n2024-01-01 10:01:00 ERROR: Failed to provision volume"}
+        _ -> {:ok, %{items: []}}
+      end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
+
+      Cron.services()
+
+      %{id: id} = svc = refetch(service) |> Console.Repo.preload([:insight, :components])
+      assert svc.insight.text
+
+      [component] = svc.components
+      component_insight = Repo.get!(Console.Schema.AiInsight, component.insight_id) |> Repo.preload(:evidence)
+      evidence_text = component_insight.evidence
+        |> Stream.filter(&(&1.type == :knowledge))
+        |> Stream.flat_map(&(&1.knowledge.observations))
+        |> Enum.join("\n")
+
+      assert evidence_text =~ "the statefulset is managing a persistent volume claim"
+      assert evidence_text =~ "my-vct-my-sts-0"
+      assert evidence_text =~ "the claim is bound to the persistent volume my-pv"
+      assert evidence_text =~ "the storage class my-sc uses the csi provisioner csi-driver.example.com"
+      assert evidence_text =~ "here are the logs for the csi provisioner csi-driver.example.com"
+      assert evidence_text =~ "CSI driver started"
+
+      assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
     end
   end
 
