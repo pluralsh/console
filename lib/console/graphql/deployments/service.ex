@@ -3,9 +3,10 @@ defmodule Console.GraphQl.Deployments.Service do
   alias Console.Schema.{ServiceComponent, Service}
   alias Console.GraphQl.Resolvers.{Deployments}
 
-  ecto_enum :component_state, ServiceComponent.State
+  ecto_enum :component_state,           ServiceComponent.State
   ecto_enum :service_deployment_status, Service.Status
-  ecto_enum :service_promotion, Service.Promotion
+  ecto_enum :service_promotion,         Service.Promotion
+  ecto_enum :renderer_type,             Service.RendererType
 
   input_object :service_deployment_attributes do
     field :name,             non_null(:string)
@@ -29,6 +30,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
     field :imports,          list_of(:service_import_attributes)
+    field :sources,          list_of(:service_source_attributes)
   end
 
   input_object :service_import_attributes do
@@ -85,6 +87,26 @@ defmodule Console.GraphQl.Deployments.Service do
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
     field :imports,          list_of(:service_import_attributes)
+    field :sources,          list_of(:service_source_attributes)
+    field :renderers,        list_of(:renderer_attributes)
+  end
+
+  input_object :service_source_attributes do
+    field :path,          :string, description: "the subdirectory this source will live in the final tarball"
+    field :repository_id, :id, description: "the id of the git repository to source from"
+    field :git,           :git_ref_attributes, description: "the location in git to use"
+  end
+
+  input_object :renderer_attributes do
+    field :path, non_null(:string)
+    field :type, non_null(:renderer_type)
+    field :helm, :helm_minimal_attributes
+  end
+
+  input_object :helm_minimal_attributes do
+    field :values,       :string, description: "a helm values file to use when rendering this helm chart"
+    field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm chart templating"
+    field :release,      :string, description: "the helm release name to use when rendering this helm chart"
   end
 
   input_object :service_clone_attributes do
@@ -94,9 +116,9 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :git_ref_attributes do
-    field :ref,    non_null(:string)
-    field :folder, non_null(:string)
-    field :files,  list_of(non_null(:string))
+    field :ref,    non_null(:string), description: "the git reference to use"
+    field :folder, non_null(:string), description: "the subdirectory in the git repository to use"
+    field :files,  list_of(non_null(:string)), description: "the files to include in the tarball"
   end
 
   input_object :config_attributes do
@@ -186,6 +208,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :message,          :string, description: "the commit message currently in use"
     field :deleted_at,       :datetime, description: "the time this service was scheduled for deletion"
     field :dry_run,          :boolean, description: "whether this service should not actively reconcile state and instead simply report pending changes"
+    field :sources,          list_of(:service_source), description: "the sources of this service"
+    field :renderers,        list_of(:renderer), description: "the renderers of this service"
 
     @desc "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
     field :docs, list_of(:git_file), resolve: &Deployments.docs/3
@@ -330,6 +354,24 @@ defmodule Console.GraphQl.Deployments.Service do
   object :helm_value do
     field :name,  non_null(:string)
     field :value, non_null(:string)
+  end
+
+  object :service_source do
+    field :path,          :string, description: "the subdirectory in the git repository to use"
+    field :repository_id, :id, description: "the id of the git repository to source from"
+    field :git,           :git_ref, description: "the git reference to use"
+  end
+
+  object :renderer do
+    field :path, non_null(:string)
+    field :type, non_null(:renderer_type)
+    field :helm, :helm_minimal
+  end
+
+  object :helm_minimal do
+    field :values,       :string, description: "a helm values file to use when rendering this helm chart"
+    field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm chart templating"
+    field :release,      :string, description: "the helm release name to use when rendering this helm chart"
   end
 
   @desc "metadata needed for configuring kustomize"
