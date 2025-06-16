@@ -68,7 +68,7 @@ RUN mix do db.certs, agent.chart, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.4
+ENV CLI_VERSION=v0.12.8
 
 COPY AGENT_VERSION AGENT_VERSION
 
