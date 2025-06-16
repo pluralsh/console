@@ -17,8 +17,8 @@ import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 import { getClusterKubeVersion } from '../runtime/RuntimeServices.tsx'
 import { HealthScoreTab } from './HealthScoreTab.tsx'
-import { OverviewTab } from './OverviewTab.tsx'
-import { UpgradesTab } from './UpgradesTab.tsx'
+import { OverviewTab } from './overview/OverviewTab.tsx'
+import { UpgradeAccordionName, UpgradesTab } from './UpgradesTab.tsx'
 
 const MIN_WIDTH = 920
 
@@ -107,6 +107,9 @@ function ClusterInfoFlyoverContent({
   refetch: Nullable<() => void>
 }) {
   const [tab, setTab] = useState(initialTab)
+  const [upgradesInitialOpen, setUpgradesInitialOpen] =
+    useState<UpgradeAccordionName>()
+
   if (!cluster) return null
 
   const kubeVersion = getClusterKubeVersion(cluster)
@@ -129,7 +132,11 @@ function ClusterInfoFlyoverContent({
           css={{ flex: 1, justifyContent: 'center' }}
         />
         {tab === ClusterInfoFlyoverTab.Overview && (
-          <OverviewTab cluster={cluster} />
+          <OverviewTab
+            cluster={cluster}
+            setTab={setTab}
+            setUpgradesInitialOpen={setUpgradesInitialOpen}
+          />
         )}
         {tab === ClusterInfoFlyoverTab.HealthScore && (
           <HealthScoreTab cluster={cluster} />
@@ -139,6 +146,7 @@ function ClusterInfoFlyoverContent({
             clusterId={cluster?.id ?? ''}
             kubeVersion={kubeVersion}
             refetch={refetch}
+            initialOpen={upgradesInitialOpen}
           />
         )}
       </Flex>

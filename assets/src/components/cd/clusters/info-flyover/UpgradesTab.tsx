@@ -10,13 +10,14 @@ import {
   IconProps,
   SuccessIcon,
   Tab,
-  TabList,
   Table,
+  TabList,
   WarningIcon,
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import {
   ClusterDistro,
+  ClusterUpgradePlanFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
   useClusterUpgradeQuery,
@@ -32,6 +33,7 @@ import { produce } from 'immer'
 import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
 import LoadingIndicator from '../../../utils/LoadingIndicator.tsx'
 import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
+import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 import {
   clusterPreFlightCols,
   clusterUpgradeColumns,
@@ -44,7 +46,7 @@ import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from '../UpgradeInsights.tsx'
-import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
+import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
 
 enum DeprecationType {
   GitOps = 'gitOps',
@@ -54,6 +56,13 @@ enum DeprecationType {
 enum AddonType {
   All = 'all',
   Cloud = 'cloud',
+}
+
+export enum UpgradeAccordionName {
+  Preflight = 'preflight',
+  Deprecations = 'deprecations',
+  AddOns = 'add-ons',
+  CustomResources = 'custom-resources',
 }
 
 function DeprecationCountChip({
@@ -80,13 +89,17 @@ export function UpgradesTab({
   clusterId,
   kubeVersion,
   refetch,
+  initialOpen,
 }: {
   clusterId: string
   kubeVersion: string
   refetch: Nullable<() => void>
+  initialOpen?: UpgradeAccordionName | undefined
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [scrolledIntoView, setScrolledIntoView] = useState(false)
+
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
@@ -117,14 +130,21 @@ export function UpgradesTab({
   const supportsCloudAddons = cluster?.distro === ClusterDistro.Eks
 
   const preFlightChecklist = useMemo(
-    () =>
-      initialClusterPreFlightItems.map((item) =>
-        produce(item, (d) => {
-          d.value = !!cluster?.upgradePlan?.[d.key]
-        })
-      ),
+    () => getPreFlightChecklist(cluster?.upgradePlan),
     [cluster?.upgradePlan]
   )
+
+  const scrollOnMount = (
+    domNode: HTMLDivElement | null,
+    name: UpgradeAccordionName
+  ) => {
+    if (initialOpen === name && !scrolledIntoView) {
+      runAfterBrowserLayout(() =>
+        domNode?.scrollIntoView({ behavior: 'smooth' })
+      )
+      setScrolledIntoView(true)
+    }
+  }
 
   if (error)
     return (
@@ -161,10 +181,15 @@ export function UpgradesTab({
         Upgrade blockers ({numUpgradeBlockers})
       </div>
       <Accordion
+        defaultValue={initialOpen}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.Preflight)
+        }
         type="single"
         fillLevel={1}
       >
         <AccordionItem
+          value={UpgradeAccordionName.Preflight}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
@@ -186,10 +211,15 @@ export function UpgradesTab({
         </AccordionItem>
       </Accordion>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.Deprecations)
+        }
       >
         <AccordionItem
+          value={UpgradeAccordionName.Deprecations}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
@@ -291,10 +321,13 @@ export function UpgradesTab({
         </AccordionItem>
       </Accordion>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) => scrollOnMount(domNode, UpgradeAccordionName.AddOns)}
       >
         <AccordionItem
+          value={UpgradeAccordionName.AddOns}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
@@ -376,10 +409,15 @@ export function UpgradesTab({
         Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
       </div>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.CustomResources)
+        }
       >
         <AccordionItem
+          value={UpgradeAccordionName.CustomResources}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
@@ -478,3 +516,12 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
 }))
+
+export const getPreFlightChecklist = (
+  upgradePlan: Nullable<ClusterUpgradePlanFragment>
+) =>
+  initialClusterPreFlightItems.map((item) =>
+    produce(item, (d) => {
+      d.value = !!upgradePlan?.[d.key]
+    })
+  )

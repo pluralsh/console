@@ -86,6 +86,7 @@ function CreatePrActionsInner({
         <>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel
@@ -94,6 +95,7 @@ function CreatePrActionsInner({
             {hasConfiguration && (
               <Button
                 secondary
+                type="button"
                 onClick={() => setCurrentStep('config')}
               >
                 Back
@@ -114,6 +116,7 @@ function CreatePrActionsInner({
         <>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel
@@ -122,6 +125,7 @@ function CreatePrActionsInner({
             {isScalingRec && (
               <Button
                 secondary
+                type="button"
                 onClick={() => setCurrentStep('selectPrAutomation')}
               >
                 Back
@@ -142,6 +146,7 @@ function CreatePrActionsInner({
         <>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel
@@ -149,6 +154,7 @@ function CreatePrActionsInner({
           <Flex gap="small">
             <Button
               secondary
+              type="button"
               onClick={() => setCurrentStep('selectType')}
             >
               Back
@@ -162,6 +168,7 @@ function CreatePrActionsInner({
         <>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel
@@ -169,6 +176,7 @@ function CreatePrActionsInner({
           <Flex gap="small">
             <Button
               secondary
+              type="button"
               onClick={() => setCurrentStep('selectType')}
             >
               Back
@@ -189,6 +197,7 @@ function CreatePrActionsInner({
         <>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel

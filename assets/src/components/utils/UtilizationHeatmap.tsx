@@ -90,7 +90,7 @@ function TooltipContent({ node }: { node: ComputedNode<object> }) {
       arrow={false}
       style={{
         top: (cursorPos?.y ?? 0) - height - 24,
-        left: (cursorPos?.x ?? 0) - 32,
+        left: (cursorPos?.x ?? 0) - 160,
       }}
       label={
         <Flex
@@ -106,7 +106,9 @@ function TooltipContent({ node }: { node: ComputedNode<object> }) {
               flexShrink: 0,
             }}
           />
-          <span>{node.id}</span>
+          <span>
+            {node.id}: <strong>{node.formattedValue}</strong>
+          </span>
         </Flex>
       }
     >

@@ -1,13 +1,8 @@
-import {
-  Chip,
-  ChipProps,
-  SemanticColorKey,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { Chip, ChipProps, ChipSeverity, Tooltip } from '@pluralsh/design-system'
 import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
 export function ClusterHealth({
@@ -88,19 +83,7 @@ export function ClusterHealthScoreChip({
   healthScore?: Nullable<number>
   onClick?: () => void
 }) {
-  const { colors } = useTheme()
-  const color: SemanticColorKey =
-    typeof healthScore !== 'number'
-      ? 'text'
-      : healthScore > 80
-        ? 'text-success'
-        : healthScore > 60
-          ? 'text-success-light'
-          : healthScore > 40
-            ? 'text-warning-light'
-            : healthScore > 20
-              ? 'text-danger-light'
-              : 'text-danger'
+  const severity: ChipSeverity = healthScoreToSeverity(healthScore)
 
   return (
     <ClusterTableChipSC
@@ -110,7 +93,7 @@ export function ClusterHealthScoreChip({
         e.stopPropagation()
         onClick?.()
       }}
-      css={{ '&& *': { color: colors[color] } }}
+      severity={severity}
     >
       {healthScore ?? '-'}
     </ClusterTableChipSC>
@@ -122,3 +105,16 @@ export const ClusterTableChipSC = styled(Chip)({
   display: 'flex',
   justifyContent: 'center',
 })
+
+export const healthScoreToSeverity = (healthScore?: Nullable<number>) =>
+  typeof healthScore !== 'number'
+    ? 'neutral'
+    : healthScore > 80
+      ? 'successDark'
+      : healthScore > 60
+        ? 'success'
+        : healthScore > 40
+          ? 'warning'
+          : healthScore > 20
+            ? 'danger'
+            : 'critical'
