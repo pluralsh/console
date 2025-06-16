@@ -1360,6 +1360,31 @@ defmodule Console.Deployments.ServicesSyncTest do
       assert content["values.yaml"]
       assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
     end
+
+    test "it can support the sources field" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      git2 = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        sources: [
+          %{path: "overrides", repository_id: git.id, git: %{ref: "master", folder: "test-apps/helm-values"}},
+          %{path: "docs", repository_id: git2.id, git: %{ref: "main", folder: "charts/deployment-operator/docs"}}
+        ],
+        helm: %{
+          url: "https://pluralsh.github.io/bootstrap",
+          chart: "stateless",
+          version: "0.1.0"
+        }
+      )
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content)
+
+      assert content["Chart.yaml"] =~ "stateless"
+      assert content["values.yaml"]
+      assert content["overrides/values-podinfo.yaml"] =~ "tag: 6.0.0"
+      assert content["docs/basics.md"]
+    end
   end
 
   describe "#digest/1" do

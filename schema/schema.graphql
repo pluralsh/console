@@ -4446,6 +4446,13 @@ enum ServicePromotion {
   ROLLBACK
 }
 
+enum RendererType {
+  AUTO
+  RAW
+  HELM
+  KUSTOMIZE
+}
+
 input ServiceDeploymentAttributes {
   name: String!
 
@@ -4489,6 +4496,8 @@ input ServiceDeploymentAttributes {
   contextBindings: [ContextBindingAttributes]
 
   imports: [ServiceImportAttributes]
+
+  sources: [ServiceSourceAttributes]
 }
 
 input ServiceImportAttributes {
@@ -4578,6 +4587,38 @@ input ServiceUpdateAttributes {
   contextBindings: [ContextBindingAttributes]
 
   imports: [ServiceImportAttributes]
+
+  sources: [ServiceSourceAttributes]
+
+  renderers: [RendererAttributes]
+}
+
+input ServiceSourceAttributes {
+  "the subdirectory this source will live in the final tarball"
+  path: String
+
+  "the id of the git repository to source from"
+  repositoryId: ID
+
+  "the location in git to use"
+  git: GitRefAttributes
+}
+
+input RendererAttributes {
+  path: String!
+  type: RendererType!
+  helm: HelmMinimalAttributes
+}
+
+input HelmMinimalAttributes {
+  "a helm values file to use when rendering this helm chart"
+  values: String
+
+  "a list of relative paths to values files to use for helm chart templating"
+  valuesFiles: [String]
+
+  "the helm release name to use when rendering this helm chart"
+  release: String
 }
 
 input ServiceCloneAttributes {
@@ -4587,8 +4628,13 @@ input ServiceCloneAttributes {
 }
 
 input GitRefAttributes {
+  "the git reference to use"
   ref: String!
+
+  "the subdirectory in the git repository to use"
   folder: String!
+
+  "the files to include in the tarball"
   files: [String!]
 }
 
@@ -4720,6 +4766,12 @@ type ServiceDeployment {
 
   "whether this service should not actively reconcile state and instead simply report pending changes"
   dryRun: Boolean
+
+  "the sources of this service"
+  sources: [ServiceSource]
+
+  "the renderers of this service"
+  renderers: [Renderer]
 
   "fetches the \/docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
   docs: [GitFile]
@@ -4903,6 +4955,34 @@ type ServiceConfiguration {
 type HelmValue {
   name: String!
   value: String!
+}
+
+type ServiceSource {
+  "the subdirectory in the git repository to use"
+  path: String
+
+  "the id of the git repository to source from"
+  repositoryId: ID
+
+  "the git reference to use"
+  git: GitRef
+}
+
+type Renderer {
+  path: String!
+  type: RendererType!
+  helm: HelmMinimal
+}
+
+type HelmMinimal {
+  "a helm values file to use when rendering this helm chart"
+  values: String
+
+  "a list of relative paths to values files to use for helm chart templating"
+  valuesFiles: [String]
+
+  "the helm release name to use when rendering this helm chart"
+  release: String
 }
 
 "metadata needed for configuring kustomize"
