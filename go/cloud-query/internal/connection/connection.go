@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
@@ -14,7 +16,7 @@ import (
 
 const driverName = "postgres"
 
-var dataSourceName = fmt.Sprintf("host=localhost port=%d user=postgres password=postgres dbname=postgres sslmode=disable", args.DatabasePort())
+var defaultDataSource = common.DataSource(args.DatabasePort(), "postgres", "postgres") // TODO: Change password.
 
 type Connection interface {
 	Configure(config config.Configuration) error
@@ -49,8 +51,8 @@ func (in *connection) Close() error {
 	return in.db.Close()
 }
 
-func NewConnection(name string) (Connection, error) {
-	db, err := sql.Open(driverName, dataSourceName)
+func NewConnection(name, dataSource string) (Connection, error) {
+	db, err := sql.Open(driverName, lo.Ternary(lo.IsEmpty(dataSource), defaultDataSource, dataSource))
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
@@ -13,19 +15,26 @@ import (
 )
 
 type ConnectionPool struct {
-	pool cmap.ConcurrentMap[string, entry]
-	ttl  time.Duration
+	admin connection.Connection
+	pool  cmap.ConcurrentMap[string, entry]
+	ttl   time.Duration
 }
 
-func NewConnectionPool(ttl time.Duration) *ConnectionPool {
+func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
+	admin, err := connection.NewConnection("admin", "")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create admin connection: %w", err)
+	}
+
 	pool := &ConnectionPool{
-		pool: cmap.New[entry](),
-		ttl:  ttl,
+		admin: admin,
+		pool:  cmap.New[entry](),
+		ttl:   ttl,
 	}
 
 	go pool.cleanupRoutine()
 
-	return pool
+	return pool, nil
 }
 
 func (c *ConnectionPool) cleanupRoutine() {
@@ -40,6 +49,17 @@ func (c *ConnectionPool) cleanupRoutine() {
 			}
 		}
 	}
+}
+
+func (c *ConnectionPool) createUser(name, password string) error {
+	_, err := c.admin.Exec(fmt.Sprintf("CREATE USER IF NOT EXISTS %q WITH PASSWORD %q", name, password))
+	return err
+}
+
+func (c *ConnectionPool) cleanup(name string) error {
+	// TODO: cleanup connection in the db
+	_, err := c.admin.Exec(fmt.Sprintf("DROP USER IF EXISTS %q", name))
+	return err
 }
 
 func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connection, error) {
@@ -60,12 +80,17 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
-		conn, err := connection.NewConnection(connectionName)
+		if err = c.createUser(connectionName, connectionName); err != nil {
+			return nil, err
+		}
+
+		conn, err := connection.NewConnection(connectionName, common.DataSource(args.DatabasePort(), connectionName, connectionName))
 		if err != nil {
 			return nil, err
 		}
 
 		if err := conn.Configure(config); err != nil {
+			_ = c.cleanup(connectionName)
 			_ = conn.Close()
 			return nil, err
 		}
@@ -84,7 +109,7 @@ func (c *ConnectionPool) Set(key string, value connection.Connection) {
 }
 
 func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) {
-	// TODO: cleanup connection in the db
+	_ = c.cleanup(t.Val.uuid)
 	err := t.Val.connection.Close()
 	if err != nil {
 		klog.ErrorS(err, "failed to close connection", "connection", t.Val.uuid)

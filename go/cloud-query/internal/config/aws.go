@@ -48,6 +48,7 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 		CREATE SCHEMA "{{ .ConnectionName }}";
 		COMMENT ON SCHEMA "{{ .ConnectionName }}" IS 'steampipe aws fdw';
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
+		ALTER USER "{{ .ConnectionName }}" set SEARCH_PATH = '{{ .ConnectionName }}';
     `
 
 	tmpl, err := template.New("connection").Parse(tpl)
