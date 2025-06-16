@@ -455,6 +455,41 @@ spec:
                 type: string
               protect:
                 type: boolean
+              renderers:
+                description: Renderers of this service
+                items:
+                  properties:
+                    helm:
+                      properties:
+                        release:
+                          description: Release the helm release name to use when rendering
+                            this helm chart
+                          type: string
+                        values:
+                          description: Values a helm values file to use when rendering
+                            this helm chart
+                          type: string
+                        valuesFiles:
+                          description: ValuesFiles a list of relative paths to values
+                            files to use for helm chart templating
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    path:
+                      type: string
+                    type:
+                      enum:
+                      - AUTO
+                      - RAW
+                      - HELM
+                      - KUSTOMIZE
+                      type: string
+                  required:
+                  - path
+                  - type
+                  type: object
+                type: array
               repositoryRef:
                 description: ObjectReference contains enough information to let you
                   inspect or modify the referred object.
@@ -499,6 +534,39 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              sources:
+                description: Sources of this service
+                items:
+                  properties:
+                    git:
+                      description: Git the location in git to use
+                      properties:
+                        files:
+                          description: Optional files to add to the manifests for
+                            this service
+                          items:
+                            type: string
+                          type: array
+                        folder:
+                          description: Folder ...
+                          type: string
+                        ref:
+                          description: Ref ...
+                          type: string
+                      required:
+                      - folder
+                      - ref
+                      type: object
+                    path:
+                      description: Path the subdirectory this source will live in
+                        the final tarball
+                      type: string
+                    repositoryId:
+                      description: RepositoryID the id of the git repository to source
+                        from
+                      type: string
+                  type: object
+                type: array
               syncConfig:
                 properties:
                   annotations:

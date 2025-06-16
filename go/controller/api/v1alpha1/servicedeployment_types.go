@@ -205,6 +205,40 @@ type ServiceSpec struct {
 	// Detach determined if user want to delete or detach service
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
+
+	// Sources of this service
+	// +kubebuilder:validation:Optional
+	Sources []Source `json:"sources,omitempty"`
+
+	// Renderers of this service
+	// +kubebuilder:validation:Optional
+	Renderers []Renderer `json:"renderers,omitempty"`
+}
+
+type Source struct {
+	//Path the subdirectory this source will live in the final tarball
+	Path *string `json:"path,omitempty"`
+	//RepositoryID the id of the git repository to source from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	//Git the location in git to use
+	Git *GitRef `json:"git,omitempty"`
+}
+
+type Renderer struct {
+	Path string `json:"path"`
+	// +kubebuilder:validation:Enum=AUTO;RAW;HELM;KUSTOMIZE
+	Type console.RendererType `json:"type"`
+
+	Helm *HelmMinimal `json:"helm,omitempty"`
+}
+
+type HelmMinimal struct {
+	//Values a helm values file to use when rendering this helm chart
+	Values *string `json:"values,omitempty"`
+	//ValuesFiles a list of relative paths to values files to use for helm chart templating
+	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	//Release the helm release name to use when rendering this helm chart
+	Release *string `json:"release,omitempty"`
 }
 
 type ServiceImport struct {

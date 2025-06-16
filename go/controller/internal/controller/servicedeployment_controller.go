@@ -175,6 +175,8 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		ParentID:        attr.ParentID,
 		Imports:         attr.Imports,
 		FlowID:          attr.FlowID,
+		Sources:         attr.Sources,
+		Renderers:       nil,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -356,6 +358,26 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 			attr.Helm.Values = values
 		}
+	}
+	if len(service.Spec.Sources) > 0 {
+		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
+		for _, source := range service.Spec.Sources {
+			newSource := &console.ServiceSourceAttributes{
+				Path:         source.Path,
+				RepositoryID: source.RepositoryID,
+			}
+			if source.Git != nil {
+				newSource.Git = &console.GitRefAttributes{
+					Ref:    newSource.Git.Ref,
+					Folder: newSource.Git.Folder,
+					Files:  newSource.Git.Files,
+				}
+			}
+			attr.Sources = append(attr.Sources, newSource)
+		}
+	}
+	if len(service.Spec.Renderers) > 0 {
+
 	}
 
 	return attr, nil, nil
