@@ -4498,6 +4498,8 @@ input ServiceDeploymentAttributes {
   imports: [ServiceImportAttributes]
 
   sources: [ServiceSourceAttributes]
+
+  renderers: [RendererAttributes]
 }
 
 input ServiceImportAttributes {

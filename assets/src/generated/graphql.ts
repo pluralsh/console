@@ -9549,6 +9549,7 @@ export type ServiceDeploymentAttributes = {
   parentId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  renderers?: InputMaybe<Array<InputMaybe<RendererAttributes>>>;
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   sources?: InputMaybe<Array<InputMaybe<ServiceSourceAttributes>>>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
