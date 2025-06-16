@@ -5,19 +5,18 @@ import {
   AppIcon,
   ChecklistIcon,
   Chip,
+  ChipProps,
   ConfettiIcon,
-  Flyover,
+  IconProps,
   SuccessIcon,
   Tab,
   TabList,
   Table,
   WarningIcon,
-  IconProps,
-  ChipProps,
 } from '@pluralsh/design-system'
+import { Row } from '@tanstack/react-table'
 import {
   ClusterDistro,
-  ClustersRowFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
   useClusterUpgradeQuery,
@@ -25,37 +24,33 @@ import {
 import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { Row } from '@tanstack/react-table'
 
-import { GqlError } from '../../utils/Alert'
+import { GqlError } from '../../../utils/Alert.tsx'
 
-import { deprecationsColumns } from './deprecationsColumns'
-import RuntimeServices, {
-  getClusterKubeVersion,
-} from './runtime/RuntimeServices'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { produce } from 'immer'
+import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
+import LoadingIndicator from '../../../utils/LoadingIndicator.tsx'
+import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
 import {
   clusterPreFlightCols,
   clusterUpgradeColumns,
   initialClusterPreFlightItems,
-} from './clusterUpgradeColumns'
+} from '../clusterUpgradeColumns.tsx'
+import { deprecationsColumns } from '../deprecationsColumns.tsx'
+import CloudAddons from '../runtime/CloudAddons.tsx'
+import RuntimeServices from '../runtime/RuntimeServices.tsx'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
-} from './UpgradeInsights'
-import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
-import CloudAddons from './runtime/CloudAddons.tsx'
-import { produce } from 'immer'
-import { clusterDeprecatedCustomResourcesColumns } from './clusterDeprecatedCustomResourcesColumns.tsx'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+} from '../UpgradeInsights.tsx'
 
-const POLL_INTERVAL = 10 * 1000
-
-export enum DeprecationType {
+enum DeprecationType {
   GitOps = 'gitOps',
   CloudProvider = 'cloudProvider',
 }
 
-export enum AddonType {
+enum AddonType {
   All = 'all',
   Cloud = 'cloud',
 }
@@ -80,7 +75,7 @@ const statesWithIssues = [
   UpgradeInsightStatus.Failed,
 ]
 
-function FlyoverContent({
+export function UpgradesTab({
   clusterId,
   kubeVersion,
   refetch,
@@ -414,35 +409,6 @@ function FlyoverContent({
         </AccordionItem>
       </Accordion>
     </div>
-  )
-}
-
-export function ClusterUpgradeFlyover({
-  open,
-  onClose,
-  cluster,
-  refetch,
-}: {
-  open: boolean
-  onClose: () => void
-  cluster: Nullable<ClustersRowFragment>
-  refetch: Nullable<() => void>
-}) {
-  const kubeVersion = getClusterKubeVersion(cluster)
-
-  return (
-    <Flyover
-      header={`Upgrade Plan for ${cluster?.name}`}
-      open={open}
-      onClose={onClose}
-      minWidth={920}
-    >
-      <FlyoverContent
-        clusterId={cluster?.id ?? ''}
-        kubeVersion={kubeVersion}
-        refetch={refetch}
-      />
-    </Flyover>
   )
 }
 
