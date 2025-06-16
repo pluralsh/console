@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :context_bindings, list_of(:context_binding_attributes)
     field :imports,          list_of(:service_import_attributes)
     field :sources,          list_of(:service_source_attributes)
+    field :renderers,        list_of(:renderer_attributes)
   end
 
   input_object :service_import_attributes do

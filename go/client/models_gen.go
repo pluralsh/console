@@ -5727,6 +5727,7 @@ type ServiceDeploymentAttributes struct {
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
 	Imports         []*ServiceImportAttributes     `json:"imports,omitempty"`
 	Sources         []*ServiceSourceAttributes     `json:"sources,omitempty"`
+	Renderers       []*RendererAttributes          `json:"renderers,omitempty"`
 }
 
 type ServiceDeploymentConnection struct {
