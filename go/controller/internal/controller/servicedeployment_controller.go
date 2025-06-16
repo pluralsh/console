@@ -176,7 +176,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		Imports:         attr.Imports,
 		FlowID:          attr.FlowID,
 		Sources:         attr.Sources,
-		Renderers:       nil,
+		Renderers:       attr.Renderers,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -377,7 +377,21 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		}
 	}
 	if len(service.Spec.Renderers) > 0 {
-
+		attr.Renderers = make([]*console.RendererAttributes, 0)
+		for _, renderer := range service.Spec.Renderers {
+			newRenderer := &console.RendererAttributes{
+				Path: renderer.Path,
+				Type: renderer.Type,
+			}
+			if renderer.Helm != nil {
+				newRenderer.Helm = &console.HelmMinimalAttributes{
+					Values:      renderer.Helm.Values,
+					ValuesFiles: renderer.Helm.ValuesFiles,
+					Release:     renderer.Helm.Release,
+				}
+			}
+			attr.Renderers = append(attr.Renderers, newRenderer)
+		}
 	}
 
 	return attr, nil, nil
