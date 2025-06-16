@@ -6524,9 +6524,9 @@ func (in *Source) DeepCopyInto(out *Source) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.RepositoryID != nil {
-		in, out := &in.RepositoryID, &out.RepositoryID
-		*out = new(string)
+	if in.RepositoryRef != nil {
+		in, out := &in.RepositoryRef, &out.RepositoryRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
 	if in.Git != nil {

@@ -218,8 +218,8 @@ type ServiceSpec struct {
 type Source struct {
 	//Path the subdirectory this source will live in the final tarball
 	Path *string `json:"path,omitempty"`
-	//RepositoryID the id of the git repository to source from
-	RepositoryID *string `json:"repositoryId,omitempty"`
+	//RepositoryRef the reference of the git repository to source from
+	RepositoryRef *corev1.ObjectReference `json:"RepositoryRef,omitempty"`
 	//Git the location in git to use
 	Git *GitRef `json:"git,omitempty"`
 }

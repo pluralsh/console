@@ -360,19 +360,20 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		}
 	}
 
-	setSources(service, attr)
+	if err := r.setSources(ctx, service, attr); err != nil {
+		return nil, nil, err
+	}
 	setRenderers(service, attr)
 
 	return attr, nil, nil
 }
 
-func setSources(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) {
+func (r *ServiceReconciler) setSources(ctx context.Context, service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) error {
 	if len(service.Spec.Sources) > 0 {
 		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
 		for _, source := range service.Spec.Sources {
 			newSource := &console.ServiceSourceAttributes{
-				Path:         source.Path,
-				RepositoryID: source.RepositoryID,
+				Path: source.Path,
 			}
 			if source.Git != nil {
 				newSource.Git = &console.GitRefAttributes{
@@ -381,9 +382,15 @@ func setSources(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploy
 					Files:  newSource.Git.Files,
 				}
 			}
+			repositoryID, err := r.getRepository(ctx, source.RepositoryRef)
+			if err != nil {
+				return err
+			}
+			newSource.RepositoryID = repositoryID
 			attr.Sources = append(attr.Sources, newSource)
 		}
 	}
+	return nil
 }
 
 func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) {
@@ -404,6 +411,24 @@ func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDepl
 			attr.Renderers = append(attr.Renderers, newRenderer)
 		}
 	}
+}
+
+func (r *ServiceReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference) (*string, error) {
+	var repositoryID *string
+	if ref != nil {
+		repository := &v1alpha1.GitRepository{}
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, repository); err != nil {
+			return nil, err
+		}
+		if !repository.Status.HasID() {
+			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
+		}
+		repositoryID = repository.Status.ID
+	}
+	return repositoryID, nil
 }
 
 func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
