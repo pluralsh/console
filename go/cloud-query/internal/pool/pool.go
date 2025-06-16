@@ -6,9 +6,10 @@ import (
 
 	"github.com/gofrs/uuid"
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"k8s.io/klog/v2"
+
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
-	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
@@ -51,8 +52,13 @@ func (c *ConnectionPool) cleanupRoutine() {
 	}
 }
 
-func (c *ConnectionPool) createUser(name, password string) error {
-	_, err := c.admin.Exec(fmt.Sprintf("CREATE USER IF NOT EXISTS %q WITH PASSWORD %q", name, password))
+func (c *ConnectionPool) setup(name, password string) error {
+	// TODO: refactor and maybe only grant user the privileges they need
+	_, err := c.admin.Exec(fmt.Sprintf(`
+		CREATE USER "%s" WITH PASSWORD '%s';
+		GRANT ALL PRIVILEGES ON DATABASE postgres TO "%s";
+		ALTER USER "%s" WITH SUPERUSER;
+	`, name, password, name, name))
 	return err
 }
 
@@ -80,8 +86,8 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
-		if err = c.createUser(connectionName, connectionName); err != nil {
-			return nil, err
+		if err = c.setup(connectionName, connectionName); err != nil {
+			return nil, fmt.Errorf("failed to create user %s: %w", connectionName, err)
 		}
 
 		conn, err := connection.NewConnection(connectionName, common.DataSource(args.DatabasePort(), connectionName, connectionName))

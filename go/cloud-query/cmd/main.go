@@ -35,7 +35,7 @@ func main() {
 		}
 	}()
 
-	conn, err := connection.NewConnection("register")
+	conn, err := connection.NewConnection("register", "")
 	if err != nil {
 		klog.Fatalf("failed to create db connection to register extensions: %v", err)
 	}
@@ -44,7 +44,11 @@ func main() {
 		klog.Fatalf("failed to register extensions: %v", err)
 	}
 
-	p := pool.NewConnectionPool(args.ConnectionTTL())
+	p, err := pool.NewConnectionPool(args.ConnectionTTL())
+	if err != nil {
+		klog.Fatalf("failed to create connection pool: %v", err)
+	}
+
 	s, err := server.New(nil, server.NewCloudQueryServer(p))
 	if err != nil {
 		klog.Fatalf("failed to create server: %v", err)
