@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
@@ -28,17 +29,21 @@ func init() {
 }
 
 const (
-	defaultExtensionsDir = "./bin"
+	defaultExtensionsDir   = "./bin"
+	defaultDatabaseDir     = "./bin/pg"
+	defaultDatabaseVersion = embeddedpostgres.V15
+	defaultDatabasePort    = 5432
 )
+
+const ()
 
 var (
-	argConnectionTTL = pflag.Duration("connection-ttl", 15*time.Minute, "default TTL for connections in the pool, connections will be closed after this duration if not used")
-	argExtensionsDir = pflag.String("extensions-dir", defaultExtensionsDir, "directory where the SQLite extensions will be stored")
+	argExtensionsDir   = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
+	argDatabaseDir     = pflag.String("database-dir", defaultDatabaseDir, "path to the database")
+	argDatabaseVersion = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
+	argDatabasePort    = pflag.Uint32("database-port", 5432, "port on which the embedded PostgreSQL database will listen")
+	argConnectionTTL   = pflag.Duration("connection-ttl", 15*time.Minute, "default TTL for connections in the pool, connections will be closed after this duration if not used")
 )
-
-func ConnectionTTL() time.Duration {
-	return *argConnectionTTL
-}
 
 func ExtensionsDir() string {
 	if len(*argExtensionsDir) == 0 {
@@ -46,6 +51,34 @@ func ExtensionsDir() string {
 	}
 
 	return *argExtensionsDir
+}
+
+func DatabaseDir() string {
+	if len(*argDatabaseDir) == 0 {
+		return defaultDatabaseDir
+	}
+
+	return *argDatabaseDir
+}
+
+func DatabaseVersion() embeddedpostgres.PostgresVersion {
+	if len(*argDatabaseVersion) == 0 {
+		return defaultDatabaseVersion
+	}
+
+	return embeddedpostgres.PostgresVersion(*argDatabaseVersion)
+}
+
+func DatabasePort() uint32 {
+	if *argDatabasePort <= 0 {
+		return defaultDatabasePort
+	}
+
+	return *argDatabasePort
+}
+
+func ConnectionTTL() time.Duration {
+	return *argConnectionTTL
 }
 
 func LogLevel() klog.Level {

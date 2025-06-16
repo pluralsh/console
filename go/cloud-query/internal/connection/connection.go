@@ -4,24 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
-const (
-	// dataSourceName is the name of the SQLite database source.
-	// In this case, we use an in-memory database as it is better for
-	// steampipe lightweight usage.
-	dataSourceName = ":memory:"
-)
+const driverName = "postgres"
+
+var dataSourceName = fmt.Sprintf("host=localhost port=%d user=postgres dbname=postgres sslmode=disable", args.DatabasePort())
 
 type Connection interface {
 	Query(q string) (columns []string, rows [][]any, err error)
 	Exec(q string) (sql.Result, error)
 	Ping() error
-	LoadedModules() ([]string, error)
+	LoadedModules() ([][]any, error)
 	Close() error
 }
 
@@ -34,14 +32,11 @@ func (in *connection) Close() error {
 	return in.db.Close()
 }
 
-func NewConnection(driverName string, config config.Configuration) (Connection, error) {
-	registerDriver(driverName, config.Provider())
-
+func NewConnection(config config.Configuration) (Connection, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(1) // Limit to a single connection for the in-memory database
 
 	q, err := config.Query()
 	if err != nil {

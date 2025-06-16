@@ -3,8 +3,8 @@ module github.com/pluralsh/console/go/cloud-query
 go 1.24.2
 
 require (
+	github.com/fergusstrange/embedded-postgres v1.31.0
 	github.com/google/uuid v1.6.0
-	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/spf13/pflag v1.0.6
 	google.golang.org/grpc v1.73.0
@@ -13,7 +13,6 @@ require (
 )
 
 require (
-	github.com/fergusstrange/embedded-postgres v1.31.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
