@@ -21,7 +21,7 @@ RUN go mod download
 COPY . .
 
 # Build the cloud-query binary
-RUN CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -tags=trace -o bin/cloud-query cmd/*.go
+RUN CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -o bin/cloud-query cmd/*.go
 
 FROM debian:12-slim AS libraries
 
