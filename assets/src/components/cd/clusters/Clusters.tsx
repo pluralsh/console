@@ -303,9 +303,10 @@ export function ClustersTable({
   rowClickAction?: 'navigate' | 'flyover'
 } & Omit<TableProps, 'data' | 'columns'>) {
   const navigate = useNavigate()
+
   const [selectedCluster, setSelectedCluster] =
     useState<Nullable<ClustersRowFragment>>(null)
-  const [flyoverTab, setFlyoverTab] = useState(ClusterInfoFlyoverTab.Upgrades)
+  const [flyoverTab, setFlyoverTab] = useState(ClusterInfoFlyoverTab.Overview)
 
   const reactTableOptions: { meta: ClustersTableMeta } = {
     meta: { refetch, setFlyoverTab, setSelectedCluster },
@@ -318,11 +319,14 @@ export function ClustersTable({
         data={data || []}
         columns={columns}
         reactTableOptions={reactTableOptions}
-        onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
-          rowClickAction === 'navigate'
-            ? navigate(getClusterDetailsPath({ clusterId: original.node?.id }))
-            : setSelectedCluster(original.node)
-        }
+        onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) => {
+          if (rowClickAction === 'navigate')
+            navigate(getClusterDetailsPath({ clusterId: original.node?.id }))
+          else {
+            setSelectedCluster(original.node)
+            setFlyoverTab(ClusterInfoFlyoverTab.Overview)
+          }
+        }}
         {...props}
       />
       <ClusterInfoFlyover

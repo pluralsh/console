@@ -1,6 +1,7 @@
 import {
   CheckRoundedIcon,
   Chip,
+  ChipSeverity,
   ErrorIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -11,26 +12,15 @@ export function ClusterUpgradeButton({
   cluster,
   onClick,
 }: {
-  cluster?: ClustersRowFragment | null | undefined
+  cluster?: Nullable<ClustersRowFragment>
   onClick: () => void
 }) {
-  const numUpgradePlans = 3
-  let numUpgradeBlockers = 0
+  const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
 
-  if (!cluster?.upgradePlan?.compatibilities) ++numUpgradeBlockers
-  if (!cluster?.upgradePlan?.deprecations) ++numUpgradeBlockers
-  if (!cluster?.upgradePlan?.incompatibilities) ++numUpgradeBlockers
-  const severity =
-    numUpgradeBlockers === 0
-      ? 'success'
-      : numUpgradeBlockers === 1
-        ? 'warning'
-        : numUpgradeBlockers === 2
-          ? 'danger'
-          : 'critical'
   return (
     <ClusterTableChipSC
       clickable
+      size="large"
       severity={severity}
       icon={
         severity === 'success' ? (
@@ -46,7 +36,7 @@ export function ClusterUpgradeButton({
         onClick()
       }}
     >
-      {`${numUpgradePlans - numUpgradeBlockers}/${numUpgradePlans}`}
+      {chipLabel}
     </ClusterTableChipSC>
   )
 }
@@ -56,19 +46,36 @@ export function ClusterUpgradeChip({
 }: {
   cluster?: Nullable<ClusterTinyFragment>
 }) {
-  const numUpgradePlans = 3
-  let numUpgrades = numUpgradePlans
-
-  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
-  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
-  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+  const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
 
   return (
     <Chip
       size="small"
-      severity={
-        numUpgrades < 2 ? 'danger' : numUpgrades === 2 ? 'warning' : 'neutral'
-      }
-    >{`Upgrades ${numUpgrades}/${numUpgradePlans}`}</Chip>
+      severity={severity}
+    >{`Upgrades ${chipLabel}`}</Chip>
   )
+}
+
+export const getClusterUpgradeInfo = (
+  cluster?: Nullable<ClusterTinyFragment>
+) => {
+  const numUpgradePlans = 3
+  let numUpgradeBlockers = 0
+
+  if (!cluster?.upgradePlan?.compatibilities) ++numUpgradeBlockers
+  if (!cluster?.upgradePlan?.deprecations) ++numUpgradeBlockers
+  if (!cluster?.upgradePlan?.incompatibilities) ++numUpgradeBlockers
+  const severity: ChipSeverity =
+    numUpgradeBlockers === 0
+      ? 'success'
+      : numUpgradeBlockers === 1
+        ? 'warning'
+        : numUpgradeBlockers === 2
+          ? 'danger'
+          : 'critical'
+  return {
+    numUpgradeBlockers,
+    chipLabel: `${numUpgradePlans - numUpgradeBlockers}/${numUpgradePlans}`,
+    severity,
+  }
 }

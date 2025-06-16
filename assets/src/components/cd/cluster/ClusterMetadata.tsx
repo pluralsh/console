@@ -30,7 +30,7 @@ import {
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
 
-const MetadataPropSC = styled(SidecarItem)((_) => ({
+export const MetadataPropSC = styled(SidecarItem)((_) => ({
   margin: 0,
 }))
 

@@ -44,6 +44,7 @@ import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from '../UpgradeInsights.tsx'
+import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 
 enum DeprecationType {
   GitOps = 'gitOps',
@@ -102,11 +103,7 @@ export function UpgradesTab({
 
   const cluster = data?.cluster
 
-  const numUpgradePlans = 3
-  let numUpgrades = numUpgradePlans
-  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
-  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
-  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+  const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
   const runtimeServices = cluster?.runtimeServices
   const cloudAddons = cluster?.cloudAddons
@@ -161,7 +158,7 @@ export function UpgradesTab({
         }}
       />
       <div css={{ ...theme.partials.text.body1Bold }}>
-        Upgrade blockers ({numUpgradePlans - numUpgrades})
+        Upgrade blockers ({numUpgradeBlockers})
       </div>
       <Accordion
         type="single"
@@ -396,12 +393,10 @@ export function UpgradesTab({
           {!isEmpty(cluster?.deprecatedCustomResources) ? (
             <Table
               flush
+              virtualizeRows
               data={cluster?.deprecatedCustomResources ?? []}
               columns={clusterDeprecatedCustomResourcesColumns}
-              css={{
-                maxHeight: 258,
-                height: '100%',
-              }}
+              maxHeight={500}
             />
           ) : (
             <EmptyState description="You do not have any deprecated custom resources." />

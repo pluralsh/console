@@ -1,21 +1,38 @@
-import { Chip, SemanticColorKey, Tooltip } from '@pluralsh/design-system'
+import {
+  Chip,
+  ChipProps,
+  SemanticColorKey,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
-export function ClusterHealth({ cluster }: { cluster?: ClustersRowFragment }) {
+export function ClusterHealth({
+  cluster,
+  size = 'large',
+}: {
+  cluster?: ClustersRowFragment
+  size?: ChipProps['size']
+}) {
   if (!cluster?.installed) {
     return (
       <Tooltip label="The deploy agent still needs to be installed in this cluster">
-        <ClusterTableChipSC severity="info">Pending</ClusterTableChipSC>
+        <ClusterTableChipSC
+          size={size}
+          severity="info"
+        >
+          Pending
+        </ClusterTableChipSC>
       </Tooltip>
     )
   }
 
   return (
     <ClusterHealthChip
+      size={size}
       cluster={cluster}
       pingedAt={cluster?.pingedAt}
     />
@@ -25,9 +42,11 @@ export function ClusterHealth({ cluster }: { cluster?: ClustersRowFragment }) {
 function ClusterHealthChip({
   cluster,
   pingedAt,
+  size = 'large',
 }: {
   cluster?: ClustersRowFragment
   pingedAt?: string | null
+  size?: ChipProps['size']
 }) {
   const [now, setNow] = useState(dayjs())
 
@@ -52,6 +71,7 @@ function ClusterHealthChip({
       css={{ width: '100%' }}
     >
       <ClusterTableChipSC
+        size={size}
         clickable
         severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
       >
@@ -84,6 +104,7 @@ export function ClusterHealthScoreChip({
 
   return (
     <ClusterTableChipSC
+      size="large"
       clickable
       onClick={(e) => {
         e.stopPropagation()
@@ -96,7 +117,7 @@ export function ClusterHealthScoreChip({
   )
 }
 
-export const ClusterTableChipSC = styled(Chip).attrs({ size: 'large' })({
+export const ClusterTableChipSC = styled(Chip)({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
