@@ -359,6 +359,14 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			attr.Helm.Values = values
 		}
 	}
+
+	setSources(service, attr)
+	setRenderers(service, attr)
+
+	return attr, nil, nil
+}
+
+func setSources(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) {
 	if len(service.Spec.Sources) > 0 {
 		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
 		for _, source := range service.Spec.Sources {
@@ -376,6 +384,9 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			attr.Sources = append(attr.Sources, newSource)
 		}
 	}
+}
+
+func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) {
 	if len(service.Spec.Renderers) > 0 {
 		attr.Renderers = make([]*console.RendererAttributes, 0)
 		for _, renderer := range service.Spec.Renderers {
@@ -393,8 +404,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			attr.Renderers = append(attr.Renderers, newRenderer)
 		}
 	}
-
-	return attr, nil, nil
 }
 
 func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
