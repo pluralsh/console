@@ -538,7 +538,30 @@ spec:
                 description: Sources of this service
                 items:
                   properties:
-                    RepositoryRef:
+                    git:
+                      description: Git the location in git to use
+                      properties:
+                        files:
+                          description: Optional files to add to the manifests for
+                            this service
+                          items:
+                            type: string
+                          type: array
+                        folder:
+                          description: Folder ...
+                          type: string
+                        ref:
+                          description: Ref ...
+                          type: string
+                      required:
+                      - folder
+                      - ref
+                      type: object
+                    path:
+                      description: Path the subdirectory this source will live in
+                        the final tarball
+                      type: string
+                    repositoryRef:
                       description: RepositoryRef the reference of the git repository
                         to source from
                       properties:
@@ -582,29 +605,6 @@ spec:
                           type: string
                       type: object
                       x-kubernetes-map-type: atomic
-                    git:
-                      description: Git the location in git to use
-                      properties:
-                        files:
-                          description: Optional files to add to the manifests for
-                            this service
-                          items:
-                            type: string
-                          type: array
-                        folder:
-                          description: Folder ...
-                          type: string
-                        ref:
-                          description: Ref ...
-                          type: string
-                      required:
-                      - folder
-                      - ref
-                      type: object
-                    path:
-                      description: Path the subdirectory this source will live in
-                        the final tarball
-                      type: string
                   type: object
                 type: array
               syncConfig:

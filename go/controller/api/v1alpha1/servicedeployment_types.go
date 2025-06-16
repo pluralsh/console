@@ -219,7 +219,7 @@ type Source struct {
 	//Path the subdirectory this source will live in the final tarball
 	Path *string `json:"path,omitempty"`
 	//RepositoryRef the reference of the git repository to source from
-	RepositoryRef *corev1.ObjectReference `json:"RepositoryRef,omitempty"`
+	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 	//Git the location in git to use
 	Git *GitRef `json:"git,omitempty"`
 }

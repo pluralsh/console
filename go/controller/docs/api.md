@@ -3323,7 +3323,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `path` _string_ | Path the subdirectory this source will live in the final tarball |  |  |
-| `RepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the git repository to source from |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the git repository to source from |  |  |
 | `git` _[GitRef](#gitref)_ | Git the location in git to use |  |  |
 
 
