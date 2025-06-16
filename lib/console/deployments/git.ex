@@ -53,6 +53,12 @@ defmodule Console.Deployments.Git do
   def get_scm_connection(id), do: Repo.get(ScmConnection, id)
   def get_scm_connection!(id), do: Repo.get!(ScmConnection, id)
 
+  def get_repositories(ids) do
+    GitRepository.for_ids(ids)
+    |> Repo.all()
+    |> Map.new(fn %GitRepository{id: id} = git -> {id, git} end)
+  end
+
   def default_scm_connection() do
     ScmConnection.default()
     |> Repo.one()

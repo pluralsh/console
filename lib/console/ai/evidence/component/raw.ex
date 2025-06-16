@@ -30,7 +30,7 @@ defmodule Console.AI.Evidence.Component.Raw do
     PrometheusRule
   ) # ignore crds which we know don't cascade to other resources, mostly our own
 
-  def hydrate(%{"kind" => k, "metadata" => %{"namespace" => ns, "uid" => uid}} = resource)
+  def hydrate(%{"kind" => k, "metadata" => %{"namespace" => ns}} = resource)
       when is_binary(ns) and k not in @kind_blacklist do
     Resource.generate(resource)
   end

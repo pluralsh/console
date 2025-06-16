@@ -29,6 +29,7 @@ defmodule Console.Schema.Service do
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
   defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3, paused: 4
+  defenum RendererType, auto: 0, raw: 1, helm: 2, kustomize: 3
 
   defmodule Git do
     use Piazza.Ecto.Schema
@@ -137,6 +138,24 @@ defmodule Console.Schema.Service do
       field :enable_helm, :boolean, default: false
     end
 
+    embeds_many :sources, Source, on_replace: :delete do
+      field :path,          :string
+      field :repository_id, :binary_id
+
+      embeds_one :git,      Git, on_replace: :update
+    end
+
+    embeds_many :renderers, Renderer, on_replace: :delete do
+      field :path, :string
+      field :type, RendererType
+
+      embeds_one :helm, HelmMinimal, on_replace: :update do
+        field :values,       :map
+        field :values_files, :map
+        field :release,      :string
+      end
+    end
+
     belongs_to :revision,   Revision
     belongs_to :cluster,    Cluster
     belongs_to :repository, GitRepository
@@ -151,21 +170,21 @@ defmodule Console.Schema.Service do
     has_one :namespace_instance, NamespaceInstance
     has_one :preview_instance,   PreviewEnvironmentInstance
 
-    has_many :vulns,   ServiceVuln
-    has_many :imports, ServiceImport, on_replace: :delete
-    has_many :errors, ServiceError, on_replace: :delete
-    has_many :components, ServiceComponent, on_replace: :delete
+    has_many :vulns,            ServiceVuln
+    has_many :imports,          ServiceImport, on_replace: :delete
+    has_many :errors,           ServiceError, on_replace: :delete
+    has_many :components,       ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
     has_many :configuration, through: [:revision, :configuration]
-    has_many :preview_templates, PreviewEnvironmentTemplate, foreign_key: :reference_service_id
+    has_many :preview_templates,       PreviewEnvironmentTemplate, foreign_key: :reference_service_id
     has_many :scaling_recommendations, ClusterScalingRecommendation, foreign_key: :service_id
-    has_many :dependencies, ServiceDependency,
+    has_many :dependencies,            ServiceDependency,
       foreign_key: :service_id,
       on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :contexts, through: [:context_bindings, :context]
     has_many :stage_services, StageService
-    has_many :read_bindings, PolicyBinding,
+    has_many :read_bindings,  PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :read_policy_id
@@ -335,6 +354,8 @@ defmodule Console.Schema.Service do
     |> cast_embed(:helm)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)
     |> cast_embed(:kustomize, with: &kustomize_changeset/2)
+    |> cast_embed(:sources, with: &sources_changeset/2)
+    |> cast_embed(:renderers, with: &renderers_changeset/2)
     |> cast_assoc(:components)
     |> cast_assoc(:errors)
     |> cast_assoc(:read_bindings)
@@ -392,5 +413,23 @@ defmodule Console.Schema.Service do
     model
     |> cast(attrs, ~w(path enable_helm)a)
     |> validate_required(~w(path)a)
+  end
+
+  defp sources_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(path repository_id)a)
+    |> cast_embed(:git)
+    |> validate_required(~w(repository_id git)a)
+  end
+
+  defp renderers_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(path type)a)
+    |> cast_embed(:helm, with: &helm_minimal_changeset/2)
+  end
+
+  defp helm_minimal_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(values values_files release)a)
   end
 end

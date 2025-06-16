@@ -2506,9 +2506,12 @@ type GitRef struct {
 }
 
 type GitRefAttributes struct {
-	Ref    string   `json:"ref"`
-	Folder string   `json:"folder"`
-	Files  []string `json:"files,omitempty"`
+	// the git reference to use
+	Ref string `json:"ref"`
+	// the subdirectory in the git repository to use
+	Folder string `json:"folder"`
+	// the files to include in the tarball
+	Files []string `json:"files,omitempty"`
 }
 
 // a git repository available for deployments
@@ -2751,6 +2754,24 @@ type HelmConfigAttributes struct {
 
 type HelmGCPAuthAttributes struct {
 	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
+}
+
+type HelmMinimal struct {
+	// a helm values file to use when rendering this helm chart
+	Values *string `json:"values,omitempty"`
+	// a list of relative paths to values files to use for helm chart templating
+	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	// the helm release name to use when rendering this helm chart
+	Release *string `json:"release,omitempty"`
+}
+
+type HelmMinimalAttributes struct {
+	// a helm values file to use when rendering this helm chart
+	Values *string `json:"values,omitempty"`
+	// a list of relative paths to values files to use for helm chart templating
+	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	// the helm release name to use when rendering this helm chart
+	Release *string `json:"release,omitempty"`
 }
 
 // A direct Plural representation of a Helm repository
@@ -5117,6 +5138,18 @@ type RegexReplacementAttributes struct {
 	Templated *bool `json:"templated,omitempty"`
 }
 
+type Renderer struct {
+	Path string       `json:"path"`
+	Type RendererType `json:"type"`
+	Helm *HelmMinimal `json:"helm,omitempty"`
+}
+
+type RendererAttributes struct {
+	Path string                 `json:"path"`
+	Type RendererType           `json:"type"`
+	Helm *HelmMinimalAttributes `json:"helm,omitempty"`
+}
+
 type ReplicaSet struct {
 	Metadata Metadata         `json:"metadata"`
 	Spec     ReplicaSetSpec   `json:"spec"`
@@ -5610,6 +5643,10 @@ type ServiceDeployment struct {
 	DeletedAt *string `json:"deletedAt,omitempty"`
 	// whether this service should not actively reconcile state and instead simply report pending changes
 	DryRun *bool `json:"dryRun,omitempty"`
+	// the sources of this service
+	Sources []*ServiceSource `json:"sources,omitempty"`
+	// the renderers of this service
+	Renderers []*Renderer `json:"renderers,omitempty"`
 	// fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries
 	Docs []*GitFile `json:"docs,omitempty"`
 	// the git repo of this service
@@ -5689,6 +5726,7 @@ type ServiceDeploymentAttributes struct {
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
 	Imports         []*ServiceImportAttributes     `json:"imports,omitempty"`
+	Sources         []*ServiceSourceAttributes     `json:"sources,omitempty"`
 }
 
 type ServiceDeploymentConnection struct {
@@ -5732,6 +5770,24 @@ type ServicePort struct {
 	Protocol   *string `json:"protocol,omitempty"`
 	Port       *int64  `json:"port,omitempty"`
 	TargetPort *string `json:"targetPort,omitempty"`
+}
+
+type ServiceSource struct {
+	// the subdirectory in the git repository to use
+	Path *string `json:"path,omitempty"`
+	// the id of the git repository to source from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git reference to use
+	Git *GitRef `json:"git,omitempty"`
+}
+
+type ServiceSourceAttributes struct {
+	// the subdirectory this source will live in the final tarball
+	Path *string `json:"path,omitempty"`
+	// the id of the git repository to source from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the location in git to use
+	Git *GitRefAttributes `json:"git,omitempty"`
 }
 
 type ServiceSpec struct {
@@ -5823,6 +5879,8 @@ type ServiceUpdateAttributes struct {
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
 	Imports         []*ServiceImportAttributes     `json:"imports,omitempty"`
+	Sources         []*ServiceSourceAttributes     `json:"sources,omitempty"`
+	Renderers       []*RendererAttributes          `json:"renderers,omitempty"`
 }
 
 type ServiceVuln struct {
@@ -9016,6 +9074,51 @@ func (e *ReadType) UnmarshalGQL(v any) error {
 }
 
 func (e ReadType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type RendererType string
+
+const (
+	RendererTypeAuto      RendererType = "AUTO"
+	RendererTypeRaw       RendererType = "RAW"
+	RendererTypeHelm      RendererType = "HELM"
+	RendererTypeKustomize RendererType = "KUSTOMIZE"
+)
+
+var AllRendererType = []RendererType{
+	RendererTypeAuto,
+	RendererTypeRaw,
+	RendererTypeHelm,
+	RendererTypeKustomize,
+}
+
+func (e RendererType) IsValid() bool {
+	switch e {
+	case RendererTypeAuto, RendererTypeRaw, RendererTypeHelm, RendererTypeKustomize:
+		return true
+	}
+	return false
+}
+
+func (e RendererType) String() string {
+	return string(e)
+}
+
+func (e *RendererType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RendererType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RendererType", str)
+	}
+	return nil
+}
+
+func (e RendererType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

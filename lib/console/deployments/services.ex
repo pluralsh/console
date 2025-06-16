@@ -115,6 +115,7 @@ defmodule Console.Deployments.Services do
       {:flux, probe(svc, [:helm, :repository]), svc},
       {:helm, probe(svc, [:helm, :url]), svc.helm}
     ], &digest_filter(&1, svc))
+    |> add_sources(svc)
     |> Enum.map(fn
       {_, id, %Service.Git{} = ref} when is_binary(id) ->
         Git.cached!(id) |> Git.Discovery.digest(ref)
@@ -131,6 +132,14 @@ defmodule Console.Deployments.Services do
       err -> err
     end
   end
+
+  defp add_sources(specs, %Service{sources: [_ | _] = sources}) do
+    Enum.map(sources, fn %Service.Source{repository_id: id, git: ref} ->
+      {:repository, id, ref}
+    end)
+    |> Enum.concat(specs)
+  end
+  defp add_sources(specs, _svc), do: specs
 
   defp digest_filter({_, nil, _}, _), do: false
   defp digest_filter({:repository, _, _} = res, %Service{helm: %Service.Helm{values_files: [_ | _]}}), do: res
@@ -155,6 +164,28 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, SmartFile.t} | Console.error
+  def tarstream(%Service{sources: [_ | _] = sources} = svc) do
+    with {:ok, f} <- tarstream(%{svc | sources: []}) do
+      repos = Enum.map(sources, & &1.repository_id)
+              |> Git.get_repositories()
+
+      Enum.reduce_while(sources, %{}, fn
+        %Service.Source{path: p, repository_id: id, git: %Service.Git{} = ref}, acc ->
+        with {:ok, f} <- Git.Discovery.fetch(repos[id], ref),
+             {:ok, contents} <- Tar.tar_stream(f),
+             contents <- Map.new(contents, fn {k, v} -> {concat_path(p, k), v} end) do
+          {:cont, Map.merge(acc, contents)}
+        else
+          {:error, _} = err -> {:halt, err}
+        end
+      end)
+      |> case do
+        %{} = files -> Tar.splice(f, files)
+        err -> err
+      end
+    end
+  end
+
   def tarstream(%Service{repository_id: id, helm: %Service.Helm{repository_id: rid, chart: c, lua_script: s} = helm} = svc)
       when is_binary(id) and (is_binary(c) or is_binary(rid)) and is_binary(s) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
@@ -205,6 +236,9 @@ defmodule Console.Deployments.Services do
   defp maybe_values(files, %Service.Helm{values: vals}) when is_binary(vals),
     do: Map.merge(files, %{"values.yaml.static" => vals})
   defp maybe_values(files, _), do: files
+
+  defp concat_path(nil, path), do: path
+  defp concat_path(prefix, path), do: Path.join(prefix, path)
 
   def referenced?(id) do
     [Cluster.for_service(id), ClusterProvider.for_service(id)]
