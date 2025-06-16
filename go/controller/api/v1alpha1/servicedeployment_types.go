@@ -236,7 +236,7 @@ type HelmMinimal struct {
 	//Values a helm values file to use when rendering this helm chart
 	Values *string `json:"values,omitempty"`
 	//ValuesFiles a list of relative paths to values files to use for helm chart templating
-	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	ValuesFiles []string `json:"valuesFiles,omitempty"`
 	//Release the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
 }

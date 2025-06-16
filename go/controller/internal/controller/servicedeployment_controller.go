@@ -404,7 +404,7 @@ func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDepl
 			if renderer.Helm != nil {
 				newRenderer.Helm = &console.HelmMinimalAttributes{
 					Values:      renderer.Helm.Values,
-					ValuesFiles: renderer.Helm.ValuesFiles,
+					ValuesFiles: lo.ToSlicePtr(renderer.Helm.ValuesFiles),
 					Release:     renderer.Helm.Release,
 				}
 			}
