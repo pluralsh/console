@@ -45,13 +45,13 @@ func (c *Configuration) Provider() Provider {
 	return c.provider
 }
 
-func (c *Configuration) Query() (string, error) {
+func (c *Configuration) Query(connectionName string) (string, error) {
 	switch c.provider {
 	case ProviderAWS:
 		if c.aws == nil {
 			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
-		return c.aws.Query(), nil
+		return c.aws.Query(connectionName)
 	case ProviderAzure:
 		if c.azure == nil {
 			return "", fmt.Errorf("configuration not set: %s", c.provider)

@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
@@ -13,9 +14,10 @@ import (
 
 const driverName = "postgres"
 
-var dataSourceName = fmt.Sprintf("host=localhost port=%d user=postgres dbname=postgres sslmode=disable", args.DatabasePort())
+var dataSourceName = fmt.Sprintf("host=localhost port=%d user=postgres password=postgres dbname=postgres sslmode=disable", args.DatabasePort())
 
 type Connection interface {
+	Configure(config config.Configuration) error
 	Query(q string) (columns []string, rows [][]any, err error)
 	Exec(q string) (sql.Result, error)
 	Ping() error
@@ -24,34 +26,34 @@ type Connection interface {
 }
 
 type connection struct {
-	db     *sql.DB
-	config config.Configuration
+	name string
+	db   *sql.DB
+}
+
+func (in *connection) Configure(config config.Configuration) error {
+	q, err := config.Query(in.name)
+	if err != nil {
+		return fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
+	}
+
+	_, err = in.db.Exec(q)
+	if err != nil {
+		return fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
+	}
+
+	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
+	return nil
 }
 
 func (in *connection) Close() error {
 	return in.db.Close()
 }
 
-func NewConnection(config config.Configuration) (Connection, error) {
+func NewConnection(name string) (Connection, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	q, err := config.Query()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
-	}
-
-	_, err = db.Exec(q)
-	if err != nil {
-		return nil, fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
-	}
-	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
-
-	return &connection{db: db, config: config}, nil
-}
-
-func (in *connection) Exec(q string) (sql.Result, error) {
-	return in.db.Exec(q)
+	return &connection{name, db}, nil
 }

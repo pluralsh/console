@@ -1,17 +1,19 @@
 package extension
 
 import (
-	"database/sql"
 	"path/filepath"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
+	"github.com/pluralsh/console/go/cloud-query/internal/connection"
 )
 
 const (
 	registerQuery = `
-DROP EXTENSION IF EXISTS steampipe_postgres_aws CASCADE;
-CREATE EXTENSION IF NOT EXISTS steampipe_postgres_aws;
+		DROP EXTENSION IF EXISTS steampipe_postgres_aws CASCADE;
+		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_aws;
+
+		CREATE EXTENSION IF NOT EXISTS ltree;
 `
 )
 
@@ -36,7 +38,7 @@ func prepare() error {
 	return nil
 }
 
-func Register(db *sql.DB) error {
+func Register(db connection.Connection) error {
 	if err := prepare(); err != nil {
 		return err
 	}

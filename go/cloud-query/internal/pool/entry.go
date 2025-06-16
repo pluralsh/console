@@ -7,6 +7,7 @@ import (
 )
 
 type entry struct {
+	uuid       string
 	connection connection.Connection
 	ping       time.Time
 }
