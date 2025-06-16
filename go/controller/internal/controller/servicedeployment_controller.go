@@ -175,6 +175,8 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		ParentID:        attr.ParentID,
 		Imports:         attr.Imports,
 		FlowID:          attr.FlowID,
+		Sources:         attr.Sources,
+		Renderers:       attr.Renderers,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -358,7 +360,75 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		}
 	}
 
+	if err := r.setSources(ctx, service, attr); err != nil {
+		return nil, nil, err
+	}
+	setRenderers(service, attr)
+
 	return attr, nil, nil
+}
+
+func (r *ServiceReconciler) setSources(ctx context.Context, service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) error {
+	if len(service.Spec.Sources) > 0 {
+		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
+		for _, source := range service.Spec.Sources {
+			newSource := &console.ServiceSourceAttributes{
+				Path: source.Path,
+			}
+			if source.Git != nil {
+				newSource.Git = &console.GitRefAttributes{
+					Ref:    newSource.Git.Ref,
+					Folder: newSource.Git.Folder,
+					Files:  newSource.Git.Files,
+				}
+			}
+			repositoryID, err := r.getRepository(ctx, source.RepositoryRef)
+			if err != nil {
+				return err
+			}
+			newSource.RepositoryID = repositoryID
+			attr.Sources = append(attr.Sources, newSource)
+		}
+	}
+	return nil
+}
+
+func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) {
+	if len(service.Spec.Renderers) > 0 {
+		attr.Renderers = make([]*console.RendererAttributes, 0)
+		for _, renderer := range service.Spec.Renderers {
+			newRenderer := &console.RendererAttributes{
+				Path: renderer.Path,
+				Type: renderer.Type,
+			}
+			if renderer.Helm != nil {
+				newRenderer.Helm = &console.HelmMinimalAttributes{
+					Values:      renderer.Helm.Values,
+					ValuesFiles: lo.ToSlicePtr(renderer.Helm.ValuesFiles),
+					Release:     renderer.Helm.Release,
+				}
+			}
+			attr.Renderers = append(attr.Renderers, newRenderer)
+		}
+	}
+}
+
+func (r *ServiceReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference) (*string, error) {
+	var repositoryID *string
+	if ref != nil {
+		repository := &v1alpha1.GitRepository{}
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, repository); err != nil {
+			return nil, err
+		}
+		if !repository.Status.HasID() {
+			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
+		}
+		repositoryID = repository.Status.ID
+	}
+	return repositoryID, nil
 }
 
 func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {

@@ -1253,6 +1253,7 @@ _Appears in:_
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
 - [ServiceTemplate](#servicetemplate)
+- [Source](#source)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1362,6 +1363,24 @@ _Appears in:_
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
 
 
+
+
+#### HelmMinimal
+
+
+
+
+
+
+
+_Appears in:_
+- [Renderer](#renderer)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `values` _string_ | Values a helm values file to use when rendering this helm chart |  |  |
+| `valuesFiles` _string array_ | ValuesFiles a list of relative paths to values files to use for helm chart templating |  |  |
+| `release` _string_ | Release the helm release name to use when rendering this helm chart |  |  |
 
 
 #### HelmRepository
@@ -2862,6 +2881,24 @@ _Appears in:_
 | `templated` _boolean_ | Whether you want to apply templating to the regex before compiling |  | Optional: {} <br /> |
 
 
+#### Renderer
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceSpec](#servicespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `path` _string_ |  |  |  |
+| `type` _[RendererType](#renderertype)_ |  |  | Enum: [AUTO RAW HELM KUSTOMIZE] <br /> |
+| `helm` _[HelmMinimal](#helmminimal)_ |  |  |  |
+
+
 #### RouterFilters
 
 
@@ -3202,6 +3239,8 @@ _Appears in:_
 | `templated` _boolean_ | Templated should apply liquid templating to raw yaml files, defaults to true |  | Optional: {} <br /> |
 | `imports` _[ServiceImport](#serviceimport) array_ |  |  | Optional: {} <br /> |
 | `detach` _boolean_ | Detach determined if user want to delete or detach service |  | Optional: {} <br /> |
+| `sources` _[Source](#source) array_ | Sources of this service |  | Optional: {} <br /> |
+| `renderers` _[Renderer](#renderer) array_ | Renderers of this service |  | Optional: {} <br /> |
 
 
 
@@ -3268,6 +3307,24 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ |  |  |  |
+
+
+#### Source
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceSpec](#servicespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `path` _string_ | Path the subdirectory this source will live in the final tarball |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the git repository to source from |  |  |
+| `git` _[GitRef](#gitref)_ | Git the location in git to use |  |  |
 
 
 #### SpecTemplate
