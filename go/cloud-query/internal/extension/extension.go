@@ -12,6 +12,12 @@ const (
 	registerQuery = `
 		DROP EXTENSION IF EXISTS steampipe_postgres_aws CASCADE;
 		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_aws;
+
+		DROP EXTENSION IF EXISTS steampipe_postgres_azure CASCADE;
+		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_azure;
+
+		DROP EXTENSION IF EXISTS steampipe_postgres_gcp CASCADE;
+		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_gcp;
 `
 )
 
@@ -19,11 +25,15 @@ var (
 	libPath          = filepath.Join(args.DatabaseDir(), "lib/postgresql")
 	extensionsPath   = filepath.Join(args.DatabaseDir(), "share/postgresql/extension/")
 	fileDestinations = map[string]string{
-		"steampipe_postgres_aws.so":       libPath,
-		"steampipe_postgres_aws.control":  extensionsPath,
-		"steampipe_postgres_aws--1.0.sql": extensionsPath,
-		// "steampipe_postgres_azure.so":     libPath,
-		// "steampipe_postgres_gcp.so":       libPath,
+		"steampipe_postgres_aws.so":         libPath,
+		"steampipe_postgres_aws.control":    extensionsPath,
+		"steampipe_postgres_aws--1.0.sql":   extensionsPath,
+		"steampipe_postgres_azure.so":       libPath,
+		"steampipe_postgres_azure.control":  extensionsPath,
+		"steampipe_postgres_azure--1.0.sql": extensionsPath,
+		"steampipe_postgres_gcp.so":         libPath,
+		"steampipe_postgres_gcp.control":    extensionsPath,
+		"steampipe_postgres_gcp--1.0.sql":   extensionsPath,
 	}
 )
 
