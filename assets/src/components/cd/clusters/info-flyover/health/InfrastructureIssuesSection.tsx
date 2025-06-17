@@ -1,5 +1,6 @@
 import { Button, Chip, PrOpenIcon, Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
+import { DrainNodeModal } from 'components/kubernetes/common/DrainNodeModal'
 import {
   ClusterOverviewDetailsFragment,
   NodeStatistic,
@@ -7,15 +8,15 @@ import {
   NodeStatisticHealth,
 } from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   CLUSTER_DETAILS_PATH,
   CLUSTER_NODES_PATH,
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
+import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts'
 import { HealthScoreSection, IssuesEmptyState } from './HealthScoreTab'
-import { DrainNodeModal } from 'components/kubernetes/common/DrainNodeModal'
-import { useState } from 'react'
 
 const columnHelper = createColumnHelper<NodeStatisticFragment>()
 
@@ -24,11 +25,13 @@ export function InfrastructureIssuesSection({
 }: {
   cluster: ClusterOverviewDetailsFragment
 }) {
+  const navigate = useNavigate()
   const infrastructureIssues =
     cluster.nodeStatistics?.filter(
       (node): node is NodeStatistic =>
         !!node && node.health !== NodeStatisticHealth.Healthy
     ) ?? []
+
   return (
     <HealthScoreSection
       title={`Infrastructure issues (${infrastructureIssues.length})`}
@@ -51,8 +54,16 @@ export function InfrastructureIssuesSection({
         />
       ) : (
         <Table
+          virtualizeRows
+          fullHeightWrap
+          rowBg="raised"
           data={infrastructureIssues}
           columns={columns}
+          onRowClick={(_e, { original }: Row<NodeStatisticFragment>) =>
+            navigate(
+              getResourceDetailsAbsPath(cluster.id, 'node', original?.name)
+            )
+          }
         />
       )}
     </HealthScoreSection>

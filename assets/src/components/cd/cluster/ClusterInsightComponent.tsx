@@ -25,7 +25,7 @@ import {
   useSetActionContent,
   useSetNavigationContent,
 } from './ClusterInsights.tsx'
-import { ComponentEntry } from './ClusterInsightsComponents.tsx'
+import { ClusterInsightComponentLabel } from './ClusterInsightsComponents.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
@@ -71,7 +71,7 @@ export default function ClusterInsightComponent(): ReactNode {
 
             {cluster?.name}
           </BasicLink>
-          <ComponentEntry
+          <ClusterInsightComponentLabel
             component={component as Nullable<ClusterInsightComponentAPI>}
             icon={null}
           />

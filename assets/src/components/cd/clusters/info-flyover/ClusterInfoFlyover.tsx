@@ -140,6 +140,7 @@ function ClusterInfoFlyoverContent({
         direction="column"
         gap="large"
         minWidth={MIN_WIDTH - 64}
+        height="100%"
       >
         <ButtonGroup
           directory={Object.values(ClusterInfoFlyoverTab).map((value) => ({

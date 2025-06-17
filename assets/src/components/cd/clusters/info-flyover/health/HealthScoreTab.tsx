@@ -15,9 +15,12 @@ export function HealthScoreTab({
     <Flex
       direction="column"
       gap="xlarge"
+      height="100%"
     >
       <InfrastructureIssuesSection cluster={cluster} />
       <ConfigurationIssuesSection cluster={cluster} />
+      {/* helpful spacer because bottom padding may get covered, can remove if the layout changes */}
+      <div css={{ minHeight: 1 }} />
     </Flex>
   )
 }
@@ -35,7 +38,7 @@ export function HealthScoreSection({
     <Flex
       direction="column"
       gap="medium"
-      maxHeight={400}
+      maxHeight={360}
     >
       <Flex
         justify="space-between"
@@ -61,7 +64,8 @@ export function IssuesEmptyState({
   return (
     <Card
       css={{
-        height: 300,
+        flex: 1,
+        minHeight: 200,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',

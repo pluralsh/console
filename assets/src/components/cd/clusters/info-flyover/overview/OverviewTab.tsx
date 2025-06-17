@@ -16,6 +16,7 @@ import { ClusterInfoFlyoverTab } from '../ClusterInfoFlyover'
 import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
 import { OverviewTabCard } from './OverviewTabCard'
 import { isEmpty } from 'lodash'
+import { componentHasInsight } from '../health/ConfigurationIssuesSection'
 
 export function OverviewTab({
   cluster,
@@ -49,7 +50,9 @@ export function OverviewTab({
             },
             {
               label: 'Infrastructure issues',
-              status: isEmpty(cluster.insightComponents)
+              status: isEmpty(
+                cluster.insightComponents?.filter(componentHasInsight)
+              )
                 ? 'success'
                 : 'warning',
               onClick: () => setTab(ClusterInfoFlyoverTab.HealthScore),

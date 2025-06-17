@@ -3,17 +3,19 @@ import { createColumnHelper, type Row } from '@tanstack/react-table'
 import { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
-import { ClusterInsightComponent as ClusterInsightComponentAPI } from '../../../generated/graphql.ts'
+
 import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData.tsx'
 import { useClusterInsightsContext } from './ClusterInsights.tsx'
+import { ClusterInsightComponentFragment } from 'generated/graphql.ts'
+import { componentHasInsight } from '../clusters/info-flyover/health/ConfigurationIssuesSection.tsx'
 
-export default function ClusterInsightsComponents(): ReactNode {
+export function ClusterInsightsComponents() {
   const { cluster } = useClusterInsightsContext()
   const theme = useTheme()
   const navigate = useNavigate()
-  const data = cluster.insightComponents as Array<ClusterInsightComponentAPI>
+  const data = cluster.insightComponents?.filter(componentHasInsight) ?? []
 
   return (
     <Table
@@ -30,14 +32,14 @@ export default function ClusterInsightsComponents(): ReactNode {
       border={theme.borders['fill-one']}
       overflowX={'hidden'}
       emptyStateProps={{ message: 'No entries found.' }}
-      onRowClick={(_e, { original }: Row<ClusterInsightComponentAPI>) =>
+      onRowClick={(_e, { original }: Row<ClusterInsightComponentFragment>) =>
         navigate(original.id)
       }
     />
   )
 }
 
-const columnHelper = createColumnHelper<ClusterInsightComponentAPI>()
+const columnHelper = createColumnHelper<ClusterInsightComponentFragment>()
 
 const TableRow = columnHelper.accessor((item) => item, {
   id: 'row',
@@ -63,18 +65,18 @@ const TableRow = columnHelper.accessor((item) => item, {
           },
         }}
       >
-        <ComponentEntry component={insight} />
+        <ClusterInsightComponentLabel component={insight} />
         <AiInsightSummaryIcon insight={insight.insight} />
       </div>
     )
   },
 })
 
-export function ComponentEntry({
+export function ClusterInsightComponentLabel({
   component,
   icon = <ComponentsIcon />,
 }: {
-  component: Nullable<ClusterInsightComponentAPI>
+  component: Nullable<ClusterInsightComponentFragment>
   icon?: Nullable<ReactNode>
 }): ReactNode {
   const theme = useTheme()
