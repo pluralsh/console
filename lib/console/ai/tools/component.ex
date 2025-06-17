@@ -8,7 +8,7 @@ defmodule Console.AI.Tools.Component do
   embedded_schema do
     field :service_deployment, :string
     field :cluster,            :string
-    field :api_version,       :string
+    field :api_version,        :string
     field :kind,               :string
     field :namespace,          :string
     field :name,               :string
@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Component do
     """
     Describes a kubernetes resource referenced as a service component for the given Plural Service Deployment.
     Use this to get a full json spec of a kubernetes resource associated with a Plural Service. If you need to find the name of the service and cluster,
-    call the `servicedeployments` and `clusters` tools first to grab them.
+    call the #{plrl_tool("servicedeployments")} and #{plrl_tool("clusters")} tools first to grab them.
     """
   end
 

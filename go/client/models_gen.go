@@ -7286,20 +7286,22 @@ func (e AutoscalingTarget) MarshalGQL(w io.Writer) {
 type ChatType string
 
 const (
-	ChatTypeText ChatType = "TEXT"
-	ChatTypeFile ChatType = "FILE"
-	ChatTypeTool ChatType = "TOOL"
+	ChatTypeText  ChatType = "TEXT"
+	ChatTypeFile  ChatType = "FILE"
+	ChatTypeTool  ChatType = "TOOL"
+	ChatTypeError ChatType = "ERROR"
 )
 
 var AllChatType = []ChatType{
 	ChatTypeText,
 	ChatTypeFile,
 	ChatTypeTool,
+	ChatTypeError,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile, ChatTypeTool:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError:
 		return true
 	}
 	return false
