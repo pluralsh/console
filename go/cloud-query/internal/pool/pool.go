@@ -56,8 +56,15 @@ func (c *ConnectionPool) cleanupRoutine() {
 
 func (c *ConnectionPool) setup(user, password, schema string) error {
 	tmpl, err := template.New("setup").Parse(`
+		-- Create the schema
+		DROP SCHEMA IF EXISTS "{{ .Schema }}" CASCADE;
+		CREATE SCHEMA "{{ .Schema }}";
+		COMMENT ON SCHEMA "{{ .Schema }}" IS 'steampipe aws fdw';
+
+		-- Create the user
 		CREATE USER "{{ .User }}" WITH PASSWORD "{{ .Password }}";
 		ALTER USER "{{ .User }}" WITH NOSUPERUSER;
+		ALTER USER "{{ .User }}" set SEARCH_PATH = '{{ .Schema }}';
 		
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE "{{ .Database }}" FROM PUBLIC;
@@ -89,9 +96,31 @@ func (c *ConnectionPool) setup(user, password, schema string) error {
 	return err
 }
 
-func (c *ConnectionPool) cleanup(name string) error {
-	// TODO: cleanup connection in the db
-	_, err := c.admin.Exec(fmt.Sprintf("DROP USER IF EXISTS %q", name))
+func (c *ConnectionPool) cleanup(user, schema, connection string) error {
+	tmpl, err := template.New("setup").Parse(`
+		-- Cleanup the connection
+		DROP SERVER IF EXISTS steampipe_{{ .Connection }};
+
+		-- Cleanup the schema
+		DROP SCHEMA IF EXISTS "{{ .Schema }}" CASCADE;
+
+		-- Cleanup the user
+		DROP USER IF EXISTS "{{ .User }}";
+`)
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	out := new(strings.Builder)
+	if err = tmpl.Execute(out, map[string]string{
+		"User":       user,
+		"Schema":     schema,
+		"Connection": connection,
+	}); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	_, err = c.admin.Exec(out.String())
 	return err
 }
 
@@ -123,7 +152,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		if err := conn.Configure(config); err != nil {
-			_ = c.cleanup(connectionName)
+			_ = c.cleanup(connectionName, connectionName, connectionName)
 			_ = conn.Close()
 			return nil, err
 		}
@@ -142,7 +171,7 @@ func (c *ConnectionPool) Set(key string, value connection.Connection) {
 }
 
 func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) {
-	_ = c.cleanup(t.Val.uuid)
+	_ = c.cleanup(t.Val.uuid, t.Val.uuid, t.Val.uuid)
 	err := t.Val.connection.Close()
 	if err != nil {
 		klog.ErrorS(err, "failed to close connection", "connection", t.Val.uuid)
