@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
+	"text/template"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"k8s.io/klog/v2"
 )
 
 type AzureConfiguration struct {
@@ -49,15 +54,37 @@ func (c *AzureConfiguration) ClientSecret() string {
 	return os.Getenv("AZURE_CLIENT_SECRET")
 }
 
-func (c *AzureConfiguration) Query() string {
-	return fmt.Sprintf(`
-			SELECT steampipe_configure_gcp('
-				subscription_id=%q
-				tenant_id=%q
-				client_id=%q
-				client_secret=%q
-			');
-		`, c.SubscriptionId(), c.TenantId(), c.ClientId(), c.ClientSecret())
+func (c *AzureConfiguration) Query(connectionName string) (string, error) {
+	tmpl, err := template.New("connection").Parse(`
+		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
+		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
+			config '
+				subscription_id="{{ .SubscriptionId }}"
+				tenant_id="{{ .TenantId }}"
+				client_id="{{ .ClientId }}"
+				client_secret="{{ .ClientSecret }}"
+		');
+		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
+    `)
+	if err != nil {
+		return "", fmt.Errorf("error parsing template: %w", err)
+	}
+
+	out := new(strings.Builder)
+	err = tmpl.Execute(out, map[string]string{
+		"DatabaseName":   "postgres",
+		"ConnectionName": connectionName,
+		"SubscriptionId": c.SubscriptionId(),
+		"TenantId":       c.TenantId(),
+		"ClientId":       c.ClientId(),
+		"ClientSecret":   c.ClientSecret(),
+	})
+	if err != nil {
+		return "", fmt.Errorf("error executing template: %w", err)
+	}
+
+	klog.V(log.LogLevelDebug).InfoS("generated AWS query", "query", out.String())
+	return out.String(), nil
 }
 
 func (c *AzureConfiguration) MarshalJSON() ([]byte, error) {

@@ -36,7 +36,7 @@ func (c *AWSConfiguration) SecretAccessKey() string {
 }
 
 func (c *AWSConfiguration) Query(connectionName string) (string, error) {
-	tpl := `
+	tmpl, err := template.New("connection").Parse(`
 		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
 		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
 			config '
@@ -44,9 +44,7 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 				secret_key="{{ .SecretKey }}"
 		');
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
-    `
-
-	tmpl, err := template.New("connection").Parse(tpl)
+    `)
 	if err != nil {
 		return "", fmt.Errorf("error parsing template: %w", err)
 	}
