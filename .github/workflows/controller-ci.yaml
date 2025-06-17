@@ -62,9 +62,9 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           check-latest: true
-      - uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v3.7.1
+      - uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.5
+          version: v2.1.6
           working-directory: go/controller
           args: --timeout=30m
   check-docs:

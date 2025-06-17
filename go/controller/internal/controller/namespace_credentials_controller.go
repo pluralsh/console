@@ -65,12 +65,12 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 
 	// If the object is not being deleted and if it does not have our finalizer, then lets add the finalizer.
 	// This is equivalent to registering our finalizer.
-	if nc.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(nc, NamespaceCredentialsFinalizer) {
+	if nc.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(nc, NamespaceCredentialsFinalizer) {
 		controllerutil.AddFinalizer(nc, NamespaceCredentialsFinalizer)
 	}
 
 	// If the object is being deleted, cleanup, remove the finalizer and stop reconciliation.
-	if !nc.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !nc.DeletionTimestamp.IsZero() {
 		r.CredentialsCache.RemoveNamespaceCredentials(nc)
 		controllerutil.RemoveFinalizer(nc, NamespaceCredentialsFinalizer)
 		return ctrl.Result{}, nil

@@ -177,7 +177,7 @@ func (r *ServiceContextReconciler) isAlreadyExists(ctx context.Context, serviceC
 func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1.ServiceContext) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if serviceContext.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(serviceContext, ServiceContextProtectionFinalizerName) {
+	if serviceContext.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(serviceContext, ServiceContextProtectionFinalizerName) {
 		controllerutil.AddFinalizer(serviceContext, ServiceContextProtectionFinalizerName)
 	}
 
