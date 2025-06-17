@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/fergusstrange/embedded-postgres"
 	"k8s.io/klog/v2"
@@ -65,7 +66,7 @@ func main() {
 
 func handleShutdown(cancel context.CancelFunc, db *embeddedpostgres.EmbeddedPostgres, s *server.Server) {
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, os.Kill)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	<-signalChan
 	klog.Info("received shutdown signal, shutting down gracefully...")
