@@ -100,7 +100,7 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: "./go"
+          context: "./go/cloud-query"
           file: "./go/cloud-query/Dockerfile"
           tags: ${{ env.REGISTRY_IMAGE }}
           labels: ${{ steps.meta.outputs.labels }}
