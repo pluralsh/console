@@ -2,6 +2,9 @@ package controller
 
 import (
 	"context"
+	"strings"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
@@ -105,6 +108,21 @@ func (r *PostgresCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) error
 }
 
 func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.PostgresCredentials) error {
+	if controllerutil.ContainsFinalizer(credentials, PostgresDatabaseProtectionFinalizerName) {
+		dbList := &v1alpha1.PostgresDatabaseList{}
+		if err := r.List(ctx, dbList, client.InNamespace(credentials.Namespace)); err != nil {
+			return err
+		}
+		for _, db := range dbList.Items {
+			if strings.EqualFold(db.Spec.CredentialsRef.Name, credentials.Name) {
+				if err := r.Client.Delete(ctx, &db); err != nil {
+					return err
+				}
+			}
+		}
+		utils.RemoveFinalizer(credentials, PostgresDatabaseProtectionFinalizerName)
+	}
+
 	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name, PostgresSecretProtectionFinalizerName); err != nil {
 		return err
 	}
