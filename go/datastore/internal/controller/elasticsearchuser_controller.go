@@ -276,7 +276,7 @@ func (r *ElasticSearchUserReconciler) handleDelete(ctx context.Context, user *v1
 		ctrl.LoggerFrom(ctx).Error(err, "failed to delete user")
 		return err
 	}
-	if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.Definition.PasswordSecretKeyRef.Name); err != nil {
+	if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.Definition.PasswordSecretKeyRef.Name, ElasticSearchSecretProtectionFinalizerName); err != nil {
 		return err
 	}
 	controllerutil.RemoveFinalizer(user, ElasticSearchUserProtectionFinalizerName)

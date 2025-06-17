@@ -6,6 +6,7 @@ resources:
 - bases/dbs.plural.sh_elasticsearchusers.yaml
 - bases/dbs.plural.sh_elasticsearchindextemplates.yaml
 - bases/dbs.plural.sh_elasticsearchilmpolicies.yaml
+- bases/dbs.plural.sh_postgrescredentials.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:
@@ -14,6 +15,7 @@ patches:
 #- path: patches/webhook_in_elasticsearchcredentials.yaml
 #- path: patches/webhook_in_elasticsearchusers.yaml
 #- path: patches/webhook_in_elasticsearchindextemplates.yaml
+#- path: patches/webhook_in_postgrescredentials.yaml
 #+kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable cert-manager, uncomment all the sections with [CERTMANAGER] prefix.
@@ -21,6 +23,7 @@ patches:
 #- path: patches/cainjection_in_elasticsearchcredentials.yaml
 #- path: patches/cainjection_in_elasticsearchusers.yaml
 #- path: patches/cainjection_in_elasticsearchindextemplates.yaml
+#- path: patches/cainjection_in_postgrescredentials.yaml
 #+kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # [WEBHOOK] To enable webhook, uncomment the following section

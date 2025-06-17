@@ -4,4 +4,5 @@ resources:
 - dbs_v1alpha1_elasticsearchuser.yaml
 - dbs_v1alpha1_elasticsearchindextemplate.yaml
 - dbs_v1alpha1_elasticsearchilmpolicy.yaml
+- dbs_v1alpha1_postgrescredentials.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
