@@ -5822,6 +5822,10 @@ type ServiceTemplate struct {
 	Contexts     []*string            `json:"contexts,omitempty"`
 	Repository   *GitRepository       `json:"repository,omitempty"`
 	Dependencies []*ServiceDependency `json:"dependencies,omitempty"`
+	// a list of sources to source manifests for the created service
+	Sources []*ServiceSource `json:"sources,omitempty"`
+	// a list of renderers to render manifests for the created service
+	Renderers []*Renderer `json:"renderers,omitempty"`
 	// possibly secret configuration for all spawned services, don't query this in list endpoints
 	Configuration []*ServiceConfiguration `json:"configuration,omitempty"`
 	// settings to configure git for a service
@@ -5859,6 +5863,10 @@ type ServiceTemplateAttributes struct {
 	Kustomize *KustomizeAttributes `json:"kustomize,omitempty"`
 	// attributes to configure sync settings for this service
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
+	// a list of sources to source manifests for this service
+	Sources []*ServiceSourceAttributes `json:"sources,omitempty"`
+	// a list of renderers to render manifests for this service
+	Renderers []*RendererAttributes `json:"renderers,omitempty"`
 }
 
 type ServiceUpdateAttributes struct {

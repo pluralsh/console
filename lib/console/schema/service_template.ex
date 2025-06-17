@@ -14,6 +14,9 @@ defmodule Console.Schema.ServiceTemplate do
     field :prev_contexts,     {:array, :string}, virtual: true
     field :inferred_contexts, {:array, :string}, virtual: true
 
+    embeds_many :sources, Service.Source, on_replace: :delete
+    embeds_many :renderers, Service.Renderer, on_replace: :delete
+
     embeds_one :git,         Service.Git,        on_replace: :update
     embeds_one :helm,        Service.Helm,       on_replace: :update
     embeds_one :kustomize,   Service.Kustomize,  on_replace: :update
@@ -72,6 +75,8 @@ defmodule Console.Schema.ServiceTemplate do
     |> cast(attrs, @valid)
     |> cast_embed(:git)
     |> cast_embed(:helm)
+    |> cast_embed(:sources)
+    |> cast_embed(:renderers)
     |> cast_assoc(:dependencies)
     |> foreign_key_constraint(:repository_id)
     |> cast_embed(:kustomize, with: &Service.kustomize_changeset/2)

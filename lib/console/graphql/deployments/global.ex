@@ -47,6 +47,8 @@ defmodule Console.GraphQl.Deployments.Global do
     field :helm,        :helm_config_attributes, description: "settings to configure helm for a service"
     field :kustomize,   :kustomize_attributes, description: "settings for service kustomization"
     field :sync_config, :sync_config_attributes, description: "attributes to configure sync settings for this service"
+    field :sources,     list_of(:service_source_attributes), description: "a list of sources to source manifests for this service"
+    field :renderers,   list_of(:renderer_attributes), description: "a list of renderers to render manifests for this service"
   end
 
   @desc "A spec for targeting clusters"
@@ -135,6 +137,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :repository,   :git_repository, resolve: dataloader(Deployments)
     field :dependencies, list_of(:service_dependency), resolve: dataloader(Deployments)
+
+    field :sources,      list_of(:service_source), description: "a list of sources to source manifests for the created service"
+    field :renderers,    list_of(:renderer), description: "a list of renderers to render manifests for the created service"
 
     field :configuration, list_of(:service_configuration),
       resolve: &Deployments.template_configuration/3,

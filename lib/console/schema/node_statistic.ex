@@ -1,7 +1,7 @@
 defmodule Console.Schema.NodeStatistic do
   use Piazza.Ecto.Schema
 
-  defenum Health, healthy: 0, warning: 1,failed: 2
+  defenum Health, healthy: 0, warning: 1, failed: 2
 
   schema "node_statistics" do
     field :name,         :string
