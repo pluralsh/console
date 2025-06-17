@@ -39,8 +39,6 @@ const (
 	defaultServerEnableReflection = false
 )
 
-const ()
-
 var (
 	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
 	argDatabaseDir            = pflag.String("database-dir", defaultDatabaseDir, "path to the database")

@@ -6,12 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/fergusstrange/embedded-postgres"
+	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
-	_ "github.com/pluralsh/console/go/cloud-query/internal/connection"
 	"github.com/pluralsh/console/go/cloud-query/internal/extension"
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/server"
