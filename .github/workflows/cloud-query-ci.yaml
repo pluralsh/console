@@ -59,7 +59,7 @@ jobs:
         with:
           go-version-file: go/cloud-query/go.mod
           check-latest: true
-      - uses: golangci/golangci-lint-action@v7
+      - uses: golangci/golangci-lint-action@v6
         with:
           # Must be in sync with the golangci-lint version in tools/go.mod
           version: v1.64.5

@@ -16,7 +16,7 @@ build: --download-extensions
 .PHONY: image
 image: ## build the Docker image
 	@echo "Building cloud-query docker image..."
-	docker build -t cloud-query:latest .
+	docker build --no-cache -t cloud-query:latest .
 
 
 # run: Build (if BUILD=true) and run the cloud-query Docker image locally.
