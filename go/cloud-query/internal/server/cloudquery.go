@@ -2,13 +2,12 @@ package server
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/anypb"
-	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
@@ -156,21 +155,12 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string, 
 	}
 
 	for _, row := range rows {
-		result := make(map[string]*anypb.Any)
+		result := make(map[string]*cloudquery.Any)
 		for i, col := range columns {
-			value, err := structpb.NewValue(row[i])
-			if err != nil {
-				klog.V(log.LogLevelVerbose).ErrorS(err, "failed to convert value to structpb", "column", col, "value", row[i])
-				return status.Errorf(codes.Internal, "failed to convert value for column '%s': %v", col, err)
+			result[col] = &cloudquery.Any{
+				Value: fmt.Sprintf("%v", row[i]),
+				Type:  reflect.TypeOf(row[i]).String(),
 			}
-
-			anyVal, err := anypb.New(value)
-			if err != nil {
-				klog.V(log.LogLevelVerbose).ErrorS(err, "failed to convert value to anypb", "column", col, "value", row[i])
-				return status.Errorf(codes.Internal, "failed to convert value for column '%s': %v", col, err)
-			}
-
-			result[col] = anyVal
 		}
 
 		output = &cloudquery.QueryOutput{
@@ -299,19 +289,8 @@ func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "i-0123456789abcdef0",
 	}
 
-	// Create mock results map
-	result := make(map[string]*anypb.Any)
+	ec2Output.Result = make(map[string]*cloudquery.Any)
 
-	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "i-0123456789abcdef0"})
-	result["instance_id"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "t2.micro"})
-	result["instance_type"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
-	result["state"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
-	result["region"] = anyVal
-
-	ec2Output.Result = result
 	ec2Output.Links = []string{"aws_vpc", "aws_subnet"}
 
 	if err := stream.Send(ec2Output); err != nil {
@@ -324,17 +303,7 @@ func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "my-app-logs",
 	}
 
-	// Create mock results map
-	result = make(map[string]*anypb.Any)
-
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "my-app-logs"})
-	result["bucket_name"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2023-05-15"})
-	result["creation_date"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-east-1"})
-	result["region"] = anyVal
-
-	s3Output.Result = result
+	s3Output.Result = make(map[string]*cloudquery.Any)
 
 	return stream.Send(s3Output)
 }
@@ -348,19 +317,8 @@ func handleAzureExtract(input *cloudquery.ExtractInput, stream grpc.ServerStream
 		Id:   "web-server-01",
 	}
 
-	// Create mock results map
-	result := make(map[string]*anypb.Any)
+	vmOutput.Result = make(map[string]*cloudquery.Any)
 
-	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "web-server-01"})
-	result["vm_name"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
-	result["vm_size"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
-	result["status"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "westeurope"})
-	result["location"] = anyVal
-
-	vmOutput.Result = result
 	vmOutput.Links = []string{"azure_disk", "azure_nic"}
 
 	return stream.Send(vmOutput)
@@ -375,19 +333,8 @@ func handleGCPExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "app-server-1",
 	}
 
-	// Create mock results map
-	result := make(map[string]*anypb.Any)
+	instanceOutput.Result = make(map[string]*cloudquery.Any)
 
-	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "app-server-1"})
-	result["instance_name"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-standard-2"})
-	result["machine_type"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "RUNNING"})
-	result["status"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-central1-a"})
-	result["zone"] = anyVal
-
-	instanceOutput.Result = result
 	instanceOutput.Links = []string{"gcp_disk", "gcp_network"}
 
 	return stream.Send(instanceOutput)

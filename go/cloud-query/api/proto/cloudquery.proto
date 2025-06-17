@@ -6,8 +6,6 @@ package cloudquery;
 // Configures where the generated code will be placed.
 option go_package = "internal/proto/cloudquery";
 
-import "google/protobuf/any.proto";
-
 message AwsCredentials {
   string access_key_id = 1;
   string secret_access_key = 2;
@@ -49,7 +47,7 @@ message ExtractInput {
 
 message QueryOutput {
   repeated string columns = 1;
-  map<string, google.protobuf.Any> result = 2;
+  map<string, Any> result = 2;
 }
 
 message SchemaColumn {
@@ -64,9 +62,14 @@ message SchemaOutput {
 
 message ExtractOutput {
   string type = 1;
-  map<string, google.protobuf.Any> result = 2;
+  map<string, Any> result = 2;
   string id = 3;
   repeated string links = 4;
+}
+
+message Any {
+  string type = 1;
+  string value = 2;
 }
 
 service CloudQuery {
