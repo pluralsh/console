@@ -65,10 +65,28 @@ if [ -z "${VERSION}" ]; then
   usage
 fi
 
+# Function to check if plugin is already installed
+check_plugin_installed() {
+  local provider=$1
+
+  if ls "${DEST_DIR}/steampipe_${DB_PROVIDER}_${provider}.so" 1> /dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
 # Function to download and unpack a plugin
 download_plugin() {
   local provider=$1
   local version=$2
+
+  # First check if the plugin is already installed
+  if check_plugin_installed "${provider}"; then
+    echo "Skipping download for ${provider} as it's already installed."
+    return 0
+  fi
+
   local base_url="https://github.com/turbot/steampipe-plugin-${provider}"
   local temp_dir=$(mktemp -d)
   local download_url

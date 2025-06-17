@@ -3,12 +3,15 @@ ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../
 include $(ROOT_DIRECTORY)/go/paths.mk
 include $(TOOLS_MAKEFILE)
 
+DIST_DIR=$(CLOUD_QUERY_DIR)/bin
+BINARY_NAME=cloud-query
+
 ##@ Build and run
 
 .PHONY: build ## build the cloud-query binary
-build:
+build: --download-extensions
 	@echo "Building cloud-query binary..."
-	CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
+	@CGO_ENABLED=0 go build -o "${DIST_DIR}/${BINARY_NAME}" cmd/*.go
 
 .PHONY: image
 image: ## build the Docker image
@@ -88,3 +91,9 @@ show-dependency-updates: ## show possible dependency updates
 update-dependencies: ## update dependencies
 	go get -u ./...
 	go mod tidy
+
+.PHONY: --download-extensions
+--download-extensions: ## INTERNAL: download postgres extensions
+	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.14.1
+	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.8.0
+	@./hack/postgres.sh -p azure -d $(DIST_DIR) -v 1.4.0
