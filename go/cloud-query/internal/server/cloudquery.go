@@ -62,6 +62,8 @@ func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream cloudque
 
 // Schema implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
+	// TODO: implement proper Schema functionality. See Query on how to handle streaming output.
+
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
@@ -85,6 +87,8 @@ func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.S
 
 // Extract implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
+	// TODO: implement proper Extract functionality. See Query on how to handle streaming output.
+
 	// Log the request
 	provider := "unknown"
 	if input.Connection != nil {
