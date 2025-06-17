@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"github.com/samber/lo"
@@ -64,7 +64,7 @@ func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials 
 
 func (c *client) Ping() error {
 	// Connect
-	db, err := sql.Open("postgres", c.connection)
+	db, err := sql.Open("pgx", c.connection)
 	if err != nil {
 		return err
 	}
