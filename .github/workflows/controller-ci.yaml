@@ -62,6 +62,7 @@ jobs:
         with:
           go-version-file: go/controller/go.mod
           check-latest: true
+          cache: 'false'
       - uses: golangci/golangci-lint-action@v8
         with:
           skip-cache: 'true'
