@@ -2,6 +2,8 @@ package pool
 
 import (
 	"fmt"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -52,8 +54,37 @@ func (c *ConnectionPool) cleanupRoutine() {
 	}
 }
 
-func (c *ConnectionPool) setup(name, password string) error {
-	_, err := c.admin.Exec(fmt.Sprintf(`CREATE USER "%s" WITH PASSWORD '%s';`, name, password))
+func (c *ConnectionPool) setup(user, password, schema string) error {
+	tmpl, err := template.New("setup").Parse(`
+		CREATE USER "{{ .User }}" WITH PASSWORD "{{ .Password }}";
+		
+		-- Allow connecting to the database
+		REVOKE CONNECT ON DATABASE "{{ .Database }}" FROM PUBLIC;
+		GRANT  CONNECT ON DATABASE "{{ .Database }}" TO "{{ .User }}";
+
+		-- Allow using the schema
+		REVOKE ALL     ON SCHEMA "{{ .Schema }}" FROM PUBLIC;
+		GRANT  USAGE   ON SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+
+		-- Allow accessing tables
+		REVOKE ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" FROM PUBLIC;
+		GRANT  ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+`)
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	out := new(strings.Builder)
+	if err = tmpl.Execute(out, map[string]string{
+		"User":     user,
+		"Password": password,
+		"Schema":   schema,
+		"Database": "postgres",
+	}); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	_, err = c.admin.Exec(out.String())
 	return err
 }
 
@@ -81,7 +112,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
-		if err = c.setup(connectionName, connectionName); err != nil {
+		if err = c.setup(connectionName, connectionName, connectionName); err != nil {
 			return nil, fmt.Errorf("failed to create user %s: %w", connectionName, err)
 		}
 

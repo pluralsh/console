@@ -48,10 +48,6 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 		CREATE SCHEMA "{{ .ConnectionName }}";
 		COMMENT ON SCHEMA "{{ .ConnectionName }}" IS 'steampipe aws fdw';
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
-		
-		REVOKE ALL     ON SCHEMA "{{ .ConnectionName }}" FROM PUBLIC;
-		GRANT  USAGE   ON SCHEMA "{{ .ConnectionName }}" TO "{{ .ConnectionName }}";
-
 		ALTER USER "{{ .ConnectionName }}" set SEARCH_PATH = '{{ .ConnectionName }}';
     `
 
@@ -62,6 +58,7 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 
 	out := new(strings.Builder)
 	err = tmpl.Execute(out, map[string]string{
+		"DatabaseName":   "postgres",
 		"ConnectionName": connectionName,
 		"AccessKey":      c.AccessKeyId(),
 		"SecretKey":      c.SecretAccessKey(),
