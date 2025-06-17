@@ -3,6 +3,9 @@ fragment NodeStatistic on NodeStatistic {
   name
   pendingPods
   health
+  cluster {
+    id
+  }
   insertedAt
   updatedAt
 }

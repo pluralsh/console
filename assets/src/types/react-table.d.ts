@@ -1,6 +1,7 @@
 import '@tanstack/react-table'
 import { LazyQueryExecFunction } from '@apollo/client'
 import type { OperationVariables } from '@apollo/client/core'
+import { TooltipProps } from '@pluralsh/design-system'
 
 declare module '@tanstack/table-core' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -10,6 +11,7 @@ declare module '@tanstack/table-core' {
     center?: boolean
     highlight?: boolean
     tooltip?: ReactNode
+    tooltipProps?: Omit<TooltipProps, 'label' | 'children'>
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
