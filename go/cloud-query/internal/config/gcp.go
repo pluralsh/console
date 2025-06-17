@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
+	"text/template"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"k8s.io/klog/v2"
 )
 
 type GCPConfiguration struct {
@@ -19,12 +24,31 @@ func (c *GCPConfiguration) ImpersonateAccessToken() string {
 	return os.Getenv("GCP_IMPERSONATE_ACCESS_TOKEN")
 }
 
-func (c *GCPConfiguration) Query() string {
-	return fmt.Sprintf(`
-			SELECT steampipe_configure_gcp('
-				impersonate_access_token=%q
-			');
-		`, c.ImpersonateAccessToken())
+func (c *GCPConfiguration) Query(connectionName string) (string, error) {
+	tmpl, err := template.New("connection").Parse(`
+		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
+		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
+			config '
+				impersonate_access_token="{{ .ImpersonateAccessToken }}"
+		');
+		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
+    `)
+	if err != nil {
+		return "", fmt.Errorf("error parsing template: %w", err)
+	}
+
+	out := new(strings.Builder)
+	err = tmpl.Execute(out, map[string]string{
+		"DatabaseName":           "postgres",
+		"ConnectionName":         connectionName,
+		"ImpersonateAccessToken": c.ImpersonateAccessToken(),
+	})
+	if err != nil {
+		return "", fmt.Errorf("error executing template: %w", err)
+	}
+
+	klog.V(log.LogLevelDebug).InfoS("generated AWS query", "query", out.String())
+	return out.String(), nil
 }
 
 func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {

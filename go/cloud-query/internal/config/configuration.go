@@ -55,12 +55,12 @@ func (c *Configuration) Query(connectionName string) (string, error) {
 		if c.azure == nil {
 			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
-		return c.azure.Query(), nil
+		return c.azure.Query(connectionName)
 	case ProviderGCP:
 		if c.gcp == nil {
 			return "", fmt.Errorf("configuration not set: %s", c.provider)
 		}
-		return c.gcp.Query(), nil
+		return c.gcp.Query(connectionName)
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", c.provider)
 	}
