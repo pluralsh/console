@@ -5,7 +5,6 @@ go 1.24.2
 require (
 	github.com/fergusstrange/embedded-postgres v1.31.0
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/google/uuid v1.6.0
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/samber/lo v1.51.0
 	github.com/spf13/pflag v1.0.6

@@ -159,7 +159,7 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string, 
 		for i, col := range columns {
 			result[col] = &cloudquery.Any{
 				Value: fmt.Sprintf("%v", row[i]),
-				Type:  reflect.TypeOf(row[i]).String(),
+				Type:  reflect.TypeOf(row[i]).String(), // TODO: Move to column?
 			}
 		}
 
