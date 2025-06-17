@@ -29,21 +29,32 @@ func init() {
 }
 
 const (
-	defaultExtensionsDir   = "./bin"
-	defaultDatabaseDir     = "./bin/pg"
-	defaultDatabaseVersion = embeddedpostgres.V15
-	defaultDatabasePort    = 5432
+	defaultExtensionsDir          = "./bin"
+	defaultDatabaseDir            = "./bin/pg"
+	defaultDatabaseVersion        = embeddedpostgres.V15
+	defaultDatabasePort           = 5432
+	defaultDatabaseMaxConnections = 200
+	defaultConnectionTTL          = 15 * time.Minute
 )
 
 const ()
 
 var (
-	argExtensionsDir   = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
-	argDatabaseDir     = pflag.String("database-dir", defaultDatabaseDir, "path to the database")
-	argDatabaseVersion = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
-	argDatabasePort    = pflag.Uint32("database-port", 5432, "port on which the embedded PostgreSQL database will listen")
-	argConnectionTTL   = pflag.Duration("connection-ttl", 15*time.Minute, "default TTL for connections in the pool, connections will be closed after this duration if not used")
+	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
+	argDatabaseDir            = pflag.String("database-dir", defaultDatabaseDir, "path to the database")
+	argDatabaseVersion        = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
+	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
+	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")
+	argConnectionTTL          = pflag.Duration("connection-ttl", defaultConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
 )
+
+func DatabaseMaxConnections() string {
+	if *argDatabaseMaxConnections <= 0 {
+		return fmt.Sprintf("%d", defaultDatabaseMaxConnections)
+	}
+
+	return strconv.Itoa(*argDatabaseMaxConnections)
+}
 
 func ExtensionsDir() string {
 	if len(*argExtensionsDir) == 0 {
@@ -59,6 +70,10 @@ func DatabaseDir() string {
 	}
 
 	return *argDatabaseDir
+}
+
+func DatabaseDataDir() string {
+	return fmt.Sprintf("%s/data", DatabaseDir())
 }
 
 func DatabaseVersion() embeddedpostgres.PostgresVersion {

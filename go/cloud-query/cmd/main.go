@@ -22,9 +22,11 @@ func main() {
 			Port(args.DatabasePort()).
 			BinariesPath(args.DatabaseDir()).
 			RuntimePath(args.DatabaseDir()).
+			CachePath(args.ExtensionsDir()).
+			DataPath(args.DatabaseDataDir()).
 			Version(args.DatabaseVersion()).
-			// TODO: export to args
-			StartParameters(map[string]string{"max_connections": "200"}))
+			Logger(klog.NewStandardLogger("INFO").Writer()).
+			StartParameters(map[string]string{"max_connections": args.DatabaseMaxConnections()}))
 	err := db.Start()
 	if err != nil {
 		klog.Fatalf("failed to start database: %v", err)

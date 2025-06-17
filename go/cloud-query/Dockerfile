@@ -21,24 +21,19 @@ RUN go mod download
 COPY . .
 
 # Build the cloud-query binary
-RUN CGO_ENABLED=1 go build -ldflags '-extldflags=-fno-PIC' -o bin/cloud-query cmd/*.go
+RUN CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
 
-FROM debian:12-slim AS libraries
+FROM golang:1.24.2 AS libraries
 
-# Set TERM environment variable for terminal compatibility
-# with the steampipe SQLite installer script
-ENV TERM=xterm-256color
-
-# Configure versions for Steampipe SQLite extensions
+# Configure versions for Steampipe extensions
 # Do not use latest versions here, as they may not be compatible
-ARG AWS_VERSION=v1.14.1
-ARG AZURE_VERSION=v1.4.0
-ARG GCP_VERSION=v1.8.0
+ARG AWS_VERSION=1.14.1
+ARG AZURE_VERSION=1.4.0
+ARG GCP_VERSION=1.8.0
 
 WORKDIR /workspace
 
-# Download Steampipe SQLite extension installer script
-ADD "https://steampipe.io/install/sqlite.sh" /workspace/sqlite.sh
+COPY . .
 
 # Install dependencies required by the installer script
 RUN apt-get update && \
@@ -47,21 +42,21 @@ RUN apt-get update && \
         curl \
         ca-certificates
 
-# Run SQLite installer script and install
+# Run installer script and install
 # provider extensions for AWS, Azure, and GCP
-RUN chmod +x /workspace/sqlite.sh && \
-    mkdir -p /workspace/lib && \
-    /workspace/sqlite.sh aws ${AWS_VERSION} /workspace/lib/ && \
-    /workspace/sqlite.sh azure ${AZURE_VERSION} /workspace/lib/ && \
-    /workspace/sqlite.sh gcp ${GCP_VERSION} /workspace/lib/
+RUN mkdir -p /workspace/lib && \
+    /workspace/hack/postgres.sh -p aws -v ${AWS_VERSION} -d /workspace/lib/ && \
+    /workspace/hack/postgres.sh -p azure -v ${AZURE_VERSION} -d /workspace/lib/ && \
+    /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/
 
-FROM gcr.io/distroless/cc-debian12:nonroot AS final
+FROM cgr.dev/chainguard/wolfi-base AS final
+
+RUN apk add libstdc++
 
 # Copy cloud-query and steampipe extensions
 COPY --from=builder /workspace/bin/cloud-query /usr/local/bin/cloud-query
-COPY --from=libraries /workspace/lib/ /steampipe/lib/
+COPY --chown=nonroot --from=libraries /workspace/lib/ /steampipe/lib/
 
-# Use nonroot user
-USER 65532:65532
+USER nonroot
 
-ENTRYPOINT ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib"]
+ENTRYPOINT ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib", "--database-dir", "/steampipe/db"]
