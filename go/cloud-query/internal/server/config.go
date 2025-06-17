@@ -3,6 +3,15 @@ package server
 import (
 	"fmt"
 	"time"
+
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
+)
+
+const (
+	defaultMaxConnectionAge      = 2 * time.Hour
+	defaultMaxConnectionAgeGrace = 5 * time.Minute
+	defaultKeepAlive             = 30 * time.Second
+	defaultKeepAliveTimeout      = 10 * time.Second
 )
 
 // Config holds the configuration for the gRPC server
@@ -34,7 +43,7 @@ type Config struct {
 // DefaultConfig returns a Config with sensible default values
 func DefaultConfig() *Config {
 	return &Config{
-		Address:               ":9192",
+		Address:               args.ServerAddress(),
 		MaxConnectionAge:      2 * time.Hour,
 		MaxConnectionAgeGrace: 5 * time.Minute,
 		KeepAlive:             30 * time.Second,
@@ -42,12 +51,27 @@ func DefaultConfig() *Config {
 	}
 }
 
-// Validate checks if the configuration is valid
-func (c *Config) Validate() error {
-	if c.Address == "" {
+// Sanitize validates the configuration and ensures all required fields are set
+func (c *Config) Sanitize() error {
+	if len(c.Address) == 0 {
 		return fmt.Errorf("server address cannot be empty")
 	}
 
-	// Additional validation as needed
+	if c.MaxConnectionAge < 0 {
+		c.MaxConnectionAge = defaultMaxConnectionAge
+	}
+
+	if c.MaxConnectionAgeGrace < 0 {
+		c.MaxConnectionAgeGrace = defaultMaxConnectionAgeGrace
+	}
+
+	if c.KeepAlive < 0 {
+		c.KeepAlive = defaultKeepAlive
+	}
+
+	if c.KeepAliveTimeout < 0 {
+		c.KeepAliveTimeout = defaultKeepAliveTimeout
+	}
+
 	return nil
 }

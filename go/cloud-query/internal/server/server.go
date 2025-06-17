@@ -110,6 +110,10 @@ func New(config *Config, routes ...Route) (*Server, error) {
 		config = DefaultConfig()
 	}
 
+	if err := config.Sanitize(); err != nil {
+		return nil, fmt.Errorf("invalid server configuration: %w", err)
+	}
+
 	return (&Server{
 		config:  config,
 		routes:  routes,
