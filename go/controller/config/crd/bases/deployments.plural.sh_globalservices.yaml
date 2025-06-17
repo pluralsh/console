@@ -492,6 +492,41 @@ spec:
                     description: Whether to protect this service from deletion.  Protected
                       services are also not drained on cluster deletion.
                     type: boolean
+                  renderers:
+                    description: Renderers of this service
+                    items:
+                      properties:
+                        helm:
+                          properties:
+                            release:
+                              description: Release the helm release name to use when
+                                rendering this helm chart
+                              type: string
+                            values:
+                              description: Values a helm values file to use when rendering
+                                this helm chart
+                              type: string
+                            valuesFiles:
+                              description: ValuesFiles a list of relative paths to
+                                values files to use for helm chart templating
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        path:
+                          type: string
+                        type:
+                          enum:
+                          - AUTO
+                          - RAW
+                          - HELM
+                          - KUSTOMIZE
+                          type: string
+                      required:
+                      - path
+                      - type
+                      type: object
+                    type: array
                   repositoryRef:
                     description: ObjectReference contains enough information to let
                       you inspect or modify the referred object.
@@ -536,6 +571,79 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
+                  sources:
+                    description: Sources of this service
+                    items:
+                      properties:
+                        git:
+                          description: Git the location in git to use
+                          properties:
+                            files:
+                              description: Optional files to add to the manifests
+                                for this service
+                              items:
+                                type: string
+                              type: array
+                            folder:
+                              description: Folder ...
+                              type: string
+                            ref:
+                              description: Ref ...
+                              type: string
+                          required:
+                          - folder
+                          - ref
+                          type: object
+                        path:
+                          description: Path the subdirectory this source will live
+                            in the final tarball
+                          type: string
+                        repositoryRef:
+                          description: RepositoryRef the reference of the git repository
+                            to source from
+                          properties:
+                            apiVersion:
+                              description: API version of the referent.
+                              type: string
+                            fieldPath:
+                              description: |-
+                                If referring to a piece of an object instead of an entire object, this string
+                                should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                                For example, if the object reference is to a container within a pod, this would take on a value like:
+                                "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                                the event) or if no container name is specified "spec.containers[2]" (container with
+                                index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                                referencing a part of an object.
+                              type: string
+                            kind:
+                              description: |-
+                                Kind of the referent.
+                                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                              type: string
+                            name:
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              type: string
+                            namespace:
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                              type: string
+                            resourceVersion:
+                              description: |-
+                                Specific resourceVersion to which this reference is made, if any.
+                                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                              type: string
+                            uid:
+                              description: |-
+                                UID of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    type: array
                   syncConfig:
                     description: SyncConfig attributes to configure sync settings
                       for this service

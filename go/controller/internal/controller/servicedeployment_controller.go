@@ -377,9 +377,9 @@ func (r *ServiceReconciler) setSources(ctx context.Context, service *v1alpha1.Se
 			}
 			if source.Git != nil {
 				newSource.Git = &console.GitRefAttributes{
-					Ref:    newSource.Git.Ref,
-					Folder: newSource.Git.Folder,
-					Files:  newSource.Git.Files,
+					Ref:    source.Git.Ref,
+					Folder: source.Git.Folder,
+					Files:  source.Git.Files,
 				}
 			}
 			repositoryID, err := r.getRepository(ctx, source.RepositoryRef)

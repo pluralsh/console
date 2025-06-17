@@ -2891,6 +2891,7 @@ _Appears in:_
 
 _Appears in:_
 - [ServiceSpec](#servicespec)
+- [ServiceTemplate](#servicetemplate)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -3273,6 +3274,8 @@ _Appears in:_
 | `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
 | `configuration` _object (keys:string, values:string)_ | Configuration is a set of non-secret service specific configuration useful for templating |  | Optional: {} <br /> |
+| `sources` _[Source](#source) array_ | Sources of this service |  | Optional: {} <br /> |
+| `renderers` _[Renderer](#renderer) array_ | Renderers of this service |  | Optional: {} <br /> |
 
 
 #### SinkConfiguration
@@ -3319,6 +3322,7 @@ _Appears in:_
 
 _Appears in:_
 - [ServiceSpec](#servicespec)
+- [ServiceTemplate](#servicetemplate)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |

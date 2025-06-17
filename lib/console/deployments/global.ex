@@ -299,6 +299,63 @@ defmodule Console.Deployments.Global do
     end
   end
 
+  @doc """
+  Adds the given global service to all target clusters
+  """
+  @spec sync_clusters(GlobalService.t) :: :ok
+  def sync_clusters(%GlobalService{id: gid} = global) do
+    %{service: svc} = global = Repo.preload(global, [:context, template: :dependencies, service: [:context_bindings, :dependencies]])
+    global = load_configuration(global)
+    bot = bot()
+
+    service_ids = GlobalService.service_ids(gid)
+                  |> Repo.all()
+                  |> MapSet.new()
+
+    Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
+    |> Cluster.target(global)
+    |> Cluster.stream()
+    |> Repo.stream(method: :keyset)
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Stream.map(fn
+      {:ok, res} -> res
+      _ -> nil
+    end)
+    |> Stream.map(fn
+      {:ok, %Service{id: id}} -> id
+      %Service{id: id} -> id
+      {:error, {:already_exists, %Service{id: id}}} -> id
+      _ -> nil
+    end)
+    |> Stream.filter(& &1)
+    |> MapSet.new()
+    |> (fn s -> MapSet.difference(service_ids, s) end).()
+    |> MapSet.to_list()
+    |> maybe_drain(global)
+  end
+
+  @doc """
+  Determines if a given list of service ids should be drained due to a state event
+  """
+  @spec maybe_drain([Service.t]) :: :ok
+  def maybe_drain(service_ids) do
+    Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
+    bot = bot()
+
+    batched(service_ids, fn service_ids ->
+      Service.for_ids(service_ids)
+      |> Repo.all()
+      |> Repo.preload([:owner])
+      |> Enum.each(fn
+        %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
+          Services.delete_service(svc.id, bot)
+        %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
+          Services.detach_service(svc.id, bot)
+        _ -> :ok
+      end)
+    end)
+  end
+
 
   @doc """
   Ensures a managed namespace is synchronized across all target clusters
@@ -390,63 +447,6 @@ defmodule Console.Deployments.Global do
     |> Repo.stream(method: :keyset)
     |> Stream.each(&Services.delete_service(&1.service_id, bot))
     |> Stream.run()
-  end
-
-  @doc """
-  Adds the given global service to all target clusters
-  """
-  @spec sync_clusters(GlobalService.t) :: :ok
-  def sync_clusters(%GlobalService{id: gid} = global) do
-    %{service: svc} = global = Repo.preload(global, [:context, template: :dependencies, service: [:context_bindings, :dependencies]])
-    global = load_configuration(global)
-    bot = bot()
-
-    service_ids = GlobalService.service_ids(gid)
-                  |> Repo.all()
-                  |> MapSet.new()
-
-    Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
-    |> Cluster.target(global)
-    |> Cluster.stream()
-    |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
-    |> Stream.map(fn
-      {:ok, res} -> res
-      _ -> nil
-    end)
-    |> Stream.map(fn
-      {:ok, %Service{id: id}} -> id
-      %Service{id: id} -> id
-      {:error, {:already_exists, %Service{id: id}}} -> id
-      _ -> nil
-    end)
-    |> Stream.filter(& &1)
-    |> MapSet.new()
-    |> (fn s -> MapSet.difference(service_ids, s) end).()
-    |> MapSet.to_list()
-    |> maybe_drain(global)
-  end
-
-  @doc """
-  Determines if a given list of service ids should be drained due to a state event
-  """
-  @spec maybe_drain([Service.t]) :: :ok
-  def maybe_drain(service_ids) do
-    Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
-    bot = bot()
-
-    batched(service_ids, fn service_ids ->
-      Service.for_ids(service_ids)
-      |> Repo.all()
-      |> Repo.preload([:owner])
-      |> Enum.each(fn
-        %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
-          Services.delete_service(svc.id, bot)
-        %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
-          Services.detach_service(svc.id, bot)
-        _ -> :ok
-      end)
-    end)
   end
 
   @doc """
