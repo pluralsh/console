@@ -444,7 +444,7 @@ func (x *ExtractInput) GetConnection() *Connection {
 type QueryOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Columns       []string               `protobuf:"bytes,1,rep,name=columns,proto3" json:"columns,omitempty"`
-	Result        map[string]*Any        `protobuf:"bytes,2,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Result        map[string]string      `protobuf:"bytes,2,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -486,7 +486,7 @@ func (x *QueryOutput) GetColumns() []string {
 	return nil
 }
 
-func (x *QueryOutput) GetResult() map[string]*Any {
+func (x *QueryOutput) GetResult() map[string]string {
 	if x != nil {
 		return x.Result
 	}
@@ -600,7 +600,7 @@ func (x *SchemaOutput) GetColumns() []*SchemaColumn {
 type ExtractOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Result        map[string]*Any        `protobuf:"bytes,2,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Result        map[string]string      `protobuf:"bytes,2,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Id            string                 `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
 	Links         []string               `protobuf:"bytes,4,rep,name=links,proto3" json:"links,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -644,7 +644,7 @@ func (x *ExtractOutput) GetType() string {
 	return ""
 }
 
-func (x *ExtractOutput) GetResult() map[string]*Any {
+func (x *ExtractOutput) GetResult() map[string]string {
 	if x != nil {
 		return x.Result
 	}
@@ -663,58 +663,6 @@ func (x *ExtractOutput) GetLinks() []string {
 		return x.Links
 	}
 	return nil
-}
-
-type Any struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Any) Reset() {
-	*x = Any{}
-	mi := &file_cloudquery_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Any) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Any) ProtoMessage() {}
-
-func (x *Any) ProtoReflect() protoreflect.Message {
-	mi := &file_cloudquery_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Any.ProtoReflect.Descriptor instead.
-func (*Any) Descriptor() ([]byte, []int) {
-	return file_cloudquery_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *Any) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-func (x *Any) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
 }
 
 var File_cloudquery_proto protoreflect.FileDescriptor
@@ -755,30 +703,27 @@ const file_cloudquery_proto_rawDesc = "" +
 	"\fExtractInput\x126\n" +
 	"\n" +
 	"connection\x18\x01 \x01(\v2\x16.cloudquery.ConnectionR\n" +
-	"connection\"\xb0\x01\n" +
+	"connection\"\x9f\x01\n" +
 	"\vQueryOutput\x12\x18\n" +
 	"\acolumns\x18\x01 \x03(\tR\acolumns\x12;\n" +
-	"\x06result\x18\x02 \x03(\v2#.cloudquery.QueryOutput.ResultEntryR\x06result\x1aJ\n" +
+	"\x06result\x18\x02 \x03(\v2#.cloudquery.QueryOutput.ResultEntryR\x06result\x1a9\n" +
 	"\vResultEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12%\n" +
-	"\x05value\x18\x02 \x01(\v2\x0f.cloudquery.AnyR\x05value:\x028\x01\":\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\":\n" +
 	"\fSchemaColumn\x12\x16\n" +
 	"\x06column\x18\x01 \x01(\tR\x06column\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\"X\n" +
 	"\fSchemaOutput\x12\x14\n" +
 	"\x05table\x18\x01 \x01(\tR\x05table\x122\n" +
-	"\acolumns\x18\x02 \x03(\v2\x18.cloudquery.SchemaColumnR\acolumns\"\xd4\x01\n" +
+	"\acolumns\x18\x02 \x03(\v2\x18.cloudquery.SchemaColumnR\acolumns\"\xc3\x01\n" +
 	"\rExtractOutput\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12=\n" +
 	"\x06result\x18\x02 \x03(\v2%.cloudquery.ExtractOutput.ResultEntryR\x06result\x12\x0e\n" +
 	"\x02id\x18\x03 \x01(\tR\x02id\x12\x14\n" +
-	"\x05links\x18\x04 \x03(\tR\x05links\x1aJ\n" +
+	"\x05links\x18\x04 \x03(\tR\x05links\x1a9\n" +
 	"\vResultEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12%\n" +
-	"\x05value\x18\x02 \x01(\v2\x0f.cloudquery.AnyR\x05value:\x028\x01\"/\n" +
-	"\x03Any\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\tR\x04type\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value2\xcf\x01\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xcf\x01\n" +
 	"\n" +
 	"CloudQuery\x12<\n" +
 	"\x05Query\x12\x16.cloudquery.QueryInput\x1a\x17.cloudquery.QueryOutput\"\x000\x01\x12?\n" +
@@ -797,7 +742,7 @@ func file_cloudquery_proto_rawDescGZIP() []byte {
 	return file_cloudquery_proto_rawDescData
 }
 
-var file_cloudquery_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_cloudquery_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_cloudquery_proto_goTypes = []any{
 	(*AwsCredentials)(nil),   // 0: cloudquery.AwsCredentials
 	(*AzureCredentials)(nil), // 1: cloudquery.AzureCredentials
@@ -810,9 +755,8 @@ var file_cloudquery_proto_goTypes = []any{
 	(*SchemaColumn)(nil),     // 8: cloudquery.SchemaColumn
 	(*SchemaOutput)(nil),     // 9: cloudquery.SchemaOutput
 	(*ExtractOutput)(nil),    // 10: cloudquery.ExtractOutput
-	(*Any)(nil),              // 11: cloudquery.Any
-	nil,                      // 12: cloudquery.QueryOutput.ResultEntry
-	nil,                      // 13: cloudquery.ExtractOutput.ResultEntry
+	nil,                      // 11: cloudquery.QueryOutput.ResultEntry
+	nil,                      // 12: cloudquery.ExtractOutput.ResultEntry
 }
 var file_cloudquery_proto_depIdxs = []int32{
 	0,  // 0: cloudquery.Connection.aws:type_name -> cloudquery.AwsCredentials
@@ -821,22 +765,20 @@ var file_cloudquery_proto_depIdxs = []int32{
 	3,  // 3: cloudquery.QueryInput.connection:type_name -> cloudquery.Connection
 	3,  // 4: cloudquery.SchemaInput.connection:type_name -> cloudquery.Connection
 	3,  // 5: cloudquery.ExtractInput.connection:type_name -> cloudquery.Connection
-	12, // 6: cloudquery.QueryOutput.result:type_name -> cloudquery.QueryOutput.ResultEntry
+	11, // 6: cloudquery.QueryOutput.result:type_name -> cloudquery.QueryOutput.ResultEntry
 	8,  // 7: cloudquery.SchemaOutput.columns:type_name -> cloudquery.SchemaColumn
-	13, // 8: cloudquery.ExtractOutput.result:type_name -> cloudquery.ExtractOutput.ResultEntry
-	11, // 9: cloudquery.QueryOutput.ResultEntry.value:type_name -> cloudquery.Any
-	11, // 10: cloudquery.ExtractOutput.ResultEntry.value:type_name -> cloudquery.Any
-	4,  // 11: cloudquery.CloudQuery.Query:input_type -> cloudquery.QueryInput
-	5,  // 12: cloudquery.CloudQuery.Schema:input_type -> cloudquery.SchemaInput
-	6,  // 13: cloudquery.CloudQuery.Extract:input_type -> cloudquery.ExtractInput
-	7,  // 14: cloudquery.CloudQuery.Query:output_type -> cloudquery.QueryOutput
-	9,  // 15: cloudquery.CloudQuery.Schema:output_type -> cloudquery.SchemaOutput
-	10, // 16: cloudquery.CloudQuery.Extract:output_type -> cloudquery.ExtractOutput
-	14, // [14:17] is the sub-list for method output_type
-	11, // [11:14] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	12, // 8: cloudquery.ExtractOutput.result:type_name -> cloudquery.ExtractOutput.ResultEntry
+	4,  // 9: cloudquery.CloudQuery.Query:input_type -> cloudquery.QueryInput
+	5,  // 10: cloudquery.CloudQuery.Schema:input_type -> cloudquery.SchemaInput
+	6,  // 11: cloudquery.CloudQuery.Extract:input_type -> cloudquery.ExtractInput
+	7,  // 12: cloudquery.CloudQuery.Query:output_type -> cloudquery.QueryOutput
+	9,  // 13: cloudquery.CloudQuery.Schema:output_type -> cloudquery.SchemaOutput
+	10, // 14: cloudquery.CloudQuery.Extract:output_type -> cloudquery.ExtractOutput
+	12, // [12:15] is the sub-list for method output_type
+	9,  // [9:12] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_cloudquery_proto_init() }
@@ -856,7 +798,7 @@ func file_cloudquery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_cloudquery_proto_rawDesc), len(file_cloudquery_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

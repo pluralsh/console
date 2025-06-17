@@ -41,7 +41,6 @@ proto: --tool install-protoc ## generate gRPC client and server code
 		--go_out=. \
 		--go-grpc_out=. \
         --proto_path=api/proto \
-        --proto_path=api/third_party \
         api/proto/*.proto
 
 ##@ Test and lint

@@ -1,9 +1,10 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -37,7 +38,7 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 }
 
 // Query implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
+func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream cloudquery.CloudQuery_QueryServer) error {
 	provider, err := in.toProvider(input)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
@@ -138,7 +139,7 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 	}
 }
 
-func (in *CloudQueryService) handleQuery(c connection.Connection, query string, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
+func (in *CloudQueryService) handleQuery(c connection.Connection, query string, stream cloudquery.CloudQuery_QueryServer) error {
 	columns, rows, err := c.Query(query)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to execute query", "query", query)
@@ -155,12 +156,9 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string, 
 	}
 
 	for _, row := range rows {
-		result := make(map[string]*cloudquery.Any)
+		result := make(map[string]string)
 		for i, col := range columns {
-			result[col] = &cloudquery.Any{
-				Value: fmt.Sprintf("%v", row[i]),
-				Type:  reflect.TypeOf(row[i]).String(), // TODO: Move to column.
-			}
+			result[col] = in.formatValue(row[i])
 		}
 
 		output = &cloudquery.QueryOutput{
@@ -176,6 +174,30 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string, 
 	}
 
 	return nil
+}
+
+func (in *CloudQueryService) formatValue(value any) string {
+	switch v := value.(type) {
+	case nil:
+		return ""
+	case string:
+		return v
+	case bool:
+		return fmt.Sprintf("%t", v)
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		return fmt.Sprintf("%v", v)
+	case time.Time:
+		return v.UTC().Format(time.RFC3339Nano)
+	case []byte:
+		return string(v)
+	default:
+		jsonData, err := json.Marshal(v)
+		if err == nil {
+			return string(jsonData)
+		}
+
+		return fmt.Sprintf("%v", v)
+	}
 }
 
 // AWS schema handler
@@ -289,7 +311,7 @@ func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "i-0123456789abcdef0",
 	}
 
-	ec2Output.Result = make(map[string]*cloudquery.Any)
+	ec2Output.Result = make(map[string]string)
 
 	ec2Output.Links = []string{"aws_vpc", "aws_subnet"}
 
@@ -303,7 +325,7 @@ func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "my-app-logs",
 	}
 
-	s3Output.Result = make(map[string]*cloudquery.Any)
+	s3Output.Result = make(map[string]string)
 
 	return stream.Send(s3Output)
 }
@@ -317,7 +339,7 @@ func handleAzureExtract(input *cloudquery.ExtractInput, stream grpc.ServerStream
 		Id:   "web-server-01",
 	}
 
-	vmOutput.Result = make(map[string]*cloudquery.Any)
+	vmOutput.Result = make(map[string]string)
 
 	vmOutput.Links = []string{"azure_disk", "azure_nic"}
 
@@ -333,7 +355,7 @@ func handleGCPExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 		Id:   "app-server-1",
 	}
 
-	instanceOutput.Result = make(map[string]*cloudquery.Any)
+	instanceOutput.Result = make(map[string]string)
 
 	instanceOutput.Links = []string{"gcp_disk", "gcp_network"}
 
