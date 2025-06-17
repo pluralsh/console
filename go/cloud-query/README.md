@@ -1,11 +1,11 @@
 # Cloud Query
 
-Cloud Query is a service part of the Plural Console ecosystem that provides cloud resource querying capabilities. It uses an embedded PostgreSQL database to store and process data about cloud resources.
+Cloud Query is a service part of the Plural Console ecosystem that provides cloud resource querying capabilities. It uses an embedded PostgreSQL database to cache and process data about cloud resources.
 
 ## Features
 
 - Query cloud resources across multiple providers
-- Embedded PostgreSQL database for data storage and retrieval through PostgreSQL FDW
+- Embedded PostgreSQL database for data storage and retrieval through PostgreSQL FDW steampipe extension
 - gRPC API for integration with other services
 - Containerized deployment for easy scaling
 
