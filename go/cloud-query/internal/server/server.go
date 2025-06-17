@@ -29,7 +29,7 @@ func (in *Server) Start(ctx context.Context) error {
 	// Start listening on the configured address
 	lis, err := net.Listen("tcp", in.config.Address)
 	if err != nil {
-		return fmt.Errorf("failed to listen on %s: %v", in.config.Address, err)
+		return fmt.Errorf("failed to listen on %s: %w", in.config.Address, err)
 	}
 
 	klog.InfoS("gRPC server starting", "address", in.config.Address)

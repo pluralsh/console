@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -57,17 +56,6 @@ func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream grpc.Ser
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to connect to provider", "provider", provider)
 		return status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
 	}
-
-	//q, err := configuration.Query()
-	//if err != nil {
-	//	return fmt.Errorf("failed to get config query for provider %s: %w", configuration.Provider(), err)
-	//}
-	//
-	//_, err = c.Exec(q)
-	//if err != nil {
-	//	return fmt.Errorf("failed to configure provider %s: %w", configuration.Provider(), err)
-	//}
-	//klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", configuration.Provider())
 
 	return in.handleQuery(c, input.GetQuery(), stream)
 }
@@ -200,130 +188,6 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string, 
 	return nil
 }
 
-// Azure query handler
-func handleAzureQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	if strings.Contains(strings.ToLower(input.GetQuery()), "vm") {
-		// Azure VMs mock data
-		output := &cloudquery.QueryOutput{
-			Columns: []string{"vm_name", "vm_size", "status", "location"},
-		}
-
-		// Create mock results map
-		result := make(map[string]*anypb.Any)
-
-		// First row
-		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "web-server-01"})
-		result["vm_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_D2s_v3"})
-		result["vm_size"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "running"})
-		result["status"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "westeurope"})
-		result["location"] = anyVal
-
-		output.Result = result
-		if err := stream.Send(output); err != nil {
-			return err
-		}
-
-		// Second row with different data
-		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "db-server-01"})
-		result["vm_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "Standard_E4s_v3"})
-		result["vm_size"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "stopped"})
-		result["status"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "eastus"})
-		result["location"] = anyVal
-
-		output = &cloudquery.QueryOutput{
-			Columns: []string{"vm_name", "vm_size", "status", "location"},
-			Result:  result,
-		}
-
-		return stream.Send(output)
-	}
-
-	// Generic Azure response
-	return sendGenericQueryResult(stream, "azure_resource")
-}
-
-// GCP query handler
-func handleGCPQuery(input *cloudquery.QueryInput, stream grpc.ServerStreamingServer[cloudquery.QueryOutput]) error {
-	if strings.Contains(strings.ToLower(input.GetQuery()), "instance") {
-		// GCP instances mock data
-		output := &cloudquery.QueryOutput{
-			Columns: []string{"instance_name", "machine_type", "status", "zone"},
-		}
-
-		// Create mock results map
-		result := make(map[string]*anypb.Any)
-
-		// First row
-		anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "app-server-1"})
-		result["instance_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-standard-2"})
-		result["machine_type"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "RUNNING"})
-		result["status"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "us-central1-a"})
-		result["zone"] = anyVal
-
-		output.Result = result
-		if err := stream.Send(output); err != nil {
-			return err
-		}
-
-		// Second row with different data
-		result = make(map[string]*anypb.Any)
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "batch-processor"})
-		result["instance_name"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "e2-highmem-4"})
-		result["machine_type"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "TERMINATED"})
-		result["status"] = anyVal
-		anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "europe-west4-c"})
-		result["zone"] = anyVal
-
-		output = &cloudquery.QueryOutput{
-			Columns: []string{"instance_name", "machine_type", "status", "zone"},
-			Result:  result,
-		}
-
-		return stream.Send(output)
-	}
-
-	// Generic GCP response
-	return sendGenericQueryResult(stream, "gcp_resource")
-}
-
-// Helper function to send a generic query result
-func sendGenericQueryResult(stream grpc.ServerStreamingServer[cloudquery.QueryOutput], resourcePrefix string) error {
-	output := &cloudquery.QueryOutput{
-		Columns: []string{"id", "name", "type", "created_at"},
-	}
-
-	// Create mock results map
-	result := make(map[string]*anypb.Any)
-
-	// Generate a unique ID
-	resourceID := fmt.Sprintf("%s-%s", resourcePrefix, uuid.New().String()[:8])
-
-	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: resourceID})
-	result["id"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock %s", resourceID)})
-	result["name"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "mock-resource"})
-	result["type"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
-	result["created_at"] = anyVal
-
-	output.Result = result
-
-	return stream.Send(output)
-}
-
 // AWS schema handler
 func handleAWSSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
 	// AWS EC2 instances table schema
@@ -424,23 +288,6 @@ func handleGCPSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingS
 	}
 
 	return stream.Send(storageSchema)
-}
-
-// Default schema handler
-func handleDefaultSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
-	// Generic resources table schema
-	genericSchema := &cloudquery.SchemaOutput{
-		Table: "generic_resources",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "id", Type: "string"},
-			{Column: "name", Type: "string"},
-			{Column: "type", Type: "string"},
-			{Column: "created_at", Type: "timestamp"},
-			{Column: "updated_at", Type: "timestamp"},
-		},
-	}
-
-	return stream.Send(genericSchema)
 }
 
 // AWS extract handler
@@ -544,29 +391,4 @@ func handleGCPExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamin
 	instanceOutput.Links = []string{"gcp_disk", "gcp_network"}
 
 	return stream.Send(instanceOutput)
-}
-
-// Default extract handler
-func handleDefaultExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
-	// Generic resource extraction
-	genericOutput := &cloudquery.ExtractOutput{
-		Type: "generic_resource",
-		Id:   uuid.New().String(),
-	}
-
-	// Create mock results map
-	result := make(map[string]*anypb.Any)
-
-	anyVal, _ := anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: genericOutput.Id})
-	result["id"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: fmt.Sprintf("Mock Resource %s", genericOutput.Id[:8])})
-	result["name"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "mock-resource"})
-	result["type"] = anyVal
-	anyVal, _ = anypb.New(&cloudquery.ExtractOutput{Type: "string", Id: "2025-06-12T00:00:00Z"})
-	result["created_at"] = anyVal
-
-	genericOutput.Result = result
-
-	return stream.Send(genericOutput)
 }

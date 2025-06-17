@@ -24,8 +24,8 @@ var (
 		"steampipe_postgres_aws.so":       libPath,
 		"steampipe_postgres_aws.control":  extensionsPath,
 		"steampipe_postgres_aws--1.0.sql": extensionsPath,
-		//"steampipe_postgres_azure.so":     libPath,
-		//"steampipe_postgres_gcp.so":       libPath,
+		// "steampipe_postgres_azure.so":     libPath,
+		// "steampipe_postgres_gcp.so":       libPath,
 	}
 )
 

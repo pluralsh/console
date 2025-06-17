@@ -35,7 +35,7 @@ jobs:
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make build
   test:
-    name: Test
+    name: Unit test
     runs-on: ubuntu-latest
     defaults:
       run:
