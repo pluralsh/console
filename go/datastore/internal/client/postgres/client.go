@@ -107,11 +107,11 @@ func (c *client) DeleteDatabase(dbName string) error {
 	}
 
 	// Terminate existing connections to the database
-	_, err = db.Exec(fmt.Sprintf(`
+	_, err = db.Exec(`
 		SELECT pg_terminate_backend(pid)
 		FROM pg_stat_activity
 		WHERE datname = $1 AND pid <> pg_backend_pid();
-	`), dbName)
+	`, dbName)
 	if err != nil {
 		return fmt.Errorf("failed to terminate connections to %q: %w", dbName, err)
 	}
