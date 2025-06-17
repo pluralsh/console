@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
