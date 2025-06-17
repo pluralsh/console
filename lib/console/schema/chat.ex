@@ -7,7 +7,7 @@ defmodule Console.Schema.Chat do
   @type history :: [msg]
 
   defenum Role, user: 0, assistant: 1, system: 2
-  defenum Type, text: 0, file: 1, tool: 2
+  defenum Type, text: 0, file: 1, tool: 2, error: 3
 
   schema "chats" do
     field :type,         Type, default: :text

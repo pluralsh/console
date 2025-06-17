@@ -1039,6 +1039,7 @@ export type ChatTool = {
 };
 
 export enum ChatType {
+  Error = 'ERROR',
   File = 'FILE',
   Text = 'TEXT',
   Tool = 'TOOL'

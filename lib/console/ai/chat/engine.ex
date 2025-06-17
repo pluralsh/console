@@ -129,6 +129,12 @@ defmodule Console.AI.Chat.Engine do
             false ->
               completion(messages, thread, user, completion, level + 1)
           end
+        else
+          {:error, err, acc} when is_list(acc) ->
+            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :assistant}])
+            |> Enum.map(&Chat.attributes/1)
+            |> ChatSvc.save_messages(thread_id, user)
+          err -> err
         end
       err -> err
     end
@@ -150,10 +156,10 @@ defmodule Console.AI.Chat.Engine do
         Stream.offset(1)
         {:cont, [tool_msg(content, id, nil, name, args) | acc]}
       else
-        :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found"}}
+        :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:halt, {:error, "failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}"}}
-        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}}
+          {:halt, {:error, "failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", Enum.reverse(acc)}}
+        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
       end
     end)
     |> tool_results()
