@@ -23,7 +23,7 @@ func main() {
 			Port(args.DatabasePort()).
 			BinariesPath(args.DatabaseDir()).
 			RuntimePath(args.DatabaseDir()).
-			CachePath(args.ExtensionsDir()).
+			CachePath(args.DatabaseExtensionsDir()).
 			DataPath(args.DatabaseDataDir()).
 			Version(args.DatabaseVersion()).
 			Logger(klog.NewStandardLogger("INFO").Writer()).
@@ -52,7 +52,11 @@ func main() {
 		klog.Fatalf("failed to create connection pool: %v", err)
 	}
 
-	s, err := server.New(nil, server.NewCloudQueryServer(p))
+	s, err := server.New(&server.Config{
+		Address:     args.ServerAddress(),
+		TLSCertPath: args.ServerTLSCertPath(),
+		TLSKeyPath:  args.ServerTLSKeyPath(),
+	}, server.NewCloudQueryServer(p))
 	if err != nil {
 		klog.Fatalf("failed to create server: %v", err)
 	}

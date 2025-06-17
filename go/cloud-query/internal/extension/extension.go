@@ -31,7 +31,7 @@ var (
 
 func prepare() error {
 	for file, destination := range fileDestinations {
-		if err := common.CopyFile(filepath.Join(args.ExtensionsDir(), file), filepath.Join(destination, file)); err != nil {
+		if err := common.CopyFile(filepath.Join(args.DatabaseExtensionsDir(), file), filepath.Join(destination, file)); err != nil {
 			return err
 		}
 	}

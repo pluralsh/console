@@ -35,6 +35,7 @@ const (
 	defaultDatabasePort           = 5432
 	defaultDatabaseMaxConnections = 200
 	defaultConnectionTTL          = 15 * time.Minute
+	defaultServerAddress          = ":9192"
 )
 
 const ()
@@ -46,7 +47,34 @@ var (
 	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
 	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")
 	argConnectionTTL          = pflag.Duration("connection-ttl", defaultConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
+	argServerAddress          = pflag.String("server-address", "", "address on which the gRPC server will listen, leave empty to use the default (:9192)")
+	argServerTLSCertPath      = pflag.String("server-tls-cert", "", "path to the TLS certificate file for the gRPC server")
+	argServerTLSKeyPath       = pflag.String("server-tls-key", "", "path to the TLS key file for the gRPC server")
 )
+
+func ServerAddress() string {
+	if len(*argServerAddress) == 0 {
+		return defaultServerAddress
+	}
+
+	return *argServerAddress
+}
+
+func ServerTLSCertPath() string {
+	if len(*argServerTLSCertPath) == 0 {
+		return ""
+	}
+
+	return *argServerTLSCertPath
+}
+
+func ServerTLSKeyPath() string {
+	if len(*argServerTLSKeyPath) == 0 {
+		return ""
+	}
+
+	return *argServerTLSKeyPath
+}
 
 func DatabaseMaxConnections() string {
 	if *argDatabaseMaxConnections <= 0 {
@@ -56,7 +84,7 @@ func DatabaseMaxConnections() string {
 	return strconv.Itoa(*argDatabaseMaxConnections)
 }
 
-func ExtensionsDir() string {
+func DatabaseExtensionsDir() string {
 	if len(*argExtensionsDir) == 0 {
 		return defaultExtensionsDir
 	}
