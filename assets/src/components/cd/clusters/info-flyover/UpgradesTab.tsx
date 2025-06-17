@@ -17,10 +17,10 @@ import {
 import { Row } from '@tanstack/react-table'
 import {
   ClusterDistro,
+  ClusterOverviewDetailsFragment,
   ClusterUpgradePlanFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
-  useClusterUpgradeQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useMemo, useRef, useState } from 'react'
@@ -28,10 +28,9 @@ import styled, { useTheme } from 'styled-components'
 
 import { GqlError } from '../../../utils/Alert.tsx'
 
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { produce } from 'immer'
+import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
 import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
-import LoadingIndicator from '../../../utils/LoadingIndicator.tsx'
 import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
 import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 import {
@@ -41,12 +40,11 @@ import {
 } from '../clusterUpgradeColumns.tsx'
 import { deprecationsColumns } from '../deprecationsColumns.tsx'
 import CloudAddons from '../runtime/CloudAddons.tsx'
-import RuntimeServices from '../runtime/RuntimeServices.tsx'
+import { RuntimeServices } from '../runtime/RuntimeServices.tsx'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
 } from '../UpgradeInsights.tsx'
-import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
 
 enum DeprecationType {
   GitOps = 'gitOps',
@@ -86,13 +84,11 @@ const statesWithIssues = [
 ]
 
 export function UpgradesTab({
-  clusterId,
-  kubeVersion,
+  cluster,
   refetch,
   initialOpen,
 }: {
-  clusterId: string
-  kubeVersion: string
+  cluster: ClusterOverviewDetailsFragment
   refetch: Nullable<() => void>
   initialOpen?: UpgradeAccordionName | undefined
 }) {
@@ -103,18 +99,6 @@ export function UpgradesTab({
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
-
-  const { data, error } = useClusterUpgradeQuery({
-    variables: {
-      kubeVersion,
-      hasKubeVersion: true,
-      id: clusterId,
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
-  const cluster = data?.cluster
 
   const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
@@ -146,16 +130,6 @@ export function UpgradesTab({
     }
   }
 
-  if (error)
-    return (
-      <GqlError
-        header="Failed to fetch cluster upgrade plan"
-        error={error}
-      />
-    )
-
-  if (!cluster) return <LoadingIndicator />
-
   return (
     <div
       css={{
@@ -173,9 +147,7 @@ export function UpgradesTab({
       <Table
         data={[cluster]}
         columns={clusterUpgradeColumns}
-        reactTableOptions={{
-          meta: { refetch, setError, data },
-        }}
+        reactTableOptions={{ meta: { refetch, setError } }}
       />
       <div css={{ ...theme.partials.text.body1Bold }}>
         Upgrade blockers ({numUpgradeBlockers})
@@ -384,7 +356,7 @@ export function UpgradesTab({
               {!isEmpty(runtimeServices) ? (
                 <RuntimeServices
                   flush
-                  data={data}
+                  cluster={cluster}
                 />
               ) : (
                 <EmptyState description="No known add-ons found" />
@@ -396,7 +368,7 @@ export function UpgradesTab({
               {!isEmpty(cloudAddons) ? (
                 <CloudAddons
                   flush
-                  data={data}
+                  cluster={cluster}
                 />
               ) : (
                 <EmptyState description="No known cloud add-ons found" />

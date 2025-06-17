@@ -1,3 +1,53 @@
+fragment NodeStatistic on NodeStatistic {
+  id
+  name
+  pendingPods
+  health
+  insertedAt
+  updatedAt
+}
+
+fragment ClusterUpgradeDeprecatedCustomResource on DeprecatedCustomResource {
+  name
+  group
+  kind
+  namespace
+  version
+  nextVersion
+}
+
+fragment ClusterUpgrade on Cluster {
+  ...ClusterRuntimeServices
+  prAutomations {
+    id
+  }
+  deprecatedCustomResources {
+    ...ClusterUpgradeDeprecatedCustomResource
+  }
+}
+
+fragment ClusterOverviewDetails on Cluster {
+  ...ClustersRow
+  ...ClusterUpgrade
+  ...ClusterInsight
+  nodeStatistics {
+    ...NodeStatistic
+  }
+  noisyNeighbors {
+    ...UtilizationHeatMap
+  }
+}
+
+query ClusterOverviewDetails(
+  $id: ID!
+  $kubeVersion: String!
+  $hasKubeVersion: Boolean!
+) {
+  cluster(id: $id) {
+    ...ClusterOverviewDetails
+  }
+}
+
 query UpgradeStatistics($projectId: ID, $tag: TagInput) {
   upgradeStatistics(projectId: $projectId, tag: $tag) {
     upgradeable

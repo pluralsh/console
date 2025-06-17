@@ -4,21 +4,25 @@ import { ClusterUtilizationHeatmaps } from 'components/cd/cluster/ClusterMetrics
 import { getClusterDistroName } from 'components/utils/ClusterDistro'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { TooltipTime } from 'components/utils/TooltipTime'
-import { ClustersRowFragment } from 'generated/graphql.ts'
+import {
+  ClusterOverviewDetailsFragment,
+  NodeStatisticHealth,
+} from 'generated/graphql.ts'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { ClusterHealth, healthScoreToSeverity } from '../../ClusterHealthChip'
-import { OverviewTabCard } from './OverviewTabCard'
 import { getClusterUpgradeInfo } from '../../ClusterUpgradeButton'
 import { ClusterInfoFlyoverTab } from '../ClusterInfoFlyover'
 import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
+import { OverviewTabCard } from './OverviewTabCard'
+import { isEmpty } from 'lodash'
 
 export function OverviewTab({
   cluster,
   setTab,
   setUpgradesInitialOpen,
 }: {
-  cluster: ClustersRowFragment
+  cluster: ClusterOverviewDetailsFragment
   setTab: (tab: ClusterInfoFlyoverTab) => void
   setUpgradesInitialOpen: (open: UpgradeAccordionName) => void
 }) {
@@ -36,12 +40,18 @@ export function OverviewTab({
           entries={[
             {
               label: 'Configuration issues',
-              status: 'warning',
+              status: cluster.nodeStatistics?.some(
+                (node) => node?.health !== NodeStatisticHealth.Healthy
+              )
+                ? 'warning'
+                : 'success',
               onClick: () => setTab(ClusterInfoFlyoverTab.HealthScore),
             },
             {
               label: 'Infrastructure issues',
-              status: 'warning',
+              status: isEmpty(cluster.insightComponents)
+                ? 'success'
+                : 'warning',
               onClick: () => setTab(ClusterInfoFlyoverTab.HealthScore),
             },
           ]}
@@ -97,7 +107,11 @@ export function OverviewTab({
   )
 }
 
-function MetadataCard({ cluster }: { cluster: ClustersRowFragment }) {
+function MetadataCard({
+  cluster,
+}: {
+  cluster: ClusterOverviewDetailsFragment
+}) {
   return (
     <MetadataCardSC>
       <MetadataPropSC heading="Current K8s version">

@@ -6,7 +6,10 @@ import {
   GitPullIcon,
   KubernetesIcon,
 } from '@pluralsh/design-system'
-import { ClustersRowFragment } from 'generated/graphql'
+import {
+  ClustersRowFragment,
+  useClusterOverviewDetailsQuery,
+} from 'generated/graphql'
 
 import ButtonGroup from 'components/utils/ButtonGroup.tsx'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro.tsx'
@@ -19,6 +22,9 @@ import { getClusterKubeVersion } from '../runtime/RuntimeServices.tsx'
 import { HealthScoreTab } from './HealthScoreTab.tsx'
 import { OverviewTab } from './overview/OverviewTab.tsx'
 import { UpgradeAccordionName, UpgradesTab } from './UpgradesTab.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 
 const MIN_WIDTH = 920
 
@@ -90,7 +96,7 @@ export function ClusterInfoFlyover({
     >
       <ClusterInfoFlyoverContent
         initialTab={initialTab}
-        cluster={cluster}
+        clusterBasic={cluster}
         refetch={refetch}
       />
     </Flyover>
@@ -99,20 +105,33 @@ export function ClusterInfoFlyover({
 
 function ClusterInfoFlyoverContent({
   initialTab,
-  cluster,
+  clusterBasic,
   refetch,
 }: {
   initialTab: ClusterInfoFlyoverTab
-  cluster: Nullable<ClustersRowFragment>
+  clusterBasic: Nullable<ClustersRowFragment>
   refetch: Nullable<() => void>
 }) {
   const [tab, setTab] = useState(initialTab)
   const [upgradesInitialOpen, setUpgradesInitialOpen] =
     useState<UpgradeAccordionName>()
+  const kubeVersion = getClusterKubeVersion(clusterBasic)
 
-  if (!cluster) return null
+  const { data, loading, error } = useClusterOverviewDetailsQuery({
+    variables: {
+      kubeVersion,
+      hasKubeVersion: true,
+      id: clusterBasic?.id ?? '',
+    },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
-  const kubeVersion = getClusterKubeVersion(cluster)
+  const cluster = data?.cluster
+
+  if (!cluster) return loading ? <LoadingIndicator /> : null
+  if (error) return <GqlError error={error} />
+
   const { chipLabel } = getClusterUpgradeInfo(cluster)
 
   return (
@@ -143,8 +162,7 @@ function ClusterInfoFlyoverContent({
         )}
         {tab === ClusterInfoFlyoverTab.Upgrades && (
           <UpgradesTab
-            clusterId={cluster?.id ?? ''}
-            kubeVersion={kubeVersion}
+            cluster={cluster}
             refetch={refetch}
             initialOpen={upgradesInitialOpen}
           />
