@@ -54,30 +54,35 @@ func (c *ConnectionPool) cleanupRoutine() {
 	}
 }
 
-func (c *ConnectionPool) setup(user, password, schema string) error {
+func (c *ConnectionPool) setup(user, password, schema, provider string) error {
 	tmpl, err := template.New("setup").Parse(`
 		-- Create the schema
 		DROP SCHEMA IF EXISTS "{{ .Schema }}" CASCADE;
 		CREATE SCHEMA "{{ .Schema }}";
 		COMMENT ON SCHEMA "{{ .Schema }}" IS 'steampipe aws fdw';
-
+		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA "{{ .Schema }}";
+		
 		-- Create the user
-		CREATE USER "{{ .User }}" WITH PASSWORD "{{ .Password }}";
+		CREATE USER "{{ .User }}" WITH PASSWORD '{{ .Password }}';
 		ALTER USER "{{ .User }}" WITH NOSUPERUSER;
-		ALTER USER "{{ .User }}" set SEARCH_PATH = '{{ .Schema }}';
+		ALTER USER "{{ .User }}" SET SEARCH_PATH = "{{ .Schema }}";
 		
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE "{{ .Database }}" FROM PUBLIC;
 		GRANT  CONNECT ON DATABASE "{{ .Database }}" TO "{{ .User }}";
-
+		
 		-- Allow using the schema
-		REVOKE ALL     ON SCHEMA "{{ .Schema }}" FROM PUBLIC;
-		GRANT  USAGE   ON SCHEMA "{{ .Schema }}" TO "{{ .User }}";
-
+		REVOKE ALL ON SCHEMA "{{ .Schema }}" FROM PUBLIC;
+		GRANT  ALL ON SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+		
 		-- Allow accessing tables
 		REVOKE ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" FROM PUBLIC;
 		GRANT  ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+		
+		-- Grant usage on foreign data wrapper and servers
+		GRANT USAGE ON FOREIGN DATA WRAPPER steampipe_postgres_{{ .Provider }} TO "{{ .User }}";
 `)
+	// failed to connect to provider 'aws': failed to configure provider aws: pq: type "ltree" does not exist
 	if err != nil {
 		return fmt.Errorf("error parsing template: %w", err)
 	}
@@ -88,6 +93,7 @@ func (c *ConnectionPool) setup(user, password, schema string) error {
 		"Password": password,
 		"Schema":   schema,
 		"Database": "postgres",
+		"Provider": provider,
 	}); err != nil {
 		return fmt.Errorf("error executing template: %w", err)
 	}
@@ -142,7 +148,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
-		if err = c.setup(connectionName, connectionName, connectionName); err != nil {
+		if err = c.setup(connectionName, connectionName, connectionName, string(config.Provider())); err != nil {
 			return nil, fmt.Errorf("failed to create user %s: %w", connectionName, err)
 		}
 

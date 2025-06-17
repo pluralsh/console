@@ -12,8 +12,6 @@ const (
 	registerQuery = `
 		DROP EXTENSION IF EXISTS steampipe_postgres_aws CASCADE;
 		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_aws;
-
-		CREATE EXTENSION IF NOT EXISTS ltree;
 `
 )
 
