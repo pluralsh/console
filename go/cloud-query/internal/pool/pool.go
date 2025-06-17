@@ -57,6 +57,7 @@ func (c *ConnectionPool) cleanupRoutine() {
 func (c *ConnectionPool) setup(user, password, schema string) error {
 	tmpl, err := template.New("setup").Parse(`
 		CREATE USER "{{ .User }}" WITH PASSWORD "{{ .Password }}";
+		ALTER USER "{{ .User }}" WITH NOSUPERUSER;
 		
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE "{{ .Database }}" FROM PUBLIC;
