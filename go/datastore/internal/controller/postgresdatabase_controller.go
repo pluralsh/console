@@ -2,19 +2,30 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
+	"github.com/pluralsh/console/go/datastore/internal/utils"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+)
 
-	dbsv1alpha1 "github.com/pluralsh/console/go/datastore/api/v1alpha1"
+const (
+	PostgresDatabaseProtectionFinalizerName = "projects.deployments.plural.sh/postgres-database-protection"
 )
 
 // PostgresDatabaseReconciler reconciles a PostgresDatabase object
 type PostgresDatabaseReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme         *runtime.Scheme
+	PostgresClient postgres.Client
 }
 
 //+kubebuilder:rbac:groups=dbs.plural.sh,resources=postgresdatabases,verbs=get;list;watch;create;update;patch;delete
@@ -23,24 +34,97 @@ type PostgresDatabaseReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the PostgresDatabase object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+	logger := ctrl.LoggerFrom(ctx)
 
-	// TODO(user): your logic here
+	db := new(v1alpha1.PostgresDatabase)
+	if err := r.Get(ctx, req.NamespacedName, db); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	utils.MarkCondition(db.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
+	scope, err := NewDefaultScope(ctx, r.Client, db)
+	if err != nil {
+		logger.V(5).Info(err.Error())
+		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Always patch object when exiting this function, so we can persist any object changes.
+	defer func() {
+		if err := scope.PatchObject(); err != nil && retErr == nil {
+			retErr = err
+		}
+	}()
+
+	credentials := new(v1alpha1.PostgresCredentials)
+	if err := r.Get(ctx, types.NamespacedName{Name: db.Spec.CredentialsRef.Name, Namespace: db.Namespace}, credentials); err != nil {
+		logger.V(5).Info(err.Error())
+		return handleRequeue(nil, err, db.SetCondition)
+	}
+
+	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
+		err := fmt.Errorf("unauthorized or unhealthy Postgres")
+		logger.V(5).Info(err.Error())
+		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
+	}
+
+	if err = r.PostgresClient.Init(ctx, r.Client, credentials); err != nil {
+		logger.Error(err, "failed to create Postgres client")
+		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if err := r.addOrRemoveFinalizer(ctx, db, credentials); err != nil {
+		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	if !db.DeletionTimestamp.IsZero() {
+		if err = r.handleDelete(db); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
+	utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(db.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *PostgresDatabaseReconciler) addOrRemoveFinalizer(ctx context.Context, database *v1alpha1.PostgresDatabase, credentials *v1alpha1.PostgresCredentials) error {
+	if database.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(database, PostgresDatabaseProtectionFinalizerName) {
+		controllerutil.AddFinalizer(database, PostgresDatabaseProtectionFinalizerName)
+		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, PostgresDatabaseProtectionFinalizerName); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *PostgresDatabaseReconciler) handleDelete(database *v1alpha1.PostgresDatabase) error {
+	if err := r.PostgresClient.DeleteDatabase(database.DatabaseName()); err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
+	}
+
+	controllerutil.RemoveFinalizer(database, PostgresDatabaseProtectionFinalizerName)
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PostgresDatabaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dbsv1alpha1.PostgresDatabase{}).
+		For(&v1alpha1.PostgresDatabase{}).
 		Complete(r)
+}
+
+func (r *PostgresDatabaseReconciler) deleteDatabase(ctx context.Context, name string) error {
+
+	return nil
 }

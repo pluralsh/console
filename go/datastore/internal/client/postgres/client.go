@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"net/url"
 	"strings"
@@ -25,6 +27,8 @@ type client struct {
 type Client interface {
 	Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.PostgresCredentials) error
 	Ping() error
+	DeleteDatabase(dbName string) error
+	UpsertDatabase(dbName string) error
 }
 
 func New() Client {
@@ -79,5 +83,70 @@ func (c *client) Ping() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *client) DeleteDatabase(dbName string) error {
+	var exists bool
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return err
+	}
+	// Check if database exists
+	query := `SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1);`
+	if err := db.QueryRow(query, dbName).Scan(&exists); err != nil {
+		return fmt.Errorf("failed to check if database exists: %w", err)
+	}
+
+	if !exists {
+		// Return a Kubernetes-style NotFound error
+		return k8serrors.NewNotFound(
+			schema.GroupResource{Group: "database", Resource: "PostgreSQLDatabase"},
+			dbName,
+		)
+	}
+
+	// Terminate existing connections to the database
+	_, err = db.Exec(fmt.Sprintf(`
+		SELECT pg_terminate_backend(pid)
+		FROM pg_stat_activity
+		WHERE datname = $1 AND pid <> pg_backend_pid();
+	`), dbName)
+	if err != nil {
+		return fmt.Errorf("failed to terminate connections to %q: %w", dbName, err)
+	}
+
+	// Drop the database
+	_, err = db.Exec(fmt.Sprintf(`DROP DATABASE "%s"`, dbName))
+	if err != nil {
+		return fmt.Errorf("failed to drop database %q: %w", dbName, err)
+	}
+
+	return nil
+}
+
+func (c *client) UpsertDatabase(dbName string) error {
+	var exists bool
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return err
+	}
+
+	query := `SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1);`
+	err = db.QueryRow(query, dbName).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("checking database existence: %w", err)
+	}
+
+	if exists {
+		return nil
+	}
+
+	// Create the database
+	_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE "%s"`, dbName))
+	if err != nil {
+		return fmt.Errorf("creating database: %w", err)
+	}
+
 	return nil
 }
