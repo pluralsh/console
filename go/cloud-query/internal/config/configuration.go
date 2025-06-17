@@ -28,7 +28,6 @@ func (c *Configuration) MarshalJSON() ([]byte, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal provider %s configuration: %w", c.provider, err)
-
 	}
 
 	parentMap := map[string]any{
