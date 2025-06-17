@@ -12,6 +12,7 @@ rules:
   - elasticsearchindextemplates
   - elasticsearchusers
   - postgrescredentials
+  - postgresdatabases
   verbs:
   - create
   - delete
@@ -28,6 +29,7 @@ rules:
   - elasticsearchindextemplates/finalizers
   - elasticsearchusers/finalizers
   - postgrescredentials/finalizers
+  - postgresdatabases/finalizers
   verbs:
   - update
 - apiGroups:
@@ -38,6 +40,7 @@ rules:
   - elasticsearchindextemplates/status
   - elasticsearchusers/status
   - postgrescredentials/status
+  - postgresdatabases/status
   verbs:
   - get
   - patch

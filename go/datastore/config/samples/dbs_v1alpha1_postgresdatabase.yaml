@@ -1,0 +1,12 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: postgresdatabase
+    app.kubernetes.io/instance: postgresdatabase-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: postgresdatabase-sample
+spec:
+  # TODO(user): Add fields here
