@@ -46,6 +46,10 @@ func main() {
 	if err = extension.Register(conn); err != nil {
 		klog.Fatalf("failed to register extensions: %v", err)
 	}
+	err = conn.Close()
+	if err != nil {
+		klog.Fatalf("failed to close db connection after registering extensions: %v", err)
+	}
 
 	p, err := pool.NewConnectionPool(args.ConnectionTTL())
 	if err != nil {
