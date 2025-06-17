@@ -53,12 +53,7 @@ func (c *ConnectionPool) cleanupRoutine() {
 }
 
 func (c *ConnectionPool) setup(name, password string) error {
-	// TODO: refactor and maybe only grant user the privileges they need
-	_, err := c.admin.Exec(fmt.Sprintf(`
-		CREATE USER "%s" WITH PASSWORD '%s';
-		GRANT ALL PRIVILEGES ON DATABASE postgres TO "%s";
-		ALTER USER "%s" WITH SUPERUSER;
-	`, name, password, name, name))
+	_, err := c.admin.Exec(fmt.Sprintf(`CREATE USER "%s" WITH PASSWORD '%s';`, name, password))
 	return err
 }
 
