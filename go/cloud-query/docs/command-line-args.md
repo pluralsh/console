@@ -21,6 +21,7 @@ cloud-query [flags]
 | `--server-address` | `:9192` | Address on which the gRPC server will listen |
 | `--server-tls-cert` | `""` | Path to the TLS certificate file for the gRPC server |
 | `--server-tls-key` | `""` | Path to the TLS key file for the gRPC server |
+| `--server-enable-reflection` | `false` | Enable gRPC reflection for the server, useful for debugging and introspection |
 | `-v` | Varies | Log level verbosity (0-5) |
 
 ## Log Levels
@@ -54,6 +55,12 @@ cloud-query --server-tls-cert /path/to/cert.pem --server-tls-key /path/to/key.pe
 
 ```bash
 cloud-query --database-max-connections 500 --connection-ttl 30m
+```
+
+### Starting the server with gRPC reflection enabled
+
+```bash
+cloud-query --server-enable-reflection
 ```
 
 ### Setting more verbose logging
