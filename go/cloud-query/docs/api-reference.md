@@ -90,7 +90,7 @@ message QueryInput {
 ```protobuf
 message QueryOutput {
   repeated string columns = 1;
-  map<string, google.protobuf.Any> result = 2;
+  map<string, string> result = 2;
 }
 ```
 
@@ -216,7 +216,7 @@ message ExtractInput {
 ```protobuf
 message ExtractOutput {
   string type = 1;
-  map<string, google.protobuf.Any> result = 2;
+  map<string, string> result = 2;
   string id = 3;
   repeated string links = 4;
 }

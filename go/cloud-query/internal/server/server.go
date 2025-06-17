@@ -98,8 +98,9 @@ func (in *Server) init() (*Server, error) {
 	in.register()
 
 	// Enable reflection service for debugging and tools like grpcurl
-	// TODO: use args to conditionally enable reflection
-	reflection.Register(in.server)
+	if in.config.EnableReflection {
+		reflection.Register(in.server)
+	}
 
 	return in, nil
 }

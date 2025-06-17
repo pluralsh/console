@@ -57,9 +57,10 @@ func main() {
 	}
 
 	s, err := server.New(&server.Config{
-		Address:     args.ServerAddress(),
-		TLSCertPath: args.ServerTLSCertPath(),
-		TLSKeyPath:  args.ServerTLSKeyPath(),
+		Address:          args.ServerAddress(),
+		TLSCertPath:      args.ServerTLSCertPath(),
+		TLSKeyPath:       args.ServerTLSKeyPath(),
+		EnableReflection: args.ServerEnableReflection(),
 	}, server.NewCloudQueryServer(p))
 	if err != nil {
 		klog.Fatalf("failed to create server: %v", err)

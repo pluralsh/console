@@ -36,6 +36,7 @@ const (
 	defaultDatabaseMaxConnections = 200
 	defaultConnectionTTL          = 15 * time.Minute
 	defaultServerAddress          = ":9192"
+	defaultServerEnableReflection = false
 )
 
 const ()
@@ -50,7 +51,12 @@ var (
 	argServerAddress          = pflag.String("server-address", "", "address on which the gRPC server will listen, leave empty to use the default (:9192)")
 	argServerTLSCertPath      = pflag.String("server-tls-cert", "", "path to the TLS certificate file for the gRPC server")
 	argServerTLSKeyPath       = pflag.String("server-tls-key", "", "path to the TLS key file for the gRPC server")
+	argServerEnableReflection = pflag.Bool("server-enable-reflection", defaultServerEnableReflection, "enable gRPC reflection for the server, useful for debugging and introspection")
 )
+
+func ServerEnableReflection() bool {
+	return *argServerEnableReflection
+}
 
 func ServerAddress() string {
 	if len(*argServerAddress) == 0 {

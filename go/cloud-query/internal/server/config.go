@@ -38,6 +38,9 @@ type Config struct {
 	// TLS configuration options
 	TLSCertPath string
 	TLSKeyPath  string
+
+	// EnableReflection enables gRPC reflection for the server
+	EnableReflection bool
 }
 
 // DefaultConfig returns a Config with sensible default values
