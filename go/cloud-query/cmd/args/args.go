@@ -39,7 +39,8 @@ const (
 	defaultDatabaseVersion        = embeddedpostgres.V15
 	defaultDatabasePort           = 5432
 	defaultDatabaseMaxConnections = 200
-	defaultConnectionTTL          = 15 * time.Minute
+	defaultDatabaseStartTimeout   = 30 * time.Second
+	defaultDatabaseConnectionTTL  = 15 * time.Minute
 	defaultServerAddress          = ":9192"
 	defaultServerEnableReflection = false
 )
@@ -55,8 +56,9 @@ var (
 	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the embedded PostgreSQL database")
 	argDatabasePassword       = pflag.String("database-password", defaultDatabasePassword, "default password for the embedded PostgreSQL database")
 	argDatabaseName           = pflag.String("database-name", defaultDatabaseName, "default database name for the embedded PostgreSQL database")
+	argDatabaseStartTimeout   = pflag.Duration("database-start-timeout", defaultDatabaseStartTimeout, "timeout for starting the embedded PostgreSQL database")
 	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")
-	argConnectionTTL          = pflag.Duration("connection-ttl", defaultConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
+	argConnectionTTL          = pflag.Duration("connection-ttl", defaultDatabaseConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
 	argServerAddress          = pflag.String("server-address", "", "address on which the gRPC server will listen, leave empty to use the default (:9192)")
 	argServerTLSCertPath      = pflag.String("server-tls-cert", "", "path to the TLS certificate file for the gRPC server")
 	argServerTLSKeyPath       = pflag.String("server-tls-key", "", "path to the TLS key file for the gRPC server")
@@ -171,8 +173,24 @@ func DatabasePort() uint32 {
 	return *argDatabasePort
 }
 
-func ConnectionTTL() time.Duration {
+func DatabaseConnectionTTL() time.Duration {
+	if *argConnectionTTL <= 0 {
+		return defaultDatabaseConnectionTTL
+	}
+
+	if *argConnectionTTL < 1*time.Minute {
+		klog.Warningf("Connection TTL is set to a very low value (%s), this may lead to performance issues", *argConnectionTTL)
+	}
+
 	return *argConnectionTTL
+}
+
+func DatabaseStartTimeout() time.Duration {
+	if *argDatabaseStartTimeout <= 0 {
+		return defaultDatabaseStartTimeout
+	}
+
+	return *argDatabaseStartTimeout
 }
 
 func LogLevel() klog.Level {
