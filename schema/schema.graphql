@@ -4543,6 +4543,8 @@ input HelmConfigAttributes {
 
   luaScript: String
 
+  luaFile: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -4957,6 +4959,9 @@ type HelmSpec {
 
   "a lua script to use for helm applies"
   luaScript: String
+
+  "a lua file to use for helm applies"
+  luaFile: String
 }
 
 "a configuration item k\/v pair"

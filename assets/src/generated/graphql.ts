@@ -3370,6 +3370,7 @@ export type HelmConfigAttributes = {
   git?: InputMaybe<GitRefAttributes>;
   ignoreCrds?: InputMaybe<Scalars['Boolean']['input']>;
   ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
+  luaFile?: InputMaybe<Scalars['String']['input']>;
   luaScript?: InputMaybe<Scalars['String']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
@@ -3458,6 +3459,8 @@ export type HelmSpec = {
   git?: Maybe<GitRef>;
   ignoreCrds?: Maybe<Scalars['Boolean']['output']>;
   ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
+  /** a lua file to use for helm applies */
+  luaFile?: Maybe<Scalars['String']['output']>;
   /** a lua script to use for helm applies */
   luaScript?: Maybe<Scalars['String']['output']>;
   release?: Maybe<Scalars['String']['output']>;

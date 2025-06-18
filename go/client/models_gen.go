@@ -2745,6 +2745,7 @@ type HelmConfigAttributes struct {
 	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
 	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	LuaScript   *string              `json:"luaScript,omitempty"`
+	LuaFile     *string              `json:"luaFile,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2838,6 +2839,8 @@ type HelmSpec struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// a lua script to use for helm applies
 	LuaScript *string `json:"luaScript,omitempty"`
+	// a lua file to use for helm applies
+	LuaFile *string `json:"luaFile,omitempty"`
 }
 
 // a (possibly nested) helm value pair
