@@ -28,7 +28,7 @@ export function OverviewTab({
   setUpgradesInitialOpen: (open: UpgradeAccordionName) => void
 }) {
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
-  const upgradePlan = cluster?.upgradePlan
+  const upgradePlan = cluster.upgradePlan
   return (
     <WrapperSC>
       <MetadataCard cluster={cluster} />
@@ -85,15 +85,17 @@ export function OverviewTab({
             },
             {
               label: 'Add-on compatibilities',
-              status: upgradePlan?.deprecations ? 'success' : 'warning',
+              status: upgradePlan?.compatibilities ? 'success' : 'warning',
               onClick: () => {
                 setTab(ClusterInfoFlyoverTab.Upgrades)
                 setUpgradesInitialOpen(UpgradeAccordionName.AddOns)
               },
             },
             {
-              label: 'Deprecated custom resources',
-              status: 'pending',
+              label: 'Deprecated custom resources (optional)',
+              status: isEmpty(cluster.deprecatedCustomResources)
+                ? 'success'
+                : 'pending',
               onClick: () => {
                 setTab(ClusterInfoFlyoverTab.Upgrades)
                 setUpgradesInitialOpen(UpgradeAccordionName.CustomResources)

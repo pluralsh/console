@@ -28,7 +28,7 @@ type ButtonGroupProps = {
   fillLevel?: FillLevel
 } & ComponentPropsWithRef<typeof SubTab>
 
-export default function ButtonGroup({
+export function ButtonGroup({
   directory,
   tab,
   onClick,
@@ -141,7 +141,9 @@ const SubTabSC = styled(SubTab)<{
   const border = `1px solid ${theme.colors[fillLevelToBorderColor[toFillLevel($fillLevel + 1)]]}`
   const bgColorName = fillLevelToBackground[toFillLevel($fillLevel)]
   return {
+    flex: 1,
     display: 'flex',
+    justifyContent: 'center',
     gap: theme.spacing.small,
     padding: !$label ? theme.spacing.small : undefined,
     outline: $path === $tab ? border : 'none',

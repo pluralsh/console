@@ -1,8 +1,9 @@
-import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useCloudSetupUnfinished } from 'components/contexts'
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 
+import { ClustersTable } from 'components/cd/clusters/Clusters.tsx'
+import { homeClustersColumns } from 'components/cd/clusters/ClustersColumns.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { useProjectId } from 'components/contexts/ProjectsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -11,11 +12,10 @@ import {
   useClustersQuery,
   useUpgradeStatisticsQuery,
 } from 'generated/graphql.ts'
+import styled from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ClusterOverviewChart } from './clusteroverview/ClusterOverviewChart.tsx'
 import { GettingStartedPopup } from './GettingStarted.tsx'
-import { ClustersTable } from 'components/cd/clusters/Clusters.tsx'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import { homeClustersColumns } from 'components/cd/clusters/ClustersColumns.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -50,28 +50,60 @@ export function Home() {
   })
 
   return (
-    <ResponsivePageFullWidth maxContentWidth={1440}>
-      {!onboarded && !isCloudSetupUnfinished && <GettingStartedPopup />}
-      <ClusterOverviewChart
-        data={chartData}
-        loading={chartLoading}
-        error={chartError}
-      />
-      {tableError ? (
-        <GqlError error={tableError} />
-      ) : (
-        <ClustersTable
-          rowClickAction="flyover"
-          data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
-          loading={!tableData && tableLoading}
-          refetch={refetch}
-          columns={homeClustersColumns}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={tableLoading}
-          onVirtualSliceChange={setVirtualSlice}
+    <Flex
+      direction="column"
+      overflow="hidden"
+      height="100%"
+    >
+      <ChartSectionSC>
+        <span>filters</span>
+        <ClusterOverviewChart
+          data={chartData}
+          loading={chartLoading}
+          error={chartError}
         />
-      )}
-    </ResponsivePageFullWidth>
+      </ChartSectionSC>
+      <TableSectionSC>
+        {tableError ? (
+          <GqlError error={tableError} />
+        ) : (
+          <ClustersTable
+            fullHeightWrap
+            rowBg="raised"
+            rowClickAction="flyover"
+            data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
+            loading={!tableData && tableLoading}
+            refetch={refetch}
+            columns={homeClustersColumns}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={tableLoading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        )}
+      </TableSectionSC>
+      {!onboarded && !isCloudSetupUnfinished && <GettingStartedPopup />}
+    </Flex>
   )
 }
+
+const ChartSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
+  backgroundColor: theme.colors['fill-accent'],
+  padding: theme.spacing.large,
+  paddingBottom: theme.spacing.xxlarge,
+  width: '100%',
+  [`@media (min-width: ${theme.breakpoints.desktopLarge}px)`]: {
+    gap: theme.spacing.xxlarge,
+  },
+}))
+
+const TableSectionSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero-selected'],
+  padding: theme.spacing.large,
+  borderTop: theme.borders.default,
+  height: '100%',
+  overflow: 'hidden',
+  flex: 1,
+}))

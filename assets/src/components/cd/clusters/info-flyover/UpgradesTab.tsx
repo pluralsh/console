@@ -195,7 +195,7 @@ export function UpgradesTab({
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.deprecations || false}
+              checked={!!cluster?.upgradePlan?.deprecations}
               icon={ChecklistIcon}
               title="Check API deprecations"
               subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
@@ -303,7 +303,7 @@ export function UpgradesTab({
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.compatibilities || false}
+              checked={!!cluster?.upgradePlan?.compatibilities}
               icon={ChecklistIcon}
               title="Check add-on compatibilities"
               subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
@@ -393,7 +393,7 @@ export function UpgradesTab({
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.deprecatedCustomResources?.length === 0}
+              checked={isEmpty(cluster?.deprecatedCustomResources)}
               icon={ChecklistIcon}
               title="Deprecated custom resources"
               subtitle="Ensure all custom resources are updated to the version required for upgrade"
@@ -413,6 +413,8 @@ export function UpgradesTab({
           )}
         </AccordionItem>
       </Accordion>
+      {/* helpful spacer because bottom padding may get covered, can remove if the layout changes */}
+      <div css={{ minHeight: 1 }} />
     </div>
   )
 }

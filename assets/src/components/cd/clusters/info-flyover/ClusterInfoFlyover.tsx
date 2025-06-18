@@ -11,7 +11,7 @@ import {
   useClusterOverviewDetailsQuery,
 } from 'generated/graphql'
 
-import ButtonGroup from 'components/utils/ButtonGroup.tsx'
+import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro.tsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -149,7 +149,6 @@ function ClusterInfoFlyoverContent({
           }))}
           tab={tab}
           onClick={(path) => setTab(path as ClusterInfoFlyoverTab)}
-          css={{ flex: 1, justifyContent: 'center' }}
         />
         {tab === ClusterInfoFlyoverTab.Overview && (
           <OverviewTab

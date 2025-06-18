@@ -73,7 +73,7 @@ export function InfrastructureIssuesSection({
 const columns = [
   columnHelper.accessor('name', {
     id: 'name',
-    header: 'Name',
+    header: 'Node name',
     meta: { gridTemplate: '1fr' },
   }),
   columnHelper.accessor('health', {
