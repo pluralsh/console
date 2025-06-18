@@ -38,7 +38,7 @@ message QueryInput {
 
 message SchemaInput {
   Connection connection = 1;
-  optional string query = 2;
+  optional string table = 2;
 }
 
 message ExtractInput {
@@ -60,7 +60,7 @@ message SchemaColumn {
 }
 
 message SchemaOutput {
-  repeated SchemaResult results = 1;
+  repeated SchemaResult result = 1;
 }
 
 message SchemaResult {

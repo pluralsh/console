@@ -4,15 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/samber/lo"
-	"k8s.io/klog/v2"
-
-	"github.com/pluralsh/console/go/cloud-query/internal/common"
-
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
-
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
+	"github.com/samber/lo"
+	"k8s.io/klog/v2"
 )
 
 const driverName = "postgres"
@@ -21,6 +19,7 @@ var defaultDataSource = common.DataSource(args.DatabasePort(), args.DatabaseUser
 
 type Connection interface {
 	Configure(config config.Configuration) error
+	Schema(table string) ([]cloudquery.SchemaResult, error)
 	Query(q string) (columns []string, rows [][]any, err error)
 	Exec(q string) (sql.Result, error)
 	Ping() error
@@ -29,8 +28,9 @@ type Connection interface {
 }
 
 type connection struct {
-	name string
-	db   *sql.DB
+	name     string
+	provider config.Provider
+	db       *sql.DB
 }
 
 func (in *connection) Configure(config config.Configuration) error {
@@ -44,6 +44,7 @@ func (in *connection) Configure(config config.Configuration) error {
 		return fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}
 
+	in.provider = config.Provider()
 	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
 	return nil
 }
@@ -58,5 +59,5 @@ func NewConnection(name, dataSource string) (Connection, error) {
 		return nil, err
 	}
 
-	return &connection{name, db}, nil
+	return &connection{name: name, db: db}, nil
 }

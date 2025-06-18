@@ -348,7 +348,7 @@ func (x *QueryInput) GetQuery() string {
 type SchemaInput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Connection    *Connection            `protobuf:"bytes,1,opt,name=connection,proto3" json:"connection,omitempty"`
-	Query         *string                `protobuf:"bytes,2,opt,name=query,proto3,oneof" json:"query,omitempty"`
+	Table         *string                `protobuf:"bytes,2,opt,name=table,proto3,oneof" json:"table,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -390,9 +390,9 @@ func (x *SchemaInput) GetConnection() *Connection {
 	return nil
 }
 
-func (x *SchemaInput) GetQuery() string {
-	if x != nil && x.Query != nil {
-		return *x.Query
+func (x *SchemaInput) GetTable() string {
+	if x != nil && x.Table != nil {
+		return *x.Table
 	}
 	return ""
 }
@@ -591,7 +591,7 @@ func (x *SchemaColumn) GetType() string {
 
 type SchemaOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Results       []*SchemaResult        `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
+	Result        []*SchemaResult        `protobuf:"bytes,1,rep,name=result,proto3" json:"result,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -626,9 +626,9 @@ func (*SchemaOutput) Descriptor() ([]byte, []int) {
 	return file_cloudquery_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *SchemaOutput) GetResults() []*SchemaResult {
+func (x *SchemaOutput) GetResult() []*SchemaResult {
 	if x != nil {
-		return x.Results
+		return x.Result
 	}
 	return nil
 }
@@ -786,8 +786,8 @@ const file_cloudquery_proto_rawDesc = "" +
 	"\n" +
 	"connection\x18\x01 \x01(\v2\x16.cloudquery.ConnectionR\n" +
 	"connection\x12\x19\n" +
-	"\x05query\x18\x02 \x01(\tH\x00R\x05query\x88\x01\x01B\b\n" +
-	"\x06_query\"F\n" +
+	"\x05table\x18\x02 \x01(\tH\x00R\x05table\x88\x01\x01B\b\n" +
+	"\x06_table\"F\n" +
 	"\fExtractInput\x126\n" +
 	"\n" +
 	"connection\x18\x01 \x01(\v2\x16.cloudquery.ConnectionR\n" +
@@ -802,9 +802,9 @@ const file_cloudquery_proto_rawDesc = "" +
 	"\x06result\x18\x01 \x03(\v2\x17.cloudquery.QueryResultR\x06result\":\n" +
 	"\fSchemaColumn\x12\x16\n" +
 	"\x06column\x18\x01 \x01(\tR\x06column\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\"B\n" +
-	"\fSchemaOutput\x122\n" +
-	"\aresults\x18\x01 \x03(\v2\x18.cloudquery.SchemaResultR\aresults\"X\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\"@\n" +
+	"\fSchemaOutput\x120\n" +
+	"\x06result\x18\x01 \x03(\v2\x18.cloudquery.SchemaResultR\x06result\"X\n" +
 	"\fSchemaResult\x12\x14\n" +
 	"\x05table\x18\x01 \x01(\tR\x05table\x122\n" +
 	"\acolumns\x18\x02 \x03(\v2\x18.cloudquery.SchemaColumnR\acolumns\"\xc3\x01\n" +
@@ -861,7 +861,7 @@ var file_cloudquery_proto_depIdxs = []int32{
 	3,  // 5: cloudquery.ExtractInput.connection:type_name -> cloudquery.Connection
 	13, // 6: cloudquery.QueryResult.result:type_name -> cloudquery.QueryResult.ResultEntry
 	7,  // 7: cloudquery.QueryOutput.result:type_name -> cloudquery.QueryResult
-	11, // 8: cloudquery.SchemaOutput.results:type_name -> cloudquery.SchemaResult
+	11, // 8: cloudquery.SchemaOutput.result:type_name -> cloudquery.SchemaResult
 	9,  // 9: cloudquery.SchemaResult.columns:type_name -> cloudquery.SchemaColumn
 	14, // 10: cloudquery.ExtractOutput.result:type_name -> cloudquery.ExtractOutput.ResultEntry
 	4,  // 11: cloudquery.CloudQuery.Query:input_type -> cloudquery.QueryInput

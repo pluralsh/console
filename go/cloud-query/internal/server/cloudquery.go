@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,13 +41,13 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 
 // Query implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryOutput, error) {
-	provider, err := in.toProvider(input)
+	provider, err := in.toProvider(input.GetConnection())
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
 		return nil, status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
 	}
 
-	configuration, err := in.toConnectionConfiguration(provider, input.Connection)
+	configuration, err := in.toConnectionConfiguration(provider, input.GetConnection())
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
 		return nil, status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
@@ -63,17 +64,25 @@ func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInp
 
 // Schema implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Schema(_ context.Context, input *cloudquery.SchemaInput) (*cloudquery.SchemaOutput, error) {
-	// TODO: implement proper Schema functionality. See Query on how to handle streaming output.
-
-	// Log the request
-	provider := "unknown"
-	if input.Connection != nil {
-		provider = input.Connection.GetProvider()
+	provider, err := in.toProvider(input.GetConnection())
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
+		return nil, status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
 	}
 
-	klog.V(log.LogLevelDebug).InfoS("received schema request", "provider", provider, "input", input)
+	configuration, err := in.toConnectionConfiguration(provider, input.GetConnection())
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
+		return nil, status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
+	}
 
-	return nil, status.Errorf(codes.Unimplemented, "schema extraction is not implemented for provider: %s", provider)
+	c, err := in.pool.Connect(configuration)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to connect to provider", "provider", provider)
+		return nil, status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
+	}
+
+	return in.handleSchema(c, input.GetTable())
 }
 
 // Extract implements the cloudquery.CloudQueryServer interface
@@ -101,12 +110,12 @@ func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc
 	}
 }
 
-func (in *CloudQueryService) toProvider(input *cloudquery.QueryInput) (config.Provider, error) {
-	if input.Connection == nil {
+func (in *CloudQueryService) toProvider(conn *cloudquery.Connection) (config.Provider, error) {
+	if conn == nil {
 		return config.ProviderUnknown, status.Errorf(codes.InvalidArgument, "connection is required")
 	}
 
-	switch config.Provider(strings.ToLower(input.Connection.GetProvider())) {
+	switch config.Provider(strings.ToLower(conn.GetProvider())) {
 	case config.ProviderAWS:
 		return config.ProviderAWS, nil
 	case config.ProviderAzure:
@@ -114,7 +123,7 @@ func (in *CloudQueryService) toProvider(input *cloudquery.QueryInput) (config.Pr
 	case config.ProviderGCP:
 		return config.ProviderGCP, nil
 	default:
-		return config.ProviderUnknown, fmt.Errorf("unsupported provider: %s", input.GetConnection().GetProvider())
+		return config.ProviderUnknown, fmt.Errorf("unsupported provider: %s", conn.GetProvider())
 	}
 }
 
@@ -155,9 +164,17 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string) 
 		})
 	}
 
-	return &cloudquery.QueryOutput{
-		Result: result,
-	}, nil
+	return &cloudquery.QueryOutput{Result: result}, nil
+}
+
+func (in *CloudQueryService) handleSchema(c connection.Connection, table string) (*cloudquery.SchemaOutput, error) {
+	result, err := c.Schema(table)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to execute schema query", "table", table)
+		return nil, status.Errorf(codes.Internal, "failed to execute schema query '%s': %v", table, err)
+	}
+
+	return &cloudquery.SchemaOutput{Result: lo.ToSlicePtr(result)}, nil
 }
 
 func (in *CloudQueryService) formatValue(value any) string {
