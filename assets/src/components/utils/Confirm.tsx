@@ -106,9 +106,6 @@ export function Confirm({
               css={{
                 color: theme.colors.text,
                 borderColor: theme.colors['text-danger-light'],
-                '::placeholder': {
-                  color: theme.colors['text-danger-light'],
-                },
               }}
             />
           </FormField>

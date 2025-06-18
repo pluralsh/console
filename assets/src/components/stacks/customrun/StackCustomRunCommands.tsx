@@ -82,7 +82,7 @@ export function StackCustomRunCommands({
             Back
           </Button>
           <Button
-            onClick={mutation}
+            onClick={() => mutation()}
             loading={loading}
           >
             Create custom run

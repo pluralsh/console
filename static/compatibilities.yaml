@@ -396,6 +396,11 @@ addons:
   release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
   helm_repository_url: https://charts.jetstack.io
   versions:
+  - version: 1.18.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.18.0
   - version: 1.17.0
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -584,7 +589,7 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 21.0.3
+    chart_version: 21.0.5
   - version: 1.31.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -724,6 +729,12 @@ addons:
   release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/external-dns
   versions:
+  - version: 0.17.0
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.17.0
   - version: 0.16.1
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -1501,7 +1512,7 @@ addons:
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    chart_version: 36.0.0
+    chart_version: 36.2.0-rc1
   - version: 3.4.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []

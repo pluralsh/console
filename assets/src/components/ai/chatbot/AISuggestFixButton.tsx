@@ -1,18 +1,22 @@
-import { Button, IconFrame, MagicWandIcon } from '@pluralsh/design-system'
-import { ComponentProps } from 'react'
+import {
+  Button,
+  ButtonProps,
+  IconFrame,
+  MagicWandIcon,
+} from '@pluralsh/design-system'
 
 function AISuggestFixButton({
   iconOnly,
   ...props
-}: Omit<ComponentProps<typeof Button>, 'startIcon'> & { iconOnly?: boolean }) {
+}: ButtonProps & { iconOnly?: boolean }) {
   return iconOnly ? (
     <IconFrame
       clickable
       tooltip
       textValue="Suggest a fix"
       icon={<MagicWandIcon />}
-      type="secondary"
       {...props}
+      type="secondary"
     />
   ) : (
     <Button

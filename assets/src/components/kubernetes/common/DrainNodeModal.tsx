@@ -36,6 +36,8 @@ export function DrainNodeModal({
         close={() => setOpen(false)}
         destructive
         label="Drain node"
+        confirmationEnabled
+        confirmationText="drain node"
         loading={loading}
         error={error}
         open={open}

@@ -6,7 +6,8 @@ defmodule Console.Deployments.Statistics do
   def info() do
     %{
       clusters: Repo.aggregate(Cluster, :count, :id),
-      services: Repo.aggregate(Service, :count, :id)
+      services: Repo.aggregate(Service, :count, :id),
+      bytes_ingested: Console.Prom.Meter.collect()
     }
   end
 
@@ -14,6 +15,10 @@ defmodule Console.Deployments.Statistics do
     cluster_stats()
     service_stats()
     stack_stats()
+  end
+
+  def compile_erlang() do
+    :telemetry.execute(metric_scope(:erlang_nodes), %{total: length(Node.list()) + 1}, %{})
   end
 
   defp cluster_stats() do

@@ -151,16 +151,31 @@ defmodule Console.Deployments.Init do
   defp maybe_setup_context(bot) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
-         {:ok, url, pass} <- Console.es_creds(),
-         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+         {:ok, _url, pass} <- Console.es_creds(),
+         {:ok, _vurl, _vtenant} <- Console.vmetrics_creds() do
+      elastic_url = Console.url("/ext/v1/ingest/elastic")
+                    |> ensure_port()
       Services.save_context(%{
         configuration: %{
-          elastic: %{url: url, user: "plrl-#{inst}", password: pass},
-          vmetrics: %{url: "#{vurl}/insert/#{vtenant}/prometheus/api/v1/write", user: "plrl-#{inst}", password: pass}
+          elastic: %{url: elastic_url, user: "plrl-#{inst}", password: pass},
+          vmetrics: %{
+            query_url: Console.url("/ext/v1/query/prometheus"),
+            url: Console.url("/ext/v1/ingest/prometheus"),
+            user: "plrl-#{inst}",
+            password: pass
+          }
         }
       }, "plrl/cloud/observability", bot)
     else
       _ -> {:ok, %{}}
+    end
+  end
+
+  defp ensure_port(url) do
+    case URI.new(url) do
+      {:ok, %URI{scheme: s, host: h, path: p}} ->
+        Path.join("#{s}://#{h}:443", p)
+      _ -> url
     end
   end
 end

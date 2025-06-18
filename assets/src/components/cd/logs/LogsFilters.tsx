@@ -73,7 +73,7 @@ export function LogsFilters({
           flex={1}
         />
         <Button
-          style={{ borderColor: hasCustomFilters && colors['border-primary'] }}
+          css={{ borderColor: hasCustomFilters && colors['border-primary'] }}
           floating
           startIcon={<FiltersIcon />}
           onClick={() => setOpen(true)}

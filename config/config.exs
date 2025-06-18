@@ -172,4 +172,6 @@ config :console, Console.Services.OIDC.Hydra,
 
 config :phoenix, :filter_parameters, {:keep, ~w(id format)}
 
+config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.Req
+
 import_config "#{Mix.env()}.exs"

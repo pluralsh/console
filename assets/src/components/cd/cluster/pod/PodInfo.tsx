@@ -38,7 +38,6 @@ function ViewLogsButton() {
   return (
     <Button
       secondary
-      fontWeight={600}
       startIcon={<LogsIcon />}
       as={Link}
       to="logs"

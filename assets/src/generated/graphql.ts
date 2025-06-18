@@ -1039,6 +1039,7 @@ export type ChatTool = {
 };
 
 export enum ChatType {
+  Error = 'ERROR',
   File = 'FILE',
   Text = 'TEXT',
   Tool = 'TOOL'
@@ -3096,8 +3097,11 @@ export type GitRef = {
 };
 
 export type GitRefAttributes = {
+  /** the files to include in the tarball */
   files?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** the subdirectory in the git repository to use */
   folder: Scalars['String']['input'];
+  /** the git reference to use */
   ref: Scalars['String']['input'];
 };
 
@@ -3289,6 +3293,11 @@ export type GroupMemberEdge = {
   node?: Maybe<GroupMember>;
 };
 
+export type HealthRange = {
+  max?: InputMaybe<Scalars['Int']['input']>;
+  min?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export enum HeatMapFlavor {
   Namespace = 'NAMESPACE',
   Node = 'NODE',
@@ -3375,6 +3384,25 @@ export type HelmConfigAttributes = {
 
 export type HelmGcpAuthAttributes = {
   applicationCredentials?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HelmMinimal = {
+  __typename?: 'HelmMinimal';
+  /** the helm release name to use when rendering this helm chart */
+  release?: Maybe<Scalars['String']['output']>;
+  /** a helm values file to use when rendering this helm chart */
+  values?: Maybe<Scalars['String']['output']>;
+  /** a list of relative paths to values files to use for helm chart templating */
+  valuesFiles?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type HelmMinimalAttributes = {
+  /** the helm release name to use when rendering this helm chart */
+  release?: InputMaybe<Scalars['String']['input']>;
+  /** a helm values file to use when rendering this helm chart */
+  values?: InputMaybe<Scalars['String']['input']>;
+  /** a list of relative paths to values files to use for helm chart templating */
+  valuesFiles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 /** A direct Plural representation of a Helm repository */
@@ -6179,6 +6207,26 @@ export type RegexReplacementAttributes = {
   templated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type Renderer = {
+  __typename?: 'Renderer';
+  helm?: Maybe<HelmMinimal>;
+  path: Scalars['String']['output'];
+  type: RendererType;
+};
+
+export type RendererAttributes = {
+  helm?: InputMaybe<HelmMinimalAttributes>;
+  path: Scalars['String']['input'];
+  type: RendererType;
+};
+
+export enum RendererType {
+  Auto = 'AUTO',
+  Helm = 'HELM',
+  Kustomize = 'KUSTOMIZE',
+  Raw = 'RAW'
+}
+
 export type ReplicaSet = {
   __typename?: 'ReplicaSet';
   metadata: Metadata;
@@ -8107,7 +8155,9 @@ export type RootQueryTypeClustersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   backups?: InputMaybe<Scalars['Boolean']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  compliance?: InputMaybe<VersionCompliance>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  healthRange?: InputMaybe<HealthRange>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   parentId?: InputMaybe<Scalars['ID']['input']>;
@@ -9398,6 +9448,8 @@ export type ServiceDeployment = {
   rawResource?: Maybe<KubernetesUnstructured>;
   /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the renderers of this service */
+  renderers?: Maybe<Array<Maybe<Renderer>>>;
   /** the git repo of this service */
   repository?: Maybe<GitRepository>;
   /** the current revision of this service */
@@ -9407,6 +9459,8 @@ export type ServiceDeployment = {
   scalingRecommendations?: Maybe<Array<Maybe<ClusterScalingRecommendation>>>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
+  /** the sources of this service */
+  sources?: Maybe<Array<Maybe<ServiceSource>>>;
   /** A summary status enum for the health of this service */
   status: ServiceDeploymentStatus;
   /** settings for advanced tuning of the sync process */
@@ -9496,7 +9550,9 @@ export type ServiceDeploymentAttributes = {
   parentId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  renderers?: InputMaybe<Array<InputMaybe<RendererAttributes>>>;
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  sources?: InputMaybe<Array<InputMaybe<ServiceSourceAttributes>>>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
   /** if you should apply liquid templating to raw yaml files, defaults to true */
   templated?: InputMaybe<Scalars['Boolean']['input']>;
@@ -9572,6 +9628,25 @@ export enum ServicePromotion {
   Proceed = 'PROCEED',
   Rollback = 'ROLLBACK'
 }
+
+export type ServiceSource = {
+  __typename?: 'ServiceSource';
+  /** the git reference to use */
+  git?: Maybe<GitRef>;
+  /** the subdirectory in the git repository to use */
+  path?: Maybe<Scalars['String']['output']>;
+  /** the id of the git repository to source from */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
+};
+
+export type ServiceSourceAttributes = {
+  /** the location in git to use */
+  git?: InputMaybe<GitRefAttributes>;
+  /** the subdirectory this source will live in the final tarball */
+  path?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the git repository to source from */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+};
 
 export type ServiceSpec = {
   __typename?: 'ServiceSpec';
@@ -9661,6 +9736,8 @@ export type ServiceUpdateAttributes = {
   parentId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  renderers?: InputMaybe<Array<InputMaybe<RendererAttributes>>>;
+  sources?: InputMaybe<Array<InputMaybe<ServiceSourceAttributes>>>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
   /** if you should apply liquid templating to raw yaml files, defaults to true */
   templated?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10556,6 +10633,12 @@ export type VectorStoreAttributes = {
   opensearch?: InputMaybe<OpensearchConnectionAttributes>;
   store?: InputMaybe<VectorStore>;
 };
+
+export enum VersionCompliance {
+  Compliant = 'COMPLIANT',
+  Latest = 'LATEST',
+  Outdated = 'OUTDATED'
+}
 
 /** a shortform reference to an addon by version */
 export type VersionReference = {

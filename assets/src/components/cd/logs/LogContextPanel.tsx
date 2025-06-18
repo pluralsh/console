@@ -129,7 +129,7 @@ export function LogContextPanel({
                   <Button
                     small
                     secondary
-                    onClick={centerMainLog}
+                    onClick={() => centerMainLog()}
                   >
                     Jump to original log
                   </Button>

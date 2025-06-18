@@ -27,7 +27,7 @@ export default function ServicePromote({ id }) {
       )}
       <div css={{ display: 'flex', gap: theme.spacing.small }}>
         <Button
-          onClick={mutation}
+          onClick={() => mutation()}
           loading={!rollback && loading}
         >
           Promote

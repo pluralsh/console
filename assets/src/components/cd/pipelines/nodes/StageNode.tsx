@@ -413,7 +413,7 @@ function AddContextModal({
   const actions = (
     <Button
       type="submit"
-      disabled={!json || jsonError}
+      disabled={!json || !!jsonError}
       loading={loading}
     >
       Add context
