@@ -246,7 +246,12 @@ func (c *client) DeleteUser(username string) error {
 	if err != nil {
 		return fmt.Errorf("listing databases owned by user: %w", err)
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Info("failed to close rows", "rows", rows)
+		}
+	}(rows)
 
 	var databases []string
 	for rows.Next() {
