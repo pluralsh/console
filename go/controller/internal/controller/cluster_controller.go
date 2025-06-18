@@ -218,12 +218,12 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
 	/// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
+	if cluster.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
 		controllerutil.AddFinalizer(cluster, ClusterFinalizer)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !cluster.DeletionTimestamp.IsZero() {
 		if !cluster.Status.HasID() {
 			controllerutil.RemoveFinalizer(cluster, ClusterFinalizer)
 			return &ctrl.Result{}

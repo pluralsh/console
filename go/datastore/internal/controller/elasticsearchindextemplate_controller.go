@@ -165,7 +165,7 @@ func (r *ElasticSearchIndexTemplateReconciler) deleteTemplateIndex(ctx context.C
 }
 
 func (r *ElasticSearchIndexTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, index *v1alpha1.ElasticsearchIndexTemplate, credentials *v1alpha1.ElasticsearchCredentials) error {
-	if index.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName) {
+	if index.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName) {
 		controllerutil.AddFinalizer(index, ElasticsearchIndexTemplateProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, ElasticsearchIndexTemplateProtectionFinalizerName); err != nil {
 			return err

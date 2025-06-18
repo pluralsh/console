@@ -173,14 +173,14 @@ func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alph
 func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v1alpha1.Catalog) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if catalog.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(catalog, CatalogProtectionFinalizerName) {
+	if catalog.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(catalog, CatalogProtectionFinalizerName) {
 		controllerutil.AddFinalizer(catalog, CatalogProtectionFinalizerName)
 	}
 
 	// If object is being deleted remove the finalizer. There is no way
 	// currently to delete catalog from Console API, so we simply detach
 	// and only remove the CRD.
-	if !catalog.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !catalog.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 		if err != nil {
 			return &requeue

@@ -121,14 +121,14 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if project.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(project, ProjectProtectionFinalizerName) {
+	if project.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(project, ProjectProtectionFinalizerName) {
 		controllerutil.AddFinalizer(project, ProjectProtectionFinalizerName)
 	}
 
 	// If object is being deleted remove the finalizer. There is no way
 	// currently to delete project from Console API, so we simply detach
 	// and only remove the CRD.
-	if !project.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !project.DeletionTimestamp.IsZero() {
 		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Spec.Name)
 		if err != nil {
 			return &requeue

@@ -187,12 +187,12 @@ func (r *ScmConnectionReconciler) isAlreadyExists(ctx context.Context, scm *v1al
 func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm *v1alpha1.ScmConnection) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if scm.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(scm, ScmConnectionProtectionFinalizerName) {
+	if scm.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(scm, ScmConnectionProtectionFinalizerName) {
 		controllerutil.AddFinalizer(scm, ScmConnectionProtectionFinalizerName)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !scm.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !scm.DeletionTimestamp.IsZero() {
 		// Remove ScmConnection from Console API if it exists
 		exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
 		if err != nil {

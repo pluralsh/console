@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cloud-query
+description: The service part of the Plural Console ecosystem that provides cloud resource querying capabilities.
+type: application
+version: 0.1.0
+appVersion: 0.1.0

@@ -6,23 +6,19 @@ import (
 	"io"
 	"strings"
 
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
-
 	corev1 "k8s.io/api/core/v1"
-
-	"github.com/pluralsh/console/go/datastore/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
+	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
+	"github.com/pluralsh/console/go/datastore/internal/utils"
 )
 
 const (
@@ -139,7 +135,7 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 		}
 		for _, user := range userList.Items {
 			if strings.EqualFold(user.Spec.CredentialsRef.Name, credentials.Name) {
-				if err := r.Client.Delete(ctx, &user); err != nil {
+				if err := r.Delete(ctx, &user); err != nil {
 					return err
 				}
 			}
@@ -154,7 +150,7 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 		}
 		for _, indexTemplate := range indexTemplateList.Items {
 			if strings.EqualFold(indexTemplate.Spec.CredentialsRef.Name, credentials.Name) {
-				if err := r.Client.Delete(ctx, &indexTemplate); err != nil {
+				if err := r.Delete(ctx, &indexTemplate); err != nil {
 					return err
 				}
 			}
@@ -168,7 +164,7 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 		}
 		for _, policy := range policyList.Items {
 			if strings.EqualFold(policy.Spec.CredentialsRef.Name, credentials.Name) {
-				if err := r.Client.Delete(ctx, &policy); err != nil {
+				if err := r.Delete(ctx, &policy); err != nil {
 					return err
 				}
 			}

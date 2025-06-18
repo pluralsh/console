@@ -214,7 +214,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	}
 
 	secret := &corev1.Secret{}
-	err = r.Client.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)}, secret)
+	err = r.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)}, secret)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	}
@@ -224,7 +224,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 		if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 			return err
 		}
-		return r.Client.Update(ctx, secret)
+		return r.Update(ctx, secret)
 	}
 
 	secret = &corev1.Secret{
@@ -234,7 +234,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 		return err
 	}
-	return r.Client.Create(ctx, secret)
+	return r.Create(ctx, secret)
 }
 
 func getTokenSecretNamespace(sa *v1alpha1.ServiceAccount) string {

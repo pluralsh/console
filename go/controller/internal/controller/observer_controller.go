@@ -279,13 +279,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer *v1alpha1.Observer) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if observer.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(observer, ObserverFinalizer) {
+	if observer.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(observer, ObserverFinalizer) {
 		controllerutil.AddFinalizer(observer, ObserverFinalizer)
 		return nil, nil
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !observer.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !observer.DeletionTimestamp.IsZero() {
 		// Remove from Console API if it exists
 		exists, err := r.ConsoleClient.IsObserverExists(ctx, observer.ObserverName())
 		if err != nil {

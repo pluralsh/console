@@ -6,23 +6,20 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/datastore/internal/test/common"
-	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
+	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	dbsv1alpha1 "github.com/pluralsh/console/go/datastore/api/v1alpha1"
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
+	"github.com/pluralsh/console/go/datastore/internal/test/common"
+	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
 )
 
 var _ = Describe("ElasticsearchCredentials Controller", func() {
@@ -48,16 +45,16 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 				},
 			}, nil)).To(Succeed())
 
-			elasticsearCredential := &dbsv1alpha1.ElasticsearchCredentials{}
+			elasticsearCredential := &v1alpha1.ElasticsearchCredentials{}
 			By("creating the custom resource for the Kind ElasticsearchCredentials")
 			err := k8sClient.Get(ctx, typeNamespacedName, elasticsearCredential)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &dbsv1alpha1.ElasticsearchCredentials{
+				resource := &v1alpha1.ElasticsearchCredentials{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					Spec: dbsv1alpha1.ElasticsearchCredentialsSpec{
+					Spec: v1alpha1.ElasticsearchCredentialsSpec{
 						Insecure: nil,
 						URL:      "http://example.com",
 						Username: "test",
@@ -74,7 +71,7 @@ var _ = Describe("ElasticsearchCredentials Controller", func() {
 		})
 
 		AfterEach(func() {
-			resource := &dbsv1alpha1.ElasticsearchCredentials{}
+			resource := &v1alpha1.ElasticsearchCredentials{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 

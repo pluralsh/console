@@ -569,12 +569,12 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 
 func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
 	// If the service is not being deleted and if it does not have the finalizer, then let's add it.
-	if service.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
+	if service.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		controllerutil.AddFinalizer(service, ServiceFinalizer)
 	}
 
 	// If the service is being deleted, cleanup and remove the finalizer.
-	if !service.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !service.DeletionTimestamp.IsZero() {
 		// If the service does not have an ID, the finalizer can be removed.
 		if !service.Status.HasID() {
 			controllerutil.RemoveFinalizer(service, ServiceFinalizer)

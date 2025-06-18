@@ -4,10 +4,6 @@ import (
 	"context"
 	"strings"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,6 +20,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/yaml"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -106,7 +107,7 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	for clusterID, clusterNamespacedName := range toDelete {
 		logger.Info("deleting cluster", "clusterID", clusterID, "clusterNamespacedName", clusterNamespacedName)
-		if err := r.Client.Delete(ctx, &v1alpha1.Cluster{
+		if err := r.Delete(ctx, &v1alpha1.Cluster{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      clusterNamespacedName.Name,
 				Namespace: clusterNamespacedName.Namespace,
@@ -175,14 +176,14 @@ func (r *ClusterSyncReconciler) reconcileCluster(ctx context.Context, cluster *c
 		clusterCRD.Namespace = namespace
 	}
 	existingCluster := &v1alpha1.Cluster{}
-	if err := r.Client.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
+	if err := r.Get(ctx, types.NamespacedName{Name: clusterCRD.Name, Namespace: clusterCRD.Namespace}, existingCluster); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return err
 		}
 
 		// to avoid spec.cloud validation
 		u.SetNamespace(clusterCRD.Namespace)
-		if err := r.Client.Create(ctx, u); err != nil {
+		if err := r.Create(ctx, u); err != nil {
 			logger.Error(err, "failed to create cluster")
 			return err
 		}
@@ -206,7 +207,7 @@ func (r *ClusterSyncReconciler) reconcileCluster(ctx context.Context, cluster *c
 			logger.Error(err, "failed to merge clusters")
 			return err
 		}
-		if err := r.Client.Update(ctx, toUpdate); err != nil {
+		if err := r.Update(ctx, toUpdate); err != nil {
 			logger.Error(err, "failed to patch cluster")
 			return err
 		}
