@@ -61,15 +61,15 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: database
-              mountPath: /steampipe/db
+            - name: {{ .Values.database.volume.name }}
+              mountPath: {{ .Values.database.volume.mountPath }}
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
-        - name: database
+        - name: {{ .Values.database.volume.name }}
           emptyDir:
-            medium: Memory
+            medium: {{ .Values.database.volume.medium }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

@@ -61,4 +61,4 @@ USER nonroot
 
 WORKDIR /steampipe/db
 
-CMD ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib", "--database-dir", "/steampipe/db/pg"]
+CMD ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib", "--database-runtime-dir", "/steampipe/runtime", "--database-cache-dir", "/steampipe/cache", "--database-data-dir", "/steampipe/db/data"]

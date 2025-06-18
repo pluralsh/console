@@ -23,9 +23,9 @@ func main() {
 			Password(args.DatabasePassword()).
 			Database(args.DatabaseName()).
 			Port(args.DatabasePort()).
-			BinariesPath(args.DatabaseDir()).
-			RuntimePath(args.DatabaseDir()).
-			CachePath(args.DatabaseExtensionsDir()).
+			BinariesPath(args.DatabaseRuntimeDir()).
+			RuntimePath(args.DatabaseRuntimeDir()).
+			CachePath(args.DatabaseCacheDir()).
 			DataPath(args.DatabaseDataDir()).
 			Version(args.DatabaseVersion()).
 			Logger(klog.NewStandardLogger("INFO").Writer()).

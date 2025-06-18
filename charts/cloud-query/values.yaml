@@ -89,6 +89,12 @@ volumes: []
 #     secretName: mysecret
 #     optional: false
 
+database:
+  volume:
+    name: database
+    mountPath: /steampipe/db
+    medium: Memory
+
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts: []
 # - name: foo

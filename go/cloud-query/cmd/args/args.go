@@ -31,7 +31,9 @@ func init() {
 
 const (
 	defaultExtensionsDir          = "./bin"
-	defaultDatabaseDir            = "./bin/pg"
+	defaultDatabaseRuntimeDir     = "./bin/runtime"
+	defaultDatabaseCacheDir       = "./bin/cache"
+	defaultDatabaseDataDir        = "./bin/data"
 	defaultDatabaseUser           = "postgres"
 	defaultDatabaseName           = "postgres"
 	defaultDatabaseVersion        = embeddedpostgres.V15
@@ -45,7 +47,9 @@ const (
 var (
 	defaultDatabasePassword   = algorithms.String(18) // Generate a random password for the database user
 	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
-	argDatabaseDir            = pflag.String("database-dir", defaultDatabaseDir, "path to the database")
+	argDatabaseRuntimeDir     = pflag.String("database-runtime-dir", defaultDatabaseRuntimeDir, "directory where the embedded PostgreSQL runtime files are stored")
+	argDatabaseCacheDir       = pflag.String("database-cache-dir", defaultDatabaseCacheDir, "directory where the embedded PostgreSQL cache files are stored")
+	argDatabaseDataDir        = pflag.String("database-data-dir", defaultDatabaseDataDir, "directory where the embedded PostgreSQL data files are stored")
 	argDatabaseVersion        = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
 	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
 	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the embedded PostgreSQL database")
@@ -127,16 +131,28 @@ func DatabaseExtensionsDir() string {
 	return *argExtensionsDir
 }
 
-func DatabaseDir() string {
-	if len(*argDatabaseDir) == 0 {
-		return defaultDatabaseDir
+func DatabaseRuntimeDir() string {
+	if len(*argDatabaseRuntimeDir) == 0 {
+		return defaultDatabaseRuntimeDir
 	}
 
-	return *argDatabaseDir
+	return *argDatabaseRuntimeDir
+}
+
+func DatabaseCacheDir() string {
+	if len(*argDatabaseCacheDir) == 0 {
+		return defaultDatabaseCacheDir
+	}
+
+	return *argDatabaseCacheDir
 }
 
 func DatabaseDataDir() string {
-	return fmt.Sprintf("%s/data", DatabaseDir())
+	if len(*argDatabaseDataDir) == 0 {
+		return defaultDatabaseDataDir
+	}
+
+	return *argDatabaseDataDir
 }
 
 func DatabaseVersion() embeddedpostgres.PostgresVersion {
