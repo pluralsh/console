@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgconn"
 	"net/url"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgconn"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
