@@ -3,7 +3,9 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgconn"
 	"net/url"
 	"strings"
 
@@ -15,6 +17,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const ERRCODE_DATABES_NOT_FOUND = "3D000"
 
 type client struct {
 	ctx        context.Context
@@ -123,6 +127,10 @@ func (c *client) DeleteDatabase(dbName string) error {
 	// Drop the database
 	_, err = db.Exec(fmt.Sprintf(`DROP DATABASE "%s"`, dbName))
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == ERRCODE_DATABES_NOT_FOUND {
+			return nil
+		}
 		return fmt.Errorf("failed to drop database %q: %w", dbName, err)
 	}
 

@@ -123,7 +123,6 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	pending := 0
 	for _, db := range user.Spec.Databases {
 		exists, err = r.PostgresClient.DatabaseExists(db)
 		if err != nil {
@@ -132,7 +131,6 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			return ctrl.Result{}, err
 		}
 		if !exists {
-			pending++
 			continue
 		}
 		if err := r.PostgresClient.SetDatabaseOwner(db, user.UserName()); err != nil {
@@ -157,10 +155,7 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(user.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	if pending > 0 {
-		return requeue, nil
-	}
-	return ctrl.Result{}, nil
+	return requeue, nil
 }
 
 func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.PostgresUser) error {
