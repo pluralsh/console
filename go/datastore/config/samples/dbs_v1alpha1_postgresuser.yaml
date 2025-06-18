@@ -1,0 +1,87 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresUser
+metadata:
+  labels:
+    app.kubernetes.io/name: postgresuser
+    app.kubernetes.io/instance: postgresuser-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: postgresuser-sample
+spec:
+  name: test
+  credentialsRef:
+    name: postgrescredentials-sample
+  databases: ["test1", "test2"]
+  passwordSecretKeyRef:
+    name: user-secret
+    key: password
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: user-secret
+  namespace: default
+data:
+  password: aGFzTDAK
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: postgresdatabase
+    app.kubernetes.io/instance: postgresdatabase-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: test1
+  namespace: default
+spec:
+  name: test1
+  credentialsRef:
+    name: postgrescredentials-sample
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: postgresdatabase
+    app.kubernetes.io/instance: postgresdatabase-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: test2
+spec:
+  name: test2
+  credentialsRef:
+    name: postgrescredentials-sample
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresCredentials
+metadata:
+  labels:
+    app.kubernetes.io/name: postgrescredentials
+    app.kubernetes.io/instance: postgrescredentials-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: postgrescredentials-sample
+  namespace: default
+spec:
+  host: 127.0.0.1
+  port: 5454
+  username: postgres
+  database: postgres
+  insecure: true
+  passwordSecretKeyRef:
+    name: postgres-secret
+    key: password
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: default
+data:
+  password: bDdDSWQ5TGdYbnJlUlM1NjA4OGk4UzI2Cg==

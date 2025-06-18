@@ -63,12 +63,12 @@ func (r *PostgresCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.
 	}()
 
 	if !credentials.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, credentials)
+		return r.handleDelete(ctx, credentials)
 	}
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
-		logger.V(5).Error(err, "failed to get password")
+		logger.V(7).Error(err, "failed to get password")
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
 	if err := utils.TryAddFinalizer(ctx, r.Client, secret, PostgresSecretProtectionFinalizerName); err != nil {
@@ -85,9 +85,8 @@ func (r *PostgresCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if err := r.PostgresClient.Ping(); err != nil {
-		logger.Error(err, "failed to connect to Postgres")
-		utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		logger.V(5).Error(err, "failed to connect to Postgres")
+		return handleRequeue(&requeue, err, credentials.SetCondition)
 	}
 
 	logger.Info("Successfully connected to Postgres")
@@ -107,25 +106,54 @@ func (r *PostgresCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Complete(r)
 }
 
-func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.PostgresCredentials) error {
+func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.PostgresCredentials) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(credentials, PostgresDatabaseProtectionFinalizerName) {
 		dbList := &v1alpha1.PostgresDatabaseList{}
 		if err := r.List(ctx, dbList, client.InNamespace(credentials.Namespace)); err != nil {
-			return err
+			return ctrl.Result{}, err
 		}
+		var deletingAny bool
 		for _, db := range dbList.Items {
 			if strings.EqualFold(db.Spec.CredentialsRef.Name, credentials.Name) {
-				if err := r.Client.Delete(ctx, &db); err != nil {
-					return err
+				deletingAny = true
+				if db.DeletionTimestamp.IsZero() {
+					if err := r.Client.Delete(ctx, &db); err != nil {
+						return ctrl.Result{}, err
+					}
 				}
 			}
+		}
+		if deletingAny {
+			return waitForResources, nil
 		}
 		utils.RemoveFinalizer(credentials, PostgresDatabaseProtectionFinalizerName)
 	}
 
+	if controllerutil.ContainsFinalizer(credentials, PostgresUserProtectionFinalizerName) {
+		userList := &v1alpha1.PostgresUserList{}
+		if err := r.List(ctx, userList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		var deletingAny bool
+		for _, usr := range userList.Items {
+			if strings.EqualFold(usr.Spec.CredentialsRef.Name, credentials.Name) {
+				deletingAny = true
+				if usr.DeletionTimestamp.IsZero() {
+					if err := r.Client.Delete(ctx, &usr); err != nil {
+						return ctrl.Result{}, err
+					}
+				}
+			}
+		}
+		if deletingAny {
+			return waitForResources, nil
+		}
+		utils.RemoveFinalizer(credentials, PostgresUserProtectionFinalizerName)
+	}
+
 	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name, PostgresSecretProtectionFinalizerName); err != nil {
-		return err
+		return ctrl.Result{}, err
 	}
 	utils.RemoveFinalizer(credentials, PostgresCredentialsProtectionFinalizerName)
-	return nil
+	return ctrl.Result{}, nil
 }

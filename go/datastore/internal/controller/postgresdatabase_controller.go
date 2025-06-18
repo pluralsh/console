@@ -6,7 +6,6 @@ import (
 
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -70,19 +69,20 @@ func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return handleRequeue(nil, err, db.SetCondition)
 	}
 
+	if err := r.addOrRemoveFinalizer(ctx, db, credentials); err != nil {
+		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	if !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		err := fmt.Errorf("unauthorized or unhealthy Postgres")
 		logger.V(5).Info(err.Error())
 		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return waitForResources, nil
 	}
 
 	if err = r.PostgresClient.Init(ctx, r.Client, credentials); err != nil {
 		logger.Error(err, "failed to create Postgres client")
-		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-	if err := r.addOrRemoveFinalizer(ctx, db, credentials); err != nil {
 		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -118,9 +118,7 @@ func (r *PostgresDatabaseReconciler) addOrRemoveFinalizer(ctx context.Context, d
 
 func (r *PostgresDatabaseReconciler) handleDelete(database *v1alpha1.PostgresDatabase) error {
 	if err := r.PostgresClient.DeleteDatabase(database.DatabaseName()); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
+		return err
 	}
 
 	controllerutil.RemoveFinalizer(database, PostgresDatabaseProtectionFinalizerName)

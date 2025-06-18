@@ -4,10 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"net/url"
 	"strings"
 
@@ -28,8 +24,12 @@ type client struct {
 type Client interface {
 	Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.PostgresCredentials) error
 	Ping() error
+	DatabaseExists(database string) (bool, error)
 	DeleteDatabase(dbName string) error
 	UpsertDatabase(dbName string) error
+	UpsertUser(username, password string) error
+	DeleteUser(username string) error
+	SetDatabaseOwner(database, username string) error
 }
 
 func New() Client {
@@ -53,7 +53,7 @@ func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials 
 		Scheme: "postgres",
 		User:   url.UserPassword(credentials.Spec.Username, password),
 		Host:   fmt.Sprintf("%s:%d", credentials.Spec.Host, credentials.Spec.Port),
-		Path:   "postgres",
+		Path:   credentials.Spec.Database,
 	}
 
 	q := u.Query()
@@ -93,6 +93,13 @@ func (c *client) DeleteDatabase(dbName string) error {
 	if err != nil {
 		return err
 	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
 	// Check if database exists
 	query := `SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1);`
 	if err := db.QueryRow(query, dbName).Scan(&exists); err != nil {
@@ -100,11 +107,7 @@ func (c *client) DeleteDatabase(dbName string) error {
 	}
 
 	if !exists {
-		// Return a Kubernetes-style NotFound error
-		return k8serrors.NewNotFound(
-			schema.GroupResource{Group: "database", Resource: "PostgreSQLDatabase"},
-			dbName,
-		)
+		return nil
 	}
 
 	// Terminate existing connections to the database
@@ -127,26 +130,188 @@ func (c *client) DeleteDatabase(dbName string) error {
 }
 
 func (c *client) UpsertDatabase(dbName string) error {
-	var exists bool
 	db, err := sql.Open("pgx", c.connection)
 	if err != nil {
 		return err
 	}
+	defer func(db *sql.DB) {
+		if err := db.Close(); err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
 
-	query := `SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1);`
-	err = db.QueryRow(query, dbName).Scan(&exists)
+	// Check if database exists
+	var exists bool
+	err = db.QueryRow(`SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = $1)`, dbName).Scan(&exists)
 	if err != nil {
 		return fmt.Errorf("checking database existence: %w", err)
 	}
 
 	if exists {
+		ctrl.LoggerFrom(c.ctx).Info("database already exists", "database", dbName)
 		return nil
 	}
 
-	// Create the database
+	// Create database
 	_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE "%s"`, dbName))
 	if err != nil {
 		return fmt.Errorf("creating database: %w", err)
+	}
+
+	ctrl.LoggerFrom(c.ctx).Info("database created", "database", dbName)
+	return nil
+}
+
+func (c *client) DatabaseExists(database string) (bool, error) {
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return false, err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	var exists bool
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT 1 FROM pg_database WHERE datname = $1
+		)
+	`, database).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("checking database existence: %w", err)
+	}
+
+	return exists, nil
+}
+
+func (c *client) UpsertUser(username, password string) error {
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	// Check if user exists
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = $1)`
+	err = db.QueryRow(query, username).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("checking user existence: %w", err)
+	}
+
+	if exists {
+		// Update password
+		_, err = db.Exec(fmt.Sprintf(`ALTER USER "%s" WITH PASSWORD '%s'`, username, password))
+		if err != nil {
+			return fmt.Errorf("updating user password: %w", err)
+		}
+		return nil
+	}
+
+	// Create new user
+	_, err = db.Exec(fmt.Sprintf(`CREATE USER "%s" WITH PASSWORD '%s'`, username, password))
+	if err != nil {
+		return fmt.Errorf("creating user: %w", err)
+	}
+	ctrl.LoggerFrom(c.ctx).Info("created user", "user", username)
+
+	return nil
+}
+
+func (c *client) DeleteUser(username string) error {
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	// Get databases owned by the user
+	rows, err := db.Query(`
+		SELECT datname FROM pg_database
+		WHERE pg_catalog.pg_get_userbyid(datdba) = $1
+	`, username)
+	if err != nil {
+		return fmt.Errorf("listing databases owned by user: %w", err)
+	}
+	defer rows.Close()
+
+	var databases []string
+	for rows.Next() {
+		var datname string
+		if err := rows.Scan(&datname); err != nil {
+			return fmt.Errorf("scanning database name: %w", err)
+		}
+		databases = append(databases, datname)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	// Drop each owned database
+	for _, dbName := range databases {
+		_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s"`, dbName))
+		if err != nil {
+			return fmt.Errorf("dropping owned database %s: %w", dbName, err)
+		}
+		ctrl.LoggerFrom(c.ctx).Info("dropped owned database", "database", dbName)
+	}
+
+	// Drop user
+	_, err = db.Exec(fmt.Sprintf(`DROP USER IF EXISTS "%s"`, username))
+	if err != nil {
+		return fmt.Errorf("dropping user: %w", err)
+	}
+	ctrl.LoggerFrom(c.ctx).Info("user deleted", "username", username)
+
+	return nil
+}
+
+func (c *client) SetDatabaseOwner(database, username string) error {
+	db, err := sql.Open("pgx", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	// Get current owner
+	var currentOwner string
+	err = db.QueryRow(`
+		SELECT pg_catalog.pg_get_userbyid(d.datdba)
+		FROM pg_catalog.pg_database d
+		WHERE d.datname = $1
+	`, database).Scan(&currentOwner)
+	if err != nil {
+		return fmt.Errorf("fetching database owner: %w", err)
+	}
+
+	// Only update if different
+	if currentOwner == username {
+		return nil
+	}
+
+	// Set new owner
+	query := fmt.Sprintf(`ALTER DATABASE "%s" OWNER TO "%s"`, database, username)
+	_, err = db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("setting database owner: %w", err)
 	}
 
 	return nil

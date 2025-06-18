@@ -13,6 +13,7 @@ rules:
   - elasticsearchusers
   - postgrescredentials
   - postgresdatabases
+  - postgresusers
   verbs:
   - create
   - delete
@@ -30,6 +31,7 @@ rules:
   - elasticsearchusers/finalizers
   - postgrescredentials/finalizers
   - postgresdatabases/finalizers
+  - postgresusers/finalizers
   verbs:
   - update
 - apiGroups:
@@ -41,6 +43,7 @@ rules:
   - elasticsearchusers/status
   - postgrescredentials/status
   - postgresdatabases/status
+  - postgresusers/status
   verbs:
   - get
   - patch
