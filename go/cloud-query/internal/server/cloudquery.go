@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -38,30 +39,30 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 }
 
 // Query implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Query(input *cloudquery.QueryInput, stream cloudquery.CloudQuery_QueryServer) error {
+func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryOutput, error) {
 	provider, err := in.toProvider(input)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
-		return status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
 	}
 
 	configuration, err := in.toConnectionConfiguration(provider, input.Connection)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
-		return status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
 	}
 
 	c, err := in.pool.Connect(configuration)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to connect to provider", "provider", provider)
-		return status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
+		return nil, status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
 	}
 
-	return in.handleQuery(c, input.GetQuery(), stream)
+	return in.handleQuery(c, input.GetQuery())
 }
 
 // Schema implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
+func (in *CloudQueryService) Schema(_ context.Context, input *cloudquery.SchemaInput) (*cloudquery.SchemaOutput, error) {
 	// TODO: implement proper Schema functionality. See Query on how to handle streaming output.
 
 	// Log the request
@@ -72,17 +73,7 @@ func (in *CloudQueryService) Schema(input *cloudquery.SchemaInput, stream grpc.S
 
 	klog.V(log.LogLevelDebug).InfoS("received schema request", "provider", provider, "input", input)
 
-	// Generate some mock schema results based on the provider
-	switch strings.ToLower(provider) {
-	case "aws":
-		return handleAWSSchema(input, stream)
-	case "azure":
-		return handleAzureSchema(input, stream)
-	case "gcp":
-		return handleGCPSchema(input, stream)
-	default:
-		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
-	}
+	return nil, status.Errorf(codes.Unimplemented, "schema extraction is not implemented for provider: %s", provider)
 }
 
 // Extract implements the cloudquery.CloudQueryServer interface
@@ -143,41 +134,30 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 	}
 }
 
-func (in *CloudQueryService) handleQuery(c connection.Connection, query string, stream cloudquery.CloudQuery_QueryServer) error {
+func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryOutput, error) {
 	columns, rows, err := c.Query(query)
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to execute query", "query", query)
-		return status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
+		return nil, status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
 	}
 	klog.V(log.LogLevelDebug).InfoS("found query results", "rows", len(rows))
 
-	output := &cloudquery.QueryOutput{
-		Columns: columns,
-	}
-
-	if len(rows) == 0 {
-		return stream.Send(output)
-	}
-
+	result := make([]*cloudquery.QueryResult, 0, len(rows))
 	for _, row := range rows {
-		result := make(map[string]string)
+		res := make(map[string]string)
 		for i, col := range columns {
-			result[col] = in.formatValue(row[i])
+			res[col] = in.formatValue(row[i])
 		}
 
-		output = &cloudquery.QueryOutput{
+		result = append(result, &cloudquery.QueryResult{
 			Columns: columns,
-			Result:  result,
-		}
-
-		klog.V(log.LogLevelTrace).InfoS("sending query output", "output", output)
-		if err = stream.Send(output); err != nil {
-			klog.V(log.LogLevelVerbose).ErrorS(err, "failed to stream query output")
-			return status.Errorf(codes.Internal, "failed to send query output: %v", err)
-		}
+			Result:  res,
+		})
 	}
 
-	return nil
+	return &cloudquery.QueryOutput{
+		Result: result,
+	}, nil
 }
 
 func (in *CloudQueryService) formatValue(value any) string {
@@ -202,108 +182,6 @@ func (in *CloudQueryService) formatValue(value any) string {
 
 		return fmt.Sprintf("%v", v)
 	}
-}
-
-// AWS schema handler
-func handleAWSSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
-	// AWS EC2 instances table schema
-	ec2Schema := &cloudquery.SchemaOutput{
-		Table: "aws_ec2_instances",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "instance_id", Type: "string"},
-			{Column: "instance_type", Type: "string"},
-			{Column: "state", Type: "string"},
-			{Column: "region", Type: "string"},
-			{Column: "availability_zone", Type: "string"},
-			{Column: "launch_time", Type: "timestamp"},
-		},
-	}
-
-	if err := stream.Send(ec2Schema); err != nil {
-		return err
-	}
-
-	// AWS S3 buckets table schema
-	s3Schema := &cloudquery.SchemaOutput{
-		Table: "aws_s3_buckets",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "bucket_name", Type: "string"},
-			{Column: "creation_date", Type: "date"},
-			{Column: "region", Type: "string"},
-			{Column: "owner_id", Type: "string"},
-			{Column: "public_access_blocked", Type: "boolean"},
-		},
-	}
-
-	return stream.Send(s3Schema)
-}
-
-// Azure schema handler
-func handleAzureSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
-	// Azure VMs table schema
-	vmSchema := &cloudquery.SchemaOutput{
-		Table: "azure_compute_virtual_machines",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "vm_name", Type: "string"},
-			{Column: "vm_size", Type: "string"},
-			{Column: "status", Type: "string"},
-			{Column: "location", Type: "string"},
-			{Column: "resource_group", Type: "string"},
-			{Column: "os_type", Type: "string"},
-		},
-	}
-
-	if err := stream.Send(vmSchema); err != nil {
-		return err
-	}
-
-	// Azure Storage accounts table schema
-	storageSchema := &cloudquery.SchemaOutput{
-		Table: "azure_storage_accounts",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "name", Type: "string"},
-			{Column: "location", Type: "string"},
-			{Column: "resource_group", Type: "string"},
-			{Column: "kind", Type: "string"},
-			{Column: "access_tier", Type: "string"},
-		},
-	}
-
-	return stream.Send(storageSchema)
-}
-
-// GCP schema handler
-func handleGCPSchema(input *cloudquery.SchemaInput, stream grpc.ServerStreamingServer[cloudquery.SchemaOutput]) error {
-	// GCP Compute instances table schema
-	computeSchema := &cloudquery.SchemaOutput{
-		Table: "gcp_compute_instances",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "instance_name", Type: "string"},
-			{Column: "machine_type", Type: "string"},
-			{Column: "status", Type: "string"},
-			{Column: "zone", Type: "string"},
-			{Column: "project_id", Type: "string"},
-			{Column: "creation_timestamp", Type: "timestamp"},
-		},
-	}
-
-	if err := stream.Send(computeSchema); err != nil {
-		return err
-	}
-
-	// GCP Storage buckets table schema
-	storageSchema := &cloudquery.SchemaOutput{
-		Table: "gcp_storage_buckets",
-		Columns: []*cloudquery.SchemaColumn{
-			{Column: "name", Type: "string"},
-			{Column: "location", Type: "string"},
-			{Column: "storage_class", Type: "string"},
-			{Column: "created_at", Type: "timestamp"},
-			{Column: "project", Type: "string"},
-		},
-	}
-
-	return stream.Send(storageSchema)
 }
 
 // AWS extract handler

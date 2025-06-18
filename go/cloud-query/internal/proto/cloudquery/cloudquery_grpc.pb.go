@@ -30,8 +30,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CloudQueryClient interface {
-	Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[QueryOutput], error)
-	Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SchemaOutput], error)
+	Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryOutput, error)
+	Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (*SchemaOutput, error)
 	Extract(ctx context.Context, in *ExtractInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ExtractOutput], error)
 }
 
@@ -43,47 +43,29 @@ func NewCloudQueryClient(cc grpc.ClientConnInterface) CloudQueryClient {
 	return &cloudQueryClient{cc}
 }
 
-func (c *cloudQueryClient) Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[QueryOutput], error) {
+func (c *cloudQueryClient) Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryOutput, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CloudQuery_ServiceDesc.Streams[0], CloudQuery_Query_FullMethodName, cOpts...)
+	out := new(QueryOutput)
+	err := c.cc.Invoke(ctx, CloudQuery_Query_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[QueryInput, QueryOutput]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
+	return out, nil
 }
 
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CloudQuery_QueryClient = grpc.ServerStreamingClient[QueryOutput]
-
-func (c *cloudQueryClient) Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SchemaOutput], error) {
+func (c *cloudQueryClient) Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (*SchemaOutput, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CloudQuery_ServiceDesc.Streams[1], CloudQuery_Schema_FullMethodName, cOpts...)
+	out := new(SchemaOutput)
+	err := c.cc.Invoke(ctx, CloudQuery_Schema_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[SchemaInput, SchemaOutput]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
+	return out, nil
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CloudQuery_SchemaClient = grpc.ServerStreamingClient[SchemaOutput]
 
 func (c *cloudQueryClient) Extract(ctx context.Context, in *ExtractInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ExtractOutput], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CloudQuery_ServiceDesc.Streams[2], CloudQuery_Extract_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CloudQuery_ServiceDesc.Streams[0], CloudQuery_Extract_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +86,8 @@ type CloudQuery_ExtractClient = grpc.ServerStreamingClient[ExtractOutput]
 // All implementations must embed UnimplementedCloudQueryServer
 // for forward compatibility.
 type CloudQueryServer interface {
-	Query(*QueryInput, grpc.ServerStreamingServer[QueryOutput]) error
-	Schema(*SchemaInput, grpc.ServerStreamingServer[SchemaOutput]) error
+	Query(context.Context, *QueryInput) (*QueryOutput, error)
+	Schema(context.Context, *SchemaInput) (*SchemaOutput, error)
 	Extract(*ExtractInput, grpc.ServerStreamingServer[ExtractOutput]) error
 	mustEmbedUnimplementedCloudQueryServer()
 }
@@ -117,11 +99,11 @@ type CloudQueryServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCloudQueryServer struct{}
 
-func (UnimplementedCloudQueryServer) Query(*QueryInput, grpc.ServerStreamingServer[QueryOutput]) error {
-	return status.Errorf(codes.Unimplemented, "method Query not implemented")
+func (UnimplementedCloudQueryServer) Query(context.Context, *QueryInput) (*QueryOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
-func (UnimplementedCloudQueryServer) Schema(*SchemaInput, grpc.ServerStreamingServer[SchemaOutput]) error {
-	return status.Errorf(codes.Unimplemented, "method Schema not implemented")
+func (UnimplementedCloudQueryServer) Schema(context.Context, *SchemaInput) (*SchemaOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Schema not implemented")
 }
 func (UnimplementedCloudQueryServer) Extract(*ExtractInput, grpc.ServerStreamingServer[ExtractOutput]) error {
 	return status.Errorf(codes.Unimplemented, "method Extract not implemented")
@@ -147,27 +129,41 @@ func RegisterCloudQueryServer(s grpc.ServiceRegistrar, srv CloudQueryServer) {
 	s.RegisterService(&CloudQuery_ServiceDesc, srv)
 }
 
-func _CloudQuery_Query_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(QueryInput)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _CloudQuery_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryInput)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(CloudQueryServer).Query(m, &grpc.GenericServerStream[QueryInput, QueryOutput]{ServerStream: stream})
+	if interceptor == nil {
+		return srv.(CloudQueryServer).Query(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudQuery_Query_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudQueryServer).Query(ctx, req.(*QueryInput))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CloudQuery_QueryServer = grpc.ServerStreamingServer[QueryOutput]
-
-func _CloudQuery_Schema_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SchemaInput)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _CloudQuery_Schema_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SchemaInput)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(CloudQueryServer).Schema(m, &grpc.GenericServerStream[SchemaInput, SchemaOutput]{ServerStream: stream})
+	if interceptor == nil {
+		return srv.(CloudQueryServer).Schema(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudQuery_Schema_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudQueryServer).Schema(ctx, req.(*SchemaInput))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CloudQuery_SchemaServer = grpc.ServerStreamingServer[SchemaOutput]
 
 func _CloudQuery_Extract_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ExtractInput)
@@ -186,18 +182,17 @@ type CloudQuery_ExtractServer = grpc.ServerStreamingServer[ExtractOutput]
 var CloudQuery_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "cloudquery.CloudQuery",
 	HandlerType: (*CloudQueryServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Query",
+			Handler:    _CloudQuery_Query_Handler,
+		},
+		{
+			MethodName: "Schema",
+			Handler:    _CloudQuery_Schema_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Query",
-			Handler:       _CloudQuery_Query_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "Schema",
-			Handler:       _CloudQuery_Schema_Handler,
-			ServerStreams: true,
-		},
 		{
 			StreamName:    "Extract",
 			Handler:       _CloudQuery_Extract_Handler,
