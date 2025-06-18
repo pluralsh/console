@@ -9687,9 +9687,13 @@ export type ServiceTemplate = {
   name?: Maybe<Scalars['String']['output']>;
   /** the namespace for this service (optional for managed namespaces) */
   namespace?: Maybe<Scalars['String']['output']>;
+  /** a list of renderers to render manifests for the created service */
+  renderers?: Maybe<Array<Maybe<Renderer>>>;
   repository?: Maybe<GitRepository>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: Maybe<Scalars['ID']['output']>;
+  /** a list of sources to source manifests for the created service */
+  sources?: Maybe<Array<Maybe<ServiceSource>>>;
   /** specification of how the templated service will be synced */
   syncConfig?: Maybe<SyncConfig>;
   templated?: Maybe<Scalars['Boolean']['output']>;
@@ -9715,8 +9719,12 @@ export type ServiceTemplateAttributes = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   /** whether to protect this templated service from deletion */
   protect?: InputMaybe<Scalars['Boolean']['input']>;
+  /** a list of renderers to render manifests for this service */
+  renderers?: InputMaybe<Array<InputMaybe<RendererAttributes>>>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** a list of sources to source manifests for this service */
+  sources?: InputMaybe<Array<InputMaybe<ServiceSourceAttributes>>>;
   /** attributes to configure sync settings for this service */
   syncConfig?: InputMaybe<SyncConfigAttributes>;
   templated?: InputMaybe<Scalars['Boolean']['input']>;

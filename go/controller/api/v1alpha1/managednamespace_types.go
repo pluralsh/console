@@ -108,6 +108,14 @@ type ServiceTemplate struct {
 	// Configuration is a set of non-secret service specific configuration useful for templating
 	// +kubebuilder:validation:Optional
 	Configuration map[string]string `json:"configuration,omitempty"`
+
+	// Sources of this service
+	// +kubebuilder:validation:Optional
+	Sources []Source `json:"sources,omitempty"`
+
+	// Renderers of this service
+	// +kubebuilder:validation:Optional
+	Renderers []Renderer `json:"renderers,omitempty"`
 }
 
 // +kubebuilder:object:root=true

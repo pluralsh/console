@@ -3049,6 +3049,12 @@ input ServiceTemplateAttributes {
 
   "attributes to configure sync settings for this service"
   syncConfig: SyncConfigAttributes
+
+  "a list of sources to source manifests for this service"
+  sources: [ServiceSourceAttributes]
+
+  "a list of renderers to render manifests for this service"
+  renderers: [RendererAttributes]
 }
 
 "A spec for targeting clusters"
@@ -3185,6 +3191,12 @@ type ServiceTemplate {
   repository: GitRepository
 
   dependencies: [ServiceDependency]
+
+  "a list of sources to source manifests for the created service"
+  sources: [ServiceSource]
+
+  "a list of renderers to render manifests for the created service"
+  renderers: [Renderer]
 
   "possibly secret configuration for all spawned services, don't query this in list endpoints"
   configuration: [ServiceConfiguration]
