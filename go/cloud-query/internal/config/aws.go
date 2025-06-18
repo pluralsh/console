@@ -9,6 +9,7 @@ import (
 
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
@@ -51,7 +52,7 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 
 	out := new(strings.Builder)
 	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":   "postgres",
+		"DatabaseName":   args.DatabaseName(),
 		"ConnectionName": connectionName,
 		"AccessKey":      c.AccessKeyId(),
 		"SecretKey":      c.SecretAccessKey(),

@@ -7,8 +7,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/cmd/args"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 type GCPConfiguration struct {
@@ -39,7 +41,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 
 	out := new(strings.Builder)
 	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":           "postgres",
+		"DatabaseName":           args.DatabaseName(),
 		"ConnectionName":         connectionName,
 		"ImpersonateAccessToken": c.ImpersonateAccessToken(),
 	})

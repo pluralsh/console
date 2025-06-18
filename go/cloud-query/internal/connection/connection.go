@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 
@@ -16,7 +17,7 @@ import (
 
 const driverName = "postgres"
 
-var defaultDataSource = common.DataSource(args.DatabasePort(), "postgres", "postgres") // TODO: Change password.
+var defaultDataSource = common.DataSource(args.DatabasePort(), args.DatabaseUser(), args.DatabasePassword())
 
 type Connection interface {
 	Configure(config config.Configuration) error

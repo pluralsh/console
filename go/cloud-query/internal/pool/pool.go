@@ -92,7 +92,7 @@ func (c *ConnectionPool) setup(user, password, schema, provider string) error {
 		"User":     user,
 		"Password": password,
 		"Schema":   schema,
-		"Database": "postgres",
+		"Database": args.DatabaseName(),
 		"Provider": provider,
 	}); err != nil {
 		return fmt.Errorf("error executing template: %w", err)

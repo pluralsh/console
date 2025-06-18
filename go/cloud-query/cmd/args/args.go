@@ -7,6 +7,7 @@ import (
 	"time"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
@@ -31,6 +32,8 @@ func init() {
 const (
 	defaultExtensionsDir          = "./bin"
 	defaultDatabaseDir            = "./bin/pg"
+	defaultDatabaseUser           = "postgres"
+	defaultDatabaseName           = "postgres"
 	defaultDatabaseVersion        = embeddedpostgres.V15
 	defaultDatabasePort           = 5432
 	defaultDatabaseMaxConnections = 200
@@ -40,10 +43,14 @@ const (
 )
 
 var (
+	defaultDatabasePassword   = algorithms.String(18) // Generate a random password for the database user
 	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
 	argDatabaseDir            = pflag.String("database-dir", defaultDatabaseDir, "path to the database")
 	argDatabaseVersion        = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
 	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
+	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the embedded PostgreSQL database")
+	argDatabasePassword       = pflag.String("database-password", defaultDatabasePassword, "default password for the embedded PostgreSQL database")
+	argDatabaseName           = pflag.String("database-name", defaultDatabaseName, "default database name for the embedded PostgreSQL database")
 	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")
 	argConnectionTTL          = pflag.Duration("connection-ttl", defaultConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
 	argServerAddress          = pflag.String("server-address", "", "address on which the gRPC server will listen, leave empty to use the default (:9192)")
@@ -78,6 +85,30 @@ func ServerTLSKeyPath() string {
 	}
 
 	return *argServerTLSKeyPath
+}
+
+func DatabaseUser() string {
+	if len(*argDatabaseUser) == 0 {
+		return defaultDatabaseUser
+	}
+
+	return *argDatabaseUser
+}
+
+func DatabasePassword() string {
+	if len(*argDatabasePassword) == 0 {
+		return defaultDatabasePassword
+	}
+
+	return *argDatabasePassword
+}
+
+func DatabaseName() string {
+	if len(*argDatabaseName) == 0 {
+		return defaultDatabaseName
+	}
+
+	return *argDatabaseName
 }
 
 func DatabaseMaxConnections() string {

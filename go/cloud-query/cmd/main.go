@@ -19,6 +19,9 @@ import (
 func main() {
 	db := embeddedpostgres.NewDatabase(
 		embeddedpostgres.DefaultConfig().
+			Username(args.DatabaseUser()).
+			Password(args.DatabasePassword()).
+			Database(args.DatabaseName()).
 			Port(args.DatabasePort()).
 			BinariesPath(args.DatabaseDir()).
 			RuntimePath(args.DatabaseDir()).
