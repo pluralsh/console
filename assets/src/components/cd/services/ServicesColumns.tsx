@@ -1,5 +1,6 @@
 import {
   DryRunIcon,
+  Flex,
   GearTrainIcon,
   GitHubLogoIcon,
   GlobeIcon,
@@ -241,10 +242,13 @@ export const ColErrors = columnHelper.accessor(
         original: { node },
       },
     }) => (
-      <div>
+      <Flex
+        direction="column"
+        gap="xsmall"
+      >
         <ServicesTableErrors service={node} />
         <ServiceDeprecations service={node} />
-      </div>
+      </Flex>
     ),
   }
 )
