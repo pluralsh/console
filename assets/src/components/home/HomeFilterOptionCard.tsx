@@ -65,7 +65,7 @@ const CardSC = styled(Card)(({ theme, selected }) => ({
   }),
   flex: 1,
   minWidth: '25%',
-  [`@media (max-width: 1400px)`]: {
+  [`@media (max-width: ${theme.breakpoints.desktopLarge}px)`]: {
     minWidth: '33%',
   },
 }))

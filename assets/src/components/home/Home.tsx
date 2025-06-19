@@ -25,10 +25,11 @@ import {
   VersionCompliance,
 } from 'generated/graphql.ts'
 import { useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
   ClusterHealthScoresFilterBtns,
+  ClusterHealthScoresHeatmap,
   HealthScoreFilterLabel,
   healthScoreLabelToRange,
 } from './clusteroverview/ClusterHealthScoresHeatmap.tsx'
@@ -48,6 +49,7 @@ enum HomeScreenTab {
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
+  const { spacing } = useTheme()
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
   // we don't want a double popup, and cloud setup would come first if relevant
@@ -98,7 +100,7 @@ export function Home() {
       height="100%"
     >
       <ChartSectionSC>
-        <WidthLimiterSC css={{ display: 'flex' }}>
+        <WidthLimiterSC css={{ display: 'flex', gap: spacing.large }}>
           <Flex
             flex={1}
             gap="medium"
@@ -125,12 +127,20 @@ export function Home() {
               />
             )}
           </Flex>
-          <ClusterUpgradesChart
-            selectedFilter={upgradeFilterOption}
-            data={upgradeData}
-            loading={upgradeLoading}
-            error={upgradeError}
-          />
+          <ChartWrapperSC>
+            {tab === HomeScreenTab.Upgrades && (
+              <ClusterUpgradesChart
+                data={upgradeData}
+                loading={upgradeLoading}
+                error={upgradeError}
+                selectedFilter={upgradeFilterOption}
+                onClick={setUpgradeFilterOption}
+              />
+            )}
+            {tab === HomeScreenTab.HealthScores && (
+              <ClusterHealthScoresHeatmap />
+            )}
+          </ChartWrapperSC>
         </WidthLimiterSC>
       </ChartSectionSC>
       <TableSectionSC>
@@ -158,6 +168,16 @@ export function Home() {
     </Flex>
   )
 }
+
+const ChartWrapperSC = styled.div(({ theme }) => ({
+  flex: 1,
+  maxWidth: 425,
+  height: 240,
+  [`@media (max-width: ${theme.breakpoints.desktopLarge}px)`]: {
+    height: 304,
+  },
+  '& g:first-of-type': { cursor: 'pointer' },
+}))
 
 const ChartSectionSC = styled.div(({ theme }) => ({
   display: 'flex',

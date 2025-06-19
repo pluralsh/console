@@ -14,8 +14,8 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { ApolloError } from '@apollo/client'
 import { EmptyState, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
-import styled from 'styled-components'
 import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
+import chroma from 'chroma-js'
 
 export enum UpgradeChartFilter {
   All = 'all',
@@ -35,11 +35,13 @@ export function ClusterUpgradesChart({
   loading,
   error,
   selectedFilter,
+  onClick,
 }: {
   data: UpgradeStatisticsQuery | undefined
   loading: boolean
   error?: Nullable<ApolloError>
   selectedFilter: UpgradeChartFilter
+  onClick: (filter: UpgradeChartFilter) => void
 }) {
   const chartData = getChartData(data?.upgradeStatistics ?? {})
 
@@ -54,36 +56,37 @@ export function ClusterUpgradesChart({
     return <EmptyState message="Upgrade statistics not found." />
 
   return (
-    <ChartContainerSC>
-      <ResponsiveRadialBar
-        colors={(item) => item.data.color}
-        endAngle={360}
-        cornerRadius={5}
-        padAngle={2}
-        padding={0.3}
-        innerRadius={0.35}
-        tooltip={(props) => (
-          <ChartTooltip
-            color={props.bar.color}
-            value={props.bar.formattedValue}
-            label={props.bar.category}
-          />
-        )}
-        layers={['bars', CenterLabel]}
-        data={chartData}
-      />
-    </ChartContainerSC>
+    <ResponsiveRadialBar
+      colors={(item) =>
+        chroma(item.data.color).alpha(
+          selectedFilter === UpgradeChartFilter.All ||
+            item.data.x === selectedFilter
+            ? 1
+            : 0.6
+        )
+      }
+      endAngle={360}
+      cornerRadius={5}
+      padAngle={2}
+      padding={0.3}
+      innerRadius={0.35}
+      onClick={(bar) =>
+        onClick(
+          bar.data.x === selectedFilter ? UpgradeChartFilter.All : bar.data.x
+        )
+      }
+      tooltip={(props) => (
+        <ChartTooltip
+          color={props.bar.color}
+          value={props.bar.formattedValue}
+          label={props.bar.category}
+        />
+      )}
+      layers={['bars', CenterLabel]}
+      data={chartData}
+    />
   )
 }
-
-const ChartContainerSC = styled.div({
-  flex: 1,
-  maxWidth: 425,
-  height: 240,
-  [`@media (max-width: 1400px)`]: {
-    height: 304,
-  },
-})
 
 export function ClusterUpgradesFilterBtns({
   selectedFilter,
@@ -145,19 +148,19 @@ const getChartData = (data: UpgradeStatisticsFragment) => {
       id: 'version-compliant',
       data: [
         {
-          color: filterToColor[UpgradeChartFilter.Latest],
-          x: 'Latest',
+          x: UpgradeChartFilter.Latest,
           y: aggregatedStats[UpgradeChartFilter.Latest],
+          color: filterToColor[UpgradeChartFilter.Latest],
         },
         {
-          color: filterToColor[UpgradeChartFilter.Compliant],
-          x: 'Version compliant',
+          x: UpgradeChartFilter.Compliant,
           y: aggregatedStats[UpgradeChartFilter.Compliant],
+          color: filterToColor[UpgradeChartFilter.Compliant],
         },
         {
-          color: filterToColor[UpgradeChartFilter.NonCompliant],
-          x: 'Not version compliant',
+          x: UpgradeChartFilter.NonCompliant,
           y: aggregatedStats[UpgradeChartFilter.NonCompliant],
+          color: filterToColor[UpgradeChartFilter.NonCompliant],
         },
       ],
     },
@@ -165,14 +168,14 @@ const getChartData = (data: UpgradeStatisticsFragment) => {
       id: 'upgradeable',
       data: [
         {
-          color: filterToColor[UpgradeChartFilter.Upgradeable],
-          x: 'Upgradeable',
+          x: UpgradeChartFilter.Upgradeable,
           y: aggregatedStats[UpgradeChartFilter.Upgradeable],
+          color: filterToColor[UpgradeChartFilter.Upgradeable],
         },
         {
-          color: filterToColor[UpgradeChartFilter.NotUpgradeable],
-          x: 'Not upgradeable',
+          x: UpgradeChartFilter.NotUpgradeable,
           y: aggregatedStats[UpgradeChartFilter.NotUpgradeable],
+          color: filterToColor[UpgradeChartFilter.NotUpgradeable],
         },
       ],
     },
