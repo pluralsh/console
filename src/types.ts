@@ -10,6 +10,7 @@ export type UserType = {
 export const SEVERITIES = [
   'info',
   'success',
+  'successDark',
   'warning',
   'danger',
   'critical',

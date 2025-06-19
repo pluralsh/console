@@ -1,11 +1,4 @@
-import {
-  Button,
-  type ButtonProps,
-  Div,
-  type DivProps,
-  Section,
-  type SectionProps,
-} from 'honorable'
+import { Div, type DivProps, Section, type SectionProps } from 'honorable'
 import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -82,22 +75,5 @@ function SidecarItem({
   )
 }
 
-function SidecarButton({ ref, ...props }: ButtonProps) {
-  return (
-    <Button
-      ref={ref}
-      tertiary
-      {...{
-        width: '100%',
-        [`> :nth-child(${props.startIcon ? '2' : '1'})`]: {
-          flexGrow: 1,
-          justifyContent: 'start',
-        },
-      }}
-      {...props}
-    />
-  )
-}
-
 export default Sidecar
-export { SidecarButton, SidecarItem }
+export { SidecarItem }

@@ -17,6 +17,7 @@ import {
   useRole,
 } from '@floating-ui/react-dom-interactions'
 import {
+  ComponentPropsWithRef,
   type JSX,
   type ReactNode,
   cloneElement,
@@ -27,8 +28,6 @@ import {
 import { mergeRefs } from 'react-merge-refs'
 import { CSSTransition } from 'react-transition-group'
 import styled, { useTheme } from 'styled-components'
-
-import { type ComponentPropsWithRef } from '@react-spring/web'
 
 import createIcon from './icons/createIcon'
 import WrapWithIf from './WrapWithIf'

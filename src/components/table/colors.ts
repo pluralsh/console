@@ -1,16 +1,17 @@
+import { type SemanticBorderKey } from '../../theme/borders'
 import { TableFillLevel } from './tableUtils'
 
 export const tableFillLevelToBorder = {
-  0: 'fill-two',
-  1: 'fill-three',
-  2: 'fill-three',
-} as const satisfies Record<TableFillLevel, string>
+  0: 'default',
+  1: 'fill-one',
+  2: 'fill-two',
+} as const satisfies Record<TableFillLevel, SemanticBorderKey>
 
-export const tableFillLevelToBorderColor = {
-  0: 'border-fill-two',
-  1: 'border-fill-three',
-  2: 'border-fill-three',
-} as const satisfies Record<TableFillLevel, string>
+export const tableFillLevelToHeaderBorder = {
+  0: 'fill-one',
+  1: 'fill-two',
+  2: 'fill-three',
+} as const satisfies Record<TableFillLevel, SemanticBorderKey>
 
 export const tableFillLevelToBg = {
   0: 'fill-zero',

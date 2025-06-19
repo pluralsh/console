@@ -65,6 +65,7 @@ function Flyover({
               <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
               <IconFrame
                 clickable
+                type="secondary"
                 onClick={onClose}
                 icon={<CloseIcon />}
               />
@@ -134,6 +135,7 @@ const FlyoverHeaderWrapSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  gap: theme.spacing.small,
   height: 56,
   borderBottom: `1px solid ${theme.colors.border}`,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
@@ -142,6 +144,7 @@ const FlyoverHeaderWrapSC = styled.div(({ theme }) => ({
 const FlyoverHeaderSC = styled.h1(({ theme }) => ({
   ...theme.partials.text.subtitle1,
   color: theme.colors.text,
+  flex: 1,
 }))
 
 export default Flyover

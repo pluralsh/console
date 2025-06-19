@@ -1,5 +1,4 @@
-import { type ComponentPropsWithRef } from '@react-spring/web'
-import { useMemo, useRef } from 'react'
+import { ComponentPropsWithRef, useMemo, useRef } from 'react'
 import {
   type AriaSwitchProps,
   VisuallyHidden,

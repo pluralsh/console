@@ -95,11 +95,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           backgroundColor: 'fill-zero',
         },
       ],
-      '&::placeholder': [
-        {
-          color: 'text-xlight',
-        },
-      ],
+      '&::placeholder': [{ color: 'text-xlight' }],
     },
     global: [
       /* Spacing */
@@ -139,15 +135,12 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         ...(body2LooseLineHeight && bold && textPartials.bodyBold),
       }),
       ({ caption }: any) => caption && textPartials.caption,
-      ({ badgeLabel }: any) => badgeLabel && textPartials.badgeLabel,
       ({ overline }: any) => overline && textPartials.overline,
       ({ truncate }: any) => truncate && textPartials.truncate,
     ],
     A: {
       Root: [
-        {
-          color: 'text',
-        },
+        { color: 'text' },
         ({ inline }: any) => inline && textPartials.inlineLink,
       ],
     },
@@ -160,100 +153,12 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         },
       ],
     },
-    ButtonGroup: {
-      Root: [
-        {
-          border: '1px solid border',
-          borderRadius: 4,
-          '& > button': {
-            border: '1px solid transparent',
-          },
-          overflow: 'hidden',
-        },
-        ({ direction }: any) =>
-          direction === 'row' && {
-            '& > button': {
-              borderLeft: '1px solid border',
-              '&:first-of-type': {
-                borderLeft: '1px solid transparent',
-              },
-            },
-          },
-        ({ direction }: any) =>
-          direction === 'column' && {
-            '& > button': {
-              borderTop: '1px solid border',
-              '&:first-of-type': {
-                borderTop: '1px solid transparent',
-              },
-            },
-          },
-      ],
-    },
-    Checkbox: {
-      Root: [
-        ({ small }: any) =>
-          small && {
-            '> span': {
-              borderWidth: '.75px',
-            },
-          },
-      ],
-      Control: [
-        {
-          width: 24,
-          height: 24,
-          borderRadius: 'medium',
-        },
-        ({ small }: any) =>
-          small && {
-            width: 16,
-            height: 16,
-          },
-      ],
-    },
-    H1: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
-    H2: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
-    H3: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
-    H4: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
-    H5: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
-    H6: {
-      Root: [
-        {
-          fontFamily: 'Monument',
-        },
-      ],
-    },
+    H1: { Root: [{ fontFamily: 'Monument' }] },
+    H2: { Root: [{ fontFamily: 'Monument' }] },
+    H3: { Root: [{ fontFamily: 'Monument' }] },
+    H4: { Root: [{ fontFamily: 'Monument' }] },
+    H5: { Root: [{ fontFamily: 'Monument' }] },
+    H6: { Root: [{ fontFamily: 'Monument' }] },
     Input: {
       Root: [
         {
@@ -382,12 +287,8 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
     MenuItem: {
       Root: [
         {
-          '& > div': {
-            borderTop: '1px solid border-fill-two',
-          },
-          '&:first-of-type > div': {
-            borderTop: 'none',
-          },
+          '& > div': { borderTop: '1px solid border-fill-two' },
+          '&:first-of-type > div': { borderTop: 'none' },
         },
       ],
       Children: [
@@ -399,106 +300,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             backgroundColor: 'fill-two-hover',
             borderColor: 'fill-two-hover',
           },
-      ],
-    },
-    Select: {
-      Root: [
-        {
-          border: '1px solid border-input',
-        },
-      ],
-    },
-    Spinner: {
-      Root: [
-        {
-          '&:before': {
-            borderTop: '2px solid white',
-          },
-        },
-      ],
-    },
-    Switch: {
-      Root: [
-        ({ checked }: any) => ({
-          padding: 8,
-          paddingLeft: 0,
-          color: checked ? 'text' : 'action-link-inactive',
-          '> div:first-of-type': {
-            backgroundColor: checked ? 'action-primary' : 'transparent',
-            border: '1px solid border-input',
-            '> span': {
-              backgroundColor: checked
-                ? 'action-link-active'
-                : 'action-link-inactive',
-            },
-          },
-          '&:hover': {
-            color: 'text',
-            '> div:first-of-type': {
-              backgroundColor: checked
-                ? 'action-primary-hover'
-                : 'action-input-hover',
-              border: '1px solid border-input',
-              '> span': {
-                backgroundColor: checked
-                  ? 'action-link-active'
-                  : 'action-link-active',
-              },
-            },
-          },
-        }),
-      ],
-      Control: [
-        {
-          width: 42,
-          height: 24,
-          borderRadius: 12,
-          '&:hover': {
-            boxShadow: 'none',
-          },
-        },
-      ],
-      Handle: [
-        ({ checked }: any) => ({
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          top: 3,
-          left: checked ? 'calc(100% - 16px - 3px)' : 3,
-        }),
-      ],
-    },
-    Tooltip: {
-      Root: [
-        {
-          caption: true,
-          backgroundColor: 'fill-two',
-          paddingVertical: 'xxsmall',
-          paddingHorizontal: 'xsmall',
-          borderRadius: 'medium',
-          boxShadow: 'moderate',
-          color: 'text-light',
-        },
-      ],
-      Arrow: [
-        {
-          backgroundColor: 'fill-two',
-          borderRadius: '1px',
-          top: '50%',
-          left: 0,
-          transformOrigin: '50% 50%',
-          transform:
-            'translate(calc(-50% + 1px), -50%) scaleY(0.77) rotate(45deg)',
-        },
-      ],
-    },
-    Ul: {
-      Root: [
-        {
-          marginBlockStart: 0,
-          marginBlockEnd: 0,
-          paddingInlineStart: 24,
-        },
       ],
     },
   }

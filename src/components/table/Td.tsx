@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 import {
   tableFillLevelToBorder,
+  tableFillLevelToHeaderBorder,
   tableFillLevelToHighlightedCellBg,
 } from './colors'
 import { type TableFillLevel } from './tableUtils'
@@ -42,6 +43,10 @@ export const Td = styled.td<{
       firstRow || highlight
         ? ''
         : theme.borders[tableFillLevelToBorder[fillLevel]],
+    'tr[data-expander-row] + tr &': {
+      // for when the previous row is expanded
+      borderTop: theme.borders[tableFillLevelToHeaderBorder[fillLevel]],
+    },
     color: theme.colors['text-light'],
 
     padding: padCells ? (loose ? '16px 12px' : '8px 12px') : 0,

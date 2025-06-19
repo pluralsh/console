@@ -2,6 +2,8 @@ import { type CSSProperties } from 'react'
 
 import { semanticColorCssVars } from './colors'
 
+export type SemanticBorderKey = keyof typeof borders
+
 export const borderWidths = {
   default: 1,
   focus: 1,
@@ -13,7 +15,7 @@ export const borderStyles = {
 
 export const borders = {
   default: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars.border}`,
-  'fill-one': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars.border}`,
+  'fill-one': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-one']}`,
   'fill-two': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-two']}`,
   'fill-three': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-three']}`,
   input: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-input']}`,

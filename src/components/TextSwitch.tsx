@@ -1,5 +1,6 @@
 import {
   type ComponentProps,
+  ComponentPropsWithRef,
   type ReactElement,
   type ReactNode,
   createContext,
@@ -18,7 +19,7 @@ import {
 } from 'react-aria'
 import { useRadioGroupState } from 'react-stately'
 
-import { type ComponentPropsWithRef, useSpring } from '@react-spring/web'
+import { useSpring } from '@react-spring/web'
 import classNames from 'classnames'
 import { VisuallyHidden, useFocusRing } from 'react-aria'
 import styled from 'styled-components'

@@ -11,10 +11,6 @@ export default {
   title: 'Card',
   component: null,
   argTypes: {
-    severity: {
-      options: ['neutral', 'info', 'success', 'warning', 'danger', 'critical'],
-      control: { type: 'select' },
-    },
     headerSize: {
       options: ['medium', 'large'],
       control: { type: 'select' },
@@ -37,7 +33,6 @@ function Template({
   disabled,
   width,
   height,
-  severity,
   headerSize,
   headerContent,
 }: {
@@ -64,10 +59,10 @@ function Template({
               width={width}
               cornerSize={cornerSize}
               fillLevel={fillLevel}
-              severity={severity}
               header={{
                 size: headerSize,
                 content: headerContent,
+                outerProps: { style: { width: width } },
               }}
             >
               <Flex
@@ -93,7 +88,6 @@ function FillLevelTemplate({
   selected,
   disabled,
   width,
-  severity,
   headerContent,
 }: { width: number; headerContent: ReactNode } & CardProps) {
   const theme = useTheme()
@@ -114,7 +108,6 @@ function FillLevelTemplate({
             width={width}
             padding="medium"
             fillLevel={fillLevel}
-            severity={severity}
             header={{
               content: headerContent,
             }}
@@ -128,12 +121,8 @@ function FillLevelTemplate({
               clickable={clickable}
               selected={selected}
               padding="medium"
-              severity={severity}
             >
-              <Card
-                padding="medium"
-                severity={severity}
-              >
+              <Card padding="medium">
                 <br />
                 Each Card background should be one level lighter than its
                 parent, but not exceed fill-three
@@ -155,10 +144,13 @@ Default.args = {
   disabled: false,
   width: 150,
   height: 150,
-  severity: 'neutral',
   headerSize: 'medium',
   headerContent: (
-    <Flex justifyContent="space-between">
+    <Flex
+      justifyContent="space-between"
+      align="center"
+      width="100%"
+    >
       <p>Header</p>
       <Tooltip label="Tooltip">
         <InfoOutlineIcon />
@@ -183,7 +175,11 @@ WithFillLevelContext.args = {
   width: 400,
   headerSize: 'medium',
   headerContent: (
-    <Flex justifyContent="space-between">
+    <Flex
+      justifyContent="space-between"
+      align="center"
+      width="100%"
+    >
       <p>Header</p>
       <Tooltip label="Tooltip">
         <InfoOutlineIcon />

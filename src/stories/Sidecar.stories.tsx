@@ -1,20 +1,6 @@
 import { A, Div } from 'honorable'
 
-import {
-  AzureLogoIcon,
-  BrowserIcon,
-  CertificateIcon,
-  CopyIcon,
-  DiscordIcon,
-  GitHubLogoIcon,
-  ScrollIcon,
-  Sidecar,
-  SidecarButton,
-  SidecarItem,
-  type SidecarProps,
-  SlackLogoIcon,
-  TwitterIcon,
-} from '../index'
+import { Sidecar, SidecarItem, type SidecarProps } from '../index'
 
 export default {
   title: 'Sidecar',
@@ -31,40 +17,6 @@ const wordWrapOnSlashes = (url: string) =>
 function Template({ heading, ...props }: SidecarProps) {
   return (
     <Div>
-      <Div
-        marginBottom="xxlarge"
-        _last={{ marginBottom: 0 }}
-        width="200px"
-      >
-        <Sidecar
-          heading={heading}
-          {...props}
-        >
-          <SidecarButton
-            as="A"
-            href="#"
-            startIcon={<BrowserIcon />}
-          >
-            Homepage
-          </SidecarButton>
-          <SidecarButton startIcon={<CertificateIcon />}>
-            Licenses
-          </SidecarButton>
-          <SidecarButton startIcon={<ScrollIcon />}>Docs</SidecarButton>
-          <SidecarButton startIcon={<TwitterIcon />}>Twitter</SidecarButton>
-          <SidecarButton startIcon={<DiscordIcon />}>Discord</SidecarButton>
-          <SidecarButton startIcon={<SlackLogoIcon />}>Slack</SidecarButton>
-          <SidecarButton startIcon={<GitHubLogoIcon />}>Github</SidecarButton>
-          <SidecarButton
-            startIcon={<AzureLogoIcon fullColor />}
-            endIcon={<CopyIcon />}
-          >
-            Azure
-          </SidecarButton>
-          <SidecarButton>No icons</SidecarButton>
-          <SidecarButton endIcon={<CopyIcon />}>End icon</SidecarButton>
-        </Sidecar>
-      </Div>
       <Div
         marginBottom="xxlarge"
         maxWidth="200px"

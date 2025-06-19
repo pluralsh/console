@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import styled from 'styled-components'
 
-import { tableFillLevelToBorder, tableHeaderColor } from './colors'
+import { tableFillLevelToHeaderBorder, tableHeaderColor } from './colors'
 import { type TableFillLevel } from './tableUtils'
 
 export const Th = styled.th<{
@@ -31,7 +31,7 @@ export const Th = styled.th<{
       zIndex: 4,
       borderBottom: highlight
         ? undefined
-        : theme.borders[tableFillLevelToBorder[fillLevel]],
+        : theme.borders[tableFillLevelToHeaderBorder[fillLevel]],
       color: theme.colors.text,
       height: 48,
       minHeight: 48,
@@ -57,7 +57,7 @@ export const Th = styled.th<{
         backgroundColor: theme.colors[tableHeaderColor(fillLevel, false)],
         borderBottom: hideHeader
           ? 'none'
-          : theme.borders[tableFillLevelToBorder[fillLevel]],
+          : theme.borders[tableFillLevelToHeaderBorder[fillLevel]],
       },
     },
     '&:first-child': {

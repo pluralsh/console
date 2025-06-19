@@ -1,5 +1,5 @@
 import { type Dispatch, useCallback, useEffect, useState } from 'react'
-import { Button, Div, Flex, P } from 'honorable'
+import { Div, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Editor, { useMonaco } from '@monaco-editor/react'
@@ -10,6 +10,7 @@ import { editorThemeLight } from '../theme/editorThemeLight'
 
 import Card, { type CardProps } from './Card'
 import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
+import Button from './Button'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string

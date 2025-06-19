@@ -8,7 +8,7 @@ import { type TabBaseProps } from './TabList'
 
 type SubTabSize = 'small' | 'medium'
 type SubtabProps = TabBaseProps &
-  ComponentPropsWithRef<'div'> & {
+  ComponentPropsWithRef<'button'> & {
     size?: SubTabSize
   }
 
@@ -26,7 +26,7 @@ const parentFillLevelToHoverBG = {
   3: 'fill-three-hover',
 } as const satisfies Record<FillLevel, keyof typeof styledTheme.colors>
 
-const SubTabBase = styled.div<{
+const SubTabBase = styled.button<{
   $size: SubTabSize
   $active: boolean
   $disabled: boolean
@@ -39,10 +39,10 @@ const SubTabBase = styled.div<{
     $size: size,
     $parentFillLevel: parentFillLevel,
   }) => ({
+    ...theme.partials.reset.button,
     ...(size === 'small'
       ? theme.partials.text.buttonSmall
       : theme.partials.text.buttonMedium),
-    tabIndex: 0,
     userSelect: 'none',
     cursor: disabled ? 'default' : active ? 'default' : 'pointer',
     pointerEvents: disabled ? 'none' : 'all',

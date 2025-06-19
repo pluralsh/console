@@ -1,8 +1,7 @@
 import styled from 'styled-components'
 
-import { type ComponentPropsWithRef } from '@react-spring/web'
-
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import { ComponentPropsWithRef } from 'react'
 
 // This nonsense is to reduce the chance of there being
 // a left margin when a <code> block is the first item in a line of text.

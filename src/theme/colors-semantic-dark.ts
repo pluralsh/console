@@ -26,6 +26,8 @@ export const semanticColorsDark = {
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
+  // accent- used sparingly
+  'fill-accent': grey[950],
 
   // Action
   //
@@ -54,7 +56,8 @@ export const semanticColorsDark = {
   // Border
   //
   border: grey[800],
-  'border-fill-two': grey[750],
+  'border-fill-one': grey[775],
+  'border-fill-two': grey[725],
   'border-fill-three': grey[700],
   'border-selected': grey[100],
   'border-input': grey[700],

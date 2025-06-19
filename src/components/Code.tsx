@@ -1,4 +1,4 @@
-import { Button, Div, Flex } from 'honorable'
+import { Div, Flex } from 'honorable'
 import {
   type ComponentProps,
   type PropsWithChildren,
@@ -33,6 +33,7 @@ import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import FileIcon from './icons/FileIcon'
+import Button from './Button'
 
 type CodeProps = Omit<CardProps, 'children'> & {
   children?: string
@@ -112,11 +113,11 @@ function CopyButtonBase({
   return (
     <Button
       className={className}
-      position="absolute"
       floating
       small
       startIcon={copied ? <CheckIcon /> : <CopyIcon />}
       onClick={handleCopy}
+      css={{ position: 'absolute' }}
     >
       {copied ? 'Copied' : 'Copy'}
     </Button>

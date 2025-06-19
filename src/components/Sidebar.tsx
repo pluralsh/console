@@ -47,10 +47,8 @@ const SidebarSC = styled.div<{
   maxWidth: $isHorizontal ? '100%' : SIDEBAR_WIDTH,
   minWidth: $isHorizontal ? '100%' : SIDEBAR_WIDTH,
   backgroundColor:
-    theme.mode === 'light'
-      ? theme.colors['fill-one']
-      : $variant === 'console'
-      ? theme.colors.grey[950]
+    $variant === 'console'
+      ? theme.colors['fill-accent']
       : theme.colors['fill-one'],
   borderBottom: $isHorizontal ? theme.borders.default : 'none',
   overflow: 'visible',

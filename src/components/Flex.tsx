@@ -1,6 +1,6 @@
 // almost drop-in replacement for anywhere 'honorable' Flex is used
 
-import { type CSSProperties, type ReactNode, type RefObject, memo } from 'react'
+import { type CSSProperties, type ReactNode, Ref, memo } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 
 type FlexBaseProps = {
@@ -41,7 +41,7 @@ type FlexBaseProps = {
 
   gap?: keyof DefaultTheme['spacing']
   padding?: keyof DefaultTheme['spacing']
-  ref?: RefObject<HTMLDivElement>
+  ref?: Ref<HTMLDivElement>
   className?: string
   children?: ReactNode
 }

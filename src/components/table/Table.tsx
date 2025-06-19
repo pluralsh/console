@@ -25,11 +25,10 @@ import EmptyState from '../EmptyState'
 import CaretUpIcon from '../icons/CaretUpIcon'
 import { Spinner } from '../Spinner'
 
-import { toTableFillLevel } from '../contexts/FillLevelContext'
 import {
   tableFillLevelToBg,
-  tableFillLevelToBorderColor,
-  tableFillLevelToHighlightedCellBg,
+  tableFillLevelToBorder,
+  tableFillLevelToHeaderBorder,
 } from './colors'
 import { FillerRows } from './FillerRows'
 import { useOnVirtualSliceChange } from './hooks'
@@ -199,10 +198,7 @@ function Table({
     [rowBg]
   )
 
-  const expanderBorder =
-    theme.borders[
-      tableFillLevelToHighlightedCellBg[toTableFillLevel(fillLevel)]
-    ]
+  const expanderBorder = theme.borders[tableFillLevelToHeaderBorder[fillLevel]]
 
   useEffect(() => {
     const lastItem = virtualRows[virtualRows.length - 1]
@@ -281,6 +277,7 @@ function Table({
                           {header.column.columnDef.meta?.tooltip && (
                             <Tooltip
                               label={header.column.columnDef.meta.tooltip}
+                              {...header.column.columnDef.meta.tooltipProps}
                             >
                               <InfoOutlineIcon />
                             </Tooltip>
@@ -408,7 +405,6 @@ function Table({
                             data-expander-row
                             $fillLevel={fillLevel}
                             $raised={isRaised(i)}
-                            $type="expander"
                           >
                             {expandedRowType === 'default' ? (
                               <>
@@ -495,9 +491,7 @@ const TableSC = styled.div<{
   $fillLevel?: TableProps['fillLevel']
 }>(({ theme, $flush, $fillLevel }) => ({
   backgroundColor: theme.colors[tableFillLevelToBg[$fillLevel]],
-  border: $flush
-    ? 'none'
-    : `1px solid ${theme.colors[tableFillLevelToBorderColor[$fillLevel]]}`,
+  border: $flush ? 'none' : theme.borders[tableFillLevelToBorder[$fillLevel]],
   borderRadius: $flush
     ? `0 0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px`
     : theme.borderRadiuses.large,

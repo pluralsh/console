@@ -10,7 +10,6 @@ export const Tr = styled.tr<{
   $selectable?: boolean
   $clickable?: boolean
   $raised?: boolean
-  $type?: 'regular' | 'expander'
 }>(
   ({
     theme,
@@ -20,15 +19,16 @@ export const Tr = styled.tr<{
     $selected: selected = false,
     $highlighted: highlighted = false,
     $fillLevel: fillLevel,
-    $type: type = 'regular',
   }) => ({
     display: 'contents',
     backgroundColor:
       theme.colors[
-        type === 'expander'
-          ? tableCellHoverColor(fillLevel, selectable, selected)
-          : tableCellColor(fillLevel, highlighted, raised, selectable, selected)
+        tableCellColor(fillLevel, highlighted, raised, selectable, selected)
       ],
+    '&[data-expander-row]': {
+      backgroundColor:
+        theme.colors[tableCellHoverColor(fillLevel, selectable, selected)],
+    },
 
     ...(clickable && {
       cursor: 'pointer',
