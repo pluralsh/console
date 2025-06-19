@@ -1,6 +1,5 @@
 import {
   FillLevel,
-  Flex,
   SubTab,
   toFillLevel,
   Tooltip,
@@ -8,9 +7,9 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { fillLevelToBackground } from './FillLevelDiv.tsx'
-import { fillLevelToBorderColor } from './List.tsx'
+import { fillLevelToBorder } from './List.tsx'
 
 import { LinkTabWrap } from './Tabs.tsx'
 
@@ -33,18 +32,14 @@ export function ButtonGroup({
   tab,
   onClick,
   toPath,
-  fillLevel,
+  fillLevel: fillLevelProp,
   ...props
 }: ButtonGroupProps) {
-  const theme = useTheme()
   const inferredFillLevel = useFillLevel()
+  const fillLevel = fillLevelProp ?? inferredFillLevel
 
   return (
-    <Flex
-      borderRadius={theme.borderRadiuses.medium}
-      border={theme.borders.default}
-      columnGap={1}
-    >
+    <GroupWrapperSC $fillLevel={fillLevel}>
       {toPath ? (
         <ButtonLinkGroup
           directory={directory}
@@ -58,11 +53,11 @@ export function ButtonGroup({
           directory={directory}
           tab={tab}
           onClick={onClick}
-          fillLevel={fillLevel ?? inferredFillLevel}
+          fillLevel={fillLevel}
           {...props}
         />
       )}
-    </Flex>
+    </GroupWrapperSC>
   )
 }
 
@@ -81,17 +76,16 @@ function ButtonLinkGroup({ directory, tab, toPath, fillLevel, ...props }) {
     >
       <LinkTabWrap
         active={path === tab}
-        subTab
         textValue={label}
         to={toPath(path)}
+        style={{ zIndex: path === tab ? 1 : 0 }}
       >
         <SubTabSC
           key={path}
-          $tab={tab}
+          $active={path === tab}
           $label={label}
           $idx={idx}
           $directory={directory}
-          $path={path}
           $fillLevel={fillLevel}
           {...props}
         >
@@ -116,11 +110,10 @@ function ButtonSwitchGroup({ directory, tab, onClick, fillLevel, ...props }) {
     >
       <SubTabSC
         onClick={() => onClick(path)}
-        $tab={tab}
+        $active={path === tab}
         $label={label}
         $idx={idx}
         $directory={directory}
-        $path={path}
         $fillLevel={fillLevel}
         {...props}
       >
@@ -130,29 +123,45 @@ function ButtonSwitchGroup({ directory, tab, onClick, fillLevel, ...props }) {
   ))
 }
 
+const GroupWrapperSC = styled.div<{
+  $fillLevel: number
+}>(({ theme, $fillLevel }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  backgroundColor:
+    $fillLevel === 0
+      ? 'transparent'
+      : theme.colors[fillLevelToBackground[toFillLevel($fillLevel)]],
+  border: theme.borders[fillLevelToBorder[toFillLevel($fillLevel)]],
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
 const SubTabSC = styled(SubTab)<{
-  $path: string
-  $tab: string
+  $active: boolean
   $idx: number
   $label: string
   $directory: Array<Entry>
   $fillLevel: number
-}>(({ theme, $path, $tab, $idx, $directory, $label, $fillLevel }) => {
-  const border = `1px solid ${theme.colors[fillLevelToBorderColor[toFillLevel($fillLevel + 1)]]}`
-  const bgColorName = fillLevelToBackground[toFillLevel($fillLevel)]
+}>(({ theme, $active, $idx, $directory, $label, $fillLevel }) => {
   return {
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
     gap: theme.spacing.small,
     padding: !$label ? theme.spacing.small : undefined,
-    outline: $path === $tab ? border : 'none',
-    color: $path === $tab ? theme.colors['text'] : theme.colors['text-primary'],
-    borderRight: $idx === $directory.length - 1 ? 'none' : border,
+    color: $active ? theme.colors['text'] : theme.colors['text-primary'],
+    borderRight:
+      $idx === $directory.length - 1 || $active
+        ? 'none'
+        : theme.borders[fillLevelToBorder[toFillLevel($fillLevel)]],
+    zIndex: $active ? 1 : 0,
+    outline: $active ? theme.borders.input : 'none',
     outlineOffset: 0,
-    outlineColor: theme.colors['border-input'],
-    backgroundColor:
-      theme.colors[$path === $tab ? `${bgColorName}-selected` : bgColorName],
+    backgroundColor: $active
+      ? theme.colors[
+          fillLevelToBackground[toFillLevel($fillLevel)] + '-selected'
+        ]
+      : 'transparent',
     borderTopLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
     borderBottomLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
     borderTopRightRadius:
@@ -164,8 +173,6 @@ const SubTabSC = styled(SubTab)<{
       background:
         theme.colors[fillLevelToBackground[toFillLevel($fillLevel + 1)]],
     },
-    '&:focus-visible': {
-      outline: `1px solid ${theme.colors['border-outline-focused']}`,
-    },
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
   }
 })

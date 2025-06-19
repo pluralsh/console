@@ -1,23 +1,28 @@
-import { ComponentProps, ReactElement, useMemo } from 'react'
-import styled, { useTheme } from 'styled-components'
 import {
   ClusterIcon,
   IconFrame,
   ManagementClusterIcon,
   ShieldLockIcon,
   Spinner,
+  toFillLevel,
+  useFillLevel,
   VirtualClusterIcon,
 } from '@pluralsh/design-system'
+import { ComponentProps, useMemo } from 'react'
+import styled, { useTheme } from 'styled-components'
 
+import { fillLevelToBackground } from 'components/utils/FillLevelDiv'
+import { fillLevelToBorderColor } from 'components/utils/List'
 import { PROTECT_TT_TEXT } from './ProtectBadge'
 
-interface DynamicClusterIconProps {
+type DynamicClusterIconProps = {
   deleting?: boolean
   upgrading?: boolean
   protect?: boolean
   self?: boolean
   virtual?: boolean
   type?: ComponentProps<typeof IconFrame>['type']
+  fillLevel?: number
 }
 
 const DynamicClusterIconSC = styled.div((_) => ({
@@ -39,8 +44,11 @@ export function DynamicClusterIcon({
   self = false,
   virtual = false,
   type = 'secondary',
-}: DynamicClusterIconProps): ReactElement<any> {
-  const theme = useTheme()
+  fillLevel: fillLevelProp,
+}: DynamicClusterIconProps) {
+  const { colors } = useTheme()
+  const inferredFillLevel = useFillLevel()
+  const fillLevel = fillLevelProp ?? inferredFillLevel
 
   const tooltip = useMemo(() => {
     if (deleting) return 'Cluster is being deleted'
@@ -55,18 +63,17 @@ export function DynamicClusterIcon({
   return (
     <DynamicClusterIconSC>
       <IconFrame
-        background="fill-two"
+        css={{
+          background: colors[fillLevelToBackground[toFillLevel(fillLevel)]],
+          borderColor: colors[fillLevelToBorderColor[toFillLevel(fillLevel)]],
+        }}
         size="medium"
         type={type}
         tooltip={tooltip}
         icon={
           pending ? (
             <Spinner
-              color={
-                deleting
-                  ? theme.colors['icon-danger']
-                  : theme.colors['icon-info']
-              }
+              color={deleting ? colors['icon-danger'] : colors['icon-info']}
             />
           ) : virtual ? (
             <VirtualClusterIcon fullColor={false} />

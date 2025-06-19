@@ -128,7 +128,6 @@ export const ColProvider = columnHelper.accessor(
       return (
         <ColClusterContentSC>
           <DistroProviderIconFrame
-            background="fill-two"
             distro={node?.distro}
             provider={node?.provider?.cloud}
             size="medium"
