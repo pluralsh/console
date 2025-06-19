@@ -11,6 +11,9 @@ rules:
   - elasticsearchilmpolicies
   - elasticsearchindextemplates
   - elasticsearchusers
+  - postgrescredentials
+  - postgresdatabases
+  - postgresusers
   verbs:
   - create
   - delete
@@ -26,6 +29,9 @@ rules:
   - elasticsearchilmpolicies/finalizers
   - elasticsearchindextemplates/finalizers
   - elasticsearchusers/finalizers
+  - postgrescredentials/finalizers
+  - postgresdatabases/finalizers
+  - postgresusers/finalizers
   verbs:
   - update
 - apiGroups:
@@ -35,6 +41,9 @@ rules:
   - elasticsearchilmpolicies/status
   - elasticsearchindextemplates/status
   - elasticsearchusers/status
+  - postgrescredentials/status
+  - postgresdatabases/status
+  - postgresusers/status
   verbs:
   - get
   - patch

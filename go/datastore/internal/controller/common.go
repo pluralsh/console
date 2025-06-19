@@ -19,6 +19,7 @@ const (
 	requeueDefault                             = 30 * time.Second
 	requeueWaitForResources                    = 5 * time.Second
 	ElasticSearchSecretProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-secret-protection"
+	PostgresSecretProtectionFinalizerName      = "projects.deployments.plural.sh/postgres-secret-protection"
 )
 
 var (
@@ -56,7 +57,7 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	return defaultMessage
 }
 
-func deleteRefSecret(ctx context.Context, k8sclient client.Client, namespace, name string) error {
+func deleteRefSecret(ctx context.Context, k8sclient client.Client, namespace, name, finalizer string) error {
 	credentialSecret := &corev1.Secret{}
 	if err := k8sclient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, credentialSecret); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -71,7 +72,7 @@ func deleteRefSecret(ctx context.Context, k8sclient client.Client, namespace, na
 		return err
 	}
 
-	if err := utils.TryRemoveFinalizer(ctx, k8sclient, credentialSecret, ElasticSearchSecretProtectionFinalizerName); err != nil {
+	if err := utils.TryRemoveFinalizer(ctx, k8sclient, credentialSecret, finalizer); err != nil {
 		return err
 	}
 
