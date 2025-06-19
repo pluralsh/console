@@ -11582,6 +11582,8 @@ export type ClustersQueryVariables = Exact<{
   tagQuery?: InputMaybe<TagQuery>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   upgradeable?: InputMaybe<Scalars['Boolean']['input']>;
+  compliance?: InputMaybe<VersionCompliance>;
+  healthRange?: InputMaybe<HealthRange>;
 }>;
 
 
@@ -12785,6 +12787,8 @@ export type DeleteGroupMutationVariables = Exact<{
 
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type UpgradeStatisticsFragment = { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null, latest?: number | null, compliant?: number | null };
 
 export type NodeStatisticFragment = { __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null };
 
@@ -16291,6 +16295,14 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const UpgradeStatisticsFragmentDoc = gql`
+    fragment UpgradeStatistics on UpgradeStatistics {
+  upgradeable
+  count
+  latest
+  compliant
+}
+    `;
 export const RuntimeServiceFragmentDoc = gql`
     fragment RuntimeService on RuntimeService {
   id
@@ -20311,7 +20323,7 @@ export type DeleteCatalogMutationHookResult = ReturnType<typeof useDeleteCatalog
 export type DeleteCatalogMutationResult = Apollo.MutationResult<DeleteCatalogMutation>;
 export type DeleteCatalogMutationOptions = Apollo.BaseMutationOptions<DeleteCatalogMutation, DeleteCatalogMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID, $upgradeable: Boolean) {
+    query Clusters($first: Int, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID, $upgradeable: Boolean, $compliance: VersionCompliance, $healthRange: HealthRange) {
   clusters(
     first: $first
     after: $after
@@ -20320,6 +20332,8 @@ export const ClustersDocument = gql`
     tagQuery: $tagQuery
     projectId: $projectId
     upgradeable: $upgradeable
+    compliance: $compliance
+    healthRange: $healthRange
   ) {
     pageInfo {
       ...PageInfo
@@ -20362,6 +20376,8 @@ ${ClusterStatusInfoFragmentDoc}`;
  *      tagQuery: // value for 'tagQuery'
  *      projectId: // value for 'projectId'
  *      upgradeable: // value for 'upgradeable'
+ *      compliance: // value for 'compliance'
+ *      healthRange: // value for 'healthRange'
  *   },
  * });
  */
@@ -25757,13 +25773,10 @@ export type ClusterOverviewDetailsQueryResult = Apollo.QueryResult<ClusterOvervi
 export const UpgradeStatisticsDocument = gql`
     query UpgradeStatistics($projectId: ID, $tag: TagInput) {
   upgradeStatistics(projectId: $projectId, tag: $tag) {
-    upgradeable
-    count
-    latest
-    compliant
+    ...UpgradeStatistics
   }
 }
-    `;
+    ${UpgradeStatisticsFragmentDoc}`;
 
 /**
  * __useUpgradeStatisticsQuery__
@@ -30665,6 +30678,7 @@ export const namedOperations = {
     PreviewEnvironmentTemplateConnection: 'PreviewEnvironmentTemplateConnection',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    UpgradeStatistics: 'UpgradeStatistics',
     NodeStatistic: 'NodeStatistic',
     ClusterUpgradeDeprecatedCustomResource: 'ClusterUpgradeDeprecatedCustomResource',
     ClusterUpgrade: 'ClusterUpgrade',

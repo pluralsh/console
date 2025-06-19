@@ -1,3 +1,10 @@
+fragment UpgradeStatistics on UpgradeStatistics {
+  upgradeable
+  count
+  latest
+  compliant
+}
+
 fragment NodeStatistic on NodeStatistic {
   id
   name
@@ -53,9 +60,6 @@ query ClusterOverviewDetails(
 
 query UpgradeStatistics($projectId: ID, $tag: TagInput) {
   upgradeStatistics(projectId: $projectId, tag: $tag) {
-    upgradeable
-    count
-    latest
-    compliant
+    ...UpgradeStatistics
   }
 }

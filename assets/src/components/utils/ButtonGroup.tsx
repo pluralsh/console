@@ -13,14 +13,16 @@ import { fillLevelToBorder } from './List.tsx'
 
 import { LinkTabWrap } from './Tabs.tsx'
 
-type Entry = {
+type DirectoryEntry = {
   path: string
   icon?: ReactNode
   label?: string
 }
 
+export type ButtonGroupDirectory = DirectoryEntry[]
+
 type ButtonGroupProps = {
-  directory: Array<Entry>
+  directory: ButtonGroupDirectory
   tab: string
   onClick?: Dispatch<string>
   toPath?: (path: string) => string
@@ -140,7 +142,7 @@ const SubTabSC = styled(SubTab)<{
   $active: boolean
   $idx: number
   $label: string
-  $directory: Array<Entry>
+  $directory: ButtonGroupDirectory
   $fillLevel: number
 }>(({ theme, $active, $idx, $directory, $label, $fillLevel }) => {
   return {
