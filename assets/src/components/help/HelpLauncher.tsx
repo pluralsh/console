@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { useTransition } from 'react-spring'
+import { useTransition } from '@react-spring/web'
 import styled from 'styled-components'
 
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'

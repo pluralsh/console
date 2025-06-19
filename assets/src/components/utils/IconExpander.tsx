@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useTransition } from 'react-spring'
+import { useTransition } from '@react-spring/web'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 
 export const ARBITRARY_VALUE_NAME = 'expander'

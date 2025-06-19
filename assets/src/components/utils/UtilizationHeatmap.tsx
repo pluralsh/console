@@ -1,5 +1,4 @@
-import { ComputedNode, ComputedNodeWithoutStyles } from '@nivo/treemap'
-import { Flex, Tooltip } from '@pluralsh/design-system'
+import { ComputedNodeWithoutStyles } from '@nivo/treemap'
 import chroma from 'chroma-js'
 import {
   formatCpu,
@@ -7,22 +6,19 @@ import {
 } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 import { HeatMapFlavor, MetricPointResponseFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useCursorPosition } from './CursorPosition'
+import { ChartTooltip } from './ChartTooltip'
 import { TreeMap } from './TreeMap'
-import { useState } from 'react'
 
 export function UtilizationHeatmap({
   data,
   flavor,
   utilizationType,
   colorScheme = 'blue',
-  customTooltip = false,
 }: {
   data: MetricPointResponseFragment[]
   flavor: HeatMapFlavor
   utilizationType: 'cpu' | 'memory'
   colorScheme?: 'blue' | 'purple'
-  customTooltip?: boolean
 }) {
   const baseColor = colorScheme === 'blue' ? '#0aa5ff' : '#4a51f2'
 
@@ -50,7 +46,14 @@ export function UtilizationHeatmap({
   return (
     <TreeMap
       type="canvas"
-      tooltip={customTooltip ? TooltipContent : undefined}
+      tooltip={({ node }) => (
+        <ChartTooltip
+          tooltipStyles={{ maxWidth: 200 }}
+          color={node.color}
+          value={node.formattedValue}
+          label={node.id}
+        />
+      )}
       label={truncatedLabel}
       colors={getColor}
       valueFormat={(d) => formatValue(d, utilizationType)}
@@ -75,44 +78,4 @@ function formatValue(value: number, type: 'cpu' | 'memory') {
     default:
       return `${value}`
   }
-}
-
-// hacky method to ensure tooltip is portaled so it doesn't get cut off by the parent container, tradeoff being we have to handle position tracking manually
-// should find a better solution for this
-function TooltipContent({ node }: { node: ComputedNode<object> }) {
-  const cursorPos = useCursorPosition()
-  const [height, setHeight] = useState(32)
-  return (
-    <Tooltip
-      manualOpen
-      displayOn="manual"
-      placement="top"
-      arrow={false}
-      style={{
-        top: (cursorPos?.y ?? 0) - height - 24,
-        left: (cursorPos?.x ?? 0) - 160,
-      }}
-      label={
-        <Flex
-          ref={(ref) => setHeight(ref?.clientHeight ?? 32)}
-          gap="small"
-          align="center"
-        >
-          <div
-            style={{
-              backgroundColor: node.color,
-              width: 10,
-              height: 10,
-              flexShrink: 0,
-            }}
-          />
-          <span>
-            {node.id}: <strong>{node.formattedValue}</strong>
-          </span>
-        </Flex>
-      }
-    >
-      <div />
-    </Tooltip>
-  )
 }

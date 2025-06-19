@@ -109,10 +109,8 @@ export function ClusterMetrics() {
 
 export function ClusterUtilizationHeatmaps({
   clusterId,
-  customTooltips = false,
 }: {
   clusterId: string
-  customTooltips?: boolean
 }) {
   const metricsEnabled = useMetricsEnabled()
   const { spacing } = useTheme()
@@ -196,7 +194,6 @@ export function ClusterUtilizationHeatmaps({
               data={memoryHeatMap}
               flavor={heatMapFlavor}
               utilizationType="memory"
-              customTooltip={customTooltips}
             />
           </Card>
           <Card
@@ -211,7 +208,6 @@ export function ClusterUtilizationHeatmaps({
               data={cpuHeatMap}
               flavor={heatMapFlavor}
               utilizationType="cpu"
-              customTooltip={customTooltips}
             />
           </Card>
         </Flex>
