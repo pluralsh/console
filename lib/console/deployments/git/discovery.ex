@@ -49,7 +49,6 @@ defmodule Console.Deployments.Git.Discovery do
   @spec addons(GitRepository.t) :: [Console.Deployments.AddOn.t]
   def addons(%GitRepository{} = repo), do: maybe_rpc(repo, &Agent.addons/1)
 
-
   @spec refs(GitRepository.t) :: {:ok, [binary]} | error
   def refs(%GitRepository{} = repo), do: maybe_rpc(repo, &Agent.refs/1)
 
@@ -91,6 +90,9 @@ defmodule Console.Deployments.Git.Discovery do
   end
 
   def local?(%GitRepository{} = repo), do: agent_node(repo) == node()
+
+  def agents(), do: Agent.local_agents()
+  def agent_states(), do: Enum.map(agents(), &Agent.info/1)
 
   defp ring() do
     HashRing.new()

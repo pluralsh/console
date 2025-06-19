@@ -19,8 +19,8 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [
 ] do
 
   def message(%{actor: :ignore}), do: :ignore
-  def message(%{item: %{id: id, cluster_id: cluster_id}}),
-    do: {"cluster:#{cluster_id}", "service.event", %{"id" => id}}
+  def message(%{item: %{id: id, cluster_id: cluster_id} = svc}),
+    do: {"cluster:#{cluster_id}", "service.event", %{"id" => id, "kick" => svc.kick}}
 end
 
 defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.ServiceManifestsRequested do
