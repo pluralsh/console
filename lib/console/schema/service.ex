@@ -167,6 +167,7 @@ defmodule Console.Schema.Service do
     field :interval,         :string
 
     field :norevise, :boolean, virtual: true, default: false
+    field :kick,     :boolean, virtual: true, default: false
 
     embeds_one :git,  Git,  on_replace: :update
     embeds_one :helm, Helm, on_replace: :update

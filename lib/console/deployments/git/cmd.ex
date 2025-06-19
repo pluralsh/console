@@ -104,18 +104,20 @@ defmodule Console.Deployments.Git.Cmd do
         [_, _] -> true
         _ -> false
       end)
-      |> Map.new(fn [sha, head] -> {coerce_head(head), sha} end)
+      |> Enum.flat_map(&coerce_head/1)
+      |> Map.new(fn [sha, head] -> {head, sha} end)
     else
       _ -> %{}
     end
   end
 
-  defp coerce_head(head) do
+  defp coerce_head([sha, head] = res) do
     case String.trim(head) do
-      "refs/remotes/origin/" <> head -> "refs/heads/#{head}"
-      head -> head
+      "refs/remotes/origin/" <> branch -> [res, [sha, "refs/heads/#{branch}"]]
+      _ -> [res]
     end
   end
+  defp coerce_head(_), do: []
 
   def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
   def msg(%GitRepository{} = repo, sha), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B", "#{sha}"])
