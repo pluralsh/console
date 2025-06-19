@@ -62,6 +62,7 @@ defmodule Console.Schema.Service do
       field :ignore_hooks,  :boolean
       field :ignore_crds,   :boolean
       field :lua_script,    :string
+      field :lua_file,      :string
 
       embeds_many :set, HelmValue, on_replace: :delete do
         field :name, :string
@@ -74,7 +75,7 @@ defmodule Console.Schema.Service do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script)a)
+      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script lua_file)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
       |> cast_embed(:git)

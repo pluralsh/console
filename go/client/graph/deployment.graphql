@@ -154,6 +154,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         ignoreHooks
         ignoreCrds
         luaScript
+        luaFile
     }
     configuration {
         name

@@ -87,6 +87,11 @@ type ServiceHelm struct {
 	// based on git state or other metadata
 	// +kubebuilder:validation:Optional
 	LuaScript *string `json:"luaScript,omitempty"`
+
+	// a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
+	// based on git state or other metadata
+	// +kubebuilder:validation:Optional
+	LuaFile *string `json:"luaFile,omitempty"`
 }
 
 type ServiceDependency struct {
