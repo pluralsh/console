@@ -23,7 +23,7 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 
-import { mapExistingNodes } from '../../../utils/graphql.ts'
+import { mapExistingNodes } from 'utils/graphql'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'

@@ -34,6 +34,11 @@ export const PR_AUTOMATIONS_ABS_PATH =
 export const PR_SCM_REL_PATH = 'scm' as const
 export const PR_SCM_ABS_PATH = `${PR_ABS_PATH}/${PR_SCM_REL_PATH}` as const
 
+// TODO: DELETE
+export const PR_SCM_WEBHOOKS_REL_PATH = 'scm-webhooks' as const
+export const PR_SCM_WEBHOOKS_ABS_PATH =
+  `${PR_ABS_PATH}/${PR_SCM_WEBHOOKS_REL_PATH}` as const
+
 export const PR_BASE_CRUMBS = [
   { label: 'PR queue', url: `${PR_ABS_PATH}/${PR_DEFAULT_REL_PATH}` },
 ] as const satisfies readonly Breadcrumb[]

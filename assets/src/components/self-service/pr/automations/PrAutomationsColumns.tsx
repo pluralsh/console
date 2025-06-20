@@ -31,10 +31,10 @@ import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { PrAutomationPermissionsModal } from 'components/pr/automations/PrAutomationPermissionsModal'
+import { PrAutomationPermissionsModal } from 'components/self-service/pr/automations/PrAutomationPermissionsModal'
 
 import { CreatePrModal } from './CreatePrModal'
-import { iconUrl } from '../../../utils/icon.ts'
+import { iconUrl } from 'utils/icon'
 
 enum MenuItemKey {
   Permissions = 'permissions',

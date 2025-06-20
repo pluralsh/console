@@ -1,27 +1,27 @@
 import {
-  Button,
-  Card,
-  CloseIcon,
-  EmptyState,
-  FiltersIcon,
+  useSetBreadcrumbs,
   Flex,
   Input,
   MagnifyingGlassIcon,
-  useSetBreadcrumbs,
+  Button,
+  CloseIcon,
+  FiltersIcon,
+  Card,
+  EmptyState,
 } from '@pluralsh/design-system'
-import { useCatalogsQuery } from '../../generated/graphql.ts'
-import { useTheme } from 'styled-components'
-import { CATALOGS_ABS_PATH } from '../../routes/selfServiceRoutesConsts.tsx'
+import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import Fuse from 'fuse.js'
-import { useCallback, useMemo, useState } from 'react'
+import { useCatalogsQuery } from 'generated/graphql'
 import { chain, isEmpty } from 'lodash'
-import { CatalogsFilters } from './CatalogsFilters.tsx'
-import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
-import { CatalogsGrid } from './CatalogsGrid.tsx'
-import { GqlError } from '../utils/Alert.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
-import { mapExistingNodes } from '../../utils/graphql.ts'
+import { useState, useMemo, useCallback } from 'react'
+import { CATALOGS_ABS_PATH } from 'routes/selfServiceRoutesConsts'
+import { useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { CatalogsFilters } from './CatalogsFilters'
+import { CatalogsGrid } from './CatalogsGrid'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },

@@ -1,14 +1,15 @@
 import { Table } from '@pluralsh/design-system'
 import { columns } from '../pr/automations/PrAutomationsColumns.tsx'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../utils/table/useFetchPaginatedData.tsx'
+
 import { usePrAutomationsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { mapExistingNodes } from '../../utils/graphql.ts'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import {
+  useFetchPaginatedData,
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+} from 'components/utils/table/useFetchPaginatedData.tsx'
+import { mapExistingNodes } from 'utils/graphql.ts'
 
 export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
   const {

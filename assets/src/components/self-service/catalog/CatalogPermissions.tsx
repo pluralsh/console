@@ -13,6 +13,7 @@ import { uniqWith, isEqual } from 'lodash'
 import { useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { Permissions } from 'components/cd/utils/PermissionsModal.tsx'
 
 export function CatalogPermissions({
   catalog,
