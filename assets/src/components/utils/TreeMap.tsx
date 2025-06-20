@@ -113,7 +113,8 @@ const WrapperSC = styled.div<{
   $hasParentLabel: boolean
   $outlineColor: string
 }>(({ $hasParentLabel, $outlineColor }) => ({
-  display: 'contents',
+  width: '100%',
+  height: '100%',
   // this targets all nodes, using outline instead of border so the border doesn't affect layout
   // if we used nivo's native border, it'll cause really small values to disappear and look like a gap
   [`& div[id^="${PARENT_NODE_NAME}"]`]: {
@@ -127,7 +128,7 @@ const WrapperSC = styled.div<{
   [`&:has(div[id="${PARENT_NODE_NAME}"])`]: {
     '& > div': {
       transform: $hasParentLabel
-        ? 'scale(1.02, 1.13) translateY(-12px)'
+        ? 'scale(1.02, 1.13) translate(-8px, -26px)'
         : 'none',
     },
     // this targets only the top-level parent node

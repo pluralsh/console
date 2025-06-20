@@ -1,5 +1,6 @@
 import {
   Chip,
+  Flex,
   GearTrainIcon,
   ListBoxItem,
   PeopleIcon,
@@ -9,7 +10,11 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { SortingFn } from '@tanstack/table-core'
-import { TableText, TabularNumbers } from 'components/cluster/TableElements'
+import {
+  TableCaretLink,
+  TableText,
+  TabularNumbers,
+} from 'components/cluster/TableElements'
 import {
   DistroProviderIconFrame,
   getClusterDistroName,
@@ -36,9 +41,11 @@ import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 import { UsageBar } from '../../utils/UsageBar.tsx'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
-import { ClusterHealth } from './ClusterHealthChip'
-import ClusterUpgrade from './ClusterUpgrade'
+import { ClusterHealth, ClusterHealthScoreChip } from './ClusterHealthChip'
+import { ClusterUpgradeButton } from './ClusterUpgradeButton.tsx'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
+import { ClusterInfoFlyoverTab } from './info-flyover/ClusterInfoFlyover.tsx'
+import { ClustersTableMeta } from './Clusters.tsx'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -99,7 +106,7 @@ export function ColClusterContent({
 export const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   id: 'cluster',
   header: 'Cluster',
-  enableSorting: true,
+  meta: { gridTemplate: '1fr' },
   cell: function Cell({ row: { original } }) {
     return <ColClusterContent cluster={original.node} />
   },
@@ -121,7 +128,6 @@ export const ColProvider = columnHelper.accessor(
       return (
         <ColClusterContentSC>
           <DistroProviderIconFrame
-            background="fill-two"
             distro={node?.distro}
             provider={node?.provider?.cloud}
             size="medium"
@@ -136,17 +142,6 @@ export const ColProvider = columnHelper.accessor(
     },
   }
 )
-
-export const ColHealth = columnHelper.accessor(({ node }) => node?.pingedAt, {
-  id: 'health',
-  header: 'Health',
-  enableSorting: true,
-  cell: ({
-    row: {
-      original: { node },
-    },
-  }) => <ClusterHealth cluster={node || undefined} />,
-})
 
 const sortVersionFn: SortingFn<Edge<ClustersRowFragment>> = (
   rowA,
@@ -258,13 +253,77 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-const ColStatusSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  width: 'max-content',
-  gap: theme.spacing.small,
-}))
+export const ColAgentHealth = columnHelper.accessor(
+  ({ node }) => node?.pingedAt,
+  {
+    id: 'agentHealth',
+    header: 'Agent health',
+    meta: {
+      tooltip:
+        "An agent is healthy if it's been pinged in the last time interval",
+    },
+    enableSorting: true,
+    cell: ({ row: { original } }) => (
+      <ClusterHealth cluster={original.node || undefined} />
+    ),
+  }
+)
 
-const numUpgrades = (cluster: Nullable<ClustersRowFragment>) => {
+export const ColHealthScore = columnHelper.accessor(
+  ({ node }) => node?.healthScore,
+  {
+    id: 'healthScore',
+    header: 'Health score',
+    meta: {
+      tooltip: 'A holistic view of the Kubernetes API configuration health',
+    },
+    cell: ({ table, row: { original } }) => {
+      const cluster = original.node
+      const { setFlyoverTab, setSelectedCluster } = table.options
+        .meta as ClustersTableMeta
+
+      if (!cluster) return null
+
+      return (
+        <ClusterHealthScoreChip
+          healthScore={cluster?.healthScore}
+          onClick={() => {
+            setSelectedCluster?.(cluster)
+            setFlyoverTab?.(ClusterInfoFlyoverTab.HealthScore)
+          }}
+        />
+      )
+    },
+  }
+)
+
+export const ColUpgradeable = columnHelper.accessor(
+  ({ node }) => getNumUpgrades(node),
+  {
+    id: 'upgradeable',
+    header: 'Upgradeable',
+    meta: { gridTemplate: 'min-content' },
+    cell: ({ table, row: { original } }) => {
+      const cluster = original.node
+      const { setFlyoverTab, setSelectedCluster } = table.options
+        .meta as ClustersTableMeta
+
+      if (!cluster) return null
+
+      return (
+        <ClusterUpgradeButton
+          cluster={cluster}
+          onClick={() => {
+            setSelectedCluster?.(cluster)
+            setFlyoverTab?.(ClusterInfoFlyoverTab.Upgrades)
+          }}
+        />
+      )
+    },
+  }
+)
+
+const getNumUpgrades = (cluster: Nullable<ClustersRowFragment>) => {
   let numUpgrades = 3
 
   if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
@@ -273,28 +332,6 @@ const numUpgrades = (cluster: Nullable<ClustersRowFragment>) => {
 
   return numUpgrades
 }
-
-export const ColStatus = columnHelper.accessor(
-  ({ node }) => numUpgrades(node),
-  {
-    id: 'status',
-    header: 'Status',
-    enableSorting: true,
-    meta: { gridTemplate: 'min-content' },
-    cell: ({ table, row: { original } }) => {
-      const { refetch } = table.options.meta as { refetch?: () => void }
-
-      return (
-        <ColStatusSC onClick={(e) => e.stopPropagation()}>
-          <ClusterUpgrade
-            cluster={original.node}
-            refetch={refetch}
-          />
-        </ColStatusSC>
-      )
-    },
-  }
-)
 
 enum MenuItemKey {
   Permissions = 'permissions',
@@ -319,7 +356,7 @@ const ColConditions = columnHelper.accessor(
 )
 */
 
-export const ColActions = columnHelper.accessor(({ node }) => node, {
+export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
@@ -406,13 +443,50 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   },
 })
 
+export const ColHomeTableActions = columnHelper.accessor(({ node }) => node, {
+  id: 'actions',
+  header: '',
+  meta: { gridTemplate: 'max(92px)' },
+  cell: function Cell({ getValue }) {
+    const cluster = getValue()
+    return (
+      <Flex gap="xxsmall">
+        <AiInsightSummaryIcon
+          preserveSpace
+          navPath={`${getClusterDetailsPath({
+            clusterId: cluster?.id,
+          })}/insights`}
+          insight={getValue()?.insight}
+        />
+        <TableCaretLink
+          to={getClusterDetailsPath({
+            clusterId: cluster?.id,
+          })}
+          textValue={`View ${cluster?.name} details`}
+        />
+      </Flex>
+    )
+  },
+})
+
 export const cdClustersColumns = [
   ColCluster,
   ColProvider,
-  ColHealth,
   ColVersion,
   ColCpu,
   ColMemory,
-  ColStatus,
-  ColActions,
+  ColAgentHealth,
+  ColHealthScore,
+  ColUpgradeable,
+  ColCdTableActions,
+]
+
+export const homeClustersColumns = [
+  ColCluster,
+  ColProvider,
+  ColVersion,
+  ColAgentHealth,
+  ColHealthScore,
+  ColUpgradeable,
+  ColHomeTableActions,
 ]

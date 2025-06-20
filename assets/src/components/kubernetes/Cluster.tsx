@@ -28,7 +28,9 @@ type ClusterContextT = {
   namespaces: string[]
 }
 
-const ClusterContext = createContext<ClusterContextT | undefined>(undefined)
+export const ClusterContext = createContext<ClusterContextT | undefined>(
+  undefined
+)
 
 export const useClusterContext = () => {
   const ctx = useContext(ClusterContext)

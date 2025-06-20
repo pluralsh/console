@@ -1,51 +1,53 @@
 import {
-  Flex,
+  FillLevel,
   SubTab,
   toFillLevel,
   Tooltip,
   useFillLevel,
   WrapWithIf,
 } from '@pluralsh/design-system'
-import { Dispatch, ReactNode } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
+import styled from 'styled-components'
 import { fillLevelToBackground } from './FillLevelDiv.tsx'
-import { fillLevelToBorderColor } from './List.tsx'
+import { fillLevelToBorder } from './List.tsx'
 
 import { LinkTabWrap } from './Tabs.tsx'
 
-interface Entry {
+type DirectoryEntry = {
   path: string
-  icon: ReactNode
+  icon?: ReactNode
   label?: string
 }
 
-interface ButtonGroupProps {
-  directory: Array<Entry>
+export type ButtonGroupDirectory = DirectoryEntry[]
+
+type ButtonGroupProps = {
+  directory: ButtonGroupDirectory
   tab: string
   onClick?: Dispatch<string>
   toPath?: (path: string) => string
-}
+  fillLevel?: FillLevel
+} & ComponentPropsWithRef<typeof SubTab>
 
-export default function ButtonGroup({
+export function ButtonGroup({
   directory,
   tab,
   onClick,
   toPath,
+  fillLevel: fillLevelProp,
   ...props
 }: ButtonGroupProps) {
-  const theme = useTheme()
+  const inferredFillLevel = useFillLevel()
+  const fillLevel = fillLevelProp ?? inferredFillLevel
 
   return (
-    <Flex
-      borderRadius={theme.borderRadiuses.medium}
-      border={theme.borders.default}
-      columnGap={1}
-    >
+    <GroupWrapperSC $fillLevel={fillLevel}>
       {toPath ? (
         <ButtonLinkGroup
           directory={directory}
           tab={tab}
           toPath={toPath}
+          fillLevel={fillLevel}
           {...props}
         />
       ) : (
@@ -53,16 +55,15 @@ export default function ButtonGroup({
           directory={directory}
           tab={tab}
           onClick={onClick}
+          fillLevel={fillLevel}
           {...props}
         />
       )}
-    </Flex>
+    </GroupWrapperSC>
   )
 }
 
-function ButtonLinkGroup({ directory, tab, toPath, ...props }) {
-  const fillLevel = useFillLevel()
-
+function ButtonLinkGroup({ directory, tab, toPath, fillLevel, ...props }) {
   return directory.map(({ path, icon, label, tooltip }, idx) => (
     <WrapWithIf
       key={path}
@@ -77,17 +78,16 @@ function ButtonLinkGroup({ directory, tab, toPath, ...props }) {
     >
       <LinkTabWrap
         active={path === tab}
-        subTab
         textValue={label}
         to={toPath(path)}
+        style={{ zIndex: path === tab ? 1 : 0 }}
       >
         <SubTabSC
           key={path}
-          $tab={tab}
+          $active={path === tab}
           $label={label}
           $idx={idx}
           $directory={directory}
-          $path={path}
           $fillLevel={fillLevel}
           {...props}
         >
@@ -98,9 +98,7 @@ function ButtonLinkGroup({ directory, tab, toPath, ...props }) {
   ))
 }
 
-function ButtonSwitchGroup({ directory, tab, onClick, ...props }) {
-  const fillLevel = useFillLevel()
-
+function ButtonSwitchGroup({ directory, tab, onClick, fillLevel, ...props }) {
   return directory.map(({ path, icon, label, tooltip }, idx) => (
     <WrapWithIf
       key={path}
@@ -114,11 +112,10 @@ function ButtonSwitchGroup({ directory, tab, onClick, ...props }) {
     >
       <SubTabSC
         onClick={() => onClick(path)}
-        $tab={tab}
+        $active={path === tab}
         $label={label}
         $idx={idx}
         $directory={directory}
-        $path={path}
         $fillLevel={fillLevel}
         {...props}
       >
@@ -128,39 +125,56 @@ function ButtonSwitchGroup({ directory, tab, onClick, ...props }) {
   ))
 }
 
+const GroupWrapperSC = styled.div<{
+  $fillLevel: number
+}>(({ theme, $fillLevel }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  backgroundColor:
+    $fillLevel === 0
+      ? 'transparent'
+      : theme.colors[fillLevelToBackground[toFillLevel($fillLevel)]],
+  border: theme.borders[fillLevelToBorder[toFillLevel($fillLevel)]],
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
 const SubTabSC = styled(SubTab)<{
-  $path: string
-  $tab: string
+  $active: boolean
   $idx: number
   $label: string
-  $directory: Array<Entry>
+  $directory: ButtonGroupDirectory
   $fillLevel: number
-}>(({ theme, $path, $tab, $idx, $directory, $label, $fillLevel }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-  padding: !$label ? theme.spacing.small : undefined,
-  outline:
-    $path === $tab
-      ? `1px solid ${theme.colors[fillLevelToBorderColor[toFillLevel($fillLevel + 1)]]}`
-      : 'none',
-  color: $path === $tab ? theme.colors['text'] : theme.colors['text-primary'],
-  outlineOffset: 0,
-  outlineColor: theme.colors['border-input'],
-  backgroundColor:
-    $path === $tab
+}>(({ theme, $active, $idx, $directory, $label, $fillLevel }) => {
+  return {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    gap: theme.spacing.small,
+    padding: !$label ? theme.spacing.small : undefined,
+    color: $active ? theme.colors['text'] : theme.colors['text-primary'],
+    borderRight:
+      $idx === $directory.length - 1 || $active
+        ? 'none'
+        : theme.borders[fillLevelToBorder[toFillLevel($fillLevel)]],
+    zIndex: $active ? 1 : 0,
+    outline: $active ? theme.borders.input : 'none',
+    outlineOffset: 0,
+    backgroundColor: $active
       ? theme.colors[
-          `${fillLevelToBackground[toFillLevel($fillLevel)]}-selected`
+          fillLevelToBackground[toFillLevel($fillLevel)] + '-selected'
         ]
-      : theme.colors[fillLevelToBackground[toFillLevel($fillLevel)]],
-  borderTopLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
-  borderBottomLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
-  borderTopRightRadius:
-    $idx === $directory.length - 1 ? theme.borderRadiuses.medium : 0,
-  borderBottomRightRadius:
-    $idx === $directory.length - 1 ? theme.borderRadiuses.medium : 0,
-  height: '100%',
-  '&:hover': {
-    background:
-      theme.colors[fillLevelToBackground[toFillLevel($fillLevel + 1)]],
-  },
-}))
+      : 'transparent',
+    borderTopLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
+    borderBottomLeftRadius: $idx === 0 ? theme.borderRadiuses.medium : 0,
+    borderTopRightRadius:
+      $idx === $directory.length - 1 ? theme.borderRadiuses.medium : 0,
+    borderBottomRightRadius:
+      $idx === $directory.length - 1 ? theme.borderRadiuses.medium : 0,
+    height: '100%',
+    '&:hover, &:focus-visible': {
+      background:
+        theme.colors[fillLevelToBackground[toFillLevel($fillLevel + 1)]],
+    },
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
+  }
+})

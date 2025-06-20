@@ -5,59 +5,62 @@ import {
   AppIcon,
   ChecklistIcon,
   Chip,
+  ChipProps,
   ConfettiIcon,
-  Flyover,
+  IconProps,
   SuccessIcon,
   Tab,
-  TabList,
   Table,
+  TabList,
   WarningIcon,
-  IconProps,
-  ChipProps,
 } from '@pluralsh/design-system'
+import { Row } from '@tanstack/react-table'
 import {
   ClusterDistro,
-  ClustersRowFragment,
+  ClusterOverviewDetailsFragment,
+  ClusterUpgradePlanFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
-  useClusterUpgradeQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { Row } from '@tanstack/react-table'
 
-import { GqlError } from '../../utils/Alert'
+import { GqlError } from '../../../utils/Alert.tsx'
 
-import { deprecationsColumns } from './deprecationsColumns'
-import RuntimeServices, {
-  getClusterKubeVersion,
-} from './runtime/RuntimeServices'
+import { produce } from 'immer'
+import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
+import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
+import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
+import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 import {
   clusterPreFlightCols,
   clusterUpgradeColumns,
   initialClusterPreFlightItems,
-} from './clusterUpgradeColumns'
+} from '../clusterUpgradeColumns.tsx'
+import { deprecationsColumns } from '../deprecationsColumns.tsx'
+import CloudAddons from '../runtime/CloudAddons.tsx'
+import { RuntimeServices } from '../runtime/RuntimeServices.tsx'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
-} from './UpgradeInsights'
-import { ClusterDistroShortNames } from '../../utils/ClusterDistro.tsx'
-import CloudAddons from './runtime/CloudAddons.tsx'
-import { produce } from 'immer'
-import { clusterDeprecatedCustomResourcesColumns } from './clusterDeprecatedCustomResourcesColumns.tsx'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+} from '../UpgradeInsights.tsx'
 
-const POLL_INTERVAL = 10 * 1000
-
-export enum DeprecationType {
+enum DeprecationType {
   GitOps = 'gitOps',
   CloudProvider = 'cloudProvider',
 }
 
-export enum AddonType {
+enum AddonType {
   All = 'all',
   Cloud = 'cloud',
+}
+
+export enum UpgradeAccordionName {
+  Preflight = 'preflight',
+  Deprecations = 'deprecations',
+  AddOns = 'add-ons',
+  CustomResources = 'custom-resources',
 }
 
 function DeprecationCountChip({
@@ -80,38 +83,24 @@ const statesWithIssues = [
   UpgradeInsightStatus.Failed,
 ]
 
-function FlyoverContent({
-  clusterId,
-  kubeVersion,
+export function UpgradesTab({
+  cluster,
   refetch,
+  initialOpen,
 }: {
-  clusterId: string
-  kubeVersion: string
+  cluster: ClusterOverviewDetailsFragment
   refetch: Nullable<() => void>
+  initialOpen?: UpgradeAccordionName | undefined
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
+  const [scrolledIntoView, setScrolledIntoView] = useState(false)
+
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
-  const { data, error } = useClusterUpgradeQuery({
-    variables: {
-      kubeVersion,
-      hasKubeVersion: true,
-      id: clusterId,
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
-  const cluster = data?.cluster
-
-  const numUpgradePlans = 3
-  let numUpgrades = numUpgradePlans
-  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
-  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
-  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+  const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
   const runtimeServices = cluster?.runtimeServices
   const cloudAddons = cluster?.cloudAddons
@@ -125,24 +114,21 @@ function FlyoverContent({
   const supportsCloudAddons = cluster?.distro === ClusterDistro.Eks
 
   const preFlightChecklist = useMemo(
-    () =>
-      initialClusterPreFlightItems.map((item) =>
-        produce(item, (d) => {
-          d.value = !!cluster?.upgradePlan?.[d.key]
-        })
-      ),
+    () => getPreFlightChecklist(cluster?.upgradePlan),
     [cluster?.upgradePlan]
   )
 
-  if (error)
-    return (
-      <GqlError
-        header="Failed to fetch cluster upgrade plan"
-        error={error}
-      />
-    )
-
-  if (!cluster) return <LoadingIndicator />
+  const scrollOnMount = (
+    domNode: HTMLDivElement | null,
+    name: UpgradeAccordionName
+  ) => {
+    if (initialOpen === name && !scrolledIntoView) {
+      runAfterBrowserLayout(() =>
+        domNode?.scrollIntoView({ behavior: 'smooth' })
+      )
+      setScrolledIntoView(true)
+    }
+  }
 
   return (
     <div
@@ -161,18 +147,21 @@ function FlyoverContent({
       <Table
         data={[cluster]}
         columns={clusterUpgradeColumns}
-        reactTableOptions={{
-          meta: { refetch, setError, data },
-        }}
+        reactTableOptions={{ meta: { refetch, setError } }}
       />
       <div css={{ ...theme.partials.text.body1Bold }}>
-        Upgrade blockers ({numUpgradePlans - numUpgrades})
+        Upgrade blockers ({numUpgradeBlockers})
       </div>
       <Accordion
+        defaultValue={initialOpen}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.Preflight)
+        }
         type="single"
         fillLevel={1}
       >
         <AccordionItem
+          value={UpgradeAccordionName.Preflight}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
@@ -194,14 +183,19 @@ function FlyoverContent({
         </AccordionItem>
       </Accordion>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.Deprecations)
+        }
       >
         <AccordionItem
+          value={UpgradeAccordionName.Deprecations}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.deprecations || false}
+              checked={!!cluster?.upgradePlan?.deprecations}
               icon={ChecklistIcon}
               title="Check API deprecations"
               subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
@@ -299,14 +293,17 @@ function FlyoverContent({
         </AccordionItem>
       </Accordion>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) => scrollOnMount(domNode, UpgradeAccordionName.AddOns)}
       >
         <AccordionItem
+          value={UpgradeAccordionName.AddOns}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.compatibilities || false}
+              checked={!!cluster?.upgradePlan?.compatibilities}
               icon={ChecklistIcon}
               title="Check add-on compatibilities"
               subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
@@ -359,7 +356,7 @@ function FlyoverContent({
               {!isEmpty(runtimeServices) ? (
                 <RuntimeServices
                   flush
-                  data={data}
+                  cluster={cluster}
                 />
               ) : (
                 <EmptyState description="No known add-ons found" />
@@ -371,7 +368,7 @@ function FlyoverContent({
               {!isEmpty(cloudAddons) ? (
                 <CloudAddons
                   flush
-                  data={data}
+                  cluster={cluster}
                 />
               ) : (
                 <EmptyState description="No known cloud add-ons found" />
@@ -384,14 +381,19 @@ function FlyoverContent({
         Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
       </div>
       <Accordion
+        defaultValue={initialOpen}
         type="single"
         fillLevel={1}
+        ref={(domNode) =>
+          scrollOnMount(domNode, UpgradeAccordionName.CustomResources)
+        }
       >
         <AccordionItem
+          value={UpgradeAccordionName.CustomResources}
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
-              checked={cluster?.deprecatedCustomResources?.length === 0}
+              checked={isEmpty(cluster?.deprecatedCustomResources)}
               icon={ChecklistIcon}
               title="Deprecated custom resources"
               subtitle="Ensure all custom resources are updated to the version required for upgrade"
@@ -401,48 +403,19 @@ function FlyoverContent({
           {!isEmpty(cluster?.deprecatedCustomResources) ? (
             <Table
               flush
+              virtualizeRows
               data={cluster?.deprecatedCustomResources ?? []}
               columns={clusterDeprecatedCustomResourcesColumns}
-              css={{
-                maxHeight: 258,
-                height: '100%',
-              }}
+              maxHeight={500}
             />
           ) : (
             <EmptyState description="You do not have any deprecated custom resources." />
           )}
         </AccordionItem>
       </Accordion>
+      {/* helpful spacer because bottom padding may get covered, can remove if the layout changes */}
+      <div css={{ minHeight: 1 }} />
     </div>
-  )
-}
-
-export function ClusterUpgradeFlyover({
-  open,
-  onClose,
-  cluster,
-  refetch,
-}: {
-  open: boolean
-  onClose: () => void
-  cluster: Nullable<ClustersRowFragment>
-  refetch: Nullable<() => void>
-}) {
-  const kubeVersion = getClusterKubeVersion(cluster)
-
-  return (
-    <Flyover
-      header={`Upgrade Plan for ${cluster?.name}`}
-      open={open}
-      onClose={onClose}
-      minWidth={920}
-    >
-      <FlyoverContent
-        clusterId={cluster?.id ?? ''}
-        kubeVersion={kubeVersion}
-        refetch={refetch}
-      />
-    </Flyover>
   )
 }
 
@@ -517,3 +490,12 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
 }))
+
+export const getPreFlightChecklist = (
+  upgradePlan: Nullable<ClusterUpgradePlanFragment>
+) =>
+  initialClusterPreFlightItems.map((item) =>
+    produce(item, (d) => {
+      d.value = !!upgradePlan?.[d.key]
+    })
+  )

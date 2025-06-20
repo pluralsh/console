@@ -34,6 +34,7 @@ const LinkTabWrapUnstyled = forwardRef(
       {cloneElement(Children.only(children), {
         active,
         vertical,
+        tabIndex: -1, // the link itself takes over the tab handling
       })}
     </UnstyledLink>
   )

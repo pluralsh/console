@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Prop, PropsContainer } from '@pluralsh/design-system'
 
 import { useBorderColor, Level } from './LogLine'
-import { ComponentPropsWithRef } from 'react-spring'
+import { ComponentPropsWithRef } from 'react'
 
 export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
   backgroundColor: color,

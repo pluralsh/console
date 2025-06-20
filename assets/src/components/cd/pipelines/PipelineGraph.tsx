@@ -25,6 +25,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
 
   return (
     <ReactFlowGraph
+      showLayoutingIndicator={false}
       baseNodes={baseNodes}
       baseEdges={baseEdges}
       elkOptions={pipelineElkOptions}

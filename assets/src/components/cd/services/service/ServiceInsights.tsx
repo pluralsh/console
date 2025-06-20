@@ -16,7 +16,7 @@ import { useServiceContext } from './ServiceDetails'
 
 export function ServiceInsights() {
   const theme = useTheme()
-  const { service, refetch, loading } = useServiceContext()
+  const { service, refetch, isRefetching } = useServiceContext()
 
   return (
     <Flex
@@ -43,7 +43,7 @@ export function ServiceInsights() {
           gap="small"
         >
           <IconFrameRefreshButton
-            loading={loading}
+            loading={isRefetching}
             refetch={refetch}
           />
           <AIPinButton insight={service?.insight as AiInsight} />

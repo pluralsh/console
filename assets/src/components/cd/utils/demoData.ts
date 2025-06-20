@@ -1,4 +1,7 @@
-export const DEMO_CLUSTERS = [
+import { ClustersRowFragment } from 'generated/graphql'
+import { Edge } from 'utils/graphql'
+
+export const DEMO_CLUSTERS: Edge<ClustersRowFragment>[] = [
   {
     __typename: 'ClusterEdge',
     node: {

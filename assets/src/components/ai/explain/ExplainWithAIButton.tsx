@@ -4,7 +4,7 @@ import {
   Button,
 } from '@pluralsh/design-system'
 import { ComponentPropsWithRef, ReactNode } from 'react'
-import { useTransition } from 'react-spring'
+import { useTransition } from '@react-spring/web'
 import { DefaultTheme, useTheme } from 'styled-components'
 
 export default function ExplainWithAIButton({

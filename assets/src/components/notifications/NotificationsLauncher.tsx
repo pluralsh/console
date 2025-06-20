@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { useTransition } from 'react-spring'
+import { useTransition } from '@react-spring/web'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { AnimatedDiv } from '@pluralsh/design-system'

@@ -11,7 +11,7 @@ import {
   CLUSTER_SERVICES_PATH,
   getClusterDetailsPath,
 } from '../../../routes/cdRoutesConsts'
-import ButtonGroup from '../../utils/ButtonGroup.tsx'
+import { ButtonGroup } from '../../utils/ButtonGroup.tsx'
 import { ModalMountTransition } from '../../utils/ModalMountTransition.tsx'
 import {
   usePageHeaderContext,

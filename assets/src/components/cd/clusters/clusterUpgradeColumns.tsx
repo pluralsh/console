@@ -19,9 +19,8 @@ import { coerce } from 'semver'
 
 import {
   ApiDeprecation,
+  ClusterOverviewDetailsFragment,
   ClusterUpgradePlanFragment,
-  ClusterUpgradeFragment,
-  ClusterUpgradeQuery,
 } from '../../../generated/graphql'
 import {
   nextSupportedVersion,
@@ -43,10 +42,10 @@ type PreFlightChecklistItem = {
   value?: boolean // this is set after fetching the upgrade plan data
 }
 
-const supportedVersions = (cluster: ClusterUpgradeFragment | null) =>
+const supportedVersions = (cluster: ClusterOverviewDetailsFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
 
-const columnHelperUpgrade = createColumnHelper<ClusterUpgradeFragment>()
+const columnHelperUpgrade = createColumnHelper<ClusterOverviewDetailsFragment>()
 const columnHelperPreFlight = createColumnHelper<PreFlightChecklistItem>()
 
 export const clusterUpgradeColumns = [
@@ -91,10 +90,9 @@ export const clusterUpgradeColumns = [
       const [targetVersion, setTargetVersion] =
         useState<Nullable<string>>(upgradeVersion)
 
-      const { refetch, setError, data } = table.options.meta as {
+      const { refetch, setError } = table.options.meta as {
         refetch?: () => void
         setError?: Dispatch<SetStateAction<Nullable<ApolloError>>>
-        data?: ClusterUpgradeQuery
       }
 
       useEffect(() => {
@@ -146,7 +144,7 @@ export const clusterUpgradeColumns = [
             cluster={cluster}
             targetVersion={targetVersion}
             apiDeprecations={
-              (data?.cluster?.apiDeprecations as ApiDeprecation[]) || []
+              (cluster?.apiDeprecations as ApiDeprecation[]) || []
             }
             refetch={refetch}
             setError={setError}

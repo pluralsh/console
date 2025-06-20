@@ -14,6 +14,7 @@ export default function IconFrameRefreshButton({
       clickable
       type="secondary"
       size="large"
+      tooltip="Refetch data"
       onClick={() => refetch()}
       icon={
         loading ? (

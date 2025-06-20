@@ -1,6 +1,6 @@
 import { AnimatedDiv, useResizeObserver } from '@pluralsh/design-system'
 import { ReactNode, RefObject, useMemo, useRef, useState } from 'react'
-import { useTransition } from 'react-spring'
+import { useTransition } from '@react-spring/web'
 
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { useTheme } from 'styled-components'
@@ -27,7 +27,7 @@ export function AIPanelOverlay({
   const ref = useRef<any>(undefined)
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
-  const maxHeight = useOverlayMaxHeight(ref, 32)
+  const maxHeight = useOverlayMaxHeight(ref, 64)
 
   useKeyDown(['Escape'], onClose)
   useClickOutside(ref, onClose)
@@ -36,6 +36,7 @@ export function AIPanelOverlay({
     <AnimatedDiv
       css={{
         zIndex: theme.zIndexes.modal,
+        boxShadow: theme.boxShadows.moderate,
         position: 'absolute',
         right: 0,
         top: 32 + theme.spacing.small,
