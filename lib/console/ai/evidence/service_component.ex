@@ -53,7 +53,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
     |> ServiceComponentChild.for_states([:failed, :pending])
     |> Console.Repo.all()
     |> Console.Repo.preload([:insight, component: [service: :cluster]])
-    |> Enum.map(&{&1, Worker.generate(&1)})
+    |> Enum.map(& {&1, Worker.generate(&1)})
     |> Enum.map(fn {c, t} -> {c, Worker.await(t)} end)
     |> Enum.map(fn
       {c, {:ok, %AiInsight{} = insight}} -> {c, insight}

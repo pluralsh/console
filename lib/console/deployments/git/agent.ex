@@ -110,7 +110,7 @@ defmodule Console.Deployments.Git.Agent do
   def init(repo) do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
-    :pg.join(__MODULE__, self())
+    # :pg.join(__MODULE__, self())
     table = :ets.new(:git_cache_entries, [:set, :protected, read_concurrency: true])
     Supervisor.register(self(), table)
     cache = Cache.new(repo, table)

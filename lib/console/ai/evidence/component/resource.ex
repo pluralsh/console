@@ -7,7 +7,6 @@ defmodule Console.AI.Evidence.Component.Resource do
     Ingress,
     CronJob,
     Job,
-    Raw,
     Certificate
   }
 
@@ -104,7 +103,7 @@ defmodule Console.AI.Evidence.Component.Resource do
   defp do_hydrate(%BatchV1.CronJob{} = cj), do: CronJob.hydrate(cj)
   defp do_hydrate(%BatchV1.Job{} = cj), do: Job.hydrate(cj)
   defp do_hydrate(%Kube.Certificate{} = cert), do: Certificate.hydrate(cert)
-  defp do_hydrate(%{"metadata" => _} = raw), do: Raw.hydrate(raw)
+  # defp do_hydrate(%{"metadata" => _}), do: {:ok, []}
   defp do_hydrate(_), do: {:ok, []}
 
   defp details(%{metadata: %{uid: uid} = meta}), do: {uid, Map.get(meta, :namespace)}

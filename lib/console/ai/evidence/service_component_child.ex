@@ -1,8 +1,7 @@
 defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponentChild do
   use Console.AI.Evidence.Base
-  alias Console.AI.Worker
   alias Console.AI.Evidence.Component.Resource
-  alias Console.Schema.{ServiceComponentChild, AiInsight}
+  alias Console.Schema.{ServiceComponentChild}
 
   require Logger
 
@@ -29,8 +28,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponentChild do
           """
         }]
         ++ tpl_events(events)
-        ++ tpl_hydration(hydration)
-        ++ traverse_children(comp, Resource.custom?(resource)),
+        ++ tpl_hydration(hydration),
         claims
       )
     end
@@ -38,7 +36,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponentChild do
 
   def insight(%{insight: insight}), do: insight
 
-  def preload(comp), do: Console.Repo.preload(comp, [insight: :evidence, service: :cluster])
+  def preload(comp), do: Console.Repo.preload(comp, [insight: :evidence, component: [service: :cluster]])
 
   defp tpl_hydration([_ | _] = hydration) do
     [
@@ -48,31 +46,31 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponentChild do
   end
   defp tpl_hydration(_), do: []
 
-  defp traverse_children(%ServiceComponentChild{uid: uid, component_id: comp_id}, true) do
-    ServiceComponentChild.for_parent(uid)
-    |> ServiceComponentChild.for_component(comp_id)
-    |> ServiceComponentChild.for_states([:failed, :pending])
-    |> Console.Repo.all()
-    |> Console.Repo.preload([:insight, component: [service: :cluster]])
-    |> Enum.map(&{&1, Worker.generate(&1)})
-    |> Enum.map(fn {c, t} -> {c, Worker.await(t)} end)
-    |> Enum.map(fn
-      {c, {:ok, %AiInsight{} = insight}} -> {c, insight}
-      {_, err} ->
-        Logger.error("failed to generate insight for component child, reason: #{inspect(err)}")
-        nil
-    end)
-    |> Enum.filter(& &1)
-    |> Enum.map(fn {c, insight} ->
-      {:user, """
-#{description(c)} (uid is #{c.uid}, parent uid is #{c.parent_uid}) is in #{c.state} state, meaning #{meaning(c.state)}.  Here's a brief summary of the current status:
+#   defp traverse_children(%ServiceComponentChild{uid: uid, component_id: comp_id}, true) do
+#     ServiceComponentChild.for_parent(uid)
+#     |> ServiceComponentChild.for_component(comp_id)
+#     |> ServiceComponentChild.for_states([:failed, :pending])
+#     |> Console.Repo.all()
+#     |> Console.Repo.preload([:insight, component: [service: :cluster]])
+#     |> Enum.map(&{&1, Worker.generate(&1)})
+#     |> Enum.map(fn {c, t} -> {c, Worker.await(t)} end)
+#     |> Enum.map(fn
+#       {c, {:ok, %AiInsight{} = insight}} -> {c, insight}
+#       {_, err} ->
+#         Logger.error("failed to generate insight for component child, reason: #{inspect(err)}")
+#         nil
+#     end)
+#     |> Enum.filter(& &1)
+#     |> Enum.map(fn {c, insight} ->
+#       {:user, """
+# #{description(c)} (uid is #{c.uid}, parent uid is #{c.parent_uid}) is in #{c.state} state, meaning #{meaning(c.state)}.  Here's a brief summary of the current status:
 
-#{insight.text}
-      """}
-    end)
-    |> prepend({:user, "this component owns a number of kubernetes objects that are currently in an indeterminate state as well, here's a rundown of them"})
-  end
-  defp traverse_children(_, _), do: []
+# #{insight.text}
+#       """}
+#     end)
+#     |> prepend({:user, "this component owns a number of kubernetes objects that are currently in an indeterminate state as well, here's a rundown of them"})
+#   end
+#   defp traverse_children(_, _), do: []
 
   defp description(%ServiceComponentChild{} = comp),
     do: "#{comp.group}/#{comp.version} #{comp.kind}#{ns(comp.namespace)} with name #{comp.name}"
