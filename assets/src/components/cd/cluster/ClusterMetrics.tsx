@@ -115,7 +115,7 @@ export function ClusterUtilizationHeatmaps({
   const metricsEnabled = useMetricsEnabled()
   const { spacing } = useTheme()
   const [heatMapFlavor, setHeatMapFlavor] = useState<HeatMapFlavor>(
-    HeatMapFlavor.Pod
+    HeatMapFlavor.Node
   )
   const {
     data: heatMapData,
