@@ -54,7 +54,7 @@ export function UtilizationHeatmap({
           label={node.id}
         />
       )}
-      label={truncatedLabel}
+      label={truncatedGraphLabel}
       colors={getColor}
       valueFormat={(d) => formatValue(d, utilizationType)}
       data={treeMapData}
@@ -62,7 +62,7 @@ export function UtilizationHeatmap({
   )
 }
 
-function truncatedLabel(
+export function truncatedGraphLabel(
   node: Omit<ComputedNodeWithoutStyles<object>, 'label' | 'parentLabel'>
 ) {
   const size = node.width > node.height ? node.width : node.height

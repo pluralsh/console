@@ -12798,6 +12798,8 @@ export type ClusterUpgradeFragment = { __typename?: 'Cluster', id: string, name:
 
 export type ClusterOverviewDetailsFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, noisyNeighbors?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, text?: string | null, sha?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
 
+export type ClusterHealthScoreFragment = { __typename?: 'Cluster', id: string, healthScore?: number | null };
+
 export type ClusterOverviewDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   kubeVersion: Scalars['String']['input'];
@@ -12814,6 +12816,13 @@ export type UpgradeStatisticsQueryVariables = Exact<{
 
 
 export type UpgradeStatisticsQuery = { __typename?: 'RootQueryType', upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null, latest?: number | null, compliant?: number | null } | null };
+
+export type ClusterHealthScoresQueryVariables = Exact<{
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterHealthScoresQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, healthScore?: number | null } | null } | null> | null } | null };
 
 export type KubernetesClusterFragment = { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null };
 
@@ -16503,6 +16512,12 @@ ${ClusterUpgradeFragmentDoc}
 ${ClusterInsightFragmentDoc}
 ${NodeStatisticFragmentDoc}
 ${UtilizationHeatMapFragmentDoc}`;
+export const ClusterHealthScoreFragmentDoc = gql`
+    fragment ClusterHealthScore on Cluster {
+  id
+  healthScore
+}
+    `;
 export const PinnedCustomResourceFragmentDoc = gql`
     fragment PinnedCustomResource on PinnedCustomResource {
   id
@@ -25811,6 +25826,50 @@ export type UpgradeStatisticsQueryHookResult = ReturnType<typeof useUpgradeStati
 export type UpgradeStatisticsLazyQueryHookResult = ReturnType<typeof useUpgradeStatisticsLazyQuery>;
 export type UpgradeStatisticsSuspenseQueryHookResult = ReturnType<typeof useUpgradeStatisticsSuspenseQuery>;
 export type UpgradeStatisticsQueryResult = Apollo.QueryResult<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>;
+export const ClusterHealthScoresDocument = gql`
+    query ClusterHealthScores($projectId: ID) {
+  clusters(projectId: $projectId, first: 1000) {
+    edges {
+      node {
+        ...ClusterHealthScore
+      }
+    }
+  }
+}
+    ${ClusterHealthScoreFragmentDoc}`;
+
+/**
+ * __useClusterHealthScoresQuery__
+ *
+ * To run a query within a React component, call `useClusterHealthScoresQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterHealthScoresQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterHealthScoresQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useClusterHealthScoresQuery(baseOptions?: Apollo.QueryHookOptions<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>(ClusterHealthScoresDocument, options);
+      }
+export function useClusterHealthScoresLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>(ClusterHealthScoresDocument, options);
+        }
+export function useClusterHealthScoresSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>(ClusterHealthScoresDocument, options);
+        }
+export type ClusterHealthScoresQueryHookResult = ReturnType<typeof useClusterHealthScoresQuery>;
+export type ClusterHealthScoresLazyQueryHookResult = ReturnType<typeof useClusterHealthScoresLazyQuery>;
+export type ClusterHealthScoresSuspenseQueryHookResult = ReturnType<typeof useClusterHealthScoresSuspenseQuery>;
+export type ClusterHealthScoresQueryResult = Apollo.QueryResult<ClusterHealthScoresQuery, ClusterHealthScoresQueryVariables>;
 export const KubernetesClustersDocument = gql`
     query KubernetesClusters($projectId: ID) {
   clusters(first: 200, projectId: $projectId) {
@@ -30344,6 +30403,7 @@ export const namedOperations = {
     GroupMembers: 'GroupMembers',
     ClusterOverviewDetails: 'ClusterOverviewDetails',
     UpgradeStatistics: 'UpgradeStatistics',
+    ClusterHealthScores: 'ClusterHealthScores',
     KubernetesClusters: 'KubernetesClusters',
     KubernetesClusterAuditLogs: 'KubernetesClusterAuditLogs',
     ArgoRollout: 'ArgoRollout',
@@ -30683,6 +30743,7 @@ export const namedOperations = {
     ClusterUpgradeDeprecatedCustomResource: 'ClusterUpgradeDeprecatedCustomResource',
     ClusterUpgrade: 'ClusterUpgrade',
     ClusterOverviewDetails: 'ClusterOverviewDetails',
+    ClusterHealthScore: 'ClusterHealthScore',
     KubernetesCluster: 'KubernetesCluster',
     PinnedCustomResource: 'PinnedCustomResource',
     ArgoRolloutStatus: 'ArgoRolloutStatus',

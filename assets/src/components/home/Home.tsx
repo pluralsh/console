@@ -20,14 +20,18 @@ import {
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ClustersQueryVariables,
+  ClustersRowFragment,
+  useClusterHealthScoresSuspenseQuery,
   useClustersQuery,
   useUpgradeStatisticsQuery,
   VersionCompliance,
 } from 'generated/graphql.ts'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
+  aggregateHealthScoreStats,
   ClusterHealthScoresFilterBtns,
   ClusterHealthScoresHeatmap,
   HealthScoreFilterLabel,
@@ -62,7 +66,13 @@ export function Home() {
   const [upgradeFilterOption, setUpgradeFilterOption] = useState(
     UpgradeChartFilter.All
   )
+  const [selectedCluster, setSelectedCluster] =
+    useState<Nullable<ClustersRowFragment>>(null)
 
+  const { data: healthScoresData } = useClusterHealthScoresSuspenseQuery({
+    variables: { projectId },
+    fetchPolicy: 'network-only',
+  })
   const {
     data: tableData,
     loading: tableLoading,
@@ -93,6 +103,23 @@ export function Home() {
     fetchPolicy: 'cache-and-network',
   })
 
+  const { aggregatedHealthScores, aggregatedUpgradeStats } = useMemo(
+    () => ({
+      aggregatedHealthScores: aggregateHealthScoreStats(
+        mapExistingNodes(healthScoresData?.clusters)
+      ),
+      aggregatedUpgradeStats: aggregateUpgradeStats(
+        upgradeData?.upgradeStatistics ?? {}
+      ),
+    }),
+    [healthScoresData, upgradeData]
+  )
+
+  const clusters = useMemo(
+    () => mapExistingNodes(tableData?.clusters),
+    [tableData]
+  )
+
   return (
     <Flex
       direction="column"
@@ -115,15 +142,14 @@ export function Home() {
               <ClusterHealthScoresFilterBtns
                 selectedFilter={healthScoreRange}
                 onSelect={setHealthScoreRange}
+                values={aggregatedHealthScores}
               />
             )}
             {tab === HomeScreenTab.Upgrades && (
               <ClusterUpgradesFilterBtns
                 selectedFilter={upgradeFilterOption}
                 onSelect={setUpgradeFilterOption}
-                values={aggregateUpgradeStats(
-                  upgradeData?.upgradeStatistics ?? {}
-                )}
+                values={aggregatedUpgradeStats}
               />
             )}
           </Flex>
@@ -138,7 +164,12 @@ export function Home() {
               />
             )}
             {tab === HomeScreenTab.HealthScores && (
-              <ClusterHealthScoresHeatmap />
+              <ClusterHealthScoresHeatmap
+                clusters={clusters}
+                onClick={(name) =>
+                  setSelectedCluster(clusters.find((c) => c.name === name))
+                }
+              />
             )}
           </ChartWrapperSC>
         </WidthLimiterSC>
@@ -152,6 +183,8 @@ export function Home() {
               fullHeightWrap
               rowBg="raised"
               rowClickAction="flyover"
+              selectedCluster={selectedCluster}
+              setSelectedCluster={setSelectedCluster}
               data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
               loading={!tableData && tableLoading}
               refetch={refetch}
@@ -173,10 +206,12 @@ const ChartWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   maxWidth: 425,
   height: 240,
+  borderRadius: theme.borderRadiuses.large,
+  overflow: 'hidden',
   [`@media (max-width: ${theme.breakpoints.desktopLarge}px)`]: {
     height: 304,
   },
-  '& g:first-of-type': { cursor: 'pointer' },
+  '& g:first-of-type, & canvas': { cursor: 'pointer' },
 }))
 
 const ChartSectionSC = styled.div(({ theme }) => ({

@@ -1,5 +1,6 @@
-import { type Theme as NivoThemeType } from '@nivo/core'
+import type { LineSeries, PointTooltipProps } from '@nivo/line'
 import { ResponsiveLine } from '@nivo/line'
+import { type PartialTheme as NivoThemeType } from '@nivo/theming'
 import { Card, Flex } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
 import { last } from 'lodash'
@@ -47,20 +48,24 @@ const SliceTootipWrapperSC = styled(Card)(({ theme }) => ({
   ...theme.partials.text.caption,
   display: 'flex',
   alignItems: 'center',
+  width: 'max-content',
   gap: theme.spacing.xsmall,
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
 }))
 
-export function SliceTooltip({ point: { serieColor, serieId, data } }) {
+export function SliceTooltip({ point }: PointTooltipProps<LineSeries>) {
+  const { seriesColor, seriesId, data } = point
+
   return (
     <SliceTootipWrapperSC fillLevel={2}>
       <Flex
         width={12}
         height={12}
-        backgroundColor={serieColor}
+        flexShrink={0}
+        backgroundColor={seriesColor}
       />
       <div>
-        {serieId}: <span css={{ fontWeight: 700 }}>{data.yFormatted}</span>
+        {seriesId}: <span css={{ fontWeight: 700 }}>{data.yFormatted}</span>
         <br />
         {data.xFormatted}
       </div>

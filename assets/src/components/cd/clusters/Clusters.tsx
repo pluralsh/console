@@ -295,18 +295,27 @@ export function ClustersTable({
   refetch,
   columns = cdClustersColumns,
   rowClickAction = 'navigate',
+  selectedCluster: selectedClusterProp,
+  setSelectedCluster: setSelectedClusterProp,
   ...props
 }: {
   data: Edge<ClustersRowFragment>[]
   refetch: () => void
   columns?: TableProps['columns']
   rowClickAction?: 'navigate' | 'flyover'
+  // for cases when parent wants to control the selected cluster
+  selectedCluster?: Nullable<ClustersRowFragment>
+  setSelectedCluster?: (cluster: Nullable<ClustersRowFragment>) => void
 } & Omit<TableProps, 'data' | 'columns'>) {
   const navigate = useNavigate()
 
-  const [selectedCluster, setSelectedCluster] =
+  const [selectedClusterInternal, setSelectedClusterInternal] =
     useState<Nullable<ClustersRowFragment>>(null)
   const [flyoverTab, setFlyoverTab] = useState(ClusterInfoFlyoverTab.Overview)
+
+  const selectedCluster = selectedClusterProp ?? selectedClusterInternal
+  const setSelectedCluster =
+    setSelectedClusterProp ?? setSelectedClusterInternal
 
   const reactTableOptions: { meta: ClustersTableMeta } = {
     meta: { refetch, setFlyoverTab, setSelectedCluster },

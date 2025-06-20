@@ -48,6 +48,11 @@ fragment ClusterOverviewDetails on Cluster {
   }
 }
 
+fragment ClusterHealthScore on Cluster {
+  id
+  healthScore
+}
+
 query ClusterOverviewDetails(
   $id: ID!
   $kubeVersion: String!
@@ -61,5 +66,15 @@ query ClusterOverviewDetails(
 query UpgradeStatistics($projectId: ID, $tag: TagInput) {
   upgradeStatistics(projectId: $projectId, tag: $tag) {
     ...UpgradeStatistics
+  }
+}
+
+query ClusterHealthScores($projectId: ID) {
+  clusters(projectId: $projectId, first: 1000) {
+    edges {
+      node {
+        ...ClusterHealthScore
+      }
+    }
   }
 }
