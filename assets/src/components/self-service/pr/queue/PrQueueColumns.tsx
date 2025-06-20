@@ -23,13 +23,12 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 
-import DecoratedName from '../../cd/services/DecoratedName'
-import { ProtectBadge } from '../../cd/clusters/ProtectBadge'
-import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
-import { BasicLink } from '../../utils/typography/BasicLink'
-
 import { PrSettingsModal } from './PrSettings'
 import { DeletePrModal } from './DeletePr'
+import { ProtectBadge } from 'components/cd/clusters/ProtectBadge'
+import DecoratedName from 'components/cd/services/DecoratedName'
+import { BasicLink } from 'components/utils/typography/BasicLink'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 enum MenuItemKey {
   None = '',

@@ -12,7 +12,7 @@ import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { Link } from 'react-router-dom'
 
-import { PrStatusChip } from 'components/pr/queue/PrQueueColumns'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 
 import { StackRunDetailsFragment } from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'

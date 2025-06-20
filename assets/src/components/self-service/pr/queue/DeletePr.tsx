@@ -1,10 +1,10 @@
 import { useTheme } from 'styled-components'
 
-import { Confirm } from '../../utils/Confirm'
+import { Confirm } from 'components/utils/Confirm'
 import {
   PullRequestFragment,
   useDeletePullRequestMutation,
-} from '../../../generated/graphql'
+} from 'generated/graphql'
 
 export function DeletePrModal({
   pr,
