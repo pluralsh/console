@@ -11,7 +11,7 @@ import {
 } from 'generated/graphql'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 
-import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
+import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/selfServiceRoutesConsts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'

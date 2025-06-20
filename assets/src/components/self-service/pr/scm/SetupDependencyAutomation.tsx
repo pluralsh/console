@@ -25,7 +25,7 @@ import { useUpdateState } from '../../hooks/useUpdateState'
 
 import { RegExpGroups } from '../../../types/regex'
 
-import { PR_QUERY_PAGE_SIZE } from './PrScmConnections'
+import { PR_QUERY_PAGE_SIZE } from './PrScmManagement.tsx'
 import { scmTypeToIcon } from './PrScmConnectionsColumns'
 
 const REPOSITORY_EXTRACT_REGEX =

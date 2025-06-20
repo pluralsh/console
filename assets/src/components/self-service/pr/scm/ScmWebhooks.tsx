@@ -1,33 +1,39 @@
 import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { useScmConnectionsQuery } from 'generated/graphql'
+import { useScmWebhooksQuery } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
+import {
+  PR_BASE_CRUMBS,
+  PR_SCM_WEBHOOKS_ABS_PATH,
+} from 'routes/selfServiceRoutesConsts'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 
-import { columns } from './PrScmConnectionsColumns'
-import { CreateScmConnection } from './CreateScmConnection'
-import { SetupDependencyAutomation } from './SetupDependencyAutomation'
+import { columns } from './ScmWebhooksColumns'
+import { CreateScmWebhook } from './CreateScmWebhook'
 
 export const PR_QUERY_PAGE_SIZE = 100
 
 const crumbs = [
   ...PR_BASE_CRUMBS,
   {
-    label: 'SCM connections',
-    url: PR_SCM_ABS_PATH,
+    label: 'SCM webhooks',
+    url: PR_SCM_WEBHOOKS_ABS_PATH,
   },
 ]
 
-export default function ScmConnections() {
+export const SCM_WEBHOOKS_Q_VARS = {
+  first: PR_QUERY_PAGE_SIZE,
+}
+
+export default function ScmWebhooks() {
   const theme = useTheme()
 
   useSetBreadcrumbs(crumbs)
@@ -41,8 +47,9 @@ export default function ScmConnections() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData({
-    queryHook: useScmConnectionsQuery,
-    keyPath: ['scmConnections'],
+    queryHook: useScmWebhooksQuery,
+    pageSize: SCM_WEBHOOKS_Q_VARS.first,
+    keyPath: ['scmWebhooks'],
   })
 
   useSetPageHeaderContent(
@@ -52,8 +59,7 @@ export default function ScmConnections() {
         gap: theme.spacing.small,
       }}
     >
-      <SetupDependencyAutomation refetch={refetch} />
-      <CreateScmConnection refetch={refetch} />
+      <CreateScmWebhook refetch={refetch} />
     </div>
   )
 
@@ -78,7 +84,7 @@ export default function ScmConnections() {
         columns={columns}
         reactTableOptions={{ meta: { refetch } }}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        data={data?.scmConnections?.edges || []}
+        data={data?.scmWebhooks?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}

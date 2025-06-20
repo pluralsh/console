@@ -9,15 +9,14 @@ import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
 import { GitHubSetup } from 'components/cloud-setup/GitHubSetup.tsx'
 import { aiRoutes } from './aiRoutes.tsx'
-import { catalogRoutes } from './catalogRoutes.tsx'
 import { cdRoutes } from './cdRoutes'
 import { costManagementRoutes } from './costManagementRoutes.tsx'
 import { edgeRoutes } from './edgeRoutes.tsx'
 import { flowRoutes } from './flowRoutes.tsx'
 import { kubernetesRoutes } from './kubernetesRoute'
-import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
 import { securityRoutes } from './securityRoutes'
+import { selfServiceRoutes } from './selfServiceRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 
@@ -60,7 +59,6 @@ const profileRoutes = [
 
 export const consoleComponentRoutes = [
   ...edgeRoutes,
-  ...catalogRoutes,
   ...stacksRoutes,
   // ...incidentsRoutes,
   ...securityRoutes,
@@ -72,6 +70,7 @@ export const consoleComponentRoutes = [
   kubernetesRoutes,
   aiRoutes,
   ...flowRoutes,
+  selfServiceRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [
@@ -92,5 +91,4 @@ export const consoleRoutes: RouteObject[] = [
     element: <GitHubSetup />,
   },
   ...secretsRoutes,
-  ...prRoutes,
 ]

@@ -1,20 +1,18 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Permissions } from '../cd/utils/PermissionsModal.tsx'
+import { Modal, Button } from '@pluralsh/design-system'
+import { StepBody } from 'components/cd/ModalAlt'
+import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
   CatalogFragment,
-  UpsertCatalogMutationVariables,
   useUpsertCatalogMutation,
-} from '../../generated/graphql.ts'
-import { ModalMountTransition } from '../utils/ModalMountTransition.tsx'
+  UpsertCatalogMutationVariables,
+} from 'generated/graphql'
+import { uniqWith, isEqual } from 'lodash'
+import { useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
 import { useTheme } from 'styled-components'
-import uniqWith from 'lodash/uniqWith'
-import isEqual from 'lodash/isEqual'
-import { isNonNullable } from '../../utils/isNonNullable.ts'
-import { bindingToBindingAttributes } from '../settings/usermanagement/roles/misc.ts'
-import { Button, Modal } from '@pluralsh/design-system'
-import { StepBody } from '../cd/ModalAlt.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import { GqlError } from '../utils/Alert.tsx'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export function CatalogPermissions({
   catalog,
