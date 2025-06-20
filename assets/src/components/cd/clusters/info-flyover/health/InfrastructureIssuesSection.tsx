@@ -1,4 +1,4 @@
-import { Button, Chip, GitPullIcon, Table } from '@pluralsh/design-system'
+import { Button, Chip, KubernetesIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { DrainNodeModal } from 'components/kubernetes/common/DrainNodeModal'
 import {
@@ -40,7 +40,7 @@ export function InfrastructureIssuesSection({
           secondary
           as={Link}
           to={`${getClusterAbsPath(cluster?.id)}/${NODES_REL_PATH}`}
-          startIcon={<GitPullIcon />}
+          startIcon={<KubernetesIcon />}
         >
           View all nodes
         </Button>
