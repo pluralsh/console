@@ -17,7 +17,7 @@ import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
 import { OverviewTabCard } from './OverviewTabCard'
 import { isEmpty } from 'lodash'
 import { componentHasInsight } from '../health/ConfigurationIssuesSection'
-
+import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 export function OverviewTab({
   cluster,
   setTab,
@@ -29,6 +29,8 @@ export function OverviewTab({
 }) {
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
   const upgradePlan = cluster.upgradePlan
+  const metricsEnabled = useMetricsEnabled()
+
   return (
     <WrapperSC>
       <MetadataCard cluster={cluster} />
@@ -104,7 +106,7 @@ export function OverviewTab({
           ]}
         />
       </Flex>
-      <ClusterUtilizationHeatmaps clusterId={cluster.id} />
+      {metricsEnabled && <ClusterUtilizationHeatmaps clusterId={cluster.id} />}
     </WrapperSC>
   )
 }
