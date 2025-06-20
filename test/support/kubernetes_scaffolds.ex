@@ -9,11 +9,12 @@ defmodule KubernetesScaffolds do
   alias Kube
   alias Console.Schema
 
+  def stateful_set(ns), do: stateful_set(ns, ns)
   def stateful_set(namespace, name) do
     %Apps.StatefulSet{
       api_version: "apps/v1",
       kind: "StatefulSet",
-      metadata: %{name: name, namespace: namespace},
+      metadata: %ObjectMeta{name: name, namespace: namespace, uid: Ecto.UUID.generate()},
       status: %Apps.StatefulSetStatus{
         current_replicas: 3,
         replicas: 3
@@ -167,6 +168,20 @@ defmodule KubernetesScaffolds do
       spec: %Kube.Certificate.Spec{
         dns_names: ["some.example.com"],
         secret_name: "example-tls"
+      }
+    }
+  end
+
+  def es_cluster(name) do
+    %{
+      "apiVersion" => "elasticsearch.k8s.elastic.co/v1",
+      "kind" => "Elasticsearch",
+      "metadata" => %{
+        "name" => name,
+        "namespace" => name
+      },
+      "spec" => %{
+        "version" => "8.16.0"
       }
     }
   end

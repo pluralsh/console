@@ -168,6 +168,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :default,       :string
     field :documentation, :string
     field :longform,      :string
+    field :display_name,  :string
     field :placeholder,   :string
     field :optional,      :boolean
     field :condition,     :condition_attributes
@@ -553,6 +554,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :documentation, :string
     field :longform,      :string
     field :placeholder,   :string
+    field :display_name,  :string
     field :optional,      :boolean
     field :values,        list_of(:string)
     field :condition,     :pr_configuration_condition

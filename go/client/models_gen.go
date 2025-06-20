@@ -4780,6 +4780,7 @@ type PrConfiguration struct {
 	Documentation *string                   `json:"documentation,omitempty"`
 	Longform      *string                   `json:"longform,omitempty"`
 	Placeholder   *string                   `json:"placeholder,omitempty"`
+	DisplayName   *string                   `json:"displayName,omitempty"`
 	Optional      *bool                     `json:"optional,omitempty"`
 	Values        []*string                 `json:"values,omitempty"`
 	Condition     *PrConfigurationCondition `json:"condition,omitempty"`
@@ -4792,6 +4793,7 @@ type PrConfigurationAttributes struct {
 	Default       *string                            `json:"default,omitempty"`
 	Documentation *string                            `json:"documentation,omitempty"`
 	Longform      *string                            `json:"longform,omitempty"`
+	DisplayName   *string                            `json:"displayName,omitempty"`
 	Placeholder   *string                            `json:"placeholder,omitempty"`
 	Optional      *bool                              `json:"optional,omitempty"`
 	Condition     *ConditionAttributes               `json:"condition,omitempty"`

@@ -45,6 +45,7 @@ fragment PrConfiguration on PrConfiguration {
   values
   default
   documentation
+  displayName
   longform
   name
   optional

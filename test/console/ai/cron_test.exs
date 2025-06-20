@@ -123,6 +123,53 @@ defmodule Console.AI.CronTest do
       assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
     end
 
+    test "it will gather info from unknown custom resources and generate" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])
+      component = insert(:service_component,
+        service: service,
+        state: :pending,
+        group: "elasticsearch.k8s.elastic.com",
+        version: "v1",
+        kind: "Elasticsearch",
+        namespace: "ns",
+        name: "name"
+      )
+      child = insert(:service_component_child,
+        uid: Ecto.UUID.generate(),
+        component: component,
+        state: :pending,
+        group: "apps",
+        version: "v1",
+        kind: "StatefulSet",
+        namespace: "ns",
+        name: "name"
+      )
+      expect(Clusters, :control_plane, 2, fn _ -> %Kazan.Server{} end)
+      expect(Clusters, :api_discovery, fn  _ -> %{} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, es_cluster("ns")} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, stateful_set("ns")} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Console.AI.OpenAI, :completion, 6, fn _, _, _ -> {:ok, "openai completion"} end)
+
+      Cron.services()
+
+      %{id: id} = svc = Console.Repo.preload(refetch(service), [:insight, components: :insight])
+
+      assert svc.insight.text
+
+      %{components: [component]} = svc
+
+      assert component.insight.text
+
+      assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
+
+      child = Console.Repo.preload(refetch(child), [:insight])
+      assert child.insight.text
+    end
+
     test "it will call aws bedrock correctly" do
       deployment_settings(ai: %{enabled: true, provider: :bedrock, bedrock: %{model_id: "test"}})
       service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])

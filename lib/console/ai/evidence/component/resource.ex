@@ -108,4 +108,5 @@ defmodule Console.AI.Evidence.Component.Resource do
 
   defp details(%{metadata: %{uid: uid} = meta}), do: {uid, Map.get(meta, :namespace)}
   defp details(%{"metadata" => %{"uid" => uid} = meta}), do: {uid, meta["namespace"]}
+  defp details(%{"metadata" => meta}), do: {meta["uid"], meta["namespace"]}
 end

@@ -2525,7 +2525,8 @@ _Appears in:_
 | `condition` _[Condition](#condition)_ |  |  | Optional: {} <br /> |
 | `default` _string_ |  |  | Optional: {} <br /> |
 | `documentation` _string_ |  |  | Optional: {} <br /> |
-| `longform` _string_ |  |  | Optional: {} <br /> |
+| `longform` _string_ | Extended documentation for the input of this field. |  | Optional: {} <br /> |
+| `displayName` _string_ | A custom display name for the input of this field.  Will default to name otherwise. |  | Optional: {} <br /> |
 | `optional` _boolean_ |  |  | Optional: {} <br /> |
 | `placeholder` _string_ |  |  | Optional: {} <br /> |
 | `validation` _[PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)_ | Any additional validations you want to apply to this configuration item before generating a pr |  | Optional: {} <br /> |

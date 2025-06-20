@@ -1,6 +1,5 @@
 defmodule Console.AI.Evidence.Component.Raw do
   use Console.AI.Evidence.Base
-  # alias Console.AI.Evidence.Component.Resource
 
   @kind_blacklist ~w(
     ServiceDeployment
@@ -31,6 +30,6 @@ defmodule Console.AI.Evidence.Component.Raw do
   ) # ignore crds which we know don't cascade to other resources, mostly our own
 
   def hydrate(%{"kind" => k, "metadata" => %{"namespace" => ns}} = _resource)
-      when is_binary(ns) and k not in @kind_blacklist, do: [] # ignore for now, not sure what we can really do
+      when is_binary(ns) and k not in @kind_blacklist, do: {:ok, []} # ignore for now, not sure what we can really do
   def hydrate(_), do: {:ok, []}
 end

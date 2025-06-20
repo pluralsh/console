@@ -132,6 +132,7 @@ defmodule Console.Schema.Configuration do
     field :name,          :string
     field :default,       :string
     field :documentation, :string
+    field :display_name,  :string
     field :longform,      :string
     field :placeholder,   :string
     field :optional,      :boolean
@@ -151,7 +152,7 @@ defmodule Console.Schema.Configuration do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(type name default values documentation longform placeholder optional)a)
+    |> cast(attrs, ~w(type name default values documentation longform placeholder optional display_name)a)
     |> cast_embed(:condition)
     |> cast_embed(:validation, with: &validation_changeset/2)
     |> validate_types()

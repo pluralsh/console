@@ -7128,6 +7128,7 @@ input PrConfigurationAttributes {
   default: String
   documentation: String
   longform: String
+  displayName: String
   placeholder: String
   optional: Boolean
   condition: ConditionAttributes
@@ -7629,6 +7630,7 @@ type PrConfiguration {
   documentation: String
   longform: String
   placeholder: String
+  displayName: String
   optional: Boolean
   values: [String]
   condition: PrConfigurationCondition
