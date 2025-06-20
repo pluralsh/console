@@ -1,7 +1,7 @@
 import { CatalogCard } from '@pluralsh/design-system'
 import { CatalogFragment } from '../../generated/graphql.ts'
 import { CSSProperties, useTheme } from 'styled-components'
-import { getCatalogAbsPath } from '../../routes/catalogRoutesConsts.tsx'
+import { getCatalogAbsPath } from '../../routes/selfServiceRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
 import { ReactNode, useCallback } from 'react'
 import { isEmpty } from 'lodash'

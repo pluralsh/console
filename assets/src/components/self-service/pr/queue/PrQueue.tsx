@@ -10,7 +10,10 @@ import { useTheme } from 'styled-components'
 
 import { usePullRequestsQuery } from 'generated/graphql'
 
-import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+import {
+  PR_BASE_CRUMBS,
+  PR_QUEUE_ABS_PATH,
+} from 'routes/selfServiceRoutesConsts'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 

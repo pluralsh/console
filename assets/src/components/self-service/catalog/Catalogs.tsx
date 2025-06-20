@@ -11,7 +11,7 @@ import {
 } from '@pluralsh/design-system'
 import { useCatalogsQuery } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
-import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { CATALOGS_ABS_PATH } from '../../routes/selfServiceRoutesConsts.tsx'
 import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
 import { chain, isEmpty } from 'lodash'

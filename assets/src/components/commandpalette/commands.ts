@@ -32,7 +32,11 @@ import { useNavigate } from 'react-router-dom'
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { useClustersTinyQuery } from '../../generated/graphql'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
-import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import {
+  CATALOGS_ABS_PATH,
+  PR_ABS_PATH,
+  PR_AUTOMATIONS_ABS_PATH,
+} from '../../routes/selfServiceRoutesConsts.tsx'
 import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
@@ -41,10 +45,6 @@ import {
   getClusterDetailsPath,
 } from '../../routes/cdRoutesConsts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import {
-  PR_ABS_PATH,
-  PR_AUTOMATIONS_ABS_PATH,
-} from '../../routes/prRoutesConsts'
 import { SECURITY_ABS_PATH } from '../../routes/securityRoutesConsts.tsx'
 import {
   SETTINGS_ABS_PATH,
@@ -231,7 +231,7 @@ export function useCommands({
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift P'],
+            hotkeys: ['shift P+R'],
           },
           {
             label: 'Security',

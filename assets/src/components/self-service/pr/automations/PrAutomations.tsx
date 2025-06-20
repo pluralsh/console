@@ -13,7 +13,10 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+import {
+  PR_BASE_CRUMBS,
+  PR_QUEUE_ABS_PATH,
+} from 'routes/selfServiceRoutesConsts'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,

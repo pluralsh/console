@@ -1,28 +1,27 @@
 import {
-  AppIcon,
-  Button,
-  Chip,
+  useSetBreadcrumbs,
   Flex,
-  PersonIcon,
+  AppIcon,
   PrQueueIcon,
+  Button,
+  PersonIcon,
   Sidecar,
   SidecarItem,
-  useSetBreadcrumbs,
+  Chip,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import { useMemo, useState } from 'react'
-import { breadcrumbs } from './Catalogs.tsx'
-import { StackedText } from '../utils/table/StackedText.tsx'
-import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
-import { useCatalogQuery } from '../../generated/graphql.ts'
-import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
+import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { StackedText } from 'components/utils/table/StackedText'
+import { useCatalogQuery } from 'generated/graphql'
+import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import { GqlError } from '../utils/Alert.tsx'
-
-import { CatalogPRAutomations } from './CatalogPRAutomations.tsx'
-import { CatalogPermissions } from './CatalogPermissions.tsx'
-import { iconUrl } from '../../utils/icon.ts'
+import { CATALOG_PARAM_ID } from 'routes/selfServiceRoutesConsts'
+import { useTheme } from 'styled-components'
+import { iconUrl } from 'utils/icon'
+import { CatalogPermissions } from './CatalogPermissions'
+import { CatalogPRAutomations } from './CatalogPRAutomations'
+import { breadcrumbs } from './Catalogs'
 
 export function Catalog() {
   const theme = useTheme()
