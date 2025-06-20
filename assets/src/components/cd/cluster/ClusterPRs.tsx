@@ -2,8 +2,8 @@ import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { usePullRequestsQuery } from '../../../generated/graphql'
-import { useThrottle } from '../../hooks/useThrottle'
+import { usePullRequestsQuery } from 'generated/graphql'
+import { useThrottle } from 'components/hooks/useThrottle'
 import {
   ColActions,
   ColCreator,
@@ -12,12 +12,12 @@ import {
   ColService,
   ColStatus,
   ColTitle,
-} from '../../pr/queue/PrQueueColumns'
-import { GqlError } from '../../utils/Alert'
+} from 'components/self-service/pr/queue/PrQueueColumns'
+import { GqlError } from 'components/utils/Alert'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { useClusterContext } from './Cluster'
 

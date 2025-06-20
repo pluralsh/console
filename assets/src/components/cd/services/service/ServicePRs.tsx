@@ -12,7 +12,6 @@ import { ComponentProps, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { useThrottle } from '../../../hooks/useThrottle'
 import {
   ColActions,
   ColCreator,
@@ -20,12 +19,13 @@ import {
   ColLabels,
   ColStatus,
   ColTitle,
-} from '../../../pr/queue/PrQueueColumns'
-import { GqlError } from '../../../utils/Alert'
+} from 'components/self-service/pr/queue/PrQueueColumns'
+import { GqlError } from 'components/utils/Alert'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
-} from '../../../utils/table/useFetchPaginatedData'
+} from 'components/utils/table/useFetchPaginatedData'
+import { useThrottle } from 'components/hooks/useThrottle'
 
 export const columns = [
   ColTitle,

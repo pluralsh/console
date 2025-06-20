@@ -17,14 +17,14 @@ import {
 
 import { GqlError } from 'components/utils/Alert'
 
-import { PrStepKey } from 'components/pr/automations/CreatePrModal'
-import { usePrAutomationForm } from 'components/pr/automations/prConfigurationUtils'
-import { CreatePrActions } from 'components/pr/automations/wizard/CreatePrActions'
+import { PrStepKey } from 'components/self-service/pr/automations/CreatePrModal'
+import { usePrAutomationForm } from 'components/self-service/pr/automations/prConfigurationUtils'
+import { CreatePrActions } from 'components/self-service/pr/automations/wizard/CreatePrActions'
 import {
   ConfigPrStep,
   CreateSuccessPrStep,
   ReviewPrStep,
-} from 'components/pr/automations/wizard/CreatePrSteps'
+} from 'components/self-service/pr/automations/wizard/CreatePrSteps'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { isEmpty } from 'lodash'
 import {

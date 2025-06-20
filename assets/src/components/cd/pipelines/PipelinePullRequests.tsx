@@ -1,5 +1,5 @@
 import { Modal, Table } from '@pluralsh/design-system'
-import { prColumns } from 'components/pr/queue/PrQueueColumns'
+import { prColumns } from 'components/self-service/pr/queue/PrQueueColumns'
 import { PullRequestFragment } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 

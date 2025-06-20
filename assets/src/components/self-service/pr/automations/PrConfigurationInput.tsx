@@ -1,14 +1,14 @@
 import { Input, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
+import {
+  ClusterHandleSelector,
+  GroupSelector,
+  UserSelector,
+  FlowSelector,
+} from 'components/cd/utils/Selectors'
 import ProjectSelector from 'components/utils/ProjectSelector'
 import { ConfigurationType, PrConfiguration } from 'generated/graphql'
 
 import { parseToBool } from 'utils/parseToBool'
-import {
-  ClusterHandleSelector,
-  FlowSelector,
-  GroupSelector,
-  UserSelector,
-} from '../../cd/utils/Selectors.tsx'
 
 export function PrConfigurationInput({
   config,

@@ -5,7 +5,7 @@ import {
   ColInsertedAt,
   ColStatus,
   ColTitle,
-} from 'components/pr/queue/PrQueueColumns'
+} from 'components/self-service/pr/queue/PrQueueColumns'
 
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'

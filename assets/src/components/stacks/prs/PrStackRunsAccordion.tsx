@@ -19,7 +19,7 @@ import { isEmpty } from 'lodash'
 
 import styled, { useTheme } from 'styled-components'
 
-import { PrStatusChip } from 'components/pr/queue/PrQueueColumns'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 
 import { StackRunsScroller } from '../runs/StackRunsScroller'
 
