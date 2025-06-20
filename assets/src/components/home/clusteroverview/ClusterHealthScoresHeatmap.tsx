@@ -29,7 +29,7 @@ export function ClusterHealthScoresHeatmap({
     const normalizedValue = (invertedValue % 20.5) / 20.5 // because the buckets are roughly in ranges of 20-21 spaced equally
     return chroma(getHealthScoreBaseColor(invertedValue)).set(
       'hsl.l',
-      0.45 + normalizedValue / 5
+      0.8 - normalizedValue / 5
     )
   }
 
@@ -55,7 +55,7 @@ export function ClusterHealthScoresHeatmap({
               {node.formattedValue}
             </span>
           }
-          label={`${node.id} health score`}
+          label={node.id}
         />
       )}
     />

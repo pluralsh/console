@@ -104,10 +104,7 @@ export function OverviewTab({
           ]}
         />
       </Flex>
-      <ClusterUtilizationHeatmaps
-        customTooltips
-        clusterId={cluster.id}
-      />
+      <ClusterUtilizationHeatmaps clusterId={cluster.id} />
     </WrapperSC>
   )
 }
