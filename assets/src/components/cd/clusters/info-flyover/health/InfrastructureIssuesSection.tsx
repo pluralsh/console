@@ -1,4 +1,4 @@
-import { Button, Chip, PrOpenIcon, Table } from '@pluralsh/design-system'
+import { Button, Chip, GitPullIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { DrainNodeModal } from 'components/kubernetes/common/DrainNodeModal'
 import {
@@ -11,11 +11,10 @@ import { capitalize, isEmpty } from 'lodash'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  CLUSTER_DETAILS_PATH,
-  CLUSTER_NODES_PATH,
-  getClusterDetailsPath,
-} from 'routes/cdRoutesConsts'
-import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts'
+  getClusterAbsPath,
+  getResourceDetailsAbsPath,
+  NODES_REL_PATH,
+} from 'routes/kubernetesRoutesConsts'
 import { HealthScoreSection, IssuesEmptyState } from './HealthScoreTab'
 
 const columnHelper = createColumnHelper<NodeStatisticFragment>()
@@ -40,10 +39,10 @@ export function InfrastructureIssuesSection({
           small
           secondary
           as={Link}
-          to={`${getClusterDetailsPath({ clusterId: cluster.id })}/${CLUSTER_DETAILS_PATH}/${CLUSTER_NODES_PATH}`}
-          startIcon={<PrOpenIcon />}
+          to={`${getClusterAbsPath(cluster?.id)}/${NODES_REL_PATH}`}
+          startIcon={<GitPullIcon />}
         >
-          View all nodes in CD
+          View all nodes
         </Button>
       }
     >
