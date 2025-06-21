@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceComponentChild do
   use Piazza.Ecto.Schema
-  alias Console.Schema.ServiceComponent
+  alias Console.Schema.{ServiceComponent, AiInsight}
 
   schema "service_component_children" do
     field :uid,        :string

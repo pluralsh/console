@@ -43,9 +43,6 @@ fragment ClusterOverviewDetails on Cluster {
   nodeStatistics {
     ...NodeStatistic
   }
-  noisyNeighbors {
-    ...UtilizationHeatMap
-  }
 }
 
 fragment ClusterHealthScore on Cluster {

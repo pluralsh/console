@@ -4826,6 +4826,11 @@ func (in *PrAutomationConfiguration) DeepCopyInto(out *PrAutomationConfiguration
 		*out = new(string)
 		**out = **in
 	}
+	if in.DisplayName != nil {
+		in, out := &in.DisplayName, &out.DisplayName
+		*out = new(string)
+		**out = **in
+	}
 	if in.Optional != nil {
 		in, out := &in.Optional, &out.Optional
 		*out = new(bool)
