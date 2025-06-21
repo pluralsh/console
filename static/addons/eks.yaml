@@ -3365,6 +3365,17 @@
     - '1.23'
     - '1.22'
   publisher: HAProxy Technologies
+- name: ibm-software_ibm-instana-observability
+  versions:
+  - version: v2.0.22-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  publisher: IBM Software
 - name: kong_konnect-ri
   versions:
   - version: v3.4.1-eksbuild.1
@@ -3381,6 +3392,10 @@
   - version: v1.33.0-eksbuild.2
     compatibilities:
     - '1.33'
+  - version: v1.32.5-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
   - version: v1.32.3-eksbuild.7
     compatibilities:
     - '1.33'
@@ -3393,6 +3408,11 @@
     compatibilities:
     - '1.33'
     - '1.32'
+  - version: v1.31.9-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.7-eksbuild.7
     compatibilities:
     - '1.33'
@@ -3418,6 +3438,12 @@
   - version: v1.31.0-eksbuild.2
     compatibilities:
     - '1.31'
+  - version: v1.30.13-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.11-eksbuild.5
     compatibilities:
     - '1.33'
@@ -3465,6 +3491,12 @@
   - version: v1.30.0-eksbuild.2
     compatibilities:
     - '1.30'
+  - version: v1.29.15-eksbuild.7
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.29.15-eksbuild.5
     compatibilities:
     - '1.32'
@@ -3534,6 +3566,11 @@
     compatibilities:
     - '1.30'
     - '1.29'
+  - version: v1.28.15-eksbuild.22
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.28.15-eksbuild.20
     compatibilities:
     - '1.30'
@@ -3603,6 +3640,12 @@
   - version: v1.28.1-eksbuild.1
     compatibilities:
     - '1.28'
+  - version: v1.27.16-eksbuild.32
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.27.16-eksbuild.30
     compatibilities:
     - '1.30'
