@@ -63,6 +63,34 @@ entries:
     version: 0.1.0
   console:
   - apiVersion: v2
+    appVersion: 0.11.23
+    created: "2025-06-21T00:43:02.229244273Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.128
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 9964a8e00054ac37e889651b801db0f1744b2908d9d20a3b85855956fb4ddee8
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.100/console-0.3.100.tgz
+    version: 0.3.100
+  - apiVersion: v2
     appVersion: 0.11.22
     created: "2025-06-20T13:49:30.074049191Z"
     dependencies:
@@ -7051,6 +7079,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.23
+    created: "2025-06-21T00:43:02.338816854Z"
+    description: deploys the datastore operator for plural cd
+    digest: 75f1f746115fc563011119381c049e1411366bc1251a4746f320661d08a98f20
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.6/datastore-0.0.6.tgz
+    version: 0.0.6
+  - apiVersion: v2
     appVersion: 0.11.22
     created: "2025-06-20T13:49:30.28743911Z"
     description: deploys the datastore operator for plural cd
@@ -7268,4 +7306,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-21T00:33:15.180548349Z"
+generated: "2025-06-21T00:43:02.339717179Z"
