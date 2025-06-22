@@ -2324,6 +2324,15 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.18.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.18.0-eksbuild.2
     compatibilities:
     - '1.33'
@@ -2334,6 +2343,15 @@
     - '1.28'
     - '1.27'
   - version: v1.18.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v1.17.3-eksbuild.1
     compatibilities:
     - '1.33'
     - '1.32'
