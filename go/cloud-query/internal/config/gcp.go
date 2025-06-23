@@ -3,10 +3,10 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"text/template"
 
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
@@ -14,24 +14,19 @@ import (
 )
 
 type GCPConfiguration struct {
-	impersonateAccessToken *string
-}
-
-func (c *GCPConfiguration) ImpersonateAccessToken() string {
-	if c != nil && c.impersonateAccessToken != nil && *c.impersonateAccessToken != "" {
-		// Return the impersonate access token if it is set.
-		return *c.impersonateAccessToken
-	}
-
-	return os.Getenv("GCP_IMPERSONATE_ACCESS_TOKEN")
+	serviceAccountJSON *string
 }
 
 func (c *GCPConfiguration) Query(connectionName string) (string, error) {
+	if c == nil {
+		return "", fmt.Errorf("gcp configuration is nil")
+	}
+
 	tmpl, err := template.New("connection").Parse(`
 		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
 		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
-				impersonate_access_token="{{ .ImpersonateAccessToken }}"
+				credentials="{{ .Credentials }}"
 		');
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
     `)
@@ -41,9 +36,9 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 
 	out := new(strings.Builder)
 	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":           args.DatabaseName(),
-		"ConnectionName":         connectionName,
-		"ImpersonateAccessToken": c.ImpersonateAccessToken(),
+		"DatabaseName":   args.DatabaseName(),
+		"ConnectionName": connectionName,
+		"Credentials":    lo.FromPtr(c.serviceAccountJSON),
 	})
 	if err != nil {
 		return "", fmt.Errorf("error executing template: %w", err)
@@ -57,12 +52,12 @@ func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		ImpersonateAccessToken *string `json:"impersonateAccessToken,omitempty"`
 	}{
-		ImpersonateAccessToken: c.impersonateAccessToken,
+		ImpersonateAccessToken: c.serviceAccountJSON,
 	})
 }
 
-func WithImpersonateAccessToken(impersonateAccessToken string) func(*GCPConfiguration) {
-	return func(c *GCPConfiguration) {
-		c.impersonateAccessToken = &impersonateAccessToken
+func WithGCPServiceAccountJSON(impersonateAccessToken string) func(configuration *Configuration) {
+	return func(c *Configuration) {
+		c.gcp.serviceAccountJSON = &impersonateAccessToken
 	}
 }

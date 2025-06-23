@@ -3,10 +3,10 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"text/template"
 
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
@@ -20,43 +20,11 @@ type AzureConfiguration struct {
 	clientSecret   *string
 }
 
-func (c *AzureConfiguration) SubscriptionId() string {
-	if c != nil && c.subscriptionId != nil && *c.subscriptionId != "" {
-		// Return the subscription ID if it is set.
-		return *c.subscriptionId
-	}
-
-	return os.Getenv("AZURE_SUBSCRIPTION_ID")
-}
-
-func (c *AzureConfiguration) TenantId() string {
-	if c != nil && c.tenantId != nil && *c.tenantId != "" {
-		// Return the tenant ID if it is set.
-		return *c.tenantId
-	}
-
-	return os.Getenv("AZURE_TENANT_ID")
-}
-
-func (c *AzureConfiguration) ClientId() string {
-	if c != nil && c.clientId != nil && *c.clientId != "" {
-		// Return the client ID if it is set.
-		return *c.clientId
-	}
-
-	return os.Getenv("AZURE_CLIENT_ID")
-}
-
-func (c *AzureConfiguration) ClientSecret() string {
-	if c != nil && c.clientSecret != nil && *c.clientSecret != "" {
-		// Return the client secret if it is set.
-		return *c.clientSecret
-	}
-
-	return os.Getenv("AZURE_CLIENT_SECRET")
-}
-
 func (c *AzureConfiguration) Query(connectionName string) (string, error) {
+	if c == nil {
+		return "", fmt.Errorf("azure configuration is nil")
+	}
+
 	tmpl, err := template.New("connection").Parse(`
 		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
 		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
@@ -76,10 +44,10 @@ func (c *AzureConfiguration) Query(connectionName string) (string, error) {
 	err = tmpl.Execute(out, map[string]string{
 		"DatabaseName":   args.DatabaseName(),
 		"ConnectionName": connectionName,
-		"SubscriptionId": c.SubscriptionId(),
-		"TenantId":       c.TenantId(),
-		"ClientId":       c.ClientId(),
-		"ClientSecret":   c.ClientSecret(),
+		"SubscriptionId": lo.FromPtr(c.subscriptionId),
+		"TenantId":       lo.FromPtr(c.tenantId),
+		"ClientId":       lo.FromPtr(c.clientId),
+		"ClientSecret":   lo.FromPtr(c.clientSecret),
 	})
 	if err != nil {
 		return "", fmt.Errorf("error executing template: %w", err)
@@ -103,26 +71,26 @@ func (c *AzureConfiguration) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func WithSubscriptionId(subscriptionId string) func(*AzureConfiguration) {
-	return func(c *AzureConfiguration) {
-		c.subscriptionId = &subscriptionId
+func WithAzureSubscriptionId(subscriptionId string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.azure.subscriptionId = &subscriptionId
 	}
 }
 
-func WithTenantId(tenantId string) func(*AzureConfiguration) {
-	return func(c *AzureConfiguration) {
-		c.tenantId = &tenantId
+func WithAzureTenantId(tenantId string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.azure.tenantId = &tenantId
 	}
 }
 
-func WithClientId(clientId string) func(*AzureConfiguration) {
-	return func(c *AzureConfiguration) {
-		c.clientId = &clientId
+func WithAzureClientId(clientId string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.azure.clientId = &clientId
 	}
 }
 
-func WithClientSecret(clientSecret string) func(*AzureConfiguration) {
-	return func(c *AzureConfiguration) {
-		c.clientSecret = &clientSecret
+func WithAzureClientSecret(clientSecret string) func(*Configuration) {
+	return func(c *Configuration) {
+		c.azure.clientSecret = &clientSecret
 	}
 }
