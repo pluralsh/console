@@ -88,7 +88,7 @@ volumes: []
 database:
   volume:
     name: database
-    mountPath: /steampipe/db
+    mountPath: /steampipe/runtime/data
     medium: Memory
 
 # Additional volumeMounts on the output Deployment definition.

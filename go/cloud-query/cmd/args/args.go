@@ -33,7 +33,7 @@ const (
 	defaultExtensionsDir          = "./bin"
 	defaultDatabaseRuntimeDir     = "./bin/runtime"
 	defaultDatabaseCacheDir       = "./bin/cache"
-	defaultDatabaseDataDir        = "./bin/data"
+	defaultDatabaseDataDir        = "./bin/runtime/data"
 	defaultDatabaseUser           = "postgres"
 	defaultDatabaseName           = "postgres"
 	defaultDatabaseVersion        = embeddedpostgres.V15
