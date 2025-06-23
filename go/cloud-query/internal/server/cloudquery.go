@@ -125,7 +125,7 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 	case config.ProviderGCP:
 		serviceAccountJSON, err := base64.StdEncoding.DecodeString(connection.GetGcp().GetServiceAccountJsonB64())
 		if err != nil {
-			return c, fmt.Errorf("failed to decode GCP service account JSON: %v", err)
+			return c, fmt.Errorf("failed to decode GCP service account JSON: %w", err)
 		}
 
 		return config.NewGCPConfiguration(config.WithGCPServiceAccountJSON(string(serviceAccountJSON))), nil
