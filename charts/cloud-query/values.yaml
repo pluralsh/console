@@ -87,7 +87,7 @@ database:
   # PostgreSQL password configuration
   password:
     # If provided, this value will be used as the PLRL_PG_PASSWORD
-    # If not provided, a random 20-character password will be generated
+    # If not provided, a default value of "postgres" will be used
     value: ~
     # If provided, the password will be taken from this existing secret
     existingSecret:
