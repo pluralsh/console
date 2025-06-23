@@ -85,28 +85,9 @@ func (in *CloudQueryService) Schema(_ context.Context, input *cloudquery.SchemaI
 }
 
 // Extract implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Extract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
-	// TODO: implement proper Extract functionality. See Query on how to handle streaming output.
-
-	// Log the request
-	provider := "unknown"
-	if input.Connection != nil {
-		provider = input.Connection.GetProvider()
-	}
-
-	klog.V(log.LogLevelDebug).InfoS("received extract request", "provider", provider, "input", input)
-
-	// Generate some mock extract results based on the provider
-	switch strings.ToLower(provider) {
-	case "aws":
-		return handleAWSExtract(input, stream)
-	case "azure":
-		return handleAzureExtract(input, stream)
-	case "gcp":
-		return handleGCPExtract(input, stream)
-	default:
-		return status.Errorf(codes.InvalidArgument, "unsupported provider: %s", provider)
-	}
+func (in *CloudQueryService) Extract(_ *cloudquery.ExtractInput, _ grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
+	// TODO: implement proper Extract functionality.
+	return status.Errorf(codes.Unimplemented, "extract functionality is not implemented yet")
 }
 
 func (in *CloudQueryService) toProvider(conn *cloudquery.Connection) (config.Provider, error) {
@@ -191,64 +172,4 @@ func (in *CloudQueryService) formatValue(value any) any {
 	default:
 		return value
 	}
-}
-
-// AWS extract handler
-func handleAWSExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
-	// Mock AWS resources extraction
-	// EC2 instance extract
-	ec2Output := &cloudquery.ExtractOutput{
-		Type: "aws_ec2_instance",
-		Id:   "i-0123456789abcdef0",
-	}
-
-	ec2Output.Result = ""
-
-	ec2Output.Links = []string{"aws_vpc", "aws_subnet"}
-
-	if err := stream.Send(ec2Output); err != nil {
-		return err
-	}
-
-	// S3 bucket extract
-	s3Output := &cloudquery.ExtractOutput{
-		Type: "aws_s3_bucket",
-		Id:   "my-app-logs",
-	}
-
-	s3Output.Result = ""
-
-	return stream.Send(s3Output)
-}
-
-// Azure extract handler
-func handleAzureExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
-	// Mock Azure resources extraction
-	// Virtual machine extract
-	vmOutput := &cloudquery.ExtractOutput{
-		Type: "azure_vm",
-		Id:   "web-server-01",
-	}
-
-	vmOutput.Result = ""
-
-	vmOutput.Links = []string{"azure_disk", "azure_nic"}
-
-	return stream.Send(vmOutput)
-}
-
-// GCP extract handler
-func handleGCPExtract(input *cloudquery.ExtractInput, stream grpc.ServerStreamingServer[cloudquery.ExtractOutput]) error {
-	// Mock GCP resources extraction
-	// Compute instance extract
-	instanceOutput := &cloudquery.ExtractOutput{
-		Type: "gcp_compute_instance",
-		Id:   "app-server-1",
-	}
-
-	instanceOutput.Result = ""
-
-	instanceOutput.Links = []string{"gcp_disk", "gcp_network"}
-
-	return stream.Send(instanceOutput)
 }
