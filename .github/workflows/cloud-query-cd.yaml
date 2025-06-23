@@ -8,7 +8,7 @@ on:
       - '.github/workflows/cloud-query-cd.yaml'
   push:
     tags:
-      - 'go/cloud-query/v*.*.*'
+      - 'v*.*.*'
 permissions:
   contents: read
 env:
@@ -174,9 +174,9 @@ jobs:
           images: ${{ matrix.images }}
           tags: |
             type=ref,event=branch
+            type=ref,event=tag
             type=ref,event=pr
             type=sha
-            type=match,pattern=go/cloud-query/(v.*),group=1
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
