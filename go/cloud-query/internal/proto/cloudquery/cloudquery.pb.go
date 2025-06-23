@@ -144,10 +144,10 @@ func (x *AzureCredentials) GetClientSecret() string {
 }
 
 type GcpCredentials struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	ServiceAccountJson string                 `protobuf:"bytes,1,opt,name=service_account_json,json=serviceAccountJson,proto3" json:"service_account_json,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	ServiceAccountJsonB64 string                 `protobuf:"bytes,1,opt,name=service_account_json_b64,json=serviceAccountJsonB64,proto3" json:"service_account_json_b64,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *GcpCredentials) Reset() {
@@ -180,9 +180,9 @@ func (*GcpCredentials) Descriptor() ([]byte, []int) {
 	return file_cloudquery_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GcpCredentials) GetServiceAccountJson() string {
+func (x *GcpCredentials) GetServiceAccountJsonB64() string {
 	if x != nil {
-		return x.ServiceAccountJson
+		return x.ServiceAccountJsonB64
 	}
 	return ""
 }
@@ -714,9 +714,9 @@ const file_cloudquery_proto_rawDesc = "" +
 	"\x0fsubscription_id\x18\x01 \x01(\tR\x0esubscriptionId\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +
 	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12#\n" +
-	"\rclient_secret\x18\x04 \x01(\tR\fclientSecret\"B\n" +
-	"\x0eGcpCredentials\x120\n" +
-	"\x14service_account_json\x18\x01 \x01(\tR\x12serviceAccountJson\"\xcd\x01\n" +
+	"\rclient_secret\x18\x04 \x01(\tR\fclientSecret\"I\n" +
+	"\x0eGcpCredentials\x127\n" +
+	"\x18service_account_json_b64\x18\x01 \x01(\tR\x15serviceAccountJsonB64\"\xcd\x01\n" +
 	"\n" +
 	"Connection\x12\x1a\n" +
 	"\bprovider\x18\x01 \x01(\tR\bprovider\x12.\n" +

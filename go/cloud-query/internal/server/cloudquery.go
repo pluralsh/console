@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -122,9 +123,12 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 			config.WithAzureClientSecret(connection.GetAzure().GetClientSecret()),
 		), nil
 	case config.ProviderGCP:
-		return config.NewGCPConfiguration(
-			config.WithGCPServiceAccountJSON(connection.GetGcp().GetServiceAccountJson()),
-		), nil
+		serviceAccountJSON, err := base64.StdEncoding.DecodeString(connection.GetGcp().GetServiceAccountJsonB64())
+		if err != nil {
+			return c, fmt.Errorf("failed to decode GCP service account JSON: %v", err)
+		}
+
+		return config.NewGCPConfiguration(config.WithGCPServiceAccountJSON(string(serviceAccountJSON))), nil
 	default:
 		return c, fmt.Errorf("unsupported provider: %s", provider)
 	}
