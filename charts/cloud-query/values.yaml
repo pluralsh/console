@@ -78,18 +78,30 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# Database configuration
+database:
+  volume:
+    name: database
+    mountPath: /steampipe/db
+    medium: Memory
+  # PostgreSQL password configuration
+  password:
+    # If provided, this value will be used as the PLRL_PG_PASSWORD
+    # If not provided, a random 20-character password will be generated
+    value: ~
+    # If provided, the password will be taken from this existing secret
+    existingSecret:
+      # Name of the existing secret
+      name: ~
+      # Key in the secret that contains the password
+      key: "password"
+
 # Additional volumes on the output Deployment definition.
 volumes: []
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
-
-database:
-  volume:
-    name: database
-    mountPath: /steampipe/runtime/data
-    medium: Memory
 
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts: []

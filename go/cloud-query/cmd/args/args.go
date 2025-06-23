@@ -7,10 +7,10 @@ import (
 	"time"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-	"github.com/pluralsh/polly/algorithms"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
@@ -33,20 +33,20 @@ const (
 	defaultExtensionsDir          = "./bin"
 	defaultDatabaseRuntimeDir     = "./bin/runtime"
 	defaultDatabaseCacheDir       = "./bin/cache"
-	defaultDatabaseDataDir        = "./bin/runtime/data"
+	defaultDatabaseDataDir        = "./bin/data"
 	defaultDatabaseUser           = "postgres"
 	defaultDatabaseName           = "postgres"
+	defaultDatabasePassword       = "postgres"
 	defaultDatabaseVersion        = embeddedpostgres.V15
 	defaultDatabasePort           = 5432
 	defaultDatabaseMaxConnections = 200
-	defaultDatabaseStartTimeout   = 30 * time.Second
+	defaultDatabaseStartTimeout   = 60 * time.Second
 	defaultDatabaseConnectionTTL  = 15 * time.Minute
 	defaultServerAddress          = ":9192"
 	defaultServerEnableReflection = false
 )
 
 var (
-	defaultDatabasePassword   = algorithms.String(18) // Generate a random password for the database user
 	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
 	argDatabaseRuntimeDir     = pflag.String("database-runtime-dir", defaultDatabaseRuntimeDir, "directory where the embedded PostgreSQL runtime files are stored")
 	argDatabaseCacheDir       = pflag.String("database-cache-dir", defaultDatabaseCacheDir, "directory where the embedded PostgreSQL cache files are stored")
@@ -54,7 +54,7 @@ var (
 	argDatabaseVersion        = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
 	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
 	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the embedded PostgreSQL database")
-	argDatabasePassword       = pflag.String("database-password", defaultDatabasePassword, "default password for the embedded PostgreSQL database")
+	argDatabasePassword       = pflag.String("database-password", common.GetPluralEnv("PG_PASSWORD", defaultDatabasePassword), "default password for the embedded PostgreSQL database")
 	argDatabaseName           = pflag.String("database-name", defaultDatabaseName, "default database name for the embedded PostgreSQL database")
 	argDatabaseStartTimeout   = pflag.Duration("database-start-timeout", defaultDatabaseStartTimeout, "timeout for starting the embedded PostgreSQL database")
 	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")

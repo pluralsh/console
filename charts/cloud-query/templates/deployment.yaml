@@ -44,6 +44,20 @@ spec:
           args:
             {{- toYaml .| nindent 12}}
           {{- end }}
+          env:
+            - name: PLRL_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.database.password.existingSecret.name }}
+                  name: {{ .Values.database.password.existingSecret.name }}
+                  key: {{ .Values.database.password.existingSecret.key }}
+                {{- else if .Values.database.password.value }}
+                  name: {{ include "cloud-query.fullname" . }}-db-password
+                  key: password
+                {{- else }}
+                  name: {{ include "cloud-query.fullname" . }}-db-password
+                  key: password
+                {{- end }}
           ports:
             - name: grpc
               containerPort: {{ .Values.service.port }}
