@@ -135,9 +135,16 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 			config.WithAWSSecretAccessKey(connection.GetAws().GetSecretAccessKey()),
 		), nil
 	case config.ProviderAzure:
-		return config.NewAzureConfiguration(), nil
+		return config.NewAzureConfiguration(
+			config.WithAzureSubscriptionId(connection.GetAzure().GetSubscriptionId()),
+			config.WithAzureTenantId(connection.GetAzure().GetTenantId()),
+			config.WithAzureClientId(connection.GetAzure().GetClientId()),
+			config.WithAzureClientSecret(connection.GetAzure().GetClientSecret()),
+		), nil
 	case config.ProviderGCP:
-		return config.NewGCPConfiguration(), nil
+		return config.NewGCPConfiguration(
+			config.WithGCPImpersonateAccessToken(connection.GetGcp().GetImpersonationToken()),
+		), nil
 	default:
 		return c, fmt.Errorf("unsupported provider: %s", provider)
 	}
