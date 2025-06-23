@@ -451,8 +451,13 @@ type PrAutomationConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Documentation *string `json:"documentation,omitempty"`
 
+	// Extended documentation for the input of this field.
 	// +kubebuilder:validation:Optional
 	Longform *string `json:"longform,omitempty"`
+
+	// A custom display name for the input of this field.  Will default to name otherwise.
+	// +kubebuilder:validation:Optional
+	DisplayName *string `json:"displayName,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Optional *bool `json:"optional,omitempty"`
@@ -506,6 +511,7 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 		Longform:      in.Longform,
 		Placeholder:   in.Placeholder,
 		Optional:      in.Optional,
+		DisplayName:   in.DisplayName,
 		Condition:     in.Condition.Attributes(),
 		Values:        in.Values,
 	}

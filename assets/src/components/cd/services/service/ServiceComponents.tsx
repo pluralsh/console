@@ -30,7 +30,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import ButtonGroup from '../../../utils/ButtonGroup.tsx'
+import { ButtonGroup } from '../../../utils/ButtonGroup.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
 import {
   ComponentStateFilter,

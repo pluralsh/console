@@ -205,9 +205,14 @@ spec:
                       type: object
                     default:
                       type: string
+                    displayName:
+                      description: A custom display name for the input of this field.  Will
+                        default to name otherwise.
+                      type: string
                     documentation:
                       type: string
                     longform:
+                      description: Extended documentation for the input of this field.
                       type: string
                     name:
                       type: string

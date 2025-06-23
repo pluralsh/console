@@ -1,13 +1,26 @@
-import { Card, FillLevel, useFillLevel } from '@pluralsh/design-system'
+import {
+  Card,
+  FillLevel,
+  SemanticBorderKey,
+  SemanticColorKey,
+  useFillLevel,
+} from '@pluralsh/design-system'
 
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 
-const fillLevelToBorderColor: Record<FillLevel, string> = {
+export const fillLevelToBorderColor: Record<FillLevel, SemanticColorKey> = {
   0: 'border',
-  1: 'border',
+  1: 'border-fill-one',
   2: 'border-fill-two',
   3: 'border-fill-three',
+}
+
+export const fillLevelToBorder: Record<FillLevel, SemanticBorderKey> = {
+  0: 'default',
+  1: 'fill-one',
+  2: 'fill-two',
+  3: 'fill-three',
 }
 
 const ListItemSC = styled.li<{
@@ -29,7 +42,7 @@ type ListItemProps = any & {
   children: ReactNode
 }
 
-function ListItem({ last, ...props }: ListItemProps) {
+export function ListItem({ last, ...props }: ListItemProps) {
   const fillLevel = useFillLevel()
 
   return (
@@ -45,7 +58,7 @@ type ListProps = any & {
   children: ReactNode
 }
 
-function List({ children, ...props }: ListProps) {
+export function List({ children, ...props }: ListProps) {
   return (
     <ul css={{ display: 'contents' }}>
       <Card
@@ -63,5 +76,3 @@ function List({ children, ...props }: ListProps) {
     </ul>
   )
 }
-
-export { fillLevelToBorderColor, List, ListItem }

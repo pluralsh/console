@@ -91,6 +91,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def opener(pid, f), do: fn -> GenServer.call(pid, {:open, f}, @timeout) end
 
+  def info(pid), do: GenServer.call(pid, :info)
+
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
   end
@@ -102,9 +104,13 @@ defmodule Console.Deployments.Git.Agent do
 
   defp via(%GitRepository{id: id}), do: {:via, Registry, {registry(), {:git, id}}}
 
+  def local_agents(), do: :pg.get_local_members(__MODULE__)
+  def all_agents(), do: :pg.get_members(__MODULE__)
+
   def init(repo) do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
+    # :pg.join(__MODULE__, self())
     table = :ets.new(:git_cache_entries, [:set, :protected, read_concurrency: true])
     Supervisor.register(self(), table)
     cache = Cache.new(repo, table)
@@ -175,6 +181,8 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
+  def handle_call(:info, _, %State{} = state), do: {:reply, state, state}
+
   def handle_call(:tags, _, %State{cache: cache} = state),
     do: {:reply, Cache.tags(cache), state}
 
@@ -228,7 +236,9 @@ defmodule Console.Deployments.Git.Agent do
   def handle_info(:move, %State{git: git} = state) do
     case Git.Discovery.local?(git) do
       true -> {:noreply, state}
-      false -> {:stop, {:shutdown, :moved}, state}
+      false ->
+        Logger.info "git repository moved: #{git.url}"
+        {:stop, {:shutdown, :moved}, state}
     end
   end
 

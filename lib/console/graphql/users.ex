@@ -55,11 +55,11 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :role_attributes do
-    field :name,  :string
-    field :description, :string
-    field :repositories, list_of(:string)
+    field :name,          :string
+    field :description,   :string
+    field :repositories,  list_of(:string)
     field :role_bindings, list_of(:binding_attributes)
-    field :permissions, list_of(:permission)
+    field :permissions,   list_of(:permission)
   end
 
   input_object :binding_attributes do

@@ -170,6 +170,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			IgnoreHooks: srv.Helm.IgnoreHooks,
 			IgnoreCrds:  srv.Helm.IgnoreCrds,
 			LuaScript:   srv.Helm.LuaScript,
+			LuaFile:     srv.Helm.LuaFile,
 			Git:         srv.Helm.Git.Attributes(),
 		}
 		if srv.Helm.Repository != nil {
@@ -226,8 +227,61 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			})
 		}
 	}
+	if err := getSources(ctx, c, serviceTemplate, srv.Sources); err != nil {
+		return nil, err
+	}
 
+	getRenderers(serviceTemplate, srv.Renderers)
 	return serviceTemplate, nil
+}
+
+func getSources(ctx context.Context, c runtimeclient.Client, attr *console.ServiceTemplateAttributes, sources []v1alpha1.Source) error {
+	if len(sources) > 0 {
+		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
+		for _, source := range sources {
+			newSource := &console.ServiceSourceAttributes{
+				Path: source.Path,
+			}
+			if source.Git != nil {
+				newSource.Git = &console.GitRefAttributes{
+					Ref:    source.Git.Ref,
+					Folder: source.Git.Folder,
+					Files:  source.Git.Files,
+				}
+			}
+			if source.RepositoryRef != nil {
+				name := v1alpha1.NamespacedName{Name: source.RepositoryRef.Name, Namespace: source.RepositoryRef.Namespace}
+				repositoryID, err := getGitRepoID(ctx, c, name)
+				if err != nil {
+					return err
+				}
+				newSource.RepositoryID = repositoryID
+			}
+			attr.Sources = append(attr.Sources, newSource)
+		}
+	}
+	return nil
+}
+
+func getRenderers(attr *console.ServiceTemplateAttributes, renderers []v1alpha1.Renderer) {
+	if len(renderers) > 0 {
+		attr.Renderers = make([]*console.RendererAttributes, 0)
+		for _, renderer := range renderers {
+			newRenderer := &console.RendererAttributes{
+				Path: renderer.Path,
+				Type: renderer.Type,
+			}
+
+			if renderer.Helm != nil {
+				newRenderer.Helm = &console.HelmMinimalAttributes{
+					Values:      renderer.Helm.Values,
+					ValuesFiles: lo.ToSlicePtr(renderer.Helm.ValuesFiles),
+					Release:     renderer.Helm.Release,
+				}
+			}
+			attr.Renderers = append(attr.Renderers, newRenderer)
+		}
+	}
 }
 
 func containerResourceRequests(requests *v1alpha1.ContainerResourceRequests) *console.ResourceRequestAttributes {

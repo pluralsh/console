@@ -1,34 +1,35 @@
-import { Chip, Tooltip } from '@pluralsh/design-system'
+import { Chip, ChipProps, ChipSeverity, Tooltip } from '@pluralsh/design-system'
 import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
+import styled from 'styled-components'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
 export function ClusterHealth({
   cluster,
-  size = 'medium',
+  size = 'large',
 }: {
   cluster?: ClustersRowFragment
-  size?: 'small' | 'medium' | 'large'
+  size?: ChipProps['size']
 }) {
   if (!cluster?.installed) {
     return (
       <Tooltip label="The deploy agent still needs to be installed in this cluster">
-        <Chip
-          severity="info"
+        <ClusterTableChipSC
           size={size}
+          severity="info"
         >
           Pending
-        </Chip>
+        </ClusterTableChipSC>
       </Tooltip>
     )
   }
 
   return (
     <ClusterHealthChip
-      cluster={cluster}
-      pingedAt={cluster.pingedAt}
       size={size}
+      cluster={cluster}
+      pingedAt={cluster?.pingedAt}
     />
   )
 }
@@ -36,11 +37,11 @@ export function ClusterHealth({
 function ClusterHealthChip({
   cluster,
   pingedAt,
-  size = 'medium',
+  size = 'large',
 }: {
   cluster?: ClustersRowFragment
   pingedAt?: string | null
-  size?: 'small' | 'medium' | 'large'
+  size?: ChipProps['size']
 }) {
   const [now, setNow] = useState(dayjs())
 
@@ -62,14 +63,58 @@ function ClusterHealthChip({
           : `This cluster was not pinged yet`
       }
       date={pingedAt}
+      css={{ width: '100%' }}
     >
-      <Chip
-        severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
+      <ClusterTableChipSC
         size={size}
         clickable
+        severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
       >
         {pinged ? (healthy ? 'Healthy' : 'Unhealthy') : 'Pending'}
-      </Chip>
+      </ClusterTableChipSC>
     </TooltipTime>
   )
 }
+
+export function ClusterHealthScoreChip({
+  healthScore,
+  onClick,
+}: {
+  healthScore?: Nullable<number>
+  onClick?: () => void
+}) {
+  const severity: ChipSeverity = healthScoreToSeverity(healthScore)
+
+  return (
+    <ClusterTableChipSC
+      size="large"
+      clickable
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.()
+      }}
+      severity={severity}
+    >
+      {healthScore ?? '-'}
+    </ClusterTableChipSC>
+  )
+}
+
+export const ClusterTableChipSC = styled(Chip)({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+})
+
+export const healthScoreToSeverity = (healthScore?: Nullable<number>) =>
+  typeof healthScore !== 'number'
+    ? 'neutral'
+    : healthScore > 80
+      ? 'successDark'
+      : healthScore > 60
+        ? 'success'
+        : healthScore > 40
+          ? 'warning'
+          : healthScore > 20
+            ? 'danger'
+            : 'critical'

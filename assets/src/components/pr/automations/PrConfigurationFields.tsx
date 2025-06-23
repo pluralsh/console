@@ -23,7 +23,7 @@ export function PrConfigurationFields({
       {(configuration || []).map((cfg) => {
         if (!cfg) return null
 
-        const { name, documentation, longform, optional } = cfg
+        const { name, documentation, longform, optional, displayName } = cfg
 
         if (!name || !conditionIsMet(cfg?.condition, configVals)) {
           return null
@@ -36,7 +36,7 @@ export function PrConfigurationFields({
           <FormField
             key={name}
             required={!optional}
-            label={upperFirst(name)}
+            label={upperFirst(displayName || name)}
             hint={upperFirst(documentation || '')}
             caption={
               !longform ? undefined : (

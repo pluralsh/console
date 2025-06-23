@@ -20,7 +20,7 @@ import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
-import { ClusterUpgradeChip } from '../clusters/ClusterUpgrade'
+import { ClusterUpgradeChip } from '../clusters/ClusterUpgradeButton'
 
 export default function ClusterSelector({
   onClusterChange,

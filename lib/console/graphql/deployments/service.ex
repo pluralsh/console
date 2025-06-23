@@ -54,6 +54,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :ignore_hooks,  :boolean
     field :ignore_crds,   :boolean
     field :lua_script,    :string
+    field :lua_file,      :string
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -343,6 +344,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :set,           list_of(:helm_value), description: "a list of helm name/value pairs to precisely set individual values"
     field :values_files,  list_of(:string), description: "a list of relative paths to values files to use for helm applies"
     field :lua_script,    :string, description: "a lua script to use for helm applies"
+    field :lua_file,      :string, description: "a lua file to use for helm applies"
   end
 
   @desc "a configuration item k/v pair"

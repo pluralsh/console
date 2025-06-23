@@ -172,6 +172,7 @@ fragment ClustersRow on Cluster {
   id
   self
   healthy
+  healthScore
   protect
   name
   handle
@@ -338,6 +339,8 @@ query Clusters(
   $tagQuery: TagQuery
   $projectId: ID
   $upgradeable: Boolean
+  $compliance: VersionCompliance
+  $healthRange: HealthRange
 ) {
   clusters(
     first: $first
@@ -347,6 +350,8 @@ query Clusters(
     tagQuery: $tagQuery
     projectId: $projectId
     upgradeable: $upgradeable
+    compliance: $compliance
+    healthRange: $healthRange
   ) {
     pageInfo {
       ...PageInfo

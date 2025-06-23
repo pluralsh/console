@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useCallback, useState } from 'react'
 import {
   ApiDeprecation,
-  ClusterUpgradeFragment,
+  ClusterOverviewDetailsFragment,
   useUpdateClusterMutation,
 } from '../../../generated/graphql'
 
@@ -19,7 +19,7 @@ export function ClustersUpgradeNow({
   refetch,
   setError,
 }: {
-  cluster?: ClusterUpgradeFragment | null
+  cluster?: ClusterOverviewDetailsFragment | null
   targetVersion: Nullable<string>
   apiDeprecations: ApiDeprecation[]
   refetch: Nullable<() => void>

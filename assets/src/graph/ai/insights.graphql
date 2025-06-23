@@ -134,6 +134,7 @@ fragment ClusterInsightComponent on ClusterInsightComponent {
   namespace
   group
   version
+  priority
   insight {
     ...AiInsight
   }

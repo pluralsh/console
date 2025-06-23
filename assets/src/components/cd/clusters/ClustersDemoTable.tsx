@@ -22,7 +22,10 @@ export function DemoTable({ mode }: { mode: 'disabled' | 'empty' }) {
     >
       <MakeInert inert>
         <TableWrapperSC $blurred>
-          <ClustersTable data={tableData} />
+          <ClustersTable
+            data={tableData}
+            refetch={() => {}}
+          />
         </TableWrapperSC>
       </MakeInert>
 

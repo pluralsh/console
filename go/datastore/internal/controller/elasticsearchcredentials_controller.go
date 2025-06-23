@@ -172,7 +172,7 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 		utils.RemoveFinalizer(credentials, PolicyFinalizer)
 	}
 
-	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name); err != nil {
+	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name, ElasticSearchSecretProtectionFinalizerName); err != nil {
 		return err
 	}
 	utils.RemoveFinalizer(credentials, ElasticSearchCredentialsProtectionFinalizerName)

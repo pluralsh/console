@@ -44,4 +44,31 @@ resources:
   kind: ElasticsearchILMPolicy
   path: github.com/pluralsh/console/go/datastore/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: dbs
+  kind: PostgresCredentials
+  path: github.com/pluralsh/console/go/datastore/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: dbs
+  kind: PostgresDatabase
+  path: github.com/pluralsh/console/go/datastore/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: dbs
+  kind: PostgresUser
+  path: github.com/pluralsh/console/go/datastore/api/v1alpha1
+  version: v1alpha1
 version: "3"

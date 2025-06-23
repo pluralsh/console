@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
+
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,6 +18,9 @@ const (
 	ElasticsearchUserReconciler          Reconciler = "elasticsearchUser"
 	ElasticsearchIndexTemplateReconciler Reconciler = "elasticsearchIndexTemplate"
 	ElasticsearchILMPolicyReconciler     Reconciler = "elasticsearchILMPolicy"
+	PostgresCredentialsReconciler        Reconciler = "postgresCredentials"
+	PostgresUserReconciler               Reconciler = "postgresUser"
+	PostgresDatabaseReconciler           Reconciler = "postgresDatabase"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -23,6 +28,9 @@ var validReconcilers = map[string]Reconciler{
 	"ElasticsearchUserReconciler":          ElasticsearchUserReconciler,
 	"ElasticsearchIndexTemplateReconciler": ElasticsearchIndexTemplateReconciler,
 	"ElasticsearchILMPolicy":               ElasticsearchILMPolicyReconciler,
+	"PostgresCredentialsReconciler":        PostgresCredentialsReconciler,
+	"PostgresUserReconciler":               PostgresUserReconciler,
+	"PostgresDatabaseReconciler":           PostgresDatabaseReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager) Controller
@@ -56,6 +64,27 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			ElasticsearchClient: elasticsearch.New(),
 		}
 	},
+	PostgresCredentialsReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.PostgresCredentialsReconciler{
+			Client:         mgr.GetClient(),
+			Scheme:         mgr.GetScheme(),
+			PostgresClient: postgres.New(),
+		}
+	},
+	PostgresUserReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.PostgresUserReconciler{
+			Client:         mgr.GetClient(),
+			Scheme:         mgr.GetScheme(),
+			PostgresClient: postgres.New(),
+		}
+	},
+	PostgresDatabaseReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.PostgresDatabaseReconciler{
+			Client:         mgr.GetClient(),
+			Scheme:         mgr.GetScheme(),
+			PostgresClient: postgres.New(),
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -87,6 +116,9 @@ func Reconcilers() ReconcilerList {
 		ElasticsearchUserReconciler,
 		ElasticsearchIndexTemplateReconciler,
 		ElasticsearchILMPolicyReconciler,
+		PostgresCredentialsReconciler,
+		PostgresUserReconciler,
+		PostgresDatabaseReconciler,
 	}
 }
 

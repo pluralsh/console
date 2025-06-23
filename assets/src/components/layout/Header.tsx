@@ -19,8 +19,7 @@ const APP_ICON_LIGHT = '/console-logo.png'
 const APP_ICON_DARK = '/console-white.png'
 
 const HeaderSC = styled.div(({ theme }) => ({
-  backgroundColor:
-    theme.mode === 'light' ? theme.colors['fill-one'] : theme.colors.grey[950],
+  backgroundColor: theme.colors['fill-accent'],
   borderBottom: theme.borders.default,
 }))
 

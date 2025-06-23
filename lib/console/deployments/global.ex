@@ -299,6 +299,63 @@ defmodule Console.Deployments.Global do
     end
   end
 
+  @doc """
+  Adds the given global service to all target clusters
+  """
+  @spec sync_clusters(GlobalService.t) :: :ok
+  def sync_clusters(%GlobalService{id: gid} = global) do
+    %{service: svc} = global = Repo.preload(global, [:context, template: :dependencies, service: [:context_bindings, :dependencies]])
+    global = load_configuration(global)
+    bot = bot()
+
+    service_ids = GlobalService.service_ids(gid)
+                  |> Repo.all()
+                  |> MapSet.new()
+
+    Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
+    |> Cluster.target(global)
+    |> Cluster.stream()
+    |> Repo.stream(method: :keyset)
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Stream.map(fn
+      {:ok, res} -> res
+      _ -> nil
+    end)
+    |> Stream.map(fn
+      {:ok, %Service{id: id}} -> id
+      %Service{id: id} -> id
+      {:error, {:already_exists, %Service{id: id}}} -> id
+      _ -> nil
+    end)
+    |> Stream.filter(& &1)
+    |> MapSet.new()
+    |> (fn s -> MapSet.difference(service_ids, s) end).()
+    |> MapSet.to_list()
+    |> maybe_drain(global)
+  end
+
+  @doc """
+  Determines if a given list of service ids should be drained due to a state event
+  """
+  @spec maybe_drain([Service.t]) :: :ok
+  def maybe_drain(service_ids) do
+    Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
+    bot = bot()
+
+    batched(service_ids, fn service_ids ->
+      Service.for_ids(service_ids)
+      |> Repo.all()
+      |> Repo.preload([:owner])
+      |> Enum.each(fn
+        %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
+          Services.delete_service(svc.id, bot)
+        %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
+          Services.detach_service(svc.id, bot)
+        _ -> :ok
+      end)
+    end)
+  end
+
 
   @doc """
   Ensures a managed namespace is synchronized across all target clusters
@@ -390,63 +447,6 @@ defmodule Console.Deployments.Global do
     |> Repo.stream(method: :keyset)
     |> Stream.each(&Services.delete_service(&1.service_id, bot))
     |> Stream.run()
-  end
-
-  @doc """
-  Adds the given global service to all target clusters
-  """
-  @spec sync_clusters(GlobalService.t) :: :ok
-  def sync_clusters(%GlobalService{id: gid} = global) do
-    %{service: svc} = global = Repo.preload(global, [:context, template: :dependencies, service: [:context_bindings, :dependencies]])
-    global = load_configuration(global)
-    bot = bot()
-
-    service_ids = GlobalService.service_ids(gid)
-                  |> Repo.all()
-                  |> MapSet.new()
-
-    Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
-    |> Cluster.target(global)
-    |> Cluster.stream()
-    |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
-    |> Stream.map(fn
-      {:ok, res} -> res
-      _ -> nil
-    end)
-    |> Stream.map(fn
-      {:ok, %Service{id: id}} -> id
-      %Service{id: id} -> id
-      {:error, {:already_exists, %Service{id: id}}} -> id
-      _ -> nil
-    end)
-    |> Stream.filter(& &1)
-    |> MapSet.new()
-    |> (fn s -> MapSet.difference(service_ids, s) end).()
-    |> MapSet.to_list()
-    |> maybe_drain(global)
-  end
-
-  @doc """
-  Determines if a given list of service ids should be drained due to a state event
-  """
-  @spec maybe_drain([Service.t]) :: :ok
-  def maybe_drain(service_ids) do
-    Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
-    bot = bot()
-
-    batched(service_ids, fn service_ids ->
-      Service.for_ids(service_ids)
-      |> Repo.all()
-      |> Repo.preload([:owner])
-      |> Enum.each(fn
-        %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
-          Services.delete_service(svc.id, bot)
-        %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
-          Services.detach_service(svc.id, bot)
-        _ -> :ok
-      end)
-    end)
   end
 
   @doc """
@@ -640,7 +640,7 @@ defmodule Console.Deployments.Global do
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
-    Enum.map([
+    template_fields(attrs, attrs, [
       ~w(helm version)a,
       ~w(helm chart)a,
       ~w(helm values_files)a,
@@ -648,17 +648,30 @@ defmodule Console.Deployments.Global do
       ~w(lua_script)a,
       ~w(git ref)a,
       ~w(git folder)a
-    ], fn keys -> Enum.map(keys, &Access.key/1) end)
-    |> Enum.reduce(attrs, fn path, attrs ->
+    ], cluster, ctx)
+    |> add_sources(attrs, cluster, ctx)
+  end
+  defp dynamic_template(attrs, _, _), do: attrs
+
+  defp add_sources(attrs, %{sources: [_ | _] = sources}, cluster, ctx) do
+    Enum.reduce(sources, attrs, fn source, attrs ->
+      fields = [~w(git ref)a, ~w(git folder)a]
+      template_fields(attrs, source, fields, cluster, ctx)
+    end)
+  end
+  defp add_sources(attrs, _, _, _), do: attrs
+
+  defp template_fields(acc, attrs, fields, cluster, ctx) do
+    Enum.map(fields, fn keys -> Enum.map(keys, &Access.key/1) end)
+    |> Enum.reduce(acc, fn path, acc ->
       case get_in(attrs, path) do
-        str when is_binary(str) -> put_in(attrs, path, render_solid_raw(str, cluster, ctx))
+        str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
         [v | _] = vals when is_binary(v) ->
-          put_in(attrs, path, Enum.map(vals, &render_solid_raw(&1, cluster, ctx)))
-        _ -> attrs
+          put_in(acc, path, Enum.map(vals, &render_solid_raw(&1, cluster, ctx)))
+        _ -> acc
       end
     end)
   end
-  defp dynamic_template(attrs, _, _), do: attrs
 
   @solid_opts [strict_variables: false, strict_filters: true]
 

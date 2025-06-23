@@ -1,8 +1,8 @@
-import { ReactNode, useRef } from 'react'
 import { AnimatedDiv, Card } from '@pluralsh/design-system'
-import { useSpring } from 'react-spring'
-import styled, { useTheme } from 'styled-components'
+import { useSpring } from '@react-spring/web'
+import { CSSProperties, ReactNode, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import styled, { useTheme } from 'styled-components'
 
 import { useCursorPosition } from './CursorPosition'
 
@@ -16,11 +16,7 @@ const ChartTooltipContentSC = styled(Card).attrs(() => ({
   '&&': {
     ...theme.partials.text.caption,
     display: 'flex',
-    paddingLeft: theme.spacing.xsmall,
-    paddingRight: theme.spacing.xsmall,
-    paddingBottom: theme.spacing.xxsmall,
-    paddingTop: theme.spacing.xxsmall,
-    flexDirection: 'row',
+    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
     alignItems: 'center',
     gap: theme.spacing.xsmall,
     transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
@@ -31,6 +27,7 @@ const ChartTooltipSwatchSC = styled.div.attrs(() => ({
 }))<{ $color: string }>(({ $color }) => ({
   width: 12,
   height: 12,
+  flexShrink: 0,
   backgroundColor: $color,
 }))
 const springConfig = {
@@ -44,22 +41,21 @@ export function ChartTooltip({
   color,
   label,
   value,
+  tooltipStyles,
 }: {
   color: string
   label: ReactNode
   value: ReactNode
+  tooltipStyles?: CSSProperties
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const cursorPos = useCursorPosition()
   const theme = useTheme()
 
-  const [springProps] = useSpring(
-    () => ({
-      ...cursorPos,
-      config: springConfig,
-    }),
-    [cursorPos]
-  )
+  const springProps = useSpring({
+    ...cursorPos,
+    config: springConfig,
+  })
 
   const content = (
     <AnimatedDiv
@@ -72,7 +68,7 @@ export function ChartTooltip({
         ...springProps,
       }}
     >
-      <ChartTooltipContentSC>
+      <ChartTooltipContentSC style={tooltipStyles}>
         <ChartTooltipSwatchSC $color={color} />
         <div>
           {label}: <b>{value}</b>

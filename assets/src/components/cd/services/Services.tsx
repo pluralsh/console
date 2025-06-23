@@ -19,7 +19,7 @@ import {
   ServiceDeploymentStatus,
   ServiceStatusCountFragment,
 } from '../../../generated/graphql'
-import ButtonGroup from '../../utils/ButtonGroup.tsx'
+import { ButtonGroup } from '../../utils/ButtonGroup.tsx'
 
 import {
   CD_BASE_CRUMBS,

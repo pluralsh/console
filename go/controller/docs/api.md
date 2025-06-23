@@ -2525,7 +2525,8 @@ _Appears in:_
 | `condition` _[Condition](#condition)_ |  |  | Optional: {} <br /> |
 | `default` _string_ |  |  | Optional: {} <br /> |
 | `documentation` _string_ |  |  | Optional: {} <br /> |
-| `longform` _string_ |  |  | Optional: {} <br /> |
+| `longform` _string_ | Extended documentation for the input of this field. |  | Optional: {} <br /> |
+| `displayName` _string_ | A custom display name for the input of this field.  Will default to name otherwise. |  | Optional: {} <br /> |
 | `optional` _boolean_ |  |  | Optional: {} <br /> |
 | `placeholder` _string_ |  |  | Optional: {} <br /> |
 | `validation` _[PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)_ | Any additional validations you want to apply to this configuration item before generating a pr |  | Optional: {} <br /> |
@@ -2891,6 +2892,7 @@ _Appears in:_
 
 _Appears in:_
 - [ServiceSpec](#servicespec)
+- [ServiceTemplate](#servicetemplate)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -3170,6 +3172,7 @@ _Appears in:_
 | `ignoreHooks` _boolean_ | whether you want to completely ignore any helm hooks when actualizing this service |  | Optional: {} <br /> |
 | `ignoreCrds` _boolean_ | whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster) |  | Optional: {} <br /> |
 | `luaScript` _string_ | a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
+| `luaFile` _string_ | a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
 
 
 #### ServiceImport
@@ -3273,6 +3276,8 @@ _Appears in:_
 | `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
 | `configuration` _object (keys:string, values:string)_ | Configuration is a set of non-secret service specific configuration useful for templating |  | Optional: {} <br /> |
+| `sources` _[Source](#source) array_ | Sources of this service |  | Optional: {} <br /> |
+| `renderers` _[Renderer](#renderer) array_ | Renderers of this service |  | Optional: {} <br /> |
 
 
 #### SinkConfiguration
@@ -3319,6 +3324,7 @@ _Appears in:_
 
 _Appears in:_
 - [ServiceSpec](#servicespec)
+- [ServiceTemplate](#servicetemplate)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |

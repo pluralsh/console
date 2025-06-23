@@ -149,6 +149,7 @@ export function JobNode({ id, data }: PipelineGateNodeProps) {
         <IconFrame
           type="secondary"
           icon={<ArrowTopRightIcon />}
+          clickable
           as={Link}
           to={`${PIPELINES_ABS_PATH}/jobs/${gate.id}`}
         />

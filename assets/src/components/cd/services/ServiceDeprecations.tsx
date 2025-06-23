@@ -5,6 +5,7 @@ import {
 } from 'generated/graphql'
 import { ComponentProps, useMemo, useState } from 'react'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import pluralize from 'pluralize'
 
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -28,7 +29,7 @@ export function ServiceDeprecationsChip({
         icon={<ErrorIcon />}
         {...props}
       >
-        {deprecationCount} deprecations
+        {deprecationCount} {pluralize('deprecation', deprecationCount)}
       </Chip>
     </Tooltip>
   )
@@ -76,6 +77,7 @@ export function ServiceDeprecations({
         }}
         clickable
         deprecationCount={deprecationCount}
+        css={{ width: 'max-content' }}
       />
       <ModalMountTransition open={isOpen}>
         <ServiceDeprecationsModal

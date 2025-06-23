@@ -1,28 +1,30 @@
 import { Switch } from '@pluralsh/design-system'
-import { Confirm } from '../../utils/Confirm.tsx'
+import { Dispatch, SetStateAction, use, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useCluster } from '../Cluster.tsx'
-import { Dispatch, SetStateAction, useState } from 'react'
 import {
   DrainNodeMutationVariables,
   useDrainNodeMutation,
 } from '../../../generated/graphql-kubernetes.ts'
 import { KubernetesClient } from '../../../helpers/kubernetes.client.ts'
+import { Confirm } from '../../utils/Confirm.tsx'
+import { ClusterContext } from '../Cluster.tsx'
 
 export function DrainNodeModal({
   name,
   open,
   setOpen,
+  clusterId: providedClusterId,
 }: {
   name: string
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
+  clusterId?: string
 }) {
   const theme = useTheme()
-  const cluster = useCluster()
+  const { cluster } = use(ClusterContext) ?? {}
   const [ignoreAllDaemonSets, setIgnoreAllDaemonSets] = useState(true)
   const [mutation, { loading, error }] = useDrainNodeMutation({
-    client: KubernetesClient(cluster?.id ?? ''),
+    client: KubernetesClient(providedClusterId ?? cluster?.id ?? ''),
     variables: {
       name,
       input: { ignoreAllDaemonSets },

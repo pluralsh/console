@@ -1,11 +1,12 @@
 import { ResponsiveLine } from '@nivo/line'
 import { EmptyState } from '@pluralsh/design-system'
-import { HOME_CARD_MAX_HEIGHT } from 'components/home/HomeCard'
 import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { SliceTooltip, useGraphTheme } from '../../utils/Graph'
+
+export const GRAPH_CARD_MAX_HEIGHT = 330
 
 export function CostTimeSeriesGraph({
   history,
@@ -21,7 +22,7 @@ export function CostTimeSeriesGraph({
     <GraphWrapperSC>
       <ResponsiveLine
         // @ts-ignore, best for this to just be a fixed size
-        height={HOME_CARD_MAX_HEIGHT}
+        height={GRAPH_CARD_MAX_HEIGHT}
         theme={graphTheme}
         data={data}
         tooltip={SliceTooltip}

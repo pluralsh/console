@@ -1,12 +1,13 @@
 import { ComputedNodeWithoutStyles } from '@nivo/treemap'
 import chroma from 'chroma-js'
-import { HeatMapFlavor, MetricPointResponseFragment } from 'generated/graphql'
-import { truncate } from 'lodash'
-import { TreeMap } from './TreeMap'
 import {
   formatCpu,
   formatMemory,
 } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
+import { HeatMapFlavor, MetricPointResponseFragment } from 'generated/graphql'
+import { truncate } from 'lodash'
+import { ChartTooltip } from './ChartTooltip'
+import { TreeMap } from './TreeMap'
 
 export function UtilizationHeatmap({
   data,
@@ -45,7 +46,15 @@ export function UtilizationHeatmap({
   return (
     <TreeMap
       type="canvas"
-      label={truncatedLabel}
+      tooltip={({ node }) => (
+        <ChartTooltip
+          tooltipStyles={{ maxWidth: 200 }}
+          color={node.color}
+          value={node.formattedValue}
+          label={node.id}
+        />
+      )}
+      label={truncatedGraphLabel}
       colors={getColor}
       valueFormat={(d) => formatValue(d, utilizationType)}
       data={treeMapData}
@@ -53,7 +62,7 @@ export function UtilizationHeatmap({
   )
 }
 
-function truncatedLabel(
+export function truncatedGraphLabel(
   node: Omit<ComputedNodeWithoutStyles<object>, 'label' | 'parentLabel'>
 ) {
   const size = node.width > node.height ? node.width : node.height

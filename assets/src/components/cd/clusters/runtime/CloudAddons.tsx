@@ -1,40 +1,43 @@
-import { Table } from '@pluralsh/design-system'
-import { CloudAddonFragment, RuntimeServicesQuery } from 'generated/graphql'
-import { useMemo } from 'react'
-import { isNonNullable } from 'utils/isNonNullable'
-import { useNavigate } from 'react-router-dom'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
+import {
+  CloudAddonFragment,
+  ClusterOverviewDetailsFragment,
+} from 'generated/graphql'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { isNonNullable } from 'utils/isNonNullable'
 
 import { getClusterAddOnDetailsPath } from '../../../../routes/cdRoutesConsts'
 
+import { isEmpty } from 'lodash'
 import { cloudColumns } from './columns'
 
 export default function CloudAddons({
-  data,
+  cluster,
   flush,
 }: {
-  data?: RuntimeServicesQuery
+  cluster: ClusterOverviewDetailsFragment
   flush?: boolean
 }) {
   const navigate = useNavigate()
   const addOns = useMemo(
-    () => data?.cluster?.cloudAddons?.filter(isNonNullable) || [],
-    [data?.cluster?.cloudAddons]
+    () => cluster.cloudAddons?.filter(isNonNullable) || [],
+    [cluster.cloudAddons]
   )
 
-  if ((data?.cluster?.cloudAddons || []).length <= 0)
-    return <p style={{ marginLeft: '1rem' }}>No Cloud Add-Ons Detected</p>
+  if (isEmpty(addOns)) return <EmptyState message="No cloud add-ons detected" />
 
   return (
     <Table
       flush={flush}
       data={addOns}
       columns={cloudColumns}
-      reactTableOptions={{ meta: { clusterId: data?.cluster?.id } }}
+      reactTableOptions={{ meta: { clusterId: cluster.id } }}
       onRowClick={(_, { original }: Row<CloudAddonFragment>) =>
         navigate(
           getClusterAddOnDetailsPath({
-            clusterId: data?.cluster?.id,
+            clusterId: cluster.id,
             addOnId: original?.id,
             isCloudAddon: true,
           })

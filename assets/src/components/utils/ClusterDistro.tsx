@@ -1,10 +1,17 @@
 import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
-import { IconFrame, type styledTheme } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  toFillLevel,
+  useFillLevel,
+  type styledTheme,
+} from '@pluralsh/design-system'
 
 import { ClusterDistro } from 'generated/graphql'
 
 import { getProviderIconUrl } from './Provider'
+import { fillLevelToBorderColor } from './List'
+import { fillLevelToBackground } from './FillLevelDiv'
 
 const DISTRO_ICON_PATH = '/cluster-distros' as const
 
@@ -123,14 +130,23 @@ export function DistroProviderIconFrame({
   distro,
   provider,
   tooltip,
+  fillLevel: fillLevelProp,
   ...props
 }: {
   distro: Nullable<ClusterDistro>
   provider?: Nullable<string>
   tooltip?: boolean | ComponentProps<typeof IconFrame>['tooltip']
+  fillLevel?: number
 } & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
+  const { colors } = useTheme()
+  const inferredFillLevel = useFillLevel() + 1
+  const fillLevel = fillLevelProp ?? inferredFillLevel
   return (
     <IconFrame
+      css={{
+        background: colors[fillLevelToBackground[toFillLevel(fillLevel)]],
+        borderColor: colors[fillLevelToBorderColor[toFillLevel(fillLevel)]],
+      }}
       textValue={getClusterDistroName(distro, 'long')}
       tooltip={
         typeof tooltip === 'boolean'
