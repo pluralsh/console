@@ -26,7 +26,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
 		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
-				credentials="{{ .Credentials }}"
+				credentials={{ .Credentials }}
 		');
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
     `)
@@ -38,7 +38,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 	err = tmpl.Execute(out, map[string]string{
 		"DatabaseName":   args.DatabaseName(),
 		"ConnectionName": connectionName,
-		"Credentials":    lo.FromPtr(c.serviceAccountJSON),
+		"Credentials":    fmt.Sprintf("%q", lo.FromPtr(c.serviceAccountJSON)),
 	})
 	if err != nil {
 		return "", fmt.Errorf("error executing template: %w", err)
