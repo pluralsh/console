@@ -205,12 +205,8 @@ export function Home() {
 const ChartWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   maxWidth: 425,
-  height: 240,
   borderRadius: theme.borderRadiuses.large,
   overflow: 'hidden',
-  [`@media (max-width: ${theme.breakpoints.desktopLarge}px)`]: {
-    height: 304,
-  },
   '& g:first-of-type, & canvas': { cursor: 'pointer' },
 }))
 
