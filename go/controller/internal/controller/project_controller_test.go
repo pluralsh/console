@@ -24,7 +24,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
 
-var _ = Describe("NotificationSink Project Controller", Ordered, func() {
+var _ = Describe("Project Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
 			projectName = "test"
@@ -97,7 +97,7 @@ var _ = Describe("NotificationSink Project Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything).Return(false, nil)
+			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 			fakeConsoleClient.On("CreateProject", mock.Anything, mock.Anything).Return(test.projectFragment, nil)
 
 			nr := &controller.ProjectReconciler{
@@ -166,7 +166,7 @@ var _ = Describe("NotificationSink Project Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
 				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
 			})
@@ -207,7 +207,7 @@ var _ = Describe("NotificationSink Project Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("DeleteProject", mock.Anything, mock.Anything).Return(nil)
 
 			nsReconciler := &controller.ProjectReconciler{
