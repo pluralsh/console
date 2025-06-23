@@ -16,12 +16,15 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useCatalogQuery } from 'generated/graphql'
 import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { CATALOG_PARAM_ID } from 'routes/selfServiceRoutesConsts'
+import {
+  CATALOG_PARAM_ID,
+  CATALOGS_ABS_PATH,
+} from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
 import { iconUrl } from 'utils/icon'
 import { CatalogPermissions } from './CatalogPermissions'
 import { CatalogPRAutomations } from './CatalogPRAutomations'
-import { breadcrumbs } from './Catalogs'
+import { getSelfServiceBreadcrumbs } from '../SelfService'
 
 export function Catalog() {
   const theme = useTheme()
@@ -34,13 +37,15 @@ export function Catalog() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...breadcrumbs, { label: catalog?.name ?? id }],
+      () => [
+        ...getSelfServiceBreadcrumbs('service catalog', CATALOGS_ABS_PATH),
+        { label: catalog?.name ?? id },
+      ],
       [catalog?.name, id]
     )
   )
 
   if (error) return <GqlError error={error} />
-
   if (!catalog) return <LoadingIndicator />
 
   return (
@@ -48,13 +53,9 @@ export function Catalog() {
       <div
         css={{
           alignSelf: 'center',
-          maxWidth: theme.breakpoints.desktop,
+          maxWidth: theme.breakpoints.desktopLarge,
           overflow: 'hidden',
           width: '100%',
-
-          [`@media (min-width: 1833px)`]: {
-            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Increased by sidecar and spacing size.
-          },
         }}
       >
         <Flex height="100%">

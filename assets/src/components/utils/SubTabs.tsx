@@ -11,14 +11,13 @@ export type SubtabDirectory = {
 
 export function SubTabs({ directory }: { directory: SubtabDirectory }) {
   const route = useParams()['*']
-
   return (
     <Flex>
       {directory
         .filter(({ enabled }) => (enabled === undefined ? true : enabled))
         .map(({ path, label }) => (
           <LinkTabWrap
-            active={route?.includes(path)}
+            active={route?.includes(path.replace('/', ''))}
             key={path}
             to={path}
           >

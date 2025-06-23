@@ -70,7 +70,7 @@ export const consoleComponentRoutes = [
   kubernetesRoutes,
   aiRoutes,
   ...flowRoutes,
-  selfServiceRoutes,
+  ...selfServiceRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [

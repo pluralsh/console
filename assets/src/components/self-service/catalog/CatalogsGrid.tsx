@@ -67,7 +67,6 @@ export function CardGrid({ onBottomReached, styles, children }: CardGridProps) {
         display: 'grid',
         gap: theme.spacing.medium,
         gridTemplateColumns: 'repeat(auto-fill, minmax(256px, 1fr))',
-        flexGrow: 1,
         overflowY: 'auto',
         paddingBottom: theme.spacing.large,
         paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.

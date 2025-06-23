@@ -1,8 +1,8 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import PrAutomations from 'components/self-service/pr/automations/PrAutomations'
+import { PrAutomations } from 'components/self-service/pr/automations/PrAutomations'
 
-import PrQueue from 'components/self-service/pr/queue/PrQueue'
+import { OutstandingPrs } from 'components/self-service/pr/queue/OutstandingPrs'
 import { ScmManagement } from 'components/self-service/pr/scm/PrScmManagement.tsx.tsx'
 
 import { SelfService } from 'components/self-service/SelfService.tsx'
@@ -13,14 +13,13 @@ import {
   CATALOG_ABS_PATH,
   CATALOGS_ABS_PATH,
   PR_AUTOMATIONS_REL_PATH,
-  PR_DEFAULT_REL_PATH,
-  PR_QUEUE_REL_PATH,
+  PR_OUTSTANDING_REL_PATH,
   PR_REL_PATH,
   PR_SCM_REL_PATH,
   SELF_SERVICE_ABS_PATH,
 } from './selfServiceRoutesConsts'
 
-export const selfServiceRoutes = (
+export const selfServiceRoutes = [
   <Route
     path={SELF_SERVICE_ABS_PATH}
     element={<SelfService />}
@@ -34,11 +33,6 @@ export const selfServiceRoutes = (
       path={CATALOGS_ABS_PATH}
       element={<Catalogs />}
     />
-    ,
-    <Route
-      path={CATALOG_ABS_PATH}
-      element={<Catalog />}
-    />
     {/* PRs */}
     <Route
       path={PR_REL_PATH}
@@ -46,11 +40,11 @@ export const selfServiceRoutes = (
     >
       <Route
         index
-        element={<Navigate to={PR_DEFAULT_REL_PATH} />}
+        element={<Navigate to={PR_OUTSTANDING_REL_PATH} />}
       />
       <Route
-        path={PR_QUEUE_REL_PATH}
-        element={<PrQueue />}
+        path={PR_OUTSTANDING_REL_PATH}
+        element={<OutstandingPrs />}
       />
       <Route
         path={PR_SCM_REL_PATH}
@@ -61,5 +55,9 @@ export const selfServiceRoutes = (
         element={<PrAutomations />}
       />
     </Route>
-  </Route>
-)
+  </Route>,
+  <Route
+    path={CATALOG_ABS_PATH}
+    element={<Catalog />}
+  />,
+]

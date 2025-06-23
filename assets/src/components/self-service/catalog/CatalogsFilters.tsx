@@ -28,7 +28,6 @@ export function CatalogsFilters({
   return (
     <div
       css={{
-        marginLeft: theme.spacing.large,
         overflowY: 'auto',
         paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and card.
         width: 220,

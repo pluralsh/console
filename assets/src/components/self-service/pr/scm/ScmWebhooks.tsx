@@ -1,42 +1,27 @@
-import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { useScmWebhooksQuery } from 'generated/graphql'
 
-import { GqlError } from 'components/utils/Alert'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-
-import {
-  PR_BASE_CRUMBS,
-  PR_SCM_WEBHOOKS_ABS_PATH,
-} from 'routes/selfServiceRoutesConsts'
+import { GqlError } from 'components/utils/Alert'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 
-import { columns } from './ScmWebhooksColumns'
 import { CreateScmWebhook } from './CreateScmWebhook'
+import { columns } from './ScmWebhooksColumns'
 
 export const PR_QUERY_PAGE_SIZE = 100
-
-const crumbs = [
-  ...PR_BASE_CRUMBS,
-  {
-    label: 'SCM webhooks',
-    url: PR_SCM_WEBHOOKS_ABS_PATH,
-  },
-]
 
 export const SCM_WEBHOOKS_Q_VARS = {
   first: PR_QUERY_PAGE_SIZE,
 }
 
-export default function ScmWebhooks() {
+export function ScmWebhooks() {
   const theme = useTheme()
-
-  useSetBreadcrumbs(crumbs)
 
   const {
     data,

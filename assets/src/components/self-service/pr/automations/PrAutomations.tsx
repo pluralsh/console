@@ -1,22 +1,11 @@
-import {
-  ArrowTopRightIcon,
-  Button,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button, Table } from '@pluralsh/design-system'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-
-import {
-  PR_BASE_CRUMBS,
-  PR_QUEUE_ABS_PATH,
-} from 'routes/selfServiceRoutesConsts'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
@@ -28,19 +17,7 @@ import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
-const crumbs = [
-  ...PR_BASE_CRUMBS,
-  {
-    label: 'PR automations',
-    url: PR_QUEUE_ABS_PATH,
-  },
-]
-
-export default function AutomationPr() {
-  const theme = useTheme()
-
-  useSetBreadcrumbs(crumbs)
-
+export function PrAutomations() {
   const {
     data,
     loading,
@@ -80,27 +57,18 @@ export default function AutomationPr() {
   if (error) return <GqlError error={error} />
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
-    >
-      <Table
-        fullHeightWrap
-        columns={columns}
-        loading={!data && loading}
-        reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        data={prAutomations}
-        virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-      />
-    </div>
+    <Table
+      fullHeightWrap
+      columns={columns}
+      loading={!data && loading}
+      reactTableOptions={{ meta: { refetch } }}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+      data={prAutomations}
+      virtualizeRows
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+    />
   )
 }

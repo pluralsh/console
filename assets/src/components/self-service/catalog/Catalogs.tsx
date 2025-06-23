@@ -1,31 +1,24 @@
 import {
-  useSetBreadcrumbs,
+  Button,
+  Card,
+  CloseIcon,
+  EmptyState,
+  FiltersIcon,
   Flex,
   Input,
   MagnifyingGlassIcon,
-  Button,
-  CloseIcon,
-  FiltersIcon,
-  Card,
-  EmptyState,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import Fuse from 'fuse.js'
 import { useCatalogsQuery } from 'generated/graphql'
 import { chain, isEmpty } from 'lodash'
-import { useState, useMemo, useCallback } from 'react'
-import { CATALOGS_ABS_PATH } from 'routes/selfServiceRoutesConsts'
-import { useTheme } from 'styled-components'
+import { useCallback, useMemo, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { CatalogsFilters } from './CatalogsFilters'
 import { CatalogsGrid } from './CatalogsGrid'
-
-export const breadcrumbs = [
-  { label: 'service catalog', url: CATALOGS_ABS_PATH },
-]
 
 // TODO: Replace with server-side search once it will be available.
 const searchOptions = {
@@ -104,134 +97,101 @@ export function Catalogs() {
       : filteredCatalogs
   }, [authorFilters, catalogs, categoryFilters, hasActiveSearch, query])
 
-  useSetBreadcrumbs(breadcrumbs)
-
   if (error) return <GqlError error={error} />
-
   if (!catalogs && loading) return <LoadingIndicator />
 
   return (
-    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
-      <div
-        css={{
-          alignSelf: 'center',
-          height: '100%',
-          maxWidth: theme.breakpoints.desktop,
-          overflow: 'hidden',
-          width: '100%',
-
-          [`@media (min-width: 1833px)`]: {
-            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Increased by filter panel and spacing size.
-          },
-        }}
+    <WrapperSC>
+      <Flex
+        direction="column"
+        grow={1}
+        height="100%"
+        overflow="hidden"
+        gap="medium"
       >
         <Flex
-          height="100%"
-          overflow={'hidden'}
+          gap="medium"
+          width="100%"
+          justify="space-between"
         >
-          <Flex
-            direction="column"
-            grow={1}
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            showClearButton
+            placeholder="Search catalog"
+            startIcon={<MagnifyingGlassIcon color="icon-light" />}
+            width="100%"
+          />
+          <Button
+            onClick={() =>
+              hasActiveFilters
+                ? resetFilters()
+                : setFiltersVisible(!filtersVisible)
+            }
+            secondary
+            startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
+            style={{
+              borderColor: hasActiveFilters
+                ? theme.colors['border-primary']
+                : undefined,
+            }}
           >
-            <div
+            {hasActiveFilters ? 'Reset filters' : 'Filters'}
+          </Button>
+        </Flex>
+        <CatalogsGrid
+          catalogs={resultCatalogs}
+          onBottomReached={() => {
+            if (!loading && pageInfo?.hasNextPage) fetchNextPage()
+          }}
+          emptyState={
+            <Card
               css={{
-                alignItems: 'center',
-                display: 'flex',
-                gap: theme.spacing.large,
-                justifyContent: 'space-between',
-                marginBottom: theme.spacing.medium,
-                paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
+                flexGrow: 1,
+                padding: theme.spacing.xxlarge,
               }}
             >
-              <div css={{ ...theme.partials.text.subtitle1 }}>
-                Service catalog
-              </div>
-              <div
-                css={{
-                  display: 'flex',
-                  gap: theme.spacing.medium,
-                }}
+              <EmptyState
+                message={
+                  hasActiveFilters || hasActiveSearch
+                    ? 'There are no results with these filters.'
+                    : 'There are no catalogs available.'
+                }
               >
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
-                  showClearButton
-                  placeholder="Search PR bundles"
-                  startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                  width={320}
-                />
-                <Button
-                  onClick={() =>
-                    hasActiveFilters
-                      ? resetFilters()
-                      : setFiltersVisible(!filtersVisible)
-                  }
-                  secondary
-                  startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-                  style={{
-                    borderColor: hasActiveFilters
-                      ? theme.colors['border-primary']
-                      : undefined,
-                  }}
-                >
-                  {hasActiveFilters ? 'Reset filters' : 'Filters'}
-                </Button>
-              </div>
-            </div>
-            <Flex
-              gap="medium"
-              overflow={'hidden'}
-              paddingBottom={theme.spacing.large}
-              {...(isEmpty(resultCatalogs) ? { height: '100%' } : {})}
-            >
-              <CatalogsGrid
-                catalogs={resultCatalogs}
-                onBottomReached={() => {
-                  if (!loading && pageInfo?.hasNextPage) fetchNextPage()
-                }}
-                emptyState={
-                  <Card
-                    css={{
-                      flexGrow: 1,
-                      padding: theme.spacing.xxlarge,
+                {(hasActiveFilters || hasActiveSearch) && (
+                  <Button
+                    secondary
+                    onClick={() => {
+                      resetFilters()
+                      setQuery('')
                     }}
                   >
-                    <EmptyState
-                      message={
-                        hasActiveFilters || hasActiveSearch
-                          ? 'There are no results with these filters.'
-                          : 'There are no catalogs available.'
-                      }
-                    >
-                      {(hasActiveFilters || hasActiveSearch) && (
-                        <Button
-                          secondary
-                          onClick={() => {
-                            resetFilters()
-                            setQuery('')
-                          }}
-                        >
-                          Reset filers
-                        </Button>
-                      )}
-                    </EmptyState>
-                  </Card>
-                }
-              />
-            </Flex>
-          </Flex>
-          {filtersVisible && (
-            <CatalogsFilters
-              authors={authors}
-              authorFilters={authorFilters}
-              setAuthorFilters={setAuthorFilters}
-              categories={categories}
-              categoryFilters={categoryFilters}
-              setCategoryFilters={setCategoryFilters}
-            />
-          )}
-        </Flex>
-      </div>
-    </ResponsiveLayoutPage>
+                    Reset filers
+                  </Button>
+                )}
+              </EmptyState>
+            </Card>
+          }
+        />
+      </Flex>
+      {filtersVisible && (
+        <CatalogsFilters
+          authors={authors}
+          authorFilters={authorFilters}
+          setAuthorFilters={setAuthorFilters}
+          categories={categories}
+          categoryFilters={categoryFilters}
+          setCategoryFilters={setCategoryFilters}
+        />
+      )}
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  height: '100%',
+  width: '100%',
+  overflow: 'hidden',
+  gap: theme.spacing.large,
+}))
