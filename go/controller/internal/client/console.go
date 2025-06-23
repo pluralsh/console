@@ -126,7 +126,7 @@ type ConsoleClient interface {
 	CreateProject(ctx context.Context, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
 	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
 	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
-	IsProjectExists(ctx context.Context, name string) (bool, error)
+	IsProjectExists(ctx context.Context, id, name *string) (bool, error)
 	UpsertHelmRepository(ctx context.Context, url string, attributes *console.HelmRepositoryAttributes) (*console.HelmRepositoryFragment, error)
 	GetHelmRepository(ctx context.Context, url string) (*console.HelmRepositoryFragment, error)
 	IsHelmRepositoryExists(ctx context.Context, url string) (bool, error)

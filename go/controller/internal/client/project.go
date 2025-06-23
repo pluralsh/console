@@ -61,8 +61,8 @@ func (c *client) DeleteProject(ctx context.Context, id string) error {
 	return err
 }
 
-func (c *client) IsProjectExists(ctx context.Context, name string) (bool, error) {
-	scm, err := c.GetProject(ctx, nil, &name)
+func (c *client) IsProjectExists(ctx context.Context, id, name *string) (bool, error) {
+	scm, err := c.GetProject(ctx, id, name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
