@@ -30,6 +30,13 @@ run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
 		-p 9192:9192 \
 		cloud-query:latest
 
+.PHONY: clean
+clean: ## clean up build/db artifacts
+	@echo "Cleaning up"
+	@rm -rf $(DIST_DIR)/cache
+	@rm -rf $(DIST_DIR)/data
+	@rm -rf $(DIST_DIR)/runtime
+
 ##@ Codegen
 
 .PHONY: proto

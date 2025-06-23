@@ -40,7 +40,7 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 }
 
 // Query implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryOutput, error) {
+func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
 	provider, err := in.toProvider(input.GetConnection())
 	if err != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
@@ -150,28 +150,31 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 	}
 }
 
-func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryOutput, error) {
+func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryResult, error) {
 	columns, rows, err := c.Query(query)
 	if err != nil {
-		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to execute query", "query", query)
 		return nil, status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
 	}
 	klog.V(log.LogLevelDebug).InfoS("found query results", "rows", len(rows))
 
-	result := make([]*cloudquery.QueryResult, 0, len(rows))
+	result := make([]map[string]any, 0, len(rows))
 	for _, row := range rows {
-		res := make(map[string]string)
+
+		// fill out the columns with the values from the row
+		rowMap := make(map[string]any)
 		for i, col := range columns {
-			res[col] = in.formatValue(row[i])
+			rowMap[col] = row[i]
 		}
 
-		result = append(result, &cloudquery.QueryResult{
-			Columns: columns,
-			Result:  res,
-		})
+		result = append(result, rowMap)
 	}
 
-	return &cloudquery.QueryOutput{Result: result}, nil
+	resultJSON, err := json.Marshal(result)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal query result for '%s': %v", query, err)
+	}
+
+	return &cloudquery.QueryResult{Result: string(resultJSON)}, nil
 }
 
 func (in *CloudQueryService) handleSchema(c connection.Connection, table string) (*cloudquery.SchemaOutput, error) {

@@ -30,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CloudQueryClient interface {
-	Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryOutput, error)
+	Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryResult, error)
 	Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (*SchemaOutput, error)
 	Extract(ctx context.Context, in *ExtractInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ExtractOutput], error)
 }
@@ -43,9 +43,9 @@ func NewCloudQueryClient(cc grpc.ClientConnInterface) CloudQueryClient {
 	return &cloudQueryClient{cc}
 }
 
-func (c *cloudQueryClient) Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryOutput, error) {
+func (c *cloudQueryClient) Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryResult, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryOutput)
+	out := new(QueryResult)
 	err := c.cc.Invoke(ctx, CloudQuery_Query_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ type CloudQuery_ExtractClient = grpc.ServerStreamingClient[ExtractOutput]
 // All implementations must embed UnimplementedCloudQueryServer
 // for forward compatibility.
 type CloudQueryServer interface {
-	Query(context.Context, *QueryInput) (*QueryOutput, error)
+	Query(context.Context, *QueryInput) (*QueryResult, error)
 	Schema(context.Context, *SchemaInput) (*SchemaOutput, error)
 	Extract(*ExtractInput, grpc.ServerStreamingServer[ExtractOutput]) error
 	mustEmbedUnimplementedCloudQueryServer()
@@ -99,7 +99,7 @@ type CloudQueryServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCloudQueryServer struct{}
 
-func (UnimplementedCloudQueryServer) Query(context.Context, *QueryInput) (*QueryOutput, error) {
+func (UnimplementedCloudQueryServer) Query(context.Context, *QueryInput) (*QueryResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
 func (UnimplementedCloudQueryServer) Schema(context.Context, *SchemaInput) (*SchemaOutput, error) {

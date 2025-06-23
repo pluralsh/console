@@ -99,6 +99,7 @@ func (in *Server) init() (*Server, error) {
 
 	// Enable reflection service for debugging and tools like grpcurl
 	if in.config.EnableReflection {
+		klog.V(log.LogLevelExtended).InfoS("enabling gRPC reflection service")
 		reflection.Register(in.server)
 	}
 

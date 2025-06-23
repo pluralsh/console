@@ -46,12 +46,7 @@ message ExtractInput {
 }
 
 message QueryResult {
-  repeated string columns = 1;
-  map<string, string> result = 2;
-}
-
-message QueryOutput {
-  repeated QueryResult result = 1;
+  string result = 2;
 }
 
 message SchemaColumn {
@@ -70,13 +65,13 @@ message SchemaResult {
 
 message ExtractOutput {
   string type = 1;
-  map<string, string> result = 2;
+  string result = 2;
   string id = 3;
   repeated string links = 4;
 }
 
 service CloudQuery {
-  rpc Query(QueryInput) returns (QueryOutput) {}
+  rpc Query(QueryInput) returns (QueryResult) {}
   rpc Schema(SchemaInput) returns (SchemaOutput) {}
   rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
 }
