@@ -117,7 +117,7 @@ func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, creden
 			if strings.EqualFold(db.Spec.CredentialsRef.Name, credentials.Name) {
 				deletingAny = true
 				if db.DeletionTimestamp.IsZero() {
-					if err := r.Client.Delete(ctx, &db); err != nil {
+					if err := r.Delete(ctx, &db); err != nil {
 						return ctrl.Result{}, err
 					}
 				}
@@ -139,7 +139,7 @@ func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, creden
 			if strings.EqualFold(usr.Spec.CredentialsRef.Name, credentials.Name) {
 				deletingAny = true
 				if usr.DeletionTimestamp.IsZero() {
-					if err := r.Client.Delete(ctx, &usr); err != nil {
+					if err := r.Delete(ctx, &usr); err != nil {
 						return ctrl.Result{}, err
 					}
 				}
