@@ -136,7 +136,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 			return &requeue
 		}
 
-		// Remove service from Console API if it exists.
+		// Remove project from Console API if it exists.
 		if exists {
 			if err = in.ConsoleClient.DeleteProject(ctx, project.Status.GetID()); err != nil {
 				// If it fails to delete the external dependency here, return with the error
