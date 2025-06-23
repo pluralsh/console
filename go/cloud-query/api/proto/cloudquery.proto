@@ -19,7 +19,7 @@ message AzureCredentials {
 }
 
 message GcpCredentials {
-  string impersonation_token = 1;
+  string service_account_json = 1;
 }
 
 message Connection {

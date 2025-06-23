@@ -143,7 +143,7 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 		), nil
 	case config.ProviderGCP:
 		return config.NewGCPConfiguration(
-			config.WithGCPImpersonateAccessToken(connection.GetGcp().GetImpersonationToken()),
+			config.WithGCPServiceAccountJSON(connection.GetGcp().GetServiceAccountJson()),
 		), nil
 	default:
 		return c, fmt.Errorf("unsupported provider: %s", provider)

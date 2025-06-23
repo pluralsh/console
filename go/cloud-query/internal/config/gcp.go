@@ -14,7 +14,7 @@ import (
 )
 
 type GCPConfiguration struct {
-	impersonateAccessToken *string
+	serviceAccountJSON *string
 }
 
 func (c *GCPConfiguration) Query(connectionName string) (string, error) {
@@ -26,7 +26,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
 		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
-				impersonate_access_token="{{ .ImpersonateAccessToken }}"
+				credentials="{{ .Credentials }}"
 		');
 		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
     `)
@@ -36,9 +36,9 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 
 	out := new(strings.Builder)
 	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":           args.DatabaseName(),
-		"ConnectionName":         connectionName,
-		"ImpersonateAccessToken": lo.FromPtr(c.impersonateAccessToken),
+		"DatabaseName":   args.DatabaseName(),
+		"ConnectionName": connectionName,
+		"Credentials":    lo.FromPtr(c.serviceAccountJSON),
 	})
 	if err != nil {
 		return "", fmt.Errorf("error executing template: %w", err)
@@ -52,12 +52,12 @@ func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		ImpersonateAccessToken *string `json:"impersonateAccessToken,omitempty"`
 	}{
-		ImpersonateAccessToken: c.impersonateAccessToken,
+		ImpersonateAccessToken: c.serviceAccountJSON,
 	})
 }
 
-func WithGCPImpersonateAccessToken(impersonateAccessToken string) func(configuration *Configuration) {
+func WithGCPServiceAccountJSON(impersonateAccessToken string) func(configuration *Configuration) {
 	return func(c *Configuration) {
-		c.gcp.impersonateAccessToken = &impersonateAccessToken
+		c.gcp.serviceAccountJSON = &impersonateAccessToken
 	}
 }
