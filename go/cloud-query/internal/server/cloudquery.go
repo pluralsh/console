@@ -171,8 +171,6 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string) 
 		return nil, status.Errorf(codes.Internal, "failed to marshal query result for '%s': %v", query, err)
 	}
 
-	fmt.Println(string(resultJSON))
-
 	return &cloudquery.QueryResult{Result: string(resultJSON)}, nil
 }
 
