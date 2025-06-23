@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	libPath          = filepath.Join(args.DatabaseDir(), "lib/postgresql")
-	extensionsPath   = filepath.Join(args.DatabaseDir(), "share/postgresql/extension/")
+	libPath          = filepath.Join(args.DatabaseRuntimeDir(), "lib/postgresql")
+	extensionsPath   = filepath.Join(args.DatabaseRuntimeDir(), "share/postgresql/extension/")
 	fileDestinations = map[string]string{
 		"steampipe_postgres_aws.so":         libPath,
 		"steampipe_postgres_aws.control":    extensionsPath,

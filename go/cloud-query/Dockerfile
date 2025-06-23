@@ -59,4 +59,6 @@ COPY --chown=nonroot --from=libraries /workspace/lib/ /steampipe/lib/
 
 USER nonroot
 
-ENTRYPOINT ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib", "--database-dir", "/steampipe/db"]
+WORKDIR /steampipe/db
+
+CMD ["/usr/local/bin/cloud-query", "--extensions-dir", "/steampipe/lib", "--database-runtime-dir", "/steampipe/runtime", "--database-cache-dir", "/steampipe/cache", "--database-data-dir", "/steampipe/db/data"]

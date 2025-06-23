@@ -23,11 +23,12 @@ func main() {
 			Password(args.DatabasePassword()).
 			Database(args.DatabaseName()).
 			Port(args.DatabasePort()).
-			BinariesPath(args.DatabaseDir()).
-			RuntimePath(args.DatabaseDir()).
-			CachePath(args.DatabaseExtensionsDir()).
+			BinariesPath(args.DatabaseRuntimeDir()).
+			RuntimePath(args.DatabaseRuntimeDir()).
+			CachePath(args.DatabaseCacheDir()).
 			DataPath(args.DatabaseDataDir()).
 			Version(args.DatabaseVersion()).
+			StartTimeout(args.DatabaseStartTimeout()).
 			Logger(klog.NewStandardLogger("INFO").Writer()).
 			StartParameters(map[string]string{"max_connections": args.DatabaseMaxConnections()}))
 	err := db.Start()
@@ -53,7 +54,7 @@ func main() {
 		klog.Fatalf("failed to close db connection after registering extensions: %v", err)
 	}
 
-	p, err := pool.NewConnectionPool(args.ConnectionTTL())
+	p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
 	if err != nil {
 		klog.Fatalf("failed to create connection pool: %v", err)
 	}
