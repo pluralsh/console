@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/pluralsh/console/go/controller/internal/cache"
@@ -120,6 +121,7 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:           mgr.GetScheme(),
 			UserGroupCache:   userGroupCache,
 			CredentialsCache: credentialsCache,
+			ServiceQueue:     workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 	ClusterReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {

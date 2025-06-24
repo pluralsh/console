@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,18 +49,37 @@ type ServiceReconciler struct {
 	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
+	Name             string
+	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
+// IsSharded implements the types.Sharded interface.
+func (r *ServiceReconciler) IsSharded() bool {
+	return true
+}
+
+// Queue implements the types.Processor interface.
+func (r *ServiceReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.ServiceQueue
+}
+
+// Reconcile is part of the main kubernetes reconciliation loop.
+//
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;patch
+func (r *ServiceReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.ServiceQueue.Add(req)
+	return ctrl.Result{}, nil
+}
 
-func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+// Process implements the types.Processor interface.
+func (r *ServiceReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
-	logger.Info("reconciling service deployment", "namespacedName", req.NamespacedName)
+	logger.Info("reconciling service deployment", "namespacedName", req.NamespacedName, "reconciler", r.Name)
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}

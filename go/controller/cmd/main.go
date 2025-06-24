@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -164,7 +165,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	runOrDie(controllers, mgr)
+	shardedProcessors := algorithms.Map(
+		algorithms.Filter(controllers, func(c types.Controller) bool {
+			sharded, ok := c.(types.Sharded)
+			return ok && sharded.IsSharded()
+		}),
+		func(c types.Controller) types.Processor {
+			// We assume that all sharded controllers implement the Processor interface.
+			return c.(types.Processor)
+		})
+
+	runOrDie(controllers, shardedProcessors, mgr)
 }
 
 func parseReconcilers(reconcilersStr string) (types.ReconcilerList, error) {
@@ -186,7 +197,9 @@ func parseReconcilers(reconcilersStr string) (types.ReconcilerList, error) {
 	return result, nil
 }
 
-func runOrDie(controllers []types.Controller, mgr ctrl.Manager) {
+func runOrDie(controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
+	ctx := ctrl.SetupSignalHandler()
+
 	for _, c := range controllers {
 		if err := c.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controller")
@@ -194,7 +207,12 @@ func runOrDie(controllers []types.Controller, mgr ctrl.Manager) {
 		}
 	}
 
-	ctx := ctrl.SetupSignalHandler()
+	setupLog.Info("starting sharded controllers")
+	for _, c := range shardedControllers {
+		m := types.NewManager("", 10, c)
+		go m.Start(ctx)
+	}
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
