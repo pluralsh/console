@@ -1,6 +1,7 @@
 defmodule Console.Compliance.Datasource.ServicesTest do
   use Console.DataCase, async: true
   alias Console.Compliance.Datasource.Services
+  alias Console.Repo
 
   describe "stream/0" do
     test "it returns a stream of service data" do
@@ -8,7 +9,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       project = insert(:project, name: "test-project")
       git_repo = insert(:git_repository, url: "https://github.com/example/repo.git")
       revision = insert(:revision, sha: "abc123")
-      cluster = insert(:cluster, handle: "test-cluster", project: project)
+      cluster = insert(:cluster, project: project)
 
       service = insert(:service, %{
         name: "test-service",
@@ -21,11 +22,14 @@ defmodule Console.Compliance.Datasource.ServicesTest do
         helm: %{url: "https://charts.example.com", chart: "test-chart", version: "1.0.0"}
       })
 
+      # Reload the service with its associations to get the current cluster handle
+      service = Repo.preload(service, :cluster)
+
       # Get the first item from the stream
       [result] = Services.stream() |> Enum.take(1)
 
       # Assert the transformed data matches expectations
-      assert result.cluster == "test-cluster"
+      assert result.cluster == service.cluster.handle
       assert result.service == "test-service"
       assert result.project == "test-project"
       assert result.namespace == "test-namespace"
@@ -43,7 +47,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
     test "it handles services with missing relationships" do
       # Create a service with minimal data
       project = insert(:project, name: "test-project")
-      cluster = insert(:cluster, handle: "test-cluster", project: project)
+      cluster = insert(:cluster, project: project)
 
       # Build service without using the factory defaults
       service = %Console.Schema.Service{
@@ -53,13 +57,16 @@ defmodule Console.Compliance.Datasource.ServicesTest do
         cluster: cluster,
         write_policy_id: Ecto.UUID.generate(),
         read_policy_id: Ecto.UUID.generate()
-      } |> Console.Repo.insert!()
+      } |> Repo.insert!()
+
+      # Reload the service with its associations to get the current cluster handle
+      service = Repo.preload(service, :cluster)
 
       # Get the first item from the stream
       [result] = Services.stream() |> Enum.take(1)
 
       # Assert the transformed data handles nil values
-      assert result.cluster == "test-cluster"
+      assert result.cluster == service.cluster.handle
       assert result.service == "minimal-service"
       assert result.project == "test-project"
       assert result.namespace == "test-namespace"
