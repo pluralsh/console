@@ -8,11 +8,12 @@ import {
   useServiceDeploymentRevisionsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from '../ServiceRevisionColumns'
 import { useServiceContext } from './ServiceDetails'
+import { SvcSettingsWrapperCardSC } from './settings/ServiceSecrets'
 
 export function ServiceRevisions() {
   const theme = useTheme()
@@ -30,7 +31,7 @@ export function ServiceRevisions() {
   const currentRevision = data.serviceDeployment.revision
 
   return (
-    <WrapperCardSC>
+    <SvcSettingsWrapperCardSC>
       <Overline>revisions</Overline>
       {currentRevision && <CurrentRevision revision={currentRevision} />}
       <h3 css={theme.partials.text.subtitle2}>All revisions</h3>
@@ -50,17 +51,9 @@ export function ServiceRevisions() {
           }}
         />
       )}
-    </WrapperCardSC>
+    </SvcSettingsWrapperCardSC>
   )
 }
-const WrapperCardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.xlarge,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  overflow: 'hidden',
-  marginBottom: theme.spacing.large,
-}))
 
 function CurrentRevision({
   revision,
