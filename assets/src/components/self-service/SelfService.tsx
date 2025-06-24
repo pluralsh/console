@@ -55,7 +55,8 @@ export function SelfService() {
     const tabName =
       directory
         .find(({ path }) => pathname.includes(path))
-        ?.label?.toLowerCase() ?? ''
+        ?.label?.toString()
+        ?.toLowerCase() ?? ''
     return { directory, breadcrumbs: getSelfServiceBreadcrumbs(tabName) }
   }, [prsEnabled, pathname])
 
@@ -88,7 +89,7 @@ const PageWrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   height: '100%',
   width: '100%',
-  overflow: 'hidden',
+  overflow: 'auto',
   padding: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge,
 }))

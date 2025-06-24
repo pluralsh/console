@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Button, Modal } from '@pluralsh/design-system'
+import { Button, Modal, PlusIcon } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
@@ -125,7 +125,9 @@ export function CreateScmConnection({
   return (
     <>
       <Button
-        primary
+        small
+        floating
+        endIcon={<PlusIcon />}
         onClick={() => setOpen(true)}
       >
         Create connection

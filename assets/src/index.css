@@ -17,6 +17,7 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  /* eslint-disable-next-line */
   interpolate-size: allow-keywords; /* as of Jun 2025 this isn't supported in Safari or Firefox, but can add a nice progressive enhancement for Chrome users */
 }
 

@@ -17,7 +17,6 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 import { Body1P } from 'components/utils/typography/Text'
 
-import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 import { scmTypeToLabel } from './PrScmConnectionsColumns'
 
 export function CreateScmConectionWebhookModalBase({
@@ -39,7 +38,7 @@ export function CreateScmConectionWebhookModalBase({
   const [mutation, { loading, error }] = useCreateScmWebhookMutation({
     update: (cache, { data }) =>
       updateCache(cache, {
-        variables: SCM_WEBHOOKS_Q_VARS,
+        variables: { first: 100 },
         query: ScmWebhooksDocument,
         update: (prev) =>
           appendConnectionToEnd(prev, data?.createScmWebhook, 'scmWebhooks'),
