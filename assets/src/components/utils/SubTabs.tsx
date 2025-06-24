@@ -1,10 +1,11 @@
 import { Flex, SubTab } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { LinkTabWrap } from './Tabs'
+import { ReactNode } from 'react'
 
 export type SubtabDirectory = {
   path: string
-  label: string
+  label: ReactNode
   enabled?: boolean
 }[]
 
@@ -19,7 +20,6 @@ export function SubTabs({ directory }: { directory: SubtabDirectory }) {
           <LinkTabWrap
             active={route?.includes(path)}
             key={path}
-            textValue={label}
             to={path}
           >
             <SubTab css={{ minWidth: 'max-content' }}>{label}</SubTab>

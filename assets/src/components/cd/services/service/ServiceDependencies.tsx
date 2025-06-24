@@ -1,29 +1,49 @@
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Chip, EmptyState, Table } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import { columns } from '../ServiceDependenciesColumns'
-
+import { createColumnHelper } from '@tanstack/react-table'
+import {
+  ServiceDependencyFragment,
+  ServiceDeploymentStatus,
+} from 'generated/graphql'
+import { capitalize } from 'lodash'
+import { isNonNullable } from 'utils/isNonNullable'
 import { useServiceContext } from './ServiceDetails'
 
-export default function ServiceDependencies() {
+const columnHelper = createColumnHelper<ServiceDependencyFragment>()
+
+export function ServiceDependencies() {
   const { service } = useServiceContext()
 
+  if (isEmpty(service.dependencies))
+    return <EmptyState message="No dependencies found." />
+
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Dependencies"
-    >
-      {isEmpty(service.dependencies) ? (
-        <EmptyState message="No dependencies" />
-      ) : (
-        <Table
-          fullHeightWrap
-          data={service?.dependencies || []}
-          columns={columns}
-        />
-      )}
-    </ScrollablePage>
+    <Table
+      fullHeightWrap
+      data={service?.dependencies?.filter(isNonNullable) ?? []}
+      columns={columns}
+    />
   )
 }
+
+const columns = [
+  columnHelper.accessor('name', {
+    id: 'name',
+    header: 'Name',
+  }),
+  columnHelper.accessor('status', {
+    id: 'status',
+    header: 'Status',
+    cell: ({ getValue }) => (
+      <Chip
+        size="large"
+        severity={
+          getValue() === ServiceDeploymentStatus.Healthy ? 'success' : 'warning'
+        }
+      >
+        {capitalize(getValue() ?? '')}
+      </Chip>
+    ),
+  }),
+]
