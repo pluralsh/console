@@ -5800,9 +5800,9 @@ func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) RunAndReturn(run fu
 	return _c
 }
 
-// IsProjectExists provides a mock function with given fields: ctx, name
-func (_m *ConsoleClientMock) IsProjectExists(ctx context.Context, name string) (bool, error) {
-	ret := _m.Called(ctx, name)
+// IsProjectExists provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) IsProjectExists(ctx context.Context, id *string, name *string) (bool, error) {
+	ret := _m.Called(ctx, id, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for IsProjectExists")
@@ -5810,17 +5810,17 @@ func (_m *ConsoleClientMock) IsProjectExists(ctx context.Context, name string) (
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
-		return rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (bool, error)); ok {
+		return rf(ctx, id, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) bool); ok {
+		r0 = rf(ctx, id, name)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5835,14 +5835,15 @@ type ConsoleClientMock_IsProjectExists_Call struct {
 
 // IsProjectExists is a helper method to define mock.On call
 //   - ctx context.Context
-//   - name string
-func (_e *ConsoleClientMock_Expecter) IsProjectExists(ctx interface{}, name interface{}) *ConsoleClientMock_IsProjectExists_Call {
-	return &ConsoleClientMock_IsProjectExists_Call{Call: _e.mock.On("IsProjectExists", ctx, name)}
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) IsProjectExists(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_IsProjectExists_Call {
+	return &ConsoleClientMock_IsProjectExists_Call{Call: _e.mock.On("IsProjectExists", ctx, id, name)}
 }
 
-func (_c *ConsoleClientMock_IsProjectExists_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_IsProjectExists_Call {
+func (_c *ConsoleClientMock_IsProjectExists_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_IsProjectExists_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
 	})
 	return _c
 }
@@ -5852,7 +5853,7 @@ func (_c *ConsoleClientMock_IsProjectExists_Call) Return(_a0 bool, _a1 error) *C
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsProjectExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsProjectExists_Call {
+func (_c *ConsoleClientMock_IsProjectExists_Call) RunAndReturn(run func(context.Context, *string, *string) (bool, error)) *ConsoleClientMock_IsProjectExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
