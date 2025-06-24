@@ -9012,6 +9012,14 @@ enum NotificationStatus {
   RESOLVED
 }
 
+enum PersonaRole {
+  PLATFORM
+  DEVELOPER
+  SECURITY
+  FINOPS
+  MANAGEMENT
+}
+
 enum ReadType {
   NOTIFICATION
   BUILD
@@ -9081,6 +9089,9 @@ input PersonaAttributes {
 
   configuration: PersonaConfigurationAttributes
 
+  "the role of this persona, controls the behavior of the homepage"
+  role: PersonaRole
+
   bindings: [BindingAttributes]
 }
 
@@ -9096,6 +9107,9 @@ input PersonaConfigurationAttributes {
 
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebarAttributes
+
+  "enable individual parts of the services views"
+  services: PersonaServicesAttributes
 }
 
 input PersonaDeploymentAttributes {
@@ -9115,11 +9129,18 @@ input PersonaSidebarAttributes {
   settings: Boolean
   backups: Boolean
   stacks: Boolean
+  security: Boolean
+  cost: Boolean
 }
 
 input PersonaHomeAttributes {
   manager: Boolean
   security: Boolean
+}
+
+input PersonaServicesAttributes {
+  secrets: Boolean
+  configuration: Boolean
 }
 
 input BootstrapTokenAttributes {
@@ -9279,6 +9300,9 @@ type Persona {
   "longform description of this persona"
   description: String
 
+  "the role of this persona"
+  role: PersonaRole
+
   "the ui configuration for this persona (additive across personas)"
   configuration: PersonaConfiguration
 
@@ -9302,6 +9326,9 @@ type PersonaConfiguration {
 
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebar
+
+  "enable individual parts of the services views"
+  services: PersonaServices
 }
 
 type PersonaDeployment {
@@ -9321,11 +9348,18 @@ type PersonaSidebar {
   settings: Boolean
   backups: Boolean
   stacks: Boolean
+  security: Boolean
+  cost: Boolean
 }
 
 type PersonaHome {
   manager: Boolean
   security: Boolean
+}
+
+type PersonaServices {
+  secrets: Boolean
+  configuration: Boolean
 }
 
 "A restricted token meant only for use in registering clusters, esp for edge devices"

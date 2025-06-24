@@ -5016,6 +5016,8 @@ export type Persona = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name for this persona */
   name: Scalars['String']['output'];
+  /** the role of this persona */
+  role?: Maybe<PersonaRole>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -5025,6 +5027,8 @@ export type PersonaAttributes = {
   /** longform description of this persona */
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** the role of this persona, controls the behavior of the homepage */
+  role?: InputMaybe<PersonaRole>;
 };
 
 export type PersonaConfiguration = {
@@ -5035,6 +5039,8 @@ export type PersonaConfiguration = {
   deployments?: Maybe<PersonaDeployment>;
   /** settings for the home page for this persona */
   home?: Maybe<PersonaHome>;
+  /** enable individual parts of the services views */
+  services?: Maybe<PersonaServices>;
   /** enable individual aspects of the sidebar */
   sidebar?: Maybe<PersonaSidebar>;
 };
@@ -5046,6 +5052,8 @@ export type PersonaConfigurationAttributes = {
   deployments?: InputMaybe<PersonaDeploymentAttributes>;
   /** configuration for the homepage for the given persona */
   home?: InputMaybe<PersonaHomeAttributes>;
+  /** enable individual parts of the services views */
+  services?: InputMaybe<PersonaServicesAttributes>;
   /** enable individual aspects of the sidebar */
   sidebar?: InputMaybe<PersonaSidebarAttributes>;
 };
@@ -5094,12 +5102,33 @@ export type PersonaHomeAttributes = {
   security?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export enum PersonaRole {
+  Developer = 'DEVELOPER',
+  Finops = 'FINOPS',
+  Management = 'MANAGEMENT',
+  Platform = 'PLATFORM',
+  Security = 'SECURITY'
+}
+
+export type PersonaServices = {
+  __typename?: 'PersonaServices';
+  configuration?: Maybe<Scalars['Boolean']['output']>;
+  secrets?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaServicesAttributes = {
+  configuration?: InputMaybe<Scalars['Boolean']['input']>;
+  secrets?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type PersonaSidebar = {
   __typename?: 'PersonaSidebar';
   audits?: Maybe<Scalars['Boolean']['output']>;
   backups?: Maybe<Scalars['Boolean']['output']>;
+  cost?: Maybe<Scalars['Boolean']['output']>;
   kubernetes?: Maybe<Scalars['Boolean']['output']>;
   pullRequests?: Maybe<Scalars['Boolean']['output']>;
+  security?: Maybe<Scalars['Boolean']['output']>;
   settings?: Maybe<Scalars['Boolean']['output']>;
   stacks?: Maybe<Scalars['Boolean']['output']>;
 };
@@ -5107,8 +5136,10 @@ export type PersonaSidebar = {
 export type PersonaSidebarAttributes = {
   audits?: InputMaybe<Scalars['Boolean']['input']>;
   backups?: InputMaybe<Scalars['Boolean']['input']>;
+  cost?: InputMaybe<Scalars['Boolean']['input']>;
   kubernetes?: InputMaybe<Scalars['Boolean']['input']>;
   pullRequests?: InputMaybe<Scalars['Boolean']['input']>;
+  security?: InputMaybe<Scalars['Boolean']['input']>;
   settings?: InputMaybe<Scalars['Boolean']['input']>;
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
 };
