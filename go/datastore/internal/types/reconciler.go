@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/go/datastore/internal/client/mysql"
+
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
@@ -21,6 +23,7 @@ const (
 	PostgresCredentialsReconciler        Reconciler = "postgresCredentials"
 	PostgresUserReconciler               Reconciler = "postgresUser"
 	PostgresDatabaseReconciler           Reconciler = "postgresDatabase"
+	MySqlCredentialsReconciler           Reconciler = "mysqlCredentials"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -31,6 +34,7 @@ var validReconcilers = map[string]Reconciler{
 	"PostgresCredentialsReconciler":        PostgresCredentialsReconciler,
 	"PostgresUserReconciler":               PostgresUserReconciler,
 	"PostgresDatabaseReconciler":           PostgresDatabaseReconciler,
+	"MySqlCredentialsReconciler":           MySqlCredentialsReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager) Controller
@@ -85,6 +89,13 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			PostgresClient: postgres.New(),
 		}
 	},
+	MySqlCredentialsReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.MySqlCredentialsReconciler{
+			Client:      mgr.GetClient(),
+			Scheme:      mgr.GetScheme(),
+			MySqlClient: mysql.New(),
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -119,6 +130,7 @@ func Reconcilers() ReconcilerList {
 		PostgresCredentialsReconciler,
 		PostgresUserReconciler,
 		PostgresDatabaseReconciler,
+		MySqlCredentialsReconciler,
 	}
 }
 
