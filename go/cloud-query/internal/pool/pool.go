@@ -2,8 +2,6 @@ package pool
 
 import (
 	"fmt"
-	"strings"
-	"text/template"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -54,79 +52,46 @@ func (c *ConnectionPool) cleanupRoutine() {
 	}
 }
 
-func (c *ConnectionPool) setup(user, password, schema, provider string) error {
-	tmpl, err := template.New("setup").Parse(`
+func (c *ConnectionPool) setup(connection, provider string) error {
+	_, err := c.admin.Exec(`
 		-- Create the schema
-		DROP SCHEMA IF EXISTS "{{ .Schema }}" CASCADE;
-		CREATE SCHEMA "{{ .Schema }}";
-		COMMENT ON SCHEMA "{{ .Schema }}" IS 'steampipe aws fdw';
-		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA "{{ .Schema }}";
+		DROP SCHEMA IF EXISTS "$2" CASCADE;
+		CREATE SCHEMA "$2";
+		COMMENT ON SCHEMA "$2" IS 'steampipe aws fdw';
+		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA "$2";
 		
 		-- Create the user
-		CREATE USER "{{ .User }}" WITH PASSWORD '{{ .Password }}';
-		ALTER USER "{{ .User }}" WITH NOSUPERUSER;
-		ALTER USER "{{ .User }}" SET SEARCH_PATH = "{{ .Schema }}";
+		CREATE USER "$2" WITH PASSWORD '$2';
+		ALTER USER "$2" WITH NOSUPERUSER;
+		ALTER USER "$2" SET SEARCH_PATH = "$2";
 		
 		-- Allow connecting to the database
-		REVOKE CONNECT ON DATABASE "{{ .Database }}" FROM PUBLIC;
-		GRANT  CONNECT ON DATABASE "{{ .Database }}" TO "{{ .User }}";
+		REVOKE CONNECT ON DATABASE "$1" FROM PUBLIC;
+		GRANT  CONNECT ON DATABASE "$1" TO "$2";
 		
 		-- Allow using the schema
-		REVOKE ALL ON SCHEMA "{{ .Schema }}" FROM PUBLIC;
-		GRANT  ALL ON SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+		REVOKE ALL ON SCHEMA "$2" FROM PUBLIC;
+		GRANT  ALL ON SCHEMA "$2" TO "$2";
 		
 		-- Allow accessing tables
-		REVOKE ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" FROM PUBLIC;
-		GRANT  ALL ON ALL TABLES IN SCHEMA "{{ .Schema }}" TO "{{ .User }}";
+		REVOKE ALL ON ALL TABLES IN SCHEMA "$2" FROM PUBLIC;
+		GRANT  ALL ON ALL TABLES IN SCHEMA "$2" TO "$2";
 		
 		-- Grant usage on foreign data wrapper and servers
-		GRANT USAGE ON FOREIGN DATA WRAPPER steampipe_postgres_{{ .Provider }} TO "{{ .User }}";
-`)
-	// failed to connect to provider 'aws': failed to configure provider aws: pq: type "ltree" does not exist
-	if err != nil {
-		return fmt.Errorf("error parsing template: %w", err)
-	}
-
-	out := new(strings.Builder)
-	if err = tmpl.Execute(out, map[string]string{
-		"User":     user,
-		"Password": password,
-		"Schema":   schema,
-		"Database": args.DatabaseName(),
-		"Provider": provider,
-	}); err != nil {
-		return fmt.Errorf("error executing template: %w", err)
-	}
-
-	_, err = c.admin.Exec(out.String())
+		GRANT USAGE ON FOREIGN DATA WRAPPER steampipe_postgres_$3 TO "$2";`, args.DatabaseName(), connection, provider)
 	return err
 }
 
-func (c *ConnectionPool) cleanup(user, schema, connection string) error {
-	tmpl, err := template.New("setup").Parse(`
+func (c *ConnectionPool) cleanup(connection string) error {
+	_, err := c.admin.Exec(`
 		-- Cleanup the connection
-		DROP SERVER IF EXISTS steampipe_{{ .Connection }};
+		DROP SERVER IF EXISTS steampipe_$1;
 
 		-- Cleanup the schema
-		DROP SCHEMA IF EXISTS "{{ .Schema }}" CASCADE;
+		DROP SCHEMA IF EXISTS "$1" CASCADE;
 
 		-- Cleanup the user
-		DROP USER IF EXISTS "{{ .User }}";
-`)
-	if err != nil {
-		return fmt.Errorf("error parsing template: %w", err)
-	}
-
-	out := new(strings.Builder)
-	if err = tmpl.Execute(out, map[string]string{
-		"User":       user,
-		"Schema":     schema,
-		"Connection": connection,
-	}); err != nil {
-		return fmt.Errorf("error executing template: %w", err)
-	}
-
-	_, err = c.admin.Exec(out.String())
+		DROP USER IF EXISTS "$1";`, connection)
 	return err
 }
 
@@ -148,7 +113,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
-		if err = c.setup(connectionName, connectionName, connectionName, string(config.Provider())); err != nil {
+		if err = c.setup(connectionName, string(config.Provider())); err != nil {
 			return nil, fmt.Errorf("failed to create user %s: %w", connectionName, err)
 		}
 
@@ -158,7 +123,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		if err := conn.Configure(config); err != nil {
-			_ = c.cleanup(connectionName, connectionName, connectionName)
+			_ = c.cleanup(connectionName)
 			_ = conn.Close()
 			return nil, err
 		}
@@ -177,7 +142,7 @@ func (c *ConnectionPool) Set(key string, value connection.Connection) {
 }
 
 func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) {
-	_ = c.cleanup(t.Val.uuid, t.Val.uuid, t.Val.uuid)
+	_ = c.cleanup(t.Val.uuid)
 	err := t.Val.connection.Close()
 	if err != nil {
 		klog.ErrorS(err, "failed to close connection", "connection", t.Val.uuid)

@@ -21,7 +21,7 @@ type Connection interface {
 	Configure(config config.Configuration) error
 	Schema(table string) ([]cloudquery.SchemaResult, error)
 	Query(q string) (columns []string, rows [][]any, err error)
-	Exec(q string) (sql.Result, error)
+	Exec(q string, args ...any) (sql.Result, error)
 	Ping() error
 	LoadedModules() ([][]any, error)
 	Close() error

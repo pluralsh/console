@@ -18,10 +18,10 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 		return nil, fmt.Errorf("table name must start with '%s_' prefix", in.provider)
 	}
 
-	qResponse, err := in.db.Query(fmt.Sprintf(`
+	qResponse, err := in.db.Query(`
 		SELECT table_name, column_name, data_type
 		FROM information_schema.columns
-		WHERE table_name LIKE '%s';`, lo.Ternary(lo.IsEmpty(table), prefix+"%", table)))
+		WHERE table_name LIKE '$1';`, lo.Ternary(lo.IsEmpty(table), prefix+"%", table))
 	if err != nil {
 		return nil, err
 	}
