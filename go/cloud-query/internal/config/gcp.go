@@ -17,7 +17,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 		return "", fmt.Errorf("gcp configuration is nil")
 	}
 
-	q := fmt.Sprintf(`
+	return fmt.Sprintf(`
 		DROP SERVER IF EXISTS %[2]s;
 		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
@@ -28,11 +28,7 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 		pq.QuoteIdentifier(connectionName),
 		pq.QuoteIdentifier("steampipe_"+connectionName),
 		lo.FromPtr(c.serviceAccountJSON),
-	)
-
-	fmt.Println(q)
-
-	return q, nil
+	), nil
 }
 
 func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {
