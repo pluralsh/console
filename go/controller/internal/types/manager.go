@@ -20,6 +20,9 @@ type Processor interface {
 
 	// Queue returns a queue.
 	Queue() workqueue.TypedRateLimitingInterface[ctrl.Request]
+
+	// Name returns the name of the processor.
+	Name() string
 }
 
 type Manager struct {
@@ -60,7 +63,7 @@ func (c *Manager) Start(ctx context.Context) {
 				defer wg.Done()
 				// Run a worker thread that just dequeues items, processes them, and marks them done.
 				// It enforces that the reconcileHandler is never invoked concurrently with the same object.
-				for c.processNextWorkItem(ctx) {
+				for c.processNextWorkItem(ctx, i) {
 					time.Sleep(time.Duration(rand.Int63n(int64(c.DeQueueJitter))))
 				}
 			}()
@@ -73,7 +76,7 @@ func (c *Manager) Start(ctx context.Context) {
 
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the reconcileHandler.
-func (c *Manager) processNextWorkItem(ctx context.Context) bool {
+func (c *Manager) processNextWorkItem(ctx context.Context, idx int) bool {
 	id, shutdown := c.Do.Queue().Get()
 	if shutdown {
 		// Stop working
@@ -87,16 +90,16 @@ func (c *Manager) processNextWorkItem(ctx context.Context) bool {
 	// put back on the workqueue and attempted again after a back-off
 	// period.
 	defer c.Do.Queue().Done(id)
-	c.reconcileHandler(ctx, id)
+	c.reconcileHandler(ctx, id, idx)
 	return true
 }
 
-func (c *Manager) reconcileHandler(ctx context.Context, req ctrl.Request) {
+func (c *Manager) reconcileHandler(ctx context.Context, req ctrl.Request, idx int) {
 	log := logf.FromContext(ctx)
 
 	// RunInformersAndControllers the syncHandler, passing it the Namespace/Name string of the
 	// resource to be synced.
-	log.V(5).Info("Reconciling")
+	log.V(4).Info("Reconciling", "controller", c.Do.Name(), "req", req, "worker_number", idx)
 	result, err := c.reconcile(ctx, req)
 	switch {
 	case err != nil:

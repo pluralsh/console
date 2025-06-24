@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/yaml"
 
 	console "github.com/pluralsh/console/go/client"
-
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
@@ -49,7 +48,6 @@ type ServiceReconciler struct {
 	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
-	Name             string
 	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
@@ -61,6 +59,10 @@ func (r *ServiceReconciler) IsSharded() bool {
 // Queue implements the types.Processor interface.
 func (r *ServiceReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
 	return r.ServiceQueue
+}
+
+func (r *ServiceReconciler) Name() string {
+	return "ServiceReconciler"
 }
 
 // Reconcile is part of the main kubernetes reconciliation loop.
@@ -79,7 +81,6 @@ func (r *ServiceReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl
 func (r *ServiceReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
-	logger.Info("reconciling service deployment", "namespacedName", req.NamespacedName, "reconciler", r.Name)
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
