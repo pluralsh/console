@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/samber/lo"
 )
 
@@ -11,19 +12,27 @@ type GCPConfiguration struct {
 	serviceAccountJSON *string
 }
 
-func (c *GCPConfiguration) Query(connectionName string) (string, []string, error) {
+func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 	if c == nil {
-		return "", nil, fmt.Errorf("gcp configuration is nil")
+		return "", fmt.Errorf("gcp configuration is nil")
 	}
 
-	return `
-		DROP SERVER IF EXISTS steampipe_$1;
-		CREATE SERVER steampipe_$1 FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
+	q := fmt.Sprintf(`
+		DROP SERVER IF EXISTS %[2]s;
+		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
-				credentials=$2
+				credentials=%[3]q
 		');
-		IMPORT FOREIGN SCHEMA "$1" FROM SERVER steampipe_$1 INTO "$1";
-    `, []string{connectionName, lo.FromPtr(c.serviceAccountJSON)}, nil
+		IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
+	`,
+		pq.QuoteIdentifier(connectionName),
+		pq.QuoteIdentifier("steampipe_"+connectionName),
+		lo.FromPtr(c.serviceAccountJSON),
+	)
+
+	fmt.Println(q)
+
+	return q, nil
 }
 
 func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {

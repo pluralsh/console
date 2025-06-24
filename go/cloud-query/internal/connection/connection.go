@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/samber/lo"
+	"k8s.io/klog/v2"
+
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
-	"github.com/samber/lo"
-	"k8s.io/klog/v2"
 )
 
 const driverName = "postgres"
@@ -34,12 +35,12 @@ type connection struct {
 }
 
 func (in *connection) Configure(config config.Configuration) error {
-	q, a, err := config.Query(in.name)
+	q, err := config.Query(in.name)
 	if err != nil {
 		return fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
 	}
 
-	_, err = in.db.Exec(q, a)
+	_, err = in.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}

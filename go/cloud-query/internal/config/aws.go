@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/samber/lo"
 )
 
@@ -12,20 +13,25 @@ type AWSConfiguration struct {
 	secretAccessKey *string
 }
 
-func (c *AWSConfiguration) Query(connectionName string) (string, []string, error) {
+func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 	if c == nil {
-		return "", nil, fmt.Errorf("aws configuration is nil")
+		return "", fmt.Errorf("aws configuration is nil")
 	}
 
-	return `
-		DROP SERVER IF EXISTS steampipe_$1;
-		CREATE SERVER steampipe_$1 FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
+	return fmt.Sprintf(`
+		DROP SERVER IF EXISTS %[2]s;
+		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
 			config '
-				access_key="$2"
-				secret_key="$3"
+				access_key=%[3]s
+				secret_key=%[4]s
 		');
-		IMPORT FOREIGN SCHEMA "$1" FROM SERVER steampipe_$1 INTO "$1";
-    `, []string{connectionName, lo.FromPtr(c.accessKeyId), lo.FromPtr(c.secretAccessKey)}, nil
+		IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
+	`,
+		pq.QuoteIdentifier(connectionName),
+		pq.QuoteIdentifier("steampipe_"+connectionName),
+		pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId)),
+		pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey)),
+	), nil
 }
 
 func (c *AWSConfiguration) MarshalJSON() ([]byte, error) {

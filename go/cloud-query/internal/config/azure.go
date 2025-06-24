@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/samber/lo"
 )
 
@@ -14,28 +15,29 @@ type AzureConfiguration struct {
 	clientSecret   *string
 }
 
-func (c *AzureConfiguration) Query(connectionName string) (string, []string, error) {
+func (c *AzureConfiguration) Query(connectionName string) (string, error) {
 	if c == nil {
-		return "", nil, fmt.Errorf("azure configuration is nil")
+		return "", fmt.Errorf("azure configuration is nil")
 	}
 
-	return `
-		DROP SERVER IF EXISTS steampipe_$1;
-		CREATE SERVER steampipe_$1 FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
+	return fmt.Sprintf(`
+		DROP SERVER IF EXISTS %[2]s;
+		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
 			config '
-				subscription_id="$2"
-				tenant_id="$3"
-				client_id="$4"
-				client_secret="$5"
+				subscription_id=%[3]s
+				tenant_id=%[4]s
+				client_id=%[5]s
+				client_secret=%[6]s
 		');
-		IMPORT FOREIGN SCHEMA "$1" FROM SERVER steampipe_$1 INTO "$1";`, []string{
-			connectionName,
-			lo.FromPtr(c.subscriptionId),
-			lo.FromPtr(c.tenantId),
-			lo.FromPtr(c.clientId),
-			lo.FromPtr(c.clientSecret),
-		}, nil
-
+		IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
+	`,
+		pq.QuoteIdentifier(connectionName),
+		pq.QuoteIdentifier("steampipe_"+connectionName),
+		pq.QuoteIdentifier(lo.FromPtr(c.subscriptionId)),
+		pq.QuoteIdentifier(lo.FromPtr(c.tenantId)),
+		pq.QuoteIdentifier(lo.FromPtr(c.clientId)),
+		pq.QuoteIdentifier(lo.FromPtr(c.clientSecret)),
+	), nil
 }
 
 func (c *AzureConfiguration) MarshalJSON() ([]byte, error) {

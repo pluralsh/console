@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/lib/pq"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"k8s.io/klog/v2"
 
@@ -53,32 +54,35 @@ func (c *ConnectionPool) cleanupRoutine() {
 }
 
 func (c *ConnectionPool) setup(connection, provider string) error {
-	_, err := c.admin.Exec(`
+	query := fmt.Sprintf(`
 		-- Create the schema
-		DROP SCHEMA IF EXISTS "$2" CASCADE;
-		CREATE SCHEMA "$2";
-		COMMENT ON SCHEMA "$2" IS 'steampipe aws fdw';
-		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA "$2";
-		
+		DROP SCHEMA IF EXISTS %[1]s CASCADE;
+		CREATE SCHEMA %[1]s;
+		COMMENT ON SCHEMA %[1]s IS 'steampipe aws fdw';
+		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA %[1]s;
+
 		-- Create the user
-		CREATE USER "$2" WITH PASSWORD '$2';
-		ALTER USER "$2" WITH NOSUPERUSER;
-		ALTER USER "$2" SET SEARCH_PATH = "$2";
-		
+		CREATE USER %[1]s WITH PASSWORD %[2]s;
+		ALTER USER %[1]s WITH NOSUPERUSER;
+		ALTER USER %[1]s SET SEARCH_PATH = %[1]s;
+
 		-- Allow connecting to the database
-		REVOKE CONNECT ON DATABASE "$1" FROM PUBLIC;
-		GRANT  CONNECT ON DATABASE "$1" TO "$2";
-		
+		REVOKE CONNECT ON DATABASE %[4]s FROM PUBLIC;
+		GRANT  CONNECT ON DATABASE %[4]s TO %[1]s;
+
 		-- Allow using the schema
-		REVOKE ALL ON SCHEMA "$2" FROM PUBLIC;
-		GRANT  ALL ON SCHEMA "$2" TO "$2";
-		
+		REVOKE ALL ON SCHEMA %[1]s FROM PUBLIC;
+		GRANT  ALL ON SCHEMA %[1]s TO %[1]s;
+
 		-- Allow accessing tables
-		REVOKE ALL ON ALL TABLES IN SCHEMA "$2" FROM PUBLIC;
-		GRANT  ALL ON ALL TABLES IN SCHEMA "$2" TO "$2";
-		
+		REVOKE ALL ON ALL TABLES IN SCHEMA %[1]s FROM PUBLIC;
+		GRANT  ALL ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
+
 		-- Grant usage on foreign data wrapper and servers
-		GRANT USAGE ON FOREIGN DATA WRAPPER steampipe_postgres_$3 TO "$2";`, args.DatabaseName(), connection, provider)
+		GRANT USAGE ON FOREIGN DATA WRAPPER %[3]s TO %[1]s;
+	`, pq.QuoteIdentifier(connection), pq.QuoteLiteral(connection), pq.QuoteIdentifier("steampipe_postgres_"+provider), pq.QuoteIdentifier(args.DatabaseName()))
+
+	_, err := c.admin.Exec(query)
 	return err
 }
 
