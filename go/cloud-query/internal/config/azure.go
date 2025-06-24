@@ -3,14 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"text/template"
 
 	"github.com/samber/lo"
-	"k8s.io/klog/v2"
-
-	"github.com/pluralsh/console/go/cloud-query/cmd/args"
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 type AzureConfiguration struct {
@@ -20,41 +14,28 @@ type AzureConfiguration struct {
 	clientSecret   *string
 }
 
-func (c *AzureConfiguration) Query(connectionName string) (string, error) {
+func (c *AzureConfiguration) Query(connectionName string) (string, []string, error) {
 	if c == nil {
-		return "", fmt.Errorf("azure configuration is nil")
+		return "", nil, fmt.Errorf("azure configuration is nil")
 	}
 
-	tmpl, err := template.New("connection").Parse(`
-		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
-		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
+	return `
+		DROP SERVER IF EXISTS steampipe_$1;
+		CREATE SERVER steampipe_$1 FOREIGN DATA WRAPPER steampipe_postgres_azure OPTIONS (
 			config '
-				subscription_id="{{ .SubscriptionId }}"
-				tenant_id="{{ .TenantId }}"
-				client_id="{{ .ClientId }}"
-				client_secret="{{ .ClientSecret }}"
+				subscription_id="$2"
+				tenant_id="$3"
+				client_id="$4"
+				client_secret="$5"
 		');
-		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
-    `)
-	if err != nil {
-		return "", fmt.Errorf("error parsing template: %w", err)
-	}
+		IMPORT FOREIGN SCHEMA "$1" FROM SERVER steampipe_$1 INTO "$1";`, []string{
+			connectionName,
+			lo.FromPtr(c.subscriptionId),
+			lo.FromPtr(c.tenantId),
+			lo.FromPtr(c.clientId),
+			lo.FromPtr(c.clientSecret),
+		}, nil
 
-	out := new(strings.Builder)
-	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":   args.DatabaseName(),
-		"ConnectionName": connectionName,
-		"SubscriptionId": lo.FromPtr(c.subscriptionId),
-		"TenantId":       lo.FromPtr(c.tenantId),
-		"ClientId":       lo.FromPtr(c.clientId),
-		"ClientSecret":   lo.FromPtr(c.clientSecret),
-	})
-	if err != nil {
-		return "", fmt.Errorf("error executing template: %w", err)
-	}
-
-	klog.V(log.LogLevelDebug).InfoS("generated AWS query", "query", out.String())
-	return out.String(), nil
 }
 
 func (c *AzureConfiguration) MarshalJSON() ([]byte, error) {

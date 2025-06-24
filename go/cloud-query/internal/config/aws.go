@@ -3,14 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"text/template"
 
 	"github.com/samber/lo"
-	"k8s.io/klog/v2"
-
-	"github.com/pluralsh/console/go/cloud-query/cmd/args"
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 type AWSConfiguration struct {
@@ -18,37 +12,20 @@ type AWSConfiguration struct {
 	secretAccessKey *string
 }
 
-func (c *AWSConfiguration) Query(connectionName string) (string, error) {
+func (c *AWSConfiguration) Query(connectionName string) (string, []string, error) {
 	if c == nil {
-		return "", fmt.Errorf("aws configuration is nil")
+		return "", nil, fmt.Errorf("aws configuration is nil")
 	}
 
-	tmpl, err := template.New("connection").Parse(`
-		DROP SERVER IF EXISTS steampipe_{{ .ConnectionName }};
-		CREATE SERVER steampipe_{{ .ConnectionName }} FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
+	return `
+		DROP SERVER IF EXISTS steampipe_$1;
+		CREATE SERVER steampipe_$1 FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
 			config '
-				access_key="{{ .AccessKey }}"
-				secret_key="{{ .SecretKey }}"
+				access_key="$2"
+				secret_key="$3"
 		');
-		IMPORT FOREIGN SCHEMA "{{ .ConnectionName }}" FROM SERVER steampipe_{{ .ConnectionName }} INTO "{{ .ConnectionName }}";
-    `)
-	if err != nil {
-		return "", fmt.Errorf("error parsing template: %w", err)
-	}
-
-	out := new(strings.Builder)
-	err = tmpl.Execute(out, map[string]string{
-		"DatabaseName":   args.DatabaseName(),
-		"ConnectionName": connectionName,
-		"AccessKey":      lo.FromPtr(c.accessKeyId),
-		"SecretKey":      lo.FromPtr(c.secretAccessKey),
-	})
-	if err != nil {
-		return "", fmt.Errorf("error executing template: %w", err)
-	}
-
-	klog.V(log.LogLevelDebug).InfoS("generated AWS query", "query", out.String())
-	return out.String(), nil
+		IMPORT FOREIGN SCHEMA "$1" FROM SERVER steampipe_$1 INTO "$1";
+    `, []string{connectionName, lo.FromPtr(c.accessKeyId), lo.FromPtr(c.secretAccessKey)}, nil
 }
 
 func (c *AWSConfiguration) MarshalJSON() ([]byte, error) {

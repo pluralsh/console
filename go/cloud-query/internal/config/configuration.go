@@ -44,25 +44,16 @@ func (c *Configuration) Provider() Provider {
 	return c.provider
 }
 
-func (c *Configuration) Query(connectionName string) (string, error) {
+func (c *Configuration) Query(connectionName string) (string, []string, error) {
 	switch c.provider {
 	case ProviderAWS:
-		if c.aws == nil {
-			return "", fmt.Errorf("configuration not set: %s", c.provider)
-		}
 		return c.aws.Query(connectionName)
 	case ProviderAzure:
-		if c.azure == nil {
-			return "", fmt.Errorf("configuration not set: %s", c.provider)
-		}
 		return c.azure.Query(connectionName)
 	case ProviderGCP:
-		if c.gcp == nil {
-			return "", fmt.Errorf("configuration not set: %s", c.provider)
-		}
 		return c.gcp.Query(connectionName)
 	default:
-		return "", fmt.Errorf("unsupported provider: %s", c.provider)
+		return "", nil, fmt.Errorf("unsupported provider: %s", c.provider)
 	}
 }
 

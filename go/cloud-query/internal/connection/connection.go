@@ -34,12 +34,12 @@ type connection struct {
 }
 
 func (in *connection) Configure(config config.Configuration) error {
-	q, err := config.Query(in.name)
+	q, a, err := config.Query(in.name)
 	if err != nil {
 		return fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
 	}
 
-	_, err = in.db.Exec(q)
+	_, err = in.db.Exec(q, a)
 	if err != nil {
 		return fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
 	}
