@@ -181,7 +181,6 @@ export function CreateScmWebhook({
     <>
       <Button
         small
-        floating
         endIcon={<PlusIcon />}
         onClick={() => setOpen(true)}
       >

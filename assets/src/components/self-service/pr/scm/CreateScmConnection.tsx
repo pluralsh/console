@@ -126,7 +126,6 @@ export function CreateScmConnection({
     <>
       <Button
         small
-        floating
         endIcon={<PlusIcon />}
         onClick={() => setOpen(true)}
       >
