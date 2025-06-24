@@ -114,7 +114,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 
 		connectionName := fmt.Sprintf("%x", id)
 		if err = c.setup(connectionName, string(config.Provider())); err != nil {
-			return nil, fmt.Errorf("failed to create user %s: %w", connectionName, err)
+			return nil, fmt.Errorf("setup failed: %w", err)
 		}
 
 		conn, err := connection.NewConnection(connectionName, common.DataSource(args.DatabasePort(), connectionName, connectionName))

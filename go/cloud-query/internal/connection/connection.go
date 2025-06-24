@@ -22,7 +22,6 @@ type Connection interface {
 	Schema(table string) ([]cloudquery.SchemaResult, error)
 	Query(q string) (columns []string, rows [][]any, err error)
 	Exec(q string, args ...any) (sql.Result, error)
-	ExecAll(q map[string][]any) error
 	Ping() error
 	LoadedModules() ([][]any, error)
 	Close() error

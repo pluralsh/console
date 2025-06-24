@@ -17,8 +17,7 @@ const (
 		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_azure;
 
 		DROP EXTENSION IF EXISTS steampipe_postgres_gcp CASCADE;
-		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_gcp;
-`
+		CREATE EXTENSION IF NOT EXISTS steampipe_postgres_gcp;`
 )
 
 var (
