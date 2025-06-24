@@ -1,28 +1,43 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
-import { useFlowQuery } from 'generated/graphql'
+import {
+  ServiceDeploymentDetailsFragment,
+  ServiceDeploymentStatus,
+  useFlowQuery,
+} from 'generated/graphql'
 import { useMemo } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
   FLOW_SERVICE_PATH_MATCHER_ABS,
+  SERVICE_SETTINGS_CONTEXTS_REL_PATH,
+  SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
   SERVICE_SETTINGS_GIT_REL_PATH,
   SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
+  SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
 } from 'routes/cdRoutesConsts'
+import FractionalChip from 'components/utils/FractionalChip'
+import isEmpty from 'lodash/isEmpty'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from '../ServiceDetails'
 
 const getDirectory = ({
-  gitEnabled,
-  helmEnabled,
+  service,
 }: {
-  gitEnabled: boolean
-  helmEnabled: boolean
+  service: ServiceDeploymentDetailsFragment
 }): SubtabDirectory => {
+  const gitEnabled = !!service.repository
+  const helmEnabled = !!service.helm?.chart || !!service.helm?.values
+  const healthyDependencies =
+    service.dependencies?.filter(
+      (dep) => dep?.status === ServiceDeploymentStatus.Healthy
+    ).length ?? 0
+  const totalDependencies = service.dependencies?.length ?? 0
+
   return [
     { path: SERVICE_SETTINGS_GIT_REL_PATH, label: 'Git', enabled: gitEnabled },
     {
@@ -32,6 +47,26 @@ const getDirectory = ({
     },
     { path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' },
     { path: SERVICE_SETTINGS_REVISIONS_REL_PATH, label: 'Revisions' },
+    {
+      path: SERVICE_SETTINGS_CONTEXTS_REL_PATH,
+      label: 'Contexts',
+      enabled: !isEmpty(service.contexts),
+    },
+    {
+      path: SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
+      label: 'Stack imports',
+      enabled: !isEmpty(service.imports),
+    },
+    {
+      path: SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
+      label: (
+        <FractionalChip
+          label="Dependencies"
+          fraction={`${healthyDependencies}/${totalDependencies}`}
+        />
+      ),
+      enabled: !isEmpty(service.dependencies),
+    },
   ]
 }
 
@@ -66,12 +101,10 @@ export function ServiceSettings() {
     skip: !flowId,
   })
 
-  const directory = useMemo(() => {
-    const hasGitRepo = !!ctx.service.repository
-    const hasHelmRepo = !!ctx.service.helm?.chart || !!ctx.service.helm?.values
-
-    return getDirectory({ gitEnabled: hasGitRepo, helmEnabled: hasHelmRepo })
-  }, [ctx.service])
+  const directory = useMemo(
+    () => getDirectory({ service: ctx.service }),
+    [ctx.service]
+  )
 
   const breadcrumbs = useMemo(
     () =>

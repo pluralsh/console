@@ -1,5 +1,4 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import isEmpty from 'lodash/isEmpty'
 import { memo, useMemo, useState } from 'react'
 import {
   Outlet,
@@ -46,15 +45,13 @@ import {
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
 
-import FractionalChip from 'components/utils/FractionalChip'
-
 import { ServiceSelector } from '../ServiceSelector'
 
+import { ApolloQueryResult } from '@apollo/client'
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
-import { ApolloQueryResult } from '@apollo/client'
 
 type ServiceContextType = {
   service: ServiceDeploymentDetailsFragment
@@ -126,22 +123,15 @@ export const getDirectory = ({
   serviceDeployment,
   logsEnabled = false,
   metricsEnabled = false,
-  meshEnabled = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   logsEnabled?: boolean | undefined
   metricsEnabled?: boolean | undefined
-  meshEnabled?: boolean | undefined
 }): Directory => {
   if (!serviceDeployment) {
     return []
   }
   const { componentStatus, dryRun, status } = serviceDeployment
-
-  const healthyDependencies =
-    serviceDeployment.dependencies?.filter((dep) => dep?.status === 'HEALTHY')
-      .length || 0
-  const totalDependencies = serviceDeployment.dependencies?.length || 0
   return [
     {
       path: SERVICE_COMPONENTS_PATH,
@@ -198,26 +188,12 @@ export const getDirectory = ({
     {
       path: 'network',
       label: 'Network',
-      enabled: meshEnabled && metricsEnabled,
+      enabled:
+        metricsEnabled &&
+        !!serviceDeployment?.cluster?.operationalLayout?.serviceMesh,
     },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
-    // {
-    //   path: 'docs',
-    //   label: name ? `${capitalize(name)} docs` : 'Docs',
-    //   enabled: !isEmpty(docs),
-    //   ...(docs ? { subpaths: docs } : {}),
-    // },
-    {
-      path: 'dependencies',
-      label: (
-        <FractionalChip
-          label="Dependencies"
-          fraction={`${healthyDependencies}/${totalDependencies}`}
-        />
-      ),
-      enabled: !isEmpty(serviceDeployment.dependencies),
-    },
     { path: 'settings', label: 'Settings', enabled: true },
   ]
 }
@@ -242,7 +218,7 @@ function ServiceDetailsBase() {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  const { serviceDeployment } = serviceData || {}
+  const { serviceDeployment } = serviceData ?? {}
   const clusterId = serviceDeployment?.cluster?.id
 
   const { data: flowData } = useFlowQuery({
@@ -259,22 +235,9 @@ function ServiceDetailsBase() {
   const logsEnabled = useLogsEnabled()
   const metricsEnabled = useMetricsEnabled()
 
-  // const docs = useMemo(
-  //   () => getDocsData(serviceData?.serviceDeployment?.docs),
-  //   [serviceData?.serviceDeployment?.docs]
-  // )
-
-  const meshEnabled =
-    !!serviceDeployment?.cluster?.operationalLayout?.serviceMesh
   const directory = useMemo(
-    () =>
-      getDirectory({
-        serviceDeployment,
-        logsEnabled,
-        metricsEnabled,
-        meshEnabled,
-      }),
-    [logsEnabled, metricsEnabled, serviceDeployment, meshEnabled]
+    () => getDirectory({ serviceDeployment, logsEnabled, metricsEnabled }),
+    [logsEnabled, metricsEnabled, serviceDeployment]
   )
 
   useSetBreadcrumbs(

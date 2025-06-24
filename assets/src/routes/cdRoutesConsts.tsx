@@ -46,6 +46,9 @@ export const SERVICE_SETTINGS_GIT_REL_PATH = 'git' as const
 export const SERVICE_SETTINGS_HELM_REL_PATH = 'helm' as const
 export const SERVICE_SETTINGS_SECRETS_REL_PATH = 'secrets' as const
 export const SERVICE_SETTINGS_REVISIONS_REL_PATH = 'revisions' as const
+export const SERVICE_SETTINGS_DEPENDENCIES_REL_PATH = 'dependencies' as const
+export const SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH = 'stack-imports' as const
+export const SERVICE_SETTINGS_CONTEXTS_REL_PATH = 'contexts' as const
 export const NODE_PARAM_NAME = 'name' as const
 export const NODE_PARAM_CLUSTER = 'clusterId' as const
 

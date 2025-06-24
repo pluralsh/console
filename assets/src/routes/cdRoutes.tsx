@@ -14,11 +14,12 @@ import Repositories from 'components/cd/repos/Repositories'
 import { ServiceComponent } from 'components/cd/services/component/ServiceComponent'
 import { ServiceComponents } from 'components/cd/services/service/ServiceComponents'
 
-import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
+import { ServiceDependencies } from 'components/cd/services/service/ServiceDependencies'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
 import ServiceErrors from 'components/cd/services/service/ServiceErrors'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
+import { ServiceStackImports } from 'components/cd/services/service/ServiceStackImports'
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
 import { ServiceRevisions } from 'components/cd/services/service/ServiceRevisions'
@@ -87,6 +88,7 @@ import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
 import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
+import { ServiceContexts } from 'components/cd/services/service/ServiceContexts.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
@@ -151,6 +153,9 @@ import {
   SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
+  SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
+  SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
+  SERVICE_SETTINGS_CONTEXTS_REL_PATH,
 } from './cdRoutesConsts'
 import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
@@ -548,10 +553,6 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
       path={SERVICE_PRS_PATH}
     />
     <Route
-      element={<ServiceDependencies />}
-      path="dependencies"
-    />
-    <Route
       element={<ServiceLogs />}
       path="logs"
     />
@@ -612,16 +613,19 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
         element={<ServiceRevisions />}
         path={SERVICE_SETTINGS_REVISIONS_REL_PATH}
       />
-    </Route>
-    {/* <Route
-      element={<ServiceDocs />}
-      path="docs"
-    >
       <Route
-        path=":docName"
-        element={<ServiceDocs />}
+        element={<ServiceDependencies />}
+        path={SERVICE_SETTINGS_DEPENDENCIES_REL_PATH}
       />
-    </Route> */}
+      <Route
+        element={<ServiceStackImports />}
+        path={SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH}
+      />
+      <Route
+        element={<ServiceContexts />}
+        path={SERVICE_SETTINGS_CONTEXTS_REL_PATH}
+      />
+    </Route>
   </Route>
 )
 

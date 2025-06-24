@@ -92,9 +92,11 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   components {
     ...ServiceDeploymentComponent
   }
+  contexts {
+    ...ServiceContext
+  }
   dependencies {
-    name
-    status
+    ...ServiceDependency
   }
   repository {
     pulledAt
@@ -104,10 +106,7 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   }
   imports {
     stack {
-      id
-      name
-      status
-      deletedAt
+      ...StackMinimal
     }
   }
   parent {
@@ -250,6 +249,29 @@ fragment ServiceDeploymentsConnection on ServiceDeploymentConnection {
       ...ServiceDeploymentsRow
     }
   }
+}
+
+fragment ServiceContext on ServiceContext {
+  id
+  configuration
+  name
+  project {
+    id
+    name
+  }
+  secrets {
+    name
+    value
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment ServiceDependency on ServiceDependency {
+  id
+  name
+  status
+  updatedAt
 }
 
 query ServiceDeployments(
