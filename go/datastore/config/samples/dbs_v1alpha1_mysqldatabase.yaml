@@ -1,0 +1,12 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: MySqlDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: mysqldatabase
+    app.kubernetes.io/instance: mysqldatabase-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: mysqldatabase-sample
+spec:
+  # TODO(user): Add fields here
