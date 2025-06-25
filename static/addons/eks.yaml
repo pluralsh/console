@@ -2280,6 +2280,7 @@
   versions:
   - version: v1.6.0-eksbuild.1
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
