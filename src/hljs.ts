@@ -19,6 +19,7 @@ import css from 'highlight.js/lib/languages/css'
 import d from 'highlight.js/lib/languages/d'
 import dart from 'highlight.js/lib/languages/dart'
 import django from 'highlight.js/lib/languages/django'
+import diff from 'highlight.js/lib/languages/diff'
 import dns from 'highlight.js/lib/languages/dns'
 import dockerfile from 'highlight.js/lib/languages/dockerfile'
 import elixir from 'highlight.js/lib/languages/elixir'
@@ -183,6 +184,7 @@ hljs.registerLanguage('css', css)
 hljs.registerLanguage('d', d)
 hljs.registerLanguage('dart', dart)
 hljs.registerLanguage('django', django)
+hljs.registerLanguage('diff', diff)
 hljs.registerLanguage('dns', dns)
 hljs.registerLanguage('dockerfile', dockerfile)
 hljs.registerLanguage('elixir', elixir)
