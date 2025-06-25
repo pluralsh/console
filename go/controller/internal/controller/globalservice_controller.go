@@ -64,11 +64,11 @@ func (r *GlobalServiceReconciler) Name() internaltypes.Reconciler {
 	return internaltypes.GlobalServiceReconciler
 }
 
-// Reconcile is part of the main kubernetes reconciliation loop.
-//
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/finalizers,verbs=update
+
+// Reconcile is part of the main kubernetes reconciliation loop.
 func (r *GlobalServiceReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.GlobalServiceQueue.Add(req)
 	return ctrl.Result{}, nil
