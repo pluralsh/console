@@ -166,7 +166,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -232,7 +232,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -313,7 +313,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -347,7 +347,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -357,7 +357,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			// It should cause no errors, just requeue.
 			fakeConsoleClient.On("IsServiceDeleting", mock.Anything).Return(true).Once()
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -368,7 +368,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("IsServiceDeleting", mock.Anything).Return(false).Once()
 			fakeConsoleClient.On("IsServiceExisting", mock.Anything).Return(false, nil).Once()
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -477,7 +477,7 @@ var _ = Describe("Wait for resources", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			resp, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())

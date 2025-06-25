@@ -258,7 +258,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pipelineNamespacedName})
+			_, err := controllerReconciler.Process(ctx, reconcile.Request{NamespacedName: pipelineNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 
 			pipeline := &v1alpha1.Pipeline{}
@@ -308,7 +308,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pipelineNamespacedName})
+			_, err := controllerReconciler.Process(ctx, reconcile.Request{NamespacedName: pipelineNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 
 			pipeline := &v1alpha1.Pipeline{}
@@ -352,7 +352,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: invalidRefPipelineNamespacedName})
+			result, err := controllerReconciler.Process(ctx, reconcile.Request{NamespacedName: invalidRefPipelineNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.RequeueAfter).NotTo(BeZero())
 			Expect(err).NotTo(HaveOccurred())
