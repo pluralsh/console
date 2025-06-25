@@ -13,7 +13,8 @@ import (
 
 // register all controllers with the controller manager.
 func init() {
-	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.BootstrapTokenReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
@@ -22,7 +23,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.CatalogReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.CatalogReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.CatalogReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
@@ -31,7 +33,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.CloudConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.CloudConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.CloudConnectionReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
@@ -40,7 +43,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ClusterReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ClusterReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ClusterReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -50,7 +54,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ClusterRestoreReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ClusterRestoreReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ClusterRestoreReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -59,7 +64,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ClusterRestoreTriggerReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ClusterRestoreTriggerReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ClusterRestoreTriggerReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -68,7 +75,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ClusterSyncReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ClusterSyncReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ClusterSyncReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -76,7 +84,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ComplianceReportGeneratorReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ComplianceReportGeneratorReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ComplianceReportGeneratorReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -86,7 +96,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.CustomStackRunReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.CustomStackRunReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.CustomStackRunReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -95,7 +106,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.DeploymentSettingsReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.DeploymentSettingsReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.DeploymentSettingsReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -105,7 +118,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.FlowReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.FlowReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.FlowReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -116,14 +130,16 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.GeneratedSecretReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.GeneratedSecretReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.GeneratedSecretReconciler{
 			Client: mgr.GetClient(),
 			Scheme: mgr.GetScheme(),
 		}
 	})
 
-	types.RegisterController(types.GitRepositoryReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.GitRepositoryReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.GitRepositoryReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -131,7 +147,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.GlobalServiceReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.GlobalServiceReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.GlobalServiceReconciler{
 			Client:             mgr.GetClient(),
 			ConsoleClient:      consoleClient,
@@ -141,7 +158,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.HelmRepositoryReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.HelmRepositoryReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.HelmRepositoryReconciler{
 			Client:             mgr.GetClient(),
 			ConsoleClient:      consoleClient,
@@ -152,7 +170,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ManagedNamespaceReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ManagedNamespaceReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ManagedNamespaceReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -161,7 +181,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.MCPServerReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.MCPServerReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.MCPServerReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -171,7 +192,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.NamespaceCredentialsReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.NamespaceCredentialsReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.NamespaceCredentialsReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -180,7 +203,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.NotificationRouterReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.NotificationRouterReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.NotificationRouterReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -189,7 +214,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.NotificationSinkReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.NotificationSinkReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.NotificationSinkReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -199,7 +226,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ObservabilityProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ObservabilityProviderReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ObservabilityProviderReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -208,7 +237,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ObserverReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ObserverReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ObserverReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -221,7 +251,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.OIDCProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.OIDCProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.OIDCProviderReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -230,7 +261,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.PipelineContextReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.PipelineContextReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PipelineContextReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -239,7 +271,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.PipelineReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.PipelineReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PipelineReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -250,7 +283,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.PrAutomationReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.PrAutomationReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PrAutomationReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
@@ -259,7 +293,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.PrAutomationTriggerReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.PrAutomationTriggerReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PrAutomationTriggerReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -268,7 +304,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.PreviewEnvironmentTemplateReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.PreviewEnvironmentTemplateReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PreviewEnvironmentTemplateReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -276,7 +314,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ProjectReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ProjectReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ProjectReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
@@ -285,7 +324,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ProviderReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -293,7 +333,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ScmConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ScmConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ScmConnectionReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -301,7 +342,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ServiceAccountReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ServiceAccountReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ServiceAccountReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -309,7 +351,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ServiceContextReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ServiceContextReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ServiceContextReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -317,7 +360,9 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ServiceDeploymentReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.ServiceDeploymentReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ServiceReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -328,7 +373,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.StackDefinitionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.StackDefinitionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.StackDefinitionReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
@@ -337,7 +383,8 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.StackReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.StackReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.InfrastructureStackReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,

@@ -27,11 +27,15 @@ const (
 var (
 	defaultReconcilers types.ReconcilerList
 
-	argConsoleUrl             = flag.String("console-url", utils.GetEnv("CONSOLE_URL", ""), "The url of the console api to fetch services from")
-	argConsoleToken           = flag.String("console-token", utils.GetEnv("CONSOLE_TOKEN", ""), "The console token to auth to console api with. Can also be set via CONSOLE_TOKEN environment variable.")
-	argMetricsBindAddress     = flag.String("metrics-bind-address", defaultMetricsAddr, "The address the metric endpoint binds to.")
-	argHealthProbeBindAddress = flag.String("health-probe-bind-address", defaultHealthProbeAddr, "The address the probe endpoint binds to.")
-	argLeaderElect            = flag.Bool("leader-elect", false,
+	argConsoleUrl = flag.String("console-url", utils.GetEnv("CONSOLE_URL", ""),
+		"The url of the console api to fetch services from")
+	argConsoleToken = flag.String("console-token", utils.GetEnv("CONSOLE_TOKEN", ""),
+		"The console token to auth to console api with. Can also be set via CONSOLE_TOKEN environment variable.")
+	argMetricsBindAddress = flag.String("metrics-bind-address", defaultMetricsAddr,
+		"The address the metric endpoint binds to.")
+	argHealthProbeBindAddress = flag.String("health-probe-bind-address", defaultHealthProbeAddr,
+		"The address the probe endpoint binds to.")
+	argLeaderElect = flag.Bool("leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	argReconcilers = flag.String(
@@ -39,8 +43,9 @@ var (
 		strings.Join(algorithms.Map(defaultReconcilers, func(r types.Reconciler) string { return string(r) }), ","),
 		fmt.Sprintf("Comma delimited list of reconciler names. Available reconcilers: %s", defaultReconcilers),
 	)
-	argWipeCacheInterval = flag.Duration("wipe-cache-interval", defaultWipeCacheInterval, "Interval at which the cache is wiped.")
-	argVersion           = flag.Bool("version", false, "Print version information and exit.")
+	argWipeCacheInterval = flag.Duration("wipe-cache-interval", defaultWipeCacheInterval,
+		"Interval at which the cache is wiped.")
+	argVersion = flag.Bool("version", false, "Print version information and exit.")
 
 	shardedReconcilersWorkerConfigMap = createShardedReconcilerWorkersFlags(types.ShardedReconcilers())
 	// Register zap-log-level flag as a fallback for klog v flag to be backward compatible.
