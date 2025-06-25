@@ -59,31 +59,28 @@ type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient
 	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller
 
 var controllerFactories = map[Reconciler]ControllerFactory{
-	GitRepositoryReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.GitRepositoryReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme()}
-	},
-	HelmRepositoryReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.HelmRepositoryReconciler{
-			Client:             mgr.GetClient(),
-			ConsoleClient:      consoleClient,
-			Scheme:             mgr.GetScheme(),
-			UserGroupCache:     userGroupCache,
-			CredentialsCache:   credentialsCache,
-			HelmRepositoryAuth: &controller.HelmRepositoryAuth{Client: mgr.GetClient(), Scheme: mgr.GetScheme()},
+	BootstrapTokenReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.BootstrapTokenReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}
 	},
-	ServiceDeploymentReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ServiceReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			UserGroupCache:   userGroupCache,
-			CredentialsCache: credentialsCache,
-			ServiceQueue:     workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+	CatalogReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.CatalogReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}
+	},
+	CloudConnectionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.CloudConnectionReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}
 	},
 	ClusterReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -104,68 +101,6 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			CredentialsCache: credentialsCache,
 		}
 	},
-	PipelineReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.PipelineReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
-			UserGroupCache:   userGroupCache,
-			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
-		}
-	},
-	ProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ProviderReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
-		}
-	},
-	GlobalServiceReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.GlobalServiceReconciler{
-			Client:             mgr.GetClient(),
-			ConsoleClient:      consoleClient,
-			Scheme:             mgr.GetScheme(),
-			CredentialsCache:   credentialsCache,
-			GlobalServiceQueue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
-		}
-	},
-	ScmConnectionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ScmConnectionReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
-		}
-	},
-	ServiceAccountReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ServiceAccountReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
-		}
-	},
-	PrAutomationReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.PrAutomationReconciler{
-			Client:         mgr.GetClient(),
-			ConsoleClient:  consoleClient,
-			Scheme:         mgr.GetScheme(),
-			UserGroupCache: userGroupCache,
-		}
-	},
-	PipelineContextReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.PipelineContextReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
-		}
-	},
 	ClusterRestoreTriggerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
 		return &controller.ClusterRestoreTriggerReconciler{
@@ -175,66 +110,20 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			CredentialsCache: credentialsCache,
 		}
 	},
-	PrAutomationTriggerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.PrAutomationTriggerReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
+	ClusterSyncReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ClusterSyncReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
 		}
 	},
-	NotificationSinkReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.NotificationSinkReconciler{
+	ComplianceReportGeneratorReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ComplianceReportGeneratorReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
-			UserGroupCache:   userGroupCache,
-		}
-	},
-	NotificationRouterReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.NotificationRouterReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
-		}
-	},
-	ManagedNamespaceReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ManagedNamespaceReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
-		}
-	},
-	StackReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.InfrastructureStackReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
 			UserGroupCache:   userGroupCache,
-			CredentialsCache: credentialsCache,
-			StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
-		}
-	},
-	StackDefinitionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.StackDefinitionReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
-		}
-	},
-	OIDCProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.OIDCProviderReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
 		}
 	},
 	CustomStackRunReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -254,12 +143,65 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			UserGroupCache:   userGroupCache,
 		}
 	},
-	ProjectReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ProjectReconciler{
-			Client:         mgr.GetClient(),
-			ConsoleClient:  consoleClient,
-			Scheme:         mgr.GetScheme(),
-			UserGroupCache: userGroupCache,
+	FlowReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.FlowReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			CredentialsCache: credentialsCache,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			FlowQueue:        workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+		}
+	},
+	GeneratedSecretReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.GeneratedSecretReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+	},
+	GitRepositoryReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.GitRepositoryReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme()}
+	},
+	GlobalServiceReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.GlobalServiceReconciler{
+			Client:             mgr.GetClient(),
+			ConsoleClient:      consoleClient,
+			Scheme:             mgr.GetScheme(),
+			CredentialsCache:   credentialsCache,
+			GlobalServiceQueue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+		}
+	},
+	HelmRepositoryReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.HelmRepositoryReconciler{
+			Client:             mgr.GetClient(),
+			ConsoleClient:      consoleClient,
+			Scheme:             mgr.GetScheme(),
+			UserGroupCache:     userGroupCache,
+			CredentialsCache:   credentialsCache,
+			HelmRepositoryAuth: &controller.HelmRepositoryAuth{Client: mgr.GetClient(), Scheme: mgr.GetScheme()},
+		}
+	},
+	ManagedNamespaceReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ManagedNamespaceReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	},
+	MCPServerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.MCPServerReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			CredentialsCache: credentialsCache,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
 		}
 	},
 	NamespaceCredentialsReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -268,6 +210,24 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
+		}
+	},
+	NotificationRouterReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.NotificationRouterReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	},
+	NotificationSinkReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.NotificationSinkReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+			UserGroupCache:   userGroupCache,
 		}
 	},
 	ObservabilityProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -290,54 +250,49 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			},
 		}
 	},
-	CatalogReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.CatalogReconciler{
+	OIDCProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.OIDCProviderReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	},
+	PipelineContextReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PipelineContextReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	},
+	PipelineReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PipelineReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+			UserGroupCache:   userGroupCache,
+			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+		}
+	},
+	PrAutomationReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PrAutomationReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
 			Scheme:         mgr.GetScheme(),
 			UserGroupCache: userGroupCache,
 		}
 	},
-	GeneratedSecretReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.GeneratedSecretReconciler{
-			Client: mgr.GetClient(),
-			Scheme: mgr.GetScheme(),
-		}
-	},
-	BootstrapTokenReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.BootstrapTokenReconciler{
-			Client:         mgr.GetClient(),
-			ConsoleClient:  consoleClient,
-			Scheme:         mgr.GetScheme(),
-			UserGroupCache: userGroupCache,
-		}
-	},
-	FlowReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.FlowReconciler{
+	PrAutomationTriggerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PrAutomationTriggerReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
-			CredentialsCache: credentialsCache,
 			Scheme:           mgr.GetScheme(),
-			UserGroupCache:   userGroupCache,
-			FlowQueue:        workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
-		}
-	},
-	MCPServerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.MCPServerReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
 			CredentialsCache: credentialsCache,
-			Scheme:           mgr.GetScheme(),
-			UserGroupCache:   userGroupCache,
-		}
-	},
-	ComplianceReportGeneratorReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ComplianceReportGeneratorReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			CredentialsCache: credentialsCache,
-			Scheme:           mgr.GetScheme(),
-			UserGroupCache:   userGroupCache,
 		}
 	},
 	PreviewEnvironmentTemplateReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -347,8 +302,33 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:        mgr.GetScheme(),
 		}
 	},
-	ClusterSyncReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.ClusterSyncReconciler{
+	ProjectReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ProjectReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}
+	},
+	ProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ProviderReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	},
+	ScmConnectionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ScmConnectionReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	},
+	ServiceAccountReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ServiceAccountReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
@@ -361,12 +341,32 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:        mgr.GetScheme(),
 		}
 	},
-	CloudConnectionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
-		return &controller.CloudConnectionReconciler{
-			Client:         mgr.GetClient(),
-			ConsoleClient:  consoleClient,
-			Scheme:         mgr.GetScheme(),
-			UserGroupCache: userGroupCache,
+	ServiceDeploymentReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.ServiceReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			CredentialsCache: credentialsCache,
+			ServiceQueue:     workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+		}
+	},
+	StackDefinitionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.StackDefinitionReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	},
+	StackReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.InfrastructureStackReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			CredentialsCache: credentialsCache,
+			StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 }
