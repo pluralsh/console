@@ -7,8 +7,8 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   DEFAULT_SCM_ATTRIBUTES,
   sanitizeScmAttributes,
-} from 'components/pr/scm/CreateScmConnection'
-import { ScmConnectionForm } from 'components/pr/scm/EditScmConnection'
+} from 'components/self-service/pr/scm/CreateScmConnection'
+import { ScmConnectionForm } from 'components/self-service/pr/scm/EditScmConnection'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body1P } from 'components/utils/typography/Text'
 import {

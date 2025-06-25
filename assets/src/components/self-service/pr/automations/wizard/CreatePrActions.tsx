@@ -7,7 +7,7 @@ import {
 import { Link } from 'react-router-dom'
 
 import { ComponentPropsWithoutRef } from 'react'
-import { PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+import { PR_OUTSTANDING_ABS_PATH } from 'routes/selfServiceRoutesConsts'
 import { PrStepKey } from '../CreatePrModal'
 import { PullRequestFragment } from 'generated/graphql'
 
@@ -62,7 +62,7 @@ function CreatePrActionsInner({
               secondary
               type="button"
               as={Link}
-              to={PR_QUEUE_ABS_PATH}
+              to={PR_OUTSTANDING_ABS_PATH}
             >
               View all PRs
             </Button>

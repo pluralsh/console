@@ -12,21 +12,19 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { ModalMountTransition } from '../../utils/ModalMountTransition'
-import {
-  SetupRenovateMutationVariables,
-  useGitRepositoriesQuery,
-  useScmConnectionsQuery,
-  useSetupRenovateMutation,
-} from '../../../generated/graphql'
-import { extendConnection } from '../../../utils/graphql'
-import { GqlError } from '../../utils/Alert'
-import { useUpdateState } from '../../hooks/useUpdateState'
-
-import { RegExpGroups } from '../../../types/regex'
-
-import { PR_QUERY_PAGE_SIZE } from './PrScmConnections'
+import { PR_QUERY_PAGE_SIZE } from './PrScmManagement.tsx'
 import { scmTypeToIcon } from './PrScmConnectionsColumns'
+import { useUpdateState } from 'components/hooks/useUpdateState.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition.tsx'
+import {
+  useScmConnectionsQuery,
+  useGitRepositoriesQuery,
+  useSetupRenovateMutation,
+  SetupRenovateMutationVariables,
+} from 'generated/graphql.ts'
+import { RegExpGroups } from 'types/regex.ts'
+import { extendConnection } from 'utils/graphql.ts'
 
 const REPOSITORY_EXTRACT_REGEX =
   /(?<userOrOrg>[^/:]+)\/(?<repository>[^/]+)?\.git$/

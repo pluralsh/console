@@ -13,9 +13,12 @@ import RoleFormBindings from 'components/settings/usermanagement/roles/RoleFormB
 import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
 import { GqlError } from 'components/utils/Alert'
 
-import { StepBody } from '../../cd/ModalAlt'
+import { StepBody } from 'components/cd/ModalAlt'
 
-import { Overline, PermissionsColumnSC } from '../../cd/utils/PermissionsModal'
+import {
+  Overline,
+  PermissionsColumnSC,
+} from 'components/cd/utils/PermissionsModal'
 
 export function PrAutomationPermissionsModal({
   prAutomation,

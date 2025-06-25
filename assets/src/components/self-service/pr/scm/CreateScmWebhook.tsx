@@ -5,6 +5,7 @@ import {
   FormField,
   Input2,
   Modal,
+  PlusIcon,
 } from '@pluralsh/design-system'
 import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -179,7 +180,8 @@ export function CreateScmWebhook({
   return (
     <>
       <Button
-        primary
+        small
+        endIcon={<PlusIcon />}
         onClick={() => setOpen(true)}
       >
         Create webhook

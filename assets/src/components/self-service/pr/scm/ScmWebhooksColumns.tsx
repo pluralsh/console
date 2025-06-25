@@ -26,7 +26,6 @@ import { useState } from 'react'
 import { Confirm } from 'components/utils/Confirm'
 
 import { ScmTypeCell, scmTypeToLabel } from './PrScmConnectionsColumns'
-import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 
 export const columnHelper = createColumnHelper<Edge<ScmWebhookFragment>>()
 
@@ -112,7 +111,7 @@ function DeleteScmWebhookModal({
     variables: { id: scmWebhook.id },
     update: (cache, { data }) =>
       updateCache(cache, {
-        variables: SCM_WEBHOOKS_Q_VARS,
+        variables: { first: 100 },
         query: ScmWebhooksDocument,
         update: (prev) =>
           removeConnection(prev, data?.deleteScmWebhook, 'scmWebhooks'),

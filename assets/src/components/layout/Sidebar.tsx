@@ -17,7 +17,6 @@ import {
   Menu,
   MenuItem,
   PersonIcon,
-  PrOpenIcon,
   ScrollIcon,
   SidebarExpandButton,
   SidebarExpandWrapper,
@@ -44,7 +43,6 @@ import styled, { useTheme } from 'styled-components'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { PersonaConfigurationFragment } from 'generated/graphql'
-import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { SECURITY_ABS_PATH } from 'routes/securityRoutesConsts'
 
@@ -64,10 +62,10 @@ import {
 import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
-import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { SELF_SERVICE_ABS_PATH } from 'routes/selfServiceRoutesConsts.tsx'
+import { GITHUB_LINK } from 'utils/constants.ts'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
-import { GITHUB_LINK } from 'utils/constants.ts'
 
 type MenuItem = {
   text: string
@@ -125,11 +123,11 @@ function getMenuItems({
       hotkeys: ['shift F'],
     },
     {
-      text: 'Service catalog',
-      expandedLabel: 'Service catalog',
+      text: 'Self service',
+      expandedLabel: 'Self service',
       icon: <CatalogIcon />,
-      path: CATALOGS_ABS_PATH,
-      hotkeys: ['shift S+C'],
+      path: SELF_SERVICE_ABS_PATH,
+      hotkeys: ['shift P'],
     },
     {
       text: 'Kubernetes',
@@ -157,17 +155,6 @@ function getMenuItems({
           },
         ]
       : []),
-    {
-      text: 'PRs',
-      expandedLabel: 'Pull requests',
-      icon: <PrOpenIcon />,
-      path: PR_DEFAULT_ABS_PATH,
-      pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
-      enabled:
-        isCDEnabled &&
-        !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
-      hotkeys: ['shift P'],
-    },
     {
       text: 'Security',
       expandedLabel: 'Security',

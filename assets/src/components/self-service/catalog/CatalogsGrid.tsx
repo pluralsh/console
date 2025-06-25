@@ -1,11 +1,11 @@
 import { CatalogCard } from '@pluralsh/design-system'
-import { CatalogFragment } from '../../generated/graphql.ts'
+import { CatalogFragment } from 'generated/graphql'
 import { CSSProperties, useTheme } from 'styled-components'
-import { getCatalogAbsPath } from '../../routes/catalogRoutesConsts.tsx'
+import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useNavigate } from 'react-router-dom'
 import { ReactNode, useCallback } from 'react'
 import { isEmpty } from 'lodash'
-import { iconUrl } from '../../utils/icon.ts'
+import { iconUrl } from 'utils/icon'
 
 const fetchMargin = 50
 
@@ -67,7 +67,6 @@ export function CardGrid({ onBottomReached, styles, children }: CardGridProps) {
         display: 'grid',
         gap: theme.spacing.medium,
         gridTemplateColumns: 'repeat(auto-fill, minmax(256px, 1fr))',
-        flexGrow: 1,
         overflowY: 'auto',
         paddingBottom: theme.spacing.large,
         paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
