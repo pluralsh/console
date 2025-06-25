@@ -43,7 +43,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = klog.NewKlogr().WithName("setup")
+	setupLog = klog.NewKlogr()
 
 	// version is managed by GoReleaser, see: https://goreleaser.com/cookbooks/using-main.version/
 	version = "dev"
@@ -59,6 +59,7 @@ func init() {
 func main() {
 	args.Init()
 	ctrl.SetLogger(setupLog)
+	ctx := ctrl.LoggerInto(ctrl.SetupSignalHandler(), setupLog)
 
 	if args.Version() {
 		versionInfo()
@@ -67,6 +68,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
+		Logger:                 setupLog,
 		Metrics:                metricsserver.Options{BindAddress: args.MetricsBindAddress()},
 		HealthProbeBindAddress: args.HealthProbeBindAddress(),
 		LeaderElection:         args.EnableLeaderElection(),
@@ -109,12 +111,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	runOrDie(controllers, shardedControllers, mgr)
+	runOrDie(ctx, controllers, shardedControllers, mgr)
 }
 
-func runOrDie(controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
-	ctx := ctrl.SetupSignalHandler()
-
+func runOrDie(ctx context.Context, controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
 	for _, c := range controllers {
 		if err := c.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controller")
