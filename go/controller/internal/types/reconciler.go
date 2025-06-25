@@ -149,6 +149,7 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
 			UserGroupCache:   userGroupCache,
+			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 	ProviderReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
@@ -162,10 +163,11 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 	GlobalServiceReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
 		return &controller.GlobalServiceReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			CredentialsCache: credentialsCache,
+			Client:             mgr.GetClient(),
+			ConsoleClient:      consoleClient,
+			Scheme:             mgr.GetScheme(),
+			CredentialsCache:   credentialsCache,
+			GlobalServiceQueue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 	ScmConnectionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
@@ -254,6 +256,7 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Scheme:           mgr.GetScheme(),
 			UserGroupCache:   userGroupCache,
 			CredentialsCache: credentialsCache,
+			StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 	StackDefinitionReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
@@ -354,6 +357,7 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			CredentialsCache: credentialsCache,
 			Scheme:           mgr.GetScheme(),
 			UserGroupCache:   userGroupCache,
+			FlowQueue:        workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
 		}
 	},
 	MCPServerReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {

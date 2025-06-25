@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -36,18 +37,35 @@ type FlowReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
 	UserGroupCache   cache.UserGroupCache
+	FlowQueue        workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=flows,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/finalizers,verbs=update
+// IsSharded implements the types.Sharded interface.
+func (r *FlowReconciler) IsSharded() bool {
+	return true
+}
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
+// Queue implements the types.Processor interface.
+func (r *FlowReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.FlowQueue
+}
+
+func (r *FlowReconciler) Name() string {
+	return "FlowReconciler"
+}
+
+// Reconcile is part of the main kubernetes reconciliation loop.
 //
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *FlowReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/finalizers,verbs=update
+func (r *FlowReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.FlowQueue.Add(req)
+	return ctrl.Result{}, nil
+}
+
+// Process implements the types.Processor interface.
+func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	flow := &v1alpha1.Flow{}

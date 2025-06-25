@@ -24,6 +24,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -47,21 +48,38 @@ const (
 // GlobalServiceReconciler reconciles a GlobalService object
 type GlobalServiceReconciler struct {
 	client.Client
-	ConsoleClient    consoleclient.ConsoleClient
-	Scheme           *runtime.Scheme
-	CredentialsCache credentials.NamespaceCredentialsCache
+	ConsoleClient      consoleclient.ConsoleClient
+	Scheme             *runtime.Scheme
+	CredentialsCache   credentials.NamespaceCredentialsCache
+	GlobalServiceQueue workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/finalizers,verbs=update
+// IsSharded implements the types.Sharded interface.
+func (r *GlobalServiceReconciler) IsSharded() bool {
+	return true
+}
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the global service closer to the desired state.
+// Queue implements the types.Processor interface.
+func (r *GlobalServiceReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.GlobalServiceQueue
+}
+
+func (r *GlobalServiceReconciler) Name() string {
+	return "GlobalServiceReconciler"
+}
+
+// Reconcile is part of the main kubernetes reconciliation loop.
 //
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/finalizers,verbs=update
+func (r *GlobalServiceReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.GlobalServiceQueue.Add(req)
+	return ctrl.Result{}, nil
+}
+
+// Process implements the types.Processor interface.
+func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	globalService := &v1alpha1.GlobalService{}
 	if err := r.Get(ctx, req.NamespacedName, globalService); err != nil {
