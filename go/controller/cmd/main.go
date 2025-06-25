@@ -57,7 +57,6 @@ func init() {
 }
 
 func main() {
-	registerControllers()
 	args.Init()
 	ctrl.SetLogger(setupLog)
 	ctx := ctrl.LoggerInto(ctrl.SetupSignalHandler(), setupLog)

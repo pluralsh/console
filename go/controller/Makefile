@@ -40,7 +40,7 @@ update-dependencies: ## update dependencies
 
 .PHONY: build
 build: manifests generate fmt vet ## build manager binary
-	go build -o bin/manager cmd/main.go
+	go build -o bin/manager cmd/*.go
 
 .PHONY: run
 run: manifests generate fmt vet ## run a controller from your host

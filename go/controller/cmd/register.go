@@ -12,7 +12,7 @@ import (
 )
 
 // register all controllers with the controller manager.
-func registerControllers() {
+func init() {
 	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.BootstrapTokenReconciler{
