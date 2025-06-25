@@ -209,7 +209,7 @@ func runOrDie(controllers []types.Controller, shardedControllers []types.Process
 
 	setupLog.Info("starting sharded controllers")
 	for _, c := range shardedControllers {
-		m := types.NewManager("", 10, c)
+		m := types.NewManager("", 15, c)
 		go m.Start(ctx)
 	}
 

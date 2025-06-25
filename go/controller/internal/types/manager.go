@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/samber/lo"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -35,6 +36,10 @@ type Manager struct {
 
 	// mu is used to synchronize Controller setup
 	mu sync.Mutex
+
+	// inProgress is a map of currently in-progress reconciles.
+	// It is used to ensure that the same object is not being processed concurrently.
+	inProgress cmap.ConcurrentMap[string, struct{}]
 
 	// MaxConcurrentReconciles is the maximum number of concurrent Reconciles which can be run. Defaults to 1.
 	MaxConcurrentReconciles int
@@ -74,6 +79,11 @@ func (c *Manager) Start(ctx context.Context) {
 	wg.Wait()
 }
 
+func (c *Manager) isInProgress(req ctrl.Request) bool {
+	_, exists := c.inProgress.Get(req.String())
+	return exists
+}
+
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the reconcileHandler.
 func (c *Manager) processNextWorkItem(ctx context.Context, idx int) bool {
@@ -90,6 +100,18 @@ func (c *Manager) processNextWorkItem(ctx context.Context, idx int) bool {
 	// put back on the workqueue and attempted again after a back-off
 	// period.
 	defer c.Do.Queue().Done(id)
+
+	c.mu.Lock()
+	if c.isInProgress(id) {
+		c.Do.Queue().Forget(id)
+		c.Do.Queue().AddAfter(id, 5*time.Second)
+		c.mu.Unlock()
+		return true
+	}
+	c.inProgress.Set(id.String(), struct{}{})
+	c.mu.Unlock()
+	defer c.inProgress.Remove(id.String())
+
 	c.reconcileHandler(ctx, id, idx)
 	return true
 }
@@ -148,7 +170,7 @@ func NewManager(name string, maxConcurrentReconciles int, processor Processor) M
 	return Manager{
 		MaxConcurrentReconciles: maxConcurrentReconciles,
 		RecoverPanic:            lo.ToPtr(true),
-		DeQueueJitter:           1 * time.Second,
+		DeQueueJitter:           time.Second,
 		Do:                      processor,
 		Name:                    name,
 	}
