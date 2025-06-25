@@ -7,15 +7,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - configmaps
-  verbs:
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - ""
-  resources:
   - secrets
   verbs:
   - create
@@ -36,12 +27,9 @@ rules:
   - complianceReportGenerators
   - customstackruns
   - deploymentsettings
-  - flows
   - generatedsecrets
   - gitrepositories
-  - globalservices
   - helmrepositories
-  - infrastructurestacks
   - managednamespaces
   - mcpservers
   - namespacecredentialss
@@ -51,7 +39,6 @@ rules:
   - observers
   - oidcproviders
   - pipelinecontexts
-  - pipelines
   - prautomations
   - prautomationtriggers
   - previewenvironmenttemplates
@@ -60,7 +47,6 @@ rules:
   - scmconnections
   - serviceaccounts
   - servicecontexts
-  - servicedeployments
   - stackdefinitions
   verbs:
   - create
@@ -83,12 +69,9 @@ rules:
   - complianceReportGenerators/finalizers
   - customstackruns/finalizers
   - deploymentsettings/finalizers
-  - flows/finalizers
   - generatedsecrets/finalizers
   - gitrepositories/finalizers
-  - globalservices/finalizers
   - helmrepositories/finalizers
-  - infrastructurestacks/finalizers
   - managednamespaces/finalizers
   - mcpservers/finalizers
   - namespacecredentialss/finalizers
@@ -98,7 +81,6 @@ rules:
   - observers/finalizers
   - oidcproviders/finalizers
   - pipelinecontexts/finalizers
-  - pipelines/finalizers
   - prautomations/finalizers
   - prautomationtriggers/finalizers
   - previewenvironmenttemplates/finalizers
@@ -107,7 +89,6 @@ rules:
   - scmconnections/finalizers
   - serviceaccounts/finalizers
   - servicecontexts/finalizers
-  - servicedeployments/finalizers
   - stackdefinitions/finalizers
   verbs:
   - update
@@ -124,12 +105,9 @@ rules:
   - complianceReportGenerators/status
   - customstackruns/status
   - deploymentsettings/status
-  - flows/status
   - generatedsecrets/status
   - gitrepositories/status
-  - globalservices/status
   - helmrepositories/status
-  - infrastructurestacks/status
   - managednamespaces/status
   - mcpservers/status
   - namespacecredentialss/status
@@ -139,7 +117,6 @@ rules:
   - observers/status
   - oidcproviders/status
   - pipelinecontexts/status
-  - pipelines/status
   - prautomations/status
   - prautomationtriggers/status
   - previewenvironmenttemplates/status
@@ -148,7 +125,6 @@ rules:
   - scmconnections/status
   - serviceaccounts/status
   - servicecontexts/status
-  - servicedeployments/status
   - stackdefinitions/status
   verbs:
   - get
