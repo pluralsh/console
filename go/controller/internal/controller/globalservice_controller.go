@@ -38,6 +38,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/errors"
+	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -54,18 +55,13 @@ type GlobalServiceReconciler struct {
 	GlobalServiceQueue workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
-// IsSharded implements the types.Sharded interface.
-func (r *GlobalServiceReconciler) IsSharded() bool {
-	return true
-}
-
 // Queue implements the types.Processor interface.
 func (r *GlobalServiceReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
 	return r.GlobalServiceQueue
 }
 
-func (r *GlobalServiceReconciler) Name() string {
-	return "GlobalServiceReconciler"
+func (r *GlobalServiceReconciler) Name() internaltypes.Reconciler {
+	return internaltypes.GlobalServiceReconciler
 }
 
 // Reconcile is part of the main kubernetes reconciliation loop.

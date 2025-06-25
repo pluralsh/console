@@ -20,12 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -36,6 +30,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/types"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -55,18 +57,13 @@ type PipelineReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 
-// IsSharded implements the types.Sharded interface.
-func (r *PipelineReconciler) IsSharded() bool {
-	return true
-}
-
 // Queue implements the types.Processor interface.
 func (r *PipelineReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
 	return r.PipelineQueue
 }
 
-func (r *PipelineReconciler) Name() string {
-	return "PipelineReconciler"
+func (r *PipelineReconciler) Name() types.Reconciler {
+	return types.PipelineReconciler
 }
 
 // Reconcile is part of the main kubernetes reconciliation loop.

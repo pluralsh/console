@@ -11,6 +11,7 @@ import (
 	"github.com/samber/lo"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/util/workqueue"
+	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -23,13 +24,10 @@ type Processor interface {
 	Queue() workqueue.TypedRateLimitingInterface[ctrl.Request]
 
 	// Name returns the name of the processor.
-	Name() string
+	Name() Reconciler
 }
 
 type Manager struct {
-	// Name is used to uniquely identify a Controller in tracing, logging and monitoring. Name is required.
-	Name string
-
 	// Reconciler is a function that can be called at any time with the information about object and
 	// ensures that the state of the system matches the state specified in the object.
 	Do Processor
@@ -56,6 +54,7 @@ func (c *Manager) Start(ctx context.Context) {
 	// use an IIFE to get proper lock handling
 	// but lock outside to get proper handling of the queue shutdown
 	c.mu.Lock()
+	klog.InfoS("starting processor manager", "controller", c.Do.Name(), "max_concurrent_reconciles", c.MaxConcurrentReconciles)
 
 	wg := &sync.WaitGroup{}
 	func() {
@@ -121,7 +120,7 @@ func (c *Manager) reconcileHandler(ctx context.Context, req ctrl.Request, idx in
 
 	// RunInformersAndControllers the syncHandler, passing it the Namespace/Name string of the
 	// resource to be synced.
-	log.V(4).Info("Reconciling", "controller", c.Do.Name(), "req", req, "worker_number", idx)
+	log.V(3).Info("Reconciling", "controller", c.Do.Name(), "req", req, "worker_number", idx)
 	result, err := c.reconcile(ctx, req)
 	switch {
 	case err != nil:
@@ -166,12 +165,12 @@ func (c *Manager) reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.
 	return c.Do.Process(ctx, req)
 }
 
-func NewManager(name string, maxConcurrentReconciles int, processor Processor) Manager {
+func NewManager(maxConcurrentReconciles int, processor Processor) Manager {
 	return Manager{
 		MaxConcurrentReconciles: maxConcurrentReconciles,
 		RecoverPanic:            lo.ToPtr(true),
 		DeQueueJitter:           time.Second,
 		Do:                      processor,
-		Name:                    name,
+		inProgress:              cmap.New[struct{}](),
 	}
 }

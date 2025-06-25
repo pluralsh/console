@@ -9,8 +9,3 @@ import (
 type Controller interface {
 	SetupWithManager(manager ctrl.Manager) error
 }
-
-type Sharded interface {
-	// IsSharded returns true if the controller is sharded.
-	IsSharded() bool
-}
