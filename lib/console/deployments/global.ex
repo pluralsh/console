@@ -643,7 +643,7 @@ defmodule Console.Deployments.Global do
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
-    template_fields(attrs, attrs, [
+    template_fields(attrs, [
       ~w(helm version)a,
       ~w(helm chart)a,
       ~w(helm values_files)a,
@@ -653,22 +653,22 @@ defmodule Console.Deployments.Global do
       ~w(git ref)a,
       ~w(git folder)a
     ], cluster, ctx)
-    |> add_sources(attrs, cluster, ctx)
+    |> add_sources(cluster, ctx)
   end
   defp dynamic_template(attrs, _, _), do: attrs
 
-  defp add_sources(attrs, %{sources: [_ | _] = sources}, cluster, ctx) do
+  defp add_sources(%{sources: [_ | _] = sources} = attrs, cluster, ctx) do
     source = Enum.map(sources, fn source ->
       fields = [~w(git ref)a, ~w(git folder)a]
-      template_fields(source, source, fields, cluster, ctx)
+      template_fields(source, fields, cluster, ctx)
     end)
     Map.put(attrs, :sources, source)
   end
-  defp add_sources(attrs, _, _, _), do: attrs
+  defp add_sources(attrs, _, _), do: attrs
 
-  defp template_fields(acc, attrs, fields, cluster, ctx) do
+  defp template_fields(attrs, fields, cluster, ctx) do
     Enum.map(fields, fn keys -> Enum.map(keys, &Access.key/1) end)
-    |> Enum.reduce(acc, fn path, acc ->
+    |> Enum.reduce(attrs, fn path, acc ->
       case get_in(attrs, path) do
         str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
         [%{value: v} | _] = vals when is_binary(v) ->
