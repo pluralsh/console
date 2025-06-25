@@ -26,7 +26,7 @@ defmodule Console.Schema.PrAutomation do
     field :branch,           :string
     field :write_policy_id,  :binary_id
     field :create_policy_id, :binary_id
-
+    field :patch,            :boolean, default: false
     field :icon,      :string
     field :dark_icon, :string
 
@@ -118,7 +118,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id icon dark_icon role identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
+  @valid ~w(name project_id icon dark_icon role patch identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

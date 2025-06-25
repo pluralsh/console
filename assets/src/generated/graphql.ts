@@ -5733,6 +5733,8 @@ export type PrAutomationAttributes = {
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** whether to generate a patch for this pr instead of a full pr */
+  patch?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project this automation lives in */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a git repository to use for create mode prs */
@@ -6131,6 +6133,8 @@ export type PullRequest = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the patch for this pr, if it is a patch.  This is in place of generating a full pr */
+  patch?: Maybe<Scalars['String']['output']>;
   /** the service this pr is meant to modify */
   service?: Maybe<ServiceDeployment>;
   status?: Maybe<PrStatus>;

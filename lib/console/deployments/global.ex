@@ -658,10 +658,11 @@ defmodule Console.Deployments.Global do
   defp dynamic_template(attrs, _, _), do: attrs
 
   defp add_sources(attrs, %{sources: [_ | _] = sources}, cluster, ctx) do
-    Enum.reduce(sources, attrs, fn source, attrs ->
+    source = Enum.map(sources, fn source ->
       fields = [~w(git ref)a, ~w(git folder)a]
-      template_fields(attrs, source, fields, cluster, ctx)
+      template_fields(source, source, fields, cluster, ctx)
     end)
+    Map.put(attrs, :sources, source)
   end
   defp add_sources(attrs, _, _, _), do: attrs
 
