@@ -61,6 +61,18 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/ai-proxy-chart-v0.1.0/ai-proxy-0.1.0.tgz
     version: 0.1.0
+  cloud-query:
+  - apiVersion: v2
+    appVersion: 0.11.21
+    created: "2025-06-26T08:25:48.706199312Z"
+    description: The service part of the Plural Console ecosystem that provides cloud
+      resource querying capabilities.
+    digest: 39d311f66fe00128de319a602a4238bd4cbffc6e738ea22ad9aafa44237cb78a
+    name: cloud-query
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/cloud-query-chart-v0.0.1/cloud-query-0.0.1.tgz
+    version: 0.0.1
   console:
   - apiVersion: v2
     appVersion: 0.11.24
@@ -7381,4 +7393,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-25T01:16:46.476383156Z"
+generated: "2025-06-26T08:25:48.706771654Z"
