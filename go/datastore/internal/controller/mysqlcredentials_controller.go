@@ -2,6 +2,9 @@ package controller
 
 import (
 	"context"
+	"strings"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/client/mysql"
@@ -93,6 +96,49 @@ func (r *MySqlCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.Req
 }
 
 func (r *MySqlCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.MySqlCredentials) (ctrl.Result, error) {
+	if controllerutil.ContainsFinalizer(credentials, MySqlDatabaseProtectionFinalizerName) {
+		dbList := &v1alpha1.MySqlDatabaseList{}
+		if err := r.List(ctx, dbList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		var deletingAny bool
+		for _, db := range dbList.Items {
+			if strings.EqualFold(db.Spec.CredentialsRef.Name, credentials.Name) {
+				deletingAny = true
+				if db.DeletionTimestamp.IsZero() {
+					if err := r.Client.Delete(ctx, &db); err != nil {
+						return ctrl.Result{}, err
+					}
+				}
+			}
+		}
+		if deletingAny {
+			return waitForResources, nil
+		}
+		utils.RemoveFinalizer(credentials, MySqlDatabaseProtectionFinalizerName)
+	}
+
+	if controllerutil.ContainsFinalizer(credentials, MySqlUserProtectionFinalizerName) {
+		userList := &v1alpha1.MySqlUserList{}
+		if err := r.List(ctx, userList, client.InNamespace(credentials.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		var deletingAny bool
+		for _, usr := range userList.Items {
+			if strings.EqualFold(usr.Spec.CredentialsRef.Name, credentials.Name) {
+				deletingAny = true
+				if usr.DeletionTimestamp.IsZero() {
+					if err := r.Client.Delete(ctx, &usr); err != nil {
+						return ctrl.Result{}, err
+					}
+				}
+			}
+		}
+		if deletingAny {
+			return waitForResources, nil
+		}
+		utils.RemoveFinalizer(credentials, MySqlUserProtectionFinalizerName)
+	}
 
 	if err := deleteRefSecret(ctx, r.Client, credentials.Namespace, credentials.Spec.PasswordSecretKeyRef.Name, MySqlSecretProtectionFinalizerName); err != nil {
 		return ctrl.Result{}, err

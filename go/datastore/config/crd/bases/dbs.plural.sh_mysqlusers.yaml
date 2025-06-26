@@ -38,6 +38,55 @@ spec:
             type: object
           spec:
             description: MySqlUserSpec defines the desired state of MySqlUser
+            properties:
+              credentialsRef:
+                description: |-
+                  LocalObjectReference contains enough information to let you locate the
+                  referenced object inside the same namespace.
+                properties:
+                  name:
+                    default: ""
+                    description: |-
+                      Name of the referent.
+                      This field is effectively required, but due to backwards compatibility is
+                      allowed to be empty. Instances of this type with an empty value here are
+                      almost certainly wrong.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              databases:
+                items:
+                  type: string
+                type: array
+              name:
+                type: string
+              passwordSecretKeyRef:
+                description: PasswordSecretKeyRef reference
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    default: ""
+                    description: |-
+                      Name of the referent.
+                      This field is effectively required, but due to backwards compatibility is
+                      allowed to be empty. Instances of this type with an empty value here are
+                      almost certainly wrong.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+                x-kubernetes-map-type: atomic
+            required:
+            - credentialsRef
+            - passwordSecretKeyRef
             type: object
           status:
             properties:

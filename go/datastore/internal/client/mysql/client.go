@@ -99,32 +99,176 @@ func (c *client) Ping() error {
 }
 
 func (c *client) DeleteDatabase(dbName string) error {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
 
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+	// Delete database if it exists
+	query := fmt.Sprintf("DROP DATABASE IF EXISTS `%s`", dbName)
+	_, err = db.ExecContext(c.ctx, query)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to delete database", "dbName", dbName)
+		return err
+	}
 	return nil
 }
 
 func (c *client) UpsertDatabase(dbName string) error {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	// Create database if it doesn't exist
+	query := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", dbName)
+	_, err = db.ExecContext(c.ctx, query)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to create database", "dbName", dbName)
+		return err
+	}
 
 	return nil
 }
 
 func (c *client) DatabaseExists(database string) (bool, error) {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return false, err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+	// Query to check if database exists
+	query := `
+		SELECT EXISTS (
+			SELECT SCHEMA_NAME
+			FROM INFORMATION_SCHEMA.SCHEMATA
+			WHERE SCHEMA_NAME = ?
+		)
+	`
+
 	var exists bool
+	err = db.QueryRowContext(c.ctx, query, database).Scan(&exists)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to check database existence", "database", database)
+		return false, err
+	}
 
 	return exists, nil
 }
 
 func (c *client) UpsertUser(username, password string) error {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	// Create user if not exists
+	createQuery := fmt.Sprintf("CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s'", username, password)
+	_, err = db.ExecContext(c.ctx, createQuery)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to create user", "username", username)
+		return err
+	}
+
+	// Update user password
+	alterQuery := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'", username, password)
+	_, err = db.ExecContext(c.ctx, alterQuery)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to update user password", "username", username)
+		return err
+	}
 
 	return nil
 }
 
 func (c *client) DeleteUser(username string) error {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	// Drop user if exists
+	query := fmt.Sprintf("DROP USER IF EXISTS '%s'@'%%'", username)
+	_, err = db.ExecContext(c.ctx, query)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to delete user", "username", username)
+		return err
+	}
 
 	return nil
 }
 
 func (c *client) SetDatabaseOwner(database, username string) error {
+	db, err := sql.Open("mysql", c.connection)
+	if err != nil {
+		return err
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			ctrl.LoggerFrom(c.ctx).Error(err, "failed to close connection")
+		}
+	}(db)
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	// Grant all privileges on the database to the user
+	query := fmt.Sprintf("GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'%%'", database, username)
+	_, err = db.ExecContext(c.ctx, query)
+	if err != nil {
+		ctrl.LoggerFrom(c.ctx).Error(err, "failed to grant privileges", "database", database, "username", username)
+		return err
+	}
 
 	return nil
 }

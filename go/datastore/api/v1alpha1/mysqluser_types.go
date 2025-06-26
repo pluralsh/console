@@ -1,12 +1,22 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MySqlUserSpec defines the desired state of MySqlUser
 type MySqlUserSpec struct {
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
+
+	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
+
+	Databases []string `json:"databases,omitempty"`
+
+	// PasswordSecretKeyRef reference
+	PasswordSecretKeyRef corev1.SecretKeySelector `json:"passwordSecretKeyRef"`
 }
 
 //+kubebuilder:object:root=true
@@ -33,6 +43,14 @@ type MySqlUserList struct {
 
 func (s *MySqlUser) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
+func (s *MySqlUser) UserName() string {
+	if s.Spec.Name != nil {
+		return *s.Spec.Name
+	}
+
+	return s.Name
 }
 
 func init() {

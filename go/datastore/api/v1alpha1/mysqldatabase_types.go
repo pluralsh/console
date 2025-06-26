@@ -1,12 +1,17 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MySqlDatabaseSpec defines the desired state of MySqlDatabase
 type MySqlDatabaseSpec struct {
+	CredentialsRef corev1.LocalObjectReference `json:"credentialsRef"`
+
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -33,6 +38,14 @@ type MySqlDatabaseList struct {
 
 func (s *MySqlDatabase) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
+func (s *MySqlDatabase) DatabaseName() string {
+	if s.Spec.Name != nil {
+		return *s.Spec.Name
+	}
+
+	return s.Name
 }
 
 func init() {

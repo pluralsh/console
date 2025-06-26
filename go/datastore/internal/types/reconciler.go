@@ -3,11 +3,9 @@ package types
 import (
 	"fmt"
 
-	"github.com/pluralsh/console/go/datastore/internal/client/mysql"
-
-	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
-
 	"github.com/pluralsh/console/go/datastore/internal/client/elasticsearch"
+	"github.com/pluralsh/console/go/datastore/internal/client/mysql"
+	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -24,6 +22,8 @@ const (
 	PostgresUserReconciler               Reconciler = "postgresUser"
 	PostgresDatabaseReconciler           Reconciler = "postgresDatabase"
 	MySqlCredentialsReconciler           Reconciler = "mysqlCredentials"
+	MySqlDatabaseReconciler              Reconciler = "mysqlDatabase"
+	MySqlUserReconciler                  Reconciler = "mysqlUser"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -35,6 +35,8 @@ var validReconcilers = map[string]Reconciler{
 	"PostgresUserReconciler":               PostgresUserReconciler,
 	"PostgresDatabaseReconciler":           PostgresDatabaseReconciler,
 	"MySqlCredentialsReconciler":           MySqlCredentialsReconciler,
+	"MySqlDatabaseReconciler":              MySqlDatabaseReconciler,
+	"MySqlUserReconciler":                  MySqlUserReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager) Controller
@@ -96,6 +98,20 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			MySqlClient: mysql.New(),
 		}
 	},
+	MySqlDatabaseReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.MySqlDatabaseReconciler{
+			Client:      mgr.GetClient(),
+			Scheme:      mgr.GetScheme(),
+			MySqlClient: mysql.New(),
+		}
+	},
+	MySqlUserReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.MySqlUserReconciler{
+			Client:      mgr.GetClient(),
+			Scheme:      mgr.GetScheme(),
+			MySqlClient: mysql.New(),
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -131,6 +147,8 @@ func Reconcilers() ReconcilerList {
 		PostgresUserReconciler,
 		PostgresDatabaseReconciler,
 		MySqlCredentialsReconciler,
+		MySqlDatabaseReconciler,
+		MySqlUserReconciler,
 	}
 }
 
