@@ -13163,6 +13163,13 @@ export type ClusterHeatMapQueryVariables = Exact<{
 
 export type ClusterHeatMapQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null } | null };
 
+export type ClusterNoisyNeighborsQueryVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterNoisyNeighborsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, noisyNeighbors?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null } | null };
+
 export type ServiceHeatMapQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
   flavor: HeatMapFlavor;
@@ -26982,6 +26989,49 @@ export type ClusterHeatMapQueryHookResult = ReturnType<typeof useClusterHeatMapQ
 export type ClusterHeatMapLazyQueryHookResult = ReturnType<typeof useClusterHeatMapLazyQuery>;
 export type ClusterHeatMapSuspenseQueryHookResult = ReturnType<typeof useClusterHeatMapSuspenseQuery>;
 export type ClusterHeatMapQueryResult = Apollo.QueryResult<ClusterHeatMapQuery, ClusterHeatMapQueryVariables>;
+export const ClusterNoisyNeighborsDocument = gql`
+    query ClusterNoisyNeighbors($clusterId: ID!) {
+  cluster(id: $clusterId) {
+    id
+    noisyNeighbors {
+      ...UtilizationHeatMap
+    }
+  }
+}
+    ${UtilizationHeatMapFragmentDoc}`;
+
+/**
+ * __useClusterNoisyNeighborsQuery__
+ *
+ * To run a query within a React component, call `useClusterNoisyNeighborsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterNoisyNeighborsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterNoisyNeighborsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterNoisyNeighborsQuery(baseOptions: Apollo.QueryHookOptions<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>(ClusterNoisyNeighborsDocument, options);
+      }
+export function useClusterNoisyNeighborsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>(ClusterNoisyNeighborsDocument, options);
+        }
+export function useClusterNoisyNeighborsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>(ClusterNoisyNeighborsDocument, options);
+        }
+export type ClusterNoisyNeighborsQueryHookResult = ReturnType<typeof useClusterNoisyNeighborsQuery>;
+export type ClusterNoisyNeighborsLazyQueryHookResult = ReturnType<typeof useClusterNoisyNeighborsLazyQuery>;
+export type ClusterNoisyNeighborsSuspenseQueryHookResult = ReturnType<typeof useClusterNoisyNeighborsSuspenseQuery>;
+export type ClusterNoisyNeighborsQueryResult = Apollo.QueryResult<ClusterNoisyNeighborsQuery, ClusterNoisyNeighborsQueryVariables>;
 export const ServiceHeatMapDocument = gql`
     query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
   serviceDeployment(id: $serviceId) {
@@ -30503,6 +30553,7 @@ export const namedOperations = {
     UnstructuredResource: 'UnstructuredResource',
     LogAggregation: 'LogAggregation',
     ClusterHeatMap: 'ClusterHeatMap',
+    ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
     NotificationRouters: 'NotificationRouters',
     NotificationSinks: 'NotificationSinks',

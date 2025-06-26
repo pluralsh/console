@@ -27,7 +27,7 @@ export function HomeFilterOptionCard<T extends string>({
       <ColorSwatchSC $color={color} />
       <Body1BoldP as="span">{value}</Body1BoldP>
       <Body2P
-        $color={selected ? 'text' : 'text-xlight'}
+        $color="text-xlight"
         css={{ flex: 1 }}
       >
         {name} {nameSuffix}
