@@ -125,6 +125,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :title,         :string
     field :message,       :string
     field :branch,        :string
+    field :patch,         :boolean, description: "whether to generate a patch for this pr instead of a full pr"
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
@@ -586,6 +587,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :title,   :string
     field :creator, :string
     field :labels,  list_of(:string)
+    field :patch,   :string, description: "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
 
     field :flow,    :flow, description: "the flow this pr is meant to modify",
       resolve: dataloader(Deployments)

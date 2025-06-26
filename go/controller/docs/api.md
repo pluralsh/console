@@ -2625,6 +2625,7 @@ _Appears in:_
 | `message` _string_ | Message the commit message this pr will incorporate |  | Optional: {} <br /> |
 | `name` _string_ | Name name of the automation in the console api (defaults to metadata.name) |  | Optional: {} <br /> |
 | `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |
+| `patch` _boolean_ | Patch whether to generate a patch for this pr instead of a full pr |  | Optional: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef a cluster this pr works on |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for generating this PR |  | Required: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the repository this automation uses. |  | Optional: {} <br /> |

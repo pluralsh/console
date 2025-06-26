@@ -1,0 +1,31 @@
+{{ if and .Values.cloud.enabled .Values.cloud.database.enabled }}
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresDatabase
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}
+spec:
+  credentialsRef:
+    name: postgres-{{ .Values.cloud.database.server }}
+  name: {{ .Values.cloud.database.name }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-user-password
+stringData:
+  password: {{ .Values.cloud.database.password | quote }}
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: PostgresUser
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}
+spec:
+  credentialsRef:
+    name: postgres-{{ .Values.cloud.database.server }}
+  name: {{ .Values.cloud.database.user }}
+  databases: 
+  - {{ .Values.cloud.database.name }}
+  passwordSecretKeyRef:
+    name: postgres-user-password
+    key: password
+{{ end }}

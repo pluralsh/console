@@ -11,6 +11,12 @@ cloud:
   enabled: false
   o11y:
     enabled: false
+  database:
+    enabled: false
+    server: ~
+    name: ~
+    password: ~
+    user: ~
   # If set to a truthy value, mounts a volume for the certs
   pgRootCert: ~
   elasticNamespace: elastic

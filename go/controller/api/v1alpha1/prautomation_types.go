@@ -88,6 +88,7 @@ func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositor
 		ConnectionID:  connectionID,
 		RepositoryID:  repositoryID,
 		ProjectID:     projectID,
+		Patch:         in.Spec.Patch,
 		Confirmation:  in.Spec.Confirmation.Attributes(),
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
@@ -158,6 +159,10 @@ type PrAutomationSpec struct {
 	// Title the title of the generated pr
 	// +kubebuilder:validation:Optional
 	Title *string `json:"title,omitempty"`
+
+	// Patch whether to generate a patch for this pr instead of a full pr
+	// +kubebuilder:validation:Optional
+	Patch *bool `json:"patch,omitempty"`
 
 	// ClusterRef a cluster this pr works on
 	// +kubebuilder:validation:Optional

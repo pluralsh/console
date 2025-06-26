@@ -63,7 +63,7 @@ defmodule Console.AI.Memoizer do
   defp persist(%schema{} = model, history, attrs, sha) do
     model
     |> schema.changeset(insight_attrs(model, history, attrs, sha))
-    |> Repo.update()
+    |> Repo.update(allow_stale: true)
     |> case do
       {:ok, %{insight: insight}} -> {:ok, insight}
       {:error, err} -> {:error, "failed to persist insight to db: #{inspect(err)}"}

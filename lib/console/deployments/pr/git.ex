@@ -41,6 +41,8 @@ defmodule Console.Deployments.Pr.Git do
     end
   end
 
+  def commit_patch(%ScmConnection{} = conn), do: git(conn, "--no-pager", ["format-patch", "-1", "HEAD", "--stdout"])
+
   def slug(%ScmConnection{} = conn, url) do
     case Regex.scan(~r[^#{url(conn)}/(.*)\.git$], url) do
       [[_, slug] | _] -> {:ok, slug}
