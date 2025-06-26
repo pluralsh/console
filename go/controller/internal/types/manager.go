@@ -43,6 +43,9 @@ type Manager struct {
 	// It is used to ensure that the same object is not being processed concurrently.
 	inProgress cmap.ConcurrentMap[string, struct{}]
 
+	// inProgessLock is used to synchronize in-progress reconciles handling
+	inProgessLock sync.Mutex
+
 	// MaxConcurrentReconciles is the maximum number of concurrent Reconciles which can be run. Defaults to 1.
 	MaxConcurrentReconciles int
 
@@ -104,15 +107,15 @@ func (c *Manager) processNextWorkItem(ctx context.Context, idx int) bool {
 	// period.
 	defer c.Do.Queue().Done(id)
 
-	c.mu.Lock()
+	c.inProgessLock.Lock()
 	if c.isInProgress(id) {
 		c.Do.Queue().Forget(id)
 		c.Do.Queue().AddAfter(id, 5*time.Second)
-		c.mu.Unlock()
+		c.inProgessLock.Unlock()
 		return true
 	}
 	c.inProgress.Set(id.String(), struct{}{})
-	c.mu.Unlock()
+	c.inProgessLock.Unlock()
 	defer c.inProgress.Remove(id.String())
 
 	c.reconcileHandler(ctx, id, idx)
@@ -176,6 +179,7 @@ func NewManager(processor Processor, opts ...Option) *Manager {
 		DeQueueJitter:           time.Second,
 		Do:                      processor,
 		inProgress:              cmap.New[struct{}](),
+		inProgessLock:           sync.Mutex{},
 		mu:                      sync.Mutex{},
 	}
 
