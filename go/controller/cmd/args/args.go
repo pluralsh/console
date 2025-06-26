@@ -17,10 +17,9 @@ import (
 )
 
 const (
-	defaultWipeCacheInterval        = 30 * time.Minute
-	defaultMetricsAddr              = ":8080"
-	defaultHealthProbeAddr          = ":8081"
-	defaultShardedReconcilerWorkers = 15
+	defaultWipeCacheInterval = 30 * time.Minute
+	defaultMetricsAddr       = ":8080"
+	defaultHealthProbeAddr   = ":8081"
 )
 
 var (
@@ -71,7 +70,7 @@ func createShardedReconcilerWorkersFlags(reconcilers types.ReconcilerList) map[t
 	for _, r := range reconcilers {
 		result[r] = flag.Int(
 			fmt.Sprintf("reconciler-%s-workers", r),
-			defaultShardedReconcilerWorkers,
+			types.DefaultShardedReconcilerWorkers,
 			fmt.Sprintf("Number of workers for the %s reconciler.", r),
 		)
 	}
@@ -164,7 +163,7 @@ func LogLevel() klog.Level {
 func ShardedReconcilerWorkers(reconciler types.Reconciler) int {
 	count, exists := shardedReconcilersWorkerConfigMap[reconciler]
 	if !exists || count == nil || *count <= 0 {
-		return defaultShardedReconcilerWorkers
+		return types.DefaultShardedReconcilerWorkers
 	}
 
 	return *count

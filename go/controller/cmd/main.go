@@ -124,7 +124,10 @@ func runOrDie(ctx context.Context, controllers []types.Controller, shardedContro
 
 	setupLog.Info("starting sharded controllers")
 	for _, c := range shardedControllers {
-		m := types.NewManager(args.ShardedReconcilerWorkers(c.Name()), c)
+		m := types.NewManager(
+			c,
+			types.WithMaxConcurrentReconciles(args.ShardedReconcilerWorkers(c.Name())),
+		)
 		go m.Start(ctx)
 	}
 

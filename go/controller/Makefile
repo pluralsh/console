@@ -76,6 +76,11 @@ test: TOOL = envtest controller-gen mockery
 test: --tool manifests generate genmock fmt vet ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
+.PHONY: bench
+bench: ## run benchmarks
+	@go test -bench=. -run=^$ -benchmem -benchtime=2x -v ./test/benchmark
+	@go test -v ./test/benchmark
+
 .PHONY: e2e
 e2e: ## run e2e tests
 	@go test ./internal/test/e2e/ -v -ginkgo.v

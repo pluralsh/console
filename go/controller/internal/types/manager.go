@@ -17,6 +17,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const (
+	DefaultShardedReconcilerWorkers = 16
+)
+
 type Processor interface {
 	Process(ctx context.Context, req ctrl.Request) (ctrl.Result, error)
 
@@ -165,12 +169,42 @@ func (c *Manager) reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.
 	return c.Do.Process(ctx, req)
 }
 
-func NewManager(maxConcurrentReconciles int, processor Processor) Manager {
-	return Manager{
-		MaxConcurrentReconciles: maxConcurrentReconciles,
+func NewManager(processor Processor, opts ...Option) *Manager {
+	manager := &Manager{
+		MaxConcurrentReconciles: DefaultShardedReconcilerWorkers,
 		RecoverPanic:            lo.ToPtr(true),
 		DeQueueJitter:           time.Second,
 		Do:                      processor,
 		inProgress:              cmap.New[struct{}](),
+		mu:                      sync.Mutex{},
+	}
+
+	for _, opt := range opts {
+		opt(manager)
+	}
+
+	return manager
+}
+
+type Option func(*Manager)
+
+// WithMaxConcurrentReconciles sets the maximum number of concurrent reconciles.
+func WithMaxConcurrentReconciles(max int) Option {
+	return func(m *Manager) {
+		m.MaxConcurrentReconciles = max
+	}
+}
+
+// WithRecoverPanic sets whether the panic caused by reconcile should be recovered.
+func WithRecoverPanic(recover bool) Option {
+	return func(m *Manager) {
+		m.RecoverPanic = lo.ToPtr(recover)
+	}
+}
+
+// WithDeQueueJitter sets the random duration that is added to the dequeue time to avoid thundering herd problem.
+func WithDeQueueJitter(jitter time.Duration) Option {
+	return func(m *Manager) {
+		m.DeQueueJitter = jitter
 	}
 }
