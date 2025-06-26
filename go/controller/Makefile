@@ -73,8 +73,8 @@ test: --tool manifests generate genmock fmt vet ## run tests
 
 .PHONY: bench
 bench: ## run benchmarks
-	@go test -bench=. -run=^$ -benchmem -v ./test/benchmark
-	@go test -v ./test/benchmark
+	@go test -bench=. -run=^$ -benchmem -benchtime=1x -v ./test/benchmark
+	@go test -count=1 -v ./test/benchmark
 
 .PHONY: e2e
 e2e: ## run e2e tests

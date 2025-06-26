@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
@@ -23,7 +22,7 @@ const (
 )
 
 var (
-	defaultReconcilers types.ReconcilerList
+	reconcilers types.ReconcilerList
 
 	argConsoleUrl = flag.String("console-url", utils.GetEnv("CONSOLE_URL", ""),
 		"The url of the console api to fetch services from")
@@ -36,11 +35,6 @@ var (
 	argLeaderElect = flag.Bool("leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	argReconcilers = flag.String(
-		"reconcilers",
-		strings.Join(algorithms.Map(defaultReconcilers, func(r types.Reconciler) string { return string(r) }), ","),
-		fmt.Sprintf("Comma delimited list of reconciler names. Available reconcilers: %s", defaultReconcilers),
-	)
 	argWipeCacheInterval = flag.Duration("wipe-cache-interval", defaultWipeCacheInterval,
 		"Interval at which the cache is wiped.")
 	argVersion = flag.Bool("version", false, "Print version information and exit.")
@@ -49,6 +43,26 @@ var (
 	// Register zap-log-level flag as a fallback for klog v flag to be backward compatible.
 	_ = flag.Int("zap-log-level", int(log.LogLevelDefault), "The number for the log level verbosity.")
 )
+
+func setupReconcilersFlag(arg string) error {
+	split := strings.Split(arg, ",")
+	if len(arg) == 0 || len(split) == 0 {
+		reconcilers = types.Reconcilers()
+	}
+
+	result := make(types.ReconcilerList, 0, len(split))
+	for _, r := range split {
+		reconciler, err := types.ToReconciler(r)
+		if err != nil {
+			klog.Fatalf("invalid reconciler %s: %v", r, err)
+		}
+
+		result = append(result, reconciler)
+	}
+
+	reconcilers = result
+	return nil
+}
 
 func Init() {
 	defaultFlagSet := flag.CommandLine
@@ -59,8 +73,15 @@ func Init() {
 	// Use default log level defined by the application
 	_ = defaultFlagSet.Set("v", fmt.Sprintf("%d", log.LogLevelDefault))
 
+	// Register reconcilers flag as function to allow dynamic validation
+	flag.Func(
+		"reconcilers",
+		fmt.Sprintf("Comma delimited list of reconciler names. Available reconcilers: %s", types.Reconcilers()),
+		setupReconcilersFlag,
+	)
+	reconcilers = types.Reconcilers()
+
 	flag.Parse()
-	defaultReconcilers = types.Reconcilers()
 	klog.V(log.LogLevelMinimal).InfoS("configured log level", "v", LogLevel())
 }
 
@@ -115,22 +136,7 @@ func EnableLeaderElection() bool {
 }
 
 func Reconcilers() types.ReconcilerList {
-	split := strings.Split(*argReconcilers, ",")
-	if len(*argReconcilers) == 0 || len(split) == 0 {
-		return defaultReconcilers
-	}
-
-	result := make(types.ReconcilerList, 0, len(split))
-	for _, r := range split {
-		reconciler, err := types.ToReconciler(r)
-		if err != nil {
-			klog.Fatalf("invalid reconciler %s: %v", r, err)
-		}
-
-		result = append(result, reconciler)
-	}
-
-	return result
+	return reconcilers
 }
 
 func WipeCacheInterval() time.Duration {
