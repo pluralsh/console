@@ -69,7 +69,7 @@ func (r *InfrastructureStackReconciler) Queue() workqueue.TypedRateLimitingInter
 }
 
 func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
-	return internaltypes.StackReconciler
+	return internaltypes.InfrastructureStackReconciler
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete

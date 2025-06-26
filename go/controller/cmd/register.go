@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -13,6 +15,7 @@ import (
 
 // register all controllers with the controller manager.
 func init() {
+	fmt.Println("registering controllers...")
 	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.BootstrapTokenReconciler{
@@ -363,7 +366,7 @@ func init() {
 	types.RegisterController(types.ServiceDeploymentReconciler, func(mgr ctrl.Manager,
 		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
-		return &controller.ServiceReconciler{
+		return &controller.ServiceDeploymentReconciler{
 			Client:           mgr.GetClient(),
 			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
@@ -383,7 +386,7 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.StackReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+	types.RegisterController(types.InfrastructureStackReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.InfrastructureStackReconciler{
 			Client:           mgr.GetClient(),

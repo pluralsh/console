@@ -18,11 +18,11 @@ type Reconciler string
 
 const (
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
-	CatalogReconciler                    Reconciler = "catalogprovider"
+	CatalogReconciler                    Reconciler = "catalog"
 	CloudConnectionReconciler            Reconciler = "cloudconnection"
 	ClusterReconciler                    Reconciler = "cluster"
 	ClusterRestoreReconciler             Reconciler = "clusterrestore"
-	ClusterRestoreTriggerReconciler      Reconciler = "restoretrigger"
+	ClusterRestoreTriggerReconciler      Reconciler = "clusterrestoretrigger"
 	ClusterSyncReconciler                Reconciler = "clustersync"
 	ComplianceReportGeneratorReconciler  Reconciler = "compliancereportgenerator"
 	CustomStackRunReconciler             Reconciler = "customstackrun"
@@ -34,11 +34,11 @@ const (
 	HelmRepositoryReconciler             Reconciler = "helmrepository"
 	ManagedNamespaceReconciler           Reconciler = "managednamespace"
 	MCPServerReconciler                  Reconciler = "mcpserver"
-	NamespaceCredentialsReconciler       Reconciler = "namespacecredentials"
+	NamespaceCredentialsReconciler       Reconciler = "namespacecredential"
 	NotificationRouterReconciler         Reconciler = "notificationrouter"
 	NotificationSinkReconciler           Reconciler = "notificationsink"
 	ObservabilityProviderReconciler      Reconciler = "observabilityprovider"
-	ObserverReconciler                   Reconciler = "observerprovider"
+	ObserverReconciler                   Reconciler = "observer"
 	OIDCProviderReconciler               Reconciler = "oidcprovider"
 	PipelineContextReconciler            Reconciler = "pipelinecontext"
 	PipelineReconciler                   Reconciler = "pipeline"
@@ -52,7 +52,7 @@ const (
 	ServiceContextReconciler             Reconciler = "servicecontext"
 	ServiceDeploymentReconciler          Reconciler = "servicedeployment"
 	StackDefinitionReconciler            Reconciler = "stackdefinition"
-	StackReconciler                      Reconciler = "stack"
+	InfrastructureStackReconciler        Reconciler = "infrastructurestack"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -91,7 +91,7 @@ func ShardedReconcilers() ReconcilerList {
 		PipelineReconciler,
 		FlowReconciler,
 		GlobalServiceReconciler,
-		StackReconciler,
+		InfrastructureStackReconciler,
 	}
 }
 
