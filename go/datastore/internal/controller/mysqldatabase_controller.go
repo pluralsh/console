@@ -116,7 +116,7 @@ func (r *MySqlDatabaseReconciler) handleDelete(database *v1alpha1.MySqlDatabase)
 }
 
 func (r *MySqlDatabaseReconciler) addOrRemoveFinalizer(ctx context.Context, database *v1alpha1.MySqlDatabase, credentials *v1alpha1.MySqlCredentials) error {
-	if database.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(database, MySqlDatabaseProtectionFinalizerName) {
+	if database.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(database, MySqlDatabaseProtectionFinalizerName) {
 		controllerutil.AddFinalizer(database, MySqlDatabaseProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, MySqlDatabaseProtectionFinalizerName); err != nil {
 			return err

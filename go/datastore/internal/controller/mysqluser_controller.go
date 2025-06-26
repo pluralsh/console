@@ -171,7 +171,7 @@ func (r *MySqlUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.M
 }
 
 func (r *MySqlUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.MySqlUser, credentials *v1alpha1.MySqlCredentials) error {
-	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, MySqlUserProtectionFinalizerName) {
+	if user.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, MySqlUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, MySqlUserProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, MySqlUserProtectionFinalizerName); err != nil {
 			return err
