@@ -5,6 +5,7 @@ toolchain go1.24.3
 use (
 	./ai-proxy
 	./client // github.com/pluralsh/console/go/client
+	./cloud-query // github.com/pluralsh/console/go/cloud-query
 	./controller // github.com/pluralsh/console/go/controller
 	./datastore // github.com/pluralsh/console/go/datastore
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service

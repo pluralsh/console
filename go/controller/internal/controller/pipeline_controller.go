@@ -150,12 +150,12 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *ctrl.Result {
 	/// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if pipeline.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(pipeline, PipelineFinalizer) {
+	if pipeline.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(pipeline, PipelineFinalizer) {
 		controllerutil.AddFinalizer(pipeline, PipelineFinalizer)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !pipeline.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !pipeline.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 		if err != nil {
 			return &requeue

@@ -172,12 +172,12 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if provider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(provider, ProviderProtectionFinalizerName) {
+	if provider.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(provider, ProviderProtectionFinalizerName) {
 		controllerutil.AddFinalizer(provider, ProviderProtectionFinalizerName)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !provider.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue
 		if r.ConsoleClient.IsProviderDeleting(ctx, provider.Status.GetID()) {
 			logger.Info("Waiting for provider to be deleted from Console API")

@@ -258,6 +258,7 @@ defmodule Console.Deployments.Global do
     dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
     tpl = Repo.preload(tpl, [:dependencies])
     tpl = dynamic_template(tpl, dest.cluster, global)
+          |> ServiceTemplate.load_contexts()
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
@@ -325,7 +326,9 @@ defmodule Console.Deployments.Global do
       {:ok, %Service{id: id}} -> id
       %Service{id: id} -> id
       {:error, {:already_exists, %Service{id: id}}} -> id
-      _ -> nil
+      err ->
+        Logger.error "Error global service to cluster #{inspect(err)}"
+        nil
     end)
     |> Stream.filter(& &1)
     |> MapSet.new()
@@ -645,6 +648,7 @@ defmodule Console.Deployments.Global do
       ~w(helm chart)a,
       ~w(helm values_files)a,
       ~w(contexts)a,
+      ~w(configuration)a,
       ~w(lua_script)a,
       ~w(git ref)a,
       ~w(git folder)a
@@ -666,6 +670,8 @@ defmodule Console.Deployments.Global do
     |> Enum.reduce(acc, fn path, acc ->
       case get_in(attrs, path) do
         str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
+        [%{value: v} | _] = vals when is_binary(v) ->
+          put_in(acc, path, Enum.map(vals, fn %{name: n, value: v} -> %{name: n, value: render_solid_raw(v, cluster, ctx)} end))
         [v | _] = vals when is_binary(v) ->
           put_in(acc, path, Enum.map(vals, &render_solid_raw(&1, cluster, ctx)))
         _ -> acc

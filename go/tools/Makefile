@@ -2,6 +2,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(ROOT_DIRECTORY)/go/tools/os.mk
 
 GO_INSTALL_TOOLS := $(shell cat $(TOOLS_DIR)/tools.go | grep _ | awk -F'"' '$$2 ~ /.*/ {print $$2}')
 TOOL_VERSIONS := $(shell awk '/require \(/{flag=1; next} flag&&/\)/{exit} flag' $(TOOLS_DIR)/go.mod | awk '{sub(/[ \t\r]+/, "");}1' | awk '{sub(/ /, "@");}1' | tr '\n' ' ')
@@ -12,7 +13,7 @@ KUBEBUILDER_VERSION := 4.5.1
 
 .PHONY: tools
 tools: ## install required tools
-tools: --tool install-kubebuilder
+tools: --tool install-kubebuilder install-protoc
 
 .PHONY: --tool
 %--tool: TOOL = .*
@@ -88,3 +89,26 @@ install-envtest: --tool ## Download and install setup-envtest in the $BINARIES_D
 .PHONY: install-ginkgo
 install-ginkgo: TOOL = ginkgo
 install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
+
+.PHONY: install-protoc-gen-go
+install-protoc-gen-go: TOOL = protoc-gen-go
+install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINARIES_DIR
+
+.PHONY: install-protoc-gen-go-grpc
+install-protoc-gen-go-grpc: TOOL = protoc-gen-go-grpc
+install-protoc-gen-go-grpc: --tool ## Download and install protoc-gen-go-grpc in the $BINARIES_DIR
+
+
+
+.PHONY: install-protoc
+install-protoc: --ensure-binaries-dir ## Download and install protoc compiler in the $BINARIES_DIR
+	@if [ ! -f "$(BINARIES_DIR)/protoc" ]; then \
+		PROTOC_VERSION="31.1" && \
+		PROTOC_ZIP="protoc-$${PROTOC_VERSION}-${PROTOC_OS}-${PROTOC_ARCH}.zip" && \
+		TEMP_DIR=$$(mktemp -d) && \
+		curl -sSL "https://github.com/protocolbuffers/protobuf/releases/download/v$${PROTOC_VERSION}/$${PROTOC_ZIP}" -o "$${TEMP_DIR}/$${PROTOC_ZIP}" && \
+		unzip -q "$${TEMP_DIR}/$${PROTOC_ZIP}" -d "$${TEMP_DIR}" && \
+		mv "$${TEMP_DIR}/bin/protoc" "$(BINARIES_DIR)/" && \
+		rm -rf "$${TEMP_DIR}" && \
+		echo "Installed protoc in $(BINARIES_DIR)/protoc"; \
+	fi

@@ -150,7 +150,7 @@ func (r *FlowReconciler) handleDelete(ctx context.Context, flow *v1alpha1.Flow) 
 	if controllerutil.ContainsFinalizer(flow, FlowFinalizer) {
 		if flow.Status.GetID() != "" {
 			existingFlow, err := r.ConsoleClient.GetFlow(ctx, flow.Status.GetID())
-			if err != nil && !errors.IsNotFound(err) {
+			if err != nil && !apierrors.IsNotFound(err) {
 				utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return err
 			}

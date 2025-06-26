@@ -22,6 +22,16 @@ fragment StackPolicyViolation on StackPolicyViolation {
   }
 }
 
+fragment StackMinimal on InfrastructureStack {
+  id
+  name
+  type
+  status
+  insertedAt
+  updatedAt
+  deletedAt
+}
+
 fragment StackTiny on InfrastructureStack {
   id
   insertedAt
