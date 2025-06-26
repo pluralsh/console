@@ -25,14 +25,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
+	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	// to ensure that exec-entrypoint and run can make use of them.
 	deploymentsv1alpha "github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/cmd/args"
 	"github.com/pluralsh/console/go/controller/internal/cache"
@@ -43,7 +43,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = klog.NewKlogr().WithName("setup")
+	setupLog = klog.NewKlogr()
 
 	// version is managed by GoReleaser, see: https://goreleaser.com/cookbooks/using-main.version/
 	version = "dev"
@@ -59,6 +59,7 @@ func init() {
 func main() {
 	args.Init()
 	ctrl.SetLogger(setupLog)
+	ctx := ctrl.LoggerInto(ctrl.SetupSignalHandler(), setupLog)
 
 	if args.Version() {
 		versionInfo()
@@ -67,6 +68,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
+		Logger:                 setupLog,
 		Metrics:                metricsserver.Options{BindAddress: args.MetricsBindAddress()},
 		HealthProbeBindAddress: args.HealthProbeBindAddress(),
 		LeaderElection:         args.EnableLeaderElection(),
@@ -109,12 +111,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	runOrDie(controllers, shardedControllers, mgr)
+	runOrDie(ctx, controllers, shardedControllers, mgr)
 }
 
-func runOrDie(controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
-	ctx := ctrl.SetupSignalHandler()
-
+func runOrDie(ctx context.Context, controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
 	for _, c := range controllers {
 		if err := c.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controller")

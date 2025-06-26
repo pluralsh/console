@@ -9,7 +9,6 @@ import (
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
-	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/controller/internal/log"
@@ -148,7 +147,7 @@ func Version() bool {
 }
 
 func LogLevel() klog.Level {
-	v := lo.Ternary(pflag.Lookup("v") != nil, pflag.Lookup("v"), pflag.Lookup("zap-log-level"))
+	v := lo.Ternary(flag.Lookup("v") != nil, flag.Lookup("v"), flag.Lookup("zap-log-level"))
 	if v == nil {
 		return log.LogLevelDefault
 	}

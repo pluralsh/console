@@ -72,11 +72,11 @@ func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
 	return internaltypes.StackReconciler
 }
 
-// Reconcile is part of the main kubernetes reconciliation loop.
-//
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+
+// Reconcile is part of the main kubernetes reconciliation loop.
 func (r *InfrastructureStackReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.StackQueue.Add(req)
 	return ctrl.Result{}, nil
