@@ -386,15 +386,22 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.InfrastructureStackReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
-		return &controller.InfrastructureStackReconciler{
-			Client:           mgr.GetClient(),
-			ConsoleClient:    consoleClient,
-			Scheme:           mgr.GetScheme(),
-			UserGroupCache:   userGroupCache,
-			CredentialsCache: credentialsCache,
-			StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
-		}
-	})
+	types.RegisterController(
+		types.InfrastructureStackReconciler,
+		func(
+			mgr ctrl.Manager,
+			consoleClient client.ConsoleClient,
+			userGroupCache cache.UserGroupCache,
+			credentialsCache credentials.NamespaceCredentialsCache,
+		) types.Controller {
+			return &controller.InfrastructureStackReconciler{
+				Client:           mgr.GetClient(),
+				ConsoleClient:    consoleClient,
+				Scheme:           mgr.GetScheme(),
+				UserGroupCache:   userGroupCache,
+				CredentialsCache: credentialsCache,
+				StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+			}
+		},
+	)
 }
