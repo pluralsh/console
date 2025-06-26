@@ -9,18 +9,17 @@ import (
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
 	"github.com/pluralsh/console/go/datastore/internal/test/common"
 	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
-	"github.com/stretchr/testify/mock"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var _ = Describe("ElasticsearchUser Controller", func() {
@@ -66,8 +65,8 @@ var _ = Describe("ElasticsearchUser Controller", func() {
 						Insecure: nil,
 						URL:      "http://example.com",
 						Username: "test",
-						PasswordSecretKeyRef: v1.SecretKeySelector{
-							LocalObjectReference: v1.LocalObjectReference{
+						PasswordSecretKeyRef: corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
 								Name: resourceName,
 							},
 							Key: "password",
@@ -99,12 +98,12 @@ var _ = Describe("ElasticsearchUser Controller", func() {
 						Namespace: "default",
 					},
 					Spec: v1alpha1.ElasticsearchUserSpec{
-						CredentialsRef: v1.LocalObjectReference{
+						CredentialsRef: corev1.LocalObjectReference{
 							Name: resourceName}, // Not required for this test.
 						Definition: v1alpha1.ElasticsearchUserDefinition{
 							User: "test",
-							PasswordSecretKeyRef: v1.SecretKeySelector{
-								LocalObjectReference: v1.LocalObjectReference{
+							PasswordSecretKeyRef: corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
 									Name: userSecretName,
 								},
 								Key: "password",

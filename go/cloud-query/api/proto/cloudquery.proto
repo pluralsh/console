@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+// Determines the package name for the generated code.
+package cloudquery;
+
+// Configures where the generated code will be placed.
+option go_package = "internal/proto/cloudquery";
+
+message AwsCredentials {
+  string access_key_id = 1;
+  string secret_access_key = 2;
+}
+
+message AzureCredentials {
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
+}
+
+message GcpCredentials {
+  string service_account_json_b64 = 1;
+}
+
+message Connection {
+  string provider = 1;
+  oneof credentials {
+    AwsCredentials aws = 2;
+    AzureCredentials azure = 3;
+    GcpCredentials gcp = 4;
+  }
+}
+
+message QueryInput {
+  Connection connection = 1;
+  string query = 2;
+}
+
+message SchemaInput {
+  Connection connection = 1;
+  optional string table = 2;
+}
+
+message ExtractInput {
+  Connection connection = 1;
+}
+
+message QueryResult {
+  string result = 2;
+}
+
+message SchemaColumn {
+  string column = 1;
+  string type = 2;
+}
+
+message SchemaOutput {
+  repeated SchemaResult result = 1;
+}
+
+message SchemaResult {
+  string table = 1;
+  repeated SchemaColumn columns = 2;
+}
+
+message ExtractOutput {
+  string type = 1;
+  string result = 2;
+  string id = 3;
+  repeated string links = 4;
+}
+
+service CloudQuery {
+  rpc Query(QueryInput) returns (QueryResult) {}
+  rpc Schema(SchemaInput) returns (SchemaOutput) {}
+  rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
+}
