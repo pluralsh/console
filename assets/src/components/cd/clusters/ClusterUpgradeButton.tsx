@@ -6,7 +6,6 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { ClusterTinyFragment, ClustersRowFragment } from 'generated/graphql'
-import { ClusterTableChipSC } from './ClusterHealthChip'
 
 export function ClusterUpgradeButton({
   cluster,
@@ -18,10 +17,11 @@ export function ClusterUpgradeButton({
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
 
   return (
-    <ClusterTableChipSC
+    <Chip
       clickable
-      size="large"
+      size="small"
       severity={severity}
+      css={{ alignSelf: 'center' }}
       icon={
         severity === 'success' ? (
           <CheckRoundedIcon />
@@ -37,7 +37,7 @@ export function ClusterUpgradeButton({
       }}
     >
       {chipLabel}
-    </ClusterTableChipSC>
+    </Chip>
   )
 }
 

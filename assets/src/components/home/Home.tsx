@@ -1,10 +1,4 @@
-import {
-  Breadcrumb,
-  Flex,
-  HealthHeartIcon,
-  UpdatesIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useCloudSetupUnfinished } from 'components/contexts'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 
@@ -43,7 +37,10 @@ import {
   ClusterUpgradesFilterBtns,
   UpgradeChartFilter,
 } from './clusteroverview/ClusterUpgradesChart.tsx'
-import { GettingStartedPopup } from './GettingStarted.tsx'
+import {
+  GettingStartedContentHomeVariant,
+  GettingStartedPopup,
+} from './GettingStarted.tsx'
 
 enum HomeScreenTab {
   HealthScores = 'Health scores',
@@ -120,6 +117,10 @@ export function Home() {
     [tableData]
   )
 
+  const noClustersYet =
+    aggregatedUpgradeStats.all === 0 &&
+    !(projectId || tableLoading || upgradeLoading)
+
   return (
     <Flex
       direction="column"
@@ -129,7 +130,7 @@ export function Home() {
       <ChartSectionSC>
         <WidthLimiterSC css={{ display: 'flex', gap: spacing.large }}>
           <Flex
-            flex={1}
+            flex={tab === HomeScreenTab.HealthScores ? 0.8 : 1}
             gap="medium"
             direction="column"
           >
@@ -178,6 +179,8 @@ export function Home() {
         <WidthLimiterSC>
           {tableError ? (
             <GqlError error={tableError} />
+          ) : noClustersYet ? (
+            <GettingStartedContentHomeVariant />
           ) : (
             <ClustersTable
               fullHeightWrap
@@ -193,6 +196,9 @@ export function Home() {
               fetchNextPage={fetchNextPage}
               isFetchingNextPage={tableLoading}
               onVirtualSliceChange={setVirtualSlice}
+              emptyStateProps={{
+                message: 'No clusters found - try adjusting your filters.',
+              }}
             />
           )}
         </WidthLimiterSC>
@@ -204,7 +210,6 @@ export function Home() {
 
 const ChartWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
-  maxWidth: 425,
   borderRadius: theme.borderRadiuses.large,
   overflow: 'hidden',
   '& g:first-of-type, & canvas': { cursor: 'pointer' },
@@ -215,7 +220,6 @@ const ChartSectionSC = styled.div(({ theme }) => ({
   justifyContent: 'center',
   width: '100%',
   padding: theme.spacing.large,
-  paddingBottom: theme.spacing.xxlarge,
   backgroundColor: theme.colors['fill-accent'],
 }))
 
@@ -240,13 +244,8 @@ const tabDirectory: ButtonGroupDirectory = [
   {
     path: HomeScreenTab.HealthScores,
     label: HomeScreenTab.HealthScores,
-    icon: <HealthHeartIcon />,
   },
-  {
-    path: HomeScreenTab.Upgrades,
-    label: HomeScreenTab.Upgrades,
-    icon: <UpdatesIcon />,
-  },
+  { path: HomeScreenTab.Upgrades, label: HomeScreenTab.Upgrades },
 ]
 
 const getUpgradesFilterArgs = (

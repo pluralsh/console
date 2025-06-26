@@ -143,10 +143,7 @@ function MetadataCard({
         )}
       </MetadataPropSC>
       <MetadataPropSC heading="Agent health">
-        <ClusterHealth
-          size="small"
-          cluster={cluster}
-        />
+        <ClusterHealth cluster={cluster} />
       </MetadataPropSC>
     </MetadataCardSC>
   )
