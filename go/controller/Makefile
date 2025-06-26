@@ -18,11 +18,6 @@ ENVTEST_K8S_VERSION := 1.28.3
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-# Validate required env variables
-ifndef PLURAL_CONSOLE_TOKEN
-$(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
-endif
-
 ##@ General
 
 .PHONY: help
@@ -78,7 +73,7 @@ test: --tool manifests generate genmock fmt vet ## run tests
 
 .PHONY: bench
 bench: ## run benchmarks
-	@go test -bench=. -run=^$ -benchmem -benchtime=2x -v ./test/benchmark
+	@go test -bench=. -run=^$ -benchmem -v ./test/benchmark
 	@go test -v ./test/benchmark
 
 .PHONY: e2e
@@ -143,6 +138,9 @@ undeploy-crds-kustomize: --tool manifests ## undeploy CRDs from the K8s cluster 
 .PHONY: deploy-kustomize
 deploy-kustomize: TOOL = kustomize
 deploy-kustomize: --tool manifests deploy-crds-kustomize ## deploy controller to the K8s cluster specified in ~/.kube/config.
+ifndef PLURAL_CONSOLE_TOKEN
+	$(error $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
+endif
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy-kustomize

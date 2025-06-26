@@ -41,6 +41,16 @@ func init() {
 	klog.SetOutput(io.Discard)
 	klog.LogToStderr(false)
 	ctrl.SetLogger(nopLogger)
+	printConfigurationInfo()
+}
+
+func printConfigurationInfo() {
+	fmt.Println("Benchmark Configuration:")
+	fmt.Printf("  Processing Time: %v\n", processingTime)
+	fmt.Printf("  Number of Events: %d\n", numEvents)
+	fmt.Printf("  Processing Timeout: %v\n", processingTimeout)
+	fmt.Printf("  Dequeue Jitter: %v\n", dequeueJitter)
+	fmt.Printf("  Worker Counts: %v\n", workerCounts)
 }
 
 // MockReconciler implements a mock reconciler that simulates processing work
