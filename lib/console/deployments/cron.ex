@@ -172,7 +172,7 @@ defmodule Console.Deployments.Cron do
     |> Task.async_stream(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)
-    end, max_concurrency: 10)
+    end, max_concurrency: 20)
     |> Stream.run()
   end
 
@@ -184,7 +184,7 @@ defmodule Console.Deployments.Cron do
     |> Task.async_stream(fn mns ->
       Logger.info "syncing managed namespace #{mns.id}"
       Global.reconcile_namespace(mns)
-    end, max_concurrency: 10)
+    end, max_concurrency: 20)
     |> Stream.run()
   end
 

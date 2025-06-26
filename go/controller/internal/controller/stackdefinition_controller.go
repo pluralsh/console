@@ -120,13 +120,13 @@ func (in *StackDefinitionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, stack *v1alpha1.StackDefinition) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if stack.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(stack, StackDefinitionFinalizer) {
+	if stack.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(stack, StackDefinitionFinalizer) {
 		controllerutil.AddFinalizer(stack, StackDefinitionFinalizer)
 		return nil, nil
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !stack.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !stack.DeletionTimestamp.IsZero() {
 		// Remove StackDefinition from Console API if it exists
 		exists, err := in.isAlreadyExists(ctx, stack)
 		if err != nil {

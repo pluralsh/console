@@ -36,7 +36,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	deploymentsv1alpha1 "github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -158,11 +157,11 @@ func (r *ManagedNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                              // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ManagedNamespaceList))). // Reconcile objects on credentials change.
-		For(&deploymentsv1alpha1.ManagedNamespace{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.ManagedNamespace{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
 
-func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace *deploymentsv1alpha1.ManagedNamespace) error {
+func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace *v1alpha1.ManagedNamespace) error {
 	if controllerutil.ContainsFinalizer(namespace, ManagedNamespaceFinalizer) {
 		if namespace.Status.GetID() != "" {
 			existingNotificationSink, err := r.ConsoleClient.GetNamespace(ctx, namespace.Status.GetID())
@@ -182,7 +181,7 @@ func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace
 	return nil
 }
 
-func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namespace *deploymentsv1alpha1.ManagedNamespace) (bool, error) {
+func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namespace *v1alpha1.ManagedNamespace) (bool, error) {
 	if !namespace.Status.HasID() {
 		return false, nil
 	}

@@ -10,14 +10,14 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { AiStream } from 'components/ai/chatbot/AISuggestFix'
-import { PRA_DOCS_URL } from 'components/pr/automations/PrAutomations'
+import { PRA_DOCS_URL } from 'components/self-service/pr/automations/PrAutomations'
 import {
   ColDocumentation,
   ColName,
   ColRepo,
   ColRole,
   ColSelect,
-} from 'components/pr/automations/PrAutomationsColumns'
+} from 'components/self-service/pr/automations/PrAutomationsColumns'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'

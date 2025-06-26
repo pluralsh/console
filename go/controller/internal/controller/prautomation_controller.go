@@ -101,12 +101,12 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if prAutomation.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(prAutomation, PrAutomationProtectionFinalizerName) {
+	if prAutomation.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(prAutomation, PrAutomationProtectionFinalizerName) {
 		controllerutil.AddFinalizer(prAutomation, PrAutomationProtectionFinalizerName)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !prAutomation.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !prAutomation.DeletionTimestamp.IsZero() {
 		exists, err := in.ConsoleClient.IsPrAutomationExists(ctx, prAutomation.Status.GetID())
 		if err != nil {
 			return &ctrl.Result{}, err

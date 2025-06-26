@@ -8,6 +8,7 @@ TOOLS_MAKEFILE := $(TOOLS_DIR)/Makefile
 BOILERPLATE_FILE := $(TOOLS_DIR)/boilerplate.go.txt
 CLIENT_DIR := $(WORKSPACES_DIR)/client
 CONTROLLER_DIR := $(WORKSPACES_DIR)/controller
+CLOUD_QUERY_DIR := $(WORKSPACES_DIR)/cloud-query
 BINARIES_DIR := $(ROOT_DIRECTORY)/binaries
 
 # Tool binaries
@@ -24,6 +25,7 @@ KUBEBUILDER ?= $(BINARIES_DIR)/kubebuilder
 KUSTOMIZE ?= $(BINARIES_DIR)/kustomize
 MOCKERY ?= $(BINARIES_DIR)/mockery
 GINKGO ?= $(BINARIES_DIR)/ginkgo
+PROTOC ?= $(BINARIES_DIR)/protoc
 
 # Global tool binaries
 HELM ?= $(shell which helm)

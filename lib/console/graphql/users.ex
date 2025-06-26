@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Users do
   enum_from_list :permission, Console.Schema.Role, :permissions, []
   ecto_enum :severity, Severity
   ecto_enum :notification_status, Status
+  ecto_enum :persona_role, Console.Schema.Persona.Role
 
   enum :read_type do
     value :notification
@@ -72,6 +73,7 @@ defmodule Console.GraphQl.Users do
     field :name,          :string
     field :description,   :string, description: "longform description of this persona"
     field :configuration, :persona_configuration_attributes
+    field :role,          :persona_role, description: "the role of this persona, controls the behavior of the homepage"
     field :bindings,      list_of(:binding_attributes)
   end
 
@@ -80,6 +82,7 @@ defmodule Console.GraphQl.Users do
     field :home,        :persona_home_attributes, description: "configuration for the homepage for the given persona"
     field :deployments, :persona_deployment_attributes, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
+    field :services,    :persona_services_attributes, description: "enable individual parts of the services views"
   end
 
   input_object :persona_deployment_attributes do
@@ -99,11 +102,18 @@ defmodule Console.GraphQl.Users do
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean
+    field :security,      :boolean
+    field :cost,          :boolean
   end
 
   input_object :persona_home_attributes do
     field :manager,  :boolean
     field :security, :boolean
+  end
+
+  input_object :persona_services_attributes do
+    field :secrets, :boolean
+    field :configuration, :boolean
   end
 
   input_object :bootstrap_token_attributes do
@@ -266,6 +276,7 @@ defmodule Console.GraphQl.Users do
     field :id,            non_null(:id)
     field :name,          non_null(:string), description: "the name for this persona"
     field :description,   :string, description: "longform description of this persona"
+    field :role,          :persona_role, description: "the role of this persona"
     field :configuration, :persona_configuration, description: "the ui configuration for this persona (additive across personas)"
     field :bindings,      list_of(:policy_binding),
       resolve: dataloader(Deployments), description: "the group bindings for this persona"
@@ -278,6 +289,7 @@ defmodule Console.GraphQl.Users do
     field :home,        :persona_home, description: "settings for the home page for this persona"
     field :deployments, :persona_deployment, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
+    field :services,    :persona_services, description: "enable individual parts of the services views"
   end
 
   object :persona_deployment do
@@ -297,11 +309,18 @@ defmodule Console.GraphQl.Users do
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean
+    field :security,      :boolean
+    field :cost,          :boolean
   end
 
   object :persona_home do
     field :manager,  :boolean
     field :security, :boolean
+  end
+
+  object :persona_services do
+    field :secrets,       :boolean
+    field :configuration, :boolean
   end
 
   @desc "A restricted token meant only for use in registering clusters, esp for edge devices"

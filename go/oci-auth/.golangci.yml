@@ -1,9 +1,8 @@
+version: "2"
 run:
   allow-parallel-runners: true
-issues:
-  max-same-issues: 0
 linters:
-  disable-all: true
+  default: none
   enable:
     - dupl
     - durationcheck
@@ -12,9 +11,6 @@ linters:
     - goconst
     - gocyclo
     - godot
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -25,8 +21,29 @@ linters:
     - prealloc
     - predeclared
     - staticcheck
-    - tenv
-    - typecheck
     - unconvert
     - unparam
     - unused
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

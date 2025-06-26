@@ -4093,6 +4093,8 @@ type Persona struct {
 	Name string `json:"name"`
 	// longform description of this persona
 	Description *string `json:"description,omitempty"`
+	// the role of this persona
+	Role *PersonaRole `json:"role,omitempty"`
 	// the ui configuration for this persona (additive across personas)
 	Configuration *PersonaConfiguration `json:"configuration,omitempty"`
 	// the group bindings for this persona
@@ -4106,7 +4108,9 @@ type PersonaAttributes struct {
 	// longform description of this persona
 	Description   *string                         `json:"description,omitempty"`
 	Configuration *PersonaConfigurationAttributes `json:"configuration,omitempty"`
-	Bindings      []*BindingAttributes            `json:"bindings,omitempty"`
+	// the role of this persona, controls the behavior of the homepage
+	Role     *PersonaRole         `json:"role,omitempty"`
+	Bindings []*BindingAttributes `json:"bindings,omitempty"`
 }
 
 type PersonaConfiguration struct {
@@ -4118,6 +4122,8 @@ type PersonaConfiguration struct {
 	Deployments *PersonaDeployment `json:"deployments,omitempty"`
 	// enable individual aspects of the sidebar
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
+	// enable individual parts of the services views
+	Services *PersonaServices `json:"services,omitempty"`
 }
 
 type PersonaConfigurationAttributes struct {
@@ -4129,6 +4135,8 @@ type PersonaConfigurationAttributes struct {
 	Deployments *PersonaDeploymentAttributes `json:"deployments,omitempty"`
 	// enable individual aspects of the sidebar
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
+	// enable individual parts of the services views
+	Services *PersonaServicesAttributes `json:"services,omitempty"`
 }
 
 type PersonaConnection struct {
@@ -4171,6 +4179,16 @@ type PersonaHomeAttributes struct {
 	Security *bool `json:"security,omitempty"`
 }
 
+type PersonaServices struct {
+	Secrets       *bool `json:"secrets,omitempty"`
+	Configuration *bool `json:"configuration,omitempty"`
+}
+
+type PersonaServicesAttributes struct {
+	Secrets       *bool `json:"secrets,omitempty"`
+	Configuration *bool `json:"configuration,omitempty"`
+}
+
 type PersonaSidebar struct {
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
@@ -4178,6 +4196,8 @@ type PersonaSidebar struct {
 	Settings     *bool `json:"settings,omitempty"`
 	Backups      *bool `json:"backups,omitempty"`
 	Stacks       *bool `json:"stacks,omitempty"`
+	Security     *bool `json:"security,omitempty"`
+	Cost         *bool `json:"cost,omitempty"`
 }
 
 type PersonaSidebarAttributes struct {
@@ -4187,6 +4207,8 @@ type PersonaSidebarAttributes struct {
 	Settings     *bool `json:"settings,omitempty"`
 	Backups      *bool `json:"backups,omitempty"`
 	Stacks       *bool `json:"stacks,omitempty"`
+	Security     *bool `json:"security,omitempty"`
+	Cost         *bool `json:"cost,omitempty"`
 }
 
 // A reference to a custom resource you want to be displayed in the k8s dashboard
@@ -8832,6 +8854,53 @@ func (e *Permission) UnmarshalGQL(v any) error {
 }
 
 func (e Permission) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PersonaRole string
+
+const (
+	PersonaRolePlatform   PersonaRole = "PLATFORM"
+	PersonaRoleDeveloper  PersonaRole = "DEVELOPER"
+	PersonaRoleSecurity   PersonaRole = "SECURITY"
+	PersonaRoleFinops     PersonaRole = "FINOPS"
+	PersonaRoleManagement PersonaRole = "MANAGEMENT"
+)
+
+var AllPersonaRole = []PersonaRole{
+	PersonaRolePlatform,
+	PersonaRoleDeveloper,
+	PersonaRoleSecurity,
+	PersonaRoleFinops,
+	PersonaRoleManagement,
+}
+
+func (e PersonaRole) IsValid() bool {
+	switch e {
+	case PersonaRolePlatform, PersonaRoleDeveloper, PersonaRoleSecurity, PersonaRoleFinops, PersonaRoleManagement:
+		return true
+	}
+	return false
+}
+
+func (e PersonaRole) String() string {
+	return string(e)
+}
+
+func (e *PersonaRole) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PersonaRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PersonaRole", str)
+	}
+	return nil
+}
+
+func (e PersonaRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

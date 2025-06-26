@@ -2095,6 +2095,7 @@ type GroupFragment struct {
 	ID          string  "json:\"id\" graphql:\"id\""
 	Name        string  "json:\"name\" graphql:\"name\""
 	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Global      *bool   "json:\"global,omitempty\" graphql:\"global\""
 }
 
 func (t *GroupFragment) GetID() string {
@@ -2114,6 +2115,12 @@ func (t *GroupFragment) GetDescription() *string {
 		t = &GroupFragment{}
 	}
 	return t.Description
+}
+func (t *GroupFragment) GetGlobal() *bool {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Global
 }
 
 type GroupMemberFragment struct {
@@ -18877,6 +18884,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -18952,6 +18960,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19027,6 +19036,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19079,6 +19089,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19130,6 +19141,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19181,6 +19193,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19393,6 +19406,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -19603,6 +19617,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -20280,6 +20295,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -20506,6 +20522,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -20721,6 +20738,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -20995,6 +21013,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -21206,6 +21225,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -21864,6 +21884,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -23635,6 +23656,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -23720,6 +23742,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -25740,6 +25763,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -25811,6 +25835,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -26924,6 +26949,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 `
 
@@ -26953,6 +26979,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 `
 
@@ -26982,6 +27009,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 `
 
@@ -27012,6 +27040,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 `
 
@@ -27807,6 +27836,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -27873,6 +27903,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -27939,6 +27970,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28005,6 +28037,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28086,6 +28119,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28163,6 +28197,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28237,6 +28272,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28311,6 +28347,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28385,6 +28422,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28443,6 +28481,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28502,6 +28541,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28562,6 +28602,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28820,6 +28861,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -28942,6 +28984,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29064,6 +29107,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29508,6 +29552,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29562,6 +29607,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29614,6 +29660,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29665,6 +29712,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29835,6 +29883,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29896,6 +29945,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -29954,6 +30004,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -30011,6 +30062,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -30069,6 +30121,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -30728,6 +30781,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
@@ -31142,6 +31196,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -31520,6 +31575,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
@@ -31832,6 +31888,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
@@ -32144,6 +32201,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
@@ -32414,6 +32472,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -32619,6 +32678,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -32879,6 +32939,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment UserFragment on User {
 	name
@@ -33559,6 +33620,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type
@@ -33875,6 +33937,7 @@ fragment GroupFragment on Group {
 	id
 	name
 	description
+	global
 }
 fragment PolicyEngineFragment on PolicyEngine {
 	type

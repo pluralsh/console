@@ -7,7 +7,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
-import { CardGrid } from 'components/catalog/CatalogsGrid'
+import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'

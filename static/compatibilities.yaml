@@ -1518,7 +1518,7 @@ addons:
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    chart_version: 36.2.0-rc1
+    chart_version: 36.2.0
   - version: 3.4.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []

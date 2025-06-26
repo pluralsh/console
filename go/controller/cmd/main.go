@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -114,7 +115,8 @@ func main() {
 	runOrDie(ctx, controllers, shardedControllers, mgr)
 }
 
-func runOrDie(ctx context.Context, controllers []types.Controller, shardedControllers []types.Processor, mgr ctrl.Manager) {
+func runOrDie(ctx context.Context, controllers []types.Controller, shardedControllers []types.Processor,
+	mgr ctrl.Manager) {
 	for _, c := range controllers {
 		if err := c.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controller")
