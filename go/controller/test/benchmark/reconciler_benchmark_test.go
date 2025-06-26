@@ -276,7 +276,7 @@ func TestCompareReconcilerThroughput(t *testing.T) {
 
 	for i, numWorkers := range workerCounts {
 		improvement := (shardedReconcilersResult[i] - singleReconcilerResult) / singleReconcilerResult * 100
-		t.Logf("Reconciler Manager (%d workers): %.2f events/sec (%.2f%% improvement)",
+		t.Logf("Sharded Reconciler (%d workers): %.2f events/sec (%.2f%% improvement)",
 			numWorkers, shardedReconcilersResult[i], improvement)
 	}
 }
