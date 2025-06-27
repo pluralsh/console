@@ -1,5 +1,11 @@
 name: CD / Cloud Query
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build"
+        required: false
+        default: "latest"
   pull_request:
     branches:
       - 'master'
@@ -177,6 +183,7 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
             type=sha
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event.inputs.version != '' }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
