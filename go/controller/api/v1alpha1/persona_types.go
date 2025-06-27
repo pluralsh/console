@@ -61,6 +61,18 @@ func (in *Persona) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
+func (in *Persona) Attributes() console.PersonaAttributes {
+	attrs := console.PersonaAttributes{
+		Name:          lo.ToPtr(in.PersonaName()),
+		Description:   in.Spec.Description,
+		Role:          in.Spec.Role,
+		Configuration: in.Spec.Configuration.Attributes(),
+		Bindings:      nil, // TODO
+	}
+
+	return attrs
+}
+
 // PersonaSpec defines the desired state of Persona
 type PersonaSpec struct {
 	// Name of this Persona. If not provided Persona's own name from Persona.ObjectMeta will be used.
@@ -106,6 +118,20 @@ type PersonaConfiguration struct {
 	Services *PersonaServices `json:"services,omitempty"`
 }
 
+func (in *PersonaConfiguration) Attributes() *console.PersonaConfigurationAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaConfigurationAttributes{
+		All:         in.All,
+		Home:        in.Home.Attributes(),
+		Deployments: in.Deployments.Attributes(),
+		Sidebar:     in.Sidebar.Attributes(),
+		Services:    in.Services.Attributes(),
+	}
+}
+
 type PersonaHome struct {
 	// +kubebuilder:validation:Optional
 	Manager *bool `json:"manager,omitempty"`
@@ -114,12 +140,34 @@ type PersonaHome struct {
 	Security *bool `json:"security,omitempty"`
 }
 
+func (in *PersonaHome) Attributes() *console.PersonaHomeAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaHomeAttributes{
+		Manager:  in.Manager,
+		Security: in.Security,
+	}
+}
+
 type PersonaServices struct {
 	// +kubebuilder:validation:Optional
 	Secrets *bool `json:"secrets,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Configuration *bool `json:"configuration,omitempty"`
+}
+
+func (in *PersonaServices) Attributes() *console.PersonaServicesAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaServicesAttributes{
+		Secrets:       in.Secrets,
+		Configuration: in.Configuration,
+	}
 }
 
 type PersonaDeployment struct {
@@ -143,6 +191,22 @@ type PersonaDeployment struct {
 
 	// +kubebuilder:validation:Optional
 	AddOns *bool `json:"addOns,omitempty"`
+}
+
+func (in *PersonaDeployment) Attributes() *console.PersonaDeploymentAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaDeploymentAttributes{
+		Clusters:     in.Clusters,
+		Deployments:  in.Deployments,
+		Repositories: in.Repositories,
+		Services:     in.Services,
+		Pipelines:    in.Pipelines,
+		Providers:    in.Providers,
+		AddOns:       in.AddOns,
+	}
 }
 
 type PersonaSidebar struct {
@@ -171,18 +235,23 @@ type PersonaSidebar struct {
 	Cost *bool `json:"cost,omitempty"`
 }
 
-func init() {
-	SchemeBuilder.Register(&Persona{}, &PersonaList{})
-}
-
-func (in *Persona) Attributes() console.PersonaAttributes {
-	attrs := console.PersonaAttributes{
-		Name:          lo.ToPtr(in.PersonaName()),
-		Description:   in.Spec.Description,
-		Role:          in.Spec.Role,
-		Configuration: nil, // TODO
-		Bindings:      nil, // TODO
+func (in *PersonaSidebar) Attributes() *console.PersonaSidebarAttributes {
+	if in == nil {
+		return nil
 	}
 
-	return attrs
+	return &console.PersonaSidebarAttributes{
+		Audits:       in.Audits,
+		Kubernetes:   in.Kubernetes,
+		PullRequests: in.PullRequests,
+		Settings:     in.Settings,
+		Backups:      in.Backups,
+		Stacks:       in.Stacks,
+		Security:     in.Security,
+		Cost:         in.Cost,
+	}
+}
+
+func init() {
+	SchemeBuilder.Register(&Persona{}, &PersonaList{})
 }
