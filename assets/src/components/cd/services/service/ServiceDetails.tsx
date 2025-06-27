@@ -52,7 +52,7 @@ import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
-import { useLogin } from 'components/contexts'
+import { useServicePersonaType } from './settings/ServiceSettings'
 
 type ServiceContextType = {
   service: ServiceDeploymentDetailsFragment
@@ -209,10 +209,7 @@ function ServiceDetailsBase() {
       `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
     )?.params ?? {}
 
-  const { personaConfiguration } = useLogin()
-  const settingsEnabled =
-    !!personaConfiguration?.services?.configuration ||
-    !!personaConfiguration?.services?.secrets
+  const personaType = useServicePersonaType()
 
   const [isRefetching, setIsRefetching] = useState(false)
 
@@ -249,9 +246,9 @@ function ServiceDetailsBase() {
         serviceDeployment,
         logsEnabled,
         metricsEnabled,
-        settingsEnabled,
+        settingsEnabled: personaType !== 'no-settings',
       }),
-    [logsEnabled, metricsEnabled, serviceDeployment, settingsEnabled]
+    [logsEnabled, metricsEnabled, personaType, serviceDeployment]
   )
 
   useSetBreadcrumbs(

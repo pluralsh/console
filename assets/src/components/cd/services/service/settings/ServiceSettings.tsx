@@ -1,11 +1,13 @@
 import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useLogin } from 'components/contexts'
+import FractionalChip from 'components/utils/FractionalChip'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import {
-  PersonaConfigurationFragment,
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
   useFlowQuery,
 } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 import { Navigate, Outlet, useMatch, useParams } from 'react-router-dom'
 import {
@@ -19,15 +21,12 @@ import {
   SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import FractionalChip from 'components/utils/FractionalChip'
-import isEmpty from 'lodash/isEmpty'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from '../ServiceDetails'
-import { useLogin } from 'components/contexts'
 
-type PersonaType =
+type ServicePersonaType =
   | 'all-settings'
   | 'secrets-only'
   | 'exclude-secrets'
@@ -38,7 +37,7 @@ const getDirectory = ({
   personaType,
 }: {
   service: ServiceDeploymentDetailsFragment
-  personaType: PersonaType
+  personaType: ServicePersonaType
 }): SubtabDirectory => {
   const gitEnabled = !!service.repository
   const helmEnabled = !!service.helm?.chart || !!service.helm?.values
@@ -119,8 +118,7 @@ export function ServiceSettings() {
     skip: !flowId,
   })
 
-  const { personaConfiguration } = useLogin()
-  const personaType = getPersonaType(personaConfiguration?.services)
+  const personaType = useServicePersonaType()
 
   const directory = useMemo(
     () =>
@@ -158,7 +156,7 @@ export function ServiceSettings() {
     >
       <SubTabs directory={directory} />
       {personaType === 'no-settings' ? (
-        <EmptyState message="Service settings are not enabled for this persona." />
+        <EmptyState message="Service settings are not enabled for your persona." />
       ) : (
         <Outlet context={ctx} />
       )}
@@ -166,12 +164,15 @@ export function ServiceSettings() {
   )
 }
 
-const getPersonaType = (
-  personaConfig: PersonaConfigurationFragment['services']
-): PersonaType => {
-  if (personaConfig?.configuration && personaConfig?.secrets)
-    return 'all-settings'
-  if (personaConfig?.secrets) return 'secrets-only'
-  if (personaConfig?.configuration) return 'exclude-secrets'
-  return 'no-settings'
+export function useServicePersonaType(): ServicePersonaType {
+  const { personaConfiguration } = useLogin()
+  const svcConfig = personaConfiguration?.services
+  const settingsDisabled = svcConfig?.configuration === false
+  const secretsDisabled = svcConfig?.secrets === false
+
+  if (personaConfiguration?.all) return 'all-settings'
+  if (settingsDisabled && secretsDisabled) return 'no-settings'
+  if (settingsDisabled) return 'secrets-only'
+  if (secretsDisabled) return 'exclude-secrets'
+  return 'all-settings'
 }
