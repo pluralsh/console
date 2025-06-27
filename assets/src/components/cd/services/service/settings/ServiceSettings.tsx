@@ -1,12 +1,13 @@
-import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import {
+  PersonaConfigurationFragment,
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
   useFlowQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Navigate, Outlet, useMatch, useParams } from 'react-router-dom'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
   FLOW_SERVICE_PATH_MATCHER_ABS,
@@ -24,11 +25,20 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from '../ServiceDetails'
+import { useLogin } from 'components/contexts'
+
+type PersonaType =
+  | 'all-settings'
+  | 'secrets-only'
+  | 'exclude-secrets'
+  | 'no-settings'
 
 const getDirectory = ({
   service,
+  personaType,
 }: {
   service: ServiceDeploymentDetailsFragment
+  personaType: PersonaType
 }): SubtabDirectory => {
   const gitEnabled = !!service.repository
   const helmEnabled = !!service.helm?.chart || !!service.helm?.values
@@ -38,6 +48,10 @@ const getDirectory = ({
     ).length ?? 0
   const totalDependencies = service.dependencies?.length ?? 0
 
+  if (personaType === 'secrets-only')
+    return [{ path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' }]
+  if (personaType === 'no-settings') return []
+
   return [
     { path: SERVICE_SETTINGS_GIT_REL_PATH, label: 'Git', enabled: gitEnabled },
     {
@@ -45,7 +59,11 @@ const getDirectory = ({
       label: 'Helm',
       enabled: helmEnabled,
     },
-    { path: SERVICE_SETTINGS_SECRETS_REL_PATH, label: 'Secrets' },
+    {
+      path: SERVICE_SETTINGS_SECRETS_REL_PATH,
+      label: 'Secrets',
+      enabled: personaType !== 'exclude-secrets',
+    },
     { path: SERVICE_SETTINGS_REVISIONS_REL_PATH, label: 'Revisions' },
     {
       path: SERVICE_SETTINGS_CONTEXTS_REL_PATH,
@@ -101,9 +119,16 @@ export function ServiceSettings() {
     skip: !flowId,
   })
 
+  const { personaConfiguration } = useLogin()
+  const personaType = getPersonaType(personaConfiguration?.services)
+
   const directory = useMemo(
-    () => getDirectory({ service: ctx.service }),
-    [ctx.service]
+    () =>
+      getDirectory({
+        service: ctx.service,
+        personaType,
+      }),
+    [ctx.service, personaType]
   )
 
   const breadcrumbs = useMemo(
@@ -118,6 +143,12 @@ export function ServiceSettings() {
   )
   useSetBreadcrumbs(breadcrumbs)
 
+  if (
+    personaType === 'secrets-only' &&
+    tab !== SERVICE_SETTINGS_SECRETS_REL_PATH
+  )
+    return <Navigate to={SERVICE_SETTINGS_SECRETS_REL_PATH} />
+
   return (
     <Flex
       direction="column"
@@ -126,7 +157,21 @@ export function ServiceSettings() {
       width="100%"
     >
       <SubTabs directory={directory} />
-      <Outlet context={ctx} />
+      {personaType === 'no-settings' ? (
+        <EmptyState message="Service settings are not enabled for this persona." />
+      ) : (
+        <Outlet context={ctx} />
+      )}
     </Flex>
   )
+}
+
+const getPersonaType = (
+  personaConfig: PersonaConfigurationFragment['services']
+): PersonaType => {
+  if (personaConfig?.configuration && personaConfig?.secrets)
+    return 'all-settings'
+  if (personaConfig?.secrets) return 'secrets-only'
+  if (personaConfig?.configuration) return 'exclude-secrets'
+  return 'no-settings'
 }
