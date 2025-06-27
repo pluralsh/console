@@ -258,6 +258,7 @@ defmodule Console.Deployments.Global do
     dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
     tpl = Repo.preload(tpl, [:dependencies])
     tpl = dynamic_template(tpl, dest.cluster, global)
+          |> ServiceTemplate.load_contexts()
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
@@ -325,7 +326,9 @@ defmodule Console.Deployments.Global do
       {:ok, %Service{id: id}} -> id
       %Service{id: id} -> id
       {:error, {:already_exists, %Service{id: id}}} -> id
-      _ -> nil
+      err ->
+        Logger.error "Error global service to cluster #{inspect(err)}"
+        nil
     end)
     |> Stream.filter(& &1)
     |> MapSet.new()
@@ -640,32 +643,36 @@ defmodule Console.Deployments.Global do
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
-    template_fields(attrs, attrs, [
+    template_fields(attrs, [
       ~w(helm version)a,
       ~w(helm chart)a,
       ~w(helm values_files)a,
       ~w(contexts)a,
+      ~w(configuration)a,
       ~w(lua_script)a,
       ~w(git ref)a,
       ~w(git folder)a
     ], cluster, ctx)
-    |> add_sources(attrs, cluster, ctx)
+    |> add_sources(cluster, ctx)
   end
   defp dynamic_template(attrs, _, _), do: attrs
 
-  defp add_sources(attrs, %{sources: [_ | _] = sources}, cluster, ctx) do
-    Enum.reduce(sources, attrs, fn source, attrs ->
+  defp add_sources(%{sources: [_ | _] = sources} = attrs, cluster, ctx) do
+    source = Enum.map(sources, fn source ->
       fields = [~w(git ref)a, ~w(git folder)a]
-      template_fields(attrs, source, fields, cluster, ctx)
+      template_fields(source, fields, cluster, ctx)
     end)
+    Map.put(attrs, :sources, source)
   end
-  defp add_sources(attrs, _, _, _), do: attrs
+  defp add_sources(attrs, _, _), do: attrs
 
-  defp template_fields(acc, attrs, fields, cluster, ctx) do
+  defp template_fields(attrs, fields, cluster, ctx) do
     Enum.map(fields, fn keys -> Enum.map(keys, &Access.key/1) end)
-    |> Enum.reduce(acc, fn path, acc ->
+    |> Enum.reduce(attrs, fn path, acc ->
       case get_in(attrs, path) do
         str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
+        [%{value: v} | _] = vals when is_binary(v) ->
+          put_in(acc, path, Enum.map(vals, fn %{name: n, value: v} -> %{name: n, value: render_solid_raw(v, cluster, ctx)} end))
         [v | _] = vals when is_binary(v) ->
           put_in(acc, path, Enum.map(vals, &render_solid_raw(&1, cluster, ctx)))
         _ -> acc

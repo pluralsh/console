@@ -57,6 +57,12 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     settings: false,
     stacks: true,
     backups: true,
+    cost: true,
+    security: true,
+  },
+  services: {
+    secrets: true,
+    configuration: true,
   },
 } satisfies RequiredDeep<PersonaConfigurationAttributes>
 

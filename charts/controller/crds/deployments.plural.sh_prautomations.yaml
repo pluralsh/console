@@ -375,6 +375,10 @@ spec:
                 description: Name name of the automation in the console api (defaults
                   to metadata.name)
                 type: string
+              patch:
+                description: Patch whether to generate a patch for this pr instead
+                  of a full pr
+                type: boolean
               projectRef:
                 description: ProjectRef the project this automation belongs to.
                 properties:

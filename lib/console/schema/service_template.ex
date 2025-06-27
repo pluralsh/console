@@ -62,11 +62,12 @@ defmodule Console.Schema.ServiceTemplate do
   end
 
   def load_contexts(%{contexts: names, prev_contexts: names} = tpl), do: tpl
-  def load_contexts(%{contexts: names} = tpl) do
+  def load_contexts(%{contexts: [_ | _] = names} = tpl) do
     ctxs = Console.Deployments.Global.fetch_contexts(names)
     Map.put(tpl, :inferred_contexts, Enum.map(ctxs, & &1.id))
     |> Map.put(:prev_contexts, names)
   end
+  def load_contexts(tpl), do: %{tpl | inferred_contexts: [], prev_contexts: []}
 
   @valid ~w(name protect namespace templated repository_id contexts revision_id)a
 

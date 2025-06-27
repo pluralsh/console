@@ -134,13 +134,13 @@ func (in *ObservabilityProviderReconciler) SetupWithManager(mgr ctrl.Manager) er
 func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if provider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(provider, ObservabilityProviderFinalizer) {
+	if provider.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(provider, ObservabilityProviderFinalizer) {
 		controllerutil.AddFinalizer(provider, ObservabilityProviderFinalizer)
 		return nil, nil
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !provider.DeletionTimestamp.IsZero() {
 		// Remove ObservabilityProvider from Console API if it exists
 		exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 		if err != nil {

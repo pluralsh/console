@@ -171,7 +171,7 @@ func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha
 }
 
 func (r *PostgresUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.PostgresUser, credentials *v1alpha1.PostgresCredentials) error {
-	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, PostgresUserProtectionFinalizerName) {
+	if user.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, PostgresUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, PostgresUserProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, PostgresUserProtectionFinalizerName); err != nil {
 			return err

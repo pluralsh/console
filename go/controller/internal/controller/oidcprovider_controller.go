@@ -126,13 +126,13 @@ func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.R
 func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidcProvider *v1alpha1.OIDCProvider) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if oidcProvider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(oidcProvider, OIDCProviderFinalizer) {
+	if oidcProvider.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(oidcProvider, OIDCProviderFinalizer) {
 		controllerutil.AddFinalizer(oidcProvider, OIDCProviderFinalizer)
 		return nil, nil
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !oidcProvider.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !oidcProvider.DeletionTimestamp.IsZero() {
 		// Remove OIDCProvider from Console API if it exists
 		exists := in.isAlreadyExists(oidcProvider)
 

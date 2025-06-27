@@ -17,12 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 // PipelineSpec defines the desired state of Pipeline.
@@ -40,7 +40,7 @@ type PipelineSpec struct {
 	// ProjectRef references project this stack belongs to.
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
-	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// Bindings contain read and write policies of this pipeline
 	// +kubebuilder:validation:Optional
@@ -61,7 +61,7 @@ type PipelineStage struct {
 // PipelineStageService is the configuration of a service within a pipeline stage,
 // including optional promotion criteria.
 type PipelineStageService struct {
-	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
+	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Criteria *PipelineStageServicePromotionCriteria `json:"criteria,omitempty"`
@@ -71,11 +71,11 @@ type PipelineStageService struct {
 type PipelineStageServicePromotionCriteria struct {
 	// ServiceRef pointing to source service to promote from.
 	// +kubebuilder:validation:Optional
-	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
+	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
 	// PrAutomationRef pointing to source PR automation to promote from.
 	// +kubebuilder:validation:Optional
-	PrAutomationRef *v1.ObjectReference `json:"prAutomationRef,omitempty"`
+	PrAutomationRef *corev1.ObjectReference `json:"prAutomationRef,omitempty"`
 
 	// The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console)
 	// +kubebuilder:validation:Optional
@@ -127,7 +127,7 @@ type PipelineGate struct {
 
 	// ClusterRef of a Cluster this gate will execute on.
 	// +kubebuilder:validation:Optional
-	ClusterRef *v1.ObjectReference `json:"clusterRef,omitempty"`
+	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
 	// Spec contains specification for more complex gate types.
 	// +kubebuilder:validation:Optional

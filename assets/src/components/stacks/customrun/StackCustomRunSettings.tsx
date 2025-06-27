@@ -9,7 +9,7 @@ import {
 
 import { FormEvent, useMemo, useState } from 'react'
 
-import { PrConfigurationFields } from 'components/pr/automations/PrConfigurationFields'
+import { PrConfigurationFields } from 'components/self-service/pr/automations/PrConfigurationFields'
 
 import styled, { useTheme } from 'styled-components'
 

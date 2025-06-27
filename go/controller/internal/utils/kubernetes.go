@@ -271,12 +271,12 @@ func SyncCondition(set func(condition metav1.Condition), conditionType, status, 
 	condition := metav1.Condition{}
 
 	if status != nil {
-		lowercaseStatus := strings.ToLower(*status)
-		if lowercaseStatus == "true" {
+		switch strings.ToLower(*status) {
+		case "true":
 			condition.Status = metav1.ConditionTrue
-		} else if lowercaseStatus == "false" {
+		case "false":
 			condition.Status = metav1.ConditionFalse
-		} else {
+		default:
 			condition.Status = metav1.ConditionUnknown
 		}
 	}

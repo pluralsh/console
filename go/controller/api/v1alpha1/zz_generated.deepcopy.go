@@ -5061,6 +5061,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Patch != nil {
+		in, out := &in.Patch, &out.Patch
+		*out = new(bool)
+		**out = **in
+	}
 	if in.ClusterRef != nil {
 		in, out := &in.ClusterRef, &out.ClusterRef
 		*out = new(v1.ObjectReference)

@@ -107,7 +107,7 @@ func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Req
 }
 
 func (r *PostgresDatabaseReconciler) addOrRemoveFinalizer(ctx context.Context, database *v1alpha1.PostgresDatabase, credentials *v1alpha1.PostgresCredentials) error {
-	if database.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(database, PostgresDatabaseProtectionFinalizerName) {
+	if database.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(database, PostgresDatabaseProtectionFinalizerName) {
 		controllerutil.AddFinalizer(database, PostgresDatabaseProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, PostgresDatabaseProtectionFinalizerName); err != nil {
 			return err

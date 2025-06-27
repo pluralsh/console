@@ -365,7 +365,7 @@ export function ServiceSecrets() {
   if (!data?.serviceDeployment?.configuration) return <LoadingIndicator />
 
   return (
-    <WrapperCardSC>
+    <SvcSettingsWrapperCardSC>
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
           open={createOpen}
@@ -411,11 +411,11 @@ export function ServiceSecrets() {
           }}
         />
       )}
-    </WrapperCardSC>
+    </SvcSettingsWrapperCardSC>
   )
 }
 
-const WrapperCardSC = styled(Card)(({ theme }) => ({
+export const SvcSettingsWrapperCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.xlarge,
   display: 'flex',
   flexDirection: 'column',

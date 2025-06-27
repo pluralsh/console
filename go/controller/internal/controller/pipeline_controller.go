@@ -20,12 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,6 +30,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -130,12 +131,12 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *ctrl.Result {
 	/// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if pipeline.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(pipeline, PipelineFinalizer) {
+	if pipeline.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(pipeline, PipelineFinalizer) {
 		controllerutil.AddFinalizer(pipeline, PipelineFinalizer)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !pipeline.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !pipeline.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 		if err != nil {
 			return &requeue

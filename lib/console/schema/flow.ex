@@ -48,6 +48,10 @@ defmodule Console.Schema.Flow do
     from(f in query, where: ilike(f.name, ^"%#{q}%"))
   end
 
+  def stream(query \\ __MODULE__) do
+    from(f in query, order_by: [asc: :id])
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(f in query, order_by: ^order)
   end

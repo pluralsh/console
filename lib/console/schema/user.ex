@@ -95,6 +95,10 @@ defmodule Console.Schema.User do
     )
   end
 
+  def stream(query \\ __MODULE__) do
+    from(u in query, order_by: [asc: :id])
+  end
+
   def for_bindings(query \\ __MODULE__, bindings) do
     base = from(u in query, left_join: gm in assoc(u, :group_members), as: :gm, distinct: true)
 

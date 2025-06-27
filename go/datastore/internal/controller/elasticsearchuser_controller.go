@@ -256,7 +256,7 @@ func (r *ElasticSearchUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ElasticSearchUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.ElasticsearchUser, credentials *v1alpha1.ElasticsearchCredentials) error {
-	if user.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
+	if user.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(user, ElasticSearchUserProtectionFinalizerName) {
 		controllerutil.AddFinalizer(user, ElasticSearchUserProtectionFinalizerName)
 		if err := utils.TryAddFinalizer(ctx, r.Client, credentials, ElasticSearchUserProtectionFinalizerName); err != nil {
 			return err

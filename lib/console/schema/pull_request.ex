@@ -17,6 +17,7 @@ defmodule Console.Schema.PullRequest do
     field :approver,   :string
     field :preview,    :string
     field :attributes, :map
+    field :patch,      :binary
 
     field :notifications_policy_id, :binary_id
 
@@ -88,6 +89,7 @@ defmodule Console.Schema.PullRequest do
     creator
     labels
     preview
+    patch
   )a
 
   def changeset(model, attrs \\ %{}) do
