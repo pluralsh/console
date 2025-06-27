@@ -52,6 +52,7 @@ import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+import { useServicePersonaType } from './settings/ServiceSettings'
 
 type ServiceContextType = {
   service: ServiceDeploymentDetailsFragment
@@ -123,14 +124,15 @@ export const getDirectory = ({
   serviceDeployment,
   logsEnabled = false,
   metricsEnabled = false,
+  settingsEnabled = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   logsEnabled?: boolean | undefined
   metricsEnabled?: boolean | undefined
+  settingsEnabled?: boolean | undefined
 }): Directory => {
-  if (!serviceDeployment) {
-    return []
-  }
+  if (!serviceDeployment) return []
+
   const { componentStatus, dryRun, status } = serviceDeployment
   return [
     {
@@ -194,7 +196,7 @@ export const getDirectory = ({
     },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
-    { path: 'settings', label: 'Settings', enabled: true },
+    { path: 'settings', label: 'Settings', enabled: settingsEnabled },
   ]
 }
 
@@ -202,11 +204,14 @@ function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const { serviceId, flowId } = useParams()
-  const [isRefetching, setIsRefetching] = useState(false)
   const { tab } =
     useMatch(
       `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
     )?.params ?? {}
+
+  const personaType = useServicePersonaType()
+
+  const [isRefetching, setIsRefetching] = useState(false)
 
   const {
     data: serviceData,
@@ -236,8 +241,14 @@ function ServiceDetailsBase() {
   const metricsEnabled = useMetricsEnabled()
 
   const directory = useMemo(
-    () => getDirectory({ serviceDeployment, logsEnabled, metricsEnabled }),
-    [logsEnabled, metricsEnabled, serviceDeployment]
+    () =>
+      getDirectory({
+        serviceDeployment,
+        logsEnabled,
+        metricsEnabled,
+        settingsEnabled: personaType !== 'no-settings',
+      }),
+    [logsEnabled, metricsEnabled, personaType, serviceDeployment]
   )
 
   useSetBreadcrumbs(

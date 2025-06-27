@@ -37,6 +37,7 @@ import CopyButton from 'components/utils/CopyButton'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { useServicePersonaType } from './ServiceSettings'
 
 function DeleteSecret({
   serviceDeploymentId,
@@ -343,6 +344,7 @@ const ColActions = ({
 
 export function ServiceSecrets() {
   const theme = useTheme()
+  const personaType = useServicePersonaType()
   const serviceId = useParams()[SERVICE_PARAM_ID]
 
   const [createOpen, setCreateOpen] = useState(false)
@@ -363,6 +365,8 @@ export function ServiceSecrets() {
 
   if (error) return <GqlError error={error} />
   if (!data?.serviceDeployment?.configuration) return <LoadingIndicator />
+  if (personaType === 'exclude-secrets')
+    return <EmptyState message="Secrets are not enabled for your persona." />
 
   return (
     <SvcSettingsWrapperCardSC>

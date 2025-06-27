@@ -1,15 +1,8 @@
 import { ApolloError } from '@apollo/client'
-import {
-  Card,
-  EmptyState,
-  Flex,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { Card, Flex, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useClusterHeatmapData } from 'components/cd/cluster/ClusterMetrics'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
@@ -73,7 +66,7 @@ export function OverviewHeatmaps({ clusterId }: { clusterId: string }) {
         cpuData={heatmapData.utilCpuHeatMap}
         loading={heatmapData.utilLoading}
         error={heatmapData.utilError}
-        direction={hasNnData ? 'column' : 'row'}
+        direction={hasNnData || heatmapData.nnLoading ? 'column' : 'row'}
       />
       <HeatmapPair
         title="Noisy neighbors"
@@ -83,7 +76,7 @@ export function OverviewHeatmaps({ clusterId }: { clusterId: string }) {
         cpuData={heatmapData.noisyCpuHeatMap}
         loading={heatmapData.nnLoading}
         error={heatmapData.nnError}
-        direction={hasUtilData ? 'column' : 'row'}
+        direction={hasUtilData || heatmapData.utilLoading ? 'column' : 'row'}
       />
     </Flex>
   )
@@ -111,21 +104,7 @@ function HeatmapPair({
   hasData: boolean
 }) {
   const { spacing } = useTheme()
-  if (!hasData)
-    return !(error || loading) ? null : (
-      <Card css={{ padding: spacing.xlarge }}>
-        {error ? (
-          <GqlError
-            css={{ width: '100%' }}
-            error={error}
-          />
-        ) : loading ? (
-          <LoadingIndicator />
-        ) : (
-          <EmptyState message={`${title} heatmaps not available.`} />
-        )}
-      </Card>
-    )
+  if (!(hasData || loading || error)) return null
   return (
     <Flex
       gap="medium"
@@ -137,39 +116,43 @@ function HeatmapPair({
         <Subtitle2H1>{title}</Subtitle2H1>
         {action}
       </StretchedFlex>
-      <Flex
-        direction={direction}
-        gap="medium"
-      >
-        <Card
-          header={{
-            content: `memory utilization${flavor ? ` by ${flavor}` : ''}`,
-          }}
-          css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <Flex
+          direction={direction}
+          gap="medium"
         >
-          <UtilizationHeatmap
-            loading={loading}
-            colorScheme="blue"
-            data={memoryData}
-            flavor={flavor}
-            utilizationType="memory"
-          />
-        </Card>
-        <Card
-          header={{
-            content: `cpu utilization${flavor ? ` by ${flavor}` : ''}`,
-          }}
-          css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
-        >
-          <UtilizationHeatmap
-            loading={loading}
-            colorScheme="purple"
-            data={cpuData}
-            flavor={flavor}
-            utilizationType="cpu"
-          />
-        </Card>
-      </Flex>
+          <Card
+            header={{
+              content: `memory utilization${flavor ? ` by ${flavor}` : ''}`,
+            }}
+            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+          >
+            <UtilizationHeatmap
+              loading={loading}
+              colorScheme="blue"
+              data={memoryData}
+              flavor={flavor}
+              utilizationType="memory"
+            />
+          </Card>
+          <Card
+            header={{
+              content: `cpu utilization${flavor ? ` by ${flavor}` : ''}`,
+            }}
+            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+          >
+            <UtilizationHeatmap
+              loading={loading}
+              colorScheme="purple"
+              data={cpuData}
+              flavor={flavor}
+              utilizationType="cpu"
+            />
+          </Card>
+        </Flex>
+      )}
     </Flex>
   )
 }

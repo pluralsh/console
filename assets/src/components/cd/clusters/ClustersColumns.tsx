@@ -471,22 +471,22 @@ export const ColHomeTableActions = columnHelper.accessor(({ node }) => node, {
 
 export const cdClustersColumns = [
   ColCluster,
-  ColHealthScore,
+  ColAgentHealth,
   ColProvider,
   ColVersion,
   ColCpu,
   ColMemory,
-  ColAgentHealth,
+  ColHealthScore,
   ColUpgradeable,
   ColCdTableActions,
 ]
 
 export const homeClustersColumns = [
   ColCluster,
-  ColHealthScore,
+  ColAgentHealth,
   ColProvider,
   ColVersion,
-  ColAgentHealth,
+  ColHealthScore,
   ColUpgradeable,
   ColHomeTableActions,
 ]

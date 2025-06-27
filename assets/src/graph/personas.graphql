@@ -20,6 +20,10 @@ fragment PersonaConfiguration on PersonaConfiguration {
     backups
     stacks
   }
+  services {
+    configuration
+    secrets
+  }
 }
 
 fragment Persona on Persona {
