@@ -15,10 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	dbsv1alpha1 "github.com/pluralsh/console/go/datastore/api/v1alpha1"
 	"github.com/pluralsh/console/go/datastore/internal/controller"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("PostgresCredentials Controller", func() {
@@ -44,16 +42,16 @@ var _ = Describe("PostgresCredentials Controller", func() {
 				},
 			}, nil)).To(Succeed())
 
-			postgresCredential := &dbsv1alpha1.PostgresCredentials{}
+			postgresCredential := &v1alpha1.PostgresCredentials{}
 			By("creating the custom resource for the Kind PostgresCredentials")
 			err := k8sClient.Get(ctx, typeNamespacedName, postgresCredential)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &dbsv1alpha1.PostgresCredentials{
+				resource := &v1alpha1.PostgresCredentials{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					Spec: dbsv1alpha1.PostgresCredentialsSpec{
+					Spec: v1alpha1.PostgresCredentialsSpec{
 						Host:     "127.0.0.1",
 						Port:     0,
 						Database: "test",
@@ -71,7 +69,7 @@ var _ = Describe("PostgresCredentials Controller", func() {
 		})
 
 		AfterEach(func() {
-			resource := &dbsv1alpha1.PostgresCredentials{}
+			resource := &v1alpha1.PostgresCredentials{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 

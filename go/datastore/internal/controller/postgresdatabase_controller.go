@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -63,6 +62,13 @@ func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}()
 
+	if !db.DeletionTimestamp.IsZero() {
+		if err = r.handleDelete(ctx, db); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
 	credentials := new(v1alpha1.PostgresCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: db.Spec.CredentialsRef.Name, Namespace: db.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
@@ -87,13 +93,6 @@ func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
-	if !db.DeletionTimestamp.IsZero() {
-		if err = r.handleDelete(db); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
-	}
-
 	if err := r.PostgresClient.UpsertDatabase(db.DatabaseName()); err != nil {
 		logger.Error(err, "failed to create database")
 		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -116,7 +115,19 @@ func (r *PostgresDatabaseReconciler) addOrRemoveFinalizer(ctx context.Context, d
 	return nil
 }
 
-func (r *PostgresDatabaseReconciler) handleDelete(database *v1alpha1.PostgresDatabase) error {
+func (r *PostgresDatabaseReconciler) handleDelete(ctx context.Context, database *v1alpha1.PostgresDatabase) error {
+	credentials := new(v1alpha1.PostgresCredentials)
+	err := r.Get(ctx, types.NamespacedName{Name: database.Spec.CredentialsRef.Name, Namespace: database.Namespace}, credentials)
+
+	if err != nil || !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
+		controllerutil.RemoveFinalizer(database, PostgresDatabaseProtectionFinalizerName)
+		return nil
+	}
+
+	if err := r.PostgresClient.Init(ctx, r.Client, credentials); err != nil {
+		return err
+	}
+
 	if err := r.PostgresClient.DeleteDatabase(database.DatabaseName()); err != nil {
 		return err
 	}

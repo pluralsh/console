@@ -10,7 +10,6 @@ import (
 	"github.com/pluralsh/console/go/datastore/internal/test/common"
 	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
 	"github.com/stretchr/testify/mock"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,12 +33,12 @@ var _ = Describe("Postgres User Controller", func() {
 		}
 		user := &v1alpha1.PostgresUser{}
 		credential := &v1alpha1.PostgresCredentials{}
-		secret := &corev1.Secret{}
+		secret := &v1.Secret{}
 
 		BeforeEach(func() {
 			err := k8sClient.Get(ctx, types.NamespacedName{Namespace: namespace, Name: userSecretName}, secret)
 			if err != nil && errors.IsNotFound(err) {
-				Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				Expect(common.MaybeCreate(k8sClient, &v1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      userSecretName,
 						Namespace: namespace,
@@ -117,7 +116,7 @@ var _ = Describe("Postgres User Controller", func() {
 			By("Cleanup the specific resource instance PostgresUser")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
-			secret := &corev1.Secret{}
+			secret := &v1.Secret{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: namespace, Name: userSecretName}, secret)
 			Expect(err).NotTo(HaveOccurred())
 
