@@ -25,7 +25,7 @@ defimpl Console.Deployments.PubSub.Previewable, for: [
   def reconcile(%@for{item: %PullRequest{} = pr}) do
     Utils.deduplicate({:pr_updated, pr.id}, fn ->
       Preview.sync_instance(pr)
-    end, ttl: :timer.seconds(15))
+    end, ttl: :timer.minutes(2))
   end
 end
 

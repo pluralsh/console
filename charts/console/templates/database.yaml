@@ -3,15 +3,17 @@ apiVersion: dbs.plural.sh/v1alpha1
 kind: PostgresDatabase
 metadata:
   name: plrl-{{ .Values.cloud.instanceName }}
+  namespace: {{ .Values.cloud.postgresNamespace }}
 spec:
   credentialsRef:
-    name: postgres-{{ .Values.cloud.database.server }}
+    name: {{ .Values.cloud.database.shard }}
   name: {{ .Values.cloud.database.name }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres-user-password
+  name: {{ .Values.cloud.instanceName }}-pg-user
+  namespace: {{ .Values.cloud.postgresNamespace }}
 stringData:
   password: {{ .Values.cloud.database.password | quote }}
 ---
@@ -19,13 +21,14 @@ apiVersion: dbs.plural.sh/v1alpha1
 kind: PostgresUser
 metadata:
   name: plrl-{{ .Values.cloud.instanceName }}
+  namespace: {{ .Values.cloud.postgresNamespace }}
 spec:
   credentialsRef:
-    name: postgres-{{ .Values.cloud.database.server }}
+    name: {{ .Values.cloud.database.shard }}
   name: {{ .Values.cloud.database.user }}
   databases: 
   - {{ .Values.cloud.database.name }}
   passwordSecretKeyRef:
-    name: postgres-user-password
+    name: {{ .Values.cloud.instanceName }}-pg-user
     key: password
 {{ end }}
