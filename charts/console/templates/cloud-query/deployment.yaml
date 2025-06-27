@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: {{ include "console.fullname" . }}-cloud-query
   labels:
-    {{ include "console.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
     {{- with .Values.cloudQuery.podLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-    app.kubernetes.io/component: cloud-query
 spec:
   {{- if not .Values.cloudQuery.autoscaling.enabled }}
   replicas: {{ .Values.cloudQuery.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: console
+      app.kubernetes.io/name: cloud-query
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: cloud-query
   template:
     metadata:
       {{- with .Values.cloudQuery.podAnnotations }}
@@ -24,11 +24,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "console.labels" . | nindent 8 }}
+        helm.sh/chart: {{ include "console.chart" . }}
+        app.kubernetes.io/name: cloud-query
+        app.kubernetes.io/instance: {{ .Release.Name }}
         {{- with .Values.cloudQuery.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        app.kubernetes.io/component: cloud-query
     spec:
       {{- with .Values.cloudQuery.imagePullSecrets }}
       imagePullSecrets:

@@ -4,7 +4,9 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "console.fullname" . }}
   labels:
-    {{- include "console.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
