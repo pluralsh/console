@@ -65,6 +65,13 @@ func (r *MySqlUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}()
 
+	if !user.DeletionTimestamp.IsZero() {
+		if err = r.handleDelete(ctx, user); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
 	credentials := new(v1alpha1.MySqlCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
@@ -87,13 +94,6 @@ func (r *MySqlUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Error(err, "failed to create MySql client")
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
-	}
-
-	if !user.DeletionTimestamp.IsZero() {
-		if err = r.handleDelete(ctx, user); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
 	}
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: user.Spec.PasswordSecretKeyRef.Name, Namespace: user.Namespace})
@@ -159,6 +159,21 @@ func (r *MySqlUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 }
 
 func (r *MySqlUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.MySqlUser) error {
+	credentials := new(v1alpha1.MySqlCredentials)
+	err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials)
+
+	if err != nil || !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
+		if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.PasswordSecretKeyRef.Name, MySqlSecretProtectionFinalizerName); err != nil {
+			return err
+		}
+		controllerutil.RemoveFinalizer(user, MySqlUserProtectionFinalizerName)
+		return nil
+	}
+
+	if err := r.MySqlClient.Init(ctx, r.Client, credentials); err != nil {
+		return err
+	}
+
 	if err := r.MySqlClient.DeleteUser(user.UserName()); err != nil {
 		return err
 	}

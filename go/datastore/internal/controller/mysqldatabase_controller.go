@@ -63,6 +63,13 @@ func (r *MySqlDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}()
 
+	if !db.DeletionTimestamp.IsZero() {
+		if err = r.handleDelete(ctx, db); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
 	credentials := new(v1alpha1.MySqlCredentials)
 	if err := r.Get(ctx, types.NamespacedName{Name: db.Spec.CredentialsRef.Name, Namespace: db.Namespace}, credentials); err != nil {
 		logger.V(5).Info(err.Error())
@@ -87,13 +94,6 @@ func (r *MySqlDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 
-	if !db.DeletionTimestamp.IsZero() {
-		if err = r.handleDelete(db); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
-	}
-
 	if err := r.MySqlClient.UpsertDatabase(db.DatabaseName()); err != nil {
 		logger.Error(err, "failed to create database")
 		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -106,7 +106,19 @@ func (r *MySqlDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	return ctrl.Result{}, nil
 }
 
-func (r *MySqlDatabaseReconciler) handleDelete(database *v1alpha1.MySqlDatabase) error {
+func (r *MySqlDatabaseReconciler) handleDelete(ctx context.Context, database *v1alpha1.MySqlDatabase) error {
+	credentials := new(v1alpha1.MySqlCredentials)
+	err := r.Get(ctx, types.NamespacedName{Name: database.Spec.CredentialsRef.Name, Namespace: database.Namespace}, credentials)
+
+	if err != nil || !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
+		controllerutil.RemoveFinalizer(database, MySqlDatabaseProtectionFinalizerName)
+		return nil
+	}
+
+	if err := r.MySqlClient.Init(ctx, r.Client, credentials); err != nil {
+		return err
+	}
+
 	if err := r.MySqlClient.DeleteDatabase(database.DatabaseName()); err != nil {
 		return err
 	}
