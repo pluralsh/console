@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,15 +63,19 @@ func (in *Persona) Diff(hasher Hasher) (changed bool, sha string, err error) {
 }
 
 func (in *Persona) Attributes() console.PersonaAttributes {
-	attrs := console.PersonaAttributes{
+	return console.PersonaAttributes{
 		Name:          lo.ToPtr(in.PersonaName()),
 		Description:   in.Spec.Description,
 		Role:          in.Spec.Role,
 		Configuration: in.Spec.Configuration.Attributes(),
-		Bindings:      nil, // TODO
+		Bindings: algorithms.Map(PolicyBindings(in.Spec.Bindings), func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
+			return &console.BindingAttributes{
+				ID:      binding.ID,
+				UserID:  binding.UserID,
+				GroupID: binding.GroupID,
+			}
+		}),
 	}
-
-	return attrs
 }
 
 // PersonaSpec defines the desired state of Persona
