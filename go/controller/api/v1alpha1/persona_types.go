@@ -68,13 +68,14 @@ func (in *Persona) Attributes() console.PersonaAttributes {
 		Description:   in.Spec.Description,
 		Role:          in.Spec.Role,
 		Configuration: in.Spec.Configuration.Attributes(),
-		Bindings: algorithms.Map(PolicyBindings(in.Spec.Bindings), func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
-			return &console.BindingAttributes{
-				ID:      binding.ID,
-				UserID:  binding.UserID,
-				GroupID: binding.GroupID,
-			}
-		}),
+		Bindings: algorithms.Map(PolicyBindings(in.Spec.Bindings),
+			func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
+				return &console.BindingAttributes{
+					ID:      binding.ID,
+					UserID:  binding.UserID,
+					GroupID: binding.GroupID,
+				}
+			}),
 	}
 }
 
