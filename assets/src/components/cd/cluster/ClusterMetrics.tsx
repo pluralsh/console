@@ -13,8 +13,9 @@ import {
   HeatMapFlavor,
   useClusterHeatMapQuery,
   useClusterMetricsQuery,
+  useClusterNoisyNeighborsQuery,
 } from 'generated/graphql'
-import { capitalize, isNull } from 'lodash'
+import { capitalize, isEmpty, isNull } from 'lodash'
 import styled, { useTheme } from 'styled-components'
 
 import { Prometheus } from '../../../utils/prometheus'
@@ -43,6 +44,21 @@ export function ClusterMetrics() {
   const { clusterId } = useParams()
   const metricsEnabled = useMetricsEnabled()
 
+  const [heatMapFlavor, setHeatMapFlavor] = useState<HeatMapFlavor>(
+    HeatMapFlavor.Node
+  )
+
+  const {
+    utilLoading: loading,
+    utilError: error,
+    utilCpuHeatMap,
+    utilMemoryHeatMap,
+  } = useClusterHeatmapData({
+    clusterId,
+    fetchUtilization: true,
+    utilizationFlavor: heatMapFlavor,
+  })
+
   const {
     data: metricsData,
     loading: metricsLoading,
@@ -65,6 +81,7 @@ export function ClusterMetrics() {
     !isNull(cpuMetrics.total) &&
     !isNull(memMetrics.total) &&
     (cpuMetrics.usage?.length ?? 0) > 0
+  const hasHeatmapData = !isEmpty(utilCpuHeatMap) || !isEmpty(utilMemoryHeatMap)
 
   return (
     <WrapperSC>
@@ -102,117 +119,84 @@ export function ClusterMetrics() {
           )}
         </Card>
       </Flex>
-      <ClusterUtilizationHeatmaps clusterId={clusterId ?? ''} />
-    </WrapperSC>
-  )
-}
-
-export function ClusterUtilizationHeatmaps({
-  clusterId,
-}: {
-  clusterId: string
-}) {
-  const metricsEnabled = useMetricsEnabled()
-  const { spacing } = useTheme()
-  const [heatMapFlavor, setHeatMapFlavor] = useState<HeatMapFlavor>(
-    HeatMapFlavor.Node
-  )
-  const {
-    data: heatMapData,
-    loading: heatMapLoading,
-    error: heatMapError,
-  } = useClusterHeatMapQuery({
-    variables: { clusterId: clusterId ?? '', flavor: heatMapFlavor },
-    skip: !metricsEnabled || !clusterId,
-    fetchPolicy: 'cache-and-network',
-    pollInterval: 60_000,
-  })
-
-  const { cpuHeatMap, memoryHeatMap } = useMemo(
-    () => ({
-      cpuHeatMap:
-        heatMapData?.cluster?.heatMap?.cpu?.filter(isNonNullable) ?? [],
-      memoryHeatMap:
-        heatMapData?.cluster?.heatMap?.memory?.filter(isNonNullable) ?? [],
-    }),
-    [heatMapData?.cluster?.heatMap]
-  )
-  return (
-    <Flex
-      flex={1}
-      gap="medium"
-      direction="column"
-    >
       <Flex
-        width="100%"
-        justifyContent="space-between"
+        flex={1}
+        gap="medium"
+        direction="column"
       >
-        <Subtitle2H1>Memory & CPU utliization</Subtitle2H1>
         <Flex
-          gap="small"
-          align="center"
+          width="100%"
+          justifyContent="space-between"
         >
-          <CaptionP $color="text-xlight">Group by</CaptionP>
-          <Select
-            width={160}
-            selectedKey={heatMapFlavor}
-            onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
+          <Subtitle2H1>Memory & CPU utliization</Subtitle2H1>
+          <Flex
+            gap="small"
+            align="center"
           >
-            {Object.values(HeatMapFlavor).map((flavor) => (
-              <ListBoxItem
-                key={flavor}
-                label={capitalize(flavor)}
+            <CaptionP $color="text-xlight">Group by</CaptionP>
+            <Select
+              width={160}
+              selectedKey={heatMapFlavor}
+              onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
+            >
+              {Object.values(HeatMapFlavor).map((flavor) => (
+                <ListBoxItem
+                  key={flavor}
+                  label={capitalize(flavor)}
+                />
+              ))}
+            </Select>
+          </Flex>
+        </Flex>
+        {!hasHeatmapData ? (
+          <Card css={{ padding: spacing.xlarge, flex: 1 }}>
+            {error ? (
+              <GqlError
+                css={{ width: '100%' }}
+                error={error}
               />
-            ))}
-          </Select>
-        </Flex>
+            ) : loading ? (
+              <LoadingIndicator />
+            ) : (
+              <EmptyState message="Utilization heatmaps not available." />
+            )}
+          </Card>
+        ) : (
+          <Flex gap="large">
+            <Card
+              header={{
+                content: `memory utilization by ${heatMapFlavor}`,
+                outerProps: { style: { paddingBottom: spacing.large } },
+              }}
+              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+            >
+              <UtilizationHeatmap
+                colorScheme="blue"
+                data={utilMemoryHeatMap}
+                loading={loading}
+                flavor={heatMapFlavor}
+                utilizationType="memory"
+              />
+            </Card>
+            <Card
+              header={{
+                content: `cpu utilization by ${heatMapFlavor}`,
+                outerProps: { style: { paddingBottom: spacing.large } },
+              }}
+              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+            >
+              <UtilizationHeatmap
+                colorScheme="purple"
+                data={utilCpuHeatMap}
+                loading={loading}
+                flavor={heatMapFlavor}
+                utilizationType="cpu"
+              />
+            </Card>
+          </Flex>
+        )}
       </Flex>
-      {!heatMapData ? (
-        <Card css={{ padding: spacing.xlarge, flex: 1 }}>
-          {heatMapError ? (
-            <GqlError
-              css={{ width: '100%' }}
-              error={heatMapError}
-            />
-          ) : heatMapLoading ? (
-            <LoadingIndicator />
-          ) : (
-            <EmptyState message="Utilization heatmaps not available." />
-          )}
-        </Card>
-      ) : (
-        <Flex gap="large">
-          <Card
-            header={{
-              content: `memory utilization by ${heatMapFlavor}`,
-              outerProps: { style: { paddingBottom: spacing.large } },
-            }}
-            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
-          >
-            <UtilizationHeatmap
-              colorScheme="blue"
-              data={memoryHeatMap}
-              flavor={heatMapFlavor}
-              utilizationType="memory"
-            />
-          </Card>
-          <Card
-            header={{
-              content: `cpu utilization by ${heatMapFlavor}`,
-              outerProps: { style: { paddingBottom: spacing.large } },
-            }}
-            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
-          >
-            <UtilizationHeatmap
-              colorScheme="purple"
-              data={cpuHeatMap}
-              flavor={heatMapFlavor}
-              utilizationType="cpu"
-            />
-          </Card>
-        </Flex>
-      )}
-    </Flex>
+    </WrapperSC>
   )
 }
 
@@ -222,6 +206,61 @@ const WrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   height: '100%',
 }))
+
+export function useClusterHeatmapData({
+  clusterId,
+  fetchNoisyNeighbors = false,
+  fetchUtilization = false,
+  utilizationFlavor = HeatMapFlavor.Node,
+}: {
+  clusterId?: string
+  fetchNoisyNeighbors?: boolean
+  fetchUtilization?: boolean
+  utilizationFlavor?: HeatMapFlavor
+}) {
+  const metricsEnabled = useMetricsEnabled()
+  const {
+    data: utilData,
+    loading: utilLoading,
+    error: utilError,
+  } = useClusterHeatMapQuery({
+    variables: { clusterId: clusterId ?? '', flavor: utilizationFlavor },
+    skip: !metricsEnabled || !clusterId || !fetchUtilization,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 60_000,
+  })
+
+  const {
+    data: nnData,
+    loading: nnLoading,
+    error: nnError,
+  } = useClusterNoisyNeighborsQuery({
+    variables: { clusterId: clusterId ?? '' },
+    skip: !metricsEnabled || !clusterId || !fetchNoisyNeighbors,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 60_000,
+  })
+
+  const ret = useMemo(
+    () => ({
+      utilCpuHeatMap:
+        utilData?.cluster?.heatMap?.cpu?.filter(isNonNullable) ?? [],
+      utilMemoryHeatMap:
+        utilData?.cluster?.heatMap?.memory?.filter(isNonNullable) ?? [],
+      noisyCpuHeatMap:
+        nnData?.cluster?.noisyNeighbors?.cpu?.filter(isNonNullable) ?? [],
+      noisyMemoryHeatMap:
+        nnData?.cluster?.noisyNeighbors?.memory?.filter(isNonNullable) ?? [],
+      utilLoading: !utilData && utilLoading,
+      utilError,
+      nnLoading: !nnData && nnLoading,
+      nnError,
+    }),
+    [utilData, nnData, utilLoading, utilError, nnLoading, nnError]
+  )
+
+  return ret
+}
 
 const processClusterMetrics = (
   cluster: Nullable<ClusterWithMetricsFragment>

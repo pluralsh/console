@@ -1,6 +1,6 @@
 import { Card, Flex } from '@pluralsh/design-system'
 import { MetadataPropSC } from 'components/cd/cluster/ClusterMetadata'
-import { ClusterUtilizationHeatmaps } from 'components/cd/cluster/ClusterMetrics'
+import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { getClusterDistroName } from 'components/utils/ClusterDistro'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { TooltipTime } from 'components/utils/TooltipTime'
@@ -8,16 +8,16 @@ import {
   ClusterOverviewDetailsFragment,
   NodeStatisticHealth,
 } from 'generated/graphql.ts'
+import { isEmpty } from 'lodash'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { ClusterHealth, healthScoreToSeverity } from '../../ClusterHealthChip'
 import { getClusterUpgradeInfo } from '../../ClusterUpgradeButton'
 import { ClusterInfoFlyoverTab } from '../ClusterInfoFlyover'
-import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
-import { OverviewTabCard } from './OverviewTabCard'
-import { isEmpty } from 'lodash'
 import { componentHasInsight } from '../health/ConfigurationIssuesSection'
-import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
+import { OverviewHeatmaps } from './OverviewHeatmaps'
+import { OverviewTabCard } from './OverviewTabCard'
 export function OverviewTab({
   cluster,
   setTab,
@@ -106,7 +106,7 @@ export function OverviewTab({
           ]}
         />
       </Flex>
-      {metricsEnabled && <ClusterUtilizationHeatmaps clusterId={cluster.id} />}
+      {metricsEnabled && <OverviewHeatmaps clusterId={cluster.id} />}
     </WrapperSC>
   )
 }
@@ -143,10 +143,7 @@ function MetadataCard({
         )}
       </MetadataPropSC>
       <MetadataPropSC heading="Agent health">
-        <ClusterHealth
-          size="small"
-          cluster={cluster}
-        />
+        <ClusterHealth cluster={cluster} />
       </MetadataPropSC>
     </MetadataCardSC>
   )
@@ -158,7 +155,6 @@ const MetadataCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.large,
   gap: theme.spacing.small,
   width: '100%',
-  height: '100%',
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({
