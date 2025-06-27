@@ -3,7 +3,9 @@ kind: Service
 metadata:
   name: {{ include "console.fullname" . }}
   labels:
-    {{- include "console.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: {{ .Values.cloudQuery.service.type }}
   ports:
@@ -12,6 +14,5 @@ spec:
       protocol: TCP
       name: grpc
   selector:
-    app.kubernetes.io/name: console
+    app.kubernetes.io/name: cloud-query
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: cloud-query
