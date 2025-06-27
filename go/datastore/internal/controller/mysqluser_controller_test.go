@@ -17,12 +17,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var _ = Describe("Postgres User Controller", func() {
+var _ = Describe("MySql User Controller", func() {
 	Context("When reconciling a resource", func() {
 		const (
-			resourceName   = "test-postgres-user"
+			resourceName   = "test-mysql-user"
 			namespace      = "default"
-			userSecretName = "test-postgres-user-secret"
+			userSecretName = "test-mysql-user-secret"
 		)
 
 		ctx := context.Background()
@@ -31,8 +31,8 @@ var _ = Describe("Postgres User Controller", func() {
 			Name:      resourceName,
 			Namespace: namespace,
 		}
-		user := &v1alpha1.PostgresUser{}
-		credential := &v1alpha1.PostgresCredentials{}
+		user := &v1alpha1.MySqlUser{}
+		credential := &v1alpha1.MySqlCredentials{}
 		secret := &v1.Secret{}
 
 		BeforeEach(func() {
@@ -48,18 +48,17 @@ var _ = Describe("Postgres User Controller", func() {
 					},
 				}, nil)).To(Succeed())
 			}
-			By("creating the custom resource for the Kind PostgresCredentials")
+			By("creating the custom resource for the Kind MySqlCredentials")
 			err = k8sClient.Get(ctx, typeNamespacedName, credential)
 			if err != nil && errors.IsNotFound(err) {
-				credentials := &v1alpha1.PostgresCredentials{
+				credentials := &v1alpha1.MySqlCredentials{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: namespace,
 					},
-					Spec: v1alpha1.PostgresCredentialsSpec{
+					Spec: v1alpha1.MySqlCredentialsSpec{
 						Host:     "127.0.0.1",
 						Port:     0,
-						Database: "test",
 						Username: "test",
 						PasswordSecretKeyRef: v1.SecretKeySelector{
 							LocalObjectReference: v1.LocalObjectReference{
@@ -70,9 +69,9 @@ var _ = Describe("Postgres User Controller", func() {
 					},
 				}
 				Expect(k8sClient.Create(ctx, credentials)).To(Succeed())
-				Expect(common.MaybePatch(k8sClient, &v1alpha1.PostgresCredentials{
+				Expect(common.MaybePatch(k8sClient, &v1alpha1.MySqlCredentials{
 					ObjectMeta: metav1.ObjectMeta{Name: resourceName, Namespace: namespace},
-				}, func(p *v1alpha1.PostgresCredentials) {
+				}, func(p *v1alpha1.MySqlCredentials) {
 					p.Status.Conditions = []metav1.Condition{
 						{
 							Type:               v1alpha1.ReadyConditionType.String(),
@@ -85,15 +84,15 @@ var _ = Describe("Postgres User Controller", func() {
 				})).To(Succeed())
 			}
 
-			By("creating the custom resource for the Kind PostgresUser")
+			By("creating the custom resource for the Kind MySqlUser")
 			err = k8sClient.Get(ctx, typeNamespacedName, user)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.PostgresUser{
+				resource := &v1alpha1.MySqlUser{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: namespace,
 					},
-					Spec: v1alpha1.PostgresUserSpec{
+					Spec: v1alpha1.MySqlUserSpec{
 						CredentialsRef: v1.LocalObjectReference{
 							Name: resourceName}, // Not required for this test.
 						PasswordSecretKeyRef: v1.SecretKeySelector{
@@ -109,11 +108,11 @@ var _ = Describe("Postgres User Controller", func() {
 		})
 
 		AfterEach(func() {
-			resource := &v1alpha1.PostgresUser{}
+			resource := &v1alpha1.MySqlUser{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance PostgresUser")
+			By("Cleanup the specific resource instance MySqlUser")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
 			secret := &v1.Secret{}
@@ -143,20 +142,20 @@ var _ = Describe("Postgres User Controller", func() {
 				},
 			}
 
-			fakePostgresClient := mocks.NewClientMock(mocks.TestingT)
-			fakePostgresClient.On("Init", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-			fakePostgresClient.On("UpsertUser", mock.Anything, mock.Anything).Return(nil)
+			fakeClient := mocks.NewMySqlClientMock(mocks.TestingT)
+			fakeClient.On("Init", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			fakeClient.On("UpsertUser", mock.Anything, mock.Anything).Return(nil)
 
-			controllerReconciler := &controller.PostgresUserReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				PostgresClient: fakePostgresClient,
+			controllerReconciler := &controller.MySqlUserReconciler{
+				Client:      k8sClient,
+				Scheme:      k8sClient.Scheme(),
+				MySqlClient: fakeClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 
-			user := &v1alpha1.PostgresUser{}
+			user := &v1alpha1.MySqlUser{}
 			err = k8sClient.Get(ctx, typeNamespacedName, user)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(user.Status)).To(Equal(common.SanitizeStatusConditions(expectedStatus)))

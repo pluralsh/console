@@ -3,25 +3,23 @@ package controller_test
 import (
 	"context"
 
-	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
-	"github.com/stretchr/testify/mock"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
+	"github.com/pluralsh/console/go/datastore/internal/controller"
 	"github.com/pluralsh/console/go/datastore/internal/test/common"
 	"github.com/pluralsh/console/go/datastore/internal/test/mocks"
+	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/pluralsh/console/go/datastore/internal/controller"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var _ = Describe("PostgresCredentials Controller", func() {
+var _ = Describe("MySqlCredentials Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-postgres-credentials"
+		const resourceName = "test-mysql-credentials"
 		const namespace = "default"
 
 		ctx := context.Background()
@@ -42,19 +40,18 @@ var _ = Describe("PostgresCredentials Controller", func() {
 				},
 			}, nil)).To(Succeed())
 
-			postgresCredential := &v1alpha1.PostgresCredentials{}
-			By("creating the custom resource for the Kind PostgresCredentials")
-			err := k8sClient.Get(ctx, typeNamespacedName, postgresCredential)
+			mysqlCredential := &v1alpha1.MySqlCredentials{}
+			By("creating the custom resource for the Kind MySqlCredentials")
+			err := k8sClient.Get(ctx, typeNamespacedName, mysqlCredential)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.PostgresCredentials{
+				resource := &v1alpha1.MySqlCredentials{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					Spec: v1alpha1.PostgresCredentialsSpec{
+					Spec: v1alpha1.MySqlCredentialsSpec{
 						Host:     "127.0.0.1",
 						Port:     0,
-						Database: "test",
 						Username: "test",
 						PasswordSecretKeyRef: corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
@@ -69,11 +66,11 @@ var _ = Describe("PostgresCredentials Controller", func() {
 		})
 
 		AfterEach(func() {
-			resource := &v1alpha1.PostgresCredentials{}
+			resource := &v1alpha1.MySqlCredentials{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance PostgresCredentials")
+			By("Cleanup the specific resource instance MySqlCredentials")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
 			secret := &corev1.Secret{}
@@ -103,21 +100,21 @@ var _ = Describe("PostgresCredentials Controller", func() {
 				},
 			}
 
-			fakePostgresClient := mocks.NewClientMock(mocks.TestingT)
-			fakePostgresClient.On("Init", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-			fakePostgresClient.On("Ping").Return(nil)
+			fakeClient := mocks.NewMySqlClientMock(mocks.TestingT)
+			fakeClient.On("Init", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			fakeClient.On("Ping").Return(nil)
 
-			controllerReconciler := &controller.PostgresCredentialsReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				PostgresClient: fakePostgresClient,
+			controllerReconciler := &controller.MySqlCredentialsReconciler{
+				Client:      k8sClient,
+				Scheme:      k8sClient.Scheme(),
+				MySqlClient: fakeClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			cred := &v1alpha1.PostgresCredentials{}
+			cred := &v1alpha1.MySqlCredentials{}
 			err = k8sClient.Get(ctx, typeNamespacedName, cred)
 
 			Expect(err).NotTo(HaveOccurred())

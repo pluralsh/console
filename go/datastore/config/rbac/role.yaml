@@ -11,6 +11,9 @@ rules:
   - elasticsearchilmpolicies
   - elasticsearchindextemplates
   - elasticsearchusers
+  - mysqlcredentials
+  - mysqldatabases
+  - mysqlusers
   - postgrescredentials
   - postgresdatabases
   - postgresusers
@@ -29,6 +32,9 @@ rules:
   - elasticsearchilmpolicies/finalizers
   - elasticsearchindextemplates/finalizers
   - elasticsearchusers/finalizers
+  - mysqlcredentials/finalizers
+  - mysqldatabases/finalizers
+  - mysqlusers/finalizers
   - postgrescredentials/finalizers
   - postgresdatabases/finalizers
   - postgresusers/finalizers
@@ -41,6 +47,9 @@ rules:
   - elasticsearchilmpolicies/status
   - elasticsearchindextemplates/status
   - elasticsearchusers/status
+  - mysqlcredentials/status
+  - mysqldatabases/status
+  - mysqlusers/status
   - postgrescredentials/status
   - postgresdatabases/status
   - postgresusers/status

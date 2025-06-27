@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: default
+data:
+  password: bXktc2VjcmV0LXB3Cg==
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: MySqlCredentials
+metadata:
+  labels:
+    app.kubernetes.io/name: mysqlcredentials
+    app.kubernetes.io/instance: mysqlcredentials-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: mysqlcredentials-sample
+  namespace: default
+spec:
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  insecure: true
+  passwordSecretKeyRef:
+    name: mysql-secret
+    key: password
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: MySqlDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: mysqldatabase
+    app.kubernetes.io/instance: mysqldatabase-sample
+    app.kubernetes.io/part-of: datastore
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: datastore
+  name: mysqldatabase-sample
+  namespace: default
+spec:
+  name: test
+  credentialsRef:
+    name: mysqlcredentials-sample
