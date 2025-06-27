@@ -63,6 +63,17 @@ entries:
     version: 0.1.0
   cloud-query:
   - apiVersion: v2
+    appVersion: 0.11.25
+    created: "2025-06-27T23:53:50.57393852Z"
+    description: The service part of the Plural Console ecosystem that provides cloud
+      resource querying capabilities.
+    digest: fc85052f7dcf0718dd3f819eb8cf63b7547c03ec14533ffabe304a716d6f1f06
+    name: cloud-query
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/cloud-query-chart-v0.0.2/cloud-query-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
     appVersion: 0.11.21
     created: "2025-06-26T08:25:48.706199312Z"
     description: The service part of the Plural Console ecosystem that provides cloud
@@ -74,6 +85,34 @@ entries:
     - https://github.com/pluralsh/console/releases/download/cloud-query-chart-v0.0.1/cloud-query-0.0.1.tgz
     version: 0.0.1
   console:
+  - apiVersion: v2
+    appVersion: 0.11.25
+    created: "2025-06-27T23:53:50.791088038Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.130
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 7f476aad67cfee5ba24878d6972551732c218762d9912a1b1df2633df56aef65
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.102/console-0.3.102.tgz
+    version: 0.3.102
   - apiVersion: v2
     appVersion: 0.11.24
     created: "2025-06-25T01:16:46.292863674Z"
@@ -7247,6 +7286,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.25
+    created: "2025-06-27T23:53:50.902917563Z"
+    description: deploys the datastore operator for plural cd
+    digest: f08bcf1e818169bf957584d967515c7f387e6c0a64aef589ee1dad0511804319
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.8/datastore-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
     appVersion: 0.11.24
     created: "2025-06-25T01:16:46.475435912Z"
     description: deploys the datastore operator for plural cd
@@ -7484,4 +7533,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-27T21:20:38.659226267Z"
+generated: "2025-06-27T23:53:50.903746173Z"
