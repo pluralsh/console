@@ -1,0 +1,32 @@
+{{- if .Values.cloudQuery.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "console.fullname" . }}
+  labels:
+    {{- include "console.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "console.fullname" . }}
+  minReplicas: {{ .Values.cloudQuery.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.cloudQuery.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.cloudQuery.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.cloudQuery.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.cloudQuery.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.cloudQuery.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
