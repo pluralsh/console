@@ -13,13 +13,14 @@ cloud:
     enabled: false
   database:
     enabled: false
-    server: ~
+    shard: ~
     name: ~
     password: ~
     user: ~
   # If set to a truthy value, mounts a volume for the certs
   pgRootCert: ~
   elasticNamespace: elastic
+  postgresNamespace: postgres
   instanceName: ~
   vmPassword: ~
   esPassword: ~
