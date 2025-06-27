@@ -29,6 +29,18 @@ func (c *client) GetPersona(ctx context.Context, id string) (*console.PersonaFra
 	return response.Persona, err
 }
 
+func (c *client) IsPersonaExists(ctx context.Context, id string) (bool, error) {
+	persona, err := c.GetPersona(ctx, id)
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return persona != nil, nil
+}
+
 func (c *client) CreatePersona(ctx context.Context, attr console.PersonaAttributes) (*console.PersonaFragment, error) {
 	response, err := c.consoleClient.CreatePersona(ctx, attr)
 	if err != nil {

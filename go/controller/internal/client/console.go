@@ -175,6 +175,7 @@ type ConsoleClient interface {
 	DeleteCloudConnection(ctx context.Context, id string) error
 	IsCloudConnection(ctx context.Context, name string) (bool, error)
 	GetPersona(ctx context.Context, id string) (*console.PersonaFragment, error)
+	IsPersonaExists(ctx context.Context, id string) (bool, error)
 	CreatePersona(ctx context.Context, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	UpdatePersona(ctx context.Context, id string, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	DeletePersona(ctx context.Context, id string) error

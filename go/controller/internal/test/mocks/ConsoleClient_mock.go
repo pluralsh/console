@@ -5795,6 +5795,63 @@ func (_c *ConsoleClientMock_IsObserverExists_Call) RunAndReturn(run func(context
 	return _c
 }
 
+// IsPersonaExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsPersonaExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPersonaExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsPersonaExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPersonaExists'
+type ConsoleClientMock_IsPersonaExists_Call struct {
+	*mock.Call
+}
+
+// IsPersonaExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsPersonaExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsPersonaExists_Call {
+	return &ConsoleClientMock_IsPersonaExists_Call{Call: _e.mock.On("IsPersonaExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsPipelineExisting provides a mock function with given fields: id
 func (_m *ConsoleClientMock) IsPipelineExisting(id string) (bool, error) {
 	ret := _m.Called(id)
