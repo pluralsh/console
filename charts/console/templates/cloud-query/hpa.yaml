@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "console.fullname" . }}
+  name: {{ include "console.fullname" . }}-cloud-query
   labels:
     helm.sh/chart: {{ include "console.chart" . }}
     app.kubernetes.io/name: cloud-query
