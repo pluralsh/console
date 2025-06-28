@@ -25,8 +25,8 @@ defmodule Console.Deployments.Observability.Webhook do
         state: Grafana.state(alert["status"]),
         severity: Grafana.severity(alert),
         url: alert["generatorURL"],
-        title: payload["title"],
-        message: "#{Grafana.summary(alert)}#{payload["message"]}",
+        title: Grafana.title(payload, alert),
+        message: "#{Grafana.summary(alert)}#{payload["message"] || ""}",
         tags: tags(alert["labels"]),
       }, add_associations(Grafana, alert))
       |> backfill_raw()
