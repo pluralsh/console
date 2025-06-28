@@ -50,6 +50,7 @@ rules:
   - observabilityproviders
   - observers
   - oidcproviders
+  - personas
   - pipelinecontexts
   - pipelines
   - prautomations
@@ -97,6 +98,7 @@ rules:
   - observabilityproviders/finalizers
   - observers/finalizers
   - oidcproviders/finalizers
+  - personas/finalizers
   - pipelinecontexts/finalizers
   - pipelines/finalizers
   - prautomations/finalizers
@@ -138,6 +140,7 @@ rules:
   - observabilityproviders/status
   - observers/status
   - oidcproviders/status
+  - personas/status
   - pipelinecontexts/status
   - pipelines/status
   - prautomations/status

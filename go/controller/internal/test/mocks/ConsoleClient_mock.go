@@ -556,6 +556,65 @@ func (_c *ConsoleClientMock_CreateOIDCProvider_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// CreatePersona provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) CreatePersona(ctx context.Context, attr client.PersonaAttributes) (*client.PersonaFragment, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePersona")
+	}
+
+	var r0 *client.PersonaFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.PersonaAttributes) (*client.PersonaFragment, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.PersonaAttributes) *client.PersonaFragment); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PersonaFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.PersonaAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreatePersona_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePersona'
+type ConsoleClientMock_CreatePersona_Call struct {
+	*mock.Call
+}
+
+// CreatePersona is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr client.PersonaAttributes
+func (_e *ConsoleClientMock_Expecter) CreatePersona(ctx interface{}, attr interface{}) *ConsoleClientMock_CreatePersona_Call {
+	return &ConsoleClientMock_CreatePersona_Call{Call: _e.mock.On("CreatePersona", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_CreatePersona_Call) Run(run func(ctx context.Context, attr client.PersonaAttributes)) *ConsoleClientMock_CreatePersona_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.PersonaAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePersona_Call) Return(_a0 *client.PersonaFragment, _a1 error) *ConsoleClientMock_CreatePersona_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePersona_Call) RunAndReturn(run func(context.Context, client.PersonaAttributes) (*client.PersonaFragment, error)) *ConsoleClientMock_CreatePersona_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreatePipelineContext provides a mock function with given fields: ctx, pipelineID, attributes
 func (_m *ConsoleClientMock) CreatePipelineContext(ctx context.Context, pipelineID string, attributes client.PipelineContextAttributes) (*client.CreatePipelineContext, error) {
 	ret := _m.Called(ctx, pipelineID, attributes)
@@ -1984,6 +2043,53 @@ func (_c *ConsoleClientMock_DeleteObserver_Call) Return(_a0 error) *ConsoleClien
 }
 
 func (_c *ConsoleClientMock_DeleteObserver_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteObserver_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeletePersona provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeletePersona(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePersona")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeletePersona_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePersona'
+type ConsoleClientMock_DeletePersona_Call struct {
+	*mock.Call
+}
+
+// DeletePersona is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeletePersona(ctx interface{}, id interface{}) *ConsoleClientMock_DeletePersona_Call {
+	return &ConsoleClientMock_DeletePersona_Call{Call: _e.mock.On("DeletePersona", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeletePersona_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeletePersona_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePersona_Call) Return(_a0 error) *ConsoleClientMock_DeletePersona_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePersona_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeletePersona_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3952,6 +4058,65 @@ func (_c *ConsoleClientMock_GetObserver_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// GetPersona provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetPersona(ctx context.Context, id string) (*client.PersonaFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPersona")
+	}
+
+	var r0 *client.PersonaFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.PersonaFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.PersonaFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PersonaFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPersona_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPersona'
+type ConsoleClientMock_GetPersona_Call struct {
+	*mock.Call
+}
+
+// GetPersona is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetPersona(ctx interface{}, id interface{}) *ConsoleClientMock_GetPersona_Call {
+	return &ConsoleClientMock_GetPersona_Call{Call: _e.mock.On("GetPersona", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetPersona_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetPersona_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPersona_Call) Return(_a0 *client.PersonaFragment, _a1 error) *ConsoleClientMock_GetPersona_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPersona_Call) RunAndReturn(run func(context.Context, string) (*client.PersonaFragment, error)) *ConsoleClientMock_GetPersona_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetPipeline(id string) (*client.PipelineFragmentMinimal, error) {
 	ret := _m.Called(id)
@@ -5630,6 +5795,63 @@ func (_c *ConsoleClientMock_IsObserverExists_Call) RunAndReturn(run func(context
 	return _c
 }
 
+// IsPersonaExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsPersonaExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPersonaExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsPersonaExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPersonaExists'
+type ConsoleClientMock_IsPersonaExists_Call struct {
+	*mock.Call
+}
+
+// IsPersonaExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsPersonaExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsPersonaExists_Call {
+	return &ConsoleClientMock_IsPersonaExists_Call{Call: _e.mock.On("IsPersonaExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPersonaExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsPersonaExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsPipelineExisting provides a mock function with given fields: id
 func (_m *ConsoleClientMock) IsPipelineExisting(id string) (bool, error) {
 	ret := _m.Called(id)
@@ -7055,6 +7277,66 @@ func (_c *ConsoleClientMock_UpdateOIDCProvider_Call) Return(_a0 *client.OIDCProv
 }
 
 func (_c *ConsoleClientMock_UpdateOIDCProvider_Call) RunAndReturn(run func(context.Context, string, client.OidcProviderType, client.OidcProviderAttributes) (*client.OIDCProviderFragment, error)) *ConsoleClientMock_UpdateOIDCProvider_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePersona provides a mock function with given fields: ctx, id, attr
+func (_m *ConsoleClientMock) UpdatePersona(ctx context.Context, id string, attr client.PersonaAttributes) (*client.PersonaFragment, error) {
+	ret := _m.Called(ctx, id, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePersona")
+	}
+
+	var r0 *client.PersonaFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.PersonaAttributes) (*client.PersonaFragment, error)); ok {
+		return rf(ctx, id, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.PersonaAttributes) *client.PersonaFragment); ok {
+		r0 = rf(ctx, id, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PersonaFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.PersonaAttributes) error); ok {
+		r1 = rf(ctx, id, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdatePersona_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePersona'
+type ConsoleClientMock_UpdatePersona_Call struct {
+	*mock.Call
+}
+
+// UpdatePersona is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attr client.PersonaAttributes
+func (_e *ConsoleClientMock_Expecter) UpdatePersona(ctx interface{}, id interface{}, attr interface{}) *ConsoleClientMock_UpdatePersona_Call {
+	return &ConsoleClientMock_UpdatePersona_Call{Call: _e.mock.On("UpdatePersona", ctx, id, attr)}
+}
+
+func (_c *ConsoleClientMock_UpdatePersona_Call) Run(run func(ctx context.Context, id string, attr client.PersonaAttributes)) *ConsoleClientMock_UpdatePersona_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.PersonaAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePersona_Call) Return(_a0 *client.PersonaFragment, _a1 error) *ConsoleClientMock_UpdatePersona_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePersona_Call) RunAndReturn(run func(context.Context, string, client.PersonaAttributes) (*client.PersonaFragment, error)) *ConsoleClientMock_UpdatePersona_Call {
 	_c.Call.Return(run)
 	return _c
 }

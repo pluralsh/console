@@ -165,6 +165,10 @@ type ConsoleClient interface {
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
 	ListPolicyConstraints(ctx context.Context, after *string, first *int64, before *string, last *int64, namespace *string, kind *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicyConstraints, error)
 	ListViolationStatistics(ctx context.Context, field ConstraintViolationField, interceptors ...clientv2.RequestInterceptor) (*ListViolationStatistics, error)
+	GetPersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPersona, error)
+	CreatePersona(ctx context.Context, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePersona, error)
+	UpdatePersona(ctx context.Context, id string, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePersona, error)
+	DeletePersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePersona, error)
 	SavePipeline(ctx context.Context, name string, attributes PipelineAttributes, interceptors ...clientv2.RequestInterceptor) (*SavePipeline, error)
 	DeletePipeline(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePipeline, error)
 	GetPipeline(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPipeline, error)
@@ -3602,6 +3606,77 @@ func (t *ViolationStatisticFragment) GetCount() *int64 {
 	return t.Count
 }
 
+type PersonaFragment struct {
+	ID            string                        "json:\"id\" graphql:\"id\""
+	Name          string                        "json:\"name\" graphql:\"name\""
+	Description   *string                       "json:\"description,omitempty\" graphql:\"description\""
+	Configuration *PersonaConfigurationFragment "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Bindings      []*PolicyBindingFragment      "json:\"bindings,omitempty\" graphql:\"bindings\""
+}
+
+func (t *PersonaFragment) GetID() string {
+	if t == nil {
+		t = &PersonaFragment{}
+	}
+	return t.ID
+}
+func (t *PersonaFragment) GetName() string {
+	if t == nil {
+		t = &PersonaFragment{}
+	}
+	return t.Name
+}
+func (t *PersonaFragment) GetDescription() *string {
+	if t == nil {
+		t = &PersonaFragment{}
+	}
+	return t.Description
+}
+func (t *PersonaFragment) GetConfiguration() *PersonaConfigurationFragment {
+	if t == nil {
+		t = &PersonaFragment{}
+	}
+	return t.Configuration
+}
+func (t *PersonaFragment) GetBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &PersonaFragment{}
+	}
+	return t.Bindings
+}
+
+type PersonaConfigurationFragment struct {
+	All         *bool                                     "json:\"all,omitempty\" graphql:\"all\""
+	Deployments *PersonaConfigurationFragment_Deployments "json:\"deployments,omitempty\" graphql:\"deployments\""
+	Home        *PersonaConfigurationFragment_Home        "json:\"home,omitempty\" graphql:\"home\""
+	Sidebar     *PersonaConfigurationFragment_Sidebar     "json:\"sidebar,omitempty\" graphql:\"sidebar\""
+}
+
+func (t *PersonaConfigurationFragment) GetAll() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.All
+}
+func (t *PersonaConfigurationFragment) GetDeployments() *PersonaConfigurationFragment_Deployments {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Deployments
+}
+func (t *PersonaConfigurationFragment) GetHome() *PersonaConfigurationFragment_Home {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Home
+}
+func (t *PersonaConfigurationFragment) GetSidebar() *PersonaConfigurationFragment_Sidebar {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Sidebar
+}
+
 type PipelineFragment struct {
 	ID      string                       "json:\"id\" graphql:\"id\""
 	Name    string                       "json:\"name\" graphql:\"name\""
@@ -6720,6 +6795,226 @@ func (t *AISettingsFragment_Anthropic) GetModel() *string {
 		t = &AISettingsFragment_Anthropic{}
 	}
 	return t.Model
+}
+
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
+}
+
+type PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -13204,6 +13499,446 @@ func (t *ListObservabilityProviders_ObservabilityProviders) GetEdges() []*ListOb
 	return t.Edges
 }
 
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
+}
+
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
+}
+
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
+}
+
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
+	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
+	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
+	Pipelines    *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Providers    *bool "json:\"providers,omitempty\" graphql:\"providers\""
+	Repositories *bool "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Services     *bool "json:\"services,omitempty\" graphql:\"services\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetAddOns() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.AddOns
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetClusters() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Clusters
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetPipelines() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Pipelines
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetProviders() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Providers
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetRepositories() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Repositories
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments) GetServices() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments{}
+	}
+	return t.Services
+}
+
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home struct {
+	Manager  *bool "json:\"manager,omitempty\" graphql:\"manager\""
+	Security *bool "json:\"security,omitempty\" graphql:\"security\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetManager() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Manager
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSecurity() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Home{}
+	}
+	return t.Security
+}
+
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Audits
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Kubernetes
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetPullRequests() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.PullRequests
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Settings
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Stacks
+}
+
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
 	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
@@ -17468,6 +18203,50 @@ func (t *ListViolationStatistics) GetViolationStatistics() []*ViolationStatistic
 		t = &ListViolationStatistics{}
 	}
 	return t.ViolationStatistics
+}
+
+type GetPersona struct {
+	Persona *PersonaFragment "json:\"persona,omitempty\" graphql:\"persona\""
+}
+
+func (t *GetPersona) GetPersona() *PersonaFragment {
+	if t == nil {
+		t = &GetPersona{}
+	}
+	return t.Persona
+}
+
+type CreatePersona struct {
+	CreatePersona *PersonaFragment "json:\"createPersona,omitempty\" graphql:\"createPersona\""
+}
+
+func (t *CreatePersona) GetCreatePersona() *PersonaFragment {
+	if t == nil {
+		t = &CreatePersona{}
+	}
+	return t.CreatePersona
+}
+
+type UpdatePersona struct {
+	UpdatePersona *PersonaFragment "json:\"updatePersona,omitempty\" graphql:\"updatePersona\""
+}
+
+func (t *UpdatePersona) GetUpdatePersona() *PersonaFragment {
+	if t == nil {
+		t = &UpdatePersona{}
+	}
+	return t.UpdatePersona
+}
+
+type DeletePersona struct {
+	DeletePersona *PersonaFragment "json:\"deletePersona,omitempty\" graphql:\"deletePersona\""
+}
+
+func (t *DeletePersona) GetDeletePersona() *PersonaFragment {
+	if t == nil {
+		t = &DeletePersona{}
+	}
+	return t.DeletePersona
 }
 
 type SavePipeline struct {
@@ -29263,6 +30042,319 @@ func (c *Client) ListViolationStatistics(ctx context.Context, field ConstraintVi
 	return &res, nil
 }
 
+const GetPersonaDocument = `query GetPersona ($id: ID!) {
+	persona(id: $id) {
+		... PersonaFragment
+	}
+}
+fragment PersonaFragment on Persona {
+	id
+	name
+	description
+	configuration {
+		... PersonaConfigurationFragment
+	}
+	bindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PersonaConfigurationFragment on PersonaConfiguration {
+	all
+	deployments {
+		addOns
+		clusters
+		pipelines
+		providers
+		repositories
+		services
+	}
+	home {
+		manager
+		security
+	}
+	sidebar {
+		audits
+		kubernetes
+		pullRequests
+		settings
+		backups
+		stacks
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetPersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPersona, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetPersona
+	if err := c.Client.Post(ctx, "GetPersona", GetPersonaDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreatePersonaDocument = `mutation CreatePersona ($attributes: PersonaAttributes!) {
+	createPersona(attributes: $attributes) {
+		... PersonaFragment
+	}
+}
+fragment PersonaFragment on Persona {
+	id
+	name
+	description
+	configuration {
+		... PersonaConfigurationFragment
+	}
+	bindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PersonaConfigurationFragment on PersonaConfiguration {
+	all
+	deployments {
+		addOns
+		clusters
+		pipelines
+		providers
+		repositories
+		services
+	}
+	home {
+		manager
+		security
+	}
+	sidebar {
+		audits
+		kubernetes
+		pullRequests
+		settings
+		backups
+		stacks
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) CreatePersona(ctx context.Context, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePersona, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreatePersona
+	if err := c.Client.Post(ctx, "CreatePersona", CreatePersonaDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdatePersonaDocument = `mutation UpdatePersona ($id: ID!, $attributes: PersonaAttributes!) {
+	updatePersona(id: $id, attributes: $attributes) {
+		... PersonaFragment
+	}
+}
+fragment PersonaFragment on Persona {
+	id
+	name
+	description
+	configuration {
+		... PersonaConfigurationFragment
+	}
+	bindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PersonaConfigurationFragment on PersonaConfiguration {
+	all
+	deployments {
+		addOns
+		clusters
+		pipelines
+		providers
+		repositories
+		services
+	}
+	home {
+		manager
+		security
+	}
+	sidebar {
+		audits
+		kubernetes
+		pullRequests
+		settings
+		backups
+		stacks
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpdatePersona(ctx context.Context, id string, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePersona, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdatePersona
+	if err := c.Client.Post(ctx, "UpdatePersona", UpdatePersonaDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeletePersonaDocument = `mutation DeletePersona ($id: ID!) {
+	deletePersona(id: $id) {
+		... PersonaFragment
+	}
+}
+fragment PersonaFragment on Persona {
+	id
+	name
+	description
+	configuration {
+		... PersonaConfigurationFragment
+	}
+	bindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PersonaConfigurationFragment on PersonaConfiguration {
+	all
+	deployments {
+		addOns
+		clusters
+		pipelines
+		providers
+		repositories
+		services
+	}
+	home {
+		manager
+		security
+	}
+	sidebar {
+		audits
+		kubernetes
+		pullRequests
+		settings
+		backups
+		stacks
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) DeletePersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePersona, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeletePersona
+	if err := c.Client.Post(ctx, "DeletePersona", DeletePersonaDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const SavePipelineDocument = `mutation SavePipeline ($name: String!, $attributes: PipelineAttributes!) {
 	savePipeline(name: $name, attributes: $attributes) {
 		... PipelineFragmentMinimal
@@ -34827,6 +35919,10 @@ var DocumentOperationNames = map[string]string{
 	UpsertPolicyConstraintsDocument:                   "UpsertPolicyConstraints",
 	ListPolicyConstraintsDocument:                     "ListPolicyConstraints",
 	ListViolationStatisticsDocument:                   "ListViolationStatistics",
+	GetPersonaDocument:                                "GetPersona",
+	CreatePersonaDocument:                             "CreatePersona",
+	UpdatePersonaDocument:                             "UpdatePersona",
+	DeletePersonaDocument:                             "DeletePersona",
 	SavePipelineDocument:                              "SavePipeline",
 	DeletePipelineDocument:                            "DeletePipeline",
 	GetPipelineDocument:                               "GetPipeline",
