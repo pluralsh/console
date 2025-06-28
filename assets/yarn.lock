@@ -7563,12 +7563,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:22.13.1":
-  version: 22.13.1
-  resolution: "@types/node@npm:22.13.1"
+"@types/node@npm:22.13.17":
+  version: 22.13.17
+  resolution: "@types/node@npm:22.13.17"
   dependencies:
     undici-types: ~6.20.0
-  checksum: a0759e4bedc3fe892c3ddef5fa9cb5251f9c5b24defc1a389438ea3b5b727c481c1a9bc94bae4ecc7426c89ad293cd66633d163da1ab14d74d358cbec9e1ce31
+  checksum: 671e5120fa7f8ce82e7bc2652c3283be14e28a4c9558705553991902961cf0f1cba8789f9940c64063112b27010a5cd5e8d9bdd154564e68ca05c7cbce181280
   languageName: node
   linkType: hard
 
@@ -10116,7 +10116,7 @@ __metadata:
     "@types/jsdom": 21.1.5
     "@types/lodash": 4.17.13
     "@types/mocha": 10.0.8
-    "@types/node": 22.13.1
+    "@types/node": 22.13.17
     "@types/react": 19.0.10
     "@types/react-dom": 19.0.4
     "@types/react-window": 1.8.8
