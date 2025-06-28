@@ -161,3 +161,6 @@ install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
 
 scrape-addons: ## scrapes cloud addon information and prints to a common format in-repo
 	@python3 utils/addons/main.py
+
+proto: ## generates protobufs schemas for elixir
+	cd go/cloud-query/api/proto && protoc --elixir_out=plugins=grpc:./../../../../../console/lib/cloud_query cloudquery.proto
