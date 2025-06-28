@@ -159,14 +159,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			fakeConsoleClient.On("CreateService", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -225,14 +225,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -306,14 +306,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -340,14 +340,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("IsServiceExisting", mock.Anything).Return(true, nil).Once()
 			fakeConsoleClient.On("DeleteService", mock.Anything).Return(nil).Once()
 
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -357,7 +357,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			// It should cause no errors, just requeue.
 			fakeConsoleClient.On("IsServiceDeleting", mock.Anything).Return(true).Once()
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -368,7 +368,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("IsServiceDeleting", mock.Anything).Return(false).Once()
 			fakeConsoleClient.On("IsServiceExisting", mock.Anything).Return(false, nil).Once()
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -470,14 +470,14 @@ var _ = Describe("Wait for resources", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			resp, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -557,7 +557,7 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
@@ -593,7 +593,7 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
@@ -625,7 +625,7 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			serviceReconciler := &controller.ServiceReconciler{
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,

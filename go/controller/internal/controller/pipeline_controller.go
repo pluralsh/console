@@ -20,8 +20,16 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/types"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,14 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -50,15 +50,33 @@ type PipelineReconciler struct {
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
 	UserGroupCache   cache.UserGroupCache
+	PipelineQueue    workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
-
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
+
+// Queue implements the types.Processor interface.
+func (r *PipelineReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.PipelineQueue
+}
+
+func (r *PipelineReconciler) Name() types.Reconciler {
+	return types.PipelineReconciler
+}
+
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines/finalizers,verbs=update
+
+// Reconcile is part of the main kubernetes reconciliation loop.
+func (r *PipelineReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.PipelineQueue.Add(req)
+	return ctrl.Result{}, nil
+}
+
+// Process implements the types.Processor interface.
+func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	// Read resource from Kubernetes cluster.

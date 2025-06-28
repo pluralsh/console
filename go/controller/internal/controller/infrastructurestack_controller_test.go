@@ -270,7 +270,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+			_, err := reconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -362,7 +362,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			_, err := reconciler.Process(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			resource := &v1alpha1.InfrastructureStack{}
 			err = k8sClient.Get(ctx, typeNamespacedName, resource)
@@ -402,7 +402,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err = reconciler.Reconcile(ctx, reconcile.Request{
+			_, err = reconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -454,7 +454,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{
+			result, err := reconciler.Process(ctx, reconcile.Request{
 				NamespacedName: invalidClusterRefTypeNamespacedName,
 			})
 
@@ -510,7 +510,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			result, err := reconciler.Reconcile(ctx, reconcile.Request{
+			result, err := reconciler.Process(ctx, reconcile.Request{
 				NamespacedName: invalidRepoRefTypeNamespacedName,
 			})
 

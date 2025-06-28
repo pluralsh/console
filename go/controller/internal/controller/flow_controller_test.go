@@ -110,7 +110,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			_, err := nr.Reconcile(ctx, reconcile.Request{
+			_, err := nr.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -150,7 +150,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
 			}
 
-			result, err := fr.Reconcile(ctx, reconcile.Request{
+			result, err := fr.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -185,7 +185,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			_, err = nsReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = nsReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 

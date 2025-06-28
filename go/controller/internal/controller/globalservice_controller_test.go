@@ -182,7 +182,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -246,7 +246,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			resp, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -322,7 +322,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			resp, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			resp, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -368,7 +368,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err = serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
@@ -433,7 +433,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
-			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 

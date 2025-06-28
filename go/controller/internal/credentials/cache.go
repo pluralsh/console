@@ -8,11 +8,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/log"
 )
 
 const (
@@ -88,7 +88,7 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
 		if ok && nc.NamespaceCredentials != namespaceCredentials.Name {
-			log.Logger.Warnf("found conflicting credentials for %s namespace: %s and %s",
+			klog.Warningf("found conflicting credentials for %s namespace: %s and %s",
 				namespace, nc.NamespaceCredentials, namespaceCredentials.Name)
 		}
 
