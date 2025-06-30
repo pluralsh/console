@@ -51,6 +51,7 @@ const (
 	ClusterSyncReconciler                Reconciler = "clustersync"
 	ServiceContextReconciler             Reconciler = "servicecontext"
 	CloudConnectionReconciler            Reconciler = "cloudconnection"
+	PersonaReconciler                    Reconciler = "persona"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -90,6 +91,7 @@ var validReconcilers = map[string]Reconciler{
 	"ClusterSyncReconciler":                ClusterSyncReconciler,
 	"ServiceContextReconciler":             ServiceContextReconciler,
 	"CloudConnectionReconciler":            CloudConnectionReconciler,
+	"PersonaReconciler":                    PersonaReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
@@ -401,6 +403,15 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			UserGroupCache: userGroupCache,
 		}
 	},
+	PersonaReconciler: func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) Controller {
+		return &controller.PersonaReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			CredentialsCache: credentialsCache,
+		}
+	},
 }
 
 // ToController maps a Reconciler to its corresponding Controller.
@@ -465,6 +476,7 @@ func Reconcilers() ReconcilerList {
 		ClusterSyncReconciler,
 		ServiceContextReconciler,
 		CloudConnectionReconciler,
+		PersonaReconciler,
 	}
 }
 
