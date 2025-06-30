@@ -30,6 +30,10 @@ func (c *client) GetPersona(ctx context.Context, id string) (*console.PersonaFra
 }
 
 func (c *client) IsPersonaExists(ctx context.Context, id string) (bool, error) {
+	if id == "" {
+		return false, nil
+	}
+
 	persona, err := c.GetPersona(ctx, id)
 	if errors.IsNotFound(err) {
 		return false, nil
