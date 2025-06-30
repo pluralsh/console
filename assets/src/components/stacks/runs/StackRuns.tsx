@@ -10,8 +10,6 @@ import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 import { StackRunsScroller } from './StackRunsScroller'
 
-const pollInterval = 5 * 1000
-
 export default function StackRuns() {
   const { stack } = useOutletContext() as StackOutletContextT
 
@@ -25,7 +23,7 @@ export default function StackRuns() {
   const queryResult = useStackRunsQuery({
     variables: { id: stack?.id ?? '' },
     fetchPolicy: 'cache-and-network',
-    pollInterval,
+    pollInterval: 2_000,
   })
 
   if (!queryResult.data) {

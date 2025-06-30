@@ -23,7 +23,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { SideNavEntries } from 'components/layout/SideNavEntries'
 import { useTheme } from 'styled-components'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 
 import { TRUNCATE } from '../../../utils/truncate'
@@ -71,7 +70,7 @@ export default function RunJob() {
 
   const { data, error, refetch } = useStackRunJobQuery({
     variables: { id: runId || '' },
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 5_000,
   })
 
   const outletContext: OutletContextT = useMemo(
