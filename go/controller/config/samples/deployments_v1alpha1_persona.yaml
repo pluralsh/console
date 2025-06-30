@@ -32,9 +32,6 @@ spec:
     services:
       secrets: true
       configuration: true
-  bindings:
-    - groupName: "platform-team"
-    - userEmail: "platform-lead@company.com"
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Persona
@@ -70,8 +67,6 @@ spec:
     services:
       secrets: false
       configuration: true
-  bindings:
-    - groupName: "developers"
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Persona
@@ -107,7 +102,3 @@ spec:
     services:
       secrets: true
       configuration: false
-  bindings:
-    - groupName: "security-team"
-    - userEmail: "security-admin@company.com"
-
