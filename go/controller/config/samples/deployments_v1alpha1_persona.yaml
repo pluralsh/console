@@ -1,0 +1,113 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Persona
+metadata:
+  name: platform-engineer-persona
+  namespace: default
+spec:
+  name: "Platform Engineer"
+  description: "Persona for platform engineering team members with full deployment and infrastructure access"
+  role: PLATFORM
+  configuration:
+    all: false
+    home:
+      manager: true
+      security: false
+    deployments:
+      clusters: true
+      deployments: true
+      repositories: true
+      services: true
+      pipelines: true
+      providers: true
+      addOns: true
+    sidebar:
+      audits: true
+      kubernetes: true
+      pullRequests: true
+      settings: true
+      backups: true
+      stacks: true
+      security: false
+      cost: true
+    services:
+      secrets: true
+      configuration: true
+  bindings:
+    - groupName: "platform-team"
+    - userEmail: "platform-lead@company.com"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Persona
+metadata:
+  name: developer-persona
+  namespace: default
+spec:
+  name: "Developer"
+  description: "Persona for application developers with limited access focused on services and deployments"
+  role: DEVELOPER
+  configuration:
+    all: false
+    home:
+      manager: false
+      security: false
+    deployments:
+      clusters: false
+      deployments: true
+      repositories: true
+      services: true
+      pipelines: true
+      providers: false
+      addOns: false
+    sidebar:
+      audits: false
+      kubernetes: false
+      pullRequests: true
+      settings: false
+      backups: false
+      stacks: false
+      security: false
+      cost: false
+    services:
+      secrets: false
+      configuration: true
+  bindings:
+    - groupName: "developers"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Persona
+metadata:
+  name: security-analyst-persona
+  namespace: default
+spec:
+  name: "Security Analyst"
+  description: "Persona for security team members focused on audits, security features, and compliance"
+  role: SECURITY
+  configuration:
+    all: false
+    home:
+      manager: false
+      security: true
+    deployments:
+      clusters: true
+      deployments: false
+      repositories: false
+      services: false
+      pipelines: false
+      providers: false
+      addOns: false
+    sidebar:
+      audits: true
+      kubernetes: true
+      pullRequests: false
+      settings: false
+      backups: false
+      stacks: false
+      security: true
+      cost: false
+    services:
+      secrets: true
+      configuration: false
+  bindings:
+    - groupName: "security-team"
+    - userEmail: "security-admin@company.com"
+
