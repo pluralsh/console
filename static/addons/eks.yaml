@@ -274,6 +274,16 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v4.2.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
   - version: v4.1.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -718,6 +728,12 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.1.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.0-eksbuild.6
     compatibilities:
     - '1.33'
@@ -3160,6 +3176,14 @@
   publisher: eks
 - name: elastic_elastic-agent
   versions:
+  - version: v9.0.3-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v9.0.2-eksbuild.1
     compatibilities:
     - '1.32'
@@ -3177,6 +3201,14 @@
     - '1.28'
     - '1.27'
   - version: v9.0.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v8.18.3-eksbuild.1
     compatibilities:
     - '1.32'
     - '1.31'

@@ -32,6 +32,15 @@ query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   }
 }
 
+query ClusterNoisyNeighbors($clusterId: ID!) {
+  cluster(id: $clusterId) {
+    id
+    noisyNeighbors {
+      ...UtilizationHeatMap
+    }
+  }
+}
+
 query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
   serviceDeployment(id: $serviceId) {
     id

@@ -12,10 +12,12 @@ import {
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { ApolloError } from '@apollo/client'
-import { EmptyState, Flex } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
+import chroma from 'chroma-js'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
-import chroma from 'chroma-js'
+import { ClusterUpgradesChartEmpty } from './ClusterUpgradesChartEmpty'
+import { isEmpty } from 'lodash'
 
 export enum UpgradeChartFilter {
   All = 'all',
@@ -51,40 +53,55 @@ export function ClusterUpgradesChart({
   )
 
   if (error) return <GqlError error={error} />
-  if (loading) return <ChartSkeleton scale={0.87} />
-  if (!data?.upgradeStatistics)
-    return <EmptyState message="Upgrade statistics not found." />
+  if (isEmpty(data?.upgradeStatistics) || data?.upgradeStatistics.count === 0)
+    return (
+      <div css={{ width: 'fit-content', margin: 'auto' }}>
+        {loading ? (
+          <ChartSkeleton scale={0.87} />
+        ) : (
+          <ClusterUpgradesChartEmpty />
+        )}
+      </div>
+    )
 
   return (
-    <ResponsiveRadialBar
-      colors={(item) =>
-        chroma(item.data.color).alpha(
-          selectedFilter === UpgradeChartFilter.All ||
-            item.data.x === selectedFilter
-            ? 1
-            : 0.6
-        )
-      }
-      endAngle={360}
-      cornerRadius={5}
-      padAngle={2}
-      padding={0.3}
-      innerRadius={0.35}
-      onClick={(bar) =>
-        onClick(
-          bar.data.x === selectedFilter ? UpgradeChartFilter.All : bar.data.x
-        )
-      }
-      tooltip={(props) => (
-        <ChartTooltip
-          color={props.bar.color}
-          value={props.bar.formattedValue}
-          label={props.bar.category}
-        />
-      )}
-      layers={['bars', CenterLabel]}
-      data={chartData}
-    />
+    <div
+      css={{
+        height: '100%',
+        width: '100%',
+        '& svg *': { transition: 'fill 0.3s ease-in-out' },
+      }}
+    >
+      <ResponsiveRadialBar
+        colors={(item) =>
+          chroma(item.data.color).alpha(
+            selectedFilter === UpgradeChartFilter.All ||
+              item.data.x === selectedFilter
+              ? 1
+              : 0.6
+          )
+        }
+        endAngle={360}
+        cornerRadius={5}
+        padAngle={2}
+        padding={0.3}
+        innerRadius={0.35}
+        onClick={(bar) =>
+          onClick(
+            bar.data.x === selectedFilter ? UpgradeChartFilter.All : bar.data.x
+          )
+        }
+        tooltip={(props) => (
+          <ChartTooltip
+            color={props.bar.color}
+            value={props.bar.formattedValue}
+            label={props.bar.category}
+          />
+        )}
+        layers={['bars', CenterLabel]}
+        data={chartData}
+      />
+    </div>
   )
 }
 

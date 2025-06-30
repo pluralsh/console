@@ -7,7 +7,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
 
-  @type pr_resp :: {:ok, binary, binary} | Console.error
+  @type pr_attrs :: %{title: binary, body: binary, branch: binary}
+  @type pr_resp :: {:ok, pr_attrs} | Console.error
 
   @doc """
   Create a pull request for the given SCM, and return the title + url of the pr if successful
@@ -41,17 +42,27 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def create(%PrAutomation{} = pr, branch, ctx) when is_binary(branch) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection, :repository])
     pr = put_in(pr.identifier, resolve_repo(pr.identifier))
-    impl = dispatcher(conn)
     with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, ext} <- external_git(pr),
          {:ok, _} <- Plural.template(f, conn.dir, ext),
          {:ok, msg} <- render_solid(pr.message, ctx),
          {:ok, _} <- commit(conn, msg),
-         {:ok, _} <- push(conn, branch),
-      do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
+      do: handle_create(pr, conn, branch, ctx)
   end
   def create(_, _, _), do: {:error, "no branch specified for this pr"}
+
+  defp handle_create(%PrAutomation{patch: true} = pr, conn, branch, ctx) do
+    with {:ok, title, body} <- description(pr, ctx),
+         {:ok, patch} <- commit_patch(conn),
+      do: {:ok, %{title: title, body: body, branch: branch, url: "<patch>", patch: patch}}
+  end
+
+  defp handle_create(%PrAutomation{} = pr, conn, branch, ctx) do
+    impl = dispatcher(conn)
+    with {:ok, _} <- push(conn, branch),
+      do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
+  end
 
   def webhook(%ScmConnection{} = conn, %ScmWebhook{} = hook) do
     impl = dispatcher(conn)

@@ -11,6 +11,8 @@ import { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { truncatedGraphLabel } from 'components/utils/UtilizationHeatmap'
+import { isEmpty } from 'lodash'
+import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
 
 export type HealthScoreFilterLabel = keyof typeof healthScoreLabelToRange
 
@@ -25,13 +27,15 @@ export function ClusterHealthScoresHeatmap({
   const data = useMemo(() => getHeatmapData(clusters), [clusters])
 
   const getColor = ({ value }: { value: number }) => {
-    const invertedValue = 100 - value
+    const invertedValue = 101 - value
     const normalizedValue = (invertedValue % 20.5) / 20.5 // because the buckets are roughly in ranges of 20-21 spaced equally
     return chroma(getHealthScoreBaseColor(invertedValue)).set(
       'hsl.l',
       0.8 - normalizedValue / 5
     )
   }
+  if (isEmpty(data.children))
+    return <EmptyHeatmapSvg label="No data to display." />
 
   return (
     <TreeMap
@@ -39,7 +43,7 @@ export function ClusterHealthScoresHeatmap({
       colors={getColor}
       label={truncatedGraphLabel}
       onClick={({ id }) => onClick(id)} // id will be the cluster name
-      valueFormat={(value) => `${100 - value}`}
+      valueFormat={(value) => `${101 - value}`}
       tooltip={({ node }) => (
         <ChartTooltip
           color={node.color}
@@ -48,7 +52,7 @@ export function ClusterHealthScoresHeatmap({
               css={{
                 color:
                   colors[
-                    severityToColor[healthScoreToSeverity(100 - node.value)]
+                    severityToColor[healthScoreToSeverity(101 - node.value)]
                   ],
               }}
             >
@@ -83,6 +87,7 @@ export function ClusterHealthScoresFilterBtns({
           onSelect={onSelect}
           onDeselect={() => onSelect('All')}
           name={filter}
+          nameSuffix="score"
           value={values[filter]}
           color={healthScoreLabelToBaseColor[filter]}
         />
@@ -132,11 +137,11 @@ const healthScoreLabelToBaseColor: Record<
   Exclude<HealthScoreFilterLabel, 'All'>,
   string
 > = {
-  '>80': '#2F6B3F',
-  '61 - 80': '#C2E085',
-  '41 - 60': '#F8DB95',
-  '20 - 40': '#EFAD6E',
-  '<20': '#D35940',
+  '>80': '#17E8A0',
+  '61 - 80': '#17DEE8',
+  '41 - 60': '#FFD346',
+  '20 - 40': '#FD984A',
+  '<20': '#EB5F7D',
 }
 
 const getHeatmapData = (clusters: ClustersRowFragment[]): TreeMapData => {
@@ -146,7 +151,7 @@ const getHeatmapData = (clusters: ClustersRowFragment[]): TreeMapData => {
       name: cluster.name,
       // reversed so the worse health scores are bigger
       // unfortunately this means we have to re-invert it everywhere else
-      amount: 100 - (cluster.healthScore ?? 0),
+      amount: 101 - (cluster.healthScore ?? 0),
     })),
   }
 }

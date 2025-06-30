@@ -7062,6 +7062,9 @@ input PrAutomationAttributes {
 
   branch: String
 
+  "whether to generate a patch for this pr instead of a full pr"
+  patch: Boolean
+
   updates: PrAutomationUpdateSpecAttributes
 
   creates: PrAutomationCreateSpecAttributes
@@ -7676,6 +7679,9 @@ type PullRequest {
   creator: String
 
   labels: [String]
+
+  "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
+  patch: String
 
   "the flow this pr is meant to modify"
   flow: Flow

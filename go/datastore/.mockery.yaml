@@ -6,4 +6,9 @@ packages:
   github.com/pluralsh/console/go/datastore/internal/client/elasticsearch:
     interfaces:
       ElasticsearchClient:
-
+  github.com/pluralsh/console/go/datastore/internal/client/postgres:
+    interfaces:
+      Client:
+  github.com/pluralsh/console/go/datastore/internal/client/mysql:
+    interfaces:
+      MySqlClient:

@@ -11,12 +11,14 @@ import { TreeMap } from './TreeMap'
 
 export function UtilizationHeatmap({
   data,
-  flavor,
+  loading,
+  flavor = HeatMapFlavor.Pod,
   utilizationType,
   colorScheme = 'blue',
 }: {
   data: MetricPointResponseFragment[]
-  flavor: HeatMapFlavor
+  loading?: boolean
+  flavor?: HeatMapFlavor
   utilizationType: 'cpu' | 'memory'
   colorScheme?: 'blue' | 'purple'
 }) {
@@ -45,6 +47,7 @@ export function UtilizationHeatmap({
 
   return (
     <TreeMap
+      loading={loading}
       type="canvas"
       tooltip={({ node }) => (
         <ChartTooltip
