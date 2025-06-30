@@ -291,15 +291,22 @@ defmodule Console.AI.Chat do
     end
   end
 
+  @thread_preloads [session: :connection, user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+
   @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
   @spec hybrid_chat([map], binary | nil, User.t) :: chats_resp
   def hybrid_chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
-    thread = get_thread!(thread_id)
-             |> Repo.preload(user: :groups, flow: :servers, insight: [:cluster, :service, :stack])
-    Console.AI.Tool.context(%{user: user, flow: thread.flow, insight: thread.insight})
+    thread = get_thread!(thread_id) |> Repo.preload(@thread_preloads)
+    Console.AI.Tool.context(%{
+      user: user,
+      flow: thread.flow,
+      insight: thread.insight,
+      session: thread.session
+    })
+
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
