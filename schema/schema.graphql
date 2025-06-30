@@ -2276,6 +2276,9 @@ input StackAttributes {
 
   policyEngine: PolicyEngineAttributes
 
+  "the agent id this stack is associated with"
+  agentId: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2496,6 +2499,9 @@ type InfrastructureStack {
   jobSpec: JobGateSpec
 
   policyEngine: PolicyEngine
+
+  "the agent id this stack is associated with"
+  agentId: String
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -4495,6 +4501,8 @@ input ServiceDeploymentAttributes {
 
   parentId: ID
 
+  agentId: String
+
   flowId: ID
 
   configuration: [ConfigAttributes]
@@ -4593,6 +4601,8 @@ input ServiceUpdateAttributes {
   parentId: ID
 
   flowId: ID
+
+  agentId: String
 
   dependencies: [ServiceDependencyAttributes]
 
@@ -4749,6 +4759,9 @@ type ServiceDeployment {
 
   "description of how helm charts should be applied"
   helm: HelmSpec
+
+  "the agent id this service is associated with"
+  agentId: String
 
   "how you'd like to perform a canary promotion"
   promotion: ServicePromotion
@@ -7965,6 +7978,17 @@ input ChatThreadAttributes {
 
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
+
+  "the session to use for this thread"
+  session: AgentSessionAttributes
+}
+
+input AgentSessionAttributes {
+  "whether the provisioning plan has been confirmed"
+  planConfirmed: Boolean
+
+  "the id of the cloud connection to use for this session"
+  connectionId: ID
 }
 
 "the settings for an AI chat thread"

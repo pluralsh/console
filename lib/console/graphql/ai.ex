@@ -48,6 +48,12 @@ defmodule Console.GraphQl.AI do
     field :insight_id, :id, description: "an ai insight this thread was created from"
     field :flow_id,    :id, description: "the flow this thread was created in"
     field :settings,   :chat_thread_settings_attributes, description: "the settings for this thread"
+    field :session,    :agent_session_attributes, description: "the session to use for this thread"
+  end
+
+  input_object :agent_session_attributes do
+    field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
   end
 
   @desc "the settings for an AI chat thread"
@@ -117,6 +123,16 @@ defmodule Console.GraphQl.AI do
   @desc "the settings for an AI chat thread"
   object :chat_thread_settings do
     field :memory, :boolean, description: "controls whether this thread uses knowledge graph-basedmemory"
+  end
+
+  @desc "A session for an AI agent to use when acting in a chat thread"
+  object :agent_session do
+    field :id,             non_null(:id)
+    field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :thread,         :chat_thread, resolve: dataloader(AI)
+    field :connection,     :cloud_connection, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   @desc "A saved item for future ai-based investigation"

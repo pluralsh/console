@@ -42,6 +42,10 @@ spec:
             type: object
           spec:
             properties:
+              agentId:
+                description: The agent session id that created this service, used
+                  for ui linking and otherwise ignored
+                type: string
               bindings:
                 description: Bindings contain read and write policies of this cluster
                 properties:

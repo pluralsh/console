@@ -107,6 +107,7 @@ defmodule Console.Schema.Stack do
     field :locked_at,       :utc_datetime_usec
     field :polled_sha,      :string
     field :variables,       :map
+    field :agent_id,        :string
 
     field :actor_changed, :boolean, virtual: true
     field :runnable,      :boolean, virtual: true

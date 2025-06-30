@@ -165,6 +165,7 @@ defmodule Console.Schema.Service do
     field :protect,          :boolean
     field :dry_run,          :boolean
     field :interval,         :string
+    field :agent_id,         :string
 
     field :norevise, :boolean, virtual: true, default: false
     field :kick,     :boolean, virtual: true, default: false

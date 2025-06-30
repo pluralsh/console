@@ -228,8 +228,10 @@ defmodule Console.AI.Chat.Engine do
 
   defp include_tools(opts, thread) do
     case {thread, ChatSvc.find_tools(thread)} do
-      {_, {:ok, [_ | _] = tools}} -> [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
-      {%ChatThread{flow: %Flow{}}, _} -> [{:plural, internal_tools(thread)} | opts]
+      {_, {:ok, [_ | _] = tools}} ->
+        [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
+      {%ChatThread{flow: %Flow{}}, _} ->
+        [{:plural, internal_tools(thread)} | opts]
       _ -> opts
     end
   end

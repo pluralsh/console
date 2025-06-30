@@ -23,6 +23,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :helm,             :helm_config_attributes
     field :kustomize,        :kustomize_attributes
     field :parent_id,        :id
+    field :agent_id,         :string
     field :flow_id,          :id
     field :configuration,    list_of(:config_attributes)
     field :dependencies,     list_of(:service_dependency_attributes)
@@ -84,6 +85,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kustomize,        :kustomize_attributes
     field :parent_id,        :id
     field :flow_id,          :id
+    field :agent_id,         :string
     field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
@@ -199,6 +201,7 @@ defmodule Console.GraphQl.Deployments.Service do
         {:ok, Map.put(helm, :parent, svc)}
       svc, _, _ -> {:ok, svc.helm}
     end
+    field :agent_id,         :string, description: "the agent id this service is associated with"
     field :promotion,        :service_promotion, description: "how you'd like to perform a canary promotion"
     field :templated,        :boolean, description: "if you should apply liquid templating to raw yaml files, defaults to true"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"

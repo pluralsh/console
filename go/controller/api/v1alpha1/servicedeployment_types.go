@@ -218,6 +218,10 @@ type ServiceSpec struct {
 	// Renderers of this service
 	// +kubebuilder:validation:Optional
 	Renderers []Renderer `json:"renderers,omitempty"`
+
+	// The agent session id that created this service, used for ui linking and otherwise ignored
+	// +kubebuilder:validation:Optional
+	AgentId *string `json:"agentId,omitempty"`
 }
 
 type Source struct {

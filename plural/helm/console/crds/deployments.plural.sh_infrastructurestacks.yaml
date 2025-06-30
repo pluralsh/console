@@ -49,6 +49,10 @@ spec:
                 description: Actor - user email to use for default Plural authentication
                   in this stack.
                 type: string
+              agentId:
+                description: The agent session id that created this service, used
+                  for ui linking and otherwise ignored
+                type: string
               approval:
                 description: Approval whether to require approval
                 type: boolean

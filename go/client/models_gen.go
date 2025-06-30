@@ -122,6 +122,13 @@ type AgentMigrationAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 }
 
+type AgentSessionAttributes struct {
+	// whether the provisioning plan has been confirmed
+	PlanConfirmed *bool `json:"planConfirmed,omitempty"`
+	// the id of the cloud connection to use for this session
+	ConnectionID *string `json:"connectionId,omitempty"`
+}
+
 type AiDelta struct {
 	Seq     int64   `json:"seq"`
 	Content string  `json:"content"`
@@ -814,6 +821,8 @@ type ChatThreadAttributes struct {
 	FlowID *string `json:"flowId,omitempty"`
 	// the settings for this thread
 	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
+	// the session to use for this thread
+	Session *AgentSessionAttributes `json:"session,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -2890,6 +2899,8 @@ type InfrastructureStack struct {
 	// optional k8s job configuration for the job that will apply this stack
 	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
+	// the agent id this stack is associated with
+	AgentID *string `json:"agentId,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -5652,6 +5663,8 @@ type ServiceDeployment struct {
 	Git *GitRef `json:"git,omitempty"`
 	// description of how helm charts should be applied
 	Helm *HelmSpec `json:"helm,omitempty"`
+	// the agent id this service is associated with
+	AgentID *string `json:"agentId,omitempty"`
 	// how you'd like to perform a canary promotion
 	Promotion *ServicePromotion `json:"promotion,omitempty"`
 	// if you should apply liquid templating to raw yaml files, defaults to true
@@ -5750,6 +5763,7 @@ type ServiceDeploymentAttributes struct {
 	Helm            *HelmConfigAttributes          `json:"helm,omitempty"`
 	Kustomize       *KustomizeAttributes           `json:"kustomize,omitempty"`
 	ParentID        *string                        `json:"parentId,omitempty"`
+	AgentID         *string                        `json:"agentId,omitempty"`
 	FlowID          *string                        `json:"flowId,omitempty"`
 	Configuration   []*ConfigAttributes            `json:"configuration,omitempty"`
 	Dependencies    []*ServiceDependencyAttributes `json:"dependencies,omitempty"`
@@ -5914,6 +5928,7 @@ type ServiceUpdateAttributes struct {
 	Kustomize       *KustomizeAttributes           `json:"kustomize,omitempty"`
 	ParentID        *string                        `json:"parentId,omitempty"`
 	FlowID          *string                        `json:"flowId,omitempty"`
+	AgentID         *string                        `json:"agentId,omitempty"`
 	Dependencies    []*ServiceDependencyAttributes `json:"dependencies,omitempty"`
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
@@ -6011,8 +6026,10 @@ type StackAttributes struct {
 	// a cron to spawn runs for this stack
 	Cron *StackCronAttributes `json:"cron,omitempty"`
 	// arbitrary variables to pass into the stack
-	Variables         *string                       `json:"variables,omitempty"`
-	PolicyEngine      *PolicyEngineAttributes       `json:"policyEngine,omitempty"`
+	Variables    *string                 `json:"variables,omitempty"`
+	PolicyEngine *PolicyEngineAttributes `json:"policyEngine,omitempty"`
+	// the agent id this stack is associated with
+	AgentID           *string                       `json:"agentId,omitempty"`
 	ReadBindings      []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
 	WriteBindings     []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 	Tags              []*TagAttributes              `json:"tags,omitempty"`

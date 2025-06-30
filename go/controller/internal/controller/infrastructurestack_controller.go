@@ -300,6 +300,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		DefinitionID:      attributes.definitionID,
 		ObservableMetrics: lo.ToSlicePtr(attributes.observableMetrics),
 		ManageState:       stack.Spec.ManageState,
+		AgentID:           stack.Spec.AgentId,
 		Workdir:           stack.Spec.Workdir,
 		Git: console.GitRefAttributes{
 			Ref:    stack.Spec.Git.Ref,

@@ -177,6 +177,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		FlowID:          attr.FlowID,
 		Sources:         attr.Sources,
 		Renderers:       attr.Renderers,
+		AgentID:         attr.AgentID,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -253,6 +254,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
 		SyncConfig:      syncConfigAttributes,
+		AgentID:         service.Spec.AgentId,
 	}
 
 	if id, ok := service.GetAnnotations()[InventoryAnnotation]; ok && id != "" {

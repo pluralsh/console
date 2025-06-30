@@ -1586,6 +1586,7 @@ _Appears in:_
 | `tags` _object (keys:string, values:string)_ | Tags used to filter stacks. |  | Optional: {} <br /> |
 | `variables` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Variables represents a file with variables in the stack run environment.<br />It will be automatically passed to the specific tool depending on the<br />stack Type (except [console.StackTypeCustom]). |  | Optional: {} <br /> |
 | `policyEngine` _[PolicyEngine](#policyengine)_ | PolicyEngine is a configuration for applying policy enforcement to a stack. |  | Optional: {} <br /> |
+| `agentId` _string_ | The agent session id that created this service, used for ui linking and otherwise ignored |  | Optional: {} <br /> |
 
 
 #### JobSpec
@@ -3245,6 +3246,7 @@ _Appears in:_
 | `detach` _boolean_ | Detach determined if user want to delete or detach service |  | Optional: {} <br /> |
 | `sources` _[Source](#source) array_ | Sources of this service |  | Optional: {} <br /> |
 | `renderers` _[Renderer](#renderer) array_ | Renderers of this service |  | Optional: {} <br /> |
+| `agentId` _string_ | The agent session id that created this service, used for ui linking and otherwise ignored |  | Optional: {} <br /> |
 
 
 
