@@ -103,8 +103,6 @@ enum MenuItemKey {
   Delete = 'delete',
 }
 
-const pollInterval = 5 * 1000
-
 const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   { path: STACK_RUNS_REL_PATH, label: 'Runs', enabled: true },
   { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
@@ -189,7 +187,7 @@ export default function Stacks() {
     variables: { id: stackId },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
-    pollInterval,
+    pollInterval: 3_000,
   })
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
