@@ -1,0 +1,111 @@
+{{- if .Values.cloudQuery.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "console.fullname" . }}-cloud-query
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- with .Values.cloudQuery.podLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if not .Values.cloudQuery.autoscaling.enabled }}
+  replicas: {{ .Values.cloudQuery.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloud-query
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.cloudQuery.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        helm.sh/chart: {{ include "console.chart" . }}
+        app.kubernetes.io/name: cloud-query
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.cloudQuery.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.cloudQuery.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "console.fullname" . }}-cloud-query
+      {{- with .Values.cloudQuery.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.cloudQuery.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.cloudQuery.image.repository }}:{{ .Values.cloudQuery.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cloudQuery.image.pullPolicy }}
+          {{- with .Values.cloudQuery.image.args }}
+          args:
+            {{- toYaml .| nindent 12}}
+          {{- end }}
+          env:
+            - name: PLRL_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.cloudQuery.database.password.existingSecret.name }}
+                  name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
+                  key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
+                {{- else if .Values.cloudQuery.database.password.value }}
+                  name: {{ include "console.fullname" . }}-db-password
+                  key: password
+                {{- else }}
+                  name: {{ include "console.fullname" . }}-db-password
+                  key: password
+                {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.cloudQuery.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cloudQuery.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cloudQuery.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ .Values.cloudQuery.database.volume.name }}
+              mountPath: {{ .Values.cloudQuery.database.volume.mountPath }}
+          {{- with .Values.cloudQuery.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: {{ .Values.cloudQuery.database.volume.name }}
+          emptyDir:
+            medium: {{ .Values.cloudQuery.database.volume.medium }}
+      {{- with .Values.cloudQuery.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cloudQuery.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cloudQuery.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cloudQuery.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
