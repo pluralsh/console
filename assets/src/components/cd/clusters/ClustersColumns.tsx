@@ -259,8 +259,7 @@ export const ColAgentHealth = columnHelper.accessor(
     id: 'agentHealth',
     header: 'Agent health',
     meta: {
-      tooltip:
-        "An agent is healthy if it's been pinged in the last time interval",
+      tooltip: 'Whether your agent has pinged within the last 15 minutes',
     },
     enableSorting: true,
     cell: ({ row: { original } }) => (
@@ -275,7 +274,7 @@ export const ColHealthScore = columnHelper.accessor(
     id: 'healthScore',
     header: 'Health score',
     meta: {
-      tooltip: 'A holistic view of the Kubernetes API configuration health',
+      tooltip: 'A holistic view of Kubernetes API configuration health',
     },
     cell: ({ table, row: { original } }) => {
       const cluster = original.node

@@ -2,7 +2,7 @@ defmodule Console.AI.Chat.Engine do
   use Console.Services.Base
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
-  alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit}
+  alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit, AgentSession}
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
     Clusters,
@@ -23,6 +23,7 @@ defmodule Console.AI.Chat.Engine do
     DeleteRelationships,
     Graph
   }
+  alias Console.AI.Tools.Agent
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
@@ -59,6 +60,11 @@ defmodule Console.AI.Chat.Engine do
     DeleteObservations,
     DeleteRelationships,
     Graph
+  ]
+
+  @agent_tools [
+    Agent.Query,
+    Agent.Schema
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
@@ -232,12 +238,12 @@ defmodule Console.AI.Chat.Engine do
         [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
       {%ChatThread{flow: %Flow{}}, _} ->
         [{:plural, internal_tools(thread)} | opts]
-      _ -> opts
+      _ ->
+        [{:plural, internal_tools(thread)} | opts]
     end
   end
 
-  defp internal_tools(%ChatThread{} = t),
-    do: memory_tools(t) ++ flow_tools(t)
+  defp internal_tools(%ChatThread{} = t), do: memory_tools(t) ++ flow_tools(t) ++ agent_tools(t)
 
   defp memory_tools(%ChatThread{} = t) do
     case ChatThread.settings(t, :memory) do
@@ -245,6 +251,9 @@ defmodule Console.AI.Chat.Engine do
       false -> []
     end
   end
+
+  defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
+  defp agent_tools(_), do: []
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []
