@@ -10,4 +10,5 @@ resources:
 - dbs_v1alpha1_mysqlcredentials.yaml
 - dbs_v1alpha1_mysqldatabase.yaml
 - dbs_v1alpha1_mysqluser.yaml
+- dbs_v1alpha1_namespacemanagement.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
