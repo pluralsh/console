@@ -97,4 +97,5 @@ export const TdLoading = styled(Td)(({ theme }) => ({
 export const TdBasic = styled.td({
   gridColumn: '1 / -1',
   padding: 0,
+  overflow: 'hidden',
 })
