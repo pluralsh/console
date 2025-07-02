@@ -263,7 +263,8 @@ func init() {
 
 	types.RegisterController(
 		types.PersonaReconciler,
-		func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		func(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
+			credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 			return &controller.PersonaReconciler{
 				Client:           mgr.GetClient(),
 				ConsoleClient:    consoleClient,
