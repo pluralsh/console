@@ -132,6 +132,30 @@ defmodule Console.GraphQl.AI do
     field :thread,         :chat_thread, resolve: dataloader(AI)
     field :connection,     :cloud_connection, resolve: dataloader(Deployments)
 
+    @desc "the services associated with this chat, usually from an agentic workflow"
+    connection field :service_deployments, node_type: :service_deployment do
+      arg :q,          :string
+      arg :status,     :service_deployment_status
+      arg :errored,    :boolean
+
+      resolve &Deployments.agent_services/3
+    end
+
+    @desc "the stacks associated with this chat, usually from an agentic workflow"
+    connection field :stacks, node_type: :infrastructure_stack do
+      arg :q,          :string
+
+      resolve &Deployments.agent_stacks/3
+    end
+
+    @desc "the pull requests associated with this chat, usually from an agentic workflow"
+    connection field :pull_requests, node_type: :pull_request do
+      arg :open,       :boolean
+      arg :q,          :string
+
+      resolve &Deployments.agent_prs/3
+    end
+
     timestamps()
   end
 

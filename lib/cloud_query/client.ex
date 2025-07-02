@@ -6,5 +6,5 @@ defmodule CloudQuery.Client do
     |> GRPC.Stub.connect()
   end
 
-  defp host(), do: "console-cloud-query:9192"
+  defp host(), do: Console.conf(:cloudquery_host)
 end

@@ -198,7 +198,8 @@ config :console,
   byok: get_env("CONSOLE_BYOK") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
-  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")
+  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
+  cloudquery_host: get_env("CONSOLE_CLOUDQUERY_HOST") || "console-cloud-query:9192"
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,

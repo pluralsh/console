@@ -590,6 +590,9 @@ type RootMutationType {
     branch: String
 
     context: Json
+
+    "a ai thread id this pr was spawned from, for associating with agentic workflows"
+    threadId: ID
   ): PullRequest
 
   "just registers a pointer record to a PR after it was created externally be some other automation"

@@ -6909,6 +6909,7 @@ export type RootMutationTypeCreatePullRequestArgs = {
   context?: InputMaybe<Scalars['Json']['input']>;
   id: Scalars['ID']['input'];
   identifier?: InputMaybe<Scalars['String']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

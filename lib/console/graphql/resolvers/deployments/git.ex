@@ -11,7 +11,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     HelmRepository,
     Observer,
     Catalog,
-    DependencyManagementService
+    DependencyManagementService,
+    AgentSession
   }
 
   def resolve_scm_webhook(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_scm_webhook(id)}
@@ -61,6 +62,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> maybe_search(PullRequest, args)
     |> pr_filters(args)
     |> filter_proj(PullRequest, args)
+    |> paginate(args)
+  end
+
+  def agent_prs(%AgentSession{agent_id: agent_id}, args, _) do
+    PullRequest.ordered()
+    |> PullRequest.for_agent(agent_id)
+    |> pr_filters(args)
+    |> maybe_search(PullRequest, args)
     |> paginate(args)
   end
 
@@ -123,8 +132,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_pr_automation(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_pr_automation(id, user)
 
-  def create_pull_request(%{id: id, branch: branch, context: ctx} = args, %{context: %{current_user: user}}),
-    do: Git.create_pull_request(%{}, ctx, id, branch, args[:identifier], user)
+  def create_pull_request(%{id: id, branch: branch, context: ctx} = args, %{context: %{current_user: user}}) do
+    additional_context = Console.AI.Chat.pr_context(args[:thread_id])
+    agent_id = Console.deep_get(additional_context, [:ai, :session, :agent_id])
+    Git.create_pull_request(%{agent_id: agent_id}, Map.merge(ctx, additional_context), id, branch, args[:identifier], user)
+  end
 
   def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_pull_request(attrs, user)

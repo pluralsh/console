@@ -1,12 +1,19 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Base do
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{User, Cluster, Tag}
+  alias Console.Schema.{User, Cluster, Tag, ChatThread, AgentSession}
 
   defmacro __using__(_opts) do
     quote do
       use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
       import Console.GraphQl.Resolvers.Deployments.Base
       import Console.Deployments.Policies, only: [allow: 3]
+    end
+  end
+
+  def for_session(%ChatThread{} = thread, fun) when is_function(fun, 1) do
+    case Console.Repo.preload(thread, [:session]) do
+      %{session: %AgentSession{agent_id: agent_id}} -> fun.(agent_id)
+      _ -> {:ok, nil}
     end
   end
 

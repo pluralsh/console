@@ -69,7 +69,7 @@ defmodule Console.Schema.ClusterUsageHistory do
   end
 
   def expired(query \\ __MODULE__) do
-    expiry = Timex.now() |> Timex.shift(days: -14)
+    expiry = Timex.now() |> Timex.shift(days: -365)
     from(cu in query, where: cu.timestamp <= ^expiry)
   end
 

@@ -4,7 +4,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   alias Console.Deployments.{Services, Clusters, Tree}
   alias Console.Schema.{
     Service,
-    Revision
+    Revision,
+    AgentSession
   }
 
   def resolve_service(%{cluster: _, name: _} = args, ctx) do
@@ -32,6 +33,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def list_services(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
+    |> service_filters(args)
+    |> maybe_search(Service, args)
+    |> Service.ordered()
+    |> paginate(args)
+  end
+
+  def agent_services(%AgentSession{agent_id: agent_id}, args, _) do
+    Service.for_agent(agent_id)
     |> service_filters(args)
     |> maybe_search(Service, args)
     |> Service.ordered()

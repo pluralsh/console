@@ -19,7 +19,8 @@ defmodule Console.AI.Chat do
     Service,
     Stack,
     Flow,
-    McpServer
+    McpServer,
+    AgentSession
   }
 
   @type context_source :: :service | :stack
@@ -292,6 +293,19 @@ defmodule Console.AI.Chat do
   end
 
   @thread_preloads [session: :connection, user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+
+  @doc """
+  Generates a context map for a PR associated with a chat thread
+  """
+  @spec pr_context(binary | ChatThread.t) :: map
+  def pr_context(thread_id) when is_binary(thread_id) do
+    get_thread!(thread_id)
+    |> Repo.preload(@thread_preloads)
+    |> pr_context()
+  end
+  def pr_context(%ChatThread{session: %AgentSession{} = session}),
+    do: %{ai: %{session: Map.take(session, ~w(agent_id)a)}}
+  def pr_context(_), do: %{}
 
   @doc """
   Saves a message history, then generates a new assistant-derived messages from there
