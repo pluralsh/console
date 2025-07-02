@@ -16,6 +16,9 @@ import (
 // Reconciler is a name of reconciler supported by this controller.
 type Reconciler string
 
+// List of supported reconcilers.
+// Sorted alphabetically for easier maintenance.
+// Please keep it that way :)
 const (
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
 	CatalogReconciler                    Reconciler = "catalog"
@@ -40,6 +43,7 @@ const (
 	ObservabilityProviderReconciler      Reconciler = "observabilityprovider"
 	ObserverReconciler                   Reconciler = "observer"
 	OIDCProviderReconciler               Reconciler = "oidcprovider"
+	PersonaReconciler                    Reconciler = "persona"
 	PipelineContextReconciler            Reconciler = "pipelinecontext"
 	PipelineReconciler                   Reconciler = "pipeline"
 	PrAutomationReconciler               Reconciler = "prautomation"
