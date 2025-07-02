@@ -12659,7 +12659,7 @@ export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string
 
 export type ClusterUsageHistoryFragment = { __typename?: 'ClusterUsageHistory', id: string, timestamp: string, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null };
 
-export type ProjectUsageHistoryFragment = { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null };
+export type ProjectUsageHistoryFragment = { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null, projectId?: string | null };
 
 export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
 
@@ -12722,7 +12722,7 @@ export type ProjectUsageHistoryQueryVariables = Exact<{
 }>;
 
 
-export type ProjectUsageHistoryQuery = { __typename?: 'RootQueryType', projectUsageHistory?: { __typename?: 'ProjectUsageHistoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectUsageHistoryEdge', node?: { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null } | null } | null> | null } | null };
+export type ProjectUsageHistoryQuery = { __typename?: 'RootQueryType', projectUsageHistory?: { __typename?: 'ProjectUsageHistoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectUsageHistoryEdge', node?: { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null, projectId?: string | null } | null } | null> | null } | null };
 
 export type SuggestScalingRecommendationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16320,6 +16320,7 @@ export const ProjectUsageHistoryFragmentDoc = gql`
   cpu
   memory
   gpu
+  projectId
 }
     `;
 export const ClusterNamespaceUsageFragmentDoc = gql`

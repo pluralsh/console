@@ -35,6 +35,7 @@ fragment ProjectUsageHistory on ProjectUsageHistory {
   cpu
   memory
   gpu
+  projectId
 }
 
 fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
