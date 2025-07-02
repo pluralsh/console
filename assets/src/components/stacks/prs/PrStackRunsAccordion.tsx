@@ -23,8 +23,6 @@ import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 
 import { StackRunsScroller } from '../runs/StackRunsScroller'
 
-const pollInterval = 5 * 1000
-
 // can't really make this dynamic with the current scroller component
 const ACCORDION_TABLE_HEIGHT = '300px'
 
@@ -43,7 +41,7 @@ export function PrStackRunsAccordion({
   const queryResult = useStackRunsQuery({
     variables: { id: stackId, pullRequestId: pr.id },
     fetchPolicy: 'cache-and-network',
-    pollInterval,
+    pollInterval: 5_000,
     skip: !isOpen,
   })
 

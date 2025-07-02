@@ -214,11 +214,6 @@ jobs:
         with:
           path: ./charts/datastore
           release: ${{github.ref_name}}
-      - name: push cloud-query chart
-        uses: pluralsh/chart-releaser@v0.1.3
-        with:
-          path: ./charts/cloud-query
-          release: ${{github.ref_name}}
       - name: controller version
         id: controller_vsn
         uses: mikefarah/yq@master

@@ -7,6 +7,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
+import { SemanticColorKey } from '@pluralsh/design-system'
 
 export const CHART_COLOR_MAP = {
   blue: '#99DAFF',
@@ -50,8 +51,14 @@ const chartColors = {
   track: 'transparent',
 } as const satisfies Record<string, string>
 
-export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
+export const createCenteredMetric = (
+  val: Nullable<string | number>,
+  label: Nullable<string | number>,
+  color: SemanticColorKey = 'text',
+  secondaryColor: SemanticColorKey = 'text-light'
+) =>
   function CenteredMetric({ center }: any) {
+    const fontSize = 25
     const theme = useTheme()
     const percentFontSize = fontSize * 0.85
     let showPercent = false
@@ -65,7 +72,7 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
     return (
       <g transform={`translate(${center[0]},${center[1] + 1})`}>
         <text
-          fill={theme.colors['text']}
+          fill={theme.colors[color]}
           x="0"
           y="0"
           textAnchor="middle"
@@ -81,7 +88,7 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
           {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
         </text>
         <text
-          fill={theme.colors['text-light']}
+          fill={theme.colors[secondaryColor]}
           x="0"
           y="5.5"
           textAnchor="middle"
@@ -120,8 +127,8 @@ function RadialBarChart({
   className?: string
   width?: number
   height?: number
-  centerVal?: string
-  centerLabel?: string
+  centerVal?: Nullable<string | number>
+  centerLabel?: Nullable<string | number>
   data: ComponentProps<typeof ResponsiveRadialBar>['data']
 } & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
   const chartTheme = useChartTheme()

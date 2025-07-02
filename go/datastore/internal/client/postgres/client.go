@@ -247,42 +247,6 @@ func (c *client) DeleteUser(username string) error {
 		}
 	}(db)
 
-	// Get databases owned by the user
-	rows, err := db.Query(`
-		SELECT datname FROM pg_database
-		WHERE pg_catalog.pg_get_userbyid(datdba) = $1
-	`, username)
-	if err != nil {
-		return fmt.Errorf("listing databases owned by user: %w", err)
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			ctrl.LoggerFrom(c.ctx).Info("failed to close rows", "rows", rows)
-		}
-	}(rows)
-
-	var databases []string
-	for rows.Next() {
-		var datname string
-		if err := rows.Scan(&datname); err != nil {
-			return fmt.Errorf("scanning database name: %w", err)
-		}
-		databases = append(databases, datname)
-	}
-	if err := rows.Err(); err != nil {
-		return err
-	}
-
-	// Drop each owned database
-	for _, dbName := range databases {
-		_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s"`, dbName))
-		if err != nil {
-			return fmt.Errorf("dropping owned database %s: %w", dbName, err)
-		}
-		ctrl.LoggerFrom(c.ctx).Info("dropped owned database", "database", dbName)
-	}
-
 	// Drop user
 	_, err = db.Exec(fmt.Sprintf(`DROP USER IF EXISTS "%s"`, username))
 	if err != nil {
@@ -322,7 +286,7 @@ func (c *client) SetDatabaseOwner(database, username string) error {
 	}
 
 	// Set new owner
-	query := fmt.Sprintf(`ALTER DATABASE "%s" OWNER TO "%s"`, database, username)
+	query := fmt.Sprintf(`GRANT ALL PRIVILEGES ON DATABASE %s TO %s`, database, username)
 	_, err = db.Exec(query)
 	if err != nil {
 		return fmt.Errorf("setting database owner: %w", err)

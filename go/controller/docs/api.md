@@ -33,6 +33,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [OIDCProvider](#oidcprovider)
 - [ObservabilityProvider](#observabilityprovider)
 - [Observer](#observer)
+- [Persona](#persona)
 - [Pipeline](#pipeline)
 - [PipelineContext](#pipelinecontext)
 - [PrAutomation](#prautomation)
@@ -189,6 +190,7 @@ _Appears in:_
 - [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
 - [DeploymentSettingsBindings](#deploymentsettingsbindings)
 - [NotificationSinkSpec](#notificationsinkspec)
+- [PersonaSpec](#personaspec)
 - [PrAutomationBindings](#prautomationbindings)
 
 | Field | Description | Default | Validation |
@@ -2269,6 +2271,143 @@ _Appears in:_
 | `awsRegion` _string_ |  |  | Optional: {} <br /> |
 
 
+#### Persona
+
+
+
+Persona is the Schema for the personas API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Persona` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[PersonaSpec](#personaspec)_ |  |  |  |
+
+
+#### PersonaConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaSpec](#personaspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `all` _boolean_ | All enables full UI for this Persona. |  | Optional: {} <br /> |
+| `home` _[PersonaHome](#personahome)_ | Home contains configuration for the homepage for this Persona. |  | Optional: {} <br /> |
+| `deployments` _[PersonaDeployment](#personadeployment)_ | Deployments enable individual parts of the deployments views. |  | Optional: {} <br /> |
+| `sidebar` _[PersonaSidebar](#personasidebar)_ | Sidebar enables individual aspects of the sidebar. |  | Optional: {} <br /> |
+| `services` _[PersonaServices](#personaservices)_ | Services enable individual parts of the services views. |  | Optional: {} <br /> |
+
+
+#### PersonaDeployment
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `clusters` _boolean_ |  |  | Optional: {} <br /> |
+| `deployments` _boolean_ |  |  | Optional: {} <br /> |
+| `repositories` _boolean_ |  |  | Optional: {} <br /> |
+| `services` _boolean_ |  |  | Optional: {} <br /> |
+| `pipelines` _boolean_ |  |  | Optional: {} <br /> |
+| `providers` _boolean_ |  |  | Optional: {} <br /> |
+| `addOns` _boolean_ |  |  | Optional: {} <br /> |
+
+
+#### PersonaHome
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `manager` _boolean_ |  |  | Optional: {} <br /> |
+| `security` _boolean_ |  |  | Optional: {} <br /> |
+
+
+#### PersonaServices
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `secrets` _boolean_ |  |  | Optional: {} <br /> |
+| `configuration` _boolean_ |  |  | Optional: {} <br /> |
+
+
+#### PersonaSidebar
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `audits` _boolean_ |  |  | Optional: {} <br /> |
+| `kubernetes` _boolean_ |  |  | Optional: {} <br /> |
+| `pullRequests` _boolean_ |  |  | Optional: {} <br /> |
+| `settings` _boolean_ |  |  | Optional: {} <br /> |
+| `backups` _boolean_ |  |  | Optional: {} <br /> |
+| `stacks` _boolean_ |  |  | Optional: {} <br /> |
+| `security` _boolean_ |  |  | Optional: {} <br /> |
+| `cost` _boolean_ |  |  | Optional: {} <br /> |
+
+
+#### PersonaSpec
+
+
+
+PersonaSpec defines the desired state of Persona
+
+
+
+_Appears in:_
+- [Persona](#persona)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this Persona. If not provided Persona's own name from Persona.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `description` _string_ | Longform description of this Persona. |  | Optional: {} <br /> |
+| `role` _[PersonaRole](#personarole)_ | Role of this Persona controls the behavior of the homepage. |  | Optional: {} <br /> |
+| `configuration` _[PersonaConfiguration](#personaconfiguration)_ | Configuration contains the UI configuration for this Persona (additive across personas)". |  | Optional: {} <br /> |
+| `bindings` _[Binding](#binding) array_ | Bindings contains the group bindings for this Persona. |  | Optional: {} <br /> |
+
+
 #### Pipeline
 
 
@@ -2625,6 +2764,7 @@ _Appears in:_
 | `message` _string_ | Message the commit message this pr will incorporate |  | Optional: {} <br /> |
 | `name` _string_ | Name name of the automation in the console api (defaults to metadata.name) |  | Optional: {} <br /> |
 | `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |
+| `patch` _boolean_ | Patch whether to generate a patch for this pr instead of a full pr |  | Optional: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef a cluster this pr works on |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for generating this PR |  | Required: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the repository this automation uses. |  | Optional: {} <br /> |

@@ -114,3 +114,46 @@ export function GettingStartedContent() {
     </div>
   )
 }
+
+export function GettingStartedContentHomeVariant() {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      direction="column"
+      align="center"
+      gap="medium"
+      margin={`${theme.spacing.xxlarge}px auto`}
+      width={576}
+    >
+      <Body1BoldP>Congrats on deploying your Plural Console!</Body1BoldP>
+      <Body2P css={{ color: theme.colors['text-light'], textAlign: 'center' }}>
+        To get the most out of the Continuous Deployment (CD) experience, you
+        can begin to add more clusters. Check out the docs or contact us to
+        learn more.
+      </Body2P>
+      <Flex
+        gap="xsmall"
+        marginTop={theme.spacing.xsmall}
+      >
+        <Button
+          floating
+          as="a"
+          href="https://www.plural.sh/contact"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Contact the team
+        </Button>
+        <Button
+          as="a"
+          href="https://docs.plural.sh/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Read docs
+        </Button>
+      </Flex>
+    </Flex>
+  )
+}

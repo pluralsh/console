@@ -1,0 +1,20 @@
+{{- if .Values.cloudQuery.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "console.fullname" . }}-cloud-query
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.cloudQuery.service.type }}
+  ports:
+    - port: {{ .Values.cloudQuery.service.port }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+  selector:
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

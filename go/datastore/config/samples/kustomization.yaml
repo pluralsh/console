@@ -7,4 +7,7 @@ resources:
 - dbs_v1alpha1_postgrescredentials.yaml
 - dbs_v1alpha1_postgresdatabase.yaml
 - dbs_v1alpha1_postgresuser.yaml
+- dbs_v1alpha1_mysqlcredentials.yaml
+- dbs_v1alpha1_mysqldatabase.yaml
+- dbs_v1alpha1_mysqluser.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

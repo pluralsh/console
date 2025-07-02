@@ -6,6 +6,7 @@ replace github.com/pluralsh/console/go/client => ../client
 
 require (
 	github.com/elastic/go-elasticsearch/v9 v9.0.0
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
@@ -21,6 +22,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/gqlgen v0.17.64 // indirect
 	github.com/Yamashou/gqlgenc v0.29.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

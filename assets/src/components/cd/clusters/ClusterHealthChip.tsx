@@ -2,12 +2,11 @@ import { Chip, ChipProps, ChipSeverity, Tooltip } from '@pluralsh/design-system'
 import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
 export function ClusterHealth({
   cluster,
-  size = 'large',
+  size = 'small',
 }: {
   cluster?: ClustersRowFragment
   size?: ChipProps['size']
@@ -15,12 +14,13 @@ export function ClusterHealth({
   if (!cluster?.installed) {
     return (
       <Tooltip label="The deploy agent still needs to be installed in this cluster">
-        <ClusterTableChipSC
+        <Chip
           size={size}
           severity="info"
+          css={{ alignSelf: 'center' }}
         >
           Pending
-        </ClusterTableChipSC>
+        </Chip>
       </Tooltip>
     )
   }
@@ -35,13 +35,13 @@ export function ClusterHealth({
 }
 
 function ClusterHealthChip({
+  size,
   cluster,
   pingedAt,
-  size = 'large',
 }: {
   cluster?: ClustersRowFragment
   pingedAt?: string | null
-  size?: ChipProps['size']
+  size: ChipProps['size']
 }) {
   const [now, setNow] = useState(dayjs())
 
@@ -63,15 +63,15 @@ function ClusterHealthChip({
           : `This cluster was not pinged yet`
       }
       date={pingedAt}
-      css={{ width: '100%' }}
+      css={{ alignSelf: 'center' }}
     >
-      <ClusterTableChipSC
+      <Chip
         size={size}
         clickable
         severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
       >
         {pinged ? (healthy ? 'Healthy' : 'Unhealthy') : 'Pending'}
-      </ClusterTableChipSC>
+      </Chip>
     </TooltipTime>
   )
 }
@@ -86,9 +86,10 @@ export function ClusterHealthScoreChip({
   const severity: ChipSeverity = healthScoreToSeverity(healthScore)
 
   return (
-    <ClusterTableChipSC
-      size="large"
+    <Chip
       clickable
+      css={{ alignSelf: 'center' }}
+      size="small"
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()
@@ -96,15 +97,9 @@ export function ClusterHealthScoreChip({
       severity={severity}
     >
       {healthScore ?? '-'}
-    </ClusterTableChipSC>
+    </Chip>
   )
 }
-
-export const ClusterTableChipSC = styled(Chip)({
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'center',
-})
 
 export const healthScoreToSeverity = (healthScore?: Nullable<number>) =>
   typeof healthScore !== 'number'
