@@ -34,13 +34,13 @@ import {
 } from './CostManagementTreeMap'
 import { ProjectUsageTimeSeries } from './ProjectCostUsageSeries'
 
-type TimeSeriesMetric = Exclude<
+export type ProjectUsageMetric = Exclude<
   keyof ProjectUsageHistory,
   '__typename' | 'timestamp' | 'projectId'
 >
 
 const METRIC_OPTIONS: Partial<
-  Record<TimeSeriesMetric, { Icon: ElementType; label: string }>
+  Record<ProjectUsageMetric, { Icon: ElementType; label: string }>
 > = {
   memory: { Icon: RamIcon, label: 'Memory' },
   cpu: { Icon: CpuIcon, label: 'CPU' },
@@ -56,7 +56,7 @@ export function CostManagementChartView() {
     AllProjectsOption.id
   )
   const [timeSeriesMetric, setTimeSeriesMetric] =
-    useState<TimeSeriesMetric>('memory')
+    useState<ProjectUsageMetric>('memory')
 
   const {
     data: clusterUsagesData,
@@ -120,7 +120,13 @@ export function CostManagementChartView() {
             label="Metric"
             css={{ width: 300 }}
           >
-            <Select label="Select metric">
+            <Select
+              label="Select metric"
+              selectedKey={timeSeriesMetric}
+              onSelectionChange={(metric) =>
+                setTimeSeriesMetric(metric as ProjectUsageMetric)
+              }
+            >
               {Object.entries(METRIC_OPTIONS).map(([id, { Icon, label }]) => (
                 <ListBoxItem
                   key={id}
@@ -138,6 +144,8 @@ export function CostManagementChartView() {
         <TimeSeriesContainerSC>
           <ProjectUsageTimeSeries
             data={timeSeries}
+            metric={timeSeriesMetric}
+            projectId={timeSeriesProjectId}
             loading={timeSeriesLoading}
             error={timeSeriesError}
           />
