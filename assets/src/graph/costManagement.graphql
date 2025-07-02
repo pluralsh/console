@@ -30,6 +30,13 @@ fragment ClusterUsageHistory on ClusterUsageHistory {
   storageCost
 }
 
+fragment ProjectUsageHistory on ProjectUsageHistory {
+  timestamp
+  cpu
+  memory
+  gpu
+}
+
 fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
   namespace
@@ -74,7 +81,7 @@ fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
 
 query ClusterUsages(
   $after: String
-  $first: Int
+  $first: Int = 500
   $before: String
   $last: Int
   $q: String
@@ -189,6 +196,29 @@ query ClusterUsageScalingRecommendations(
         node {
           ...ClusterScalingRecommendation
         }
+      }
+    }
+  }
+}
+
+query ProjectUsageHistory(
+  $after: String
+  $first: Int = 365
+  $before: String
+  $last: Int
+) {
+  projectUsageHistory(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ProjectUsageHistory
       }
     }
   }

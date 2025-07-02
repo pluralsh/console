@@ -6,6 +6,7 @@ import { useGraphTheme } from './Graph'
 import { isEmpty } from 'lodash'
 import { EmptyState } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
+import { ChartTooltip } from './ChartTooltip'
 
 export type TreeMapData = {
   name: string
@@ -38,6 +39,14 @@ const commonTreeMapProps = {
   label: (e) => e.id,
   labelSkipSize: 16,
   nodeOpacity: 0.9,
+  tooltip: ({ node }) => (
+    <ChartTooltip
+      tooltipStyles={{ maxWidth: 200 }}
+      color={node?.color}
+      value={node?.formattedValue}
+      label={node?.id}
+    />
+  ),
 }
 
 export const PARENT_NODE_NAME = 'overarching'

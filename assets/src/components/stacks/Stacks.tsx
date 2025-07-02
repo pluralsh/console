@@ -304,7 +304,7 @@ export default function Stacks() {
             selectedTagKeys={selectedTagKeys}
             setSelectedTagKeys={setSelectedTagKeys}
             searchOp={tagOp}
-            setSearchOp={setTagOp as (value: 'AND' | 'OR') => void}
+            setSearchOp={setTagOp}
             comboBoxProps={{
               endIcon: (
                 <CloseIcon
