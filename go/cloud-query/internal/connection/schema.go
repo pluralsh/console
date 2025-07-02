@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
-	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 )
 
 func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
