@@ -34,6 +34,7 @@ export const ColCluster = (
         <IconFrame
           icon={<ClusterIcon />}
           type="floating"
+          css={{ flexShrink: 0 }}
         />
         {name}
       </Flex>

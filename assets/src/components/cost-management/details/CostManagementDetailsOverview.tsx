@@ -7,11 +7,11 @@ import {
   DeltaDownIcon,
   DeltaUpIcon,
   Flex,
-  LoadingSpinner,
   RamIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { Body1P, Title1H1 } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
@@ -42,7 +42,7 @@ export function CostManagementDetailsOverview() {
   const { data, loading, error } = historyQuery
   const usageData = data?.clusterUsage
 
-  if (!usageData && loading) return <LoadingSpinner />
+  if (!usageData && loading) return <LoadingIndicator />
   if (error) return <GqlError error={error} />
 
   const history =

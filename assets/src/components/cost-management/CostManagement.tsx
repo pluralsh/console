@@ -1,203 +1,64 @@
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Conjunction } from 'generated/graphql'
+import { Dispatch, Key, useMemo, useState } from 'react'
+import { Outlet } from 'react-router-dom'
 import {
-  Card,
-  ClusterIcon,
-  CpuIcon,
-  Flex,
-  RamIcon,
-  Table,
-  TagMultiSelectProps,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { Row } from '@tanstack/react-table'
-import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
-import { useProjectId } from 'components/contexts/ProjectsContext'
-import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
-import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
-import {
-  ClusterUsageTinyFragment,
-  Conjunction,
-  useClusterUsagesQuery,
-} from 'generated/graphql'
-import { Key, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
-import { keySetToTagArray } from 'utils/clusterTags'
-import {
-  ColActions,
-  ColCluster,
-  ColCpuCost,
-  ColCpuEfficiency,
-  ColLoadBalancerCost,
-  ColMemoryCost,
-  ColMemoryEfficiency,
-  ColNetworkCost,
-} from './ClusterUsagesTableCols'
-import {
-  CostManagementTreeMap,
-  cpuCostByCluster,
-  memoryCostByCluster,
-} from './CostManagementTreeMap'
-import {
-  COST_MANAGEMENT_REL_PATH,
+  CM_CHART_VIEW_REL_PATH,
+  CM_TABLE_VIEW_REL_PATH,
   COST_MANAGEMENT_ABS_PATH,
 } from 'routes/costManagementRoutesConsts'
+import styled from 'styled-components'
+
+import { SubTabs } from 'components/utils/SubTabs'
 
 export const CM_TREE_MAP_CARD_HEIGHT = 300
 
+export type CMContextType = {
+  tagKeysState: [Set<Key>, Dispatch<Set<Key>>]
+  tagOpState: [Conjunction, Dispatch<Conjunction>]
+}
+
 const breadcrumbs = [
-  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: 'cost management', url: COST_MANAGEMENT_ABS_PATH },
+]
+
+const directory = [
+  {
+    label: 'Chart view',
+    path: `${COST_MANAGEMENT_ABS_PATH}/${CM_CHART_VIEW_REL_PATH}`,
+  },
+  {
+    label: 'Table view',
+    path: `${COST_MANAGEMENT_ABS_PATH}/${CM_TABLE_VIEW_REL_PATH}`,
+  },
 ]
 
 export function CostManagement() {
   useSetBreadcrumbs(breadcrumbs)
-  const theme = useTheme()
-  const navigate = useNavigate()
-  const projectId = useProjectId()
-  const [selectedTagKeys, setSelectedTagKeys] = useState<Set<Key>>(new Set())
-  const [tagOp, setTagOp] = useState<Conjunction>(Conjunction.Or)
+  const tagKeysState = useState<Set<Key>>(new Set())
+  const tagOpState = useState<Conjunction>(Conjunction.Or)
 
-  const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: useClusterUsagesQuery,
-        pageSize: 500,
-        keyPath: ['clusterUsages'],
-      },
-      {
-        projectId,
-        tagQuery:
-          selectedTagKeys.size > 0
-            ? { op: tagOp, tags: keySetToTagArray(selectedTagKeys) }
-            : undefined,
-      }
-    )
-
-  const usages = useMemo(
-    () =>
-      data?.clusterUsages?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is ClusterUsageTinyFragment => !!node) || [],
-    [data?.clusterUsages?.edges]
+  const ctx: CMContextType = useMemo(
+    () => ({ tagKeysState, tagOpState }),
+    [tagKeysState, tagOpState]
   )
 
   return (
     <WrapperSC>
-      <Flex
-        justify="space-between"
-        align="center"
-      >
-        <Subtitle1H1>Cost Management</Subtitle1H1>
-        <TagsFilter
-          selectedTagKeys={selectedTagKeys}
-          setSelectedTagKeys={setSelectedTagKeys}
-          searchOp={tagOp}
-          setSearchOp={setTagOp as TagMultiSelectProps['onChangeMatchType']}
-        />
-      </Flex>
-      <Flex gap="large">
-        <Card
-          css={{
-            padding: theme.spacing.large,
-            height: CM_TREE_MAP_CARD_HEIGHT,
-          }}
-          header={{
-            outerProps: { style: { flex: 1 } },
-            content: (
-              <Flex gap="small">
-                <CpuIcon />
-                <OverlineH1 as="h3">CPU cost by cluster</OverlineH1>
-              </Flex>
-            ),
-          }}
-        >
-          <CostManagementTreeMap
-            colorScheme="blue"
-            loading={loading}
-            data={cpuCostByCluster(usages)}
-            dataSize={usages.length}
-          />
-        </Card>
-        <Card
-          css={{
-            padding: theme.spacing.large,
-            height: CM_TREE_MAP_CARD_HEIGHT,
-          }}
-          header={{
-            outerProps: { style: { flex: 1 } },
-            content: (
-              <Flex gap="small">
-                <RamIcon />
-                <OverlineH1 as="h3">memory cost by cluster</OverlineH1>
-              </Flex>
-            ),
-          }}
-        >
-          <CostManagementTreeMap
-            colorScheme="purple"
-            loading={loading}
-            data={memoryCostByCluster(usages)}
-            dataSize={usages.length}
-          />
-        </Card>
-      </Flex>
-      <Card
-        css={{ overflow: 'hidden', maxHeight: 500 }}
-        header={{
-          content: (
-            <Flex gap="small">
-              <ClusterIcon />
-              <OverlineH1 as="h3">clusters</OverlineH1>
-            </Flex>
-          ),
-        }}
-      >
-        {error ? (
-          <GqlError error={error} />
-        ) : (
-          <Table
-            fullHeightWrap
-            fillLevel={1}
-            virtualizeRows
-            flush
-            rowBg="base"
-            loading={!data && loading}
-            columns={cols}
-            data={usages}
-            onRowClick={(_, row: Row<ClusterUsageTinyFragment>) =>
-              navigate(`details/${row.original?.id}`)
-            }
-            hasNextPage={data?.clusterUsages?.pageInfo?.hasNextPage}
-            isFetchingNextPage={loading}
-            fetchNextPage={fetchNextPage}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-            onVirtualSliceChange={setVirtualSlice}
-          />
-        )}
-      </Card>
+      <SubTabs directory={directory} />
+      <Outlet context={ctx} />
     </WrapperSC>
   )
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
-  width: '100%',
-  padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'auto',
+  height: '100%',
+  width: '100%',
+  margin: 'auto',
+  maxWidth: theme.breakpoints.desktopLarge,
   gap: theme.spacing.medium,
+  padding: theme.spacing.large,
 }))
-
-const cols = [
-  ColCluster,
-  ColCpuCost,
-  ColMemoryCost,
-  // ColStorageCost,
-  ColLoadBalancerCost,
-  ColNetworkCost,
-  ColMemoryEfficiency,
-  ColCpuEfficiency,
-  ColActions,
-]
