@@ -19,6 +19,7 @@ type Reconciler string
 // List of supported reconcilers.
 // Sorted alphabetically for easier maintenance.
 // Please keep it that way :)
+// Note: If you add a new reconciler, please also register it in the cmd/register.go file
 const (
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
 	CatalogReconciler                    Reconciler = "catalog"
