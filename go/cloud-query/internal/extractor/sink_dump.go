@@ -36,7 +36,7 @@ func (in *dumpSink) Send(output *cloudquery.ExtractOutput) error {
 		return fmt.Errorf("failed to marshal output to YAML: %w", err)
 	}
 
-	_, _ = file.WriteString(fmt.Sprintf("# Table: %s\n# ID: %s\n# Links: %s\n", output.Type, output.Id, output.Links))
+	_, _ = fmt.Fprintf(file, "# Table: %s\n# ID: %s\n# Links: %s\n", output.Type, output.Id, output.Links)
 	_, _ = file.Write(bytes)
 	_, _ = file.WriteString("\n---\n")
 	return err
