@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cron,           :stack_cron_attributes, description: "a cron to spawn runs for this stack"
     field :variables,      :json, description: "arbitrary variables to pass into the stack"
     field :policy_engine,  :policy_engine_attributes
+    field :agent_id,       :string, description: "the agent id this stack is associated with"
 
 
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -181,6 +182,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :status,              non_null(:stack_status), description: "The status of the last run of the stack"
     field :job_spec,            :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"
     field :policy_engine,       :policy_engine
+    field :agent_id,            :string, description: "the agent id this stack is associated with"
 
     @desc "version/image config for the tool you're using"
     field :configuration,       non_null(:stack_configuration), resolve: fn

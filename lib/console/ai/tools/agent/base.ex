@@ -1,0 +1,72 @@
+defmodule Console.AI.Tools.Agent.Base do
+  @moduledoc false
+
+  alias Console.AI.Tool
+  alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
+  alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
+
+  defmacro __using__(_) do
+    quote do
+      use Ecto.Schema
+      import Ecto.Changeset
+      import Console.AI.Tools.Utils
+      import Console.AI.Tools.Agent.Base
+      alias Console.AI.Tool
+      alias CloudQuery.Client
+      alias Cloudquery.CloudQuery.Stub
+      alias Console.Schema.{AgentSession, CloudConnection}
+    end
+  end
+
+  def session() do
+    case Tool.session() do
+      %AgentSession{} = session -> {:session, session}
+      _ -> {:error, "this chat is not associated with an agent session"}
+    end
+  end
+
+  def to_pb(%CloudConnection{provider: :aws} = connection) do
+    %Connection{
+      provider:    "#{connection.provider}",
+      credentials: to_pb(connection.configuration.aws),
+    }
+  end
+
+  def to_pb(%CloudConnection{provider: :gcp} = connection) do
+    %Connection{
+      provider:    "#{connection.provider}",
+      credentials: to_pb(connection.configuration.gcp),
+    }
+  end
+
+  def to_pb(%CloudConnection{provider: :azure} = connection) do
+    %Connection{
+      provider:    "#{connection.provider}",
+      credentials: to_pb(connection.configuration.azure),
+    }
+  end
+
+  def to_pb(%Configuration.Aws{} = aws) do
+    %AwsCredentials{
+      access_key_id:     aws.access_key_id,
+      secret_access_key: aws.secret_access_key
+    }
+  end
+
+  def to_pb(%Configuration.Gcp{} = gcp) do
+    %GcpCredentials{
+      service_account_json_b64: Base.encode64(gcp.service_account_key),
+    }
+  end
+
+  def to_pb(%Configuration.Azure{} = azure) do
+    %AzureCredentials{
+      subscription_id: azure.subscription_id,
+      tenant_id:       azure.tenant_id,
+      client_id:       azure.client_id,
+      client_secret:   azure.client_secret
+    }
+  end
+
+  def to_pb(_), do: nil
+end

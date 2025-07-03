@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "properties": {
+        "plan": {
+            "type": "string",
+            "description": "A markdown representation of the infrastructure that would be needed to create what the user is asking for"
+        },
+        "required_services": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "The name of the cloud provider services that will be used to create the infrastructure"
+            }
+        },
+        "open_questions": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "Potential questions that might remain even if the plan is implemented"
+            }
+        }
+    },
+    "required": ["plan"],
+    "additionalProperties": false
+}

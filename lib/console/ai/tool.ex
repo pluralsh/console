@@ -6,7 +6,8 @@ defmodule Console.AI.Tool do
     Service,
     Stack,
     Cluster,
-    AiInsight
+    AiInsight,
+    AgentSession
   }
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings}
@@ -14,17 +15,18 @@ defmodule Console.AI.Tool do
   @type t :: %__MODULE__{}
 
   defmodule Context do
-    alias Console.Schema.{Flow, User, AiInsight, Stack, Cluster, Service}
+    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service}
     @type t :: %__MODULE__{
       flow: Flow.t,
       user: User.t,
       insight: AiInsight.t,
       stack: Stack.t,
       cluster: Cluster.t,
-      service: Service.t
+      service: Service.t,
+      session: AgentSession.t
     }
 
-    defstruct [:flow, :user, :insight, :stack, :cluster, :service]
+    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session]
 
     def new(args), do: struct(__MODULE__, args)
   end
@@ -66,6 +68,13 @@ defmodule Console.AI.Tool do
   def flow() do
     case Process.get(@ctx) do
       %Context{flow: %Flow{} = flow} -> flow
+      _ -> nil
+    end
+  end
+
+  def session() do
+    case Process.get(@ctx) do
+      %Context{session: %AgentSession{} = session} -> session
       _ -> nil
     end
   end

@@ -1007,6 +1007,14 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_session_factory do
+    %Schema.AgentSession{
+      thread: build(:chat_thread),
+      connection: build(:cloud_connection),
+      agent_id: sequence(:agent_id, & "agent-#{&1}")
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

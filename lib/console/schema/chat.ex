@@ -7,7 +7,7 @@ defmodule Console.Schema.Chat do
   @type history :: [msg]
 
   defenum Role, user: 0, assistant: 1, system: 2
-  defenum Type, text: 0, file: 1, tool: 2, error: 3
+  defenum Type, text: 0, file: 1, tool: 2, error: 3, implementation_plan: 4
 
   schema "chats" do
     field :type,         Type, default: :text
@@ -26,6 +26,11 @@ defmodule Console.Schema.Chat do
         field :call_id,   :string
         field :name,      :string
         field :arguments, :map
+      end
+
+      embeds_one :plan, PlanAttributes, on_replace: :update do
+        field :required_services, {:array, :string}
+        field :open_questions, {:array, :string}
       end
     end
 
@@ -101,6 +106,7 @@ defmodule Console.Schema.Chat do
     |> cast(attrs, [])
     |> cast_embed(:file, with: &file_changeset/2)
     |> cast_embed(:tool, with: &tool_changeset/2)
+    |> cast_embed(:plan, with: &plan_changeset/2)
   end
 
   defp file_changeset(model, attrs) do
@@ -113,5 +119,10 @@ defmodule Console.Schema.Chat do
     model
     |> cast(attrs, ~w(name arguments call_id)a)
     |> validate_required(~w(name arguments)a)
+  end
+
+  defp plan_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(required_services open_questions)a)
   end
 end

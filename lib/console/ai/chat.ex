@@ -19,7 +19,8 @@ defmodule Console.AI.Chat do
     Service,
     Stack,
     Flow,
-    McpServer
+    McpServer,
+    AgentSession
   }
 
   @type context_source :: :service | :stack
@@ -291,19 +292,79 @@ defmodule Console.AI.Chat do
     end
   end
 
+  @thread_preloads [session: :connection, user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+
+  @doc """
+  Generates a context map for a PR associated with a chat thread
+  """
+  @spec pr_context(binary | ChatThread.t) :: map
+  def pr_context(thread_id) when is_binary(thread_id) do
+    get_thread!(thread_id)
+    |> Repo.preload(@thread_preloads)
+    |> pr_context()
+  end
+  def pr_context(%ChatThread{session: %AgentSession{} = session}),
+    do: %{ai: %{session: Map.take(session, ~w(agent_id)a)}}
+  def pr_context(_), do: %{}
+
   @doc """
   Saves a message history, then generates a new assistant-derived messages from there
   """
   @spec hybrid_chat([map], binary | nil, User.t) :: chats_resp
   def hybrid_chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
-    thread = get_thread!(thread_id)
-             |> Repo.preload(user: :groups, flow: :servers, insight: [:cluster, :service, :stack])
-    Console.AI.Tool.context(%{user: user, flow: thread.flow, insight: thread.insight})
+    thread = get_thread!(thread_id) |> Repo.preload(@thread_preloads)
+    Console.AI.Tool.context(%{
+      user: user,
+      flow: thread.flow,
+      insight: thread.insight,
+      session: thread.session
+    })
+
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
     |> add_operation(:chat, fn _ ->
+      Chat.for_thread(thread_id)
+      |> Chat.ordered()
+      |> Repo.all()
+      |> fit_context_window()
+      |> Enum.map(&Chat.message/1)
+      |> Enum.filter(& &1)
+      |> Engine.completion(thread, user)
+    end)
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(timeout: 300_000)
+    |> case do
+      {:ok, %{chat: %Chat{} = chat}} -> {:ok, [chat]}
+      {:ok, %{chat: [%Chat{} | _] = chats}} -> {:ok, chats}
+      err -> err
+    end
+  end
+
+
+  @spec confirm_plan(binary, User.t) :: chats_resp
+  def confirm_plan(thread_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
+    |> add_operation(:thread, fn _ ->
+      get_thread!(thread_id)
+      |> Repo.preload(@thread_preloads)
+      |> ChatThread.changeset(%{session: %{plan_confirmed: true}})
+      |> Repo.update()
+    end)
+    |> add_operation(:save, fn _ -> save([%{role: :user, content: "confirmed"}], thread_id, user) end)
+    |> add_operation(:chat, fn %{thread: thread} ->
+      Console.AI.Tool.context(%{
+        user: user,
+        flow: thread.flow,
+        insight: thread.insight,
+        session: thread.session
+      })
+
       Chat.for_thread(thread_id)
       |> Chat.ordered()
       |> Repo.all()

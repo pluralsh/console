@@ -18,6 +18,7 @@ defmodule Console.Schema.PullRequest do
     field :preview,    :string
     field :attributes, :map
     field :patch,      :binary
+    field :agent_id,   :string
 
     field :notifications_policy_id, :binary_id
 
@@ -64,6 +65,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.flow_id == ^flow_id)
   end
 
+  def for_agent(query \\ __MODULE__, agent_id) do
+    from(pr in query, where: pr.agent_id == ^agent_id)
+  end
+
   def stack(query \\ __MODULE__) do
     from(pr in query, where: not is_nil(pr.stack_id))
   end
@@ -90,6 +95,7 @@ defmodule Console.Schema.PullRequest do
     labels
     preview
     patch
+    agent_id
   )a
 
   def changeset(model, attrs \\ %{}) do

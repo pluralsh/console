@@ -590,6 +590,9 @@ type RootMutationType {
     branch: String
 
     context: Json
+
+    "a ai thread id this pr was spawned from, for associating with agentic workflows"
+    threadId: ID
   ): PullRequest
 
   "just registers a pointer record to a PR after it was created externally be some other automation"
@@ -959,6 +962,9 @@ type RootMutationType {
 
   "Chat mutation that can also execute MCP servers in line with the overall completion"
   hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
+
+  "Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision"
+  confirmPlan(threadId: ID!): [Chat]
 
   "Confirms a chat message and calls its MCP server, if the user has access to the thread"
   confirmChat(
@@ -2276,6 +2282,9 @@ input StackAttributes {
 
   policyEngine: PolicyEngineAttributes
 
+  "the agent id this stack is associated with"
+  agentId: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2496,6 +2505,9 @@ type InfrastructureStack {
   jobSpec: JobGateSpec
 
   policyEngine: PolicyEngine
+
+  "the agent id this stack is associated with"
+  agentId: String
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -4495,6 +4507,8 @@ input ServiceDeploymentAttributes {
 
   parentId: ID
 
+  agentId: String
+
   flowId: ID
 
   configuration: [ConfigAttributes]
@@ -4593,6 +4607,8 @@ input ServiceUpdateAttributes {
   parentId: ID
 
   flowId: ID
+
+  agentId: String
 
   dependencies: [ServiceDependencyAttributes]
 
@@ -4749,6 +4765,9 @@ type ServiceDeployment {
 
   "description of how helm charts should be applied"
   helm: HelmSpec
+
+  "the agent id this service is associated with"
+  agentId: String
 
   "how you'd like to perform a canary promotion"
   promotion: ServicePromotion
@@ -7905,6 +7924,7 @@ enum ChatType {
   FILE
   TOOL
   ERROR
+  IMPLEMENTATION_PLAN
 }
 
 enum EvidenceType {
@@ -7965,6 +7985,17 @@ input ChatThreadAttributes {
 
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
+
+  "the session to use for this thread"
+  session: AgentSessionAttributes
+}
+
+input AgentSessionAttributes {
+  "whether the provisioning plan has been confirmed"
+  planConfirmed: Boolean
+
+  "the id of the cloud connection to use for this session"
+  connectionId: ID
 }
 
 "the settings for an AI chat thread"

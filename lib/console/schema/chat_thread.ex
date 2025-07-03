@@ -1,6 +1,6 @@
 defmodule Console.Schema.ChatThread do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, Chat, AiInsight, Flow}
+  alias Console.Schema.{User, Chat, AiInsight, Flow, AgentSession}
 
   @max_threads 50
 
@@ -20,6 +20,10 @@ defmodule Console.Schema.ChatThread do
     belongs_to :user, User
     belongs_to :insight, AiInsight
     belongs_to :flow, Flow
+
+    has_one :session, AgentSession,
+      on_replace: :update,
+      foreign_key: :thread_id
 
     timestamps()
   end
@@ -86,6 +90,7 @@ defmodule Console.Schema.ChatThread do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:settings, with: &settings_changeset/2)
+    |> cast_assoc(:session)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:insight_id)
     |> foreign_key_constraint(:flow_id)

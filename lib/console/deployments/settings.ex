@@ -268,7 +268,7 @@ defmodule Console.Deployments.Settings do
   @spec upsert_cloud_connection(map, User.t) :: cloud_connection_resp
   def upsert_cloud_connection(%{name: name} = attrs, %User{} = user) do
     case get_cloud_connection_by_name(name) do
-      %CloudConnection{} = conn -> conn
+      %CloudConnection{} = conn -> Repo.preload(conn, [:read_bindings])
       nil -> %CloudConnection{}
     end
     |> CloudConnection.changeset(attrs)

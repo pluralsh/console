@@ -20,7 +20,7 @@ defmodule Console.Cost.CronTest do
 
   describe "#prune/0" do
     test "it can prune old history records" do
-      hist = insert_list(3, :cluster_usage_history, timestamp: Timex.now() |> Timex.shift(days: -30))
+      hist = insert_list(3, :cluster_usage_history, timestamp: Timex.now() |> Timex.shift(days: -400))
       keep = insert_list(3, :cluster_usage_history)
 
       Cron.prune()

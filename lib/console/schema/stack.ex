@@ -1,5 +1,5 @@
 defmodule Console.Schema.Stack do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{
     Service,
@@ -107,6 +107,7 @@ defmodule Console.Schema.Stack do
     field :locked_at,       :utc_datetime_usec
     field :polled_sha,      :string
     field :variables,       :map
+    field :agent_id,        :string
 
     field :actor_changed, :boolean, virtual: true
     field :runnable,      :boolean, virtual: true
@@ -179,6 +180,12 @@ defmodule Console.Schema.Stack do
     end)
   end
 
+  def for_agent(query \\ __MODULE__, agent_id) do
+    from(s in query,
+      where: s.agent_id == ^agent_id
+    )
+  end
+
   def distinct(query \\ __MODULE__), do: from(s in query, distinct: true)
 
   def with_tag_query(query \\ __MODULE__, tq) do
@@ -212,7 +219,7 @@ defmodule Console.Schema.Stack do
     )
   end
 
-  @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 
 
@@ -242,6 +249,7 @@ defmodule Console.Schema.Stack do
     |> change_markers(actor_id: :actor_changed)
     |> determine_runnable()
     |> validate_required(~w(name type status project_id)a)
+    |> immutable([:agent_id])
   end
 
   def update_changeset(changeset) do

@@ -7,7 +7,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     PullRequest,
     CustomStackRun,
     DeploymentSettings,
-    StackDefinition
+    StackDefinition,
+    AgentSession
   }
 
   def list_stacks(args, %{context: %{current_user: user}}) do
@@ -28,6 +29,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def list_stack_definitions(args, _) do
     StackDefinition.ordered()
+    |> paginate(args)
+  end
+
+  def agent_stacks(%AgentSession{agent_id: agent_id}, args, _) do
+    Stack.for_agent(agent_id)
+    |> stack_filters(args)
+    |> maybe_search(Stack, args)
+    |> Stack.ordered()
     |> paginate(args)
   end
 

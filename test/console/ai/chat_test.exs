@@ -367,6 +367,24 @@ defmodule Console.AI.ChatTest do
       end
     end
   end
+
+  describe "confirm_plan/2" do
+    test "it will confirm a plan" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      insert(:agent_session, thread: thread)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _], _ -> {:ok, "openai completion"} end)
+
+      {:ok, [chat]} = Chat.confirm_plan(thread.id, user)
+
+      assert chat.content == "openai completion"
+      assert chat.role == :assistant
+
+      assert Repo.preload(refetch(thread), [:session]).session.plan_confirmed
+    end
+  end
 end
 
 defmodule Console.AI.ChatSyncTest do

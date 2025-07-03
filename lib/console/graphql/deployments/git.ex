@@ -997,6 +997,7 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :identifier, :string
       arg :branch,     :string
       arg :context,    :json
+      arg :thread_id,  :id, description: "a ai thread id this pr was spawned from, for associating with agentic workflows"
 
       safe_resolve &Deployments.create_pull_request/2
     end

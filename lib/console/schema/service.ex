@@ -1,5 +1,5 @@
 defmodule Console.Schema.Service do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{
@@ -165,6 +165,7 @@ defmodule Console.Schema.Service do
     field :protect,          :boolean
     field :dry_run,          :boolean
     field :interval,         :string
+    field :agent_id,         :string
 
     field :norevise, :boolean, virtual: true, default: false
     field :kick,     :boolean, virtual: true, default: false
@@ -309,6 +310,12 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def for_agent(query \\ __MODULE__, agent_id) do
+    from(s in query,
+      where: s.agent_id == ^agent_id
+    )
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(s in query, where: s.status == ^status)
   end
@@ -372,7 +379,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval flow_id parent_id docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -406,6 +413,7 @@ defmodule Console.Schema.Service do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :namespace, :version, :cluster_id])
+    |> immutable([:agent_id])
   end
 
   def update_changeset(changeset) do

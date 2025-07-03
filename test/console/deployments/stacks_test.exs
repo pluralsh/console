@@ -207,6 +207,18 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
     end
 
+    test "you cannot update agent id" do
+      stack = insert(:stack, agent_id: "agent-id")
+
+      {:error, _} = Stacks.update_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        git: %{ref: "main", folder: "terraform"},
+        agent_id: "other-agent-id"
+      }, stack.id, admin_user())
+    end
+
     test "random users cannot update" do
       stack = insert(:stack)
       user = insert(:user)

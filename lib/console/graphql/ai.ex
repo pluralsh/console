@@ -48,6 +48,12 @@ defmodule Console.GraphQl.AI do
     field :insight_id, :id, description: "an ai insight this thread was created from"
     field :flow_id,    :id, description: "the flow this thread was created in"
     field :settings,   :chat_thread_settings_attributes, description: "the settings for this thread"
+    field :session,    :agent_session_attributes, description: "the session to use for this thread"
+  end
+
+  input_object :agent_session_attributes do
+    field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
   end
 
   @desc "the settings for an AI chat thread"
@@ -117,6 +123,40 @@ defmodule Console.GraphQl.AI do
   @desc "the settings for an AI chat thread"
   object :chat_thread_settings do
     field :memory, :boolean, description: "controls whether this thread uses knowledge graph-basedmemory"
+  end
+
+  @desc "A session for an AI agent to use when acting in a chat thread"
+  object :agent_session do
+    field :id,             non_null(:id)
+    field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :thread,         :chat_thread, resolve: dataloader(AI)
+    field :connection,     :cloud_connection, resolve: dataloader(Deployments)
+
+    @desc "the services associated with this chat, usually from an agentic workflow"
+    connection field :service_deployments, node_type: :service_deployment do
+      arg :q,          :string
+      arg :status,     :service_deployment_status
+      arg :errored,    :boolean
+
+      resolve &Deployments.agent_services/3
+    end
+
+    @desc "the stacks associated with this chat, usually from an agentic workflow"
+    connection field :stacks, node_type: :infrastructure_stack do
+      arg :q,          :string
+
+      resolve &Deployments.agent_stacks/3
+    end
+
+    @desc "the pull requests associated with this chat, usually from an agentic workflow"
+    connection field :pull_requests, node_type: :pull_request do
+      arg :open,       :boolean
+      arg :q,          :string
+
+      resolve &Deployments.agent_prs/3
+    end
+
+    timestamps()
   end
 
   @desc "A saved item for future ai-based investigation"
@@ -333,6 +373,14 @@ defmodule Console.GraphQl.AI do
       arg :messages,  list_of(:chat_message)
 
       resolve &AI.hybrid_chat/2
+    end
+
+    @desc "Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision"
+    field :confirm_plan, list_of(:chat) do
+      middleware Authenticated
+      arg :thread_id, non_null(:id)
+
+      resolve &AI.confirm_plan/2
     end
 
     @desc "Confirms a chat message and calls its MCP server, if the user has access to the thread"

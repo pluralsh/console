@@ -21,4 +21,8 @@ defmodule Console.Deployments.Observability.Webhook.Grafana do
 
   def summary(%{"annotations" => %{"summary" => summary}}), do: "Alert Summary: #{summary}\n"
   def summary(_), do: ""
+
+  def title(%{"title" => title}, _) when is_binary(title), do: title
+  def title(_, %{"labels" => %{"alertname" => title}}) when is_binary(title), do: title
+  def title(_, _), do: "Alertmanager Alert"
 end

@@ -142,6 +142,10 @@ type InfrastructureStackSpec struct {
 	// PolicyEngine is a configuration for applying policy enforcement to a stack.
 	// +kubebuilder:validation:Optional
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
+
+	// The agent session id that created this service, used for ui linking and otherwise ignored
+	// +kubebuilder:validation:Optional
+	AgentId *string `json:"agentId,omitempty"`
 }
 
 type StackFile struct {

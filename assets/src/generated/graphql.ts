@@ -175,6 +175,13 @@ export type AgentMigrationAttributes = {
   ref?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AgentSessionAttributes = {
+  /** the id of the cloud connection to use for this session */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether the provisioning plan has been confirmed */
+  planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -999,6 +1006,8 @@ export type ChatThreadAttributes = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  /** the session to use for this thread */
+  session?: InputMaybe<AgentSessionAttributes>;
   /** the settings for this thread */
   settings?: InputMaybe<ChatThreadSettingsAttributes>;
   /** controls whether this thread is autosummarized, set true when users explicitly set summary */
@@ -1041,6 +1050,7 @@ export type ChatTool = {
 export enum ChatType {
   Error = 'ERROR',
   File = 'FILE',
+  ImplementationPlan = 'IMPLEMENTATION_PLAN',
   Text = 'TEXT',
   Tool = 'TOOL'
 }
@@ -3519,6 +3529,8 @@ export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
   /** the actor of this stack (defaults to root console user) */
   actor?: Maybe<User>;
+  /** the agent id this stack is associated with */
+  agentId?: Maybe<Scalars['String']['output']>;
   /** whether to require approval */
   approval?: Maybe<Scalars['Boolean']['output']>;
   /** why this run was cancelled */
@@ -6446,6 +6458,8 @@ export type RootMutationType = {
   configureBackups?: Maybe<Cluster>;
   /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
   confirmChat?: Maybe<Chat>;
+  /** Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision */
+  confirmPlan?: Maybe<Array<Maybe<Chat>>>;
   /** Reads and deletes a given shared secret */
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
@@ -6750,6 +6764,11 @@ export type RootMutationTypeConfirmChatArgs = {
 };
 
 
+export type RootMutationTypeConfirmPlanArgs = {
+  threadId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeConsumeSecretArgs = {
   handle: Scalars['String']['input'];
 };
@@ -6898,6 +6917,7 @@ export type RootMutationTypeCreatePullRequestArgs = {
   context?: InputMaybe<Scalars['Json']['input']>;
   id: Scalars['ID']['input'];
   identifier?: InputMaybe<Scalars['String']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -9420,6 +9440,8 @@ export type ServiceDependencyAttributes = {
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
+  /** the agent id this service is associated with */
+  agentId?: Maybe<Scalars['String']['output']>;
   /** list all alerts discovered for this service */
   alerts?: Maybe<AlertConnection>;
   /** the cluster this service is deployed into */
@@ -9574,6 +9596,7 @@ export type ServiceDeploymentRevisionsArgs = {
 };
 
 export type ServiceDeploymentAttributes = {
+  agentId?: InputMaybe<Scalars['String']['input']>;
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
@@ -9771,6 +9794,7 @@ export type ServiceTemplateAttributes = {
 };
 
 export type ServiceUpdateAttributes = {
+  agentId?: InputMaybe<Scalars['String']['input']>;
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
@@ -9868,6 +9892,8 @@ export type SmtpSettingsAttributes = {
 export type StackAttributes = {
   /** user id to use for default Plural authentication in this stack */
   actorId?: InputMaybe<Scalars['ID']['input']>;
+  /** the agent id this stack is associated with */
+  agentId?: InputMaybe<Scalars['String']['input']>;
   /** whether to require approval */
   approval?: InputMaybe<Scalars['Boolean']['input']>;
   /** The cluster on which the terraform will be applied */

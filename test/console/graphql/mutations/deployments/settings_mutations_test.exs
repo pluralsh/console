@@ -99,6 +99,40 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
       assert binding["group"]["name"] == group.name
     end
 
+    test "admins can update bindings on a cloud connection" do
+      group = insert(:group)
+      other_group = insert(:group)
+      conn = insert(:cloud_connection, provider: :aws, read_bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"upsertCloudConnection" => upserted}}} = run_query("""
+        mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {
+          upsertCloudConnection(attributes: $attrs) {
+            id
+            name
+            provider
+            readBindings { group { name } }
+            configuration { aws { accessKeyId } }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => conn.name,
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+          "readBindings" => [%{"groupId" => group.id}, %{"groupId" => other_group.id}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert upserted["id"] == conn.id
+      assert upserted["name"] == conn.name
+      assert upserted["provider"] == "AWS"
+      assert upserted["configuration"]["aws"]["accessKeyId"] == "test"
+
+      bindings = upserted["readBindings"]
+      assert MapSet.new(bindings, & &1["group"]["name"])
+             |> MapSet.equal?(MapSet.new([group.name, other_group.name]))
+    end
+
     test "nonadmins cannot upsert a cloud connection" do
       {:ok, %{errors: [_ | _]}} = run_query("""
         mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {
