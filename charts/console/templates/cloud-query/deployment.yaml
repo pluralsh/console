@@ -60,11 +60,8 @@ spec:
                 {{- if .Values.cloudQuery.database.password.existingSecret.name }}
                   name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
                   key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
-                {{- else if .Values.cloudQuery.database.password.value }}
-                  name: {{ include "console.fullname" . }}-db-password
-                  key: password
                 {{- else }}
-                  name: {{ include "console.fullname" . }}-db-password
+                  name: {{ include "console.cloudquery.db.secret" . }}
                   key: password
                 {{- end }}
           ports:
