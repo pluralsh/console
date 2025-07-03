@@ -84,9 +84,9 @@ func (r *NamespaceManagementReconciler) Reconcile(ctx context.Context, req ctrl.
 	if err != nil {
 		return result, err
 	}
-	namespacesCreated := tooYoung
+	namespacesAge := tooYoung
 	if r.MaxNamespaceAge != 0 {
-		namespacesCreated = r.MaxNamespaceAge
+		namespacesAge = r.MaxNamespaceAge
 	}
 
 	for _, namespace := range namespaces.Items {
@@ -96,7 +96,7 @@ func (r *NamespaceManagementReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 
 		createdAt := namespace.CreationTimestamp.Time
-		recentlyCreated := time.Now().Add(-namespacesCreated)
+		recentlyCreated := time.Now().Add(-namespacesAge)
 		if createdAt.After(recentlyCreated) {
 			logger.V(5).Info("Namespace created too recently, ignoring for now", "namespace", namespace.Name)
 			continue
