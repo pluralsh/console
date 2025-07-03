@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "console.fullname" . }}-cloud-query
+  name: cloud-query
   labels:
     helm.sh/chart: {{ include "console.chart" . }}
     app.kubernetes.io/name: cloud-query
@@ -47,7 +47,7 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloudQuery.image.repository }}:{{ .Values.cloudQuery.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.cloudQuery.image.repository }}:{{ .Values.cloudQuery.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.cloudQuery.image.pullPolicy }}
           {{- with .Values.cloudQuery.image.args }}
           args:
