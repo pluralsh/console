@@ -375,6 +375,14 @@ defmodule Console.GraphQl.AI do
       resolve &AI.hybrid_chat/2
     end
 
+    @desc "Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision"
+    field :confirm_plan, list_of(:chat) do
+      middleware Authenticated
+      arg :thread_id, non_null(:id)
+
+      resolve &AI.confirm_plan/2
+    end
+
     @desc "Confirms a chat message and calls its MCP server, if the user has access to the thread"
     field :confirm_chat, :chat do
       middleware Authenticated

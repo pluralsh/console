@@ -64,7 +64,8 @@ defmodule Console.AI.Chat.Engine do
 
   @agent_tools [
     Agent.Query,
-    Agent.Schema
+    Agent.Schema,
+    Agent.Plan
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
@@ -213,7 +214,7 @@ defmodule Console.AI.Chat.Engine do
   end
 
   @spec tool_msg(binary, binary | nil, McpServer.t | nil, binary, map) :: map
-  defp tool_msg(content, call_id, server, name, args) do
+  defp tool_msg(content, call_id, server, name, args) when is_binary(content) or is_nil(content) do
     %{
       role: :user,
       content: content,
@@ -228,6 +229,7 @@ defmodule Console.AI.Chat.Engine do
       }
     }
   end
+  defp tool_msg(%{} = msg, _, _, _, _), do: Map.merge(msg, %{role: :assistant})
 
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err

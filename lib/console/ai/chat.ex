@@ -345,6 +345,46 @@ defmodule Console.AI.Chat do
     end
   end
 
+
+  @spec confirm_plan(binary, User.t) :: chats_resp
+  def confirm_plan(thread_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
+    |> add_operation(:thread, fn _ ->
+      get_thread!(thread_id)
+      |> Repo.preload(@thread_preloads)
+      |> ChatThread.changeset(%{session: %{plan_confirmed: true}})
+      |> Repo.update()
+    end)
+    |> add_operation(:save, fn _ -> save([%{role: :user, content: "confirmed"}], thread_id, user) end)
+    |> add_operation(:chat, fn %{thread: thread} ->
+      Console.AI.Tool.context(%{
+        user: user,
+        flow: thread.flow,
+        insight: thread.insight,
+        session: thread.session
+      })
+
+      Chat.for_thread(thread_id)
+      |> Chat.ordered()
+      |> Repo.all()
+      |> fit_context_window()
+      |> Enum.map(&Chat.message/1)
+      |> Enum.filter(& &1)
+      |> Engine.completion(thread, user)
+    end)
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(timeout: 300_000)
+    |> case do
+      {:ok, %{chat: %Chat{} = chat}} -> {:ok, [chat]}
+      {:ok, %{chat: [%Chat{} | _] = chats}} -> {:ok, chats}
+      err -> err
+    end
+  end
+
   @doc """
   Finds all MCP tools associated with a chat thread
   """

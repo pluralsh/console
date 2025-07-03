@@ -1050,6 +1050,7 @@ export type ChatTool = {
 export enum ChatType {
   Error = 'ERROR',
   File = 'FILE',
+  ImplementationPlan = 'IMPLEMENTATION_PLAN',
   Text = 'TEXT',
   Tool = 'TOOL'
 }
@@ -6457,6 +6458,8 @@ export type RootMutationType = {
   configureBackups?: Maybe<Cluster>;
   /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
   confirmChat?: Maybe<Chat>;
+  /** Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision */
+  confirmPlan?: Maybe<Array<Maybe<Chat>>>;
   /** Reads and deletes a given shared secret */
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
@@ -6758,6 +6761,11 @@ export type RootMutationTypeConfigureBackupsArgs = {
 
 export type RootMutationTypeConfirmChatArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeConfirmPlanArgs = {
+  threadId: Scalars['ID']['input'];
 };
 
 

@@ -6,6 +6,6 @@
             "description": "A valid SQL query using the schema from the cloud_schema tool to query the cloud accounts configuration data"
         }
     },
-    "required": [],
+    "required": ["query"],
     "additionalProperties": false
 }

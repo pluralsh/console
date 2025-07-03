@@ -963,6 +963,9 @@ type RootMutationType {
   "Chat mutation that can also execute MCP servers in line with the overall completion"
   hybridChat(threadId: ID, messages: [ChatMessage]): [Chat]
 
+  "Confirms a plan for an agentic chat thread, which will transition to suggesting the PR automations to provision"
+  confirmPlan(threadId: ID!): [Chat]
+
   "Confirms a chat message and calls its MCP server, if the user has access to the thread"
   confirmChat(
     "the id of the chat message to confirm"
@@ -7921,6 +7924,7 @@ enum ChatType {
   FILE
   TOOL
   ERROR
+  IMPLEMENTATION_PLAN
 }
 
 enum EvidenceType {

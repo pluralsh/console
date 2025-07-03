@@ -122,6 +122,9 @@ defmodule Console.GraphQl.Resolvers.AI do
   def confirm_chat(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.confirm_chat(id, user)
 
+  def confirm_plan(%{thread_id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.confirm_plan(id, user)
+
   def cancel_chat(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.cancel_chat(id, user)
 
