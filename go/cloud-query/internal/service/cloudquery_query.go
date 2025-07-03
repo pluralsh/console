@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/common"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
@@ -32,7 +33,7 @@ func (in *CloudQueryService) handleQuery(c connection.Connection, query string) 
 
 	result := make([]map[string]any, 0, len(rows))
 	for _, row := range rows {
-		result = append(result, toRow(columns, row))
+		result = append(result, common.ToRow(columns, row))
 	}
 
 	resultJSON, err := json.Marshal(result)
