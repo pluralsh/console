@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -9,17 +8,21 @@ import (
 // NamespaceManagementSpec defines the desired state of NamespaceManagement.
 type NamespaceManagementSpec struct {
 	// The interval at which you'll reconcile namespaces according to this spec
-	Interval string `json:"interval,omitempty"`
+	Interval string `json:"interval"`
 	// A resource to use to verify if the namespace should be pruned, if it exists, the namespace will be ignored
-	Sentinel corev1.ObjectReference `json:"sentinel,omitempty"`
+	Sentinel Sentinel `json:"sentinel"`
 	// A regex to use to match namespaces to prune
-	NamespacePattern string `json:"namespacePattern,omitempty"`
+	NamespacePattern string `json:"namespacePattern"`
 }
 
-// NamespaceManagementStatus defines the observed state of NamespaceManagement.
-type NamespaceManagementStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+type Sentinel struct {
+	Kind string `json:"kind"`
+	// +optional
+	Namespace *string `json:"namespace,omitempty"`
+
+	Name string `json:"name"`
+
+	APIVersion string `json:"apiVersion"`
 }
 
 // +kubebuilder:object:root=true

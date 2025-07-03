@@ -5,5 +5,11 @@ metadata:
     app.kubernetes.io/name: datastore
     app.kubernetes.io/managed-by: kustomize
   name: namespacemanagement-sample
+  namespace: default
 spec:
-  # TODO(user): Add fields here
+  interval: "1h"
+  namespacePattern: "helm-app"
+  sentinel:
+    name: test
+    apiVersion: "apps/v1"
+    kind: "Deployment"
