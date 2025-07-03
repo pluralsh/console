@@ -283,8 +283,7 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   defp jitter() do
-    seconds = :rand.uniform(@jitter)
-              |> :timer.seconds()
+    seconds = :rand.uniform(@jitter) |> :timer.seconds()
     seconds - @jitter_offset
   end
 end

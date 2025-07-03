@@ -761,13 +761,14 @@ type Chat struct {
 	// whether this chat requires confirmation
 	Confirm *bool `json:"confirm,omitempty"`
 	// when the chat was confirmed
-	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
-	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
-	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
-	Thread      *ChatThread         `json:"thread,omitempty"`
-	Server      *McpServer          `json:"server,omitempty"`
-	InsertedAt  *string             `json:"insertedAt,omitempty"`
-	UpdatedAt   *string             `json:"updatedAt,omitempty"`
+	ConfirmedAt  *string             `json:"confirmedAt,omitempty"`
+	Attributes   *ChatTypeAttributes `json:"attributes,omitempty"`
+	PullRequest  *PullRequest        `json:"pullRequest,omitempty"`
+	Thread       *ChatThread         `json:"thread,omitempty"`
+	Server       *McpServer          `json:"server,omitempty"`
+	PrAutomation *PrAutomation       `json:"prAutomation,omitempty"`
+	InsertedAt   *string             `json:"insertedAt,omitempty"`
+	UpdatedAt    *string             `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {
@@ -7347,6 +7348,7 @@ const (
 	ChatTypeTool               ChatType = "TOOL"
 	ChatTypeError              ChatType = "ERROR"
 	ChatTypeImplementationPlan ChatType = "IMPLEMENTATION_PLAN"
+	ChatTypePrCall             ChatType = "PR_CALL"
 )
 
 var AllChatType = []ChatType{
@@ -7355,11 +7357,12 @@ var AllChatType = []ChatType{
 	ChatTypeTool,
 	ChatTypeError,
 	ChatTypeImplementationPlan,
+	ChatTypePrCall,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan, ChatTypePrCall:
 		return true
 	}
 	return false

@@ -7925,6 +7925,7 @@ enum ChatType {
   TOOL
   ERROR
   IMPLEMENTATION_PLAN
+  PR_CALL
 }
 
 enum EvidenceType {
@@ -8028,6 +8029,8 @@ type Chat {
   thread: ChatThread
 
   server: McpServer
+
+  prAutomation: PrAutomation
 
   insertedAt: DateTime
 

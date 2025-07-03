@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "pr_automation_id": {
+            "type": "string",
+            "description": "The id of the pr automation to call.  Use this to actually provision some infrastructure."
+        }
+    },
+    "required": ["pr_automation_id"],
+    "additionalProperties": false
+}

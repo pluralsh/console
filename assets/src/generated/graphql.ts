@@ -938,6 +938,7 @@ export type Chat = {
   content?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  prAutomation?: Maybe<PrAutomation>;
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
@@ -1051,6 +1052,7 @@ export enum ChatType {
   Error = 'ERROR',
   File = 'FILE',
   ImplementationPlan = 'IMPLEMENTATION_PLAN',
+  PrCall = 'PR_CALL',
   Text = 'TEXT',
   Tool = 'TOOL'
 }
