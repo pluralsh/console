@@ -3,10 +3,11 @@ package v1alpha1
 import (
 	"context"
 
-	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 // CloudConnectionSpec defines the desired state of CloudConnection
@@ -25,8 +26,13 @@ type CloudConnectionSpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Provider is immutable"
 	Provider CloudProvider `json:"provider"`
 
+	// Configuration contains the cloud connection configuration.
+	// +kubebuilder:validation:Required
 	Configuration CloudConnectionConfiguration `json:"configuration"`
 
+	// ReadBindings is a list of bindings that defines
+	// who can use this CloudConnection.
+	// +kubebuilder:validation:Optional
 	ReadBindings []Binding `json:"readBindings,omitempty"`
 }
 
@@ -56,7 +62,7 @@ type CloudConnectionConfiguration struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:scope=Cluster
+//+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
 

@@ -411,8 +411,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this CloudConnection. If not provided CloudConnection's own name<br />from CloudConnection.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: {} <br />Type: string <br /> |
-| `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ |  |  |  |
-| `readBindings` _[Binding](#binding) array_ |  |  |  |
+| `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ | Configuration contains the cloud connection configuration. |  | Required: {} <br /> |
+| `readBindings` _[Binding](#binding) array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: {} <br /> |
 
 
 #### CloudProvider
