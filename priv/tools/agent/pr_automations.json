@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "catalog_id": {
+            "type": "string",
+            "description": "The id of the catalog to fetch the pr automations from.  Use this to find a pr automation to actually provision some infrastructure."
+        }
+    },
+    "required": ["catalog_id"],
+    "additionalProperties": false
+}

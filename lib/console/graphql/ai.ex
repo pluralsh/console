@@ -71,9 +71,10 @@ defmodule Console.GraphQl.AI do
     field :confirmed_at, :datetime, description: "when the chat was confirmed"
     field :attributes,   :chat_type_attributes
 
-    field :pull_request, :pull_request, resolve: dataloader(Deployments)
-    field :thread,       :chat_thread,  resolve: dataloader(AI)
-    field :server,       :mcp_server,   resolve: dataloader(Deployments)
+    field :pull_request,  :pull_request, resolve: dataloader(Deployments)
+    field :thread,        :chat_thread,  resolve: dataloader(AI)
+    field :server,        :mcp_server,   resolve: dataloader(Deployments)
+    field :pr_automation, :pr_automation, resolve: dataloader(Deployments)
 
     timestamps()
   end

@@ -49,6 +49,10 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
   end
 
+  input_object :stack_overrides_attributes do
+    field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+  end
+
   input_object :stack_hook_attributes do
     field :cmd,          non_null(:string), description: "a script hook to run at a stage"
     field :args,         list_of(:string), description: "args for `cmd`"
@@ -63,6 +67,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   input_object :stack_cron_attributes do
     field :crontab,      non_null(:string), description: "the crontab to use for spawning stack runs"
     field :auto_approve, :boolean, description: "whether you want to auto approve any changes spawned by the cron worker"
+    field :overrides,    :stack_overrides_attributes, description: "configuration overrides for the cron run"
   end
 
   input_object :policy_engine_attributes do
@@ -244,11 +249,17 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_cron do
     field :crontab, non_null(:string), description: "the crontab used to independently spawn runs for this stack"
     field :auto_approve, :boolean, description: "whether you want any cron-derived runs to automatically approve changes"
+    field :overrides,    :stack_overrides, description: "configuration overrides for the cron run"
   end
 
   @desc "grab-bag of state configuration urls for supported tools"
   object :state_urls do
     field :terraform, :terraform_state_urls
+  end
+
+  @desc "Configuration overrides for a stack cron run"
+  object :stack_overrides do
+    field :terraform, :terraform_configuration, description: "the terraform configuration for this stack"
   end
 
   @desc "Urls for configuring terraform HTTP remote state"

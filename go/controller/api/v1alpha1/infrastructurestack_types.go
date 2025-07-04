@@ -189,6 +189,16 @@ type StackCron struct {
 	// Whether to automatically approve cron-spawned runs
 	// +kubebuilder:validation:Optional
 	AutoApprove *bool `json:"autoApprove"`
+
+	// Overrides for the cron triggered stack run configuration
+	// +kubebuilder:validation:Optional
+	Overrides *StackOverrides `json:"overrides,omitempty"`
+}
+
+type StackOverrides struct {
+	// Terraform is the terraform configuration for this stack
+	// +kubebuilder:validation:Optional
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 }
 
 type StackHook struct {

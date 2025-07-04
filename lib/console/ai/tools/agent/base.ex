@@ -12,6 +12,7 @@ defmodule Console.AI.Tools.Agent.Base do
       import Console.AI.Tools.Utils
       import Console.AI.Tools.Agent.Base
       alias Console.AI.Tool
+      alias Console.AI.Tool.Context
       alias CloudQuery.Client
       alias Cloudquery.CloudQuery.Stub
       alias Console.Schema.{AgentSession, CloudConnection}

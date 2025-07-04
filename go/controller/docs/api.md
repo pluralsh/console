@@ -3536,6 +3536,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `crontab` _string_ | The crontab on which to spawn stack runs |  |  |
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs |  | Optional: {} <br /> |
+| `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration |  | Optional: {} <br /> |
 
 
 #### StackDefinition
@@ -3627,6 +3628,22 @@ _Appears in:_
 | `cmd` _string_ | the command this hook will execute |  | Required: {} <br /> |
 | `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
 | `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY DESTROY] <br />Required: {} <br /> |
+
+
+#### StackOverrides
+
+
+
+
+
+
+
+_Appears in:_
+- [StackCron](#stackcron)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: {} <br /> |
 
 
 #### StackSettings
@@ -3744,6 +3761,7 @@ _Appears in:_
 
 _Appears in:_
 - [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |

@@ -536,10 +536,10 @@ defmodule Console.Deployments.Stacks do
     %{stack: stack} = Repo.preload(cron, [stack: @poll_preloads])
     start_transaction()
     |> add_operation(:run, fn _ ->
-      create_run(stack, stack.sha, %{
+      create_run(stack, stack.sha, maybe_merge_overrides(%{
         message: "cron run for #{stack.name}",
         approval: stack.approval || approve
-      })
+      }, cron))
     end)
     |> add_operation(:cron, fn _ ->
       StackCron.changeset(cron, %{last_run_at: Timex.now()})
@@ -547,6 +547,11 @@ defmodule Console.Deployments.Stacks do
     end)
     |> execute(extract: :run)
   end
+
+  defp maybe_merge_overrides(attrs, %StackCron{overrides: %StackCron.ConfigurationOverrides{} = overrides}) do
+    Map.put(attrs, :configuration, Console.mapify(overrides))
+  end
+  defp maybe_merge_overrides(attrs, _), do: attrs
 
   @doc """
   Creates an ad-hoc command run w/in the stack's execution context
@@ -618,7 +623,7 @@ defmodule Console.Deployments.Stacks do
       |> StackRun.changeset(
         stack_attrs(stack, sha)
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
-        |> Map.merge(attrs)
+        |> DeepMerge.deep_merge(attrs)
       )
       |> Repo.insert()
     end)

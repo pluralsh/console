@@ -761,13 +761,14 @@ type Chat struct {
 	// whether this chat requires confirmation
 	Confirm *bool `json:"confirm,omitempty"`
 	// when the chat was confirmed
-	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
-	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
-	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
-	Thread      *ChatThread         `json:"thread,omitempty"`
-	Server      *McpServer          `json:"server,omitempty"`
-	InsertedAt  *string             `json:"insertedAt,omitempty"`
-	UpdatedAt   *string             `json:"updatedAt,omitempty"`
+	ConfirmedAt  *string             `json:"confirmedAt,omitempty"`
+	Attributes   *ChatTypeAttributes `json:"attributes,omitempty"`
+	PullRequest  *PullRequest        `json:"pullRequest,omitempty"`
+	Thread       *ChatThread         `json:"thread,omitempty"`
+	Server       *McpServer          `json:"server,omitempty"`
+	PrAutomation *PrAutomation       `json:"prAutomation,omitempty"`
+	InsertedAt   *string             `json:"insertedAt,omitempty"`
+	UpdatedAt    *string             `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {
@@ -6078,6 +6079,8 @@ type StackCron struct {
 	Crontab string `json:"crontab"`
 	// whether you want any cron-derived runs to automatically approve changes
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverrides `json:"overrides,omitempty"`
 }
 
 type StackCronAttributes struct {
@@ -6085,6 +6088,8 @@ type StackCronAttributes struct {
 	Crontab string `json:"crontab"`
 	// whether you want to auto approve any changes spawned by the cron worker
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverridesAttributes `json:"overrides,omitempty"`
 }
 
 type StackDefinition struct {
@@ -6164,6 +6169,17 @@ type StackOutputAttributes struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
 	Secret *bool  `json:"secret,omitempty"`
+}
+
+// Configuration overrides for a stack cron run
+type StackOverrides struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+}
+
+type StackOverridesAttributes struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -7347,6 +7363,7 @@ const (
 	ChatTypeTool               ChatType = "TOOL"
 	ChatTypeError              ChatType = "ERROR"
 	ChatTypeImplementationPlan ChatType = "IMPLEMENTATION_PLAN"
+	ChatTypePrCall             ChatType = "PR_CALL"
 )
 
 var AllChatType = []ChatType{
@@ -7355,11 +7372,12 @@ var AllChatType = []ChatType{
 	ChatTypeTool,
 	ChatTypeError,
 	ChatTypeImplementationPlan,
+	ChatTypePrCall,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan, ChatTypePrCall:
 		return true
 	}
 	return false

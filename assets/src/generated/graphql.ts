@@ -938,6 +938,7 @@ export type Chat = {
   content?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  prAutomation?: Maybe<PrAutomation>;
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
@@ -1051,6 +1052,7 @@ export enum ChatType {
   Error = 'ERROR',
   File = 'FILE',
   ImplementationPlan = 'IMPLEMENTATION_PLAN',
+  PrCall = 'PR_CALL',
   Text = 'TEXT',
   Tool = 'TOOL'
 }
@@ -9978,6 +9980,8 @@ export type StackCron = {
   autoApprove?: Maybe<Scalars['Boolean']['output']>;
   /** the crontab used to independently spawn runs for this stack */
   crontab: Scalars['String']['output'];
+  /** configuration overrides for the cron run */
+  overrides?: Maybe<StackOverrides>;
 };
 
 export type StackCronAttributes = {
@@ -9985,6 +9989,8 @@ export type StackCronAttributes = {
   autoApprove?: InputMaybe<Scalars['Boolean']['input']>;
   /** the crontab to use for spawning stack runs */
   crontab: Scalars['String']['input'];
+  /** configuration overrides for the cron run */
+  overrides?: InputMaybe<StackOverridesAttributes>;
 };
 
 export type StackDefinition = {
@@ -10071,6 +10077,18 @@ export type StackOutputAttributes = {
   name: Scalars['String']['input'];
   secret?: InputMaybe<Scalars['Boolean']['input']>;
   value: Scalars['String']['input'];
+};
+
+/** Configuration overrides for a stack cron run */
+export type StackOverrides = {
+  __typename?: 'StackOverrides';
+  /** the terraform configuration for this stack */
+  terraform?: Maybe<TerraformConfiguration>;
+};
+
+export type StackOverridesAttributes = {
+  /** the terraform configuration for this stack */
+  terraform?: InputMaybe<TerraformConfigurationAttributes>;
 };
 
 export type StackPolicyViolation = {

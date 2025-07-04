@@ -1,13 +1,13 @@
 defmodule Console.Schema.Chat do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, ChatThread, PullRequest, McpServer}
+  alias Console.Schema.{User, ChatThread, PullRequest, McpServer, PrAutomation}
   alias Console.AI.Provider
 
   @type msg :: t | %{role: Provider.sender, content: binary} | Provider.message
   @type history :: [msg]
 
   defenum Role, user: 0, assistant: 1, system: 2
-  defenum Type, text: 0, file: 1, tool: 2, error: 3, implementation_plan: 4
+  defenum Type, text: 0, file: 1, tool: 2, error: 3, implementation_plan: 4, pr_call: 5
 
   schema "chats" do
     field :type,         Type, default: :text
@@ -34,19 +34,22 @@ defmodule Console.Schema.Chat do
       end
     end
 
-    belongs_to :server,       McpServer
-    belongs_to :pull_request, PullRequest
-    belongs_to :user,         User
-    belongs_to :thread,       ChatThread
+    belongs_to :server,        McpServer
+    belongs_to :pull_request,  PullRequest
+    belongs_to :user,          User
+    belongs_to :thread,        ChatThread
+    belongs_to :pr_automation, PrAutomation
 
     timestamps()
   end
+
+  @tool_call_types ~w(tool pr_call)a
 
   @spec message(msg) :: Provider.message
   def message(%__MODULE__{confirm: true, confirmed_at: nil}), do: nil
   def message(%__MODULE__{type: :file, role: r, content: c, attributes: %{file: %{name: n}}}),
     do: {r, Jason.encode!(%{name: n, content: c})}
-  def message(%{type: :tool, content: c, attributes: %{tool: %{call_id: id}}}) when is_binary(id),
+  def message(%{type: t, content: c, attributes: %{tool: %{call_id: id}}}) when t in @tool_call_types and is_binary(id),
     do: {:tool, c, id}
   def message(%{role: r, content: c}), do: {r, c}
   def message({r, c}), do: {r, c}
@@ -89,7 +92,7 @@ defmodule Console.Schema.Chat do
 
   defp expiry(), do: Timex.now() |> Timex.shift(days: -5)
 
-  @valid ~w(user_id type thread_id role content seq confirm confirmed_at server_id pull_request_id)a
+  @valid ~w(user_id type thread_id role content seq confirm confirmed_at server_id pull_request_id pr_automation_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

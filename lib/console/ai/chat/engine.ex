@@ -65,7 +65,13 @@ defmodule Console.AI.Chat.Engine do
   @agent_tools [
     Agent.Query,
     Agent.Schema,
-    Agent.Plan
+    Agent.Plan,
+    Agent.Catalogs,
+    Agent.Automations
+  ]
+
+  @agent_planned_tools [
+    Agent.CallPr,
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
@@ -229,7 +235,13 @@ defmodule Console.AI.Chat.Engine do
       }
     }
   end
-  defp tool_msg(%{} = msg, _, _, _, _), do: Map.merge(msg, %{role: :assistant})
+
+  defp tool_msg(%{} = msg, call_id, _, name, args) do
+    Map.merge(%{
+      role: :assistant,
+      attributes: %{tool: %{call_id: call_id, name: name, arguments: args}}
+    }, msg)
+  end
 
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err
@@ -245,7 +257,12 @@ defmodule Console.AI.Chat.Engine do
     end
   end
 
-  defp internal_tools(%ChatThread{} = t), do: memory_tools(t) ++ flow_tools(t) ++ agent_tools(t)
+  defp internal_tools(%ChatThread{} = t) do
+    memory_tools(t)
+    |> Enum.concat(flow_tools(t))
+    |> Enum.concat(agent_tools(t))
+    |> Enum.concat(agent_planned_tools(t))
+  end
 
   defp memory_tools(%ChatThread{} = t) do
     case ChatThread.settings(t, :memory) do
@@ -256,6 +273,9 @@ defmodule Console.AI.Chat.Engine do
 
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
   defp agent_tools(_), do: []
+
+  defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
+  defp agent_planned_tools(_), do: []
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []
