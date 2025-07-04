@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/lib/pq"
-	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
@@ -26,9 +25,7 @@ type DefaultExtractor struct {
 func (in DefaultExtractor) Extract(conn connection.Connection) error {
 	klog.V(log.LogLevelDebug).InfoS("starting extraction")
 
-	for _, entry := range lo.Entries(in.Resources()) {
-		table := entry.Key
-		factory := entry.Value
+	for table, factory := range in.Resources() {
 		columns, rows, err := conn.Query("SELECT * FROM" + pq.QuoteIdentifier(table))
 		if err != nil {
 			return fmt.Errorf("failed to query table '%s': %w", table, err)
@@ -39,7 +36,8 @@ func (in DefaultExtractor) Extract(conn connection.Connection) error {
 			klog.V(log.LogLevelTrace).InfoS("processing row", "table", table, "row", row)
 			rowJson, err := common.ToRowJSON(columns, row)
 			if err != nil {
-				return fmt.Errorf("failed to convert row to JSON: %w", err)
+				klog.V(log.LogLevelVerbose).ErrorS(err, "failed to convert row to JSON", "table", table, "row", row)
+				continue
 			}
 
 			itable, err := factory(rowJson)
