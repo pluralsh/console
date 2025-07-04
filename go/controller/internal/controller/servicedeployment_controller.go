@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -26,12 +27,12 @@ import (
 	"sigs.k8s.io/yaml"
 
 	console "github.com/pluralsh/console/go/client"
-
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/errors"
+	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -41,13 +42,23 @@ const (
 	ServiceOwnerAnnotation = "deployments.plural.sh/service-owner"
 )
 
-// ServiceReconciler reconciles a Service object
-type ServiceReconciler struct {
+// ServiceDeploymentReconciler reconciles a Service object
+type ServiceDeploymentReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
 	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
+	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]
+}
+
+// Queue implements the types.Processor interface.
+func (r *ServiceDeploymentReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.ServiceQueue
+}
+
+func (r *ServiceDeploymentReconciler) Name() internaltypes.Reconciler {
+	return internaltypes.ServiceDeploymentReconciler
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
@@ -56,10 +67,16 @@ type ServiceReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;patch
 
-func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+// Reconcile is part of the main kubernetes reconciliation loop.
+func (r *ServiceDeploymentReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.ServiceQueue.Add(req)
+	return ctrl.Result{}, nil
+}
+
+// Process implements the types.Processor interface.
+func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
-	logger.Info("reconciling service deployment", "namespacedName", req.NamespacedName)
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -235,7 +252,7 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 	}
 }
 
-func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, *ctrl.Result, error) {
+func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, *ctrl.Result, error) {
 	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes()
 	if err != nil {
 		return nil, nil, err
@@ -371,7 +388,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	return attr, nil, nil
 }
 
-func (r *ServiceReconciler) setSources(ctx context.Context, service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) error {
+func (r *ServiceDeploymentReconciler) setSources(ctx context.Context, service *v1alpha1.ServiceDeployment, attr *console.ServiceDeploymentAttributes) error {
 	if len(service.Spec.Sources) > 0 {
 		attr.Sources = make([]*console.ServiceSourceAttributes, 0)
 		for _, source := range service.Spec.Sources {
@@ -416,7 +433,7 @@ func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDepl
 	}
 }
 
-func (r *ServiceReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference) (*string, error) {
+func (r *ServiceDeploymentReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference) (*string, error) {
 	var repositoryID *string
 	if ref != nil {
 		repository := &v1alpha1.GitRepository{}
@@ -434,7 +451,7 @@ func (r *ServiceReconciler) getRepository(ctx context.Context, ref *corev1.Objec
 	return repositoryID, nil
 }
 
-func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
+func (r *ServiceDeploymentReconciler) svcConfiguration(ctx context.Context, service *v1alpha1.ServiceDeployment) ([]*console.ConfigAttributes, bool, error) {
 	configuration := make([]*console.ConfigAttributes, 0)
 	hasConfig := false
 	if service.Spec.ConfigurationRef != nil {
@@ -458,7 +475,7 @@ func (r *ServiceReconciler) svcConfiguration(ctx context.Context, service *v1alp
 	return configuration, hasConfig, nil
 }
 
-func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
+func (r *ServiceDeploymentReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
 	stack := &v1alpha1.InfrastructureStack{}
 	if err := r.Get(ctx, client.ObjectKey{Name: obj.Name, Namespace: obj.Namespace}, stack); err != nil {
 		return nil, err
@@ -469,7 +486,7 @@ func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectRef
 	return stack.Status.ID, nil
 }
 
-func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
+func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
 	valuesFromMap := map[string]interface{}{}
 	valuesMap := map[string]interface{}{}
 
@@ -502,7 +519,7 @@ func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *core
 	return lo.ToPtr(string(out)), nil
 }
 
-func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	logger := log.FromContext(ctx)
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
@@ -570,7 +587,7 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 	return nil
 }
 
-func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
+func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
 	// If the service is not being deleted and if it does not have the finalizer, then let's add it.
 	if service.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		controllerutil.AddFinalizer(service, ServiceFinalizer)
@@ -618,7 +635,7 @@ func (r *ServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeploy
 	return nil
 }
 
-func (r *ServiceReconciler) deleteService(id string, detach bool) error {
+func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) error {
 	if detach {
 		return r.ConsoleClient.DetachService(id)
 	}
@@ -627,7 +644,7 @@ func (r *ServiceReconciler) deleteService(id string, detach bool) error {
 
 // ensureService makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
+func (r *ServiceDeploymentReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.Bindings == nil {
 		return nil
 	}
@@ -669,7 +686,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.

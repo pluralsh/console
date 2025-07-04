@@ -29,6 +29,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,6 +44,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -58,18 +60,30 @@ type InfrastructureStackReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	UserGroupCache   cache.UserGroupCache
 	CredentialsCache credentials.NamespaceCredentialsCache
+	StackQueue       workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+// Queue implements the types.Processor interface.
+func (r *InfrastructureStackReconciler) Queue() workqueue.TypedRateLimitingInterface[ctrl.Request] {
+	return r.StackQueue
+}
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
+	return internaltypes.InfrastructureStackReconciler
+}
+
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+
+// Reconcile is part of the main kubernetes reconciliation loop.
+func (r *InfrastructureStackReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.StackQueue.Add(req)
+	return ctrl.Result{}, nil
+}
+
+// Process implements the types.Processor interface.
+func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	stack := &v1alpha1.InfrastructureStack{}

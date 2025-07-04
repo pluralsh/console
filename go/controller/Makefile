@@ -18,11 +18,6 @@ ENVTEST_K8S_VERSION := 1.28.3
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-# Validate required env variables
-ifndef PLURAL_CONSOLE_TOKEN
-$(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
-endif
-
 ##@ General
 
 .PHONY: help
@@ -40,7 +35,7 @@ update-dependencies: ## update dependencies
 
 .PHONY: build
 build: manifests generate fmt vet ## build manager binary
-	go build -o bin/manager cmd/main.go
+	go build -o bin/manager cmd/*.go
 
 .PHONY: run
 run: manifests generate fmt vet ## run a controller from your host
@@ -74,7 +69,12 @@ fix: --tool ## fix issues found by linters
 .PHONY: test
 test: TOOL = envtest controller-gen mockery
 test: --tool manifests generate genmock fmt vet ## run tests
-	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -v /e2e) -v
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -vE '/e2e|/benchmark') -v
+
+.PHONY: bench
+bench: ## run benchmarks
+	@go test -bench=. -run=^$ -benchmem -benchtime=1x -v ./test/benchmark
+	@go test -count=1 -v ./test/benchmark
 
 .PHONY: e2e
 e2e: ## run e2e tests
@@ -138,6 +138,9 @@ undeploy-crds-kustomize: --tool manifests ## undeploy CRDs from the K8s cluster 
 .PHONY: deploy-kustomize
 deploy-kustomize: TOOL = kustomize
 deploy-kustomize: --tool manifests deploy-crds-kustomize ## deploy controller to the K8s cluster specified in ~/.kube/config.
+ifndef PLURAL_CONSOLE_TOKEN
+	$(error $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
+endif
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy-kustomize
