@@ -8,7 +8,7 @@ func (in MockResource) ID() string {
 	return "mock-resource"
 }
 
-func (in MockResource) Links() []string {
+func (in MockResource) Links(_ map[string]string) []string {
 	return []string{}
 }
 
@@ -16,6 +16,6 @@ func (in MockResource) Links() []string {
 type UnlinkedResource struct {
 }
 
-func (in UnlinkedResource) Links() []string {
+func (in UnlinkedResource) Links(_ map[string]string) []string {
 	return []string{}
 }

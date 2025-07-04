@@ -18,14 +18,20 @@ import (
 // It is designed to be used with a variety of cloud providers by providing the necessary resource factories.
 type DefaultExtractor struct {
 	sink      Sink
-	resources map[string]ResourceFactory
+	resources []Entry
+
+	// lookup is a map that can be used to resolve short IDs to full IDs.
+	// It is being filled during the extraction process and relies on the extraction order.
+	lookup map[string]string
 }
 
-// Extract extracts data from the provided connection and sends it to the sink.
-func (in DefaultExtractor) Extract(conn connection.Connection) error {
+// Extract implements the Extractor interface.
+func (in *DefaultExtractor) Extract(conn connection.Connection) error {
 	klog.V(log.LogLevelDebug).InfoS("starting extraction")
 
-	for table, factory := range in.Resources() {
+	for _, entry := range in.Resources() {
+		table := string(entry.Table)
+		factory := entry.Factory
 		columns, rows, err := conn.Query("SELECT * FROM" + pq.QuoteIdentifier(table))
 		if err != nil {
 			return fmt.Errorf("failed to query table '%s': %w", table, err)
@@ -45,11 +51,13 @@ func (in DefaultExtractor) Extract(conn connection.Connection) error {
 				return fmt.Errorf("could not create table interface: %w", err)
 			}
 
+			in.lookup[itable.ShortID()] = itable.ID()
+
 			output := &cloudquery.ExtractOutput{
 				Type:   table,
 				Result: rowJson,
 				Id:     itable.ID(),
-				Links:  itable.Links(),
+				Links:  itable.Links(in.lookup),
 			}
 
 			if err := in.Sink().Send(output); err != nil {
@@ -62,17 +70,20 @@ func (in DefaultExtractor) Extract(conn connection.Connection) error {
 	return nil
 }
 
-func (in DefaultExtractor) Sink() Sink {
+// Sink implements the Extractor interface.
+func (in *DefaultExtractor) Sink() Sink {
 	return in.sink
 }
 
-func (in DefaultExtractor) Resources() map[string]ResourceFactory {
+// Resources implements the Extractor interface.
+func (in *DefaultExtractor) Resources() []Entry {
 	return in.resources
 }
 
-func NewDefaultExtractor(sink Sink, resources map[string]ResourceFactory) Extractor {
-	return DefaultExtractor{
+func NewDefaultExtractor(sink Sink, resources []Entry) *DefaultExtractor {
+	return &DefaultExtractor{
 		sink:      sink,
 		resources: resources,
+		lookup:    make(map[string]string),
 	}
 }

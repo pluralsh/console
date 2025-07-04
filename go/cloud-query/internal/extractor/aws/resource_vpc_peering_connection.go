@@ -13,3 +13,7 @@ type VPCPeeringConnection struct {
 func (in VPCPeeringConnection) ID() string {
 	return in.ARN
 }
+
+func (in VPCPeeringConnection) ShortID() string {
+	return in.ARN
+}

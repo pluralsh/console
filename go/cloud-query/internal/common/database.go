@@ -8,6 +8,11 @@ import (
 func formatValue(value any) any {
 	switch v := value.(type) {
 	case []byte:
+		var result any
+		if err := json.Unmarshal(v, &result); err == nil {
+			return result
+		}
+
 		return string(v)
 	default:
 		return value
