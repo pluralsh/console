@@ -7,8 +7,8 @@ type EKSCluster struct {
 }
 
 type EKSClusterVPCConfig struct {
-	SubnetIDs []string `json:"subnet_ids"`
-	VPCID     string   `json:"vpc_id"`
+	SubnetIDs []string `json:"SubnetIds"`
+	VPCID     string   `json:"VpcId"`
 }
 
 func (in EKSCluster) ID() string {
