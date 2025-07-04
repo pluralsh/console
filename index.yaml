@@ -86,6 +86,34 @@ entries:
     version: 0.0.1
   console:
   - apiVersion: v2
+    appVersion: 0.11.26
+    created: "2025-07-04T21:49:45.691580647Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.131
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: c1d88a48d24aa2eea748fb485cd2465104c780c746f32a2a16db922fe48dc024
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.103/console-0.3.103.tgz
+    version: 0.3.103
+  - apiVersion: v2
     appVersion: 0.11.25
     created: "2025-06-27T23:53:50.791088038Z"
     dependencies:
@@ -7404,6 +7432,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.26
+    created: "2025-07-04T21:49:45.803455175Z"
+    description: deploys the datastore operator for plural cd
+    digest: a7c5cd82c8ab148757a9925be3dff1cc545a67d87ca2825d0b4d5040d11d5ad2
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.9/datastore-0.0.9.tgz
+    version: 0.0.9
+  - apiVersion: v2
     appVersion: 0.11.25
     created: "2025-06-27T23:53:50.902917563Z"
     description: deploys the datastore operator for plural cd
@@ -7651,4 +7689,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-04T18:32:33.540801468Z"
+generated: "2025-07-04T21:49:45.805310496Z"
