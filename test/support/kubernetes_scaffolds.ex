@@ -4,25 +4,30 @@ defmodule KubernetesScaffolds do
   alias Kazan.Apis.Networking.V1, as: Networking
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
+  alias Kazan.Apis.Storage.V1, as: Storage
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, ObjectMeta}
   alias Kazan.Models.Apimachinery
   alias Kube
   alias Console.Schema
 
-  def stateful_set(ns), do: stateful_set(ns, ns)
-  def stateful_set(namespace, name) do
+  def stateful_set(name, namespace, replicas, vcts) do
     %Apps.StatefulSet{
       api_version: "apps/v1",
       kind: "StatefulSet",
-      metadata: %ObjectMeta{name: name, namespace: namespace, uid: Ecto.UUID.generate()},
-      status: %Apps.StatefulSetStatus{
-        current_replicas: 3,
-        replicas: 3
+      metadata: %ObjectMeta{
+        name: name,
+        namespace: namespace,
+        uid: Ecto.UUID.generate()
       },
       spec: %Apps.StatefulSetSpec{
-        replicas: 3,
-        service_name: name,
-        selector: %LabelSelector{match_labels: %{"label" => "value"}}
+        replicas: replicas,
+        selector: %LabelSelector{match_labels: %{app: name}},
+        volume_claim_templates: vcts,
+        service_name: name
+      },
+      status: %Apps.StatefulSetStatus{
+        replicas: replicas,
+        current_replicas: replicas
       }
     }
   end
@@ -31,7 +36,7 @@ defmodule KubernetesScaffolds do
     %Apps.Deployment{
       api_version: "apps/v1",
       kind: "Deployment",
-      metadata: %{name: name, namespace: namespace},
+      metadata: %ObjectMeta{name: name, namespace: namespace},
       status: %Apps.DeploymentStatus{
         available_replicas: 3,
         replicas: 3,
@@ -48,7 +53,7 @@ defmodule KubernetesScaffolds do
     %Core.Service{
       api_version: "v1",
       kind: "Service",
-      metadata: %{name: name, namespace: namespace},
+      metadata: %ObjectMeta{name: name, namespace: namespace},
       status: %Core.ServiceStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Core.ServiceSpec{
         selector: %{"label" => "value"},
@@ -64,7 +69,7 @@ defmodule KubernetesScaffolds do
     %Networking.Ingress{
       api_version: "networking.k8s.io/v1",
       kind: "Ingress",
-      metadata: %{name: name, namespace: namespace},
+      metadata: %ObjectMeta{name: name, namespace: namespace},
       status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Networking.IngressSpec{
         tls: [%Networking.IngressTLS{hosts: ["example.com"]}],
@@ -89,7 +94,7 @@ defmodule KubernetesScaffolds do
     %Core.Pod{
       api_version: "v1",
       kind: "Pod",
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       status: %Core.PodStatus{pod_ip: "1.2.3.4"},
       spec: %Core.PodSpec{node_name: "some-node"}
     }
@@ -99,7 +104,7 @@ defmodule KubernetesScaffolds do
     %Core.Node{
       api_version: "v1",
       kind: "Node",
-      metadata: %{name: name},
+      metadata: %ObjectMeta{name: name},
       status: %Core.NodeStatus{
         allocatable: %{"cpu" => "2", "memory" => "6Gi"},
         capacity: %{"cpu" => "2", "memory" => "6Gi"}
@@ -115,7 +120,7 @@ defmodule KubernetesScaffolds do
     %Batch.CronJob{
       api_version: "batch/v1",
       kind: "CronJob",
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       status: %Batch.CronJobStatus{last_schedule_time: "time"},
       spec: %Batch.CronJobSpec{
         concurrency_policy: "Forbid",
@@ -129,7 +134,7 @@ defmodule KubernetesScaffolds do
     %BatchV1.Job{
       api_version: "batch/v1",
       kind: "Job",
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       status: %BatchV1.JobStatus{active: 1},
       spec: %BatchV1.JobSpec{
         parallelism: 1,
@@ -140,7 +145,7 @@ defmodule KubernetesScaffolds do
 
   def logfilter(name) do
     %Kube.LogFilter{
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       spec: %Kube.LogFilter.Spec{
         query: "query",
         labels: [%Kube.LogFilter.Spec.Labels{name: "l", value: "v"}]
@@ -245,7 +250,7 @@ defmodule KubernetesScaffolds do
 
   def license(name) do
     %Kube.License{
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.License.Status{
         policy: %Kube.License.Status.Policy{
           free: true,
@@ -257,14 +262,14 @@ defmodule KubernetesScaffolds do
 
   def configuration_overlay(name, opts \\ []) do
     %Kube.ConfigurationOverlay{
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       spec: struct(Kube.ConfigurationOverlay.Spec, opts),
     }
   end
 
   def vertical_pod_autoscaler(name) do
     %Kube.VerticalPodAutoscaler{
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       spec: %Kube.VerticalPodAutoscaler.Spec{
         target_ref: %{kind: :statefulset, name: "name", api_version: "core/v1"},
         update_policy: %{update_mode: "Off"}
@@ -276,7 +281,7 @@ defmodule KubernetesScaffolds do
     %Core.Namespace{
       api_version: "v1",
       kind: "Namespace",
-      metadata: %{name: name},
+      metadata: %ObjectMeta{name: name},
       spec: %Core.NamespaceSpec{finalizers: ["finalizer"]},
       status: %Core.NamespaceStatus{phase: "Created"}
     }
@@ -286,7 +291,7 @@ defmodule KubernetesScaffolds do
     %Core.ConfigMap{
       api_version: "v1",
       kind: "ConfigMap",
-      metadata: %{namespace: name, name: name},
+      metadata: %ObjectMeta{namespace: name, name: name},
       data: %{"some" => "config"}
     }
   end
@@ -295,7 +300,7 @@ defmodule KubernetesScaffolds do
     %Core.Secret{
       api_version: "v1",
       kind: "Secret",
-      metadata: %{namespace: name, name: name},
+      metadata: %ObjectMeta{namespace: name, name: name},
       data: %{"some" => "secret"},
       type: "Opaque"
     }
@@ -303,7 +308,7 @@ defmodule KubernetesScaffolds do
 
   def wireguard_peer(name) do
     %Kube.WireguardPeer{
-      metadata: %{name: name, namespace: "wireguard", annotations: %{}},
+      metadata: %ObjectMeta{name: name, namespace: "wireguard", annotations: %{}},
       spec: %Kube.WireguardPeer.Spec{wireguard_ref: "wireguard"},
       status: %Kube.WireguardPeer.Status{ready: true, config_ref: %Kube.WireguardPeer.Status.ConfigRef{name: "n", key: "k"}}
     }
@@ -316,7 +321,7 @@ defmodule KubernetesScaffolds do
 
   def wireguard_server() do
     %Kube.WireguardServer{
-      metadata: %{name: "wireguard", namespage: "wireguard"},
+      metadata: %ObjectMeta{name: "wireguard", namespace: "wireguard"},
       status: %Kube.WireguardServer.Status{ready: true}
     }
   end
@@ -364,6 +369,51 @@ defmodule KubernetesScaffolds do
       kind: "GitRepository",
       metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.GitRepository.Status{id: id}
+    }
+  end
+
+  def volume_claim_template(name, sc_name) do
+    %Core.PersistentVolumeClaim{
+      metadata: %ObjectMeta{name: name},
+      spec: %Core.PersistentVolumeClaimSpec{
+        access_modes: ["ReadWriteOnce"],
+        storage_class_name: sc_name,
+        resources: %Core.ResourceRequirements{
+          requests: %{"storage" => "1Gi"}
+        }
+      }
+    }
+  end
+
+  def persistent_volume_claim(name, namespace, sc_name, volume_name) do
+    %Core.PersistentVolumeClaim{
+      metadata: %ObjectMeta{
+        name: name,
+        namespace: namespace,
+        uid: Ecto.UUID.generate()
+      },
+      spec: %Core.PersistentVolumeClaimSpec{
+        storage_class_name: sc_name,
+        volume_name: volume_name
+      },
+      status: %Core.PersistentVolumeClaimStatus{phase: "Bound"}
+    }
+  end
+
+  def persistent_volume(name) do
+    %Core.PersistentVolume{
+      metadata: %ObjectMeta{name: name, uid: Ecto.UUID.generate()},
+      spec: %Core.PersistentVolumeSpec{
+        capacity: %{storage: "1Gi"},
+        access_modes: ["ReadWriteOnce"]
+      }
+    }
+  end
+
+  def storage_class(name, provisioner) do
+    %Storage.StorageClass{
+      metadata: %ObjectMeta{name: name, uid: Ecto.UUID.generate()},
+      provisioner: provisioner
     }
   end
 end
