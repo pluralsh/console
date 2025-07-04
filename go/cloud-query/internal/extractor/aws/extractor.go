@@ -39,12 +39,11 @@ var (
 		TableVPC,                  // Links: None
 		TableVPCSubnet,            // Links: VPC
 		TableVPCPeeringConnection, // Links: None,
-		// TODO: add role here
-		TableEKSCluster,   // Links: VPC, VPCSubnet
-		TableEKSAddon,     // Links: EKSCluster, Role
-		TableEKSNodeGroup, // Links: EKSCluster, Role, VPCSubnet
-		TableEC2Instance,  // Links: VPC, VPCSubnet
-		TableS3Bucket,     // Links: None,
+		TableEKSCluster,           // Links: VPC, VPCSubnet
+		TableEKSAddon,             // Links: EKSCluster
+		TableEKSNodeGroup,         // Links: EKSCluster, VPCSubnet
+		TableEC2Instance,          // Links: VPC, VPCSubnet
+		TableS3Bucket,             // Links: None,
 	}
 )
 
