@@ -65,13 +65,13 @@ defmodule Console.AI.Chat.Engine do
   @agent_tools [
     Agent.Query,
     Agent.Schema,
-    Agent.Plan
+    Agent.Plan,
+    Agent.Catalogs,
+    Agent.Automations
   ]
 
   @agent_planned_tools [
     Agent.CallPr,
-    Agent.Catalogs,
-    Agent.Automations
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}

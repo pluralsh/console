@@ -6079,6 +6079,8 @@ type StackCron struct {
 	Crontab string `json:"crontab"`
 	// whether you want any cron-derived runs to automatically approve changes
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverrides `json:"overrides,omitempty"`
 }
 
 type StackCronAttributes struct {
@@ -6086,6 +6088,8 @@ type StackCronAttributes struct {
 	Crontab string `json:"crontab"`
 	// whether you want to auto approve any changes spawned by the cron worker
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverridesAttributes `json:"overrides,omitempty"`
 }
 
 type StackDefinition struct {
@@ -6165,6 +6169,17 @@ type StackOutputAttributes struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
 	Secret *bool  `json:"secret,omitempty"`
+}
+
+// Configuration overrides for a stack cron run
+type StackOverrides struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+}
+
+type StackOverridesAttributes struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 }
 
 type StackPolicyViolation struct {

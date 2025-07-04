@@ -2315,6 +2315,11 @@ input StackConfigurationAttributes {
   terraform: TerraformConfigurationAttributes
 }
 
+input StackOverridesAttributes {
+  "the terraform configuration for this stack"
+  terraform: TerraformConfigurationAttributes
+}
+
 input StackHookAttributes {
   "a script hook to run at a stage"
   cmd: String!
@@ -2340,6 +2345,9 @@ input StackCronAttributes {
 
   "whether you want to auto approve any changes spawned by the cron worker"
   autoApprove: Boolean
+
+  "configuration overrides for the cron run"
+  overrides: StackOverridesAttributes
 }
 
 input PolicyEngineAttributes {
@@ -2596,11 +2604,20 @@ type StackCron {
 
   "whether you want any cron-derived runs to automatically approve changes"
   autoApprove: Boolean
+
+  "configuration overrides for the cron run"
+  overrides: StackOverrides
 }
 
 "grab-bag of state configuration urls for supported tools"
 type StateUrls {
   terraform: TerraformStateUrls
+}
+
+"Configuration overrides for a stack cron run"
+type StackOverrides {
+  "the terraform configuration for this stack"
+  terraform: TerraformConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"

@@ -332,6 +332,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		attr.Cron = &console.StackCronAttributes{
 			Crontab:     stack.Spec.Cron.Crontab,
 			AutoApprove: stack.Spec.Cron.AutoApprove,
+			Overrides:   r.stackOverridesAttributes(stack.Spec.Cron.Overrides),
 		}
 	}
 
@@ -424,6 +425,23 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	}
 
 	return attr, nil
+}
+
+func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1alpha1.StackOverrides) *console.StackOverridesAttributes {
+	if overrides == nil {
+		return nil
+	}
+
+	result := &console.StackOverridesAttributes{}
+
+	if overrides.Terraform != nil {
+		result.Terraform = &console.TerraformConfigurationAttributes{
+			Parallelism: overrides.Terraform.Parallelism,
+			Refresh:     overrides.Terraform.Refresh,
+		}
+	}
+
+	return result
 }
 
 func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alpha1.StackConfiguration) *console.StackConfigurationAttributes {

@@ -8,6 +8,10 @@ defmodule Console.Schema.StackCron do
     field :next_run_at,  :utc_datetime_usec
     field :last_run_at,  :utc_datetime_usec
 
+    embeds_one :overrides, ConfigurationOverrides, on_replace: :update do
+      embeds_one :terraform, Stack.Configuration.Terraform, on_replace: :update
+    end
+
     belongs_to :stack, Stack
 
     timestamps()
@@ -26,8 +30,15 @@ defmodule Console.Schema.StackCron do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:overrides, with: &overrides_changeset/2)
     |> add_next_run()
     |> validate_required([:crontab, :next_run_at])
+  end
+
+  defp overrides_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:terraform, with: &Stack.Configuration.terraform_changeset/2)
   end
 
   defp add_next_run(cs) do

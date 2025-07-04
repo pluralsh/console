@@ -334,6 +334,44 @@ defmodule Console.Deployments.StacksTest do
       assert cron.last_run_at
       assert Timex.after?(cron.next_run_at, cron.last_run_at)
     end
+
+    test "it can handle cron configuration overrides" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "old-sha"
+      )
+      cron = insert(:stack_cron, stack: stack, overrides: %{terraform: %{parallelism: 10}})
+
+      {:ok, run} = Stacks.spawn_cron(cron)
+
+      assert run.stack_id == stack.id
+      assert run.message
+      assert run.configuration.terraform.parallelism == 10
+
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "old-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second, third] = run.steps
+
+      assert first.cmd == "terraform"
+      assert first.args == ["init", "-upgrade"]
+      assert first.index == 0
+
+      assert second.cmd == "terraform"
+      assert second.args == ["plan"]
+      assert second.index == 1
+
+      assert third.cmd == "terraform"
+      assert third.args == ["apply", "terraform.tfplan"]
+      assert third.index == 2
+
+      cron = refetch(cron)
+      assert cron.last_run_at
+      assert Timex.after?(cron.next_run_at, cron.last_run_at)
+    end
   end
 
   describe "#poll/1" do
