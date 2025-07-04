@@ -47,7 +47,6 @@ export const evidenceDirectory: Record<
   [EvidenceType.Log]: { icon: <LogsIcon />, label: 'Logs' },
   [EvidenceType.Pr]: { icon: <PrOpenIcon />, label: 'PRs' },
   [EvidenceType.Alert]: { icon: <SirenIcon />, label: 'Alerts' },
-  // TODO: change to knowledge icon when in DS
   [EvidenceType.Knowledge]: { icon: <BrainIcon />, label: 'Knowledge' },
 }
 

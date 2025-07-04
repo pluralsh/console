@@ -8,7 +8,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import { Conjunction, TagType, useTagPairsLazyQuery } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
-import { type Key, useMemo, useState } from 'react'
+import { Dispatch, type Key, useMemo, useState } from 'react'
 import { tagToKey } from 'utils/clusterTags'
 
 export function TagsFilter({
@@ -26,7 +26,7 @@ export function TagsFilter({
   selectedTagKeys: Set<Key>
   setSelectedTagKeys: (keys: Set<Key>) => void
   searchOp: Conjunction
-  setSearchOp: TagMultiSelectProps['onChangeMatchType']
+  setSearchOp: Dispatch<Conjunction>
   comboBoxProps?: TagMultiSelectProps['comboBoxProps']
   selectProps?: TagMultiSelectProps['selectProps']
 }) {
@@ -88,7 +88,7 @@ export function TagsFilter({
       loading={loading}
       options={searchResults}
       selectedMatchType={searchOp}
-      onChangeMatchType={setSearchOp}
+      onChangeMatchType={(value) => setSearchOp(value as Conjunction)}
     />
   )
 }

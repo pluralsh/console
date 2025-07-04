@@ -74,7 +74,6 @@ export function PreviewTemplatesTable({
       renderExpanded={({ row }) => <PreviewTemplateTableExpander row={row} />}
       onRowClick={(_, row) => row.getToggleExpandedHandler()()}
       reactTableOptions={reactTableOptions}
-      {...expandedRowBorderFix}
     />
   )
 }
@@ -91,7 +90,7 @@ function PreviewTemplateTableExpander({
   const commentTemplate = row.original?.commentTemplate ?? ''
 
   return (
-    <div css={{ background: colors['fill-three'], maxWidth: 520 }}>
+    <div css={{ background: colors['fill-three'] }}>
       <TabList
         stateRef={tabStateRef}
         stateProps={{
@@ -139,11 +138,5 @@ const TemplateTabSC = styled(Tab)(({ theme }) => ({
     '&:hover': { background: theme.colors['fill-three-hover'] },
   },
 }))
-
-// TODO: add this to DS
-// should also probably add a native scroll-to-row ability
-const expandedRowBorderFix = {
-  'tr[data-expander-row] td': { padding: 0 },
-}
 
 const cols = [ColExpanderWithInitialScroll, ColName, ColReferenceService]

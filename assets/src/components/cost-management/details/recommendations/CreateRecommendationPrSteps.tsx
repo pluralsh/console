@@ -106,7 +106,6 @@ export function SelectPrAutomationStep({
     return (
       <Callout
         severity="warning"
-        // @ts-ignore, need to change this type in DS to ReactNode
         title={
           <StackedText
             first="There are no available PR automations"
