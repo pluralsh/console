@@ -229,6 +229,7 @@ type AiSettingsAttributes struct {
 	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
 	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
 	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 type Alert struct {
@@ -2643,6 +2644,12 @@ type GlobalServiceConnection struct {
 type GlobalServiceEdge struct {
 	Node   *GlobalService `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type GraphStoreAttributes struct {
+	Enabled *bool                              `json:"enabled,omitempty"`
+	Store   *VectorStore                       `json:"store,omitempty"`
+	Elastic *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 }
 
 type Group struct {

@@ -1520,6 +1520,8 @@ input AiSettingsAttributes {
   vertex: VertexAiAttributes
 
   vectorStore: VectorStoreAttributes
+
+  graph: GraphStoreAttributes
 }
 
 input ToolConfigAttributes {
@@ -1637,6 +1639,12 @@ input VectorStoreAttributes {
   store: VectorStore
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+}
+
+input GraphStoreAttributes {
+  enabled: Boolean
+  store: VectorStore
+  elastic: ElasticsearchConnectionAttributes
 }
 
 input SmtpSettingsAttributes {

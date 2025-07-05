@@ -297,6 +297,7 @@ export type AiSettingsAttributes = {
   /** ai provider to use with embeddings (for vector indexing) */
   embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  graph?: InputMaybe<GraphStoreAttributes>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
@@ -3253,6 +3254,12 @@ export type GlobalServiceEdge = {
   __typename?: 'GlobalServiceEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<GlobalService>;
+};
+
+export type GraphStoreAttributes = {
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  store?: InputMaybe<VectorStore>;
 };
 
 export type Group = {
