@@ -58,7 +58,8 @@ defmodule Console.AI.Chat.Engine do
     Agent.Catalogs,
     Agent.Automations,
     Agent.Clusters,
-    Agent.Search
+    Agent.Search,
+    Agent.Stack
   ]
 
   @agent_planned_tools [

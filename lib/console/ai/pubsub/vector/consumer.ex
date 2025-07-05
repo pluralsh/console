@@ -13,8 +13,10 @@ defmodule Console.AI.PubSub.Vector.Consumer do
     end
   end
 
-  defp insert(%Indexable{data: resources, filters: fs}) when is_list(resources),
-    do: Enum.each(resources, &VectorStore.insert(&1, filters: fs))
+  defp insert(%Indexable{data: resources, filters: fs}) when is_list(resources) do
+    Console.throttle(resources, count: 10, pause: 200)
+    |> Enum.each(&VectorStore.insert(&1, filters: fs))
+  end
   defp insert(%Indexable{data: res, filters: fs}), do: VectorStore.insert(res, filters: fs)
   defp insert(pass), do: pass
 end

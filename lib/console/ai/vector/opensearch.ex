@@ -2,6 +2,7 @@ defmodule Console.AI.Vector.Opensearch do
   @behaviour Console.AI.VectorStore
   import Console.Services.Base, only: [ok: 1]
   import Console.AI.Vector.Utils
+  alias Console.AI.Vector.Elastic
 
   alias Console.AI.Utils
   alias Console.AI.Provider
@@ -63,10 +64,10 @@ defmodule Console.AI.Vector.Opensearch do
 
   def insert(%__MODULE__{conn: %Opensearch{} = os}, data, opts \\ []) do
     filters = Keyword.get(opts, :filters, [])
-    with {datatype, text} <- Content.content(data),
+    with {id, datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
       Req.new([
-        url: Opensearch.url(os, "#{os.index}/_doc"),
+        url: Opensearch.url(os, Elastic.doc_url(os.index, id)),
         method: :post,
         headers: Opensearch.headers(os, @headers),
         body: Jason.encode!(doc_filters(%{
