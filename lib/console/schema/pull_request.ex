@@ -1,6 +1,6 @@
 defmodule Console.Schema.PullRequest do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow}
+  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow, PrGovernance}
 
   defenum Status, open: 0, merged: 1, closed: 2
 
@@ -8,6 +8,7 @@ defmodule Console.Schema.PullRequest do
     field :url,        :string
     field :status,     Status, default: :open
     field :title,      :string
+    field :body,       :string
     field :creator,    :string
     field :labels,     {:array, :string}
     field :ref,        :string
@@ -19,15 +20,18 @@ defmodule Console.Schema.PullRequest do
     field :attributes, :map
     field :patch,      :binary
     field :agent_id,   :string
+    field :approved,   :boolean, default: false
+    field :governance_state, :map
 
     field :notifications_policy_id, :binary_id
 
     field :comment_id, :string, virtual: true
 
-    belongs_to :cluster, Cluster
-    belongs_to :service, Service
-    belongs_to :stack,   Stack
-    belongs_to :flow,    Flow
+    belongs_to :cluster,    Cluster
+    belongs_to :service,    Service
+    belongs_to :stack,      Stack
+    belongs_to :flow,       Flow
+    belongs_to :governance, PrGovernance
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -69,6 +73,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.agent_id == ^agent_id)
   end
 
+  def pending_governance(query \\ __MODULE__) do
+    from(pr in query, where: not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open)
+  end
+
   def stack(query \\ __MODULE__) do
     from(pr in query, where: not is_nil(pr.stack_id))
   end
@@ -87,6 +95,7 @@ defmodule Console.Schema.PullRequest do
     approver
     status
     title
+    body
     cluster_id
     stack_id
     service_id
@@ -96,6 +105,9 @@ defmodule Console.Schema.PullRequest do
     preview
     patch
     agent_id
+    governance_id
+    approved
+    governance_state
   )a
 
   def changeset(model, attrs \\ %{}) do

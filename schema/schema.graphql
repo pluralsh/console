@@ -566,6 +566,12 @@ type RootMutationType {
 
   deletePrAutomation(id: ID!): PrAutomation
 
+  "upserts a governance controller"
+  upsertPrGovernance(attributes: PrGovernanceAttributes!): PrGovernance
+
+  "deletes a governance controller"
+  deletePrGovernance(id: ID!): PrGovernance
+
   "creates the service to enable self-hosted renovate in one pass"
   setupRenovate(
     connectionId: ID!
@@ -7142,6 +7148,9 @@ input PrAutomationAttributes {
   "a git repository to use for create mode prs"
   repositoryId: ID
 
+  "the governance controller to use for this pr"
+  governanceId: ID
+
   configuration: [PrConfigurationAttributes]
 
   confirmation: PrConfirmationAttributes
@@ -7410,6 +7419,27 @@ input ObserverAddonAttributes {
   name: String!
   kubernetesVersion: String
   kubernetesVersions: [String!]
+}
+
+"The settings for configuring a pr governance controller"
+input PrGovernanceAttributes {
+  name: String!
+
+  "the scm connection to use for pr generation"
+  connectionId: ID!
+
+  configuration: PrGovernanceConfigurationAttributes
+}
+
+"The settings for configuring a pr governance controller"
+input PrGovernanceConfigurationAttributes {
+  webhook: GovernanceWebhookAttributes
+}
+
+"The settings for configuring a pr governance controller"
+input GovernanceWebhookAttributes {
+  "the url to send webhooks to"
+  url: String!
 }
 
 "a git repository available for deployments"
@@ -7897,6 +7927,26 @@ type Catalog {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A governance controller is a mechanism to enforce a set of rules on a set of PRs"
+type PrGovernance {
+  id: ID!
+  name: String!
+  connection: ScmConnection
+  configuration: PrGovernanceConfiguration
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"The configuration for a pr governance controller"
+type PrGovernanceConfiguration {
+  webhook: GovernanceWebhook
+}
+
+"The webhook configuration for a pr governance controller"
+type GovernanceWebhook {
+  url: String!
 }
 
 type GitRepositoryConnection {
