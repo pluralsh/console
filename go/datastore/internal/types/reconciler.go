@@ -24,6 +24,7 @@ const (
 	MySqlCredentialsReconciler           Reconciler = "mysqlCredentials"
 	MySqlDatabaseReconciler              Reconciler = "mysqlDatabase"
 	MySqlUserReconciler                  Reconciler = "mysqlUser"
+	NamespaceManagementReconciler        Reconciler = "namespaceManagement"
 )
 
 var validReconcilers = map[string]Reconciler{
@@ -37,6 +38,7 @@ var validReconcilers = map[string]Reconciler{
 	"MySqlCredentialsReconciler":           MySqlCredentialsReconciler,
 	"MySqlDatabaseReconciler":              MySqlDatabaseReconciler,
 	"MySqlUserReconciler":                  MySqlUserReconciler,
+	"NamespaceManagementReconciler":        NamespaceManagementReconciler,
 }
 
 type ControllerFactory func(mgr ctrl.Manager) Controller
@@ -110,6 +112,12 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 			Client:      mgr.GetClient(),
 			Scheme:      mgr.GetScheme(),
 			MySqlClient: mysql.New(),
+		}
+	},
+	NamespaceManagementReconciler: func(mgr ctrl.Manager) Controller {
+		return &controller.NamespaceManagementReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
 		}
 	},
 }

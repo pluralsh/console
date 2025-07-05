@@ -1,0 +1,15 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: NamespaceManagement
+metadata:
+  labels:
+    app.kubernetes.io/name: datastore
+    app.kubernetes.io/managed-by: kustomize
+  name: namespacemanagement-sample
+  namespace: default
+spec:
+  interval: "1h"
+  namespacePattern: "helm-app"
+  sentinel:
+    name: test
+    apiVersion: "apps/v1"
+    kind: "Deployment"

@@ -12,6 +12,7 @@ resources:
 - bases/dbs.plural.sh_mysqlcredentials.yaml
 - bases/dbs.plural.sh_mysqldatabases.yaml
 - bases/dbs.plural.sh_mysqlusers.yaml
+- bases/dbs.plural.sh_namespacemanagements.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:
