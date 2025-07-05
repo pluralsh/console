@@ -6,10 +6,10 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
-func (in *connection) Query(q string) (columns []string, rows [][]any, err error) {
+func (in *connection) Query(q string, args ...any) (columns []string, rows [][]any, err error) {
 	klog.V(log.LogLevelDebug).InfoS("running query", "query", q)
 
-	qResponse, err := in.db.Query(q)
+	qResponse, err := in.db.Query(q, args...)
 	if err != nil {
 		return columns, rows, err
 	}

@@ -14,9 +14,37 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/extension"
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/server"
+	"github.com/pluralsh/console/go/cloud-query/internal/service"
 )
 
 func main() {
+	db := setupDatabaseOrDie()
+
+	p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
+	if err != nil {
+		klog.Fatalf("failed to create connection pool: %v", err)
+	}
+
+	s, err := server.New(&server.Config{
+		Address:          args.ServerAddress(),
+		TLSCertPath:      args.ServerTLSCertPath(),
+		TLSKeyPath:       args.ServerTLSKeyPath(),
+		EnableReflection: args.ServerEnableReflection(),
+	}, service.NewCloudQueryService(p))
+	if err != nil {
+		klog.Fatalf("failed to create server: %v", err)
+	}
+
+	// Setup signal handling for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	go handleShutdown(cancel, db, s)
+
+	if err = s.Start(ctx); err != nil {
+		klog.Fatalf("failed to start server: %v", err)
+	}
+}
+
+func setupDatabaseOrDie() *embeddedpostgres.EmbeddedPostgres {
 	db := embeddedpostgres.NewDatabase(
 		embeddedpostgres.DefaultConfig().
 			Username(args.DatabaseUser()).
@@ -35,11 +63,6 @@ func main() {
 	if err != nil {
 		klog.Fatalf("failed to start database: %v", err)
 	}
-	defer func() {
-		if err = db.Stop(); err != nil {
-			klog.Fatalf("failed to stop database: %v", err)
-		}
-	}()
 
 	conn, err := connection.NewConnection("register", "")
 	if err != nil {
@@ -54,28 +77,7 @@ func main() {
 		klog.Fatalf("failed to close db connection after registering extensions: %v", err)
 	}
 
-	p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
-	if err != nil {
-		klog.Fatalf("failed to create connection pool: %v", err)
-	}
-
-	s, err := server.New(&server.Config{
-		Address:          args.ServerAddress(),
-		TLSCertPath:      args.ServerTLSCertPath(),
-		TLSKeyPath:       args.ServerTLSKeyPath(),
-		EnableReflection: args.ServerEnableReflection(),
-	}, server.NewCloudQueryServer(p))
-	if err != nil {
-		klog.Fatalf("failed to create server: %v", err)
-	}
-
-	// Setup signal handling for graceful shutdown
-	ctx, cancel := context.WithCancel(context.Background())
-	go handleShutdown(cancel, db, s)
-
-	if err = s.Start(ctx); err != nil {
-		klog.Fatalf("failed to start server: %v", err)
-	}
+	return db
 }
 
 func handleShutdown(cancel context.CancelFunc, db *embeddedpostgres.EmbeddedPostgres, s *server.Server) {

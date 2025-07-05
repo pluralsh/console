@@ -14,19 +14,19 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/service"
 )
 
 // Server represents a gRPC server instance
 type Server struct {
-	config  *Config
-	server  *grpc.Server
-	routes  []Route
-	stopped chan struct{} // Channel to signal when server is stopped
+	config   *Config
+	server   *grpc.Server
+	services []service.Service
+	stopped  chan struct{} // Channel to signal when server is stopped
 }
 
 // Start initializes and starts the gRPC server
 func (in *Server) Start(ctx context.Context) error {
-	// Start listening on the configured address
 	lis, err := net.Listen("tcp", in.config.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", in.config.Address, err)
@@ -67,11 +67,11 @@ func (in *Server) Stop() {
 }
 
 func (in *Server) register() {
-	for _, route := range in.routes {
+	for _, route := range in.services {
 		route.Install(in.server)
 	}
 
-	klog.V(log.LogLevelVerbose).InfoS("gRPC services registered", "count", len(in.routes))
+	klog.V(log.LogLevelVerbose).InfoS("gRPC services registered", "count", len(in.services))
 }
 
 func (in *Server) init() (*Server, error) {
@@ -107,7 +107,7 @@ func (in *Server) init() (*Server, error) {
 }
 
 // New creates and returns a new Server with the provided configuration
-func New(config *Config, routes ...Route) (*Server, error) {
+func New(config *Config, services ...service.Service) (*Server, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -117,8 +117,8 @@ func New(config *Config, routes ...Route) (*Server, error) {
 	}
 
 	return (&Server{
-		config:  config,
-		routes:  routes,
-		stopped: make(chan struct{}),
+		config:   config,
+		services: services,
+		stopped:  make(chan struct{}),
 	}).init()
 }

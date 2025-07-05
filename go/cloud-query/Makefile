@@ -18,7 +18,6 @@ image: ## build the Docker image
 	@echo "Building cloud-query docker image..."
 	docker build --no-cache -t cloud-query:latest .
 
-
 # run: Build (if BUILD=true) and run the cloud-query Docker image locally.
 # Usage: make run BUILD=true or BUILD=true make run
 # If BUILD=true is set, the Docker image will be built before running.
@@ -36,6 +35,7 @@ clean: ## clean up build/db artifacts
 	@rm -rf $(DIST_DIR)/cache
 	@rm -rf $(DIST_DIR)/data
 	@rm -rf $(DIST_DIR)/runtime
+	@rm -rf $(DIST_DIR)/dump/*
 
 ##@ Codegen
 
@@ -92,6 +92,6 @@ update-dependencies: ## update dependencies
 
 .PHONY: --download-extensions
 --download-extensions: ## INTERNAL: download postgres extensions
-	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.14.1
+	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.16.1
 	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.8.0
 	@./hack/postgres.sh -p azure -d $(DIST_DIR) -v 1.4.0
