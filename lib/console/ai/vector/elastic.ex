@@ -90,6 +90,15 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
+  def delete(%__MODULE__{conn: %Elastic{} = es}, opts) do
+    filters = Keyword.get(opts, :filters, [])
+    not_filters = Keyword.get(opts, :not, [])
+    query = %{query: %{bool: add_not(%{must: filters(filters)}, not_filters)}}
+    Elastic.url(es, "#{es.index}/_delete_by_query")
+    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(es, @headers))
+    |> handle_response("could not delete vectors from elasticsearch:")
+  end
+
   defp vector_query(embedding, count, filters, n_candidates) do
     query_filters(%{
       size: count,
@@ -97,13 +106,23 @@ defmodule Console.AI.Vector.Elastic do
     }, filters)
   end
 
-  defp query_filters(query, [_ | _] = filters) do
-    put_in(query, [:knn, :filter], Enum.map(filters, fn
-      {k, {:raw, v}} -> %{term: %{k => v}}
-      {k, v} -> %{term: %{"filters.#{k}.keyword" => v}}
-    end))
+  defp query_filters(query, [_ | _] = fs) do
+    put_in(query, [:knn, :filter], filters(fs))
   end
   defp query_filters(query, _), do: query
+
+  defp filters([_ | _] = filters) do
+    Enum.map(filters, fn
+      {k, {:raw, v}} -> %{term: %{k => v}}
+      {k, v} -> %{term: %{"filters.#{k}.keyword" => v}}
+    end)
+  end
+  defp filters(_), do: %{}
+
+  defp add_not(filters, [_ | _] = not_filters) do
+    Map.put(filters, :must_not, filters(not_filters))
+  end
+  defp add_not(filters, _), do: filters
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code}}, _) when code >= 200 and code < 300, do: :ok
   defp handle_response({:ok, %HTTPoison.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}

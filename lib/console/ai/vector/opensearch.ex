@@ -101,6 +101,8 @@ defmodule Console.AI.Vector.Opensearch do
     end
   end
 
+  def delete(_, _), do: :ok
+
   defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
   defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: opensearch error"}
