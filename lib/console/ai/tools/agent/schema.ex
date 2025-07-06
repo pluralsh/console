@@ -24,7 +24,7 @@ defmodule Console.AI.Tools.Agent.Schema do
          {:ok, client} <- Client.connect(),
          input = %SchemaInput{table: table, connection: to_pb(connection)},
          {:ok, result} <- Stub.schema(client, input) do
-      {:ok, Jason.encode!(Map.take(result, [:table, :columns]))}
+      Jason.encode(Map.take(result, [:table, :columns]))
     else
       {:session, _} -> {:ok, "No cloud connection tied to this session, cannot query"}
       {:error, reason} -> {:ok, "Error getting schema: #{inspect(reason)}"}

@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to search for a cloud resource within a Plural Stack.  This should be a natural language query that describes the cloud resource you are looking for."
+        }
+    },
+    "required": ["query"],
+    "additionalProperties": false
+}

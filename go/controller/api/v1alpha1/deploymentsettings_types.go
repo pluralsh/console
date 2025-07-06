@@ -380,6 +380,10 @@ type AISettings struct {
 
 	// +kubebuilder:validation:Optional
 	VectorStore *VectorStore `json:"vectorStore,omitempty"`
+
+	// Configuration for the cloud graph store, which uses similar datastores to the vector store
+	// +kubebuilder:validation:Optional
+	Graph *GraphStore `json:"graph,omitempty"`
 }
 
 type Tools struct {
@@ -429,12 +433,18 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		return nil, err
 	}
 
+	graphStoreAttributes, err := in.Graph.Attributes(ctx, c, namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	attr := &console.AiSettingsAttributes{
 		Enabled:           in.Enabled,
 		Provider:          in.Provider,
 		ToolProvider:      in.ToolProvider,
 		EmbeddingProvider: in.EmbeddingProvider,
 		VectorStore:       vectorStoreAttributes,
+		Graph:             graphStoreAttributes,
 	}
 
 	if in.Tools != nil && in.Tools.CreatePr != nil {
@@ -751,6 +761,55 @@ func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Clien
 
 	res, err := utils.GetSecretKey(ctx, c, in.ServiceAccountJsonSecretRef, namespace)
 	return lo.ToPtr(res), err
+}
+
+type GraphStore struct {
+	// +kubebuilder:default=false
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// +kubebuilder:validation:Enum=ELASTIC
+	// +kubebuilder:validation:Optional
+	Store *console.VectorStore `json:"store,omitempty"`
+
+	// elastic configuration for the graph store
+	// +kubebuilder:validation:Optional
+	Elastic *ElasticsearchConnectionSettings `json:"elastic,omitempty"`
+}
+
+func (in *GraphStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.GraphStoreAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	if lo.FromPtr(in.Enabled) && in.Store == nil {
+		return nil, fmt.Errorf("vector store type has to be set if it is enabled")
+	}
+
+	attr := &console.GraphStoreAttributes{
+		Enabled: in.Enabled,
+		Store:   in.Store,
+	}
+
+	switch *in.Store {
+	case console.VectorStoreElastic:
+		if in.Elastic == nil {
+			return nil, fmt.Errorf("must provide elastic configuration to set the provider to ELASTIC")
+		}
+
+		password, err := in.Elastic.Password(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Elastic = &console.ElasticsearchConnectionAttributes{
+			Host:     in.Elastic.Host,
+			Index:    in.Elastic.Index,
+			User:     in.Elastic.User,
+			Password: password,
+		}
+	}
+	return attr, nil
 }
 
 type VectorStore struct {

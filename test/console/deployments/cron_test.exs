@@ -317,4 +317,24 @@ defmodule Console.Deployments.CronTest do
       refute refetch(ignore).helm.ignore_crds
     end
   end
+
+  describe "#pr_governance/0" do
+    test "it will confirm pull requests" do
+      governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", governance: governance)
+
+      expect(HTTPoison, :post, fn "https://webhook.url/v1/confirm", _, _ ->
+        body = Jason.encode!(%{state: %{service_now_id: "1234567890"}})
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+      end)
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, "pluralsh", "console", "1", _ ->
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      Cron.pr_governance()
+
+      assert refetch(pr).approved
+    end
+  end
 end

@@ -7,6 +7,7 @@ defmodule Console.Deployments.Git do
   alias Console.Services.Users
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
+  alias Console.Deployments.Pr.Governance.Provider, as: GovernanceProvider
   alias Console.Deployments.Observer.Runner
   alias Console.Schema.{
     GitRepository,
@@ -19,7 +20,8 @@ defmodule Console.Deployments.Git do
     DependencyManagementService,
     HelmRepository,
     Observer,
-    Catalog
+    Catalog,
+    PrGovernance
   }
 
   require Logger
@@ -36,6 +38,7 @@ defmodule Console.Deployments.Git do
   @type pull_request_resp :: {:ok, PullRequest.t} | Console.error
   @type observer_resp :: {:ok, Observer.t} | Console.error
   @type catalog_resp :: {:ok, Catalog.t} | Console.error
+  @type governance_resp :: {:ok, PrGovernance.t} | Console.error
 
   @decorate cacheable(cache: @cache, key: {:git_repo, id}, opts: [ttl: @ttl])
   def cached!(id), do: Repo.get!(GitRepository, id)
@@ -89,6 +92,12 @@ defmodule Console.Deployments.Git do
   def get_catalog!(id), do: Repo.get!(Catalog, id)
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
+
+  def get_governance_by_name!(name), do: Repo.get_by!(PrGovernance, name: name)
+
+  def get_governance_by_name(name), do: Repo.get_by(PrGovernance, name: name)
+
+  def get_governance!(id), do: Repo.get!(PrGovernance, id)
 
   def deploy_url(), do: Console.conf(:deploy_url) || "https://github.com/pluralsh/deployment-operator.git"
 
@@ -341,6 +350,7 @@ defmodule Console.Deployments.Git do
       |> PullRequest.changeset(
         Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
         |> Map.merge(attrs)
+        |> Map.put(:governance_id, pr.governance_id)
         |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
       )
       |> Repo.insert()
@@ -385,6 +395,19 @@ defmodule Console.Deployments.Git do
       {%{flow_id: flow_id} = attrs, nil} when is_binary(flow_id) ->
         create_pr(attrs, url)
       _ -> {:error, :not_found}
+    end
+  end
+
+  @doc """
+  Confirms a pull request with the governance controller then approves it directly
+  """
+  @spec confirm_pull_request(PullRequest.t) :: pull_request_resp
+  def confirm_pull_request(%PullRequest{} = pr) do
+    with %PullRequest{} = pr = Repo.preload(pr, [governance: :connection]),
+         {:ok, _} <- GovernanceProvider.confirm(pr),
+         {:ok, _} <- Dispatcher.approve(pr.governance.connection, pr, "Approved by Plural PR Governance") do
+      PullRequest.changeset(pr, %{approved: true})
+      |> Repo.update()
     end
   end
 
@@ -541,6 +564,30 @@ defmodule Console.Deployments.Git do
     get_observer!(id)
     |> allow(user, :write)
     |> when_ok(&Runner.run/1)
+  end
+
+  @doc """
+  Upserts a new governance controller
+  """
+  @spec upsert_governance(map, User.t) :: governance_resp
+  def upsert_governance(%{name: name} = attrs, %User{} = user) do
+    case get_governance_by_name(name) do
+      %PrGovernance{} = governance -> governance
+      nil -> %PrGovernance{name: name}
+    end
+    |> PrGovernance.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes a governance controller
+  """
+  @spec delete_governance(binary, User.t) :: governance_resp
+  def delete_governance(id, %User{} = user) do
+    get_governance!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

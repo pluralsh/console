@@ -229,6 +229,7 @@ type AiSettingsAttributes struct {
 	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
 	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
 	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 type Alert struct {
@@ -2645,6 +2646,23 @@ type GlobalServiceEdge struct {
 	Cursor *string        `json:"cursor,omitempty"`
 }
 
+// The webhook configuration for a pr governance controller
+type GovernanceWebhook struct {
+	URL string `json:"url"`
+}
+
+// The settings for configuring a pr governance controller
+type GovernanceWebhookAttributes struct {
+	// the url to send webhooks to
+	URL string `json:"url"`
+}
+
+type GraphStoreAttributes struct {
+	Enabled *bool                              `json:"enabled,omitempty"`
+	Store   *VectorStore                       `json:"store,omitempty"`
+	Elastic *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
+}
+
 type Group struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -4742,7 +4760,9 @@ type PrAutomationAttributes struct {
 	// the project this automation lives in
 	ProjectID *string `json:"projectId,omitempty"`
 	// a git repository to use for create mode prs
-	RepositoryID  *string                      `json:"repositoryId,omitempty"`
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the governance controller to use for this pr
+	GovernanceID  *string                      `json:"governanceId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
 	Confirmation  *PrConfirmationAttributes    `json:"confirmation,omitempty"`
 	// users who can update this automation
@@ -4874,6 +4894,34 @@ type PrCreateSpec struct {
 type PrDeleteSpec struct {
 	Files   []string `json:"files,omitempty"`
 	Folders []string `json:"folders,omitempty"`
+}
+
+// A governance controller is a mechanism to enforce a set of rules on a set of PRs
+type PrGovernance struct {
+	ID            string                     `json:"id"`
+	Name          string                     `json:"name"`
+	Connection    *ScmConnection             `json:"connection,omitempty"`
+	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
+	InsertedAt    *string                    `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                    `json:"updatedAt,omitempty"`
+}
+
+// The settings for configuring a pr governance controller
+type PrGovernanceAttributes struct {
+	Name string `json:"name"`
+	// the scm connection to use for pr generation
+	ConnectionID  string                               `json:"connectionId"`
+	Configuration *PrGovernanceConfigurationAttributes `json:"configuration,omitempty"`
+}
+
+// The configuration for a pr governance controller
+type PrGovernanceConfiguration struct {
+	Webhook *GovernanceWebhook `json:"webhook,omitempty"`
+}
+
+// The settings for configuring a pr governance controller
+type PrGovernanceConfigurationAttributes struct {
+	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
 }
 
 // the details of where to find and place a templated file

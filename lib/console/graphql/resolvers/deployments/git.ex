@@ -35,6 +35,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def resolve_catalog(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_catalog!(id)}
   def resolve_catalog(%{name: name}, _), do: {:ok, Git.get_catalog_by_name(name)}
 
+  def resolve_pr_governance(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_governance!(id)}
+  def resolve_pr_governance(%{name: name}, _), do: {:ok, Git.get_governance_by_name!(name)}
+
   def list_git_repositories(args, _) do
     GitRepository.ordered()
     |> paginate(args)
@@ -185,6 +188,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def register_github_app(%{name: name, installation_id: inst_id}, %{context: %{current_user: user}}),
     do: Git.register_github_app(name, inst_id, user)
+
+  def upsert_pr_governance(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.upsert_governance(attrs, user)
+
+  def delete_pr_governance(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_governance(id, user)
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn

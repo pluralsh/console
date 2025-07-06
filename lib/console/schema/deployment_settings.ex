@@ -163,6 +163,13 @@ defmodule Console.Schema.DeploymentSettings do
         embeds_one :opensearch, Opensearch, on_replace: :update
       end
 
+      embeds_one :graph, Graph, on_replace: :update do
+        field :enabled, :boolean, default: false
+        field :store, VectorStore, default: :elastic
+
+        embeds_one :elastic, Elastic, on_replace: :update
+      end
+
       embeds_one :tools, ToolsConfig, on_replace: :update do
         embeds_one :create_pr, PrToolConfig, on_replace: :update do
           field :connection_id, :string
@@ -293,6 +300,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(enabled provider tool_provider embedding_provider)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
+    |> cast_embed(:graph, with: &graph_store_changeset/2)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
@@ -359,6 +367,12 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
     |> set_initialized()
+  end
+
+  defp graph_store_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled)a)
+    |> cast_embed(:elastic)
   end
 
   defp logging_changeset(model, attrs) do

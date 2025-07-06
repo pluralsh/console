@@ -1,4 +1,7 @@
 defprotocol Console.AI.Vector.Storable do
+  @spec id(any) :: binary | nil
+  def id(any)
+
   @spec content(any) :: binary | :ignore
   def content(any)
 
@@ -10,6 +13,8 @@ defprotocol Console.AI.Vector.Storable do
 end
 
 defimpl Console.AI.Vector.Storable, for: Any do
+  def id(_), do: nil
+
   def content(_), do: :ignore
 
   def datatype(_), do: "any"
@@ -19,6 +24,8 @@ end
 
 defimpl Console.AI.Vector.Storable, for: Console.Deployments.Pr.File do
   alias Console.AI.Utils
+
+  def id(_), do: nil
 
   def content(%@for{} = file) do
     """
@@ -73,6 +80,8 @@ end
 defimpl Console.AI.Vector.Storable, for: Console.Schema.AlertResolution.Mini do
   alias Console.AI.Utils
 
+  def id(%@for{alert_id: id}), do: id
+
   def content(%@for{} = mini) do
     """
     title: #{mini.title}
@@ -100,4 +109,39 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.AlertResolution.Mini do
     #{res.resolution}
     """
   end
+end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.StackState.Mini do
+  alias Console.AI.Utils
+  alias Console.AI.Tools.Utils, as: TU
+
+  def id(%@for{identifier: id, stack: %{id: stack_id}}), do: "#{stack_id}.#{id}"
+
+  def content(%@for{} = mini) do
+    base = base_content(mini)
+
+    case TU.yaml_encode(mini.stack) do
+      {:ok, yaml} ->
+        """
+        #{base}
+        stack:
+        #{TU.indent(yaml, 2)}
+        """
+      _ -> base
+    end
+  end
+
+  defp base_content(%@for{} = mini) do
+    """
+    identifier: #{mini.identifier}
+    resource: #{mini.resource}
+    name: #{mini.name}
+    configuration: #{mini.configuration}
+    links: #{mini.links}
+    """
+  end
+
+  def datatype(_), do: "stack_state"
+
+  def prompt(%@for{}), do: ""
 end

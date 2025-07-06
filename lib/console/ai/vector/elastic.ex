@@ -50,9 +50,9 @@ defmodule Console.AI.Vector.Elastic do
 
   def insert(%__MODULE__{conn: %Elastic{} = es}, data, opts \\ []) do
     filters = Keyword.get(opts, :filters, [])
-    with {datatype, text} <- Content.content(data),
+    with {id, datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
-      Elastic.url(es, "#{es.index}/_doc")
+      Elastic.url(es, doc_url(es.index, id))
       |> HTTPoison.post(Jason.encode!(doc_filters(%{
         passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
         datatype: datatype,
@@ -62,6 +62,9 @@ defmodule Console.AI.Vector.Elastic do
       |> handle_response("could not insert vector into elasticsearch:")
     end
   end
+
+  def doc_url(index, id) when is_binary(id), do: "#{index}/_doc/#{id}"
+  def doc_url(index, _), do: "#{index}/_doc"
 
   defp doc_filters(doc, [_ | _] = filters) do
     Map.put(doc, :filters, Map.new(filters))

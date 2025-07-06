@@ -91,6 +91,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :bedrock,            :bedrock_ai_attributes
     field :vertex,             :vertex_ai_attributes
     field :vector_store,       :vector_store_attributes
+    field :graph,              :graph_store_attributes
   end
 
   input_object :tool_config_attributes do
@@ -156,6 +157,12 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :store,      :vector_store
     field :elastic,    :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
+  end
+
+  input_object :graph_store_attributes do
+    field :enabled,    :boolean
+    field :store,      :vector_store
+    field :elastic,    :elasticsearch_connection_attributes
   end
 
   input_object :smtp_settings_attributes do

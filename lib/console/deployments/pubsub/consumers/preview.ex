@@ -7,14 +7,10 @@ defmodule Console.Deployments.PubSub.Preview do
 
   def handle_event(event) do
     case Previewable.reconcile(event) do
-      {:ok, _} = result ->
-        Logger.info "Reconciled preview for event #{event.__struct__}"
-        result
-
+      {:ok, _} = result -> result
       {:error, _} = err ->
         Logger.error "Error reconciling preview for event #{event.__struct__}: #{inspect(err)}"
         err
-
       _ -> :ok
     end
   end

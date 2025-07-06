@@ -30,7 +30,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       })
       |> case do
         {:ok, %{"web_url" => url} = mr} ->
-          {:ok, %{title: title, ref: branch, url: url, owner: owner(mr)}}
+          {:ok, %{title: title, ref: branch, body: body, url: url, owner: owner(mr)}}
         err -> err
       end
     end
@@ -104,6 +104,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
         {:error, reason}
     end
   end
+
+  def approve(_, _, _), do: {:error, "not implemented"}
 
   def pr_info(url) do
     with {:ok, group, repo, number} <- get_pull_id(url) do

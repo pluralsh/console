@@ -30,6 +30,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   """
   @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
+  @callback approve(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
   @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
 
@@ -77,6 +78,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def review(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.review(conn, pr, body)
+  end
+
+  def approve(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
+    impl = dispatcher(conn)
+    impl.approve(conn, pr, body)
   end
 
   def files(%ScmConnection{} = conn, url) do

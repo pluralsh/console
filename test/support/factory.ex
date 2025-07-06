@@ -1015,6 +1015,13 @@ defmodule Console.Factory do
     }
   end
 
+  def pr_governance_factory do
+    %Schema.PrGovernance{
+      name: sequence(:pr_governance, & "pr-governance-#{&1}"),
+      connection: build(:scm_connection)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

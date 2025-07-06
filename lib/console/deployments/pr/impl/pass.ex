@@ -12,4 +12,6 @@ defmodule Console.Deployments.Pr.Impl.Pass do
   def files(_, _), do: {:ok, []}
 
   def pr_info(_), do: {:ok, %{}}
+
+  def approve(_, _, _), do: {:ok, ""}
 end

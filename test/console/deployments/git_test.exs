@@ -780,6 +780,69 @@ defmodule Console.Deployments.GitTest do
       assert mgmt.connection_id == scm.id
     end
   end
+
+  describe "#upsert_pr_governance/2" do
+    test "it can create a new governance controller" do
+      admin = admin_user()
+      conn = insert(:scm_connection)
+
+      {:ok, governance} = Git.upsert_governance(%{name: "governance", connection_id: conn.id}, admin)
+
+      assert governance.name == "governance"
+      assert governance.connection_id == conn.id
+    end
+
+    test "it can update an existing governance controller" do
+      admin = admin_user()
+      governance = insert(:pr_governance)
+
+      {:ok, updated} = Git.upsert_governance(%{name: governance.name, configuration: %{webhook: %{url: "https://webhook.url"}}}, admin)
+
+      assert updated.id == governance.id
+      assert updated.configuration.webhook.url == "https://webhook.url"
+    end
+
+    test "randos cannot create" do
+      {:error, _} = Git.upsert_governance(%{name: "governance", connection_id: insert(:scm_connection).id}, insert(:user))
+    end
+  end
+
+  describe "#delete_pr_governance/2" do
+    test "it can delete a governance controller" do
+      governance = insert(:pr_governance)
+
+      {:ok, deleted} = Git.delete_governance(governance.id, admin_user())
+
+      assert deleted.id == governance.id
+      refute refetch(governance)
+    end
+
+    test "random users cannot delete" do
+      governance = insert(:pr_governance)
+
+      {:error, _} = Git.delete_governance(governance.id, insert(:user))
+    end
+  end
+
+  describe "#confirm_pull_request/1" do
+    test "it can confirm a pull request" do
+      governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", governance: governance)
+
+      expect(HTTPoison, :post, fn "https://webhook.url/v1/confirm", _, _ ->
+        body = Jason.encode!(%{state: %{service_now_id: "1234567890"}})
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+      end)
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, "pluralsh", "console", "1", _ ->
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      {:ok, _} = Git.confirm_pull_request(pr)
+
+      assert refetch(pr).approved
+    end
+  end
 end
 
 defmodule Console.Deployments.GitSyncTest do

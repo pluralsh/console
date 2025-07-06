@@ -22,18 +22,23 @@ defmodule Console.AI.Tools.Clusters do
   def name(), do: plrl_tool("clusters")
   def description(), do: "Shows the clusters currently being deployed into this flow"
 
-  def implement(%__MODULE__{} = query) do
+  def implement(%__MODULE__{query: q}) do
     for_flow(fn %Flow{id: flow_id} ->
       Cluster.for_flow(flow_id)
       |> Repo.all()
       |> Repo.preload([:tags, :project])
-      |> Enum.filter(&maybe_search(&1, query))
-      |> model()
-      |> Jason.encode()
+      |> postprocess(q)
     end)
   end
 
-  defp maybe_search(%Cluster{name: n, tags: ts}, %__MODULE__{query: q}) when is_binary(q) do
+  def postprocess(clusters, q) when is_list(clusters) and (is_binary(q) or is_nil(q)) do
+    clusters
+    |> Enum.filter(&maybe_search(&1, q))
+    |> model()
+    |> Jason.encode()
+  end
+
+  defp maybe_search(%Cluster{name: n, tags: ts}, q) when is_binary(q) do
     (
       String.contains?(n, q) ||
       Enum.any?((ts || []), & String.contains?(&1.value, q) || String.contains?(&1.name, q))

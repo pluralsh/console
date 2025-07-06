@@ -9,15 +9,18 @@ defmodule Console.AI.VectorStore do
   alias Console.Deployments.Settings
 
   defmodule Response do
-    @type type :: :alert | :pr
+    alias Console.Schema.{AlertResolution, StackState}
+
+    @type type :: :alert | :pr | :stack
 
     @type t :: %__MODULE__{
       type: type,
       pr_file: Console.Deployments.Pr.File.t,
-      alert_resolution: Console.Schema.AlertResolution.Mini.t
+      alert_resolution: AlertResolution.Mini.t,
+      stack_state: StackState.Mini.t
     }
 
-    defstruct [:pr_file, :alert_resolution, :type]
+    defstruct [:pr_file, :alert_resolution, :stack_state, :type]
   end
 
   @type store :: Console.AI.Vector.Elastic.t
@@ -34,6 +37,12 @@ defmodule Console.AI.VectorStore do
       %DeploymentSettings{ai: %{vector_store: %{enabled: enabled}}} -> enabled
       _ -> false
     end
+  end
+
+  def init() do
+    settings = Settings.fetch_consistent()
+    with {:ok, %{__struct__: mod} = store} <- store(settings),
+      do: mod.init(store)
   end
 
   def insert(struct, opts \\ []) do
