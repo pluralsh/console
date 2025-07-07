@@ -3,6 +3,18 @@ fragment KustomizeFragment on Kustomize {
     enableHelm
 }
 
+fragment HelmMinimalFragment on HelmMinimal {
+    values
+    valuesFiles
+    release
+}
+
+fragment RendererFragment on Renderer {
+    path
+    type
+    helm { ...HelmMinimalFragment }
+}
+
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
     id
     name
