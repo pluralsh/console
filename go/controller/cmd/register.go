@@ -33,15 +33,15 @@ func init() {
 		}
 	})
 
-	// types.RegisterController(types.CloudConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-	// 	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
-	// 	return &controller.CloudConnectionReconciler{
-	// 		Client:         mgr.GetClient(),
-	// 		ConsoleClient:  consoleClient,
-	// 		Scheme:         mgr.GetScheme(),
-	// 		UserGroupCache: userGroupCache,
-	// 	}
-	// })
+	types.RegisterController(types.CloudConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.CloudConnectionReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}
+	})
 
 	types.RegisterController(types.ClusterReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
