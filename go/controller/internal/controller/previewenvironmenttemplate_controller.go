@@ -154,7 +154,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 
 func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl v1alpha1.PreviewEnvironmentTemplate) (*console.PreviewEnvironmentTemplateAttributes, *ctrl.Result, error) {
 	attr := &console.PreviewEnvironmentTemplateAttributes{
-		Name:            previewEnvTmpl.GetName(),
+		Name:            previewEnvTmpl.ConsoleName(),
 		CommentTemplate: previewEnvTmpl.Spec.CommentTemplate,
 	}
 	sta, err := genServiceTemplate(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
