@@ -15,7 +15,8 @@ const columnHelper = createColumnHelper<
   ClusterUsageTinyFragment | ClusterNamespaceUsageFragment
 >()
 
-const dollarize = (cost) => (cost ? `$${cost.toFixed(2)}` : '--')
+export const dollarize = (cost: Nullable<number>) =>
+  cost ? `$${cost.toFixed(2)}` : '--'
 
 export const ColCluster = (
   columnHelper as ColumnHelper<ClusterUsageTinyFragment>
@@ -34,6 +35,7 @@ export const ColCluster = (
         <IconFrame
           icon={<ClusterIcon />}
           type="floating"
+          css={{ flexShrink: 0 }}
         />
         {name}
       </Flex>
@@ -84,15 +86,18 @@ export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
   },
 })
 
-export const ColStorageCost = columnHelper.accessor(({ storage }) => storage, {
-  id: 'storageCost',
-  header: 'Storage cost',
-  cell: function Cell({ getValue }) {
-    const storage = getValue()
+export const ColStorageCost = columnHelper.accessor(
+  ({ storageCost }) => storageCost,
+  {
+    id: 'storageCost',
+    header: 'Storage cost',
+    cell: function Cell({ getValue }) {
+      const storage = getValue()
 
-    return <SimpleTextWrapperSC>{dollarize(storage)}</SimpleTextWrapperSC>
-  },
-})
+      return <SimpleTextWrapperSC>{dollarize(storage)}</SimpleTextWrapperSC>
+    },
+  }
+)
 
 export const ColLoadBalancerCost = columnHelper.accessor(
   ({ loadBalancerCost }) => loadBalancerCost,

@@ -1,5 +1,5 @@
 import {
-  BookIcon,
+  BrainIcon,
   Button,
   Card,
   Divider,
@@ -68,8 +68,7 @@ export function KnowledgeEvidencePanel({
           >
             <BasicEvidenceLine
               key={i}
-              // TODO: change to knowledge icon when in DS
-              icon={<BookIcon />}
+              icon={<BrainIcon />}
               content={item.name}
               onClick={() => setSelectedItem(item)}
               isTable={isTable}

@@ -6,7 +6,6 @@ import {
 } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 import { HeatMapFlavor, MetricPointResponseFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { ChartTooltip } from './ChartTooltip'
 import { TreeMap } from './TreeMap'
 
 export function UtilizationHeatmap({
@@ -49,14 +48,6 @@ export function UtilizationHeatmap({
     <TreeMap
       loading={loading}
       type="canvas"
-      tooltip={({ node }) => (
-        <ChartTooltip
-          tooltipStyles={{ maxWidth: 200 }}
-          color={node.color}
-          value={node.formattedValue}
-          label={node.id}
-        />
-      )}
       label={truncatedGraphLabel}
       colors={getColor}
       valueFormat={(d) => formatValue(d, utilizationType)}

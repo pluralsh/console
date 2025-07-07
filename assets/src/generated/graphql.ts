@@ -12655,11 +12655,13 @@ export type ComponentTreeQueryVariables = Exact<{
 
 export type ComponentTreeQuery = { __typename?: 'RootQueryType', componentTree?: { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null } | null };
 
-export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null };
+export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null };
 
 export type ClusterUsageHistoryFragment = { __typename?: 'ClusterUsageHistory', id: string, timestamp: string, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null };
 
-export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null };
+export type ProjectUsageHistoryFragment = { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storageCost?: number | null, projectId?: string | null };
+
+export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, storageCost?: number | null };
 
 export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
 
@@ -12674,7 +12676,7 @@ export type ClusterUsagesQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null> | null } | null };
+export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storage?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, storageCost?: number | null, nodeCost?: number | null, controlPlaneCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null> | null } | null };
 
 export type ClusterUsageHistoryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12697,7 +12699,7 @@ export type ClusterUsageNamespacesQueryVariables = Exact<{
 }>;
 
 
-export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null } | null } | null> | null } | null } | null };
+export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, storage?: number | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, storageCost?: number | null } | null } | null> | null } | null } | null };
 
 export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12711,6 +12713,16 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
 
 
 export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null } | null> | null } | null } | null };
+
+export type ProjectUsageHistoryQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ProjectUsageHistoryQuery = { __typename?: 'RootQueryType', projectUsageHistory?: { __typename?: 'ProjectUsageHistoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectUsageHistoryEdge', node?: { __typename?: 'ProjectUsageHistory', timestamp: string, cpu?: number | null, memory?: number | null, gpu?: number | null, storageCost?: number | null, projectId?: string | null } | null } | null> | null } | null };
 
 export type SuggestScalingRecommendationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16279,6 +16291,7 @@ export const ClusterUsageTinyFragmentDoc = gql`
   memUtil
   cpuCost
   memoryCost
+  storageCost
   nodeCost
   controlPlaneCost
   ingressCost
@@ -16302,6 +16315,16 @@ export const ClusterUsageHistoryFragmentDoc = gql`
   storageCost
 }
     `;
+export const ProjectUsageHistoryFragmentDoc = gql`
+    fragment ProjectUsageHistory on ProjectUsageHistory {
+  timestamp
+  cpu
+  memory
+  gpu
+  storageCost
+  projectId
+}
+    `;
 export const ClusterNamespaceUsageFragmentDoc = gql`
     fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   id
@@ -16316,6 +16339,7 @@ export const ClusterNamespaceUsageFragmentDoc = gql`
   ingressCost
   loadBalancerCost
   egressCost
+  storageCost
 }
     `;
 export const TagFragmentDoc = gql`
@@ -24646,7 +24670,7 @@ export type ComponentTreeLazyQueryHookResult = ReturnType<typeof useComponentTre
 export type ComponentTreeSuspenseQueryHookResult = ReturnType<typeof useComponentTreeSuspenseQuery>;
 export type ComponentTreeQueryResult = Apollo.QueryResult<ComponentTreeQuery, ComponentTreeQueryVariables>;
 export const ClusterUsagesDocument = gql`
-    query ClusterUsages($after: String, $first: Int, $before: String, $last: Int, $q: String, $tagQuery: TagQuery, $projectId: ID) {
+    query ClusterUsages($after: String, $first: Int = 500, $before: String, $last: Int, $q: String, $tagQuery: TagQuery, $projectId: ID) {
   clusterUsages(
     after: $after
     first: $first
@@ -24893,6 +24917,57 @@ export type ClusterUsageScalingRecommendationsQueryHookResult = ReturnType<typeo
 export type ClusterUsageScalingRecommendationsLazyQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsLazyQuery>;
 export type ClusterUsageScalingRecommendationsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsSuspenseQuery>;
 export type ClusterUsageScalingRecommendationsQueryResult = Apollo.QueryResult<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>;
+export const ProjectUsageHistoryDocument = gql`
+    query ProjectUsageHistory($after: String, $first: Int = 365, $before: String, $last: Int) {
+  projectUsageHistory(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ProjectUsageHistory
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ProjectUsageHistoryFragmentDoc}`;
+
+/**
+ * __useProjectUsageHistoryQuery__
+ *
+ * To run a query within a React component, call `useProjectUsageHistoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectUsageHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectUsageHistoryQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useProjectUsageHistoryQuery(baseOptions?: Apollo.QueryHookOptions<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>(ProjectUsageHistoryDocument, options);
+      }
+export function useProjectUsageHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>(ProjectUsageHistoryDocument, options);
+        }
+export function useProjectUsageHistorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>(ProjectUsageHistoryDocument, options);
+        }
+export type ProjectUsageHistoryQueryHookResult = ReturnType<typeof useProjectUsageHistoryQuery>;
+export type ProjectUsageHistoryLazyQueryHookResult = ReturnType<typeof useProjectUsageHistoryLazyQuery>;
+export type ProjectUsageHistorySuspenseQueryHookResult = ReturnType<typeof useProjectUsageHistorySuspenseQuery>;
+export type ProjectUsageHistoryQueryResult = Apollo.QueryResult<ProjectUsageHistoryQuery, ProjectUsageHistoryQueryVariables>;
 export const SuggestScalingRecommendationDocument = gql`
     mutation SuggestScalingRecommendation($id: ID!) {
   suggestScalingRecommendation(id: $id)
@@ -30639,6 +30714,7 @@ export const namedOperations = {
     ClusterUsageHistory: 'ClusterUsageHistory',
     ClusterUsageNamespaces: 'ClusterUsageNamespaces',
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
+    ProjectUsageHistory: 'ProjectUsageHistory',
     ClusterRegistration: 'ClusterRegistration',
     ClusterRegistrations: 'ClusterRegistrations',
     ClusterISOImages: 'ClusterISOImages',
@@ -30981,6 +31057,7 @@ export const namedOperations = {
     ComponentTree: 'ComponentTree',
     ClusterUsageTiny: 'ClusterUsageTiny',
     ClusterUsageHistory: 'ClusterUsageHistory',
+    ProjectUsageHistory: 'ProjectUsageHistory',
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     ClusterRegistration: 'ClusterRegistration',
