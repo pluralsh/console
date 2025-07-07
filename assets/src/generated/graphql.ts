@@ -7951,6 +7951,7 @@ export type RootQueryType = {
   policyStatistics?: Maybe<Array<Maybe<PolicyStatistic>>>;
   prAutomation?: Maybe<PrAutomation>;
   prAutomations?: Maybe<PrAutomationConnection>;
+  prGovernance?: Maybe<PrGovernance>;
   previewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   project?: Maybe<Project>;
   projectUsageHistory?: Maybe<ProjectUsageHistoryConnection>;
@@ -8835,6 +8836,12 @@ export type RootQueryTypePrAutomationsArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<PrRole>;
+};
+
+
+export type RootQueryTypePrGovernanceArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 

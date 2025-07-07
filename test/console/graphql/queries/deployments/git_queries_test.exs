@@ -277,4 +277,34 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
       assert found["id"] == webhook.id
     end
   end
+
+  describe "prGovernance" do
+    test "it can fetch a pr governance by id" do
+      governance = insert(:pr_governance)
+
+      {:ok, %{data: %{"prGovernance" => found}}} = run_query("""
+        query PrGovernance($id: ID!) {
+          prGovernance(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => governance.id}, %{current_user: admin_user()})
+
+      assert found["id"] == governance.id
+    end
+
+    test "it can fetch a pr governance by name" do
+      governance = insert(:pr_governance)
+
+      {:ok, %{data: %{"prGovernance" => found}}} = run_query("""
+        query PrGovernance($name: String!) {
+          prGovernance(name: $name) {
+            id
+          }
+        }
+      """, %{"name" => governance.name}, %{current_user: admin_user()})
+
+      assert found["id"] == governance.id
+    end
+  end
 end
