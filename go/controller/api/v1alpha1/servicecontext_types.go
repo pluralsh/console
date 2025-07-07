@@ -55,7 +55,7 @@ func (s *ServiceContext) ConsoleID() *string {
 	return s.Status.ID
 }
 
-func (s *ServiceContext) GetName() string {
+func (s *ServiceContext) ConsoleName() string {
 	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
 		return *s.Spec.Name
 	}

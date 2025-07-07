@@ -34,7 +34,7 @@ type OIDCProvider struct {
 	Status Status           `json:"status,omitempty"`
 }
 
-func (in *OIDCProvider) GetName() string {
+func (in *OIDCProvider) ConsoleName() string {
 	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
 		return *in.Spec.Name
 	}
@@ -57,7 +57,7 @@ func (in *OIDCProvider) Diff(hasher Hasher) (changed bool, sha string, err error
 
 func (in *OIDCProvider) Attributes() console.OidcProviderAttributes {
 	result := console.OidcProviderAttributes{
-		Name:         in.GetName(),
+		Name:         in.ConsoleName(),
 		Description:  in.Spec.Description,
 		RedirectUris: lo.ToSlicePtr(in.Spec.RedirectUris),
 	}

@@ -60,7 +60,7 @@ func init() {
 	SchemeBuilder.Register(&PreviewEnvironmentTemplate{}, &PreviewEnvironmentTemplateList{})
 }
 
-func (in *PreviewEnvironmentTemplate) GetName() string {
+func (in *PreviewEnvironmentTemplate) ConsoleName() string {
 	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
 		return *in.Spec.Name
 	}
