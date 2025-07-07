@@ -52,7 +52,7 @@ spec:
                   read:
                     description: Read bindings.
                     items:
-                      description: Binding ...
+                      description: Binding represents a policy binding.
                       properties:
                         UserID:
                           type: string
@@ -69,7 +69,7 @@ spec:
                   write:
                     description: Write bindings.
                     items:
-                      description: Binding ...
+                      description: Binding represents a policy binding.
                       properties:
                         UserID:
                           type: string
@@ -214,7 +214,7 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               git:
-                description: GitRef ...
+                description: GitRef represents a reference to a Git repository.
                 properties:
                   files:
                     description: Optional files to add to the manifests for this service
@@ -222,10 +222,12 @@ spec:
                       type: string
                     type: array
                   folder:
-                    description: Folder ...
+                    description: Folder is the folder in the Git repository where
+                      the manifests are located.
                     type: string
                   ref:
-                    description: Ref ...
+                    description: Ref is the Git reference (branch, tag, or commit)
+                      to use.
                     type: string
                 required:
                 - folder
@@ -246,10 +248,12 @@ spec:
                           type: string
                         type: array
                       folder:
-                        description: Folder ...
+                        description: Folder is the folder in the Git repository where
+                          the manifests are located.
                         type: string
                       ref:
-                        description: Ref ...
+                        description: Ref is the Git reference (branch, tag, or commit)
+                          to use.
                         type: string
                     required:
                     - folder
@@ -557,10 +561,12 @@ spec:
                             type: string
                           type: array
                         folder:
-                          description: Folder ...
+                          description: Folder is the folder in the Git repository
+                            where the manifests are located.
                           type: string
                         ref:
-                          description: Ref ...
+                          description: Ref is the Git reference (branch, tag, or commit)
+                            to use.
                           type: string
                       required:
                       - folder
