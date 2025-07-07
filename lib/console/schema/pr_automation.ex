@@ -8,7 +8,8 @@ defmodule Console.Schema.PrAutomation do
     Configuration,
     Project,
     GitRepository,
-    Catalog
+    Catalog,
+    PrGovernance
   }
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
@@ -84,6 +85,7 @@ defmodule Console.Schema.PrAutomation do
     belongs_to :repository, GitRepository
     belongs_to :project,    Project
     belongs_to :catalog,    Catalog
+    belongs_to :governance, PrGovernance
 
     has_many :write_bindings, PolicyBinding,
       on_replace: :delete,
@@ -118,7 +120,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id icon dark_icon role patch identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
+  @valid ~w(name project_id icon dark_icon role patch identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id governance_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

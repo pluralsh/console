@@ -27,6 +27,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Notifications,
   Console.Deployments.PubSub.Preview,
   Console.Deployments.PubSub.Email,
+  Console.Deployments.PubSub.Governance,
   Console.AI.PubSub.Consumer,
   Console.AI.PubSub.Vector.Consumer
 ]
@@ -71,6 +72,7 @@ config :console, Console.Cron.Scheduler,
     {"15 1 * * *",     {Console.Deployments.Cron, :prune_cluster_audit_logs, []}},
     {"0 * * * *",      {Console.Deployments.Cron, :prune_policy, []}},
     {"15 * * * *",     {Console.Deployments.Cron, :prune_vuln_reports, []}},
+    {"*/15 * * * *",   {Console.Deployments.Cron, :pr_governance, []}},
     {"30 1 * * *",     {Console.Cron.Jobs, :prune_notifications, []}},
     {"45 1 * * *",     {Console.Cron.Jobs, :prune_audits, []}},
     {"0 2 * * *",      {Console.Deployments.Cron, :prune_alerts, []}},

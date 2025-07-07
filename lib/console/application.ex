@@ -51,6 +51,7 @@ defmodule Console.Application do
       Console.Watchers.Supervisor,
       Console.AI.GothManager,
       Console.PromEx,
+      Console.AI.Graph.Indexer.Supervisor,
     ] ++ consumers()
       ++ oidc_providers()
       ++ [

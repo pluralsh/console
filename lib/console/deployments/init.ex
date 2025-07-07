@@ -143,6 +143,11 @@ defmodule Console.Deployments.Init do
           vector_store: :elastic,
           elastic: Map.put(es_creds, :index, "plrl-#{inst}-vectors")
         })
+        |> put_in([:ai, :graph], %{
+          enabled: true,
+          store: :elastic,
+          elastic: Map.put(es_creds, :index, "plrl-#{inst}-graph")
+        })
     else
       _ -> attrs
     end

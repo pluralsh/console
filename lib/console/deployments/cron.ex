@@ -351,6 +351,17 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def pr_governance() do
+    PullRequest.stream()
+    |> PullRequest.pending_governance()
+    |> Repo.stream(method: :keyset)
+    |> Task.async_stream(fn pr ->
+      Logger.info "attempting to apply governance for #{pr.id}"
+      Git.confirm_pull_request(pr)
+    end, max_concurrency: 20)
+    |> Stream.run()
+  end
+
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
   defp log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
   defp log(_, _), do: :ok

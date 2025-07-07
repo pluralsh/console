@@ -297,6 +297,7 @@ export type AiSettingsAttributes = {
   /** ai provider to use with embeddings (for vector indexing) */
   embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  graph?: InputMaybe<GraphStoreAttributes>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
@@ -3255,6 +3256,24 @@ export type GlobalServiceEdge = {
   node?: Maybe<GlobalService>;
 };
 
+/** The webhook configuration for a pr governance controller */
+export type GovernanceWebhook = {
+  __typename?: 'GovernanceWebhook';
+  url: Scalars['String']['output'];
+};
+
+/** The settings for configuring a pr governance controller */
+export type GovernanceWebhookAttributes = {
+  /** the url to send webhooks to */
+  url: Scalars['String']['input'];
+};
+
+export type GraphStoreAttributes = {
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  store?: InputMaybe<VectorStore>;
+};
+
 export type Group = {
   __typename?: 'Group';
   description?: Maybe<Scalars['String']['output']>;
@@ -5741,6 +5760,8 @@ export type PrAutomationAttributes = {
   darkIcon?: InputMaybe<Scalars['String']['input']>;
   deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
+  /** the governance controller to use for this pr */
+  governanceId?: InputMaybe<Scalars['ID']['input']>;
   /** an icon url to use for this catalog */
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -5893,6 +5914,36 @@ export type PrDeleteSpec = {
   __typename?: 'PrDeleteSpec';
   files?: Maybe<Array<Scalars['String']['output']>>;
   folders?: Maybe<Array<Scalars['String']['output']>>;
+};
+
+/** A governance controller is a mechanism to enforce a set of rules on a set of PRs */
+export type PrGovernance = {
+  __typename?: 'PrGovernance';
+  configuration?: Maybe<PrGovernanceConfiguration>;
+  connection?: Maybe<ScmConnection>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The settings for configuring a pr governance controller */
+export type PrGovernanceAttributes = {
+  configuration?: InputMaybe<PrGovernanceConfigurationAttributes>;
+  /** the scm connection to use for pr generation */
+  connectionId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+/** The configuration for a pr governance controller */
+export type PrGovernanceConfiguration = {
+  __typename?: 'PrGovernanceConfiguration';
+  webhook?: Maybe<GovernanceWebhook>;
+};
+
+/** The settings for configuring a pr governance controller */
+export type PrGovernanceConfigurationAttributes = {
+  webhook?: InputMaybe<GovernanceWebhookAttributes>;
 };
 
 export enum PrRole {
@@ -6540,6 +6591,8 @@ export type RootMutationType = {
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
+  /** deletes a governance controller */
+  deletePrGovernance?: Maybe<PrGovernance>;
   deletePreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   deleteProject?: Maybe<Project>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
@@ -6666,6 +6719,8 @@ export type RootMutationType = {
   upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  /** upserts a governance controller */
+  upsertPrGovernance?: Maybe<PrGovernance>;
   upsertPreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
@@ -7150,6 +7205,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeletePrAutomationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePrGovernanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7720,6 +7780,11 @@ export type RootMutationTypeUpsertObserverArgs = {
 
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
+
+export type RootMutationTypeUpsertPrGovernanceArgs = {
+  attributes: PrGovernanceAttributes;
 };
 
 

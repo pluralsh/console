@@ -183,15 +183,14 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
   alias Console.Schema.{Stack, StackRun, PullRequest}
   alias Console.Deployments.Stacks
 
-  def process(%{item: %{id: id} = run}) do
-    run = Console.Repo.preload(run, [:pull_request])
-    case {Stacks.get_stack!(run.stack_id), run} do
-      {%Stack{delete_run_id: ^id} = stack, %StackRun{status: :successful}} ->
+  def process(%{item: %StackRun{id: id} = run}) do
+    case Console.Repo.preload(run, [:pull_request, :stack]) do
+      %StackRun{stack: %Stack{delete_run_id: ^id} = stack, status: :successful} ->
         Console.Repo.delete(stack)
-      {_, %StackRun{pull_request: %PullRequest{} = pr} = run} ->
+      %StackRun{pull_request: %PullRequest{} = pr} = run ->
         Stacks.post_comment(run)
         Stacks.dequeue(pr)
-      {stack, _} -> Stacks.dequeue(stack)
+      %StackRun{stack: %Stack{} = stack} -> Stacks.dequeue(stack)
     end
   end
 end

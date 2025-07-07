@@ -142,6 +142,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :catalog_id,    :id, description: "the catalog this automation will belong to"
     field :project_id,    :id, description: "the project this automation lives in"
     field :repository_id, :id, description: "a git repository to use for create mode prs"
+    field :governance_id, :id, description: "the governance controller to use for this pr"
 
     field :configuration, list_of(:pr_configuration_attributes)
 
@@ -358,6 +359,23 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,                non_null(:string)
     field :kubernetes_version,  :string
     field :kubernetes_versions, list_of(non_null(:string))
+  end
+
+  @desc "The settings for configuring a pr governance controller"
+  input_object :pr_governance_attributes do
+    field :name, non_null(:string)
+    field :connection_id, non_null(:id), description: "the scm connection to use for pr generation"
+    field :configuration, :pr_governance_configuration_attributes
+  end
+
+  @desc "The settings for configuring a pr governance controller"
+  input_object :pr_governance_configuration_attributes do
+    field :webhook, :governance_webhook_attributes
+  end
+
+  @desc "The settings for configuring a pr governance controller"
+  input_object :governance_webhook_attributes do
+    field :url, non_null(:string), description: "the url to send webhooks to"
   end
 
   @desc "a git repository available for deployments"
@@ -734,6 +752,26 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  @desc "A governance controller is a mechanism to enforce a set of rules on a set of PRs"
+  object :pr_governance do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string)
+    field :connection,    :scm_connection, resolve: dataloader(Deployments)
+    field :configuration, :pr_governance_configuration, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "The configuration for a pr governance controller"
+  object :pr_governance_configuration do
+    field :webhook, :governance_webhook
+  end
+
+  @desc "The webhook configuration for a pr governance controller"
+  object :governance_webhook do
+    field :url, non_null(:string)
+  end
+
   connection node_type: :git_repository
   connection node_type: :helm_repository
   connection node_type: :scm_connection
@@ -969,6 +1007,22 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr_automation/2
+    end
+
+    @desc "upserts a governance controller"
+    field :upsert_pr_governance, :pr_governance do
+      middleware Authenticated
+      arg :attributes, non_null(:pr_governance_attributes)
+
+      safe_resolve &Deployments.upsert_pr_governance/2
+    end
+
+    @desc "deletes a governance controller"
+    field :delete_pr_governance, :pr_governance do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_pr_governance/2
     end
 
     @desc "creates the service to enable self-hosted renovate in one pass"

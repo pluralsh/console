@@ -208,6 +208,55 @@ spec:
                     description: Enabled defines whether to enable the AI integration
                       or not.
                     type: boolean
+                  graph:
+                    description: Configuration for the cloud graph store, which uses
+                      similar datastores to the vector store
+                    properties:
+                      elastic:
+                        description: elastic configuration for the graph store
+                        properties:
+                          host:
+                            type: string
+                          index:
+                            type: string
+                          passwordSecretRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          user:
+                            type: string
+                        required:
+                        - host
+                        - index
+                        type: object
+                      enabled:
+                        default: false
+                        type: boolean
+                      store:
+                        enum:
+                        - ELASTIC
+                        type: string
+                    type: object
                   ollama:
                     description: Ollama holds configuration for a self-hosted Ollama
                       deployment, more details available at https://github.com/ollama/ollama
