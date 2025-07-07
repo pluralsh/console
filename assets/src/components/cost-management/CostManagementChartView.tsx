@@ -1,3 +1,4 @@
+import { ComputedNode } from '@nivo/treemap'
 import {
   Card,
   CpuIcon,
@@ -23,7 +24,8 @@ import {
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { ElementType, useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
+import { getCostManagementDetailsPath } from 'routes/costManagementRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { keySetToTagArray } from 'utils/clusterTags'
 import { mapExistingNodes } from 'utils/graphql'
@@ -51,6 +53,7 @@ export const METRIC_OPTIONS: Partial<
 
 export function CostManagementChartView() {
   const { spacing } = useTheme()
+  const navigate = useNavigate()
   const projectId = useProjectId()
   const { tagKeysState, tagOpState } = useOutletContext<CMContextType>()
 
@@ -83,15 +86,25 @@ export function CostManagementChartView() {
 
   const clusterUsagesSize = clusterUsagesData?.clusterUsages?.edges?.length
 
-  const { clusterCpuCosts, clusterMemoryCosts, timeSeries } = useMemo(() => {
-    const clusterUsages = mapExistingNodes(clusterUsagesData?.clusterUsages)
-    const timeSeries = mapExistingNodes(timeSeriesData?.projectUsageHistory)
-    return {
-      clusterCpuCosts: cpuCostByCluster(clusterUsages),
-      clusterMemoryCosts: memoryCostByCluster(clusterUsages),
-      timeSeries,
-    }
-  }, [clusterUsagesData, timeSeriesData])
+  const { clusterUsages, clusterCpuCosts, clusterMemoryCosts, timeSeries } =
+    useMemo(() => {
+      const clusterUsages = mapExistingNodes(clusterUsagesData?.clusterUsages)
+      const timeSeries = mapExistingNodes(timeSeriesData?.projectUsageHistory)
+      return {
+        clusterUsages,
+        clusterCpuCosts: cpuCostByCluster(clusterUsages),
+        clusterMemoryCosts: memoryCostByCluster(clusterUsages),
+        timeSeries,
+      }
+    }, [clusterUsagesData, timeSeriesData])
+
+  const handleTreeMapClick = (node: ComputedNode<object>) => {
+    const clusterName = node.id
+    const usageId = clusterUsages.find(
+      (usage) => usage.cluster?.name === clusterName
+    )?.id
+    if (usageId) navigate(getCostManagementDetailsPath(usageId))
+  }
 
   return (
     <Flex
@@ -171,6 +184,7 @@ export function CostManagementChartView() {
               css={{
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
+                cursor: 'pointer',
               }}
               header={{
                 outerProps: { style: { flex: 1 } },
@@ -187,12 +201,14 @@ export function CostManagementChartView() {
                 loading={clusterUsagesLoading}
                 data={clusterCpuCosts}
                 dataSize={clusterUsagesSize}
+                onClick={handleTreeMapClick}
               />
             </Card>
             <Card
               css={{
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
+                cursor: 'pointer',
               }}
               header={{
                 outerProps: { style: { flex: 1 } },
@@ -209,6 +225,7 @@ export function CostManagementChartView() {
                 loading={clusterUsagesLoading}
                 data={clusterMemoryCosts}
                 dataSize={clusterUsagesSize}
+                onClick={handleTreeMapClick}
               />
             </Card>
           </Flex>
