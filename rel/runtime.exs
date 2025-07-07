@@ -23,7 +23,7 @@ if get_env("PLURAL_CLIENT_ID") do
     plural: [
       discovery_document_uri: get_env("PLURAL_DISCOVERY_URL") || "https://oidc.plural.sh/.well-known/openid-configuration",
       client_id: get_env("PLURAL_CLIENT_ID"),
-      client_secret: get_env("PLURAL_CLIENT_SECRET"),
+      client_secret: get_env("PLURAL_CLIENT_SECRET") || :unauthenticated,
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
       pkce_enabled: get_env("OIDC_PKCE_ENABLED") == "true",
