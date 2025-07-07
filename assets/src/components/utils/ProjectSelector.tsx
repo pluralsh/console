@@ -22,7 +22,7 @@ export default function ProjectSelect({
   selectionValueType?: 'id' | 'name'
   allowSelectAll?: boolean
 } & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
-  const theme = useTheme()
+  const { colors } = useTheme()
   const { projects } = useProjectsContext()
 
   // can't just render the "all" listbox item conditionally because the Select children type is too restrictive
@@ -32,7 +32,7 @@ export default function ProjectSelect({
   return (
     <Select
       selectionMode="single"
-      titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
+      titleContent={<ProjectIcon color={colors['icon-light']} />}
       label="Select project"
       onSelectionChange={(value) => setSelectedProject(value as string)}
       selectedKey={selectedProject}

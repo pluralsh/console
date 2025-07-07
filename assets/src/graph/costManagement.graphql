@@ -8,6 +8,7 @@ fragment ClusterUsageTiny on ClusterUsage {
   memUtil
   cpuCost
   memoryCost
+  storageCost
   nodeCost
   controlPlaneCost
   ingressCost
@@ -35,6 +36,7 @@ fragment ProjectUsageHistory on ProjectUsageHistory {
   cpu
   memory
   gpu
+  storageCost
   projectId
 }
 
@@ -51,6 +53,7 @@ fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
   ingressCost
   loadBalancerCost
   egressCost
+  storageCost
 }
 
 fragment ClusterScalingRecommendation on ClusterScalingRecommendation {

@@ -96,7 +96,7 @@ export function CostManagementDetailsOverview() {
           content: (
             <Flex gap="small">
               <ChartIcon />
-              Cluster time-series (CPU, Memory, storage)
+              Cluster costs (CPU, Memory, storage)
             </Flex>
           ),
         }}

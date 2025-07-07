@@ -26,6 +26,7 @@ import {
   ColMemoryCost,
   ColMemoryEfficiency,
   ColNetworkCost,
+  ColStorageCost,
 } from './ClusterUsagesTableCols'
 import { CMContextType } from './CostManagement'
 
@@ -94,6 +95,7 @@ const cols = [
   ColCluster,
   ColCpuCost,
   ColMemoryCost,
+  ColStorageCost,
   ColLoadBalancerCost,
   ColNetworkCost,
   ColMemoryEfficiency,

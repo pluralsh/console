@@ -6,11 +6,18 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { COLORS } from 'utils/color'
 
+import { useProjectsContext } from 'components/contexts/ProjectsContext'
 import { SliceTooltip, useGraphTheme } from 'components/utils/Graph'
 import { ProjectUsageHistoryFragment } from 'generated/graphql'
+import { groupBy, isEmpty, isNil, pick } from 'lodash'
 import { useMemo } from 'react'
 import { formatDateTime } from 'utils/datetime'
-import { ProjectUsageMetric } from './CostManagementChartView'
+import { METRIC_OPTIONS, ProjectUsageMetric } from './CostManagementChartView'
+import { LineGraphData } from './details/CostTimeSeriesGraph'
+import {
+  formatCpu,
+  formatMemory,
+} from './details/recommendations/ClusterScalingRecsTableCols'
 
 export function ProjectUsageTimeSeries({
   data,
@@ -25,11 +32,38 @@ export function ProjectUsageTimeSeries({
   loading: boolean
   error?: Nullable<ApolloError>
 }) {
+  const { projects } = useProjectsContext()
   const graphTheme = useGraphTheme()
-  const graphData = useMemo(
-    () => getGraphData(data, metric, projectId),
-    [data, metric, projectId]
-  )
+
+  const graphData = useMemo(() => {
+    const groupedData = groupBy(data, 'projectId')
+    const filteredData =
+      projectId !== 'all' ? pick(groupedData, projectId) : groupedData
+    const graphDataArr = Object.entries(filteredData).flatMap(
+      ([projectId, points], i) => {
+        const timestamps = new Set() // for avoiding duplicates
+        const newLineData: LineGraphData = {
+          id: projects.find((p) => p.id === projectId)?.name ?? `Unknown-${i}`,
+          data: [],
+        }
+        points.forEach((point) => {
+          const value = point[metric]
+          if (!timestamps.has(point.timestamp) && !isNil(value)) {
+            newLineData.data.push({
+              x: new Date(point.timestamp),
+              y: value,
+            })
+            timestamps.add(point.timestamp)
+          }
+        })
+        if (isEmpty(newLineData.data)) return [] // this gets removed entirely by 'flatMap'
+        return newLineData
+      }
+    )
+
+    // return null if all the arrays are empty
+    return graphDataArr.every((obj) => isEmpty(obj)) ? null : graphDataArr
+  }, [data, metric, projectId, projects])
 
   if (error) return <GqlError error={error} />
   if (!graphData)
@@ -45,39 +79,36 @@ export function ProjectUsageTimeSeries({
       data={graphData}
       tooltip={SliceTooltip}
       colors={COLORS}
-      margin={{ top: 8, right: 96, bottom: 24, left: 64 }}
-      xScale={{ type: 'point' }}
+      margin={{ top: 32, right: 96, bottom: 56, left: 78 }}
+      yFormat={(value) => formatByMetric(value, metric)}
+      xScale={{ type: 'time' }}
       yScale={{
         type: 'linear',
         min: 'auto',
         max: 'auto',
       }}
-      curve="basis"
+      curve="natural"
       axisBottom={{
-        format: (value) => formatDateTime(value, 'MMM DD, YYYY'),
+        format: (value) => formatDateTime(value, 'M/DD'),
+        legend: 'date',
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: 'time',
         legendOffset: 36,
         legendPosition: 'middle',
         truncateTickAt: 0,
       }}
       axisLeft={{
-        format: (value) => `$${value}`,
+        format: (value) => formatByMetric(value, metric),
+        legend: METRIC_OPTIONS[metric]?.label ?? '',
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: 'cost',
-        legendOffset: -40,
+        legendOffset: -60,
         legendPosition: 'middle',
-        truncateTickAt: 0,
       }}
       xFormat={(value) => formatDateTime(value, 'MMM DD, YYYY')}
       pointSize={0}
-      pointColor={{ theme: 'background' }}
-      pointBorderWidth={2}
-      pointBorderColor={{ from: 'serieColor' }}
       enableTouchCrosshair
       useMesh
       legends={[
@@ -86,9 +117,6 @@ export function ProjectUsageTimeSeries({
           direction: 'column',
           justify: false,
           translateX: 100,
-          translateY: 0,
-          itemsSpacing: 0,
-          itemDirection: 'left-to-right',
           itemWidth: 80,
           itemHeight: 32,
           itemOpacity: 0.75,
@@ -98,10 +126,7 @@ export function ProjectUsageTimeSeries({
           effects: [
             {
               on: 'hover',
-              style: {
-                itemBackground: 'rgba(0, 0, 0, .03)',
-                itemOpacity: 1,
-              },
+              style: { itemBackground: 'rgba(0, 0, 0, .03)', itemOpacity: 1 },
             },
           ],
         },
@@ -110,53 +135,18 @@ export function ProjectUsageTimeSeries({
   )
 }
 
-type GraphData = {
-  id: string
-  data: {
-    x: string
-    y: number | null
-  }[]
-}
-const getGraphData = (
-  history: ProjectUsageHistoryFragment[],
-  metric: ProjectUsageMetric,
-  projectId: string
-) => {
-  const cpuData: GraphData = {
-    id: 'CPU',
-    data: [],
+const formatByMetric = (
+  value: number | null,
+  metric: ProjectUsageMetric
+): string => {
+  if (isNil(value)) return '--'
+  switch (metric) {
+    case 'cpu':
+    case 'gpu':
+      return formatCpu(value)
+    case 'memory':
+      return formatMemory(value)
+    case 'storageCost':
+      return `$${value.toFixed(2)}`
   }
-  const memoryData: GraphData = {
-    id: 'Memory',
-    data: [],
-  }
-  const storageData: GraphData = {
-    id: 'Storage',
-    data: [],
-  }
-
-  const timestamps = new Set()
-  history.forEach((point) => {
-    if (!timestamps.has(point.timestamp)) {
-      cpuData.data.push({
-        x: point.timestamp,
-        y: point.cpu ?? null,
-      })
-      memoryData.data.push({
-        x: point.timestamp,
-        y: point.memory ?? null,
-      })
-      storageData.data.push({
-        x: point.timestamp,
-        y: point.gpu ? point.gpu : null,
-      })
-
-      timestamps.add(point.timestamp)
-    }
-  })
-
-  const data = [cpuData, memoryData, storageData]
-
-  // return null instead of empty arrays if there's no data at all
-  return data.some((obj) => obj.data.length > 0) ? data : null
 }

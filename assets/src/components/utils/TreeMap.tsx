@@ -1,6 +1,6 @@
 import { ResponsiveTreeMapCanvas, ResponsiveTreeMapHtml } from '@nivo/treemap'
 
-import { ComponentPropsWithoutRef } from 'react'
+import { ComponentPropsWithoutRef, memo } from 'react'
 import { styled, useTheme } from 'styled-components'
 import { useGraphTheme } from './Graph'
 import { isEmpty } from 'lodash'
@@ -51,7 +51,7 @@ const commonTreeMapProps = {
 
 export const PARENT_NODE_NAME = 'overarching'
 
-export function TreeMap({
+export const TreeMap = memo(function TreeMap({
   data,
   loading,
   type,
@@ -115,7 +115,7 @@ export function TreeMap({
       )}
     </WrapperSC>
   )
-}
+})
 
 // just used to override nivo styles when rendered in html
 const WrapperSC = styled.div<{

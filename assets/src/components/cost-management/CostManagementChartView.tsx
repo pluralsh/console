@@ -1,6 +1,7 @@
 import {
   Card,
   CpuIcon,
+  DatabaseIcon,
   Flex,
   FormField,
   ListBoxItem,
@@ -16,7 +17,7 @@ import ProjectSelect, {
 } from 'components/utils/ProjectSelector'
 import { OverlineH1 } from 'components/utils/typography/Text'
 import {
-  ProjectUsageHistory,
+  ProjectUsageHistoryFragment,
   useClusterUsagesQuery,
   useProjectUsageHistoryQuery,
 } from 'generated/graphql'
@@ -35,16 +36,17 @@ import {
 import { ProjectUsageTimeSeries } from './ProjectCostUsageSeries'
 
 export type ProjectUsageMetric = Exclude<
-  keyof ProjectUsageHistory,
+  keyof ProjectUsageHistoryFragment,
   '__typename' | 'timestamp' | 'projectId'
 >
 
-const METRIC_OPTIONS: Partial<
+export const METRIC_OPTIONS: Partial<
   Record<ProjectUsageMetric, { Icon: ElementType; label: string }>
 > = {
   memory: { Icon: RamIcon, label: 'Memory' },
   cpu: { Icon: CpuIcon, label: 'CPU' },
   gpu: { Icon: CpuIcon, label: 'GPU' },
+  storageCost: { Icon: DatabaseIcon, label: 'Storage cost' },
 }
 
 export function CostManagementChartView() {
@@ -227,7 +229,6 @@ const TimeSeriesContainerSC = styled.div(({ theme }) => ({
   flex: 1,
   width: '100%',
   minHeight: 260,
-  padding: theme.spacing.large,
   background: theme.colors['fill-accent'],
   borderTop: theme.borders.default,
 }))
