@@ -187,6 +187,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
             secret
         }
     }
+    renderers {
+        ...RendererFragment
+    }
 }
 
 query GetServiceDeploymentForAgent($id: ID!) {
