@@ -1,5 +1,5 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { memo, useMemo, useState } from 'react'
+import { memo, Suspense, useMemo, useState } from 'react'
 import {
   Outlet,
   useLocation,
@@ -277,7 +277,9 @@ function ServiceDetailsBase() {
             maxHeight: '100%',
           }}
         >
-          <ServiceSelector />
+          <Suspense fallback={null}>
+            <ServiceSelector />
+          </Suspense>
           <div
             css={{
               overflowY: 'auto',

@@ -2,6 +2,7 @@ import { ListBoxItem, Select } from '@pluralsh/design-system'
 import {
   useFlowServicesQuery,
   useServiceDeploymentsTinyQuery,
+  useServiceDeploymentTinySuspenseQuery,
 } from 'generated/graphql'
 import { Key, useCallback, useMemo } from 'react'
 import { useMatch, useNavigate, useParams } from 'react-router-dom'
@@ -18,11 +19,15 @@ export function ServiceSelector() {
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { flowId, serviceId, clusterId } = useParams()
+  const { flowId, serviceId } = useParams()
   const referrer = !!flowId ? 'flow' : 'cd'
 
+  const { data: serviceTiny } = useServiceDeploymentTinySuspenseQuery({
+    variables: { id: serviceId ?? '' },
+  })
+
   const { data: clusterServices } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId: clusterId ?? '' },
+    variables: { clusterId: serviceTiny.serviceDeployment?.cluster?.id ?? '' },
     skip: referrer !== 'cd',
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
@@ -76,6 +81,7 @@ export function ServiceSelector() {
       aria-label="app"
       selectedKey={serviceId}
       onSelectionChange={switchService}
+      label="Select a service"
     >
       {serviceList.map((service) => (
         <ListBoxItem
