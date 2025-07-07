@@ -124,6 +124,8 @@ type ConsoleClient interface {
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
 	DeletePrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrAutomation, error)
 	CreatePullRequest(ctx context.Context, id string, identifier *string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
+	DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error)
+	UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
@@ -1481,6 +1483,49 @@ func (t *GitRepositoryFragment) GetDecrypt() *bool {
 		t = &GitRepositoryFragment{}
 	}
 	return t.Decrypt
+}
+
+type PrGovernanceConfigurationFragment struct {
+	Webhook *PrGovernanceConfigurationFragment_Webhook_ "json:\"webhook,omitempty\" graphql:\"webhook\""
+}
+
+func (t *PrGovernanceConfigurationFragment) GetWebhook() *PrGovernanceConfigurationFragment_Webhook_ {
+	if t == nil {
+		t = &PrGovernanceConfigurationFragment{}
+	}
+	return t.Webhook
+}
+
+type PrGovernanceFragment struct {
+	ID            string                             "json:\"id\" graphql:\"id\""
+	Name          string                             "json:\"name\" graphql:\"name\""
+	Connection    *ScmConnectionFragment             "json:\"connection,omitempty\" graphql:\"connection\""
+	Configuration *PrGovernanceConfigurationFragment "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *PrGovernanceFragment) GetID() string {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.ID
+}
+func (t *PrGovernanceFragment) GetName() string {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.Name
+}
+func (t *PrGovernanceFragment) GetConnection() *ScmConnectionFragment {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.Connection
+}
+func (t *PrGovernanceFragment) GetConfiguration() *PrGovernanceConfigurationFragment {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.Configuration
 }
 
 type HelmRepositoryFragment struct {
@@ -6041,6 +6086,28 @@ func (t *ContainerSpecFragment_EnvFrom) GetSecret() string {
 		t = &ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type PrGovernanceConfigurationFragment_Webhook_ struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
+	if t == nil {
+		t = &PrGovernanceConfigurationFragment_Webhook_{}
+	}
+	return t.URL
+}
+
+type PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
+	if t == nil {
+		t = &PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
+	}
+	return t.URL
 }
 
 type MCPServerFragment_Authentication_Headers struct {
@@ -13228,6 +13295,28 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 	return t.Edges
 }
 
+type DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
+	if t == nil {
+		t = &DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
+	}
+	return t.URL
+}
+
+type UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
+	if t == nil {
+		t = &UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
+	}
+	return t.URL
+}
+
 type ListHelmRepositories_HelmRepositories_Edges struct {
 	Node *HelmRepositoryFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -17752,6 +17841,28 @@ func (t *CreatePullRequest) GetCreatePullRequest() *PullRequestFragment {
 		t = &CreatePullRequest{}
 	}
 	return t.CreatePullRequest
+}
+
+type DeletePrGovernance struct {
+	DeletePrGovernance *PrGovernanceFragment "json:\"deletePrGovernance,omitempty\" graphql:\"deletePrGovernance\""
+}
+
+func (t *DeletePrGovernance) GetDeletePrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &DeletePrGovernance{}
+	}
+	return t.DeletePrGovernance
+}
+
+type UpsertPrGovernance struct {
+	UpsertPrGovernance *PrGovernanceFragment "json:\"upsertPrGovernance,omitempty\" graphql:\"upsertPrGovernance\""
+}
+
+func (t *UpsertPrGovernance) GetUpsertPrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &UpsertPrGovernance{}
+	}
+	return t.UpsertPrGovernance
 }
 
 type GetGroup struct {
@@ -27719,6 +27830,108 @@ func (c *Client) CreatePullRequest(ctx context.Context, id string, identifier *s
 	return &res, nil
 }
 
+const DeletePrGovernanceDocument = `mutation DeletePrGovernance ($id: ID!) {
+	deletePrGovernance(id: $id) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+	connection {
+		... ScmConnectionFragment
+	}
+	configuration {
+		... PrGovernanceConfigurationFragment
+	}
+}
+fragment ScmConnectionFragment on ScmConnection {
+	id
+	name
+	apiUrl
+	baseUrl
+	type
+	username
+	insertedAt
+	updatedAt
+}
+fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
+	webhook {
+		... {
+			url
+		}
+	}
+}
+`
+
+func (c *Client) DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeletePrGovernance
+	if err := c.Client.Post(ctx, "DeletePrGovernance", DeletePrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertPrGovernanceDocument = `mutation UpsertPrGovernance ($attributes: PrGovernanceAttributes!) {
+	upsertPrGovernance(attributes: $attributes) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+	connection {
+		... ScmConnectionFragment
+	}
+	configuration {
+		... PrGovernanceConfigurationFragment
+	}
+}
+fragment ScmConnectionFragment on ScmConnection {
+	id
+	name
+	apiUrl
+	baseUrl
+	type
+	username
+	insertedAt
+	updatedAt
+}
+fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
+	webhook {
+		... {
+			url
+		}
+	}
+}
+`
+
+func (c *Client) UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertPrGovernance
+	if err := c.Client.Post(ctx, "UpsertPrGovernance", UpsertPrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetGroupDocument = `query GetGroup ($name: String!) {
 	group(name: $name) {
 		... GroupFragment
@@ -35878,6 +36091,8 @@ var DocumentOperationNames = map[string]string{
 	UpdatePrAutomationDocument:                        "UpdatePrAutomation",
 	DeletePrAutomationDocument:                        "DeletePrAutomation",
 	CreatePullRequestDocument:                         "CreatePullRequest",
+	DeletePrGovernanceDocument:                        "DeletePrGovernance",
+	UpsertPrGovernanceDocument:                        "UpsertPrGovernance",
 	GetGroupDocument:                                  "GetGroup",
 	CreateGroupDocument:                               "CreateGroup",
 	UpdateGroupDocument:                               "UpdateGroup",

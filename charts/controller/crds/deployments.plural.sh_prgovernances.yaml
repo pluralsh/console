@@ -1,0 +1,54 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.3
+  name: prgovernances.deployments.plural.sh
+spec:
+  group: deployments.plural.sh
+  names:
+    kind: PrGovernance
+    listKind: PrGovernanceList
+    plural: prgovernances
+    singular: prgovernance
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PrGovernance is the Schema for the prgovernances API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PrGovernanceSpec defines the desired state of PrGovernance
+            properties:
+              foo:
+                description: Foo is an example field of PrGovernance. Edit prgovernance_types.go
+                  to remove/update
+                type: string
+            type: object
+          status:
+            description: PrGovernanceStatus defines the observed state of PrGovernance
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -215,4 +215,13 @@ resources:
   kind: CloudConnection
   path: github.com/pluralsh/console/go/controller/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
+  kind: PrGovernance
+  path: github.com/pluralsh/console/go/controller/api/v1alpha1
+  version: v1alpha1
 version: "3"
