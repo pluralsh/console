@@ -11,19 +11,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-func getProviderSettingsSecretRef(spec v1alpha1.CloudConnectionSpec) corev1.SecretKeySelector {
-	switch spec.Provider {
-	case v1alpha1.AWS:
-		return spec.Configuration.AWS.SecretAccessKey
-	case v1alpha1.Azure:
-		return spec.Configuration.Azure.ClientSecret
-	case v1alpha1.GCP:
-		return spec.Configuration.GCP.ServiceAccountKey
-	}
-	return corev1.SecretKeySelector{}
-}
-
-func (r *CloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Context, connection v1alpha1.CloudConnection) (*console.CloudConnectionAttributes, error) {
+func (r *NamespacedCloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Context, connection v1alpha1.NamespacedCloudConnection) (*console.CloudConnectionAttributes, error) {
 	switch connection.Spec.Provider {
 	case v1alpha1.AWS:
 		return r.toCloudConnectionAWSSettingsAttributes(ctx, connection.Spec.Configuration.AWS, connection.Namespace)
@@ -36,7 +24,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Cont
 	return nil, fmt.Errorf("unsupported cloud: %q", connection.Spec.Provider)
 }
 
-func (r *CloudConnectionReconciler) toCloudConnectionAzureSettingsAttributes(ctx context.Context, azure *v1alpha1.AzureCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
+func (r *NamespacedCloudConnectionReconciler) toCloudConnectionAzureSettingsAttributes(ctx context.Context, azure *v1alpha1.AzureCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: azure.ClientSecret.Name, Namespace: namespace})
 	if err != nil {
 		return nil, err
@@ -58,7 +46,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionAzureSettingsAttributes(ctx
 	}, nil
 }
 
-func (r *CloudConnectionReconciler) toCloudConnectionGCPSettingsAttributes(ctx context.Context, gcp *v1alpha1.GCPCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
+func (r *NamespacedCloudConnectionReconciler) toCloudConnectionGCPSettingsAttributes(ctx context.Context, gcp *v1alpha1.GCPCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: gcp.ServiceAccountKey.Name, Namespace: namespace})
 	if err != nil {
 		return nil, err
@@ -78,7 +66,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionGCPSettingsAttributes(ctx c
 	}, nil
 }
 
-func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx context.Context, aws *v1alpha1.AWSCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
+func (r *NamespacedCloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx context.Context, aws *v1alpha1.AWSCloudConnection, namespace string) (*console.CloudConnectionAttributes, error) {
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: aws.SecretAccessKey.Name, Namespace: namespace})
 	if err != nil {

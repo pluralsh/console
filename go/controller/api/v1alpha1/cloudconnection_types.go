@@ -10,6 +10,10 @@ import (
 	console "github.com/pluralsh/console/go/client"
 )
 
+func init() {
+	SchemeBuilder.Register(&CloudConnection{}, &CloudConnectionList{})
+}
+
 // CloudConnectionSpec defines the desired state of CloudConnection
 type CloudConnectionSpec struct {
 	// Name of this CloudConnection. If not provided CloudConnection's own name
@@ -62,7 +66,7 @@ type CloudConnectionConfiguration struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:scope=Namespaced
+//+kubebuilder:resource:scope=Cluster
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
 
@@ -82,10 +86,6 @@ type CloudConnectionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CloudConnection `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&CloudConnection{}, &CloudConnectionList{})
 }
 
 // CloudConnectionGetter is just a helper function that can be implemented to properly

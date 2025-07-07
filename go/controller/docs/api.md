@@ -28,6 +28,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [MCPServer](#mcpserver)
 - [ManagedNamespace](#managednamespace)
 - [NamespaceCredentials](#namespacecredentials)
+- [NamespacedCloudConnection](#namespacedcloudconnection)
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
 - [OIDCProvider](#oidcprovider)
@@ -406,6 +407,7 @@ CloudConnectionSpec defines the desired state of CloudConnection
 
 _Appears in:_
 - [CloudConnection](#cloudconnection)
+- [NamespacedCloudConnection](#namespacedcloudconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1785,8 +1787,16 @@ _Appears in:_
 | `namespaces` _string array_ | Namespaces that will be connected with credentials from SecretRef. |  | Required: {} <br /> |
 | `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef contains reference to secret with credentials. |  | Required: {} <br /> |
 
+#### NamespacedCloudConnection
 
+NamespacedCloudConnection is the Schema for the cloudconnections API
 
+| Field                                                                                                              | Description                                                     | Default | Validation |
+|--------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|---------|------------|
+| `apiVersion` _string_                                                                                              | `deployments.plural.sh/v1alpha1`                                |         |            |
+| `kind` _string_                                                                                                    | `NamespacedCloudConnection`                                     |         |            |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |         |            |
+| `spec` _[CloudConnectionSpec](#cloudconnectionspec)_                                                               |                                                                 |         |            |
 
 #### NamespacedName
 

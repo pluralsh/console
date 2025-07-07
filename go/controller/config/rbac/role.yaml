@@ -45,6 +45,7 @@ rules:
   - managednamespaces
   - mcpservers
   - namespacecredentialss
+  - namespacedcloudconnections
   - notificationrouters
   - notificationsinks
   - observabilityproviders
@@ -93,6 +94,7 @@ rules:
   - managednamespaces/finalizers
   - mcpservers/finalizers
   - namespacecredentialss/finalizers
+  - namespacedcloudconnections/finalizers
   - notificationrouters/finalizers
   - notificationsinks/finalizers
   - observabilityproviders/finalizers
@@ -135,6 +137,7 @@ rules:
   - managednamespaces/status
   - mcpservers/status
   - namespacecredentialss/status
+  - namespacedcloudconnections/status
   - notificationrouters/status
   - notificationsinks/status
   - observabilityproviders/status

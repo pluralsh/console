@@ -12,7 +12,7 @@ spec:
     listKind: CloudConnectionList
     plural: cloudconnections
     singular: cloudconnection
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - description: Console ID

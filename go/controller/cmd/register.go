@@ -203,6 +203,16 @@ func init() {
 		}
 	})
 
+	types.RegisterController(types.NamespacedCloudConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.NamespacedCloudConnectionReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}
+	})
+
 	types.RegisterController(types.NotificationRouterReconciler, func(mgr ctrl.Manager,
 		consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {

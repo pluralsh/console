@@ -27,33 +27,33 @@ import (
 )
 
 const (
-	// CloudConnectionProtectionFinalizerName defines name for the main finalizer that synchronizes
+	// NamespacedCloudConnectionProtectionFinalizerName defines name for the main finalizer that synchronizes
 	// resource deletion from the Console API prior to removing the CRD.
-	CloudConnectionProtectionFinalizerName = "providers.deployments.plural.sh/cloud-connection-protection"
+	NamespacedCloudConnectionProtectionFinalizerName = "providers.deployments.plural.sh/namespaced-cloud-connection-protection"
 )
 
-// CloudConnectionReconciler reconciles a CloudConnection object
-type CloudConnectionReconciler struct {
+// NamespacedCloudConnectionReconciler reconciles a CloudConnection object
+type NamespacedCloudConnectionReconciler struct {
 	client.Client
 	ConsoleClient  consoleclient.ConsoleClient
 	Scheme         *runtime.Scheme
 	UserGroupCache cache.UserGroupCache
 }
 
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections/finalizers,verbs=update
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=namespacedcloudconnections,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=namespacedcloudconnections/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=namespacedcloudconnections/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
+func (r *NamespacedCloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	// Read Provider CRD from the K8S API
-	connection := new(v1alpha1.CloudConnection)
+	connection := new(v1alpha1.NamespacedCloudConnection)
 	if err := r.Get(ctx, req.NamespacedName, connection); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -125,7 +125,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	return ctrl.Result{}, nil
 }
 
-func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alpha1.CloudConnection, changed bool) (*console.CloudConnectionFragment, error) {
+func (r *NamespacedCloudConnectionReconciler) sync(ctx context.Context, connection *v1alpha1.NamespacedCloudConnection, changed bool) (*console.CloudConnectionFragment, error) {
 	if !changed {
 		return r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
 	}
@@ -133,13 +133,13 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	if err != nil {
 		return nil, err
 	}
-	attr.Name = connection.CloudConnectionName()
+	attr.Name = connection.NamespacedCloudConnectionName()
 	attr.ReadBindings = policyBindings(connection.Spec.ReadBindings)
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
 }
 
-func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection) error {
+func (r *NamespacedCloudConnectionReconciler) ensure(connection *v1alpha1.NamespacedCloudConnection) error {
 	if connection.Spec.ReadBindings == nil {
 		return nil
 	}
@@ -156,7 +156,7 @@ func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection)
 	return nil
 }
 
-func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {
+func (r *NamespacedCloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.NamespacedCloudConnection) error {
 	secretRef := getProviderSettingsSecretRef(connection.Spec)
 	if secretRef.Name == "" || secretRef.Key == "" {
 		return fmt.Errorf("the provider configuration secret ref for provider %q is incorrect", connection.Spec.Provider)
@@ -170,8 +170,8 @@ func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, con
 	return utils.TryAddControllerRef(ctx, r.Client, connection, secret, r.Scheme)
 }
 
-func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context, connection *v1alpha1.CloudConnection) (reconcile.Result, error) {
-	apiConnection, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.CloudConnectionName()))
+func (r *NamespacedCloudConnectionReconciler) handleExistingConnection(ctx context.Context, connection *v1alpha1.NamespacedCloudConnection) (reconcile.Result, error) {
+	apiConnection, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.NamespacedCloudConnectionName()))
 	if err != nil {
 		if errors.IsNotFound(err) {
 			connection.Status.ID = nil
@@ -186,12 +186,12 @@ func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context
 	return requeue, nil
 }
 
-func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connection *v1alpha1.CloudConnection) (bool, error) {
+func (r *NamespacedCloudConnectionReconciler) isAlreadyExists(ctx context.Context, connection *v1alpha1.NamespacedCloudConnection) (bool, error) {
 	if connection.Status.HasReadonlyCondition() {
 		return connection.Status.IsReadonly(), nil
 	}
 
-	_, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.CloudConnectionName()))
+	_, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.NamespacedCloudConnectionName()))
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -208,7 +208,7 @@ func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connect
 	return false, nil
 }
 
-func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, connection *v1alpha1.CloudConnection) (*ctrl.Result, error) {
+func (r *NamespacedCloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, connection *v1alpha1.NamespacedCloudConnection) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if connection.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(connection, CloudConnectionProtectionFinalizerName) {
@@ -217,7 +217,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !connection.DeletionTimestamp.IsZero() {
-		exists, err := r.ConsoleClient.IsCloudConnection(ctx, connection.CloudConnectionName())
+		exists, err := r.ConsoleClient.IsCloudConnection(ctx, connection.NamespacedCloudConnectionName())
 		if err != nil {
 			if errors.IsNotFound(err) {
 				controllerutil.RemoveFinalizer(connection, CloudConnectionProtectionFinalizerName)
@@ -249,10 +249,10 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *CloudConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *NamespacedCloudConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		For(&v1alpha1.CloudConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.NamespacedCloudConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
