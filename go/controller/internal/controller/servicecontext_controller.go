@@ -125,7 +125,7 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 		attributes.ProjectID = project.Status.ID
 	}
 
-	return r.ConsoleClient.SaveServiceContext(sc.GetName(), attributes)
+	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
 }
 
 func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (reconcile.Result, error) {
