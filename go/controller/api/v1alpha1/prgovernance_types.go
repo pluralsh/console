@@ -1,13 +1,9 @@
 package v1alpha1
 
 import (
-	"context"
-	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // PrGovernanceSpec defines the desired state of PrGovernance
@@ -15,8 +11,8 @@ type PrGovernanceSpec struct {
 	Name *string `json:"name,omitempty"`
 	// Reference a ScmConnection to reuse its credentials for this PrGovernance's authentication
 	// +kubebuilder:validation:Optional
-	ConnectionRef *corev1.ObjectReference   `json:"connectionRef,omitempty"`
-	Configuration PrGovernanceConfiguration `json:"configuration"`
+	ConnectionRef corev1.ObjectReference     `json:"connectionRef"`
+	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
 }
 
 type PrGovernanceConfiguration struct {
@@ -67,12 +63,10 @@ func (in *PrGovernance) Diff(hasher Hasher) (changed bool, sha string, err error
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
-func (in *PrGovernance) Attributes(ctx context.Context, client client.Client, governance PrGovernance) (*console.PrGovernanceAttributes, *ctrl.Result, error) {
-	attributes := &console.PrGovernanceAttributes{
-		Name:          "",
-		ConnectionID:  "",
-		Configuration: nil,
+func (in *PrGovernance) ConsoleName() string {
+	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
+		return *in.Spec.Name
 	}
 
-	return attributes, nil, nil
+	return in.Name
 }

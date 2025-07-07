@@ -2,10 +2,14 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	
+	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -74,13 +78,13 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 	if changed {
-		attr, res, err := prGovernance.Attributes(ctx, r.Client, *prGovernance)
+		attr, res, err := r.attributes(ctx, prGovernance)
 		if res != nil || err != nil {
 			return handleRequeue(res, err, prGovernance.SetCondition)
 		}
 		apiPrGovernance, err := r.ConsoleClient.UpsertPrGovernance(ctx, *attr)
 		if err != nil {
-			logger.Error(err, "unable to create or update catalog")
+			logger.Error(err, "unable to upsert PrGovernance")
 			utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -89,8 +93,6 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
-	return ctrl.Result{}, nil
 
 	return ctrl.Result{}, nil
 }
@@ -136,6 +138,32 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 	// stop reconciliation as the item has been deleted
 	controllerutil.RemoveFinalizer(prGovernance, PrGovernanceFinalizerName)
 	return &ctrl.Result{}
+}
+
+func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v1alpha1.PrGovernance) (*console.PrGovernanceAttributes, *ctrl.Result, error) {
+	attributes := &console.PrGovernanceAttributes{
+		Name: prGovernance.ConsoleName(),
+	}
+
+	connection := &v1alpha1.ScmConnection{}
+	ref := prGovernance.Spec.ConnectionRef
+	if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
+		return nil, nil, err
+	}
+	if !connection.Status.HasID() {
+		return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
+	}
+	attributes.ConnectionID = *connection.Status.ID
+
+	if prGovernance.Spec.Configuration != nil {
+		attributes.Configuration = &console.PrGovernanceConfigurationAttributes{
+			Webhook: &console.GovernanceWebhookAttributes{
+				URL: prGovernance.Spec.Configuration.Webhooks.Url,
+			},
+		}
+	}
+
+	return attributes, nil, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
