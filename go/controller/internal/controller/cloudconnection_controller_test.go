@@ -64,9 +64,10 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 					Configuration: v1alpha1.CloudConnectionConfiguration{
 						AWS: &v1alpha1.AWSCloudConnection{
 							AccessKeyId: "123",
-							SecretAccessKey: corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{Name: connectionSecretName},
-								Key:                  "applicationCredentials",
+							SecretAccessKey: v1alpha1.ObjectKeyReference{
+								Name:      connectionSecretName,
+								Namespace: namespace,
+								Key:       "applicationCredentials",
 							},
 							Region: "test",
 						},

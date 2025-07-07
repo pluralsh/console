@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -41,21 +40,21 @@ type CloudConnectionSpec struct {
 }
 
 type AWSCloudConnection struct {
-	AccessKeyId     string                   `json:"accessKeyId"`
-	SecretAccessKey corev1.SecretKeySelector `json:"secretAccessKey"`
-	Region          string                   `json:"region"`
+	AccessKeyId     string             `json:"accessKeyId"`
+	SecretAccessKey ObjectKeyReference `json:"secretAccessKey"`
+	Region          string             `json:"region"`
 }
 
 type GCPCloudConnection struct {
-	ServiceAccountKey corev1.SecretKeySelector `json:"serviceAccountKey"`
-	ProjectId         string                   `json:"projectId"`
+	ServiceAccountKey ObjectKeyReference `json:"serviceAccountKey"`
+	ProjectId         string             `json:"projectId"`
 }
 
 type AzureCloudConnection struct {
-	SubscriptionId string                   `json:"subscriptionId"`
-	TenantId       string                   `json:"tenantId"`
-	ClientId       string                   `json:"clientId"`
-	ClientSecret   corev1.SecretKeySelector `json:"clientSecret"`
+	SubscriptionId string             `json:"subscriptionId"`
+	TenantId       string             `json:"tenantId"`
+	ClientId       string             `json:"clientId"`
+	ClientSecret   ObjectKeyReference `json:"clientSecret"`
 }
 
 type CloudConnectionConfiguration struct {

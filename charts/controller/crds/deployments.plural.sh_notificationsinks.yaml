@@ -43,7 +43,7 @@ spec:
                 description: Bindings to determine users/groups to be notified for
                   PLURAL sync types
                 items:
-                  description: Binding ...
+                  description: Binding represents a policy binding.
                   properties:
                     UserID:
                       type: string

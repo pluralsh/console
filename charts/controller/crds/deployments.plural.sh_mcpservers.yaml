@@ -63,7 +63,7 @@ spec:
                   read:
                     description: Read bindings.
                     items:
-                      description: Binding ...
+                      description: Binding represents a policy binding.
                       properties:
                         UserID:
                           type: string
@@ -80,7 +80,7 @@ spec:
                   write:
                     description: Write bindings.
                     items:
-                      description: Binding ...
+                      description: Binding represents a policy binding.
                       properties:
                         UserID:
                           type: string

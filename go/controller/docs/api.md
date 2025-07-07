@@ -28,7 +28,6 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [MCPServer](#mcpserver)
 - [ManagedNamespace](#managednamespace)
 - [NamespaceCredentials](#namespacecredentials)
-- [NamespacedCloudConnection](#namespacedcloudconnection)
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
 - [OIDCProvider](#oidcprovider)
@@ -111,7 +110,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `accessKeyId` _string_ |  |  |  |
-| `secretAccessKey` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 | `region` _string_ |  |  |  |
 
 
@@ -133,7 +132,7 @@ _Appears in:_
 | `subscriptionId` _string_ |  |  |  |
 | `tenantId` _string_ |  |  |  |
 | `clientId` _string_ |  |  |  |
-| `clientSecret` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `clientSecret` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 
 
 #### AzureOpenAISettings
@@ -180,7 +179,7 @@ _Appears in:_
 
 
 
-Binding ...
+Binding represents a policy binding.
 
 
 
@@ -207,7 +206,7 @@ _Appears in:_
 
 
 
-Bindings represents a policy bindings that
+Bindings represents policy bindings that
 can be used to define read/write permissions
 to this resource for users/groups in the system.
 
@@ -407,7 +406,6 @@ CloudConnectionSpec defines the desired state of CloudConnection
 
 _Appears in:_
 - [CloudConnection](#cloudconnection)
-- [NamespacedCloudConnection](#namespacedcloudconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1155,7 +1153,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceAccountKey` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `serviceAccountKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 | `projectId` _string_ |  |  |  |
 
 
@@ -1247,7 +1245,7 @@ _Appears in:_
 
 
 
-GitRef ...
+GitRef represents a reference to a Git repository.
 
 
 
@@ -1261,8 +1259,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `folder` _string_ | Folder ... |  | Required: {} <br /> |
-| `ref` _string_ | Ref ... |  | Required: {} <br /> |
+| `folder` _string_ | Folder is the folder in the Git repository where the manifests are located. |  | Required: {} <br /> |
+| `ref` _string_ | Ref is the Git reference (branch, tag, or commit) to use. |  | Required: {} <br /> |
 | `files` _string array_ | Optional files to add to the manifests for this service |  | Optional: {} <br /> |
 
 
@@ -1787,16 +1785,8 @@ _Appears in:_
 | `namespaces` _string array_ | Namespaces that will be connected with credentials from SecretRef. |  | Required: {} <br /> |
 | `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef contains reference to secret with credentials. |  | Required: {} <br /> |
 
-#### NamespacedCloudConnection
 
-NamespacedCloudConnection is the Schema for the cloudconnections API
 
-| Field                                                                                                              | Description                                                     | Default | Validation |
-|--------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|---------|------------|
-| `apiVersion` _string_                                                                                              | `deployments.plural.sh/v1alpha1`                                |         |            |
-| `kind` _string_                                                                                                    | `NamespacedCloudConnection`                                     |         |            |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |         |            |
-| `spec` _[CloudConnectionSpec](#cloudconnectionspec)_                                                               |                                                                 |         |            |
 
 #### NamespacedName
 
@@ -1928,6 +1918,27 @@ _Appears in:_
 | `description` _string_ | Description can be used to describe this OIDCProvider. |  | Optional: {} <br /> |
 | `redirectUris` _string array_ | RedirectUris is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
 | `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br /><br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
+
+
+#### ObjectKeyReference
+
+
+
+ObjectKeyReference is a reference to an object in a specific namespace.
+It is used to reference objects like secrets, configmaps, etc.
+
+
+
+_Appears in:_
+- [AWSCloudConnection](#awscloudconnection)
+- [AzureCloudConnection](#azurecloudconnection)
+- [GCPCloudConnection](#gcpcloudconnection)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is unique within a namespace to reference a resource. |  | Required: {} <br /> |
+| `namespace` _string_ | Namespace defines the space within which the resource name must be unique. |  | Required: {} <br /> |
+| `key` _string_ | Key is the key of the object to use. |  | Required: {} <br /> |
 
 
 #### ObjectReferenceTemplate

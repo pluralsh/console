@@ -58,29 +58,26 @@ spec:
                       region:
                         type: string
                       secretAccessKey:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          ObjectKeyReference is a reference to an object in a specific namespace.
+                          It is used to reference objects like secrets, configmaps, etc.
                         properties:
                           key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
+                            description: Key is the key of the object to use.
                             type: string
                           name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            description: Name is unique within a namespace to reference
+                              a resource.
                             type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
+                          namespace:
+                            description: Namespace defines the space within which
+                              the resource name must be unique.
+                            type: string
                         required:
                         - key
+                        - name
+                        - namespace
                         type: object
-                        x-kubernetes-map-type: atomic
                     required:
                     - accessKeyId
                     - region
@@ -91,29 +88,26 @@ spec:
                       clientId:
                         type: string
                       clientSecret:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          ObjectKeyReference is a reference to an object in a specific namespace.
+                          It is used to reference objects like secrets, configmaps, etc.
                         properties:
                           key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
+                            description: Key is the key of the object to use.
                             type: string
                           name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            description: Name is unique within a namespace to reference
+                              a resource.
                             type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
+                          namespace:
+                            description: Namespace defines the space within which
+                              the resource name must be unique.
+                            type: string
                         required:
                         - key
+                        - name
+                        - namespace
                         type: object
-                        x-kubernetes-map-type: atomic
                       subscriptionId:
                         type: string
                       tenantId:
@@ -129,29 +123,26 @@ spec:
                       projectId:
                         type: string
                       serviceAccountKey:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          ObjectKeyReference is a reference to an object in a specific namespace.
+                          It is used to reference objects like secrets, configmaps, etc.
                         properties:
                           key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
+                            description: Key is the key of the object to use.
                             type: string
                           name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            description: Name is unique within a namespace to reference
+                              a resource.
                             type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
+                          namespace:
+                            description: Namespace defines the space within which
+                              the resource name must be unique.
+                            type: string
                         required:
                         - key
+                        - name
+                        - namespace
                         type: object
-                        x-kubernetes-map-type: atomic
                     required:
                     - projectId
                     - serviceAccountKey
@@ -180,7 +171,7 @@ spec:
                   ReadBindings is a list of bindings that defines
                   who can use this CloudConnection.
                 items:
-                  description: Binding ...
+                  description: Binding represents a policy binding.
                   properties:
                     UserID:
                       type: string

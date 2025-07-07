@@ -47,7 +47,7 @@ spec:
               bindings:
                 description: Bindings contains the group bindings for this Persona.
                 items:
-                  description: Binding ...
+                  description: Binding represents a policy binding.
                   properties:
                     UserID:
                       type: string

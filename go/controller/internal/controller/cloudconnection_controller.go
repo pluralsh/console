@@ -157,12 +157,12 @@ func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection)
 }
 
 func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {
-	secretRef := getProviderSettingsSecretRef(connection.Spec)
-	if secretRef.Name == "" || secretRef.Key == "" {
+	secretRef := r.getProviderSettingsSecretRef(connection.Spec)
+	if secretRef.Name == "" || secretRef.Namespace == "" || secretRef.Key == "" {
 		return fmt.Errorf("the provider configuration secret ref for provider %q is incorrect", connection.Spec.Provider)
 	}
 
-	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: secretRef.Name, Namespace: connection.Namespace})
+	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: secretRef.Name, Namespace: secretRef.Namespace})
 	if err != nil {
 		return err
 	}

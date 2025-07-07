@@ -47,7 +47,8 @@ spec:
             metadata:
               type: object
             spec:
-              description: CloudConnectionSpec defines the desired state of CloudConnection
+              description: NamespacedCloudConnectionSpec defines the desired state of
+                CloudConnection
               properties:
                 configuration:
                   description: Configuration contains the cloud connection configuration.
