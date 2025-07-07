@@ -135,6 +135,8 @@ type RootQueryType {
 
   prAutomation(id: ID, name: String): PrAutomation
 
+  prGovernance(id: ID, name: String): PrGovernance
+
   pullRequests(
     after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String
   ): PullRequestConnection

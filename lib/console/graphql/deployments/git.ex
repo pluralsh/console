@@ -858,6 +858,14 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve &Deployments.resolve_pr_automation/2
     end
 
+    field :pr_governance, :pr_governance do
+      middleware Authenticated
+      arg :id, :id
+      arg :name, :string
+
+      resolve &Deployments.resolve_pr_governance/2
+    end
+
     connection field :pull_requests, node_type: :pull_request do
       middleware Authenticated
       arg :cluster_id, :id
