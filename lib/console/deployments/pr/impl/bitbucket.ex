@@ -31,7 +31,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
       })
       |> case do
         {:ok, %{"links" => %{"html" => %{"href" => url}}} = mr} ->
-          {:ok, %{title: title, ref: branch, url: url, owner: owner(mr)}}
+          {:ok, %{title: title, ref: branch, body: body, url: url, owner: owner(mr)}}
         err -> err
       end
     end
@@ -98,6 +98,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
         err
     end
   end
+
+  def approve(_, _, _), do: {:error, "not implemented"}
 
   def pr_info(url) do
     with {:ok, workspace, repo, number} <- get_pull_id(url) do

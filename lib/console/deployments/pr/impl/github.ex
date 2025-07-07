@@ -18,8 +18,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
         base: pr.branch || "main",
       })
       |> case do
-        {_, %{"html_url" => url} = body, _} ->
-          {:ok, %{title: title, url: url, ref: branch, owner: owner(body)}}
+        {_, %{"html_url" => url} = result, _} ->
+          {:ok, %{title: title, url: url, body: body, ref: branch, owner: owner(result)}}
         {_, body, _} -> {:error, "failed to create pull request: #{Jason.encode!(body)}"}
       end
     end
@@ -74,6 +74,17 @@ defmodule Console.Deployments.Pr.Impl.Github do
         _ -> Tentacat.Pulls.Reviews.create(client, owner, repo, number, body)
       end
       |> case do
+        {_, %{"id" => id}, _} -> {:ok, "#{id}"}
+        {_, body, _} -> {:error, "failed to create review comment: #{Jason.encode!(body)}"}
+      end
+    end
+  end
+
+  def approve(conn, %PullRequest{url: url}, body) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, client} <- client(conn),
+         body = %{"body" => filter_ansi(body), "event" => "APPROVE"} do
+      case Tentacat.Pulls.Reviews.create(client, owner, repo, number, body) do
         {_, %{"id" => id}, _} -> {:ok, "#{id}"}
         {_, body, _} -> {:error, "failed to create review comment: #{Jason.encode!(body)}"}
       end

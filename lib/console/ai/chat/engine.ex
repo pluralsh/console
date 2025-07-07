@@ -2,6 +2,7 @@ defmodule Console.AI.Chat.Engine do
   use Console.Services.Base
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
+  import Console.AI.Chat.System
   alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit, AgentSession}
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
@@ -28,18 +29,6 @@ defmodule Console.AI.Chat.Engine do
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
 
-  @chat """
-  The following is a chat history concerning a set of kubernetes or devops questions, usually encompassing topics like terraform,
-  helm, GitOps, and other technologies and best practices.  The chat is occuring on the Plural Platform, which has a few concepts that
-  are worth keeping in mind:
-
-  * Clusters - kubernetes clusters registered with Plural for future management
-  * Services (also called Service Deployments) - a kubernetes application deployed via Plural's GitOps engine
-  * Stacks - an infrastructure as code stack used to provision cloud resources via Plural that can interact with Services
-
-  Please provide a response suitable for a junior engineer with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
-  """
-
   @plrl_tools [
     Clusters,
     SvcTool,
@@ -65,7 +54,16 @@ defmodule Console.AI.Chat.Engine do
   @agent_tools [
     Agent.Query,
     Agent.Schema,
-    Agent.Plan
+    Agent.Plan,
+    Agent.Catalogs,
+    Agent.Automations,
+    Agent.Clusters,
+    Agent.Search,
+    Agent.Stack
+  ]
+
+  @agent_planned_tools [
+    Agent.CallPr,
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
@@ -94,7 +92,7 @@ defmodule Console.AI.Chat.Engine do
   end
   def call_tool(_, _), do: {:error, "this chat cannot be confirmed"}
 
-  @recursive_limit 5
+  @recursive_limit 8
 
   @doc"""
   This will run a sequence of completions in a row gathering tools so users don't have to drive the RAG process manually.
@@ -110,10 +108,13 @@ defmodule Console.AI.Chat.Engine do
   end
 
   def completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
+    preface = prompt(thread)
+
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
-    |> Provider.completion(include_tools([preface: @chat], thread))
+    |> fit_context_window(preface)
+    |> Provider.completion(include_tools([preface: preface], thread))
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})
@@ -229,7 +230,13 @@ defmodule Console.AI.Chat.Engine do
       }
     }
   end
-  defp tool_msg(%{} = msg, _, _, _, _), do: Map.merge(msg, %{role: :assistant})
+
+  defp tool_msg(%{} = msg, call_id, _, name, args) do
+    Map.merge(%{
+      role: :assistant,
+      attributes: %{tool: %{call_id: call_id, name: name, arguments: args}}
+    }, msg)
+  end
 
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err
@@ -245,7 +252,12 @@ defmodule Console.AI.Chat.Engine do
     end
   end
 
-  defp internal_tools(%ChatThread{} = t), do: memory_tools(t) ++ flow_tools(t) ++ agent_tools(t)
+  defp internal_tools(%ChatThread{} = t) do
+    memory_tools(t)
+    |> Enum.concat(flow_tools(t))
+    |> Enum.concat(agent_tools(t))
+    |> Enum.concat(agent_planned_tools(t))
+  end
 
   defp memory_tools(%ChatThread{} = t) do
     case ChatThread.settings(t, :memory) do
@@ -254,8 +266,26 @@ defmodule Console.AI.Chat.Engine do
     end
   end
 
+  defp fit_context_window(msgs, preface) do
+    Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
+    |> trim_messages(msgs, Provider.context_window())
+  end
+
+  defp trim_messages(total, msgs, window) when total < window, do: msgs
+  defp trim_messages(_, [_] = msgs, _), do: msgs
+  defp trim_messages(_, [] = msgs, _), do: msgs
+  defp trim_messages(total, [msg | rest], window),
+    do: trim_messages(total - msg_size(msg), rest, window)
+
+  defp msg_size(%{content: content}), do: byte_size(content)
+  defp msg_size({_, content}), do: byte_size(content)
+  defp msg_size({_, content, _}), do: byte_size(content)
+
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
   defp agent_tools(_), do: []
+
+  defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
+  defp agent_planned_tools(_), do: []
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []

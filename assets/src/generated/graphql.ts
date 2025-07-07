@@ -297,6 +297,7 @@ export type AiSettingsAttributes = {
   /** ai provider to use with embeddings (for vector indexing) */
   embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  graph?: InputMaybe<GraphStoreAttributes>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
@@ -938,6 +939,7 @@ export type Chat = {
   content?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  prAutomation?: Maybe<PrAutomation>;
   pullRequest?: Maybe<PullRequest>;
   role: AiRole;
   seq: Scalars['Int']['output'];
@@ -1051,6 +1053,7 @@ export enum ChatType {
   Error = 'ERROR',
   File = 'FILE',
   ImplementationPlan = 'IMPLEMENTATION_PLAN',
+  PrCall = 'PR_CALL',
   Text = 'TEXT',
   Tool = 'TOOL'
 }
@@ -3251,6 +3254,24 @@ export type GlobalServiceEdge = {
   __typename?: 'GlobalServiceEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<GlobalService>;
+};
+
+/** The webhook configuration for a pr governance controller */
+export type GovernanceWebhook = {
+  __typename?: 'GovernanceWebhook';
+  url: Scalars['String']['output'];
+};
+
+/** The settings for configuring a pr governance controller */
+export type GovernanceWebhookAttributes = {
+  /** the url to send webhooks to */
+  url: Scalars['String']['input'];
+};
+
+export type GraphStoreAttributes = {
+  elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  store?: InputMaybe<VectorStore>;
 };
 
 export type Group = {
@@ -5739,6 +5760,8 @@ export type PrAutomationAttributes = {
   darkIcon?: InputMaybe<Scalars['String']['input']>;
   deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
+  /** the governance controller to use for this pr */
+  governanceId?: InputMaybe<Scalars['ID']['input']>;
   /** an icon url to use for this catalog */
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -5891,6 +5914,36 @@ export type PrDeleteSpec = {
   __typename?: 'PrDeleteSpec';
   files?: Maybe<Array<Scalars['String']['output']>>;
   folders?: Maybe<Array<Scalars['String']['output']>>;
+};
+
+/** A governance controller is a mechanism to enforce a set of rules on a set of PRs */
+export type PrGovernance = {
+  __typename?: 'PrGovernance';
+  configuration?: Maybe<PrGovernanceConfiguration>;
+  connection?: Maybe<ScmConnection>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The settings for configuring a pr governance controller */
+export type PrGovernanceAttributes = {
+  configuration?: InputMaybe<PrGovernanceConfigurationAttributes>;
+  /** the scm connection to use for pr generation */
+  connectionId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+/** The configuration for a pr governance controller */
+export type PrGovernanceConfiguration = {
+  __typename?: 'PrGovernanceConfiguration';
+  webhook?: Maybe<GovernanceWebhook>;
+};
+
+/** The settings for configuring a pr governance controller */
+export type PrGovernanceConfigurationAttributes = {
+  webhook?: InputMaybe<GovernanceWebhookAttributes>;
 };
 
 export enum PrRole {
@@ -6538,6 +6591,8 @@ export type RootMutationType = {
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
+  /** deletes a governance controller */
+  deletePrGovernance?: Maybe<PrGovernance>;
   deletePreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   deleteProject?: Maybe<Project>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
@@ -6664,6 +6719,8 @@ export type RootMutationType = {
   upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  /** upserts a governance controller */
+  upsertPrGovernance?: Maybe<PrGovernance>;
   upsertPreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
@@ -7148,6 +7205,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeletePrAutomationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePrGovernanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7718,6 +7780,11 @@ export type RootMutationTypeUpsertObserverArgs = {
 
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
+
+export type RootMutationTypeUpsertPrGovernanceArgs = {
+  attributes: PrGovernanceAttributes;
 };
 
 
@@ -9978,6 +10045,8 @@ export type StackCron = {
   autoApprove?: Maybe<Scalars['Boolean']['output']>;
   /** the crontab used to independently spawn runs for this stack */
   crontab: Scalars['String']['output'];
+  /** configuration overrides for the cron run */
+  overrides?: Maybe<StackOverrides>;
 };
 
 export type StackCronAttributes = {
@@ -9985,6 +10054,8 @@ export type StackCronAttributes = {
   autoApprove?: InputMaybe<Scalars['Boolean']['input']>;
   /** the crontab to use for spawning stack runs */
   crontab: Scalars['String']['input'];
+  /** configuration overrides for the cron run */
+  overrides?: InputMaybe<StackOverridesAttributes>;
 };
 
 export type StackDefinition = {
@@ -10071,6 +10142,18 @@ export type StackOutputAttributes = {
   name: Scalars['String']['input'];
   secret?: InputMaybe<Scalars['Boolean']['input']>;
   value: Scalars['String']['input'];
+};
+
+/** Configuration overrides for a stack cron run */
+export type StackOverrides = {
+  __typename?: 'StackOverrides';
+  /** the terraform configuration for this stack */
+  terraform?: Maybe<TerraformConfiguration>;
+};
+
+export type StackOverridesAttributes = {
+  /** the terraform configuration for this stack */
+  terraform?: InputMaybe<TerraformConfigurationAttributes>;
 };
 
 export type StackPolicyViolation = {

@@ -41,3 +41,40 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.AlertResolutionCreat
   defp filters(%Alert{service: %Service{flow_id: f}}) when is_binary(f), do: [flow_id: f]
   defp filters(_), do: []
 end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackUpdated do
+  alias Console.Repo
+  alias Console.Schema.{StackState, Stack}
+  alias Console.AI.PubSub.Vector.Indexable
+
+  @final ~w(successful failed)a
+
+  def resource(%@for{item: %Stack{status: s} = stack}) when s in @final do
+    case Repo.preload(stack, [:state, :repository]) do
+      %Stack{state: %StackState{state: [_ | _] = items} = state} = stack ->
+        minis =
+          Enum.reject(items, &String.starts_with?(&1.identifier, "data."))
+          |> Enum.map(&StackState.Mini.new(%{state | stack: stack}, &1))
+        [
+          %Indexable{delete: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
+          %Indexable{data: minis, filters: [stack_id: stack.id]}
+        ]
+      _ -> :ok
+    end
+  end
+  def resource(_), do: :ok
+end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
+  alias Console.AI.PubSub.Vector.Indexable
+  alias Console.Schema.{Stack, StackRun}
+
+  def resource(%@for{item: %StackRun{status: :successful, id: id} = run}) do
+    case Console.Repo.preload(run, [:stack]) do
+      %StackRun{stack: %Stack{delete_run_id: ^id}} ->
+        %Indexable{delete: true, filters: [stack_id: run.stack_id, datatype: {:raw, :stack_state}]}
+      _ -> :ok
+    end
+  end
+  def resource(_), do: :ok
+end

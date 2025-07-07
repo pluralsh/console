@@ -70,7 +70,7 @@ defmodule Console.Schema.Stack do
       |> validate_required(~w(cmd after_stage)a)
     end
 
-    defp terraform_changeset(model, attrs) do
+    def terraform_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(parallelism refresh)a)
     end

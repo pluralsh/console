@@ -229,6 +229,7 @@ type AiSettingsAttributes struct {
 	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
 	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
 	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 type Alert struct {
@@ -761,13 +762,14 @@ type Chat struct {
 	// whether this chat requires confirmation
 	Confirm *bool `json:"confirm,omitempty"`
 	// when the chat was confirmed
-	ConfirmedAt *string             `json:"confirmedAt,omitempty"`
-	Attributes  *ChatTypeAttributes `json:"attributes,omitempty"`
-	PullRequest *PullRequest        `json:"pullRequest,omitempty"`
-	Thread      *ChatThread         `json:"thread,omitempty"`
-	Server      *McpServer          `json:"server,omitempty"`
-	InsertedAt  *string             `json:"insertedAt,omitempty"`
-	UpdatedAt   *string             `json:"updatedAt,omitempty"`
+	ConfirmedAt  *string             `json:"confirmedAt,omitempty"`
+	Attributes   *ChatTypeAttributes `json:"attributes,omitempty"`
+	PullRequest  *PullRequest        `json:"pullRequest,omitempty"`
+	Thread       *ChatThread         `json:"thread,omitempty"`
+	Server       *McpServer          `json:"server,omitempty"`
+	PrAutomation *PrAutomation       `json:"prAutomation,omitempty"`
+	InsertedAt   *string             `json:"insertedAt,omitempty"`
+	UpdatedAt    *string             `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {
@@ -2642,6 +2644,23 @@ type GlobalServiceConnection struct {
 type GlobalServiceEdge struct {
 	Node   *GlobalService `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+// The webhook configuration for a pr governance controller
+type GovernanceWebhook struct {
+	URL string `json:"url"`
+}
+
+// The settings for configuring a pr governance controller
+type GovernanceWebhookAttributes struct {
+	// the url to send webhooks to
+	URL string `json:"url"`
+}
+
+type GraphStoreAttributes struct {
+	Enabled *bool                              `json:"enabled,omitempty"`
+	Store   *VectorStore                       `json:"store,omitempty"`
+	Elastic *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 }
 
 type Group struct {
@@ -4741,7 +4760,9 @@ type PrAutomationAttributes struct {
 	// the project this automation lives in
 	ProjectID *string `json:"projectId,omitempty"`
 	// a git repository to use for create mode prs
-	RepositoryID  *string                      `json:"repositoryId,omitempty"`
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the governance controller to use for this pr
+	GovernanceID  *string                      `json:"governanceId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
 	Confirmation  *PrConfirmationAttributes    `json:"confirmation,omitempty"`
 	// users who can update this automation
@@ -4873,6 +4894,34 @@ type PrCreateSpec struct {
 type PrDeleteSpec struct {
 	Files   []string `json:"files,omitempty"`
 	Folders []string `json:"folders,omitempty"`
+}
+
+// A governance controller is a mechanism to enforce a set of rules on a set of PRs
+type PrGovernance struct {
+	ID            string                     `json:"id"`
+	Name          string                     `json:"name"`
+	Connection    *ScmConnection             `json:"connection,omitempty"`
+	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
+	InsertedAt    *string                    `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                    `json:"updatedAt,omitempty"`
+}
+
+// The settings for configuring a pr governance controller
+type PrGovernanceAttributes struct {
+	Name string `json:"name"`
+	// the scm connection to use for pr generation
+	ConnectionID  string                               `json:"connectionId"`
+	Configuration *PrGovernanceConfigurationAttributes `json:"configuration,omitempty"`
+}
+
+// The configuration for a pr governance controller
+type PrGovernanceConfiguration struct {
+	Webhook *GovernanceWebhook `json:"webhook,omitempty"`
+}
+
+// The settings for configuring a pr governance controller
+type PrGovernanceConfigurationAttributes struct {
+	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
 }
 
 // the details of where to find and place a templated file
@@ -6078,6 +6127,8 @@ type StackCron struct {
 	Crontab string `json:"crontab"`
 	// whether you want any cron-derived runs to automatically approve changes
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverrides `json:"overrides,omitempty"`
 }
 
 type StackCronAttributes struct {
@@ -6085,6 +6136,8 @@ type StackCronAttributes struct {
 	Crontab string `json:"crontab"`
 	// whether you want to auto approve any changes spawned by the cron worker
 	AutoApprove *bool `json:"autoApprove,omitempty"`
+	// configuration overrides for the cron run
+	Overrides *StackOverridesAttributes `json:"overrides,omitempty"`
 }
 
 type StackDefinition struct {
@@ -6164,6 +6217,17 @@ type StackOutputAttributes struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
 	Secret *bool  `json:"secret,omitempty"`
+}
+
+// Configuration overrides for a stack cron run
+type StackOverrides struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+}
+
+type StackOverridesAttributes struct {
+	// the terraform configuration for this stack
+	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -7347,6 +7411,7 @@ const (
 	ChatTypeTool               ChatType = "TOOL"
 	ChatTypeError              ChatType = "ERROR"
 	ChatTypeImplementationPlan ChatType = "IMPLEMENTATION_PLAN"
+	ChatTypePrCall             ChatType = "PR_CALL"
 )
 
 var AllChatType = []ChatType{
@@ -7355,11 +7420,12 @@ var AllChatType = []ChatType{
 	ChatTypeTool,
 	ChatTypeError,
 	ChatTypeImplementationPlan,
+	ChatTypePrCall,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan, ChatTypePrCall:
 		return true
 	}
 	return false

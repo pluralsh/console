@@ -326,4 +326,78 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       assert c > 0
     end
   end
+
+  describe "StackUpdated" do
+    test "it can vector index stack states" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      stack = insert(:stack, status: :successful)
+      insert(:stack_state, stack: stack, state: [
+        %{identifier: "1", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+        %{identifier: "2", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+      ])
+
+      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      event = %PubSub.StackUpdated{item: stack}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+  end
+
+  describe "StackRunCompleted" do
+    test "it can vector index stack states" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      stack = insert(:stack, status: :successful, deleted_at: Timex.now(), sha: "last-sha")
+      insert(:stack_state, stack: stack, state: [
+        %{identifier: "1", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+        %{identifier: "2", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+      ])
+
+      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      # populate the index first
+      event = %PubSub.StackUpdated{item: stack}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+
+      # now simulate a deleted stack and test that it wipes appropriately
+      {:ok, run} = Console.Deployments.Stacks.create_run(stack, stack.sha)
+      event = %PubSub.StackRunCompleted{item: %{run | status: :successful}}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, 0} = ES.count_index(ES.vector_index())
+    end
+  end
 end

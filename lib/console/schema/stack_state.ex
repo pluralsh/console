@@ -40,3 +40,73 @@ defmodule Console.Schema.StackState do
     |> validate_required(~w(identifier)a)
   end
 end
+
+defmodule Console.Schema.StackState.Mini do
+  @moduledoc """
+  A minified version of a stack state item to be used for vector indexing
+  """
+  alias Console.Schema.{StackState, Stack, GitRepository}
+
+  @type stack_data :: %{
+    id: binary,
+    name: binary,
+    status: binary,
+    repository: %{
+      id: binary,
+      url: binary
+    },
+    git: %{
+      ref: binary,
+      folder: binary
+    }
+  }
+
+  @type t :: %__MODULE__{
+    identifier: binary,
+    resource: binary,
+    name: binary,
+    configuration: binary,
+    links: [binary],
+    stack: stack_data()
+  }
+
+  defstruct [:identifier, :resource, :name, :configuration, :links, :stack]
+
+  def new(%{"title" => _} = args) do
+    %__MODULE__{
+      identifier: args["identifier"],
+      resource: args["resource"],
+      name: args["name"],
+      configuration: args["configuration"],
+      links: args["links"],
+      stack: args["stack"]
+    }
+  end
+
+  def new(%StackState{stack: %Stack{} = stack}, %StackState.StateItem{} = item) do
+    %__MODULE__{
+      identifier: item.identifier,
+      resource: item.resource,
+      name: item.name,
+      configuration: Jason.encode!(item.configuration),
+      links: item.links,
+      stack: stack_data(stack)
+    }
+  end
+
+  defp stack_data(%Stack{repository: %GitRepository{} = repository, git: git} = stack) do
+    %{
+      id: stack.id,
+      name: stack.name,
+      status: stack.status,
+      repository: %{
+        id: repository.id,
+        url: repository.url
+      },
+      git: %{
+        ref: git.ref,
+        folder: git.folder,
+      }
+    }
+  end
+end

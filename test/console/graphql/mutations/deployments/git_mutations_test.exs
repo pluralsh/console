@@ -485,4 +485,48 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       refute refetch(catalog)
     end
   end
+
+  describe "upsertPrGovernance" do
+    test "admins can upsert governance controllers" do
+      conn = insert(:scm_connection)
+
+      {:ok, %{data: %{"upsertPrGovernance" => governance}}} = run_query("""
+        mutation Upsert($attrs: PrGovernanceAttributes!) {
+          upsertPrGovernance(attributes: $attrs) {
+            id
+            name
+            connection { id }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "governance",
+          "connectionId" => conn.id,
+          "configuration" => %{
+            "webhook" => %{
+              "url" => "https://webhook.url"
+            }
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      assert governance["name"] == "governance"
+      assert governance["connection"]["id"] == conn.id
+    end
+  end
+
+  describe "deletePrGovernance" do
+    test "admins can delete governance controllers" do
+      governance = insert(:pr_governance)
+
+      {:ok, %{data: %{"deletePrGovernance" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deletePrGovernance(id: $id) { id }
+        }
+      """, %{"id" => governance.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == governance.id
+      refute refetch(governance)
+    end
+  end
 end

@@ -94,6 +94,7 @@ _Appears in:_
 | `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: {} <br /> |
 | `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: {} <br /> |
 | `vectorStore` _[VectorStore](#vectorstore)_ |  |  | Optional: {} <br /> |
+| `graph` _[GraphStore](#graphstore)_ | Configuration for the cloud graph store, which uses similar datastores to the vector store |  | Optional: {} <br /> |
 
 
 #### AWSCloudConnection
@@ -1071,6 +1072,7 @@ _Appears in:_
 
 
 _Appears in:_
+- [GraphStore](#graphstore)
 - [VectorStore](#vectorstore)
 
 | Field | Description | Default | Validation |
@@ -1343,6 +1345,24 @@ _Appears in:_
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to span a specific project only |  | Optional: {} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ |  |  | Optional: {} <br /> |
+
+
+#### GraphStore
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ |  | false | Optional: {} <br /> |
+| `store` _[VectorStore](#vectorstore)_ |  |  | Enum: [ELASTIC] <br />Optional: {} <br /> |
+| `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | elastic configuration for the graph store |  | Optional: {} <br /> |
 
 
 #### HTTPConnection
@@ -3557,6 +3577,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `crontab` _string_ | The crontab on which to spawn stack runs |  |  |
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs |  | Optional: {} <br /> |
+| `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration |  | Optional: {} <br /> |
 
 
 #### StackDefinition
@@ -3648,6 +3669,22 @@ _Appears in:_
 | `cmd` _string_ | the command this hook will execute |  | Required: {} <br /> |
 | `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
 | `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY DESTROY] <br />Required: {} <br /> |
+
+
+#### StackOverrides
+
+
+
+
+
+
+
+_Appears in:_
+- [StackCron](#stackcron)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: {} <br /> |
 
 
 #### StackSettings
@@ -3765,6 +3802,7 @@ _Appears in:_
 
 _Appears in:_
 - [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |

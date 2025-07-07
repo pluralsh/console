@@ -566,6 +566,12 @@ type RootMutationType {
 
   deletePrAutomation(id: ID!): PrAutomation
 
+  "upserts a governance controller"
+  upsertPrGovernance(attributes: PrGovernanceAttributes!): PrGovernance
+
+  "deletes a governance controller"
+  deletePrGovernance(id: ID!): PrGovernance
+
   "creates the service to enable self-hosted renovate in one pass"
   setupRenovate(
     connectionId: ID!
@@ -1520,6 +1526,8 @@ input AiSettingsAttributes {
   vertex: VertexAiAttributes
 
   vectorStore: VectorStoreAttributes
+
+  graph: GraphStoreAttributes
 }
 
 input ToolConfigAttributes {
@@ -1637,6 +1645,12 @@ input VectorStoreAttributes {
   store: VectorStore
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+}
+
+input GraphStoreAttributes {
+  enabled: Boolean
+  store: VectorStore
+  elastic: ElasticsearchConnectionAttributes
 }
 
 input SmtpSettingsAttributes {
@@ -2315,6 +2329,11 @@ input StackConfigurationAttributes {
   terraform: TerraformConfigurationAttributes
 }
 
+input StackOverridesAttributes {
+  "the terraform configuration for this stack"
+  terraform: TerraformConfigurationAttributes
+}
+
 input StackHookAttributes {
   "a script hook to run at a stage"
   cmd: String!
@@ -2340,6 +2359,9 @@ input StackCronAttributes {
 
   "whether you want to auto approve any changes spawned by the cron worker"
   autoApprove: Boolean
+
+  "configuration overrides for the cron run"
+  overrides: StackOverridesAttributes
 }
 
 input PolicyEngineAttributes {
@@ -2596,11 +2618,20 @@ type StackCron {
 
   "whether you want any cron-derived runs to automatically approve changes"
   autoApprove: Boolean
+
+  "configuration overrides for the cron run"
+  overrides: StackOverrides
 }
 
 "grab-bag of state configuration urls for supported tools"
 type StateUrls {
   terraform: TerraformStateUrls
+}
+
+"Configuration overrides for a stack cron run"
+type StackOverrides {
+  "the terraform configuration for this stack"
+  terraform: TerraformConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"
@@ -7117,6 +7148,9 @@ input PrAutomationAttributes {
   "a git repository to use for create mode prs"
   repositoryId: ID
 
+  "the governance controller to use for this pr"
+  governanceId: ID
+
   configuration: [PrConfigurationAttributes]
 
   confirmation: PrConfirmationAttributes
@@ -7385,6 +7419,27 @@ input ObserverAddonAttributes {
   name: String!
   kubernetesVersion: String
   kubernetesVersions: [String!]
+}
+
+"The settings for configuring a pr governance controller"
+input PrGovernanceAttributes {
+  name: String!
+
+  "the scm connection to use for pr generation"
+  connectionId: ID!
+
+  configuration: PrGovernanceConfigurationAttributes
+}
+
+"The settings for configuring a pr governance controller"
+input PrGovernanceConfigurationAttributes {
+  webhook: GovernanceWebhookAttributes
+}
+
+"The settings for configuring a pr governance controller"
+input GovernanceWebhookAttributes {
+  "the url to send webhooks to"
+  url: String!
 }
 
 "a git repository available for deployments"
@@ -7874,6 +7929,26 @@ type Catalog {
   updatedAt: DateTime
 }
 
+"A governance controller is a mechanism to enforce a set of rules on a set of PRs"
+type PrGovernance {
+  id: ID!
+  name: String!
+  connection: ScmConnection
+  configuration: PrGovernanceConfiguration
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"The configuration for a pr governance controller"
+type PrGovernanceConfiguration {
+  webhook: GovernanceWebhook
+}
+
+"The webhook configuration for a pr governance controller"
+type GovernanceWebhook {
+  url: String!
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -7925,6 +8000,7 @@ enum ChatType {
   TOOL
   ERROR
   IMPLEMENTATION_PLAN
+  PR_CALL
 }
 
 enum EvidenceType {
@@ -8028,6 +8104,8 @@ type Chat {
   thread: ChatThread
 
   server: McpServer
+
+  prAutomation: PrAutomation
 
   insertedAt: DateTime
 

@@ -51,6 +51,11 @@ defmodule Console.AI.Tools.Utils do
     data
   end
 
+  def indent(str, count \\ 2) do
+    String.split(str, "\n")
+    |> Enum.map_join("\n", & "#{String.duplicate(" ", count)}#{&1}")
+  end
+
   def yaml_encode(data) do
     with {:ok, doc} = Ymlr.document(data),
       do: {:ok, String.trim_leading(doc, "---\n")}
