@@ -39,7 +39,6 @@ const (
 	ManagedNamespaceReconciler           Reconciler = "managednamespace"
 	MCPServerReconciler                  Reconciler = "mcpserver"
 	NamespaceCredentialsReconciler       Reconciler = "namespacecredential"
-	NamespacedCloudConnectionReconciler  Reconciler = "namespacedcloudconnection"
 	NotificationRouterReconciler         Reconciler = "notificationrouter"
 	NotificationSinkReconciler           Reconciler = "notificationsink"
 	ObservabilityProviderReconciler      Reconciler = "observabilityprovider"
