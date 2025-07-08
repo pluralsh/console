@@ -38,6 +38,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [PipelineContext](#pipelinecontext)
 - [PrAutomation](#prautomation)
 - [PrAutomationTrigger](#prautomationtrigger)
+- [PrGovernance](#prgovernance)
 - [PreviewEnvironmentTemplate](#previewenvironmenttemplate)
 - [Project](#project)
 - [Provider](#provider)
@@ -2929,6 +2930,74 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `label` _string_ | The label of this checkbox |  |  |
+
+
+#### PrGovernance
+
+
+
+PrGovernance is the Schema for the prgovernances API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `PrGovernance` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[PrGovernanceSpec](#prgovernancespec)_ |  |  |  |
+
+
+#### PrGovernanceConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrGovernanceSpec](#prgovernancespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `webhook` _[PrGovernanceWebhook](#prgovernancewebhook)_ |  |  |  |
+
+
+#### PrGovernanceSpec
+
+
+
+PrGovernanceSpec defines the desired state of PrGovernance
+
+
+
+_Appears in:_
+- [PrGovernance](#prgovernance)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | Reference a ScmConnection to reuse its credentials for this PrGovernance's authentication |  | Optional: {} <br /> |
+| `configuration` _[PrGovernanceConfiguration](#prgovernanceconfiguration)_ |  |  |  |
+
+
+#### PrGovernanceWebhook
+
+
+
+
+
+
+
+_Appears in:_
+- [PrGovernanceConfiguration](#prgovernanceconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ |  |  |  |
 
 
 #### PreviewEnvironmentTemplate
