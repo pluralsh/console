@@ -32,7 +32,7 @@ defmodule Console.AI.Graph.Indexer.Source do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp ingest_conn(%CloudConnection{} = conn) do
+  def ingest_conn(%CloudConnection{} = conn) do
     with {:ok, channel} <- Client.connect(),
          {:ok, stream} <- Stub.extract(channel, %ExtractInput{connection: to_pb(conn)}) do
       stream
