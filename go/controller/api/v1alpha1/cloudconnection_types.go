@@ -3,12 +3,15 @@ package v1alpha1
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	console "github.com/pluralsh/console/go/client"
 )
+
+func init() {
+	SchemeBuilder.Register(&CloudConnection{}, &CloudConnectionList{})
+}
 
 // CloudConnectionSpec defines the desired state of CloudConnection
 type CloudConnectionSpec struct {
@@ -37,21 +40,21 @@ type CloudConnectionSpec struct {
 }
 
 type AWSCloudConnection struct {
-	AccessKeyId     string                   `json:"accessKeyId"`
-	SecretAccessKey corev1.SecretKeySelector `json:"secretAccessKey"`
-	Region          string                   `json:"region"`
+	AccessKeyId     string             `json:"accessKeyId"`
+	SecretAccessKey ObjectKeyReference `json:"secretAccessKey"`
+	Region          string             `json:"region"`
 }
 
 type GCPCloudConnection struct {
-	ServiceAccountKey corev1.SecretKeySelector `json:"serviceAccountKey"`
-	ProjectId         string                   `json:"projectId"`
+	ServiceAccountKey ObjectKeyReference `json:"serviceAccountKey"`
+	ProjectId         string             `json:"projectId"`
 }
 
 type AzureCloudConnection struct {
-	SubscriptionId string                   `json:"subscriptionId"`
-	TenantId       string                   `json:"tenantId"`
-	ClientId       string                   `json:"clientId"`
-	ClientSecret   corev1.SecretKeySelector `json:"clientSecret"`
+	SubscriptionId string             `json:"subscriptionId"`
+	TenantId       string             `json:"tenantId"`
+	ClientId       string             `json:"clientId"`
+	ClientSecret   ObjectKeyReference `json:"clientSecret"`
 }
 
 type CloudConnectionConfiguration struct {
@@ -62,7 +65,7 @@ type CloudConnectionConfiguration struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:scope=Namespaced
+//+kubebuilder:resource:scope=Cluster
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
 
@@ -82,10 +85,6 @@ type CloudConnectionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CloudConnection `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&CloudConnection{}, &CloudConnectionList{})
 }
 
 // CloudConnectionGetter is just a helper function that can be implemented to properly
