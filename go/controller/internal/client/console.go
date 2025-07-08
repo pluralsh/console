@@ -179,6 +179,9 @@ type ConsoleClient interface {
 	CreatePersona(ctx context.Context, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	UpdatePersona(ctx context.Context, id string, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	DeletePersona(ctx context.Context, id string) error
+	UpsertPrGovernance(ctx context.Context, attributes console.PrGovernanceAttributes) (*console.PrGovernanceFragment, error)
+	DeletePrGovernance(ctx context.Context, id string) error
+	GetPrGovernance(ctx context.Context, id, name *string) (*console.PrGovernanceFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

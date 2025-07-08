@@ -124,6 +124,9 @@ type ConsoleClient interface {
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
 	DeletePrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrAutomation, error)
 	CreatePullRequest(ctx context.Context, id string, identifier *string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
+	GetPrGovernance(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrGovernance, error)
+	DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error)
+	UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
@@ -1488,6 +1491,24 @@ func (t *GitRepositoryFragment) GetDecrypt() *bool {
 		t = &GitRepositoryFragment{}
 	}
 	return t.Decrypt
+}
+
+type PrGovernanceFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *PrGovernanceFragment) GetID() string {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.ID
+}
+func (t *PrGovernanceFragment) GetName() string {
+	if t == nil {
+		t = &PrGovernanceFragment{}
+	}
+	return t.Name
 }
 
 type HelmRepositoryFragment struct {
@@ -17811,6 +17832,39 @@ func (t *CreatePullRequest) GetCreatePullRequest() *PullRequestFragment {
 	return t.CreatePullRequest
 }
 
+type GetPrGovernance struct {
+	PrGovernance *PrGovernanceFragment "json:\"prGovernance,omitempty\" graphql:\"prGovernance\""
+}
+
+func (t *GetPrGovernance) GetPrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &GetPrGovernance{}
+	}
+	return t.PrGovernance
+}
+
+type DeletePrGovernance struct {
+	DeletePrGovernance *PrGovernanceFragment "json:\"deletePrGovernance,omitempty\" graphql:\"deletePrGovernance\""
+}
+
+func (t *DeletePrGovernance) GetDeletePrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &DeletePrGovernance{}
+	}
+	return t.DeletePrGovernance
+}
+
+type UpsertPrGovernance struct {
+	UpsertPrGovernance *PrGovernanceFragment "json:\"upsertPrGovernance,omitempty\" graphql:\"upsertPrGovernance\""
+}
+
+func (t *UpsertPrGovernance) GetUpsertPrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &UpsertPrGovernance{}
+	}
+	return t.UpsertPrGovernance
+}
+
 type GetGroup struct {
 	Group *GroupFragment "json:\"group,omitempty\" graphql:\"group\""
 }
@@ -27806,6 +27860,91 @@ func (c *Client) CreatePullRequest(ctx context.Context, id string, identifier *s
 	return &res, nil
 }
 
+const GetPrGovernanceDocument = `query GetPrGovernance ($id: ID, $name: String) {
+	prGovernance(id: $id, name: $name) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+}
+`
+
+func (c *Client) GetPrGovernance(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrGovernance, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetPrGovernance
+	if err := c.Client.Post(ctx, "GetPrGovernance", GetPrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeletePrGovernanceDocument = `mutation DeletePrGovernance ($id: ID!) {
+	deletePrGovernance(id: $id) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+}
+`
+
+func (c *Client) DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeletePrGovernance
+	if err := c.Client.Post(ctx, "DeletePrGovernance", DeletePrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertPrGovernanceDocument = `mutation UpsertPrGovernance ($attributes: PrGovernanceAttributes!) {
+	upsertPrGovernance(attributes: $attributes) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+}
+`
+
+func (c *Client) UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertPrGovernance
+	if err := c.Client.Post(ctx, "UpsertPrGovernance", UpsertPrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetGroupDocument = `query GetGroup ($name: String!) {
 	group(name: $name) {
 		... GroupFragment
@@ -35965,6 +36104,9 @@ var DocumentOperationNames = map[string]string{
 	UpdatePrAutomationDocument:                        "UpdatePrAutomation",
 	DeletePrAutomationDocument:                        "DeletePrAutomation",
 	CreatePullRequestDocument:                         "CreatePullRequest",
+	GetPrGovernanceDocument:                           "GetPrGovernance",
+	DeletePrGovernanceDocument:                        "DeletePrGovernance",
+	UpsertPrGovernanceDocument:                        "UpsertPrGovernance",
 	GetGroupDocument:                                  "GetGroup",
 	CreateGroupDocument:                               "CreateGroup",
 	UpdateGroupDocument:                               "UpdateGroup",

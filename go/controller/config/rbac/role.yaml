@@ -56,6 +56,7 @@ rules:
   - prautomations
   - prautomationtriggers
   - previewenvironmenttemplates
+  - prgovernances
   - projects
   - providers
   - scmconnections
@@ -104,6 +105,7 @@ rules:
   - prautomations/finalizers
   - prautomationtriggers/finalizers
   - previewenvironmenttemplates/finalizers
+  - prgovernances/finalizers
   - projects/finalizers
   - providers/finalizers
   - scmconnections/finalizers
@@ -146,6 +148,7 @@ rules:
   - prautomations/status
   - prautomationtriggers/status
   - previewenvironmenttemplates/status
+  - prgovernances/status
   - projects/status
   - providers/status
   - scmconnections/status

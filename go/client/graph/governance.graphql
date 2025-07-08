@@ -1,0 +1,22 @@
+fragment PrGovernanceFragment on PrGovernance {
+    id
+    name
+}
+
+query GetPrGovernance($id: ID, $name: String) {
+    prGovernance(id: $id, name: $name) {
+        ...PrGovernanceFragment
+    }
+}
+
+mutation DeletePrGovernance($id: ID!) {
+    deletePrGovernance(id: $id) {
+        ...PrGovernanceFragment
+    }
+}
+
+mutation UpsertPrGovernance($attributes: PrGovernanceAttributes!) {
+    upsertPrGovernance(attributes: $attributes) {
+        ...PrGovernanceFragment
+    }
+}
