@@ -112,6 +112,10 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   parent {
     id
     name
+    cluster {
+      id
+      name
+    }
   }
   alerts(first: 500) {
     # just to get the count

@@ -160,13 +160,16 @@ defmodule Console.Services.Users do
   end
 
   @spec bootstrap_user(map) :: user_resp
-  def bootstrap_user(%{"email" => email} = attrs) do
-    email = sanitize_email(email)
+  def bootstrap_user(attrs) do
+    Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
+    |> bootstrap_user_impl()
+  end
 
+  def bootstrap_user_impl(%{"email" => email} = attrs) do
+    email = sanitize_email(email)
     attrs = token_attrs(attrs)
             |> Map.put("email", email)
-    groups = Map.new(attrs, fn {k, v} -> {String.downcase(k), v} end)
-             |> group_attrs()
+    groups = group_attrs(attrs)
     start_transaction()
     |> add_operation(:user, fn _ ->
       case get_user_by_email(email) do
@@ -181,12 +184,12 @@ defmodule Console.Services.Users do
     |> execute(extract: :hydrated)
   end
 
-  def bootstrap_user(%{"emails" => [email | _]} = attrs) do
+  def bootstrap_user_impl(%{"emails" => [email | _]} = attrs) do
     Map.put(attrs, "email", email)
     |> bootstrap_user()
   end
 
-  def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
+  def bootstrap_user_impl(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   defp sanitize_email(email) do
     case Console.conf(:org_email_suffix) do

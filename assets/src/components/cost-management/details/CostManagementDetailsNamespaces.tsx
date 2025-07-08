@@ -28,6 +28,7 @@ import {
   ColMemoryCost,
   ColNamespace,
   ColNetworkCost,
+  ColStorageCost,
 } from '../ClusterUsagesTableCols'
 import { CM_TREE_MAP_CARD_HEIGHT } from '../CostManagement'
 import {
@@ -172,7 +173,7 @@ const cols = [
   ColNamespace,
   ColCpuCost,
   ColMemoryCost,
-  // ColStorageCost,
+  ColStorageCost,
   ColLoadBalancerCost,
   ColNetworkCost,
 ]

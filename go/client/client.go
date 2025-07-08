@@ -940,6 +940,7 @@ type ServiceDeploymentForAgent struct {
 	SyncConfig    *ServiceDeploymentForAgent_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 	Revision      *ServiceDeploymentForAgent_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
 	Imports       []*ServiceDeploymentForAgent_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
+	Renderers     []*RendererFragment                        "json:\"renderers,omitempty\" graphql:\"renderers\""
 }
 
 func (t *ServiceDeploymentForAgent) GetID() string {
@@ -1043,6 +1044,12 @@ func (t *ServiceDeploymentForAgent) GetImports() []*ServiceDeploymentForAgent_Im
 		t = &ServiceDeploymentForAgent{}
 	}
 	return t.Imports
+}
+func (t *ServiceDeploymentForAgent) GetRenderers() []*RendererFragment {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Renderers
 }
 
 type ClusterRegistrationFragment struct {
@@ -1630,6 +1637,56 @@ func (t *KustomizeFragment) GetEnableHelm() *bool {
 		t = &KustomizeFragment{}
 	}
 	return t.EnableHelm
+}
+
+type HelmMinimalFragment struct {
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+}
+
+func (t *HelmMinimalFragment) GetValues() *string {
+	if t == nil {
+		t = &HelmMinimalFragment{}
+	}
+	return t.Values
+}
+func (t *HelmMinimalFragment) GetValuesFiles() []*string {
+	if t == nil {
+		t = &HelmMinimalFragment{}
+	}
+	return t.ValuesFiles
+}
+func (t *HelmMinimalFragment) GetRelease() *string {
+	if t == nil {
+		t = &HelmMinimalFragment{}
+	}
+	return t.Release
+}
+
+type RendererFragment struct {
+	Path string               "json:\"path\" graphql:\"path\""
+	Type RendererType         "json:\"type\" graphql:\"type\""
+	Helm *HelmMinimalFragment "json:\"helm,omitempty\" graphql:\"helm\""
+}
+
+func (t *RendererFragment) GetPath() string {
+	if t == nil {
+		t = &RendererFragment{}
+	}
+	return t.Path
+}
+func (t *RendererFragment) GetType() *RendererType {
+	if t == nil {
+		t = &RendererFragment{}
+	}
+	return &t.Type
+}
+func (t *RendererFragment) GetHelm() *HelmMinimalFragment {
+	if t == nil {
+		t = &RendererFragment{}
+	}
+	return t.Helm
 }
 
 type ServiceDeploymentBaseFragment struct {
@@ -24984,10 +25041,25 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			secret
 		}
 	}
+	renderers {
+		... RendererFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
 	enableHelm
+}
+fragment RendererFragment on Renderer {
+	path
+	type
+	helm {
+		... HelmMinimalFragment
+	}
+}
+fragment HelmMinimalFragment on HelmMinimal {
+	values
+	valuesFiles
+	release
 }
 `
 
@@ -25433,10 +25505,25 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			secret
 		}
 	}
+	renderers {
+		... RendererFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
 	enableHelm
+}
+fragment RendererFragment on Renderer {
+	path
+	type
+	helm {
+		... HelmMinimalFragment
+	}
+}
+fragment HelmMinimalFragment on HelmMinimal {
+	values
+	valuesFiles
+	release
 }
 `
 

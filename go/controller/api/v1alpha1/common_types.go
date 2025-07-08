@@ -1,11 +1,12 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 // NamespacedName is the same as types.NamespacedName
@@ -20,7 +21,7 @@ type NamespacedName struct {
 	Namespace string `json:"namespace"`
 }
 
-// Bindings represents a policy bindings that
+// Bindings represents policy bindings that
 // can be used to define read/write permissions
 // to this resource for users/groups in the system.
 type Bindings struct {
@@ -33,7 +34,7 @@ type Bindings struct {
 	Write []Binding `json:"write,omitempty"`
 }
 
-// Binding ...
+// Binding represents a policy binding.
 type Binding struct {
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`
@@ -147,13 +148,13 @@ const (
 	NamespacedCredentialsConditionMessage ConditionMessage = "Using default credentials"
 )
 
-// GitRef ...
+// GitRef represents a reference to a Git repository.
 type GitRef struct {
-	// Folder ...
+	// Folder is the folder in the Git repository where the manifests are located.
 	// +kubebuilder:validation:Required
 	Folder string `json:"folder"`
 
-	// Ref ...
+	// Ref is the Git reference (branch, tag, or commit) to use.
 	// +kubebuilder:validation:Required
 	Ref string `json:"ref"`
 
@@ -235,7 +236,7 @@ func (p *Status) IsStatusConditionTrue(condition ConditionType) bool {
 	return meta.IsStatusConditionTrue(p.Conditions, condition.String())
 }
 
-// PluralResource ...
+// PluralResource represents a resource that can be managed in plural form.
 // +k8s:deepcopy-gen=false
 type PluralResource interface {
 	client.Object
@@ -246,11 +247,27 @@ type PluralResource interface {
 	ConsoleName() string
 }
 
-// NamespacedPluralResource ...
+// NamespacedPluralResource represents a resource that can be managed in plural form.
 // +k8s:deepcopy-gen=false
 type NamespacedPluralResource interface {
 	PluralResource
 
 	// ConsoleNamespace returns a resource namespace read from the Console API
 	ConsoleNamespace() string
+}
+
+// ObjectKeyReference is a reference to an object in a specific namespace.
+// It is used to reference objects like secrets, configmaps, etc.
+type ObjectKeyReference struct {
+	// Name is unique within a namespace to reference a resource.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Namespace defines the space within which the resource name must be unique.
+	// +kubebuilder:validation:Required
+	Namespace string `json:"namespace"`
+
+	// Key is the key of the object to use.
+	// +kubebuilder:validation:Required
+	Key string `json:"key"`
 }

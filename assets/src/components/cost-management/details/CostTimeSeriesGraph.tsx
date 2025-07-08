@@ -4,7 +4,9 @@ import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
+import { formatDateTime } from 'utils/datetime'
 import { SliceTooltip, useGraphTheme } from '../../utils/Graph'
+import { dollarize } from '../ClusterUsagesTableCols'
 
 export const GRAPH_CARD_MAX_HEIGHT = 330
 
@@ -28,30 +30,26 @@ export function CostTimeSeriesGraph({
         tooltip={SliceTooltip}
         colors={COLORS}
         margin={{ top: 32, right: 128, bottom: 64, left: 64 }}
-        xScale={{ type: 'point' }}
+        xScale={{ type: 'time' }}
         yScale={{
           type: 'linear',
           min: 'auto',
           max: 'auto',
         }}
-        curve="basis"
+        yFormat={dollarize}
+        curve="natural"
         axisBottom={{
-          format: (value) => dayjs(value).format('MMM DD, YYYY'),
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'time',
+          format: (value) => formatDateTime(value, 'M/DD'),
+          legend: 'date',
           legendOffset: 36,
           legendPosition: 'middle',
-          truncateTickAt: 0,
         }}
         axisLeft={{
           format: (value) => `$${value}`,
-          tickSize: 5,
           tickPadding: 5,
           tickRotation: 0,
           legend: 'cost',
-          legendOffset: -40,
+          legendOffset: -50,
           legendPosition: 'middle',
           truncateTickAt: 0,
         }}
@@ -93,23 +91,23 @@ export function CostTimeSeriesGraph({
   )
 }
 
-type GraphData = {
+export type LineGraphData = {
   id: string
   data: {
-    x: string
+    x: Date
     y: number | null
   }[]
 }
 const getGraphData = (history: ClusterUsageHistoryFragment[]) => {
-  const cpuData: GraphData = {
+  const cpuData: LineGraphData = {
     id: 'CPU',
     data: [],
   }
-  const memoryData: GraphData = {
+  const memoryData: LineGraphData = {
     id: 'Memory',
     data: [],
   }
-  const storageData: GraphData = {
+  const storageData: LineGraphData = {
     id: 'Storage',
     data: [],
   }
@@ -118,15 +116,15 @@ const getGraphData = (history: ClusterUsageHistoryFragment[]) => {
   history.forEach((point) => {
     if (!timestamps.has(point.timestamp)) {
       cpuData.data.push({
-        x: point.timestamp,
+        x: new Date(point.timestamp),
         y: point.cpuCost ?? null,
       })
       memoryData.data.push({
-        x: point.timestamp,
+        x: new Date(point.timestamp),
         y: point.memoryCost ?? null,
       })
       storageData.data.push({
-        x: point.timestamp,
+        x: new Date(point.timestamp),
         y: point.storageCost ? point.storageCost : null,
       })
 

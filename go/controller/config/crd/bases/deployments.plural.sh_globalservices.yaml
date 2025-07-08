@@ -305,10 +305,12 @@ spec:
                           type: string
                         type: array
                       folder:
-                        description: Folder ...
+                        description: Folder is the folder in the Git repository where
+                          the manifests are located.
                         type: string
                       ref:
-                        description: Ref ...
+                        description: Ref is the Git reference (branch, tag, or commit)
+                          to use.
                         type: string
                     required:
                     - folder
@@ -330,10 +332,12 @@ spec:
                               type: string
                             type: array
                           folder:
-                            description: Folder ...
+                            description: Folder is the folder in the Git repository
+                              where the manifests are located.
                             type: string
                           ref:
-                            description: Ref ...
+                            description: Ref is the Git reference (branch, tag, or
+                              commit) to use.
                             type: string
                         required:
                         - folder
@@ -590,10 +594,12 @@ spec:
                                 type: string
                               type: array
                             folder:
-                              description: Folder ...
+                              description: Folder is the folder in the Git repository
+                                where the manifests are located.
                               type: string
                             ref:
-                              description: Ref ...
+                              description: Ref is the Git reference (branch, tag,
+                                or commit) to use.
                               type: string
                           required:
                           - folder

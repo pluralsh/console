@@ -41,6 +41,7 @@ export function useGraphTheme(): NivoThemeType {
       },
     },
     grid: { line: { stroke: colors.border } },
+    crosshair: { line: { stroke: colors['border-fill-three'] } },
   }
 }
 

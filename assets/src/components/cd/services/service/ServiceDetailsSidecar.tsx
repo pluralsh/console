@@ -105,7 +105,7 @@ export function ServiceDetailsSidecar({
             secondary
             as={Link}
             to={getServiceDetailsPath({
-              clusterId: cluster?.id,
+              clusterId: parent.cluster?.id,
               serviceId: parent.id,
             })}
             endIcon={<ArrowTopRightIcon />}
