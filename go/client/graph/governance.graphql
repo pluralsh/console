@@ -1,20 +1,6 @@
-fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
-    webhook {
-        ...{
-            url
-        }
-    }
-}
-
 fragment PrGovernanceFragment on PrGovernance {
     id
     name
-    connection {
-        ...ScmConnectionFragment
-    }
-    configuration {
-        ...PrGovernanceConfigurationFragment
-    }
 }
 
 query GetPrGovernance($id: ID, $name: String) {

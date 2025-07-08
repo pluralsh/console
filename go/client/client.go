@@ -1493,22 +1493,9 @@ func (t *GitRepositoryFragment) GetDecrypt() *bool {
 	return t.Decrypt
 }
 
-type PrGovernanceConfigurationFragment struct {
-	Webhook *PrGovernanceConfigurationFragment_Webhook_ "json:\"webhook,omitempty\" graphql:\"webhook\""
-}
-
-func (t *PrGovernanceConfigurationFragment) GetWebhook() *PrGovernanceConfigurationFragment_Webhook_ {
-	if t == nil {
-		t = &PrGovernanceConfigurationFragment{}
-	}
-	return t.Webhook
-}
-
 type PrGovernanceFragment struct {
-	ID            string                             "json:\"id\" graphql:\"id\""
-	Name          string                             "json:\"name\" graphql:\"name\""
-	Connection    *ScmConnectionFragment             "json:\"connection,omitempty\" graphql:\"connection\""
-	Configuration *PrGovernanceConfigurationFragment "json:\"configuration,omitempty\" graphql:\"configuration\""
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
 }
 
 func (t *PrGovernanceFragment) GetID() string {
@@ -1522,18 +1509,6 @@ func (t *PrGovernanceFragment) GetName() string {
 		t = &PrGovernanceFragment{}
 	}
 	return t.Name
-}
-func (t *PrGovernanceFragment) GetConnection() *ScmConnectionFragment {
-	if t == nil {
-		t = &PrGovernanceFragment{}
-	}
-	return t.Connection
-}
-func (t *PrGovernanceFragment) GetConfiguration() *PrGovernanceConfigurationFragment {
-	if t == nil {
-		t = &PrGovernanceFragment{}
-	}
-	return t.Configuration
 }
 
 type HelmRepositoryFragment struct {
@@ -6144,28 +6119,6 @@ func (t *ContainerSpecFragment_EnvFrom) GetSecret() string {
 		t = &ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
-}
-
-type PrGovernanceConfigurationFragment_Webhook_ struct {
-	URL string "json:\"url\" graphql:\"url\""
-}
-
-func (t *PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
-	if t == nil {
-		t = &PrGovernanceConfigurationFragment_Webhook_{}
-	}
-	return t.URL
-}
-
-type PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
-	URL string "json:\"url\" graphql:\"url\""
-}
-
-func (t *PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
-	if t == nil {
-		t = &PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
-	}
-	return t.URL
 }
 
 type MCPServerFragment_Authentication_Headers struct {
@@ -13351,39 +13304,6 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 		t = &ListPrAutomations_PrAutomations{}
 	}
 	return t.Edges
-}
-
-type GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
-	URL string "json:\"url\" graphql:\"url\""
-}
-
-func (t *GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
-	if t == nil {
-		t = &GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
-	}
-	return t.URL
-}
-
-type DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
-	URL string "json:\"url\" graphql:\"url\""
-}
-
-func (t *DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
-	if t == nil {
-		t = &DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
-	}
-	return t.URL
-}
-
-type UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
-	URL string "json:\"url\" graphql:\"url\""
-}
-
-func (t *UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
-	if t == nil {
-		t = &UpsertPrGovernance_UpsertPrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
-	}
-	return t.URL
 }
 
 type ListHelmRepositories_HelmRepositories_Edges struct {
@@ -27948,29 +27868,6 @@ const GetPrGovernanceDocument = `query GetPrGovernance ($id: ID, $name: String) 
 fragment PrGovernanceFragment on PrGovernance {
 	id
 	name
-	connection {
-		... ScmConnectionFragment
-	}
-	configuration {
-		... PrGovernanceConfigurationFragment
-	}
-}
-fragment ScmConnectionFragment on ScmConnection {
-	id
-	name
-	apiUrl
-	baseUrl
-	type
-	username
-	insertedAt
-	updatedAt
-}
-fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
-	webhook {
-		... {
-			url
-		}
-	}
 }
 `
 
@@ -28000,29 +27897,6 @@ const DeletePrGovernanceDocument = `mutation DeletePrGovernance ($id: ID!) {
 fragment PrGovernanceFragment on PrGovernance {
 	id
 	name
-	connection {
-		... ScmConnectionFragment
-	}
-	configuration {
-		... PrGovernanceConfigurationFragment
-	}
-}
-fragment ScmConnectionFragment on ScmConnection {
-	id
-	name
-	apiUrl
-	baseUrl
-	type
-	username
-	insertedAt
-	updatedAt
-}
-fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
-	webhook {
-		... {
-			url
-		}
-	}
 }
 `
 
@@ -28051,29 +27925,6 @@ const UpsertPrGovernanceDocument = `mutation UpsertPrGovernance ($attributes: Pr
 fragment PrGovernanceFragment on PrGovernance {
 	id
 	name
-	connection {
-		... ScmConnectionFragment
-	}
-	configuration {
-		... PrGovernanceConfigurationFragment
-	}
-}
-fragment ScmConnectionFragment on ScmConnection {
-	id
-	name
-	apiUrl
-	baseUrl
-	type
-	username
-	insertedAt
-	updatedAt
-}
-fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
-	webhook {
-		... {
-			url
-		}
-	}
 }
 `
 

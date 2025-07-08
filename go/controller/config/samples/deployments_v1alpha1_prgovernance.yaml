@@ -1,3 +1,25 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-token
+  namespace: default
+stringData:
+  token: "test-token"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github
+  namespace: default
+spec:
+  name: scm-test-github
+  type: GITHUB
+  tokenSecretRef:
+    name: github-token
+    namespace: default
+  username: "johndoe"
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: PrGovernance
 metadata:
@@ -9,4 +31,10 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: prgovernance-sample
 spec:
-  # TODO(user): Add fields here
+  name: test
+  connectionRef:
+    name: github
+    namespace: default
+  configuration:
+    webhook:
+      url: "https://example.com"
