@@ -757,7 +757,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
     field :connection,    :scm_connection, resolve: dataloader(Deployments)
-    field :configuration, :pr_governance_configuration, resolve: dataloader(Deployments)
+    field :configuration, :pr_governance_configuration
 
     timestamps()
   end

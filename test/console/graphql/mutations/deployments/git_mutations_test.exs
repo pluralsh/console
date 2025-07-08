@@ -496,6 +496,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
             id
             name
             connection { id }
+            configuration { webhook { url } }
           }
         }
       """, %{
@@ -512,6 +513,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
 
       assert governance["name"] == "governance"
       assert governance["connection"]["id"] == conn.id
+      assert governance["configuration"]["webhook"]["url"] == "https://webhook.url"
     end
   end
 

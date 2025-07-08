@@ -1,6 +1,7 @@
 defmodule Console.AI.Graph.Indexer.Sink do
   use GenServer
   alias Console.AI.Graph.Provider
+  require Logger
 
   defmodule Chunk do
     defstruct [:connection, :chunk]
@@ -24,8 +25,14 @@ defmodule Console.AI.Graph.Indexer.Sink do
   def handle_call({:ingest, %Chunk{} = chunk}, _from, state), do: {:reply, :ok, [chunk | state]}
 
   def handle_info(:poll, state) do
-    Enum.each(state, fn %Chunk{connection: conn, chunk: chunk} -> Provider.bulk_index(conn, chunk) end)
+    Enum.each(state, fn %Chunk{connection: conn, chunk: chunk} ->
+      Provider.bulk_index(conn, chunk)
+      |> log_error()
+    end)
     {:noreply, []}
   end
   def handle_info(_, state), do: {:noreply, state}
+
+  defp log_error({:error, error}), do: Logger.error("Error indexing chunk: #{inspect(error)}")
+  defp log_error(_), do: :ok
 end
