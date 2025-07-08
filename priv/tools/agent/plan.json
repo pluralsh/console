@@ -3,7 +3,7 @@
     "properties": {
         "plan": {
             "type": "string",
-            "description": "A markdown representation of the infrastructure that would be needed to create what the user is asking for"
+            "description": "A markdown representation of the infrastructure that would be needed to create what the user is asking for.  Explicitly call out the pr automations you plan to use in here."
         },
         "required_services": {
             "type": "array",

@@ -29,21 +29,21 @@ defmodule Console.AI.Tools.Agent.Base do
   def to_pb(%CloudConnection{provider: :aws} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.aws),
+      credentials: {:aws, to_pb(connection.configuration.aws)},
     }
   end
 
   def to_pb(%CloudConnection{provider: :gcp} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.gcp),
+      credentials: {:gcp, to_pb(connection.configuration.gcp)},
     }
   end
 
   def to_pb(%CloudConnection{provider: :azure} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.azure),
+      credentials: {:azure, to_pb(connection.configuration.azure)},
     }
   end
 

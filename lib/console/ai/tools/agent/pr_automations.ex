@@ -15,7 +15,9 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
     |> validate_required([:catalog_id])
   end
 
-  def json_schema(), do: Console.priv_file!("tools/agent/automations.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/agent/pr_automations.json") |> Jason.decode!()
+
+  def json_schema(), do: @json_schema
   def name(), do: plrl_tool("pr_automations")
   def description(), do: "Returns a list of pr automations that are present in this catalog.  These are individual PRs that provision infrastructure a user might want to create in a tested, gitops fashion."
 

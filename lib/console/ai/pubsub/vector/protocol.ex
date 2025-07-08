@@ -42,23 +42,37 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.AlertResolutionCreat
   defp filters(_), do: []
 end
 
+defmodule Console.AI.PubSub.Vectorizable.Stack do
+  alias Console.Schema.{StackState, Stack}
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def indexable(%StackState{state: [_ | _] = items} = state, %Stack{} = stack) do
+    minis =
+      Enum.reject(items, &String.starts_with?(&1.identifier, "data."))
+      |> Enum.map(&StackState.Mini.new(%{state | stack: stack}, &1))
+    [
+      %Indexable{delete: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
+      %Indexable{data: minis, filters: [stack_id: stack.id]}
+    ]
+  end
+
+  def indexable(_, _), do: :ok
+end
+
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackUpdated do
   alias Console.Repo
   alias Console.Schema.{StackState, Stack}
   alias Console.AI.PubSub.Vector.Indexable
+  alias Console.AI.PubSub.Vectorizable.Stack, as: StackUtils
+  require Logger
 
   @final ~w(successful failed)a
 
   def resource(%@for{item: %Stack{status: s} = stack}) when s in @final do
+    Logger.info("StackUpdated{#{stack.name}}")
     case Repo.preload(stack, [:state, :repository]) do
-      %Stack{state: %StackState{state: [_ | _] = items} = state} = stack ->
-        minis =
-          Enum.reject(items, &String.starts_with?(&1.identifier, "data."))
-          |> Enum.map(&StackState.Mini.new(%{state | stack: stack}, &1))
-        [
-          %Indexable{delete: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
-          %Indexable{data: minis, filters: [stack_id: stack.id]}
-        ]
+      %Stack{state: %StackState{} = state} = stack ->
+        StackUtils.indexable(state, stack)
       _ -> :ok
     end
   end
@@ -67,12 +81,17 @@ end
 
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
   alias Console.AI.PubSub.Vector.Indexable
-  alias Console.Schema.{Stack, StackRun}
+  alias Console.Schema.{Stack, StackRun, StackState}
+  alias Console.AI.PubSub.Vectorizable.Stack, as: StackUtils
+  require Logger
 
   def resource(%@for{item: %StackRun{status: :successful, id: id} = run}) do
-    case Console.Repo.preload(run, [:stack]) do
+    case Console.Repo.preload(run, [stack: [:state, :repository]]) do
       %StackRun{stack: %Stack{delete_run_id: ^id}} ->
         %Indexable{delete: true, filters: [stack_id: run.stack_id, datatype: {:raw, :stack_state}]}
+      %StackRun{stack: %Stack{state: %StackState{} = state} = stack} ->
+        Logger.info("StackRunCompleted{#{run.stack.name}}")
+        StackUtils.indexable(state, stack)
       _ -> :ok
     end
   end

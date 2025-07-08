@@ -399,5 +399,37 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       {:ok, 0} = ES.count_index(ES.vector_index())
     end
+
+    test "it will index stack state on successful non-delete runs" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      stack = insert(:stack, status: :successful)
+      insert(:stack_state, stack: stack, state: [
+        %{identifier: "1", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+        %{identifier: "2", resource: "resource", name: "name", configuration: %{"key" => "value"}},
+      ])
+
+      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      run = insert(:stack_run, stack: stack, status: :successful)
+      event = %PubSub.StackRunCompleted{item: refetch(run)}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
   end
 end

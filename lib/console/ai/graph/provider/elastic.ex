@@ -97,7 +97,8 @@ defmodule Console.AI.Graph.Provider.Elastic do
 
   defp passages(doc) do
     case Provider.embeddings(doc) do
-      {:ok, embeddings} -> Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end)
+      {:ok, embeddings} ->
+        Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end)
       _ -> []
     end
   end

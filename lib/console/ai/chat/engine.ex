@@ -24,7 +24,7 @@ defmodule Console.AI.Chat.Engine do
     DeleteRelationships,
     Graph
   }
-  alias Console.AI.Tools.Agent
+  alias Console.AI.Tools.Agent, as: AgentTool
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
@@ -52,18 +52,18 @@ defmodule Console.AI.Chat.Engine do
   ]
 
   @agent_tools [
-    Agent.Query,
-    Agent.Schema,
-    Agent.Plan,
-    Agent.Catalogs,
-    Agent.Automations,
-    Agent.Clusters,
-    Agent.Search,
-    Agent.Stack
+    AgentTool.Query,
+    AgentTool.Schema,
+    AgentTool.Plan,
+    AgentTool.Catalogs,
+    AgentTool.PrAutomations,
+    AgentTool.Clusters,
+    AgentTool.Search,
+    AgentTool.Stack
   ]
 
   @agent_planned_tools [
-    Agent.CallPr,
+    AgentTool.CallPr,
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}

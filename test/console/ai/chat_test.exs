@@ -471,6 +471,34 @@ defmodule Console.AI.ChatSyncTest do
       assert audit.tool == "echo"
     end
 
+    test "it can do a chat with a agent session" do
+      user   = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      insert(:agent_session, thread: thread)
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+
+      expect(HTTPoison, :post, fn _, _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
+          %{
+            message: %{
+              content: "openai completion"
+            }
+          }
+        ]})}}
+      end)
+      # expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ -> {:ok, "openai completion"} end)
+
+      {:ok, [next]} = Chat.hybrid_chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.user_id == user.id
+      assert next.thread_id == thread.id
+      assert next.role == :assistant
+      assert next.content == "openai completion"
+    end
+
     test "it won't recurse if a mcp call requires confirmation" do
       user   = insert(:user)
       flow   = insert(:flow)

@@ -13,7 +13,8 @@ defmodule Console.AI.Tools.Agent.CallPr do
     |> validate_required([:pr_automation_id])
   end
 
-  def json_schema(), do: Console.priv_file!("tools/agent/call_pr.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/agent/call_pr.json") |> Jason.decode!()
+  def json_schema(), do: @json_schema
   def name(), do: plrl_tool("call_pr_automation")
   def description(), do: "Prompts a user to execute a pr automation by id, which should be discoverd by searching catalogs and pr automations within them."
 
