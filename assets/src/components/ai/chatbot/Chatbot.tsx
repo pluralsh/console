@@ -5,6 +5,8 @@ import {
 } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ChatThreadFragment,
@@ -27,8 +29,6 @@ import {
   ChatbotPanelThread,
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -38,9 +38,7 @@ export function Chatbot() {
   const { open, setOpen, fullscreen } = useChatbotContext()
   const settings = useDeploymentSettings()
 
-  if (!settings.ai?.enabled) {
-    return null
-  }
+  if (!settings.ai?.enabled) return null
 
   return (
     <div css={{ position: 'relative' }}>
@@ -116,7 +114,6 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
   })
   const tools =
     threadDetailsQuery.data?.chatThread?.tools?.filter(isNonNullable) ?? []
-  const shouldUseMCP = !!currentThread?.flow && !isEmpty(tools)
 
   const rows = useMemo(() => {
     const threads =
@@ -141,7 +138,7 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
       $fullscreen={fullscreen}
       {...props}
     >
-      {shouldUseMCP && (
+      {!isEmpty(tools) && (
         <McpServerShelf
           isOpen={showMcpServers}
           setIsOpen={setShowMcpServers}
@@ -169,7 +166,6 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
               currentThread={currentThread}
               threadDetailsQuery={threadDetailsQuery}
               fullscreen={fullscreen}
-              shouldUseMCP={shouldUseMCP}
               showMcpServers={showMcpServers}
               setShowMcpServers={setShowMcpServers}
               showExamplePrompts={showPrompts}

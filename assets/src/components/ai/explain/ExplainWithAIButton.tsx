@@ -32,17 +32,15 @@ export default function ExplainWithAIButton({
         secondary
         small
         startIcon={startIcon}
-        {...(active
-          ? {
-              ...aiGradientBorderStyles(theme),
-              transitionDuration: '1s',
-              transitionProperty: 'border',
-              _hover: {
-                backgroundImage: `linear-gradient(${theme.colors['fill-zero-selected']}, ${theme.colors['fill-zero-selected']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
-                border: '1px solid transparent',
-              },
-            }
-          : {})}
+        css={{
+          ...(active
+            ? {
+                ...aiGradientBorderStyles(theme),
+                transitionDuration: '1s',
+                transitionProperty: 'border',
+              }
+            : {}),
+        }}
         {...props}
       >
         {children}

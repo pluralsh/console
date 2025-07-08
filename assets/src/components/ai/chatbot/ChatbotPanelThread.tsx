@@ -24,7 +24,6 @@ import {
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
-  useChatMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -45,7 +44,6 @@ export function ChatbotPanelThread({
   currentThread,
   fullscreen,
   threadDetailsQuery: { data, loading, error },
-  shouldUseMCP,
   showMcpServers,
   setShowMcpServers,
   showExamplePrompts = false,
@@ -54,7 +52,6 @@ export function ChatbotPanelThread({
   currentThread: ChatThreadFragment
   fullscreen: boolean
   threadDetailsQuery: ChatThreadDetailsQueryResult
-  shouldUseMCP: boolean
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
   showExamplePrompts: boolean
@@ -100,38 +97,28 @@ export function ChatbotPanelThread({
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
 
-  const commonChatAttributes = {
+  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
+  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
+  const [
+    mutateHybridChat,
+    { loading: sendingMessage, error: messageError, reset },
+  ] = useHybridChatMutation({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadDetails'],
     onCompleted: () => streaming && scrollToBottom(),
-  }
-  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
-  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
-  const [mutateRegChat, { loading: regLoading, error: regError }] =
-    useChatMutation({
-      ...commonChatAttributes,
-      optimisticResponse: ({ messages }) =>
-        getChatOptimisticResponse({
-          mutation: 'chat',
-          content: messages?.[0]?.content,
-        }),
-      update: (cache, { data }) =>
-        updateChatCache(currentThread.id, cache, [data?.chat]),
-    })
-  const [mutateHybridChat, { loading: hybridLoading, error: hybridError }] =
-    useHybridChatMutation({
-      ...commonChatAttributes,
-      optimisticResponse: ({ messages }) =>
-        getChatOptimisticResponse({
-          mutation: 'hybridChat',
-          content: messages?.[0]?.content,
-        }),
-      update: (cache, { data }) =>
-        updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
-    })
+    optimisticResponse: ({ messages }) =>
+      getChatOptimisticResponse({
+        mutation: 'hybridChat',
+        content: messages?.[0]?.content,
+      }),
+    update: (cache, { data }) =>
+      updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
+  })
 
-  const sendingMessage = regLoading || hybridLoading
-  const messageError = regError || hybridError
+  // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
+  useEffect(() => {
+    reset()
+  }, [currentThread.id, reset])
 
   // scroll to the bottom when number of messages increases
   const length = messages.length
@@ -149,10 +136,9 @@ export function ChatbotPanelThread({
         messages: [{ role: AiRole.User, content: newMessage }],
         threadId: currentThread.id,
       }
-      if (shouldUseMCP) mutateHybridChat({ variables })
-      else mutateRegChat({ variables })
+      mutateHybridChat({ variables })
     },
-    [currentThread.id, shouldUseMCP, mutateHybridChat, mutateRegChat]
+    [currentThread.id, mutateHybridChat]
   )
 
   if (!data && loading)
@@ -216,7 +202,6 @@ export function ChatbotPanelThread({
         currentThread={currentThread}
         sendMessage={sendMessage}
         fullscreen={fullscreen}
-        shouldUseMCP={shouldUseMCP}
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}

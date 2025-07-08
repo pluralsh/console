@@ -3,6 +3,7 @@ import {
   BrainIcon,
   ChatFilledIcon,
   CloseIcon,
+  ComposeIcon,
   ExpandIcon,
   Flex,
   IconFrame,
@@ -10,14 +11,16 @@ import {
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
   AiInsightFragment,
   ChatThreadTinyFragment,
+  useCloudConnectionsQuery,
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { useCallback } from 'react'
+import { use, useCallback } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
 import { AIPinButton } from '../AIPinButton'
@@ -38,7 +41,16 @@ export function ChatbotHeader({
   currentInsight?: Nullable<AiInsightFragment>
 }) {
   const { colors } = useTheme()
-  const { setFullscreen, closeChatbot, goToThreadList } = useChatbot()
+  const { featureFlags } = use(FeatureFlagContext)
+  const {
+    setFullscreen,
+    closeChatbot,
+    goToThreadList,
+    createNewThread,
+    mutationLoading,
+    mutationError,
+  } = useChatbot()
+
   const insight = currentThread?.insight || currentInsight
   let state: HeaderState = 'list'
   if (currentThread) state = 'thread'
@@ -64,6 +76,10 @@ export function ChatbotHeader({
       },
     })
   }, [currentThread, updateThread])
+
+  const { data: cloudConnections, loading: cloudConnectionsLoading } =
+    useCloudConnectionsQuery()
+  const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
   return (
     <WrapperSC $fullscreen={fullscreen}>
@@ -96,9 +112,27 @@ export function ChatbotHeader({
           />
         </>
       )}
+      {!cloudConnectionsLoading && (
+        <IconFrame
+          clickable
+          icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+          size={fullscreen ? 'large' : 'medium'}
+          type="secondary"
+          tooltip="Start a new chat"
+          onClick={() =>
+            createNewThread({
+              summary: 'New chat with Plural Copilot',
+              ...(featureFlags.Copilot &&
+                connectionId && {
+                  session: { connectionId },
+                }),
+            })
+          }
+        />
+      )}
       <IconFrame
         {...(fullscreen
-          ? { icon: <ShrinkIcon css={{ width: 16 }} />, size: 'large' }
+          ? { icon: <ShrinkIcon />, size: 'large' }
           : { icon: <ExpandIcon /> })}
         type="secondary"
         tooltip={fullscreen ? 'Collapse' : 'Expand'}
@@ -175,6 +209,15 @@ export function ChatbotHeader({
         marginBottom="medium"
       >
         Error updating thread settings.
+      </Toast>
+      <Toast
+        show={!!mutationError}
+        closeTimeout={5000}
+        severity="danger"
+        position="bottom"
+        marginBottom="medium"
+      >
+        <strong>Error creating new thread:</strong> {mutationError?.message}
       </Toast>
     </WrapperSC>
   )
