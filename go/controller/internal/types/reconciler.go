@@ -58,6 +58,7 @@ const (
 	ServiceDeploymentReconciler          Reconciler = "servicedeployment"
 	StackDefinitionReconciler            Reconciler = "stackdefinition"
 	InfrastructureStackReconciler        Reconciler = "infrastructurestack"
+	PrGovernanceReconciler               Reconciler = "prgovernance"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

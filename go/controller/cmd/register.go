@@ -414,4 +414,13 @@ func init() {
 			}
 		},
 	)
+
+	types.RegisterController(types.PrGovernanceReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.PrGovernanceReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
 }

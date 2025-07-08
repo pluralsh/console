@@ -124,6 +124,7 @@ type ConsoleClient interface {
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
 	DeletePrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrAutomation, error)
 	CreatePullRequest(ctx context.Context, id string, identifier *string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
+	GetPrGovernance(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrGovernance, error)
 	DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error)
 	UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
@@ -13295,6 +13296,17 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 	return t.Edges
 }
 
+type GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_) GetURL() string {
+	if t == nil {
+		t = &GetPrGovernance_PrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_{}
+	}
+	return t.URL
+}
+
 type DeletePrGovernance_DeletePrGovernance_PrGovernanceFragment_Configuration_PrGovernanceConfigurationFragment_Webhook_ struct {
 	URL string "json:\"url\" graphql:\"url\""
 }
@@ -17841,6 +17853,17 @@ func (t *CreatePullRequest) GetCreatePullRequest() *PullRequestFragment {
 		t = &CreatePullRequest{}
 	}
 	return t.CreatePullRequest
+}
+
+type GetPrGovernance struct {
+	PrGovernance *PrGovernanceFragment "json:\"prGovernance,omitempty\" graphql:\"prGovernance\""
+}
+
+func (t *GetPrGovernance) GetPrGovernance() *PrGovernanceFragment {
+	if t == nil {
+		t = &GetPrGovernance{}
+	}
+	return t.PrGovernance
 }
 
 type DeletePrGovernance struct {
@@ -27830,6 +27853,58 @@ func (c *Client) CreatePullRequest(ctx context.Context, id string, identifier *s
 	return &res, nil
 }
 
+const GetPrGovernanceDocument = `query GetPrGovernance ($id: ID, $name: String) {
+	prGovernance(id: $id, name: $name) {
+		... PrGovernanceFragment
+	}
+}
+fragment PrGovernanceFragment on PrGovernance {
+	id
+	name
+	connection {
+		... ScmConnectionFragment
+	}
+	configuration {
+		... PrGovernanceConfigurationFragment
+	}
+}
+fragment ScmConnectionFragment on ScmConnection {
+	id
+	name
+	apiUrl
+	baseUrl
+	type
+	username
+	insertedAt
+	updatedAt
+}
+fragment PrGovernanceConfigurationFragment on PrGovernanceConfiguration {
+	webhook {
+		... {
+			url
+		}
+	}
+}
+`
+
+func (c *Client) GetPrGovernance(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrGovernance, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetPrGovernance
+	if err := c.Client.Post(ctx, "GetPrGovernance", GetPrGovernanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const DeletePrGovernanceDocument = `mutation DeletePrGovernance ($id: ID!) {
 	deletePrGovernance(id: $id) {
 		... PrGovernanceFragment
@@ -36091,6 +36166,7 @@ var DocumentOperationNames = map[string]string{
 	UpdatePrAutomationDocument:                        "UpdatePrAutomation",
 	DeletePrAutomationDocument:                        "DeletePrAutomation",
 	CreatePullRequestDocument:                         "CreatePullRequest",
+	GetPrGovernanceDocument:                           "GetPrGovernance",
 	DeletePrGovernanceDocument:                        "DeletePrGovernance",
 	UpsertPrGovernanceDocument:                        "UpsertPrGovernance",
 	GetGroupDocument:                                  "GetGroup",

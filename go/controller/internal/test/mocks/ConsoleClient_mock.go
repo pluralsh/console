@@ -2199,6 +2199,53 @@ func (_c *ConsoleClientMock_DeletePrAutomation_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// DeletePrGovernance provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeletePrGovernance(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePrGovernance")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeletePrGovernance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePrGovernance'
+type ConsoleClientMock_DeletePrGovernance_Call struct {
+	*mock.Call
+}
+
+// DeletePrGovernance is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeletePrGovernance(ctx interface{}, id interface{}) *ConsoleClientMock_DeletePrGovernance_Call {
+	return &ConsoleClientMock_DeletePrGovernance_Call{Call: _e.mock.On("DeletePrGovernance", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeletePrGovernance_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeletePrGovernance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePrGovernance_Call) Return(_a0 error) *ConsoleClientMock_DeletePrGovernance_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePrGovernance_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeletePrGovernance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeletePreviewEnvironmentTemplate provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) DeletePreviewEnvironmentTemplate(ctx context.Context, id string) error {
 	ret := _m.Called(ctx, id)
@@ -4348,6 +4395,66 @@ func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Return(_a0 *client.PrAut
 }
 
 func (_c *ConsoleClientMock_GetPrAutomationByName_Call) RunAndReturn(run func(context.Context, string) (*client.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomationByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPrGovernance provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetPrGovernance(ctx context.Context, id *string, name *string) (*client.PrGovernanceFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPrGovernance")
+	}
+
+	var r0 *client.PrGovernanceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.PrGovernanceFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.PrGovernanceFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PrGovernanceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPrGovernance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPrGovernance'
+type ConsoleClientMock_GetPrGovernance_Call struct {
+	*mock.Call
+}
+
+// GetPrGovernance is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetPrGovernance(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetPrGovernance_Call {
+	return &ConsoleClientMock_GetPrGovernance_Call{Call: _e.mock.On("GetPrGovernance", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetPrGovernance_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetPrGovernance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrGovernance_Call) Return(_a0 *client.PrGovernanceFragment, _a1 error) *ConsoleClientMock_GetPrGovernance_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrGovernance_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.PrGovernanceFragment, error)) *ConsoleClientMock_GetPrGovernance_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -8454,6 +8561,65 @@ func (_c *ConsoleClientMock_UpsertObserver_Call) Return(_a0 *client.ObserverFrag
 }
 
 func (_c *ConsoleClientMock_UpsertObserver_Call) RunAndReturn(run func(context.Context, client.ObserverAttributes) (*client.ObserverFragment, error)) *ConsoleClientMock_UpsertObserver_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertPrGovernance provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertPrGovernance(ctx context.Context, attributes client.PrGovernanceAttributes) (*client.PrGovernanceFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertPrGovernance")
+	}
+
+	var r0 *client.PrGovernanceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.PrGovernanceAttributes) (*client.PrGovernanceFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.PrGovernanceAttributes) *client.PrGovernanceFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PrGovernanceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.PrGovernanceAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertPrGovernance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertPrGovernance'
+type ConsoleClientMock_UpsertPrGovernance_Call struct {
+	*mock.Call
+}
+
+// UpsertPrGovernance is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.PrGovernanceAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertPrGovernance(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertPrGovernance_Call {
+	return &ConsoleClientMock_UpsertPrGovernance_Call{Call: _e.mock.On("UpsertPrGovernance", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertPrGovernance_Call) Run(run func(ctx context.Context, attributes client.PrGovernanceAttributes)) *ConsoleClientMock_UpsertPrGovernance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.PrGovernanceAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertPrGovernance_Call) Return(_a0 *client.PrGovernanceFragment, _a1 error) *ConsoleClientMock_UpsertPrGovernance_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertPrGovernance_Call) RunAndReturn(run func(context.Context, client.PrGovernanceAttributes) (*client.PrGovernanceFragment, error)) *ConsoleClientMock_UpsertPrGovernance_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
-	
+
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -70,7 +70,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return *result, nil
 	}
 
-	// Get Catalog SHA that can be saved back in the status to check for changes
+	// Get SHA that can be saved back in the status to check for changes
 	changed, sha, err := prGovernance.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate catalog SHA")
@@ -128,7 +128,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 	}
 
 	// try to delete the resource
-	if err := r.ConsoleClient.DeletePreviewEnvironmentTemplate(ctx, prGovernance.Status.GetID()); err != nil {
+	if err := r.ConsoleClient.DeletePrGovernance(ctx, prGovernance.Status.GetID()); err != nil {
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -147,6 +147,9 @@ func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v
 
 	connection := &v1alpha1.ScmConnection{}
 	ref := prGovernance.Spec.ConnectionRef
+	if ref.Namespace == "" {
+		ref.Namespace = prGovernance.Namespace
+	}
 	if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, connection); err != nil {
 		return nil, nil, err
 	}
