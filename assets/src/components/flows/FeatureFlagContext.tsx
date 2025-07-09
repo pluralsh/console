@@ -20,10 +20,12 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
+  Copilot: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
+  Copilot: false,
 }
 
 export const FeatureFlagContext = createContext<{

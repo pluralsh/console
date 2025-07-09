@@ -84,6 +84,11 @@ fragment ChatThreadSettings on ChatThreadSettings {
   memory
 }
 
+fragment CloudConnectionTiny on CloudConnection {
+  id
+  name
+}
+
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
   aiPins(first: $first, last: $last, after: $after, before: $before) {
     pageInfo {
@@ -124,6 +129,24 @@ query ChatThreads(
 query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
     ...ChatThread
+  }
+}
+
+query CloudConnections(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...CloudConnectionTiny
+      }
+    }
   }
 }
 

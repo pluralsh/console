@@ -19,7 +19,7 @@ import {
   useAddChatContextMutation,
   useThreadPrMutation,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
+import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
   Dispatch,
@@ -39,7 +39,6 @@ export function SendMessageForm({
   currentThread,
   sendMessage,
   fullscreen,
-  shouldUseMCP,
   serverNames,
   showMcpServers,
   setShowMcpServers,
@@ -50,7 +49,6 @@ export function SendMessageForm({
   currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
   fullscreen: boolean
-  shouldUseMCP: boolean
   serverNames: string[]
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
@@ -123,7 +121,7 @@ export function SendMessageForm({
       $fullscreen={fullscreen}
       ref={formRef}
     >
-      {shouldUseMCP && (
+      {!isEmpty(serverNames) && (
         <Flex
           justify="space-between"
           align="center"
@@ -176,7 +174,7 @@ export function SendMessageForm({
                   : undefined,
               }}
             />
-            {shouldUseMCP && (
+            {!isEmpty(serverNames) && (
               <IconFrame
                 icon={<ServersIcon />}
                 type="secondary"
