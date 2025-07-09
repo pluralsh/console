@@ -1,6 +1,7 @@
 import {
   Accordion,
   AccordionItem,
+  AppIcon,
   Button,
   Card,
   CaretRightIcon,
@@ -11,6 +12,7 @@ import {
   FileIcon,
   Flex,
   Markdown,
+  PrQueueIcon,
 } from '@pluralsh/design-system'
 
 import isJson from 'is-json'
@@ -24,12 +26,16 @@ import {
   AiRole,
   ChatType,
   ChatTypeAttributes,
+  PrAutomationFragment,
   useConfirmChatMutation,
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
 import { useState } from 'react'
 import { ChatMessageActions } from './ChatMessage'
+import { iconUrl } from 'utils/icon'
+import { StackedText } from 'components/utils/table/StackedText'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 type ChatMessageContentProps = {
   id?: string
@@ -41,6 +47,7 @@ type ChatMessageContentProps = {
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
+  prAutomation?: Nullable<PrAutomationFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
@@ -57,6 +64,7 @@ export function ChatMessageContent({
   content,
   type = ChatType.Text,
   attributes,
+  prAutomation,
   confirm,
   confirmedAt,
   serverName,
@@ -93,6 +101,8 @@ export function ChatMessageContent({
           threadId={threadId}
         />
       )
+    case ChatType.PrCall:
+      return <PrCallContent prAutomation={prAutomation} />
     case ChatType.Text:
     default:
       return role === AiRole.Assistant || role === AiRole.System ? (
@@ -207,6 +217,56 @@ function ImplementationPlanMessageContent({
         </Button>
       </Accordion>
       {error && <GqlError error={error} />}
+    </Flex>
+  )
+}
+
+function PrCallContent({
+  prAutomation,
+}: Pick<ChatMessageContentProps, 'prAutomation'>) {
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  if (!prAutomation) return <GqlError error="PR automation not found." />
+
+  const { icon, darkIcon, name, documentation } = prAutomation
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      align="flex-start"
+      width="fit-content"
+    >
+      <CaptionP $color="text-xlight">PR automation:</CaptionP>
+      <Card css={{ padding: theme.spacing.xsmall, minWidth: 150 }}>
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+        >
+          <AppIcon
+            size="xxsmall"
+            url={iconUrl(icon, darkIcon, theme.mode)}
+            icon={<PrQueueIcon />}
+          />
+          <StackedText
+            first={name}
+            second={documentation}
+          />
+        </Flex>
+      </Card>
+      <Button
+        small
+        css={{ alignSelf: 'flex-end' }}
+        onClick={() => setOpen(true)}
+      >
+        Create PR
+      </Button>
+      <CreatePrModal
+        prAutomation={prAutomation}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </Flex>
   )
 }

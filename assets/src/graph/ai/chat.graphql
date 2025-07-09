@@ -28,9 +28,15 @@ fragment Chat on Chat {
       name
       arguments
     }
+    prCall {
+      context
+    }
   }
   pullRequest {
     ...PullRequest
+  }
+  prAutomation {
+    ...PrAutomation
   }
   server {
     id

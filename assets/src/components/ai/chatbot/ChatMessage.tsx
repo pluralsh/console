@@ -24,6 +24,7 @@ import {
   AiRole,
   ChatType,
   ChatTypeAttributes,
+  PrAutomationFragment,
   PullRequestFragment,
   useDeleteChatMutation,
 } from 'generated/graphql'
@@ -40,6 +41,7 @@ export function ChatMessage({
   type = ChatType.Text,
   attributes,
   pullRequest,
+  prAutomation,
   confirm,
   confirmedAt,
   serverName,
@@ -56,6 +58,7 @@ export function ChatMessage({
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
+  prAutomation?: Nullable<PrAutomationFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
@@ -104,6 +107,7 @@ export function ChatMessage({
             confirmedAt={confirmedAt}
             serverName={serverName}
             highlightToolContent={highlightToolContent}
+            prAutomation={prAutomation}
           />
           {type !== ChatType.File && (
             <ChatMessageActions
