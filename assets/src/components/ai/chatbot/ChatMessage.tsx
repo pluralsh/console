@@ -9,14 +9,13 @@ import {
   GitHubLogoIcon,
   IconFrame,
   IconFrameProps,
-  Markdown,
   PluralLogoMark,
   Spinner,
   TrashCanIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentPropsWithRef, ReactNode, useState } from 'react'
+import { ComponentPropsWithRef, useState } from 'react'
 import styled, { CSSObject, useTheme } from 'styled-components'
 import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
@@ -37,6 +36,7 @@ export function ChatMessage({
   seq,
   content,
   role,
+  threadId,
   type = ChatType.Text,
   attributes,
   pullRequest,
@@ -52,6 +52,7 @@ export function ChatMessage({
   seq?: number
   content?: Nullable<string>
   role: AiRole
+  threadId?: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
@@ -63,28 +64,7 @@ export function ChatMessage({
   highlightToolContent?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
-  let finalContent: ReactNode
   const rightAlign = role === AiRole.User
-
-  if (role === AiRole.Assistant || role === AiRole.System) {
-    finalContent = <Markdown text={content ?? ''} />
-  } else {
-    finalContent = (
-      <ChatMessageContent
-        id={id ?? ''}
-        seq={seq}
-        showActions={showActions && !disableActions}
-        side={rightAlign ? 'right' : 'left'}
-        content={content ?? ''}
-        type={type}
-        attributes={attributes}
-        confirm={confirm}
-        confirmedAt={confirmedAt}
-        serverName={serverName}
-        highlightToolContent={highlightToolContent}
-      />
-    )
-  }
 
   return pullRequest ? (
     <PrChatMesssage
@@ -110,7 +90,21 @@ export function ChatMessage({
             ...contentStyles,
           }}
         >
-          {finalContent}
+          <ChatMessageContent
+            id={id ?? ''}
+            seq={seq}
+            showActions={showActions && !disableActions}
+            side={rightAlign ? 'right' : 'left'}
+            content={content ?? ''}
+            role={role}
+            threadId={threadId}
+            type={type}
+            attributes={attributes}
+            confirm={confirm}
+            confirmedAt={confirmedAt}
+            serverName={serverName}
+            highlightToolContent={highlightToolContent}
+          />
           {type !== ChatType.File && (
             <ChatMessageActions
               id={id ?? ''}

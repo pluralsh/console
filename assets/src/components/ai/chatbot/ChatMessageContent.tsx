@@ -6,6 +6,8 @@ import {
   CaretRightIcon,
   Chip,
   Code,
+  Divider,
+  DocumentIcon,
   FileIcon,
   Flex,
   Markdown,
@@ -15,23 +17,27 @@ import isJson from 'is-json'
 
 import styled, { useTheme } from 'styled-components'
 
+import { GqlError } from 'components/utils/Alert'
+import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  AiRole,
   ChatType,
   ChatTypeAttributes,
   useConfirmChatMutation,
+  useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { ChatMessageActions } from './ChatMessage'
 import { useState } from 'react'
-import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { GqlError } from 'components/utils/Alert'
+import { ChatMessageActions } from './ChatMessage'
 
 type ChatMessageContentProps = {
   id?: string
   seq?: number
+  role?: AiRole
+  threadId?: string
   showActions?: boolean
-  side: 'left' | 'right'
+  side?: 'left' | 'right'
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
@@ -44,6 +50,8 @@ type ChatMessageContentProps = {
 export function ChatMessageContent({
   id,
   seq,
+  role,
+  threadId,
   showActions,
   side,
   content,
@@ -78,9 +86,20 @@ export function ChatMessageContent({
           highlightToolContent={highlightToolContent}
         />
       )
+    case ChatType.ImplementationPlan:
+      return (
+        <ImplementationPlanMessageContent
+          content={content}
+          threadId={threadId}
+        />
+      )
     case ChatType.Text:
     default:
-      return <StandardMessageContent content={content} />
+      return role === AiRole.Assistant || role === AiRole.System ? (
+        <Markdown text={content ?? ''} />
+      ) : (
+        <StandardMessageContent content={content} />
+      )
   }
 }
 
@@ -116,7 +135,7 @@ function FileMessageContent({
               seq={seq}
               content={fileName}
               show={showActions}
-              side={side}
+              side={side ?? 'right'}
               iconFrameType="floating"
               css={{ position: 'absolute', right: 16, top: 4 }}
             />
@@ -128,6 +147,67 @@ function FileMessageContent({
         </Code>
       </AccordionItem>
     </Accordion>
+  )
+}
+
+function ImplementationPlanMessageContent({
+  content,
+  threadId,
+}: ChatMessageContentProps) {
+  const { spacing, colors } = useTheme()
+  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation()
+
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <Accordion
+        type="single"
+        css={{
+          '&:has(:first-of-type button:hover)': {
+            background: colors['fill-two-hover'],
+          },
+        }}
+      >
+        <AccordionItem
+          padding="compact"
+          caret="right"
+          trigger={
+            <Flex
+              gap="small"
+              align="center"
+              wordBreak="break-word"
+            >
+              <DocumentIcon
+                size={12}
+                color="icon-light"
+              />
+              <CaptionP $color="text-light">Implementation Plan</CaptionP>
+            </Flex>
+          }
+        >
+          <div css={{ padding: spacing.xsmall }}>
+            <Markdown text={content} />
+          </div>
+        </AccordionItem>
+        <Divider
+          css={{ margin: `0 ${spacing.small}px` }}
+          backgroundColor={colors['border-fill-three']}
+        />
+        <Button
+          small
+          css={{ margin: spacing.small, alignSelf: 'flex-start' }}
+          loading={loading}
+          onClick={() =>
+            confirmPlan({ variables: { threadId: threadId ?? '' } })
+          }
+        >
+          Confirm plan
+        </Button>
+      </Accordion>
+      {error && <GqlError error={error} />}
+    </Flex>
   )
 }
 

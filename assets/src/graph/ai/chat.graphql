@@ -180,6 +180,12 @@ mutation ConfirmChat($id: ID!) {
   }
 }
 
+mutation ConfirmChatPlan($threadId: ID!) {
+  confirmPlan(threadId: $threadId) {
+    ...Chat
+  }
+}
+
 mutation ClearChatHistory($before: Int) {
   clearChatHistory(before: $before)
 }

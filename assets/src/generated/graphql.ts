@@ -11195,6 +11195,13 @@ export type ConfirmChatMutationVariables = Exact<{
 
 export type ConfirmChatMutation = { __typename?: 'RootMutationType', confirmChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
 
+export type ConfirmChatPlanMutationVariables = Exact<{
+  threadId: Scalars['ID']['input'];
+}>;
+
+
+export type ConfirmChatPlanMutation = { __typename?: 'RootMutationType', confirmPlan?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+
 export type ClearChatHistoryMutationVariables = Exact<{
   before?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -18460,6 +18467,39 @@ export function useConfirmChatMutation(baseOptions?: Apollo.MutationHookOptions<
 export type ConfirmChatMutationHookResult = ReturnType<typeof useConfirmChatMutation>;
 export type ConfirmChatMutationResult = Apollo.MutationResult<ConfirmChatMutation>;
 export type ConfirmChatMutationOptions = Apollo.BaseMutationOptions<ConfirmChatMutation, ConfirmChatMutationVariables>;
+export const ConfirmChatPlanDocument = gql`
+    mutation ConfirmChatPlan($threadId: ID!) {
+  confirmPlan(threadId: $threadId) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type ConfirmChatPlanMutationFn = Apollo.MutationFunction<ConfirmChatPlanMutation, ConfirmChatPlanMutationVariables>;
+
+/**
+ * __useConfirmChatPlanMutation__
+ *
+ * To run a mutation, you first call `useConfirmChatPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfirmChatPlanMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [confirmChatPlanMutation, { data, loading, error }] = useConfirmChatPlanMutation({
+ *   variables: {
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useConfirmChatPlanMutation(baseOptions?: Apollo.MutationHookOptions<ConfirmChatPlanMutation, ConfirmChatPlanMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConfirmChatPlanMutation, ConfirmChatPlanMutationVariables>(ConfirmChatPlanDocument, options);
+      }
+export type ConfirmChatPlanMutationHookResult = ReturnType<typeof useConfirmChatPlanMutation>;
+export type ConfirmChatPlanMutationResult = Apollo.MutationResult<ConfirmChatPlanMutation>;
+export type ConfirmChatPlanMutationOptions = Apollo.BaseMutationOptions<ConfirmChatPlanMutation, ConfirmChatPlanMutationVariables>;
 export const ClearChatHistoryDocument = gql`
     mutation ClearChatHistory($before: Int) {
   clearChatHistory(before: $before)
@@ -30880,6 +30920,7 @@ export const namedOperations = {
     Chat: 'Chat',
     HybridChat: 'HybridChat',
     ConfirmChat: 'ConfirmChat',
+    ConfirmChatPlan: 'ConfirmChatPlan',
     ClearChatHistory: 'ClearChatHistory',
     DeleteChat: 'DeleteChat',
     SaveChats: 'SaveChats',
