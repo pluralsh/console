@@ -75,6 +75,18 @@ defmodule Console.AI.Chat.Engine do
     AgentTool.CallPr,
   ]
 
+  @code_pre_tools [
+    AgentTool.Stack,
+    AgentTool.Coding.StackFiles,
+    AgentTool.Coding.Pr
+  ]
+
+  @code_post_tools [
+    AgentTool.Coding.Commit,
+    AgentTool.Stack,
+    AgentTool.Coding.StackFiles,
+  ]
+
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
     %Chat{confirm: true, attributes: %Attributes{tool: %Attributes.ToolAttributes{name: name, arguments: args}}} = chat,
@@ -294,9 +306,13 @@ defmodule Console.AI.Chat.Engine do
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
 
+  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p, pull_request_id: nil}}) when is_binary(p),
+    do: @code_pre_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
   defp agent_tools(_), do: []
 
+  defp agent_planned_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: []
   defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
   defp agent_planned_tools(_), do: []
 

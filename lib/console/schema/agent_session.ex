@@ -1,18 +1,22 @@
 defmodule Console.Schema.AgentSession do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{CloudConnection, ChatThread}
+  alias Console.Schema.{CloudConnection, ChatThread, Stack, PullRequest}
 
   schema "agent_sessions" do
     field :agent_id,       :string
     field :plan_confirmed, :boolean
+    field :prompt,         :string
+    field :branch,         :string
 
-    belongs_to :connection, CloudConnection
-    belongs_to :thread,     ChatThread
+    belongs_to :connection,   CloudConnection
+    belongs_to :thread,       ChatThread
+    belongs_to :stack,        Stack
+    belongs_to :pull_request, PullRequest
 
     timestamps()
   end
 
-  @valid ~w(plan_confirmed connection_id thread_id)a
+  @valid ~w(plan_confirmed connection_id thread_id stack_id pull_request_id prompt branch)a
 
   def changeset(model, attrs \\ %{}) do
     model

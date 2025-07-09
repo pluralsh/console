@@ -32,6 +32,7 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Helm.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Observer.Worker.registry()]},
       {Registry, [keys: :unique, name: Console.AI.MCP.Agent.registry()]},
+      {Registry, [keys: :unique, name: Console.AI.Agents]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,

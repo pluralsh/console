@@ -4,9 +4,24 @@ defmodule Console.AI.Fixer.Stack do
   import Console.AI.Fixer.Base
   alias Console.Repo
   alias Console.AI.Fixer.Parent
-  alias Console.Schema.{Stack, StackRun, Service, GitRepository}
+  alias Console.Schema.{Stack, StackRun, Service, GitRepository, PullRequest}
   alias Console.Deployments.{Stacks}
 
+  @spec healthy_prompt(Stack.t()) :: {:ok, [{:user, binary}]} | Console.error()
+  def healthy_prompt(%Stack{} = stack) do
+    stack = Repo.preload(stack, [:repository])
+    with {:ok, f} <- Stacks.tarstream(last_healthy_run(stack)),
+      do: code_prompt(f, stack.git.folder)
+  end
+
+  @spec pr_prompt(Stack.t(), PullRequest.t()) :: {:ok, [{:user, binary}]} | Console.error()
+  def pr_prompt(%Stack{} = stack, %PullRequest{} = pr) do
+    stack = Repo.preload(stack, [:repository])
+    with {:ok, f} <- Stacks.tarstream(last_pr_run(stack, pr)),
+      do: code_prompt(f, stack.git.folder)
+  end
+
+  @spec prompt(Stack.t(), AiInsight.t()) :: {:ok, [{:user, binary}]} | Console.error()
   def prompt(%Stack{} = stack, insight) do
     stack = Repo.preload(stack, [:repository, :parent])
     with {:ok, f} <- Stacks.tarstream(last_run(stack)),
@@ -39,8 +54,25 @@ defmodule Console.AI.Fixer.Stack do
     """
   end
 
+  defp last_healthy_run(%Stack{} = stack) do
+    StackRun.for_stack(stack.id)
+    |> StackRun.for_status(:successful)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+  end
+
   defp last_run(%Stack{} = stack) do
     StackRun.for_stack(stack.id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+  end
+
+  defp last_pr_run(%Stack{} = stack, %PullRequest{} = pr) do
+    StackRun.for_stack(stack.id)
+    |> StackRun.for_pr(pr.id)
     |> StackRun.for_status(:failed)
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)

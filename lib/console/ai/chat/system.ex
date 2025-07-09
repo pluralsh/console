@@ -16,7 +16,7 @@ defmodule Console.AI.Chat.System do
   Please provide a response suitable for a junior engineer with minimal infrastructure experience, providing as much documentation and links to supporting materials as possible.
   """
 
-  @agent """
+  @base_agent """
   The following is an exploratory conversation between a user and an experienced platform engineer, focusing on cloud and kubernetes infrastructure.
   The user will usually be looking for a few things:
 
@@ -34,6 +34,25 @@ defmodule Console.AI.Chat.System do
   * when asking the user to call pr automations, do your best to autofill its configuration fields, and don't worry about asking otherwise, as our UI can let them fill it in manually.
   """
 
-  def prompt(%ChatThread{session: %AgentSession{}}), do: @agent
+  @code_agent """
+  You're a devops engineer being asked to complete a basic scoped task around reconfiguring infrastructure using Infrastructure as Code.  You're given a prompt and will execute a workflow
+  that follows this pattern:
+
+  1. Find the stack that needs to be modified, we'll provide you with a tool call to do this that allows for general semantic search.
+  2. Modify the terraform or other IaC code encapsulated in the stack to accomplish the given task and create a PR.  This will be the single pr that will be used throughout the run.
+  3. We will provide you with terraform plans or other input after the PR has been created to further modify the code in case changes are needed.
+  4. If an additional change is needed, push additional commits to the PR branch you've used already.
+  """
+
+  def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p) do
+    """
+    #{@code_agent}
+
+    The user has provided this as your requirements:
+
+    #{p}
+    """
+  end
+  def prompt(%ChatThread{session: %AgentSession{}}), do: @base_agent
   def prompt(_), do: @chat
 end

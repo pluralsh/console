@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "stack_id": {
+            "type": "string",
+            "description": "The id of the stack to get the files for"
+        }
+    },
+    "required": ["stack_id"],
+    "additionalProperties": false
+}

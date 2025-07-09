@@ -11,6 +11,7 @@ defmodule Console.AI.Tools.Agent.Base do
       import Ecto.Changeset
       import Console.AI.Tools.Utils
       import Console.AI.Tools.Agent.Base
+      alias Console.Deployments.Policies
       alias Console.AI.Tool
       alias Console.AI.Tool.Context
       alias CloudQuery.Client
@@ -23,6 +24,17 @@ defmodule Console.AI.Tools.Agent.Base do
     case Tool.session() do
       %AgentSession{} = session -> {:session, session}
       _ -> {:error, "this chat is not associated with an agent session"}
+    end
+  end
+
+  def update_session(attrs) do
+    with {:session, %AgentSession{} = session} <- session(),
+         {:ok, session} <- AgentSession.changeset(session, attrs) |> Console.Repo.update(),
+         _ <- Tool.upsert(%{session: session}) do
+      {:ok, session}
+    else
+      {:error, err} ->
+        {:error, "failed to update session, reason: #{inspect(err)}"}
     end
   end
 
