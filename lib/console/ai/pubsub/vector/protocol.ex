@@ -69,7 +69,6 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackUpdated do
   @final ~w(successful failed)a
 
   def resource(%@for{item: %Stack{status: s} = stack}) when s in @final do
-    Logger.info("StackUpdated{#{stack.name}}")
     case Repo.preload(stack, [:state, :repository]) do
       %Stack{state: %StackState{} = state} = stack ->
         StackUtils.indexable(state, stack)
@@ -90,7 +89,6 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
       %StackRun{stack: %Stack{delete_run_id: ^id}} ->
         %Indexable{delete: true, filters: [stack_id: run.stack_id, datatype: {:raw, :stack_state}]}
       %StackRun{stack: %Stack{state: %StackState{} = state} = stack} ->
-        Logger.info("StackRunCompleted{#{run.stack.name}}")
         StackUtils.indexable(state, stack)
       _ -> :ok
     end

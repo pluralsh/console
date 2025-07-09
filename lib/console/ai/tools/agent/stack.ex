@@ -21,9 +21,11 @@ defmodule Console.AI.Tools.Agent.Stack do
   def name(), do: plrl_tool("stack_search")
   def description(), do: "Execute a semantic search for a cloud resource within a Plural Stack.  Use this if a user is searching specifically for a plural stack or for how the terraform configuration of their cloud has been set up. You might need to get more data about the resource to make this query precise, as it will need additional information like ids that are present in terraform state."
 
+  @opts [filters: [datatype: {:raw, :stack_state}], count: 3]
+
   def implement(%__MODULE__{query: query}) do
     with true <- VectorStore.enabled?(),
-         {:ok, results} <- VectorStore.fetch(query, filters: [datatype: {:raw, :stack_state}]) do
+         {:ok, results} <- VectorStore.fetch(query, @opts) do
       Enum.map(results, &format/1)
       |> Enum.filter(& &1)
       |> Jason.encode()
@@ -39,7 +41,7 @@ defmodule Console.AI.Tools.Agent.Stack do
   end
   defp format(_), do: nil
 
-  defp stack_attrs(%{id: id, name: name, repository: %{url: url}, git: %{ref: r, folder: f}}) do
+  defp stack_attrs(%{"id" => id, "name" => name, "repository" => %{"url" => url}, "git" => %{"ref" => r, "folder" => f}}) do
     %{
       stack_id: id,
       stack_name: name,

@@ -857,8 +857,9 @@ type ChatTool struct {
 
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
-	File *ChatFile `json:"file,omitempty"`
-	Tool *ChatTool `json:"tool,omitempty"`
+	File   *ChatFile         `json:"file,omitempty"`
+	Tool   *ChatTool         `json:"tool,omitempty"`
+	PrCall *PrCallAttributes `json:"prCall,omitempty"`
 }
 
 type CloudAddon struct {
@@ -4814,6 +4815,11 @@ type PrAutomationUpdateSpecAttributes struct {
 	ReplaceTemplate *string                  `json:"replaceTemplate,omitempty"`
 	Yq              *string                  `json:"yq,omitempty"`
 	MatchStrategy   *MatchStrategy           `json:"matchStrategy,omitempty"`
+}
+
+// Additional attributes for describing a pr call tool call that derived this chat message
+type PrCallAttributes struct {
+	Context map[string]any `json:"context,omitempty"`
 }
 
 // a checkbox item to render before creating a pr

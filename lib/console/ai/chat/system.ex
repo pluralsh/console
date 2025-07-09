@@ -30,6 +30,8 @@ defmodule Console.AI.Chat.System do
   * all changes should follow GitOps principles, always use infrastructrue as code, and don't recommend using the cloud ui directly unless absolutely necessary.
   * for kubernetes deployments, use the management cluster minimally to prevent blast radius and other technical risks.  This cluster will have the handle `mgmt`.
   * use the Plural service catalog whenever possible, as it will contain tested and secure provisioning and management workflows.
+  * if the user wants to provision new infrastructure, first find the appropriate catalog entry that fits their needs, and get a high level implementatino plan for them in place. Don't go into detail on specific configuration settings until the plan is specified and approved.
+  * when asking the user to call pr automations, do your best to autofill its configuration fields, and don't worry about asking otherwise, as our UI can let them fill it in manually.
   """
 
   def prompt(%ChatThread{session: %AgentSession{}}), do: @agent

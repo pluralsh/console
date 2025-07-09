@@ -8118,6 +8118,7 @@ type Chat {
 type ChatTypeAttributes {
   file: ChatFile
   tool: ChatTool
+  prCall: PrCallAttributes
 }
 
 "Additional attributes for describing a file type chat"
@@ -8129,6 +8130,11 @@ type ChatFile {
 type ChatTool {
   name: String
   arguments: Map
+}
+
+"Additional attributes for describing a pr call tool call that derived this chat message"
+type PrCallAttributes {
+  context: Map
 }
 
 "A list of chat messages around a specific topic created on demand"

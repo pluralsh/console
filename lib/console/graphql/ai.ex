@@ -81,8 +81,9 @@ defmodule Console.GraphQl.AI do
 
   @desc "Additional attributes of this chat message, used for formatting it in the display"
   object :chat_type_attributes do
-    field :file, :chat_file
-    field :tool, :chat_tool
+    field :file,    :chat_file
+    field :tool,    :chat_tool
+    field :pr_call, :pr_call_attributes
   end
 
   @desc "Additional attributes for describing a file type chat"
@@ -94,6 +95,11 @@ defmodule Console.GraphQl.AI do
   object :chat_tool do
     field :name,      :string
     field :arguments, :map
+  end
+
+  @desc "Additional attributes for describing a pr call tool call that derived this chat message"
+  object :pr_call_attributes do
+    field :context, :map
   end
 
   @desc "A list of chat messages around a specific topic created on demand"

@@ -3,7 +3,16 @@ defmodule Console.AI.Chat.Engine do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
   import Console.AI.Chat.System
-  alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit, AgentSession}
+  alias Console.Schema.{
+    Chat,
+    Chat.Attributes,
+    ChatThread,
+    Flow,
+    User,
+    McpServer,
+    McpServerAudit,
+    AgentSession
+  }
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
     Clusters,
@@ -52,13 +61,13 @@ defmodule Console.AI.Chat.Engine do
   ]
 
   @agent_tools [
-    AgentTool.Query,
-    AgentTool.Schema,
+    # AgentTool.Query,
+    # AgentTool.Schema,
     AgentTool.Plan,
     AgentTool.Catalogs,
     AgentTool.PrAutomations,
     AgentTool.Clusters,
-    AgentTool.Search,
+    # AgentTool.Search,
     AgentTool.Stack
   ]
 
@@ -160,7 +169,7 @@ defmodule Console.AI.Chat.Engine do
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
-        Stream.publish(stream, content, 1)
+        publish_to_stream(stream, content)
         Stream.offset(1)
         {:cont, [tool_msg(content, id, nil, name, args) | acc]}
       else
@@ -181,7 +190,7 @@ defmodule Console.AI.Chat.Engine do
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
-        Stream.publish(stream, content, 1)
+        publish_to_stream(stream, content)
         Stream.offset(1)
         {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
@@ -270,6 +279,10 @@ defmodule Console.AI.Chat.Engine do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
   end
+
+  defp publish_to_stream(stream, %{content: content}), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(stream, content) when is_binary(content), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(_, _), do: :ok
 
   defp trim_messages(total, msgs, window) when total < window, do: msgs
   defp trim_messages(_, [_] = msgs, _), do: msgs

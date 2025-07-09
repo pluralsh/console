@@ -1062,6 +1062,7 @@ export enum ChatType {
 export type ChatTypeAttributes = {
   __typename?: 'ChatTypeAttributes';
   file?: Maybe<ChatFile>;
+  prCall?: Maybe<PrCallAttributes>;
   tool?: Maybe<ChatTool>;
 };
 
@@ -5828,6 +5829,12 @@ export type PrAutomationUpdateSpecAttributes = {
   /** list of yaml overlay operations to apply to a file */
   yamlOverlays?: InputMaybe<Array<InputMaybe<YamlOverlayAttributes>>>;
   yq?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Additional attributes for describing a pr call tool call that derived this chat message */
+export type PrCallAttributes = {
+  __typename?: 'PrCallAttributes';
+  context?: Maybe<Scalars['Map']['output']>;
 };
 
 /** a checkbox item to render before creating a pr */

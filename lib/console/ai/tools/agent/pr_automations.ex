@@ -15,6 +15,7 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
     |> validate_required([:catalog_id])
   end
 
+  @fields ~w(id name description title configuration)a
   @json_schema Console.priv_file!("tools/agent/pr_automations.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
@@ -24,7 +25,10 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
   def implement(%__MODULE__{catalog_id: catalog_id}) do
     PrAutomation.for_catalog(catalog_id)
     |> Repo.all()
-    |> Enum.map(&Map.take(&1, [:id, :name, :description, :title]))
+    |> Enum.map(fn pra ->
+      Map.take(pra, @fields)
+      |> Console.mapify()
+    end)
     |> Jason.encode()
   end
 end
