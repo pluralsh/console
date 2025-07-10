@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Agent.CallPr do
 
   def implement(%__MODULE__{pr_automation_id: pra_id} = model) do
     {:ok, %{
-      content: "Calling pr #{pra_id}",
+      content: "Calling pr #{pra_id}, the user will be prompted for how to configure this PR in product (don't reiterate what configuration is necessary)",
       type: :pr_call,
       pr_automation_id: pra_id,
       attributes: %{pr_call: %{context: model.context}}
