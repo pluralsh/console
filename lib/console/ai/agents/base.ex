@@ -23,13 +23,18 @@ defmodule Console.AI.Agents.Base do
 
       def init(session) do
         Logger.info("Starting agent session #{session.id}")
-        :timer.send_interval(:timer.minutes(15), self(), {:move, session})
+        Process.send_after(self(), :die, :timer.minutes(15))
+        :timer.send_interval(:timer.minutes(1), self(), {:move, session})
         {:ok, session, {:continue, :boot}}
       end
 
       def handle_continue(:boot, %AgentSession{initialized: false} = session) do
         Logger.info("Booting agent session #{session.id}")
         {thread, session} = setup_context(session)
+
+        Console.AI.Stream.topic(:thread, thread.id, thread.user)
+        |> Console.AI.Stream.enable()
+
         {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
         update_context(%{session: session})
         Logger.info("Booted agent session #{session.id}")
