@@ -32,6 +32,7 @@ export function getChatOptimisticResponse({
     type: type ?? ChatType.Text,
     attributes: null,
     pullRequest: null,
+    prAutomation: null,
     confirm: null,
     confirmedAt: null,
     server: null,
