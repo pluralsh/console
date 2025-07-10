@@ -118,7 +118,10 @@ defmodule Console.AI.Chat do
     start_transaction()
     |> add_operation(:thread, fn _ ->
       %ChatThread{user_id: user.id}
-      |> ChatThread.changeset(%{session: attrs})
+      |> ChatThread.changeset(%{
+        summary: "An agent session to handle: #{attrs[:prompt] || "a user request"}",
+        session: attrs
+      })
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
