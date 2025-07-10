@@ -65,6 +65,14 @@ spec:
                 description: Configuration contains the UI configuration for this
                   Persona (additive across personas)".
                 properties:
+                  ai:
+                    description: AI enables individual parts of the ai views.
+                    properties:
+                      pr:
+                        description: Enables whether users bound to this persona can
+                          use AI to generate PRs.
+                        type: boolean
+                    type: object
                   all:
                     description: All enables full UI for this Persona.
                     type: boolean

@@ -4136,6 +4136,14 @@ type Persona struct {
 	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
+type PersonaAi struct {
+	Pr *bool `json:"pr,omitempty"`
+}
+
+type PersonaAiAttributes struct {
+	Pr *bool `json:"pr,omitempty"`
+}
+
 type PersonaAttributes struct {
 	Name *string `json:"name,omitempty"`
 	// longform description of this persona
@@ -4157,6 +4165,8 @@ type PersonaConfiguration struct {
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServices `json:"services,omitempty"`
+	// enable individual parts of the ai views
+	Ai *PersonaAi `json:"ai,omitempty"`
 }
 
 type PersonaConfigurationAttributes struct {
@@ -4170,6 +4180,8 @@ type PersonaConfigurationAttributes struct {
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServicesAttributes `json:"services,omitempty"`
+	// enable individual parts of the ai views
+	Ai *PersonaAiAttributes `json:"ai,omitempty"`
 }
 
 type PersonaConnection struct {

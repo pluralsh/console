@@ -9239,6 +9239,9 @@ input PersonaConfigurationAttributes {
 
   "enable individual parts of the services views"
   services: PersonaServicesAttributes
+
+  "enable individual parts of the ai views"
+  ai: PersonaAiAttributes
 }
 
 input PersonaDeploymentAttributes {
@@ -9270,6 +9273,10 @@ input PersonaHomeAttributes {
 input PersonaServicesAttributes {
   secrets: Boolean
   configuration: Boolean
+}
+
+input PersonaAiAttributes {
+  pr: Boolean
 }
 
 input BootstrapTokenAttributes {
@@ -9458,6 +9465,9 @@ type PersonaConfiguration {
 
   "enable individual parts of the services views"
   services: PersonaServices
+
+  "enable individual parts of the ai views"
+  ai: PersonaAi
 }
 
 type PersonaDeployment {
@@ -9489,6 +9499,10 @@ type PersonaHome {
 type PersonaServices {
   secrets: Boolean
   configuration: Boolean
+}
+
+type PersonaAi {
+  pr: Boolean
 }
 
 "A restricted token meant only for use in registering clusters, esp for edge devices"

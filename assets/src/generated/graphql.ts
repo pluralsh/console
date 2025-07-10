@@ -5057,6 +5057,15 @@ export type Persona = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type PersonaAi = {
+  __typename?: 'PersonaAi';
+  pr?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaAiAttributes = {
+  pr?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type PersonaAttributes = {
   bindings?: InputMaybe<Array<InputMaybe<BindingAttributes>>>;
   configuration?: InputMaybe<PersonaConfigurationAttributes>;
@@ -5069,6 +5078,8 @@ export type PersonaAttributes = {
 
 export type PersonaConfiguration = {
   __typename?: 'PersonaConfiguration';
+  /** enable individual parts of the ai views */
+  ai?: Maybe<PersonaAi>;
   /** enable full ui for this persona */
   all?: Maybe<Scalars['Boolean']['output']>;
   /** enable individual parts of the deployments views */
@@ -5082,6 +5093,8 @@ export type PersonaConfiguration = {
 };
 
 export type PersonaConfigurationAttributes = {
+  /** enable individual parts of the ai views */
+  ai?: InputMaybe<PersonaAiAttributes>;
   /** enable full ui for this persona */
   all?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable individual parts of the deployments views */

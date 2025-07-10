@@ -24,6 +24,10 @@ defmodule Console.Schema.Persona do
       embeds_one :sidebar, Sidebar, on_replace: :update do
         boolean_fields [:all, :kubernetes, :audits, :pull_requests, :settings, :backups, :stacks, :security, :cost]
       end
+
+      embeds_one :ai, AI, on_replace: :update do
+        boolean_fields [:all, :pr]
+      end
     end
 
     def changeset(model, attrs) do
@@ -33,6 +37,7 @@ defmodule Console.Schema.Persona do
       |> cast_embed(:sidebar, with: &sidebar_cs/2)
       |> cast_embed(:home, with: &home_cs/2)
       |> cast_embed(:services, with: &services_cs/2)
+      |> cast_embed(:ai, with: &ai_cs/2)
     end
 
     defp deployments_cs(model, attrs) do
@@ -55,10 +60,16 @@ defmodule Console.Schema.Persona do
       |> cast(attrs, services_fields())
     end
 
+    defp ai_cs(model, attrs) do
+      model
+      |> cast(attrs, ai_fields())
+    end
+
     defp deployments_fields(), do: __MODULE__.Deployments.__schema__(:fields) -- [:id]
     defp sidebar_fields(), do: __MODULE__.Sidebar.__schema__(:fields) -- [:id]
     defp home_fields(), do: __MODULE__.Home.__schema__(:fields) -- [:id]
     defp services_fields(), do: __MODULE__.Services.__schema__(:fields) -- [:id]
+    defp ai_fields(), do: __MODULE__.AI.__schema__(:fields) -- [:id]
   end
 
   schema "personas" do
