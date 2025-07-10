@@ -43,8 +43,18 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
     |> cast_embed(:file_updates, with: &file_update_changeset/2)
     |> cast_embed(:file_creates, with: &file_create_changeset/2)
     |> cast_embed(:file_deletes, with: &file_delete_changeset/2)
+    |> infer_commit_message()
     |> infer_title()
     |> validate_required(@valid)
+  end
+
+  defp infer_commit_message(cs) do
+    with nil <- get_field(cs, :commit_message),
+         {:session, %AgentSession{prompt: p}} when is_binary(p) <- session() do
+      put_change(cs, :commit_message, "Plural AI agentic fix for prompt: #{p}")
+    else
+      _ -> cs
+    end
   end
 
   defp infer_title(cs) do
@@ -64,10 +74,10 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
 
   def implement(%__MODULE__{stack_id: id, branch_name: branch, commit_message: msg} = pr) do
     branch = "plrl/ai/#{branch}-#{Console.rand_alphanum(6)}"
-    stack = Console.Deployments.Stacks.get_stack(id)
+    stack = Console.Deployments.Stacks.get_stack(id) |> IO.inspect(label: "stack")
     with %Stack{repository: %GitRepository{url: url}} = stack <- Console.Repo.preload(stack, [:repository]),
          %User{} = user <- Tool.actor(),
-         {:ok, stack} <- Policies.can?(user, stack, :write),
+         {:ok, stack} <- Policies.allow(stack, user, :write),
          {:conn, %ScmConnection{} = conn} <- {:conn, Tool.scm_connection()},
          conn <- %{conn | author: Tool.actor()},
          url = to_http(conn, url),

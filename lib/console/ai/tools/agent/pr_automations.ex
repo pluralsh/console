@@ -4,15 +4,15 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
   alias Console.Schema.PrAutomation
 
   embedded_schema do
-    field :catalog_id, :string
+    field :catalog, :string
   end
 
-  @valid ~w(catalog_id)a
+  @valid ~w(catalog)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required([:catalog_id])
+    |> validate_required([:catalog])
   end
 
   @fields ~w(id name description title configuration)a
@@ -22,8 +22,8 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
   def name(), do: plrl_tool("pr_automations")
   def description(), do: "Returns a list of pr automations that are present in this catalog.  These are individual PRs that provision infrastructure a user might want to create in a tested, gitops fashion."
 
-  def implement(%__MODULE__{catalog_id: catalog_id}) do
-    PrAutomation.for_catalog(catalog_id)
+  def implement(%__MODULE__{catalog: catalog}) do
+    PrAutomation.for_catalog_name(catalog)
     |> Repo.all()
     |> Enum.map(fn pra ->
       Map.take(pra, @fields)

@@ -47,7 +47,7 @@ defmodule Console.AI.Tools.Agent.Coding.Commit do
     else
       {:session, _} -> {:error, "You've made too many commits, any future commits are blocked in this session."}
       {:conn, _} -> {:error, "no scm connection configured for AI yet"}
-      err -> err
+      err -> {:error, "unknown failure committing changes, reason: #{inspect(err)}"}
     end
   end
 end

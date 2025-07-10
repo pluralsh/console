@@ -71,7 +71,7 @@ defmodule Console.AI.Agents.Base do
       |> Enum.filter(& &1)
       |> Engine.completion(thread, user)
     end)
-    |> add_operation(:bump, fn %{access: thread} ->
+    |> add_operation(:bump, fn _ ->
       ChatThread.changeset(thread, %{last_message_at: Timex.now()})
       |> Repo.update()
     end)
@@ -79,7 +79,7 @@ defmodule Console.AI.Agents.Base do
       AgentSession.changeset(session, %{initialized: true})
       |> Repo.update()
     end)
-    |> execute()
+    |> execute(timeout: 300_000)
     |> case do
       {:ok, %{bump: thread, init: session}} -> {:ok, thread, session}
       err -> err
