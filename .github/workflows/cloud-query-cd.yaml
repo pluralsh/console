@@ -126,7 +126,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ env.PLATFORM_PAIR }}
+          name: digests-db-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -211,7 +211,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ env.PLATFORM_PAIR }}
+          name: digests-cloudquery-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -235,7 +235,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*
+          pattern: digests-db-*
           merge-multiple: true
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -298,7 +298,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*
+          pattern: digests-cloudquery-*
           merge-multiple: true
       - name: Login to GHCR
         uses: docker/login-action@v3
