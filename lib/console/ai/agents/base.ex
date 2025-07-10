@@ -7,7 +7,7 @@ defmodule Console.AI.Agents.Base do
 
   defmacro __using__(_) do
     quote do
-      use GenServer
+      use GenServer, restart: :transient
       import Console.AI.Agents.Base
       alias Console.Schema.AgentSession
       require Logger
@@ -22,18 +22,22 @@ defmodule Console.AI.Agents.Base do
       end
 
       def init(session) do
+        Logger.info("Starting agent session #{session.id}")
         :timer.send_interval(:timer.minutes(15), self(), {:move, session})
         {:ok, session, {:continue, :boot}}
       end
 
       def handle_continue(:boot, %AgentSession{initialized: false} = session) do
+        Logger.info("Booting agent session #{session.id}")
         {thread, session} = setup_context(session)
-        {:ok, thread, session} = drive(thread, [{:user, session.prompt}], session.user)
+        {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
         update_context(%{session: session})
+        Logger.info("Booted agent session #{session.id}")
         {:noreply, {thread, session}}
       end
 
       def handle_continue(:boot, %AgentSession{} = session) do
+        Logger.info("restarting agent session #{session.id}")
         {thread, session} = setup_context(session)
         {:noreply, {thread, session}}
       end

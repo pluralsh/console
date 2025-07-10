@@ -27,7 +27,7 @@ defmodule Console.AI.Agents.Discovery do
     case Supervisor.start_child(module, session) do
       {:ok, pid} -> fun.(pid)
       {:error, {:already_started, pid}} -> fun.(pid)
-      err -> err
+      err -> IO.inspect(err, label: "error starting agent session")
     end
   end
   def start_and_run(_, _), do: {:error, "no helm repository located"}

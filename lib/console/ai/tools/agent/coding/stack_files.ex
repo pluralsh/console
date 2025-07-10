@@ -8,6 +8,14 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
     field :stack_id, :string
   end
 
+  @valid ~w(stack_id)a
+
+  def changeset(model, attrs) do
+    model
+    |> cast(attrs, @valid)
+    |> validate_required(@valid)
+  end
+
   @json_schema Console.priv_file!("tools/agent/coding/stack_files.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
@@ -17,7 +25,7 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
   def implement(%__MODULE__{stack_id: id}) do
     with %Stack{} = stack <- Stacks.get_stack(id),
          %User{} = user <- Tool.actor(),
-         {:ok, stack} <- Policies.can?(user, stack, :write),
+         {:ok, stack} <- Policies.allow(user, stack, :write),
          {:ok, [_ | rest]} <- get_prompt(stack),
          {:ok, yaml} <- yaml_encode(rest) do
       {:ok, "Here are the terraform files for the stack:\n\n```yaml\n#{yaml}\n```"}

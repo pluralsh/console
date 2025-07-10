@@ -40,6 +40,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Observer.Supervisor,
+      Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
