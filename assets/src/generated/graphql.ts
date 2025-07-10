@@ -180,6 +180,8 @@ export type AgentSessionAttributes = {
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** whether the provisioning plan has been confirmed */
   planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the prompt to use for this session */
+  prompt?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AiDelta = {
@@ -6524,6 +6526,8 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
+  /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
+  createAgentSession?: Maybe<ChatThread>;
   createAlertResolution?: Maybe<AlertResolution>;
   createBootstrapToken?: Maybe<BootstrapToken>;
   createCluster?: Maybe<Cluster>;
@@ -6845,6 +6849,11 @@ export type RootMutationTypeCreateAccessTokenArgs = {
 
 export type RootMutationTypeCreateAgentMigrationArgs = {
   attributes: AgentMigrationAttributes;
+};
+
+
+export type RootMutationTypeCreateAgentSessionArgs = {
+  attributes: AgentSessionAttributes;
 };
 
 

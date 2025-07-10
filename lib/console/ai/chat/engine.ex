@@ -253,7 +253,7 @@ defmodule Console.AI.Chat.Engine do
   end
 
   defp tool_msg(%{} = msg, call_id, _, name, args) do
-    Map.merge(%{
+    DeepMerge.deep_merge(%{
       role: :assistant,
       attributes: %{tool: %{call_id: call_id, name: name, arguments: args}}
     }, msg)

@@ -1,8 +1,16 @@
 defmodule Console.AI.Agents.Base do
+  use Console.Services.Base
+  alias Console.AI.Chat, as: ChatSvc
+  alias Console.Schema.{ChatThread, Chat, AgentSession}
+  alias Console.Repo
+  alias Console.AI.Chat.Engine
+
   defmacro __using__(_) do
     quote do
       use GenServer
+      import Console.AI.Agents.Base
       alias Console.Schema.AgentSession
+      require Logger
 
       def registry(), do: Console.AI.Agents
 
@@ -14,18 +22,85 @@ defmodule Console.AI.Agents.Base do
       end
 
       def init(session) do
-        Process.send_after(self(), :die, :timer.minutes(15))
+        :timer.send_interval(:timer.minutes(15), self(), {:move, session})
         {:ok, session, {:continue, :boot}}
+      end
+
+      def handle_continue(:boot, %AgentSession{initialized: false} = session) do
+        {thread, session} = setup_context(session)
+        {:ok, thread, session} = drive(thread, [{:user, session.prompt}], session.user)
+        update_context(%{session: session})
+        {:noreply, {thread, session}}
+      end
+
+      def handle_continue(:boot, %AgentSession{} = session) do
+        {thread, session} = setup_context(session)
+        {:noreply, {thread, session}}
       end
 
       def boot(_pid), do: :ok
 
       def enqueue(pid, task), do: GenServer.cast(pid, {:enqueue, task})
 
-      def handle_info(:die, session) do
-        {:stop, :normal, session}
+      def handle_info({:move, session}, state) do
+        case Console.AI.Agents.Discovery.local?(session) do
+          true ->
+            {:noreply, state}
+          false ->
+            {:stop, :moved, state}
+        end
       end
+      def handle_info(:die, session), do: {:stop, :normal, session}
       def handle_info(_, session), do: {:noreply, session}
     end
+  end
+
+  def drive(thread, messages \\ [], user) do
+    start_transaction()
+    |> add_operation(:save, fn _ -> ChatSvc.save(format(messages), thread.id, thread.user) end)
+    |> add_operation(:chat, fn _ ->
+      Chat.for_thread(thread.id)
+      |> Chat.ordered()
+      |> Repo.all()
+      |> ChatSvc.fit_context_window()
+      |> Enum.map(&Chat.message/1)
+      |> Enum.filter(& &1)
+      |> Engine.completion(thread, user)
+    end)
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> add_operation(:init, fn %{bump: %{session: session}} ->
+      AgentSession.changeset(session, %{initialized: true})
+      |> Repo.update()
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{bump: thread, init: session}} -> {:ok, thread, session}
+      err -> err
+    end
+  end
+
+  defp format(messages) do
+    Enum.map(messages, fn
+      %{} = msg -> msg
+      {:user, content} -> %{content: content, role: :user}
+    end)
+  end
+
+  def update_context(attrs), do: Console.AI.Tool.upsert(attrs)
+
+  @thread_preloads [session: [:connection, :pull_request, :stack], user: :groups]
+
+  def setup_context(%AgentSession{} = session) do
+    thread = ChatSvc.get_thread!(session.thread_id) |> Repo.preload(@thread_preloads)
+    Console.AI.Tool.context(%{
+      user: thread.user,
+      flow: thread.flow,
+      insight: thread.insight,
+      session: thread.session
+    })
+    {thread, thread.session}
   end
 end

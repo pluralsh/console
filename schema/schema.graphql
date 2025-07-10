@@ -1022,6 +1022,9 @@ type RootMutationType {
 
   aiFixPr(insightId: ID!, messages: [ChatMessage]): PullRequest
 
+  "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
+  createAgentSession(attributes: AgentSessionAttributes!): ChatThread
+
   acceptLogin(challenge: String!): OauthResponse
 
   oauthConsent(challenge: String!, scopes: [String]): OauthResponse
@@ -8071,6 +8074,9 @@ input ChatThreadAttributes {
 input AgentSessionAttributes {
   "whether the provisioning plan has been confirmed"
   planConfirmed: Boolean
+
+  "the prompt to use for this session"
+  prompt: String
 
   "the id of the cloud connection to use for this session"
   connectionId: ID

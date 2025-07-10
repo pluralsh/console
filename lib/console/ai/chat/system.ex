@@ -31,7 +31,9 @@ defmodule Console.AI.Chat.System do
   * for kubernetes deployments, use the management cluster minimally to prevent blast radius and other technical risks.  This cluster will have the handle `mgmt`.
   * use the Plural service catalog whenever possible, as it will contain tested and secure provisioning and management workflows.
   * if the user wants to provision new infrastructure, first find the appropriate catalog entry that fits their needs, and get a high level implementatino plan for them in place. Don't go into detail on specific configuration settings until the plan is specified and approved.
+  * You don't need to ask for specific configuration for each of the pr automations an implementation plan will use, those will be provided to the user via a wizard in product in a more clear way.
   * when asking the user to call pr automations, do your best to autofill its configuration fields, and don't worry about asking otherwise, as our UI can let them fill it in manually.
+  * DO NOT send multiple instances of an implementation plan if one is already pending confirmation, and NEVER send a pr automation multiple times in the same thread.  The results from those tools will have <implementation_plan> or <pr_call> tags surrounding them.
   """
 
   @code_agent """
@@ -44,15 +46,7 @@ defmodule Console.AI.Chat.System do
   4. If an additional change is needed, push additional commits to the PR branch you've used already.
   """
 
-  def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p) do
-    """
-    #{@code_agent}
-
-    The user has provided this as your requirements:
-
-    #{p}
-    """
-  end
+  def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_agent
   def prompt(%ChatThread{session: %AgentSession{}}), do: @base_agent
   def prompt(_), do: @chat
 end

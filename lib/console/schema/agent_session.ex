@@ -7,6 +7,8 @@ defmodule Console.Schema.AgentSession do
     field :plan_confirmed, :boolean
     field :prompt,         :string
     field :branch,         :string
+    field :initialized,    :boolean, default: false
+    field :commit_count,   :integer, default: 0
 
     belongs_to :connection,   CloudConnection
     belongs_to :thread,       ChatThread
@@ -16,7 +18,7 @@ defmodule Console.Schema.AgentSession do
     timestamps()
   end
 
-  @valid ~w(plan_confirmed connection_id thread_id stack_id pull_request_id prompt branch)a
+  @valid ~w(plan_confirmed connection_id thread_id stack_id pull_request_id prompt branch initialized commit_count)a
 
   def changeset(model, attrs \\ %{}) do
     model

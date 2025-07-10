@@ -125,6 +125,8 @@ type AgentMigrationAttributes struct {
 type AgentSessionAttributes struct {
 	// whether the provisioning plan has been confirmed
 	PlanConfirmed *bool `json:"planConfirmed,omitempty"`
+	// the prompt to use for this session
+	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
 }

@@ -53,6 +53,7 @@ defmodule Console.GraphQl.AI do
 
   input_object :agent_session_attributes do
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
   end
 
@@ -491,6 +492,14 @@ defmodule Console.GraphQl.AI do
       arg :messages,   list_of(:chat_message)
 
       resolve &AI.fix_pr/2
+    end
+
+    @desc "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
+    field :create_agent_session, :chat_thread do
+      middleware Authenticated
+      arg :attributes, non_null(:agent_session_attributes)
+
+      resolve &AI.create_agent_session/2
     end
   end
 
