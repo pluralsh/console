@@ -19,8 +19,8 @@ func formatValue(value any) any {
 	}
 }
 
-func DataSource(port uint32, user, password string) string {
-	return fmt.Sprintf("host=localhost port=%d user=%s password=%s dbname=postgres sslmode=disable", port, user, password)
+func DataSource(host, port, db, user, password string) string {
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, db)
 }
 
 func ToRow(columns []string, row []any) map[string]any {

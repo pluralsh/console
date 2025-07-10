@@ -10,6 +10,7 @@ import (
 
 type GCPConfiguration struct {
 	serviceAccountJSON *string
+	project            *string
 }
 
 func (c *GCPConfiguration) Query(connectionName string) (string, error) {
@@ -22,25 +23,35 @@ func (c *GCPConfiguration) Query(connectionName string) (string, error) {
 		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_gcp OPTIONS (
 			config '
 				credentials=%[3]q
+				project=%[4]q
 		');
 		IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
 	`,
 		pq.QuoteIdentifier(connectionName),
 		pq.QuoteIdentifier("steampipe_"+connectionName),
 		lo.FromPtr(c.serviceAccountJSON),
+		lo.FromPtr(c.project),
 	), nil
 }
 
 func (c *GCPConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		ImpersonateAccessToken *string `json:"impersonateAccessToken,omitempty"`
+		ServiceAccountJSON *string `json:"serviceAccountJSON,omitempty"`
+		Project            *string `json:"project,omitempty"`
 	}{
-		ImpersonateAccessToken: c.serviceAccountJSON,
+		ServiceAccountJSON: c.serviceAccountJSON,
+		Project:            c.project,
 	})
 }
 
-func WithGCPServiceAccountJSON(impersonateAccessToken string) func(configuration *Configuration) {
+func WithGCPServiceAccountJSON(serviceAccountJSON string) func(configuration *Configuration) {
 	return func(c *Configuration) {
-		c.gcp.serviceAccountJSON = &impersonateAccessToken
+		c.gcp.serviceAccountJSON = &serviceAccountJSON
+	}
+}
+
+func WithGCPProject(project string) func(configuration *Configuration) {
+	return func(c *Configuration) {
+		c.gcp.project = &project
 	}
 }

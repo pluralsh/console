@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
@@ -30,35 +29,23 @@ func init() {
 }
 
 const (
-	defaultExtensionsDir          = "./bin"
-	defaultDatabaseRuntimeDir     = "./bin/runtime"
-	defaultDatabaseCacheDir       = "./bin/cache"
-	defaultDatabaseDataDir        = "./bin/data"
 	defaultDatabaseUser           = "postgres"
 	defaultDatabaseName           = "postgres"
 	defaultDatabasePassword       = "postgres"
-	defaultDatabaseVersion        = embeddedpostgres.V15
-	defaultDatabasePort           = 5432
-	defaultDatabaseMaxConnections = 200
-	defaultDatabaseStartTimeout   = 60 * time.Second
+	defaultDatabaseHost           = "localhost"
+	defaultDatabasePort           = "5432"
 	defaultDatabaseConnectionTTL  = 15 * time.Minute
 	defaultServerAddress          = ":9192"
 	defaultServerEnableReflection = false
 )
 
 var (
-	argExtensionsDir          = pflag.String("extensions-dir", defaultExtensionsDir, "directory where extensions are stored")
-	argDatabaseRuntimeDir     = pflag.String("database-runtime-dir", defaultDatabaseRuntimeDir, "directory where the embedded PostgreSQL runtime files are stored")
-	argDatabaseCacheDir       = pflag.String("database-cache-dir", defaultDatabaseCacheDir, "directory where the embedded PostgreSQL cache files are stored")
-	argDatabaseDataDir        = pflag.String("database-data-dir", defaultDatabaseDataDir, "directory where the embedded PostgreSQL data files are stored")
-	argDatabaseVersion        = pflag.String("database-version", string(defaultDatabaseVersion), "version of the embedded PostgreSQL database to use")
-	argDatabasePort           = pflag.Uint32("database-port", defaultDatabasePort, "port on which the embedded PostgreSQL database will listen")
-	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the embedded PostgreSQL database")
-	argDatabasePassword       = pflag.String("database-password", common.GetPluralEnv("PG_PASSWORD", defaultDatabasePassword), "default password for the embedded PostgreSQL database")
-	argDatabaseName           = pflag.String("database-name", defaultDatabaseName, "default database name for the embedded PostgreSQL database")
-	argDatabaseStartTimeout   = pflag.Duration("database-start-timeout", defaultDatabaseStartTimeout, "timeout for starting the embedded PostgreSQL database")
-	argDatabaseMaxConnections = pflag.Int("database-max-connections", defaultDatabaseMaxConnections, "maximum number of connections to the embedded PostgreSQL database")
-	argConnectionTTL          = pflag.Duration("connection-ttl", defaultDatabaseConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
+	argDatabaseHost           = pflag.String("database-host", defaultDatabaseHost, "host of the PostgreSQL database, leave empty to use the default (localhost)")
+	argDatabasePort           = pflag.String("database-port", defaultDatabasePort, "port of the PostgreSQL database, leave empty to use the default (5432)")
+	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the PostgreSQL database")
+	argDatabasePassword       = pflag.String("database-password", common.GetPluralEnv("PG_PASSWORD", defaultDatabasePassword), "default password for the PostgreSQL database")
+	argDatabaseName           = pflag.String("database-name", defaultDatabaseName, "default database name for the PostgreSQL database")
+	argDatabaseConnectionTTL  = pflag.Duration("connection-ttl", defaultDatabaseConnectionTTL, "default TTL for connections in the pool, connections will be closed after this duration if not used")
 	argServerAddress          = pflag.String("server-address", "", "address on which the gRPC server will listen, leave empty to use the default (:9192)")
 	argServerTLSCertPath      = pflag.String("server-tls-cert", "", "path to the TLS certificate file for the gRPC server")
 	argServerTLSKeyPath       = pflag.String("server-tls-key", "", "path to the TLS key file for the gRPC server")
@@ -117,56 +104,16 @@ func DatabaseName() string {
 	return *argDatabaseName
 }
 
-func DatabaseMaxConnections() string {
-	if *argDatabaseMaxConnections <= 0 {
-		return fmt.Sprintf("%d", defaultDatabaseMaxConnections)
+func DatabaseHost() string {
+	if argDatabaseHost == nil || len(*argDatabaseHost) == 0 {
+		return defaultDatabaseHost
 	}
 
-	return strconv.Itoa(*argDatabaseMaxConnections)
+	return *argDatabaseHost
 }
 
-func DatabaseExtensionsDir() string {
-	if len(*argExtensionsDir) == 0 {
-		return defaultExtensionsDir
-	}
-
-	return *argExtensionsDir
-}
-
-func DatabaseRuntimeDir() string {
-	if len(*argDatabaseRuntimeDir) == 0 {
-		return defaultDatabaseRuntimeDir
-	}
-
-	return *argDatabaseRuntimeDir
-}
-
-func DatabaseCacheDir() string {
-	if len(*argDatabaseCacheDir) == 0 {
-		return defaultDatabaseCacheDir
-	}
-
-	return *argDatabaseCacheDir
-}
-
-func DatabaseDataDir() string {
-	if len(*argDatabaseDataDir) == 0 {
-		return defaultDatabaseDataDir
-	}
-
-	return *argDatabaseDataDir
-}
-
-func DatabaseVersion() embeddedpostgres.PostgresVersion {
-	if len(*argDatabaseVersion) == 0 {
-		return defaultDatabaseVersion
-	}
-
-	return embeddedpostgres.PostgresVersion(*argDatabaseVersion)
-}
-
-func DatabasePort() uint32 {
-	if *argDatabasePort <= 0 {
+func DatabasePort() string {
+	if argDatabasePort == nil || len(*argDatabasePort) == 0 {
 		return defaultDatabasePort
 	}
 
@@ -174,23 +121,15 @@ func DatabasePort() uint32 {
 }
 
 func DatabaseConnectionTTL() time.Duration {
-	if *argConnectionTTL <= 0 {
+	if *argDatabaseConnectionTTL <= 0 {
 		return defaultDatabaseConnectionTTL
 	}
 
-	if *argConnectionTTL < 1*time.Minute {
-		klog.Warningf("Connection TTL is set to a very low value (%s), this may lead to performance issues", *argConnectionTTL)
+	if *argDatabaseConnectionTTL < 1*time.Minute {
+		klog.Warningf("Connection TTL is set to a very low value (%s), this may lead to performance issues", *argDatabaseConnectionTTL)
 	}
 
-	return *argConnectionTTL
-}
-
-func DatabaseStartTimeout() time.Duration {
-	if *argDatabaseStartTimeout <= 0 {
-		return defaultDatabaseStartTimeout
-	}
-
-	return *argDatabaseStartTimeout
+	return *argDatabaseConnectionTTL
 }
 
 func LogLevel() klog.Level {

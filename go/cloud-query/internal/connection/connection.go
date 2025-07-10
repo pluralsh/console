@@ -16,7 +16,7 @@ import (
 
 const driverName = "postgres"
 
-var defaultDataSource = common.DataSource(args.DatabasePort(), args.DatabaseUser(), args.DatabasePassword())
+var defaultDataSource = common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), args.DatabaseUser(), args.DatabasePassword())
 
 type Connection interface {
 	Configure(config config.Configuration) error

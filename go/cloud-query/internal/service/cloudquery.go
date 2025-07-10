@@ -91,7 +91,10 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 			return c, fmt.Errorf("failed to decode GCP service account JSON: %w", err)
 		}
 
-		return config.NewGCPConfiguration(config.WithGCPServiceAccountJSON(string(serviceAccountJSON))), nil
+		return config.NewGCPConfiguration(
+			config.WithGCPServiceAccountJSON(string(serviceAccountJSON)),
+			config.WithGCPProject(connection.GetGcp().GetProject()),
+		), nil
 	default:
 		return c, fmt.Errorf("unsupported provider: %s", provider)
 	}
