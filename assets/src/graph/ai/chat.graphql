@@ -248,6 +248,12 @@ mutation ThreadPr($threadId: ID!) {
   }
 }
 
+mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
+  createAgentSession(attributes: $attributes) {
+    ...ChatThread
+  }
+}
+
 subscription AIChatStream(
   $threadId: ID
   $insightId: ID

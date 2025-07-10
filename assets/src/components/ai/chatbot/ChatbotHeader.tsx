@@ -1,12 +1,16 @@
 import {
   ArrowLeftIcon,
   BrainIcon,
+  Button,
   ChatFilledIcon,
   CloseIcon,
   ComposeIcon,
   ExpandIcon,
   Flex,
   IconFrame,
+  Input,
+  Modal,
+  RobotIcon,
   ShrinkIcon,
   Spinner,
   Toast,
@@ -18,9 +22,10 @@ import {
   AiInsightFragment,
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
+  useCreateAgentSessionMutation,
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { use, useCallback } from 'react'
+import { use, useCallback, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
 import { AIPinButton } from '../AIPinButton'
@@ -113,22 +118,30 @@ export function ChatbotHeader({
         </>
       )}
       {!cloudConnectionsLoading && (
-        <IconFrame
-          clickable
-          icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
-          size={fullscreen ? 'large' : 'medium'}
-          type="secondary"
-          tooltip="Start a new chat"
-          onClick={() =>
-            createNewThread({
-              summary: 'New chat with Plural Copilot',
-              ...(featureFlags.Copilot &&
-                connectionId && {
-                  session: { connectionId },
-                }),
-            })
-          }
-        />
+        <>
+          {featureFlags.Copilot && connectionId && (
+            <AgentSessionButton
+              connectionId={connectionId}
+              fullscreen={fullscreen}
+            />
+          )}
+          <IconFrame
+            clickable
+            icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+            size={fullscreen ? 'large' : 'medium'}
+            type="secondary"
+            tooltip="Start a new chat"
+            onClick={() =>
+              createNewThread({
+                summary: 'New chat with Plural Copilot',
+                ...(featureFlags.Copilot &&
+                  connectionId && {
+                    session: { connectionId },
+                  }),
+              })
+            }
+          />
+        </>
       )}
       <IconFrame
         {...(fullscreen
@@ -220,6 +233,70 @@ export function ChatbotHeader({
         <strong>Error creating new thread:</strong> {mutationError?.message}
       </Toast>
     </WrapperSC>
+  )
+}
+
+function AgentSessionButton({
+  connectionId,
+  fullscreen,
+}: {
+  connectionId: string
+  fullscreen: boolean
+}) {
+  const { goToThread } = useChatbot()
+  const [showInputModal, setShowInputModal] = useState(false)
+  const [prompt, setPrompt] = useState('')
+  const [
+    createAgentSession,
+    { loading: agentSessionLoading, error: agentSessionError },
+  ] = useCreateAgentSessionMutation({
+    variables: { attributes: { connectionId, prompt } },
+    onCompleted: (data) =>
+      data.createAgentSession?.id && goToThread(data.createAgentSession.id),
+  })
+  return (
+    <>
+      <IconFrame
+        clickable
+        icon={<RobotIcon />}
+        size={fullscreen ? 'large' : 'medium'}
+        type="secondary"
+        tooltip="Create agent session"
+        onClick={() => setShowInputModal(true)}
+      />
+      <Modal
+        header="Set prompt"
+        open={showInputModal}
+        onClose={() => setShowInputModal(false)}
+        asForm
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!agentSessionLoading) createAgentSession()
+        }}
+        actions={
+          <Button
+            type="submit"
+            loading={agentSessionLoading}
+          >
+            Create
+          </Button>
+        }
+      >
+        <Input
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+        />
+      </Modal>
+      <Toast
+        show={!!agentSessionError}
+        severity="danger"
+        position="bottom"
+        marginBottom="medium"
+      >
+        <strong>Error creating agent session:</strong>{' '}
+        {agentSessionError?.message}
+      </Toast>
+    </>
   )
 }
 
