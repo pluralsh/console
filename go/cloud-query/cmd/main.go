@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,7 +15,20 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/service"
 )
 
+func startHealthzHandler() {
+	http.HandleFunc("/healthz", healthz)
+	go func() {
+		klog.InfoS("starting /healthz endpoint", "address", ":8080")
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			klog.Fatalf("failed to start healthz server: %v", err)
+		}
+	}()
+}
+
 func main() {
+	startHealthzHandler()
+
 	p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
 	if err != nil {
 		klog.Fatalf("failed to create connection pool: %v", err)
