@@ -2830,6 +2830,27 @@ export type DeprecatedCustomResourceAttributes = {
   version: Scalars['String']['input'];
 };
 
+/** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */
+export type DiffNormalizer = {
+  __typename?: 'DiffNormalizer';
+  /** A list of json pointers to the fields to ignore */
+  jsonPointers?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The kind of the resource to normalize */
+  kind?: Maybe<Scalars['String']['output']>;
+  /** The name of the resource to normalize */
+  name?: Maybe<Scalars['String']['output']>;
+  /** The namespace of the resource to normalize */
+  namespace?: Maybe<Scalars['String']['output']>;
+};
+
+export type DiffNormalizerAttributes = {
+  /** A list of json patches to apply to the service which controls how drift detection works */
+  jsonPointers?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ElasticsearchConnection = {
   __typename?: 'ElasticsearchConnection';
   host: Scalars['String']['output'];
@@ -10519,6 +10540,8 @@ export type SyncConfig = {
   __typename?: 'SyncConfig';
   /** whether the agent should auto-create the namespace for this service */
   createNamespace?: Maybe<Scalars['Boolean']['output']>;
+  /** A list of diff normalizers to apply to the service which controls how drift detection works */
+  diffNormalizers?: Maybe<Array<Maybe<DiffNormalizer>>>;
   /** Whether to require all resources are placed in the same namespace */
   enforceNamespace?: Maybe<Scalars['Boolean']['output']>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
@@ -10526,6 +10549,8 @@ export type SyncConfig = {
 
 export type SyncConfigAttributes = {
   createNamespace?: InputMaybe<Scalars['Boolean']['input']>;
+  /** A list of diff normalizers to apply to the service which controls how drift detection works */
+  diffNormalizers?: InputMaybe<Array<InputMaybe<DiffNormalizerAttributes>>>;
   enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   namespaceMetadata?: InputMaybe<MetadataAttributes>;
 };

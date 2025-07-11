@@ -4570,8 +4570,24 @@ input ServiceImportAttributes {
 
 input SyncConfigAttributes {
   createNamespace: Boolean
+
   enforceNamespace: Boolean
+
   namespaceMetadata: MetadataAttributes
+
+  "A list of diff normalizers to apply to the service which controls how drift detection works"
+  diffNormalizers: [DiffNormalizerAttributes]
+}
+
+input DiffNormalizerAttributes {
+  name: String
+
+  kind: String
+
+  namespace: String
+
+  "A list of json patches to apply to the service which controls how drift detection works"
+  jsonPointers: [String]
 }
 
 input HelmConfigAttributes {
@@ -5207,12 +5223,30 @@ type SyncConfig {
   enforceNamespace: Boolean
 
   namespaceMetadata: NamespaceMetadata
+
+  "A list of diff normalizers to apply to the service which controls how drift detection works"
+  diffNormalizers: [DiffNormalizer]
 }
 
 "metadata fields for created namespaces"
 type NamespaceMetadata {
   labels: Map
   annotations: Map
+}
+
+"Allows you to control whether a specific set of fields in a kubernetes object is drift detected"
+type DiffNormalizer {
+  "The name of the resource to normalize"
+  name: String
+
+  "The kind of the resource to normalize"
+  kind: String
+
+  "The namespace of the resource to normalize"
+  namespace: String
+
+  "A list of json pointers to the fields to ignore"
+  jsonPointers: [String]
 }
 
 "A reusable bundle of configuration designed to make it easy to communicate between tools like tf\/pulumi and k8s"

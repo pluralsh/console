@@ -2324,6 +2324,26 @@ type DeprecatedCustomResourceAttributes struct {
 	NextVersion string `json:"nextVersion"`
 }
 
+// Allows you to control whether a specific set of fields in a kubernetes object is drift detected
+type DiffNormalizer struct {
+	// The name of the resource to normalize
+	Name *string `json:"name,omitempty"`
+	// The kind of the resource to normalize
+	Kind *string `json:"kind,omitempty"`
+	// The namespace of the resource to normalize
+	Namespace *string `json:"namespace,omitempty"`
+	// A list of json pointers to the fields to ignore
+	JSONPointers []*string `json:"jsonPointers,omitempty"`
+}
+
+type DiffNormalizerAttributes struct {
+	Name      *string `json:"name,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	// A list of json patches to apply to the service which controls how drift detection works
+	JSONPointers []*string `json:"jsonPointers,omitempty"`
+}
+
 type ElasticsearchConnection struct {
 	Host string `json:"host"`
 	// the index to query for log data
@@ -6533,12 +6553,16 @@ type SyncConfig struct {
 	// Whether to require all resources are placed in the same namespace
 	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
+	// A list of diff normalizers to apply to the service which controls how drift detection works
+	DiffNormalizers []*DiffNormalizer `json:"diffNormalizers,omitempty"`
 }
 
 type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
+	// A list of diff normalizers to apply to the service which controls how drift detection works
+	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`
 }
 
 type Tag struct {
