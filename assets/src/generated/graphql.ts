@@ -11285,13 +11285,6 @@ export type AddChatContextMutationVariables = Exact<{
 
 export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
-export type ThreadPrMutationVariables = Exact<{
-  threadId: Scalars['ID']['input'];
-}>;
-
-
-export type ThreadPrMutation = { __typename?: 'RootMutationType', threadPr?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
-
 export type CreateAgentSessionMutationVariables = Exact<{
   attributes: AgentSessionAttributes;
 }>;
@@ -18803,39 +18796,6 @@ export function useAddChatContextMutation(baseOptions?: Apollo.MutationHookOptio
 export type AddChatContextMutationHookResult = ReturnType<typeof useAddChatContextMutation>;
 export type AddChatContextMutationResult = Apollo.MutationResult<AddChatContextMutation>;
 export type AddChatContextMutationOptions = Apollo.BaseMutationOptions<AddChatContextMutation, AddChatContextMutationVariables>;
-export const ThreadPrDocument = gql`
-    mutation ThreadPr($threadId: ID!) {
-  threadPr(threadId: $threadId) {
-    ...Chat
-  }
-}
-    ${ChatFragmentDoc}`;
-export type ThreadPrMutationFn = Apollo.MutationFunction<ThreadPrMutation, ThreadPrMutationVariables>;
-
-/**
- * __useThreadPrMutation__
- *
- * To run a mutation, you first call `useThreadPrMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useThreadPrMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [threadPrMutation, { data, loading, error }] = useThreadPrMutation({
- *   variables: {
- *      threadId: // value for 'threadId'
- *   },
- * });
- */
-export function useThreadPrMutation(baseOptions?: Apollo.MutationHookOptions<ThreadPrMutation, ThreadPrMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ThreadPrMutation, ThreadPrMutationVariables>(ThreadPrDocument, options);
-      }
-export type ThreadPrMutationHookResult = ReturnType<typeof useThreadPrMutation>;
-export type ThreadPrMutationResult = Apollo.MutationResult<ThreadPrMutation>;
-export type ThreadPrMutationOptions = Apollo.BaseMutationOptions<ThreadPrMutation, ThreadPrMutationVariables>;
 export const CreateAgentSessionDocument = gql`
     mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
   createAgentSession(attributes: $attributes) {
@@ -30998,7 +30958,6 @@ export const namedOperations = {
     DeleteChatThread: 'DeleteChatThread',
     CloneChatThread: 'CloneChatThread',
     AddChatContext: 'AddChatContext',
-    ThreadPr: 'ThreadPr',
     CreateAgentSession: 'CreateAgentSession',
     AiFixPr: 'AiFixPr',
     UpsertMcpServer: 'UpsertMcpServer',
