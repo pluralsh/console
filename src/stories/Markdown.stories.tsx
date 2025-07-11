@@ -205,6 +205,19 @@ Thanks goes to all these [wonderful people](https://www.chatwoot.com/docs/contri
 
 
 *Chatwoot* &copy; 2017-2023, Chatwoot Inc - Released under the MIT License.
+
+---
+
+## Sample Table 
+
+| Feature      | Supported | Notes                        |
+|--------------|-----------|------------------------------|
+| Markdown     | Yes       | Full GFM support             |
+| Tables       | Yes       | With alignment and formatting|
+| Images       | Yes       | Inline and referenced        |
+| Code blocks  | Yes       | With syntax highlighting     |
+| Task Lists   | Yes       | [x] and [ ] supported        |
+| HTML         | Partial   | Some tags are supported      |
 `
 
 export default {

@@ -207,6 +207,51 @@ const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   margin: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
 }))
 
+const MdTable = styled.table(({ theme }) => ({
+  paddingTop: theme.spacing.medium,
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  tableLayout: 'fixed',
+  width: '100%',
+}))
+
+const MdTh = styled.th(({ theme }) => ({
+  padding: theme.spacing.small,
+  height: 40,
+  textAlign: 'left',
+  backgroundColor: theme.colors['fill-one'],
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  // top rounded table corners
+  'tr:first-child &': {
+    '&:first-child': { borderTopLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderTopRightRadius: theme.borderRadiuses.large },
+  },
+  // remove inner borders
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
+}))
+
+const MdTd = styled.td(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero-selected'],
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  color: theme.colors['text-light'],
+  height: 40,
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  borderTop: 'none',
+  textAlign: 'left',
+  // bottom row stronger border, rounded corners
+  'tr:last-child &': {
+    borderBottom: theme.borders['fill-two'],
+    '&:first-child': { borderBottomLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderBottomRightRadius: theme.borderRadiuses.large },
+  },
+  // remove inner borders
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
+}))
+
 function MarkdownImage({
   src,
   gitUrl,
@@ -299,6 +344,9 @@ function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
           code: render({ component: InlineCode }),
           pre: render({ component: MarkdownPreformatted }),
           hr: render({ component: MdHr }),
+          th: render({ component: MdTh }),
+          td: render({ component: MdTd }),
+          table: render({ component: MdTable }),
         }}
       >
         {text}
