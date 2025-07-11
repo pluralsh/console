@@ -33,7 +33,7 @@
                       "type": "string"
                     },
                     "replacement": {
-                        "description": "the file content you want to write to this file",
+                        "description": "the file content you want to write to this file, including all whitespace and line characters to the correct indentation level.",
                         "type": "string"
                     },
                     "previous": {
@@ -69,11 +69,11 @@
                 "description": "A file to create in this PR",
                 "properties": {
                     "file_name": {
-                        "description": "the relative file path name for this create",
+                        "description": "the relative file path name for the file to create",
                         "type": "string"
                     },
                     "content": {
-                        "description": "the content to write to the file",
+                        "description": "the full content to write to the file",
                         "type": "string"
                     }
                 },

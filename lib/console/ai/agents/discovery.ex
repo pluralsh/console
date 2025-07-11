@@ -11,8 +11,10 @@ defmodule Console.AI.Agents.Discovery do
   def boot(module, %AgentSession{} = session),
     do: maybe_rpc(module, session, &module.boot/1)
 
-  def enqueue(module, %AgentSession{} = session, event),
-    do: maybe_rpc(module, session, &module.enqueue(&1, event))
+  def enqueue(module, %AgentSession{} = session, event) do
+    Logger.info("enqueueing event to agent session #{session.id}")
+    maybe_rpc(module, session, &module.enqueue(&1, event))
+  end
 
   def maybe_rpc(module, %AgentSession{} = session, fun) when is_function(fun, 1) do
     me = node()

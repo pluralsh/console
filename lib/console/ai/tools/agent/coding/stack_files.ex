@@ -27,9 +27,9 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
     with %Stack{} = stack <- Stacks.get_stack(id),
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write),
-         {:ok, [_ | rest]} <- get_prompt(stack),
-         {:ok, yaml} <- yaml_encode(Enum.map(rest, fn {:user, raw} -> raw end)) do
-      {:ok, "Here are the terraform files for the stack:\n\n```yaml\n#{yaml}\n```"}
+         {:ok, [_ | rest]} <- get_prompt(stack) do
+      Enum.map(rest, fn {:user, raw} -> raw end)
+      |> Jason.encode()
     else
       {:error, err} -> {:error, "failed to get stack files, reason: #{inspect(err)}"}
       nil -> {:error, "could not find stack with id #{id}"}

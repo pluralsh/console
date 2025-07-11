@@ -160,7 +160,7 @@ defmodule Console.AI.Chat.Engine do
           end
         else
           {:error, err, acc} when is_list(acc) ->
-            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :assistant}])
+            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :user}])
             |> Enum.map(&Chat.attributes/1)
             |> ChatSvc.save_messages(thread_id, user)
           err -> err

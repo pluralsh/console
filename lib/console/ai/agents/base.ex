@@ -25,7 +25,7 @@ defmodule Console.AI.Agents.Base do
         Logger.info("Starting agent session #{session.id}")
         Process.send_after(self(), :die, :timer.minutes(15))
         :timer.send_interval(:timer.minutes(1), self(), {:move, session})
-        {:ok, session, {:continue, :boot}}
+        {:ok, refetch(session), {:continue, :boot}}
       end
 
       def handle_continue(:boot, %AgentSession{initialized: false} = session) do
@@ -36,6 +36,7 @@ defmodule Console.AI.Agents.Base do
         |> Console.AI.Stream.enable()
 
         {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
+        {:ok, session} = initialized(session)
         update_context(%{session: session})
         Logger.info("Booted agent session #{session.id}")
         {:noreply, {thread, session}}
@@ -44,6 +45,10 @@ defmodule Console.AI.Agents.Base do
       def handle_continue(:boot, %AgentSession{} = session) do
         Logger.info("restarting agent session #{session.id}")
         {thread, session} = setup_context(session)
+
+        Console.AI.Stream.topic(:thread, thread.id, thread.user)
+        |> Console.AI.Stream.enable()
+
         {:noreply, {thread, session}}
       end
 
@@ -63,6 +68,8 @@ defmodule Console.AI.Agents.Base do
       def handle_info(_, session), do: {:noreply, session}
     end
   end
+
+  def refetch(%AgentSession{id: id}), do: Console.Repo.get!(AgentSession, id)
 
   def drive(thread, messages \\ [], user) do
     start_transaction()
@@ -111,5 +118,10 @@ defmodule Console.AI.Agents.Base do
       session: thread.session
     })
     {thread, thread.session}
+  end
+
+  def initialized(%AgentSession{} = session) do
+    AgentSession.changeset(session, %{initialized: true})
+    |> Console.Repo.update()
   end
 end
