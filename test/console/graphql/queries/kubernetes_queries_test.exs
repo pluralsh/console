@@ -14,7 +14,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
       insert(:service_component, service: svc, group: "apps", version: "v1", kind: "StatefulSet", namespace: "namespace", name: "name")
-      expect(Kazan, :run, fn _, _ -> {:ok, stateful_set("namespace", "name")} end)
+      expect(Kazan, :run, fn _, _ -> {:ok, stateful_set("name", "namespace", 3, [])} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
       {:ok, %{data: %{"statefulSet" => stateful}}} = run_query("""

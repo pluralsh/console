@@ -43,6 +43,7 @@ Mimic.copy(Console.AI.Memoizer)
 Mimic.copy(Console.AI.VectorStore)
 Mimic.copy(Console.Mesh.Prometheus)
 Mimic.copy(Req)
+Mimic.copy(Kazan.Client.Imp)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
