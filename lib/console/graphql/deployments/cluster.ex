@@ -65,6 +65,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kubelet_version,    :string
     field :distro,             :cluster_distro
     field :health_score,       :integer
+    field :openshift_version,  :string
+    field :node_count,         :integer
+    field :pod_count,          :integer
+    field :namespace_count,    :integer
+    field :cpu_total,          :float
+    field :memory_total,       :float
     field :insight_components, list_of(:cluster_insight_component_attributes),
       description: "scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval"
     field :node_statistics,    list_of(:node_statistic_attributes)
@@ -433,6 +439,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :installed,         :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+
+    field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
+    field :node_count,         :integer, description: "The number of nodes in this cluster"
+    field :pod_count,          :integer, description: "The number of pods in this cluster"
+    field :namespace_count,    :integer, description: "The number of namespaces in this cluster"
+    field :cpu_total,          :float, description: "The total CPU capacity of the cluster"
+    field :memory_total,       :float, description: "The total memory capacity of the cluster"
+
     field :agent_helm_values, :string, description: "The helm values for the agent installation",
       resolve: &Deployments.agent_helm_values_for_cluster/3
 
