@@ -813,11 +813,8 @@ cloudQuery:
     port: 9192
 
   resources:
-    limits:
-      memory: 2Gi
-      cpu: 200m
     requests:
-      memory: 650Mi
+      memory: 250Mi
       cpu: 100m
 
   livenessProbe: ~
