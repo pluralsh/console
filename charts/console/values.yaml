@@ -7,7 +7,7 @@ global:
   additionalVolumeMounts: ~
   registry: ghcr.io/pluralsh
 
-cloud: 
+cloud:
   enabled: false
   o11y:
     enabled: false
@@ -250,15 +250,15 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: 'app.kubernetes.io/name'
-            operator: In
-            values:
-            - console
-        topologyKey: "kubernetes.io/hostname"
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: 'app.kubernetes.io/name'
+                operator: In
+                values:
+                  - console
+          topologyKey: "kubernetes.io/hostname"
 
 monitoring:
   # enabled determines if the monitor.yaml and prometheusrule.yaml templates should be used
@@ -309,13 +309,13 @@ gitServer:
   # gitPort is used to access the git server for ssh based git operations.
   gitPort: 9418
 
-  image: 
+  image:
     repository: ghcr.io/pluralsh/git-server
     tag: ~
   
-  containerSecurityContext: 
+  containerSecurityContext:
     runAsNonRoot: true
-  securityContext: 
+  securityContext:
     runAsUser: 65543
     runAsGroup: 65543
   resources: ~
@@ -525,7 +525,7 @@ kas:
       save ""
       # Enable idle client connection timeout (5 minutes)
       timeout 300
-      
+
 # dashboard is used to override some values in kubernetes dashboard default chart (packaged in charts/kubernetes-dashboard-*.tgz). See https://github.com/kubernetes/dashboard/blob/master/charts/kubernetes-dashboard/values.yaml
 dashboard:
   # enabled is used in Chart.yaml to determine if dashboard dependency should be installed
@@ -557,24 +557,24 @@ dashboard:
           cpu: 1
           memory: 2Gi
       args:
-      - --act-as-proxy
-      - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
-      - --apiserver-skip-tls-verify
-      - --metrics-provider=none
-      - --cluster-context-enabled=true
-      - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
-      - --disable-csrf-protection
+        - --act-as-proxy
+        - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
+        - --apiserver-skip-tls-verify
+        - --metrics-provider=none
+        - --cluster-context-enabled=true
+        - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
+        - --disable-csrf-protection
       env:
-      - name: KAS_HOST
-        valueFrom:
-          secretKeyRef:
-            name: console-env
-            key: KAS_HOST
-      - name: CONSOLE_HOST
-        valueFrom:
-          secretKeyRef:
-            name: console-env
-            key: CONSOLE_HOST
+        - name: KAS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: console-env
+              key: KAS_HOST
+        - name: CONSOLE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: console-env
+              key: CONSOLE_HOST
 
   # All items below are the default values in the dashboard chart (i.e. no override unless user changes the values). Potentially useful for documentation
 
@@ -803,7 +803,7 @@ cloudQuery:
   securityContext: {}
     # capabilities:
     #   drop:
-    #   - ALL
+  #   - ALL
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
@@ -813,15 +813,11 @@ cloudQuery:
     port: 9192
 
   resources:
-    limits:
-      memory: 2Gi
-      cpu: 200m
     requests:
-      memory: 650Mi
+      memory: 250Mi
       cpu: 100m
 
   livenessProbe: ~
-  readinessProbe: ~
 
   autoscaling:
     enabled: false
@@ -831,13 +827,12 @@ cloudQuery:
     # targetMemoryUtilizationPercentage: 80
 
   database:
-    volume:
-      name: database
-      mountPath: /steampipe/db
-      medium: Memory
+    image:
+      repository: ghcr.io/pluralsh/cloud-query-db
+      pullPolicy: IfNotPresent
+      tag: ~
     # PostgreSQL password configuration
     password:
-      # If provided, this value will be used as the PLRL_PG_PASSWORD
       # If not provided, a default value of "postgres" will be used
       value: ~
       # If provided, the password will be taken from this existing secret

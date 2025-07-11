@@ -121,7 +121,10 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 			return nil, fmt.Errorf("setup failed: %w", err)
 		}
 
-		conn, err := connection.NewConnection(connectionName, common.DataSource(args.DatabasePort(), connectionName, connectionName))
+		conn, err := connection.NewConnection(
+			connectionName,
+			common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), connectionName, connectionName),
+		)
 		if err != nil {
 			return nil, err
 		}

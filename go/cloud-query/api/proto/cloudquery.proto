@@ -20,6 +20,7 @@ message AzureCredentials {
 
 message GcpCredentials {
   string service_account_json_b64 = 1;
+  string project = 2;
 }
 
 message Connection {

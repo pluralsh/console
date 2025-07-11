@@ -1,0 +1,46 @@
+services:
+  cloud-query-db:
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    container_name: cloud-query-db
+    environment:
+      POSTGRES_DB: cloudquery
+      POSTGRES_USER: cloudquery
+      POSTGRES_PASSWORD: cloudquery
+      STEAMPIPE_LOG_LEVEL: debug
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudquery -d cloudquery"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cloudquery-network
+
+  cloud-query:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloud-query
+    command:
+      - "/usr/local/bin/cloud-query"
+      - "--database-host=cloud-query-db"
+      - "--database-port=5432"
+      - "--database-user=cloudquery"
+      - "--database-password=cloudquery"
+      - "--database-name=cloudquery"
+    ports:
+      - "9192:9192"
+    depends_on:
+      cloud-query-db:
+        condition: service_healthy
+    networks:
+      - cloudquery-network
+    restart: unless-stopped
+
+networks:
+  cloudquery-network:
+    driver: bridge
