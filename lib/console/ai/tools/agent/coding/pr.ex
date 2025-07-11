@@ -119,7 +119,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
 
   defp file_updates(%{file_updates: [_ | _] = updates}, dir) do
     Enum.reduce_while(updates, :ok, fn %__MODULE__.FileUpdate{file_name: f, previous: p, replacement: r}, _ ->
-      with {:ok, path} <- Path.safe_relative(f, dir),
+      with {:ok, path} <- relpath(dir, f),
            :ok <- Editor.replace(path, p, r) do
         {:cont, :ok}
       else
@@ -132,7 +132,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
 
   defp file_deletes(%{file_deletes: [_ | _] = deletes}, dir) do
     Enum.reduce_while(deletes, :ok, fn %__MODULE__.FileDelete{file_name: f}, _ ->
-      with {:ok, path} <- Path.safe_relative(f, dir),
+      with {:ok, path} <- relpath(dir, f),
            :ok <- File.rm(path) do
         {:cont, :ok}
       else
@@ -145,7 +145,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
 
   defp file_creates(%{file_creates: [_ | _] = creates}, dir) do
     Enum.reduce_while(creates, :ok, fn %__MODULE__.FileCreate{file_name: f, content: c}, _ ->
-      with {:ok, path} <- Path.safe_relative(f, dir),
+      with {:ok, path} <- relpath(dir, f),
            :ok <- File.write(path, c) do
         {:cont, :ok}
       else
@@ -155,6 +155,11 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
     end)
   end
   defp file_creates(_, _), do: :ok
+
+  defp relpath(dir, f) do
+    with {:ok, sanitized} <- Path.safe_relative(f, dir),
+      do: {:ok, Path.join(dir, sanitized)}
+  end
 
   def file_update_changeset(model, attrs) do
     model

@@ -38,10 +38,10 @@ defmodule Console.AI.Tools.Agent.Coding.Commit do
          {:conn, %ScmConnection{} = conn} <- {:conn, Tool.scm_connection()},
          conn <- %{conn | author: Tool.actor()},
          url = to_http(conn, url),
-         {:ok, %ScmConnection{dir: d} = conn} <- setup(conn, url, branch),
+         {:ok, %ScmConnection{dir: d} = conn} <- clone_branch(conn, url, branch),
          :ok <- Pr.apply_fs_changes(pr, d),
          {:ok, _} <- commit(conn, msg),
-         {:ok, _} <- push(conn, branch),
+         {:ok, _} <- push(conn),
          {:ok, _} <- update_session(%{commit_count: (count || 0) + 1}) do
       {:ok, "Changes committed and pushed to #{branch}"}
     else

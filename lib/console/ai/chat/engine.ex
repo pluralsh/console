@@ -180,7 +180,6 @@ defmodule Console.AI.Chat.Engine do
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
-           _ <- IO.inspect({name, args}, label: "making plural tool call"),
            {:ok, content} <- impl.implement(parsed) do
         publish_to_stream(stream, content)
         Stream.offset(1)

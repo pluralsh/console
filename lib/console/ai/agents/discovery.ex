@@ -6,6 +6,7 @@ defmodule Console.AI.Agents.Discovery do
   """
   alias Console.Schema.AgentSession
   alias Console.AI.Agents.Supervisor
+  require Logger
 
   def boot(module, %AgentSession{} = session),
     do: maybe_rpc(module, session, &module.boot/1)
@@ -15,8 +16,9 @@ defmodule Console.AI.Agents.Discovery do
 
   def maybe_rpc(module, %AgentSession{} = session, fun) when is_function(fun, 1) do
     me = node()
+    Logger.info("trying agent session rpc #{inspect(module)} #{session.id}")
     case worker_node(session) do
-      ^me -> start_and_run(session, fun)
+      ^me -> start_and_run(module, session, fun)
       node ->
         :erpc.call(node, __MODULE__, :start_and_run, [module, session, fun], :timer.seconds(30))
         |> Console.handle_rpc()
@@ -27,10 +29,9 @@ defmodule Console.AI.Agents.Discovery do
     case Supervisor.start_child(module, session) do
       {:ok, pid} -> fun.(pid)
       {:error, {:already_started, pid}} -> fun.(pid)
-      err -> IO.inspect(err, label: "error starting agent session")
+      err -> err
     end
   end
-  def start_and_run(_, _), do: {:error, "no helm repository located"}
 
   def worker_node(%AgentSession{id: id}), do: HashRing.key_to_node(ring(), id)
 

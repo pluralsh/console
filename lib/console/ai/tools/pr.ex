@@ -79,7 +79,7 @@ defmodule Console.AI.Tools.Pr do
 
   defp file_updates(_, %__MODULE__{file_updates: [_ | _] = updates}, dir) do
     Enum.reduce_while(updates, :ok, fn %__MODULE__.FileUpdate{file_name: f, previous: p, replacement: r}, _ ->
-      with {:ok, path} <- Path.safe_relative(f, dir),
+      with {:ok, path} <- relpath(dir, f),
            :ok <- Editor.replace(path, p, r) do
         {:cont, :ok}
       else
@@ -90,6 +90,11 @@ defmodule Console.AI.Tools.Pr do
   end
 
   defp file_updates(_, _, _), do: {:error, "no updates defined"}
+
+  defp relpath(dir, f) do
+    with {:ok, sanitized} <- Path.safe_relative(f, dir),
+      do: {:ok, Path.join(dir, sanitized)}
+  end
 
   defp file_update_changeset(model, attrs) do
     model
