@@ -58,8 +58,4 @@ COPY --from=libraries /workspace/lib//steampipe_postgres_*.sql /usr/share/postgr
 COPY --from=libraries /workspace/lib//steampipe_postgres_*.control /usr/share/postgresql/${POSTGRES_MAJOR_VERSION}/extension/
 
 # Copy gcloud CLI
-COPY --from=libraries /opt/google-cloud-sdk /opt/google-cloud-sdk
-
-# Create symlinks for gcloud commands
-RUN ln -s /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud && \
-    ln -s /opt/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil
+COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
