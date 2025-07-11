@@ -1,6 +1,6 @@
 defmodule Console.AI.Fixer.Base do
   use Console.AI.Evidence.Base
-  alias Console.Deployments.Tar
+  alias Console.Deployments.{Tar, Git}
   alias Console.Deployments.Pr.File
   alias Console.AI.Vector.Storable
   alias Console.AI.Provider
@@ -8,7 +8,8 @@ defmodule Console.AI.Fixer.Base do
     Service,
     AiInsightEvidence,
     AiInsight,
-    Alert
+    Alert,
+    GitRepository
   }
 
   @extension_blacklist ~w(.tgz .png .jpeg .jpg .gz .tar .zip .tar.gz)
@@ -41,6 +42,12 @@ defmodule Console.AI.Fixer.Base do
     end
   end
   def svc_code_prompt(f, svc), do: code_prompt(f, folder(svc))
+
+  def git_code_prompt(subfolder, %Service.Git{} = ref, %GitRepository{} = repo) do
+    with {:ok, f} <- Git.Discovery.fetch(repo, ref) do
+      code_prompt(f, subfolder)
+    end
+  end
 
   def code_prompt(f, subfolder, preface \\ @preface) do
     with {:ok, contents} <- Tar.tar_stream(f) do

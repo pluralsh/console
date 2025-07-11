@@ -2,7 +2,7 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
   use Console.AI.Tools.Agent.Base
   alias Console.Schema.{Stack, User, AgentSession, PullRequest}
   alias Console.Deployments.Stacks
-  alias Console.AI.Fixer.Stack, as: StackFixer
+  alias Console.AI.Fixer.Base, as: FixerBase
 
   embedded_schema do
     field :stack_id, :string
@@ -24,7 +24,7 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
 
   def implement(%__MODULE__{stack_id: id}) do
     Console.AI.Fixer.Base.raw()
-    with %Stack{} = stack <- Stacks.get_stack(id),
+    with %Stack{} = stack <- Stacks.get_stack(id) |> Console.Repo.preload([:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write),
          {:ok, [_ | rest]} <- get_prompt(stack) do
@@ -36,12 +36,12 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
     end
   end
 
-  defp get_prompt(%Stack{} = stack) do
+  defp get_prompt(%Stack{git: ref, repository: repo}) do
     with {:session, %AgentSession{} = session} <- session() do
       case Console.Repo.preload(session, [:pull_request]) do
-        %AgentSession{pull_request: %PullRequest{} = pr} ->
-          StackFixer.pr_prompt(stack, pr)
-        _ -> StackFixer.healthy_prompt(stack)
+        %AgentSession{branch: branch, pull_request: %PullRequest{}} ->
+          FixerBase.git_code_prompt(ref.folder, %{ref | ref: branch}, repo)
+        _ -> FixerBase.git_code_prompt(ref.folder, ref, repo)
       end
     else
       _ -> {:error, "could not find session"}
