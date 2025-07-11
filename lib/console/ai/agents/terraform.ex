@@ -9,7 +9,7 @@ defmodule Console.AI.Agents.Terraform do
     case failed_run_messages(run) do
       [_ | _] = messages ->
         Logger.info("handling failed terraform run in agent session #{session.id}")
-        drive(thread, messages, session.user)
+        drive(thread, messages, thread.user)
         |> handle_result(thread, session)
       _ -> {:noreply, {thread, session}}
     end
@@ -26,7 +26,7 @@ defmodule Console.AI.Agents.Terraform do
 
           #{p}
           """}
-        ], session.user)
+        ], thread.user)
         |> handle_result(thread, session)
       _ -> {:noreply, {thread, session}}
     end

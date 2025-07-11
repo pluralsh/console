@@ -994,6 +994,18 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// The version of OpenShift this cluster is running
+	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
+	// The number of nodes in this cluster
+	NodeCount *int64 `json:"nodeCount,omitempty"`
+	// The number of pods in this cluster
+	PodCount *int64 `json:"podCount,omitempty"`
+	// The number of namespaces in this cluster
+	NamespaceCount *int64 `json:"namespaceCount,omitempty"`
+	// The total CPU capacity of the cluster
+	CPUTotal *float64 `json:"cpuTotal,omitempty"`
+	// The total memory capacity of the cluster
+	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1345,10 +1357,16 @@ type ClusterNodeMetrics struct {
 }
 
 type ClusterPing struct {
-	CurrentVersion string         `json:"currentVersion"`
-	KubeletVersion *string        `json:"kubeletVersion,omitempty"`
-	Distro         *ClusterDistro `json:"distro,omitempty"`
-	HealthScore    *int64         `json:"healthScore,omitempty"`
+	CurrentVersion   string         `json:"currentVersion"`
+	KubeletVersion   *string        `json:"kubeletVersion,omitempty"`
+	Distro           *ClusterDistro `json:"distro,omitempty"`
+	HealthScore      *int64         `json:"healthScore,omitempty"`
+	OpenshiftVersion *string        `json:"openshiftVersion,omitempty"`
+	NodeCount        *int64         `json:"nodeCount,omitempty"`
+	PodCount         *int64         `json:"podCount,omitempty"`
+	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
+	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
+	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`

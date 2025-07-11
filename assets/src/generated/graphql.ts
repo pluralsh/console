@@ -1195,6 +1195,8 @@ export type Cluster = {
   cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
+  /** The total CPU capacity of the cluster */
+  cpuTotal?: Maybe<Scalars['Float']['output']>;
   /** a custom credential to use when provisioning this cluster */
   credential?: Maybe<ProviderCredential>;
   /** current k8s version as told to us by the deployment operator */
@@ -1232,13 +1234,19 @@ export type Cluster = {
   kubeletVersion?: Maybe<Scalars['String']['output']>;
   /** Queries logs for a cluster out of loki */
   logs?: Maybe<Array<Maybe<LogStream>>>;
+  /** The total memory capacity of the cluster */
+  memoryTotal?: Maybe<Scalars['Float']['output']>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
   /** A summation of the metrics utilization of the current cluster */
   metricsSummary?: Maybe<ClusterMetricsSummary>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
+  /** The number of namespaces in this cluster */
+  namespaceCount?: Maybe<Scalars['Int']['output']>;
   networkGraph?: Maybe<Array<Maybe<NetworkMeshEdge>>>;
+  /** The number of nodes in this cluster */
+  nodeCount?: Maybe<Scalars['Int']['output']>;
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   /** list of node pool specs managed by CAPI */
@@ -1251,6 +1259,8 @@ export type Cluster = {
   noisyNeighbors?: Maybe<UtilizationHeatMap>;
   /** the object store connection bound to this cluster for backup/restore */
   objectStore?: Maybe<ObjectStore>;
+  /** The version of OpenShift this cluster is running */
+  openshiftVersion?: Maybe<Scalars['String']['output']>;
   /** a high level description of the setup of common resources in a cluster */
   operationalLayout?: Maybe<OperationalLayout>;
   /** the parent of this virtual cluster */
@@ -1259,6 +1269,8 @@ export type Cluster = {
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** custom resources with dedicated views for this cluster */
   pinnedCustomResources?: Maybe<Array<Maybe<PinnedCustomResource>>>;
+  /** The number of pods in this cluster */
+  podCount?: Maybe<Scalars['Int']['output']>;
   /** lists OPA constraints registered in this cluster */
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
@@ -1679,13 +1691,19 @@ export type ClusterNodeMetrics = {
 };
 
 export type ClusterPing = {
+  cpuTotal?: InputMaybe<Scalars['Float']['input']>;
   currentVersion: Scalars['String']['input'];
   distro?: InputMaybe<ClusterDistro>;
   healthScore?: InputMaybe<Scalars['Int']['input']>;
   /** scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval */
   insightComponents?: InputMaybe<Array<InputMaybe<ClusterInsightComponentAttributes>>>;
   kubeletVersion?: InputMaybe<Scalars['String']['input']>;
+  memoryTotal?: InputMaybe<Scalars['Float']['input']>;
+  namespaceCount?: InputMaybe<Scalars['Int']['input']>;
+  nodeCount?: InputMaybe<Scalars['Int']['input']>;
   nodeStatistics?: InputMaybe<Array<InputMaybe<NodeStatisticAttributes>>>;
+  openshiftVersion?: InputMaybe<Scalars['String']['input']>;
+  podCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */

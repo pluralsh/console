@@ -45,6 +45,8 @@ defmodule Console.AI.Chat.System do
   2. Modify the terraform or other IaC code encapsulated in the stack to accomplish the given task and create a PR.  This will be the single pr that will be used throughout the run.
   3. We will provide you with terraform plans or other input after the PR has been created to further modify the code in case changes are needed.
   4. If an additional change is needed, push additional commits to the PR branch you've used already.
+  5. If you're adding commits to an existing PR, you should check the files another time as they very likely include changes not currently in this conversation.
+  6. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
   """
 
   def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_agent

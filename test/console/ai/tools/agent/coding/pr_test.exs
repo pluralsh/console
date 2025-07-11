@@ -42,6 +42,8 @@ defmodule Console.AI.Tools.Agent.Coding.PrTest do
       %{pull_request: pr} = Console.Repo.preload(refetch(session), [:pull_request])
 
       assert pr.url == "https://github.com/pr/url"
+
+      assert_receive {:event, %Console.PubSub.PullRequestCreated{}}
     end
   end
 end

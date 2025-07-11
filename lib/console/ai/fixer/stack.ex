@@ -73,7 +73,6 @@ defmodule Console.AI.Fixer.Stack do
   defp last_pr_run(%Stack{} = stack, %PullRequest{} = pr) do
     StackRun.for_stack(stack.id)
     |> StackRun.for_pr(pr.id)
-    |> StackRun.for_status(:failed)
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)
     |> Repo.one()

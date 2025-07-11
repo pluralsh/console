@@ -3,7 +3,6 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
   import Console.Deployments.Pr.Git
   alias Console.Schema.{
     PrAutomation,
-    PullRequest,
     ScmConnection,
     Stack,
     GitRepository,
@@ -11,6 +10,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
   }
   alias Console.AI.{Tool, File.Editor}
   alias Console.Deployments.Pr.Dispatcher
+  alias Console.Deployments.Git, as: GitSvc
 
   embedded_schema do
     field :stack_id,       :string
@@ -95,7 +95,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
                           identifier: identifier,
                         }, branch, %{}),
         {:session, %AgentSession{id: session_id}} <- session(),
-        {:ok, pull_request} <- create_pr(attrs, %{stack_id: stack.id, session_id: session_id}),
+        {:ok, pull_request} <- GitSvc.create_pull_request(Map.merge(attrs, %{stack_id: stack.id, session_id: session_id})),
         {:ok, _} <- update_session(%{pull_request_id: pull_request.id, branch: branch}) do
       {:ok, "Pull request created at url #{pull_request.url}"}
     else
@@ -103,12 +103,6 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
       {:error, err} -> {:ok, "failed to create pull request, reason: #{inspect(err)}"}
       err -> {:ok, "failed to create pull request with unknown reason: #{inspect(err)}"}
     end
-  end
-
-  defp create_pr(attrs, additional) do
-    %PullRequest{}
-    |> PullRequest.changeset(Map.merge(attrs, additional))
-    |> Console.Repo.insert()
   end
 
   def apply_fs_changes(pr, dir) do

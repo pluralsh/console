@@ -5410,6 +5410,18 @@ input ClusterPing {
 
   healthScore: Int
 
+  openshiftVersion: String
+
+  nodeCount: Int
+
+  podCount: Int
+
+  namespaceCount: Int
+
+  cpuTotal: Float
+
+  memoryTotal: Float
+
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
 
@@ -5937,6 +5949,24 @@ type Cluster {
 
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
+
+  "The version of OpenShift this cluster is running"
+  openshiftVersion: String
+
+  "The number of nodes in this cluster"
+  nodeCount: Int
+
+  "The number of pods in this cluster"
+  podCount: Int
+
+  "The number of namespaces in this cluster"
+  namespaceCount: Int
+
+  "The total CPU capacity of the cluster"
+  cpuTotal: Float
+
+  "The total memory capacity of the cluster"
+  memoryTotal: Float
 
   "The helm values for the agent installation"
   agentHelmValues: String
