@@ -49,7 +49,7 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Write([]byte(fmt.Sprintf("%v\n", err)))
+		_, _ = fmt.Fprintf(w, "%v\n", err)
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
