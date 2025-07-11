@@ -74,7 +74,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
 
   def implement(%__MODULE__{stack_id: id, branch_name: branch, commit_message: msg} = pr) do
     branch = "plrl/ai/#{branch}-#{Console.rand_alphanum(6)}"
-    stack = Console.Deployments.Stacks.get_stack(id) |> IO.inspect(label: "stack")
+    stack = Console.Deployments.Stacks.get_stack(id)
     with %Stack{repository: %GitRepository{url: url}} = stack <- Console.Repo.preload(stack, [:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write),
@@ -128,7 +128,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
       end
     end)
   end
-  defp file_updates(_, _), do: {:error, "no updates defined"}
+  defp file_updates(_, _), do: :ok
 
   defp file_deletes(%{file_deletes: [_ | _] = deletes}, dir) do
     Enum.reduce_while(deletes, :ok, fn %__MODULE__.FileDelete{file_name: f}, _ ->
@@ -141,7 +141,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
       end
     end)
   end
-  defp file_deletes(_, _), do: {:error, "no deletes defined"}
+  defp file_deletes(_, _), do: :ok
 
   defp file_creates(%{file_creates: [_ | _] = creates}, dir) do
     Enum.reduce_while(creates, :ok, fn %__MODULE__.FileCreate{file_name: f, content: c}, _ ->
@@ -154,6 +154,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
       end
     end)
   end
+  defp file_creates(_, _), do: :ok
 
   def file_update_changeset(model, attrs) do
     model
