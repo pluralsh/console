@@ -95,9 +95,9 @@ defmodule Console.Deployments.Observer.Poller do
     end
   end
 
-  defp supports_version?(res, %Observer.Target.Addon{kubernetes_versions: [_ | _] = versions}),
+  defp supports_version?(res, %{kubernetes_versions: [_ | _] = versions}),
     do: Enum.all?(versions, &supports_version?(res, &1))
-  defp supports_version?(res, %Observer.Target.Addon{kubernetes_version: vsn}) when is_binary(vsn),
+  defp supports_version?(res, %{kubernetes_version: vsn}) when is_binary(vsn),
     do: supports_version?(res, vsn)
   defp supports_version?(%Version{kube: reqs}, vsn) when is_binary(vsn),
     do: !Utils.blocking?(reqs, vsn, 0)

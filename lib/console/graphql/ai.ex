@@ -6,6 +6,7 @@ defmodule Console.GraphQl.AI do
 
   ecto_enum :chat_type, Console.Schema.Chat.Type
   ecto_enum :evidence_type, Console.Schema.AiInsightEvidence.Type
+  ecto_enum :agent_session_type, Console.Schema.AgentSession.Type
 
   @desc "A role to pass to an LLM, modeled after OpenAI's chat api roles"
   enum :ai_role do
@@ -52,7 +53,9 @@ defmodule Console.GraphQl.AI do
   end
 
   input_object :agent_session_attributes do
+    field :type,           :agent_session_type, description: "the type of agent this session is for"
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
+    field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
   end
 
@@ -81,8 +84,9 @@ defmodule Console.GraphQl.AI do
 
   @desc "Additional attributes of this chat message, used for formatting it in the display"
   object :chat_type_attributes do
-    field :file, :chat_file
-    field :tool, :chat_tool
+    field :file,    :chat_file
+    field :tool,    :chat_tool
+    field :pr_call, :pr_call_attributes
   end
 
   @desc "Additional attributes for describing a file type chat"
@@ -94,6 +98,11 @@ defmodule Console.GraphQl.AI do
   object :chat_tool do
     field :name,      :string
     field :arguments, :map
+  end
+
+  @desc "Additional attributes for describing a pr call tool call that derived this chat message"
+  object :pr_call_attributes do
+    field :context, :map
   end
 
   @desc "A list of chat messages around a specific topic created on demand"
@@ -129,9 +138,15 @@ defmodule Console.GraphQl.AI do
   @desc "A session for an AI agent to use when acting in a chat thread"
   object :agent_session do
     field :id,             non_null(:id)
+    field :type,           :agent_session_type, description: "the type of agent this session is for"
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
     field :thread,         :chat_thread, resolve: dataloader(AI)
     field :connection,     :cloud_connection, resolve: dataloader(Deployments)
+    field :branch,         :string, description: "the branch this session's pr is operating on"
+
+    field :service,      :service_deployment, resolve: dataloader(Deployments)
+    field :stack,        :infrastructure_stack, resolve: dataloader(Deployments)
+    field :pull_request, :pull_request, resolve: dataloader(Deployments)
 
     @desc "the services associated with this chat, usually from an agentic workflow"
     connection field :service_deployments, node_type: :service_deployment do
@@ -485,6 +500,14 @@ defmodule Console.GraphQl.AI do
       arg :messages,   list_of(:chat_message)
 
       resolve &AI.fix_pr/2
+    end
+
+    @desc "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
+    field :create_agent_session, :chat_thread do
+      middleware Authenticated
+      arg :attributes, non_null(:agent_session_attributes)
+
+      resolve &AI.create_agent_session/2
     end
   end
 

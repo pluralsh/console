@@ -145,3 +145,44 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.StackState.Mini do
 
   def prompt(%@for{}), do: ""
 end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.ServiceComponent.Mini do
+  alias Console.AI.Utils
+  alias Console.AI.Tools.Utils, as: TU
+
+  def id(%@for{service_id: id, group: g, kind: k, namespace: n, name: name, version: v}),
+    do: "#{id}.#{g}.#{k}.#{n}.#{name}.#{v}"
+
+  def content(%@for{} = mini) do
+    base = base_content(mini)
+
+    with {:ok, svc_yaml} <- TU.yaml_encode(mini.service),
+         {:ok, children_yaml} <- TU.yaml_encode(mini.children) do
+        """
+        #{base}
+        service:
+        #{TU.indent(svc_yaml, 2)}
+        children:
+        #{TU.indent(children_yaml, 2)}
+        """
+    else
+      _ -> base
+    end
+  end
+
+  defp base_content(%@for{} = mini) do
+    """
+    service_id: #{mini.service_id}
+    service_url: #{mini.service_url}
+    group: #{mini.group}
+    version: #{mini.version}
+    kind: #{mini.kind}
+    namespace: #{mini.namespace}
+    name: #{mini.name}
+    """
+  end
+
+  def datatype(_), do: "service_component"
+
+  def prompt(%@for{}), do: ""
+end

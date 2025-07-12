@@ -7,6 +7,7 @@ defmodule Console.AI.Graph.Indexer.Source do
   alias Console.AI.Graph.IndexableItem
   alias Console.AI.Graph.{Provider, Indexer.Sink}
   alias Console.Schema.CloudConnection
+  require Logger
 
   @poll :timer.minutes(60)
   @chunk_size 50
@@ -36,7 +37,13 @@ defmodule Console.AI.Graph.Indexer.Source do
     with {:ok, channel} <- Client.connect(),
          {:ok, stream} <- Stub.extract(channel, %ExtractInput{connection: to_pb(conn)}) do
       stream
-      |> Stream.map(fn {:ok, out} -> to_indexable(out, conn) end)
+      |> Stream.map(fn
+        {:ok, out} -> to_indexable(out, conn)
+        {:error, error} ->
+          Logger.info "stream error: #{inspect(error)}"
+          nil
+      end)
+      |> Stream.filter(& &1)
       |> Console.throttle(count: 500, pause: :timer.seconds(1))
       |> Stream.chunk_every(@chunk_size)
       |> Enum.each(&Sink.ingest(%Sink.Chunk{connection: conn, chunk: &1}))

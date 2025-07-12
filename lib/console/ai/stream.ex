@@ -25,7 +25,8 @@ defmodule Console.AI.Stream do
     end
   end
 
-  def publish(%__MODULE__{topic: topic, offset: offset, msg: msg, role: role}, c, ind) when is_binary(topic) do
+  def publish(%__MODULE__{topic: topic, offset: offset, msg: msg, role: role}, c, ind)
+    when is_binary(topic) and is_binary(c) do
     msg = %{content: c, seq: ind + offset, message: msg, role: role}
     AIChannel.stream(topic, msg)
     Absinthe.Subscription.publish(

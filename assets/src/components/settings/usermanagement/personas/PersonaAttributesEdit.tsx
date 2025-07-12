@@ -64,6 +64,9 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     secrets: true,
     configuration: true,
   },
+  ai: {
+    pr: true,
+  },
 } satisfies RequiredDeep<PersonaConfigurationAttributes>
 
 export function PersonaAttributes({

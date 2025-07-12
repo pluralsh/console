@@ -376,6 +376,14 @@ defmodule Console.Deployments.Git do
     |> notify(:create, user)
   end
 
+  @spec create_pull_request(map) :: pull_request_resp
+  def create_pull_request(attrs) do
+    %PullRequest{}
+    |> PullRequest.changeset(attrs)
+    |> Repo.insert()
+    |> notify(:create)
+  end
+
   @doc """
   Updates attributes for a pr in response to a scm webhook invocation
   """

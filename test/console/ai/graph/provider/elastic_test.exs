@@ -43,7 +43,6 @@ defmodule Console.AI.Graph.Provider.ElasticTest do
       end
 
       Provider.bulk_index(insert(:cloud_connection), avoid)
-
       ES.refresh(index)
 
 

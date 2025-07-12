@@ -197,6 +197,39 @@ defmodule Console.Deployments.Observer.SyncRunnerTest do
       assert obs.last_value == context.context["some"]
     end
 
+    test "it can poll an addon version set" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{
+          type: :addon,
+          addon: %{name: "ingress-nginx", kubernetes_versions: ~w(1.30 1.29 1.28)}
+        },
+        actions: [
+          %{
+            type: :pipeline,
+            configuration: %{
+              pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}
+            }
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      assert obs.last_value == "4.12.0"
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
     test "it can poll an eks addon and add a pipeline context" do
       bot("console")
       pipeline = insert(:pipeline)

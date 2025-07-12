@@ -1,40 +1,53 @@
 import {
   Accordion,
   AccordionItem,
+  AppIcon,
   Button,
   Card,
   CaretRightIcon,
   Chip,
   Code,
+  Divider,
+  DocumentIcon,
   FileIcon,
   Flex,
   Markdown,
+  PrQueueIcon,
 } from '@pluralsh/design-system'
 
 import isJson from 'is-json'
 
 import styled, { useTheme } from 'styled-components'
 
+import { GqlError } from 'components/utils/Alert'
+import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  AiRole,
   ChatType,
   ChatTypeAttributes,
+  PrAutomationFragment,
   useConfirmChatMutation,
+  useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { ChatMessageActions } from './ChatMessage'
 import { useState } from 'react'
-import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { GqlError } from 'components/utils/Alert'
+import { ChatMessageActions } from './ChatMessage'
+import { iconUrl } from 'utils/icon'
+import { StackedText } from 'components/utils/table/StackedText'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 type ChatMessageContentProps = {
   id?: string
   seq?: number
+  role?: AiRole
+  threadId?: string
   showActions?: boolean
-  side: 'left' | 'right'
+  side?: 'left' | 'right'
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
+  prAutomation?: Nullable<PrAutomationFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
@@ -44,11 +57,14 @@ type ChatMessageContentProps = {
 export function ChatMessageContent({
   id,
   seq,
+  role,
+  threadId,
   showActions,
   side,
   content,
   type = ChatType.Text,
   attributes,
+  prAutomation,
   confirm,
   confirmedAt,
   serverName,
@@ -78,9 +94,22 @@ export function ChatMessageContent({
           highlightToolContent={highlightToolContent}
         />
       )
+    case ChatType.ImplementationPlan:
+      return (
+        <ImplementationPlanMessageContent
+          content={content}
+          threadId={threadId}
+        />
+      )
+    case ChatType.PrCall:
+      return <PrCallContent prAutomation={prAutomation} />
     case ChatType.Text:
     default:
-      return <StandardMessageContent content={content} />
+      return role === AiRole.Assistant || role === AiRole.System ? (
+        <Markdown text={content ?? ''} />
+      ) : (
+        <StandardMessageContent content={content} />
+      )
   }
 }
 
@@ -116,7 +145,7 @@ function FileMessageContent({
               seq={seq}
               content={fileName}
               show={showActions}
-              side={side}
+              side={side ?? 'right'}
               iconFrameType="floating"
               css={{ position: 'absolute', right: 16, top: 4 }}
             />
@@ -128,6 +157,117 @@ function FileMessageContent({
         </Code>
       </AccordionItem>
     </Accordion>
+  )
+}
+
+function ImplementationPlanMessageContent({
+  content,
+  threadId,
+}: ChatMessageContentProps) {
+  const { spacing, colors } = useTheme()
+  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation()
+
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <Accordion
+        type="single"
+        css={{
+          '&:has(:first-of-type button:hover)': {
+            background: colors['fill-two-hover'],
+          },
+        }}
+      >
+        <AccordionItem
+          padding="compact"
+          caret="right"
+          trigger={
+            <Flex
+              gap="small"
+              align="center"
+              wordBreak="break-word"
+            >
+              <DocumentIcon
+                size={12}
+                color="icon-light"
+              />
+              <CaptionP $color="text-light">Implementation Plan</CaptionP>
+            </Flex>
+          }
+        >
+          <div css={{ padding: spacing.xsmall }}>
+            <Markdown text={content} />
+          </div>
+        </AccordionItem>
+        <Divider
+          css={{ margin: `0 ${spacing.small}px` }}
+          backgroundColor={colors['border-fill-three']}
+        />
+        <Button
+          small
+          css={{ margin: spacing.small, alignSelf: 'flex-start' }}
+          loading={loading}
+          onClick={() =>
+            confirmPlan({ variables: { threadId: threadId ?? '' } })
+          }
+        >
+          Confirm plan
+        </Button>
+      </Accordion>
+      {error && <GqlError error={error} />}
+    </Flex>
+  )
+}
+
+function PrCallContent({
+  prAutomation,
+}: Pick<ChatMessageContentProps, 'prAutomation'>) {
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  if (!prAutomation) return <GqlError error="PR automation not found." />
+
+  const { icon, darkIcon, name, documentation } = prAutomation
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      align="flex-start"
+      width="fit-content"
+    >
+      <CaptionP $color="text-xlight">PR automation:</CaptionP>
+      <Card css={{ padding: theme.spacing.xsmall, minWidth: 150 }}>
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+        >
+          <AppIcon
+            size="xxsmall"
+            url={iconUrl(icon, darkIcon, theme.mode)}
+            icon={<PrQueueIcon />}
+          />
+          <StackedText
+            first={name}
+            second={documentation}
+          />
+        </Flex>
+      </Card>
+      <Button
+        small
+        css={{ alignSelf: 'flex-end' }}
+        onClick={() => setOpen(true)}
+      >
+        Create PR
+      </Button>
+      <CreatePrModal
+        prAutomation={prAutomation}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </Flex>
   )
 }
 

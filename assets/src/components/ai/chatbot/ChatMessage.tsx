@@ -9,14 +9,13 @@ import {
   GitHubLogoIcon,
   IconFrame,
   IconFrameProps,
-  Markdown,
   PluralLogoMark,
   Spinner,
   TrashCanIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentPropsWithRef, ReactNode, useState } from 'react'
+import { ComponentPropsWithRef, useState } from 'react'
 import styled, { CSSObject, useTheme } from 'styled-components'
 import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
@@ -25,10 +24,12 @@ import {
   AiRole,
   ChatType,
   ChatTypeAttributes,
+  PrAutomationFragment,
   PullRequestFragment,
   useDeleteChatMutation,
 } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
 
@@ -37,54 +38,39 @@ export function ChatMessage({
   seq,
   content,
   role,
+  threadId,
   type = ChatType.Text,
   attributes,
   pullRequest,
+  prAutomation,
   confirm,
   confirmedAt,
   serverName,
   disableActions,
   highlightToolContent,
   contentStyles,
+  updatedAt,
   ...props
 }: {
   id?: string
   seq?: number
   content?: Nullable<string>
   role: AiRole
+  threadId?: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
+  prAutomation?: Nullable<PrAutomationFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
   disableActions?: boolean
   contentStyles?: CSSObject
   highlightToolContent?: boolean
+  updatedAt?: Nullable<string>
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
-  let finalContent: ReactNode
   const rightAlign = role === AiRole.User
-
-  if (role === AiRole.Assistant || role === AiRole.System) {
-    finalContent = <Markdown text={content ?? ''} />
-  } else {
-    finalContent = (
-      <ChatMessageContent
-        id={id ?? ''}
-        seq={seq}
-        showActions={showActions && !disableActions}
-        side={rightAlign ? 'right' : 'left'}
-        content={content ?? ''}
-        type={type}
-        attributes={attributes}
-        confirm={confirm}
-        confirmedAt={confirmedAt}
-        serverName={serverName}
-        highlightToolContent={highlightToolContent}
-      />
-    )
-  }
 
   return pullRequest ? (
     <PrChatMesssage
@@ -110,12 +96,28 @@ export function ChatMessage({
             ...contentStyles,
           }}
         >
-          {finalContent}
+          <ChatMessageContent
+            id={id ?? ''}
+            seq={seq}
+            showActions={showActions && !disableActions}
+            side={rightAlign ? 'right' : 'left'}
+            content={content ?? ''}
+            role={role}
+            threadId={threadId}
+            type={type}
+            attributes={attributes}
+            confirm={confirm}
+            confirmedAt={confirmedAt}
+            serverName={serverName}
+            highlightToolContent={highlightToolContent}
+            prAutomation={prAutomation}
+          />
           {type !== ChatType.File && (
             <ChatMessageActions
               id={id ?? ''}
               seq={seq}
               content={content ?? ''}
+              timestamp={updatedAt}
               show={showActions && !disableActions}
               side={rightAlign ? 'right' : 'left'}
             />
@@ -130,6 +132,7 @@ export function ChatMessageActions({
   id,
   seq,
   content,
+  timestamp,
   show = true,
   side,
   iconFrameType = 'tertiary',
@@ -138,6 +141,7 @@ export function ChatMessageActions({
   id: string
   seq: number | undefined
   content: string
+  timestamp?: Nullable<string>
   show?: boolean
   side: 'left' | 'right'
   iconFrameType?: IconFrameProps['type']
@@ -166,49 +170,61 @@ export function ChatMessageActions({
       $side={side}
       {...props}
     >
-      <WrapWithIf
-        condition={!copied}
-        wrapper={
-          <CopyToClipboard
-            text={content}
-            onCopy={showCopied}
+      {timestamp && side === 'right' && (
+        <CaptionP $color="text-light">
+          {formatDateTime(timestamp, 'h:mma')}
+        </CaptionP>
+      )}
+      <Flex gap="xxsmall">
+        <WrapWithIf
+          condition={!copied}
+          wrapper={
+            <CopyToClipboard
+              text={content}
+              onCopy={showCopied}
+            />
+          }
+        >
+          <IconFrame
+            clickable
+            as="div"
+            tooltip="Copy to clipboard"
+            type={iconFrameType}
+            icon={
+              copied ? (
+                <CheckIcon color="icon-success" />
+              ) : (
+                <CopyIcon color="icon-xlight" />
+              )
+            }
           />
-        }
-      >
+        </WrapWithIf>
         <IconFrame
           clickable
           as="div"
-          tooltip="Copy to clipboard"
+          tooltip="Fork thread from this message"
           type={iconFrameType}
+          onClick={onFork}
           icon={
-            copied ? (
-              <CheckIcon color="icon-success" />
-            ) : (
-              <CopyIcon color="icon-xlight" />
-            )
+            mutationLoading ? <Spinner /> : <GitForkIcon color="icon-xlight" />
           }
         />
-      </WrapWithIf>
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Fork thread from this message"
-        type={iconFrameType}
-        onClick={onFork}
-        icon={
-          mutationLoading ? <Spinner /> : <GitForkIcon color="icon-xlight" />
-        }
-      />
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Delete message"
-        type={iconFrameType}
-        onClick={onDelete}
-        icon={
-          deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-xlight" />
-        }
-      />
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Delete message"
+          type={iconFrameType}
+          onClick={onDelete}
+          icon={
+            deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
+          }
+        />
+      </Flex>
+      {timestamp && side === 'left' && (
+        <CaptionP $color="text-light">
+          {formatDateTime(timestamp, 'h:mma')}
+        </CaptionP>
+      )}
     </ActionsWrapperSC>
   )
 }
@@ -274,7 +290,9 @@ const ActionsWrapperSC = styled.div<{
   $side: 'left' | 'right'
 }>(({ theme, $show, $side }) => ({
   display: 'flex',
-  gap: theme.spacing.xxsmall,
+  width: '100%',
+  gap: theme.spacing.large,
+  alignItems: 'center',
   opacity: $show ? 1 : 0,
   transition: '0.3s opacity ease',
   pointerEvents: $show ? 'auto' : 'none',

@@ -83,6 +83,7 @@ defmodule Console.GraphQl.Users do
     field :deployments, :persona_deployment_attributes, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services_attributes, description: "enable individual parts of the services views"
+    field :ai,          :persona_ai_attributes, description: "enable individual parts of the ai views"
   end
 
   input_object :persona_deployment_attributes do
@@ -114,6 +115,10 @@ defmodule Console.GraphQl.Users do
   input_object :persona_services_attributes do
     field :secrets, :boolean
     field :configuration, :boolean
+  end
+
+  input_object :persona_ai_attributes do
+    field :pr,  :boolean
   end
 
   input_object :bootstrap_token_attributes do
@@ -290,6 +295,7 @@ defmodule Console.GraphQl.Users do
     field :deployments, :persona_deployment, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services, description: "enable individual parts of the services views"
+    field :ai,          :persona_ai, description: "enable individual parts of the ai views"
   end
 
   object :persona_deployment do
@@ -321,6 +327,10 @@ defmodule Console.GraphQl.Users do
   object :persona_services do
     field :secrets,       :boolean
     field :configuration, :boolean
+  end
+
+  object :persona_ai do
+    field :pr,  :boolean
   end
 
   @desc "A restricted token meant only for use in registering clusters, esp for edge devices"

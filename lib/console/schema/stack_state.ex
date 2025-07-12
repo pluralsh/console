@@ -72,7 +72,7 @@ defmodule Console.Schema.StackState.Mini do
 
   defstruct [:identifier, :resource, :name, :configuration, :links, :stack]
 
-  def new(%{"title" => _} = args) do
+  def new(%{} = args) do
     %__MODULE__{
       identifier: args["identifier"],
       resource: args["resource"],

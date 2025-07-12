@@ -2332,6 +2332,22 @@ Persona is the Schema for the personas API
 | `spec` _[PersonaSpec](#personaspec)_ |  |  |  |
 
 
+#### PersonaAI
+
+
+
+
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `pr` _boolean_ | Enables whether users bound to this persona can use AI to generate PRs. |  | Optional: {} <br /> |
+
+
 #### PersonaConfiguration
 
 
@@ -2350,6 +2366,7 @@ _Appears in:_
 | `deployments` _[PersonaDeployment](#personadeployment)_ | Deployments enable individual parts of the deployments views. |  | Optional: {} <br /> |
 | `sidebar` _[PersonaSidebar](#personasidebar)_ | Sidebar enables individual aspects of the sidebar. |  | Optional: {} <br /> |
 | `services` _[PersonaServices](#personaservices)_ | Services enable individual parts of the services views. |  | Optional: {} <br /> |
+| `ai` _[PersonaAI](#personaai)_ | AI enables individual parts of the ai views. |  | Optional: {} <br /> |
 
 
 #### PersonaDeployment

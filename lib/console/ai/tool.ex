@@ -43,6 +43,13 @@ defmodule Console.AI.Tool do
 
   def context(attrs), do: Process.put(@ctx, struct(Context, attrs))
 
+  def upsert(attrs) do
+    case Process.get(@ctx) do
+      %Context{} = ctx -> Process.put(@ctx, Map.merge(ctx, attrs))
+      _ -> context(attrs)
+    end
+  end
+
   def actor() do
     case Process.get(@ctx) do
       %Context{user: %User{} = user} -> user

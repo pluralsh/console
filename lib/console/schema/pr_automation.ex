@@ -104,6 +104,13 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, where: p.catalog_id == ^catalog_id)
   end
 
+  def for_catalog_name(query \\ __MODULE__, name) do
+    from(p in query,
+      join: c in assoc(p, :catalog),
+      where: c.name == ^name
+    )
+  end
+
   def search(query \\ __MODULE__, q) do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end

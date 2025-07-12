@@ -5,7 +5,6 @@ import {
   IconFrame,
   MagicWandIcon,
   PlusIcon,
-  PrOpenIcon,
   SendMessageIcon,
   ServersIcon,
   Tooltip,
@@ -17,7 +16,6 @@ import {
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
-  useThreadPrMutation,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
 import {
@@ -59,7 +57,6 @@ export function SendMessageForm({
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
-  const [threadPrBtnClicked, setThreadPrBtnClicked] = useState(false)
   const [newMessage, setNewMessage] = usePersistedSessionState<string>(
     'currentAiChatMessage',
     ''
@@ -72,12 +69,6 @@ export function SendMessageForm({
       onCompleted: () => {
         setContextBtnClicked(true)
       },
-    })
-
-  const [createThreadPr, { loading: threadPrLoading, error: threadPrError }] =
-    useThreadPrMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
     })
 
   const contentEditableRef = useRef<HTMLDivElement>(null)
@@ -110,11 +101,6 @@ export function SendMessageForm({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
-  const handleCreateThreadPr = useCallback(() => {
-    setThreadPrBtnClicked(true)
-    createThreadPr({ variables: { threadId: currentThread.id } })
-  }, [createThreadPr, currentThread.id])
-
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -145,7 +131,6 @@ export function SendMessageForm({
       )}
       <EditableContentWrapperSC $fullscreen={fullscreen}>
         {contextError && <GqlError error={contextError} />}
-        {threadPrError && <GqlError error={threadPrError} />}
         <EditableDiv
           placeholder="Start typing..."
           setValue={setNewMessage}
@@ -202,16 +187,6 @@ export function SendMessageForm({
                 </Button>
               </Tooltip>
             )}
-            <Button
-              small
-              secondary
-              disabled={threadPrBtnClicked}
-              loading={threadPrLoading}
-              onClick={handleCreateThreadPr}
-              startIcon={<PrOpenIcon />}
-            >
-              Create PR
-            </Button>
           </Flex>
           <IconFrame
             icon={<SendMessageIcon />}

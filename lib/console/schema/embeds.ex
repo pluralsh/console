@@ -55,14 +55,14 @@ defmodule Console.Schema.DiffNormalizer do
   use Piazza.Ecto.Schema
 
   embedded_schema do
-    field :group,        :string
-    field :kind,         :string
-    field :name,         :string
-    field :namespace,    :string
-    field :json_patches, {:array, :string}
+    field :group,         :string
+    field :kind,          :string
+    field :name,          :string
+    field :namespace,     :string
+    field :json_pointers, {:array, :string}
   end
 
-  @valid ~w(json_patches group kind name namespace)a
+  @valid ~w(json_pointers group kind name namespace)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -123,8 +123,12 @@ type AgentMigrationAttributes struct {
 }
 
 type AgentSessionAttributes struct {
+	// the type of agent this session is for
+	Type *AgentSessionType `json:"type,omitempty"`
 	// whether the provisioning plan has been confirmed
 	PlanConfirmed *bool `json:"planConfirmed,omitempty"`
+	// the prompt to use for this session
+	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
 }
@@ -857,8 +861,9 @@ type ChatTool struct {
 
 // Additional attributes of this chat message, used for formatting it in the display
 type ChatTypeAttributes struct {
-	File *ChatFile `json:"file,omitempty"`
-	Tool *ChatTool `json:"tool,omitempty"`
+	File   *ChatFile         `json:"file,omitempty"`
+	Tool   *ChatTool         `json:"tool,omitempty"`
+	PrCall *PrCallAttributes `json:"prCall,omitempty"`
 }
 
 type CloudAddon struct {
@@ -991,6 +996,22 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// The version of OpenShift this cluster is running
+	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
+	// The number of nodes in this cluster
+	NodeCount *int64 `json:"nodeCount,omitempty"`
+	// The number of pods in this cluster
+	PodCount *int64 `json:"podCount,omitempty"`
+	// The number of namespaces in this cluster
+	NamespaceCount *int64 `json:"namespaceCount,omitempty"`
+	// The total CPU capacity of the cluster
+	CPUTotal *float64 `json:"cpuTotal,omitempty"`
+	// The total memory capacity of the cluster
+	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
+	// The CPU utilization of the cluster
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// The memory utilization of the cluster
+	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1342,10 +1363,18 @@ type ClusterNodeMetrics struct {
 }
 
 type ClusterPing struct {
-	CurrentVersion string         `json:"currentVersion"`
-	KubeletVersion *string        `json:"kubeletVersion,omitempty"`
-	Distro         *ClusterDistro `json:"distro,omitempty"`
-	HealthScore    *int64         `json:"healthScore,omitempty"`
+	CurrentVersion   string         `json:"currentVersion"`
+	KubeletVersion   *string        `json:"kubeletVersion,omitempty"`
+	Distro           *ClusterDistro `json:"distro,omitempty"`
+	HealthScore      *int64         `json:"healthScore,omitempty"`
+	OpenshiftVersion *string        `json:"openshiftVersion,omitempty"`
+	NodeCount        *int64         `json:"nodeCount,omitempty"`
+	PodCount         *int64         `json:"podCount,omitempty"`
+	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
+	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
+	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
+	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
+	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
@@ -2301,6 +2330,26 @@ type DeprecatedCustomResourceAttributes struct {
 	Name      string  `json:"name"`
 	// the next valid version for this resource
 	NextVersion string `json:"nextVersion"`
+}
+
+// Allows you to control whether a specific set of fields in a kubernetes object is drift detected
+type DiffNormalizer struct {
+	// The name of the resource to normalize
+	Name *string `json:"name,omitempty"`
+	// The kind of the resource to normalize
+	Kind *string `json:"kind,omitempty"`
+	// The namespace of the resource to normalize
+	Namespace *string `json:"namespace,omitempty"`
+	// A list of json pointers to the fields to ignore
+	JSONPointers []*string `json:"jsonPointers,omitempty"`
+}
+
+type DiffNormalizerAttributes struct {
+	Name      *string `json:"name,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	// A list of json patches to apply to the service which controls how drift detection works
+	JSONPointers []*string `json:"jsonPointers,omitempty"`
 }
 
 type ElasticsearchConnection struct {
@@ -4133,6 +4182,14 @@ type Persona struct {
 	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
+type PersonaAi struct {
+	Pr *bool `json:"pr,omitempty"`
+}
+
+type PersonaAiAttributes struct {
+	Pr *bool `json:"pr,omitempty"`
+}
+
 type PersonaAttributes struct {
 	Name *string `json:"name,omitempty"`
 	// longform description of this persona
@@ -4154,6 +4211,8 @@ type PersonaConfiguration struct {
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServices `json:"services,omitempty"`
+	// enable individual parts of the ai views
+	Ai *PersonaAi `json:"ai,omitempty"`
 }
 
 type PersonaConfigurationAttributes struct {
@@ -4167,6 +4226,8 @@ type PersonaConfigurationAttributes struct {
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServicesAttributes `json:"services,omitempty"`
+	// enable individual parts of the ai views
+	Ai *PersonaAiAttributes `json:"ai,omitempty"`
 }
 
 type PersonaConnection struct {
@@ -4814,6 +4875,11 @@ type PrAutomationUpdateSpecAttributes struct {
 	ReplaceTemplate *string                  `json:"replaceTemplate,omitempty"`
 	Yq              *string                  `json:"yq,omitempty"`
 	MatchStrategy   *MatchStrategy           `json:"matchStrategy,omitempty"`
+}
+
+// Additional attributes for describing a pr call tool call that derived this chat message
+type PrCallAttributes struct {
+	Context map[string]any `json:"context,omitempty"`
 }
 
 // a checkbox item to render before creating a pr
@@ -6495,12 +6561,16 @@ type SyncConfig struct {
 	// Whether to require all resources are placed in the same namespace
 	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
+	// A list of diff normalizers to apply to the service which controls how drift detection works
+	DiffNormalizers []*DiffNormalizer `json:"diffNormalizers,omitempty"`
 }
 
 type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
+	// A list of diff normalizers to apply to the service which controls how drift detection works
+	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`
 }
 
 type Tag struct {
@@ -7016,6 +7086,47 @@ type YamlOverlayAttributes struct {
 	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+}
+
+type AgentSessionType string
+
+const (
+	AgentSessionTypeTerraform  AgentSessionType = "TERRAFORM"
+	AgentSessionTypeKubernetes AgentSessionType = "KUBERNETES"
+)
+
+var AllAgentSessionType = []AgentSessionType{
+	AgentSessionTypeTerraform,
+	AgentSessionTypeKubernetes,
+}
+
+func (e AgentSessionType) IsValid() bool {
+	switch e {
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes:
+		return true
+	}
+	return false
+}
+
+func (e AgentSessionType) String() string {
+	return string(e)
+}
+
+func (e *AgentSessionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentSessionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentSessionType", str)
+	}
+	return nil
+}
+
+func (e AgentSessionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AiProvider string

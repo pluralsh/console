@@ -2,7 +2,7 @@ defmodule Console.AI.Vector.Content do
   alias Console.AI.Vector.Storable
   alias Console.AI.VectorStore.Response
   alias Console.Deployments.Pr.File
-  alias Console.Schema.{AlertResolution, StackState}
+  alias Console.Schema.{AlertResolution, StackState, ServiceComponent}
 
   def content(data), do: {Storable.id(data), Storable.datatype(data), Storable.content(data)}
 
@@ -14,6 +14,9 @@ defmodule Console.AI.Vector.Content do
 
   def decode("stack_state", data), do: %Response{type: :stack, stack_state: StackState.Mini.new(data)}
   def decode(:stack_state, data), do: %Response{type: :stack, stack_state: StackState.Mini.new(data)}
+
+  def decode("service_component", data), do: %Response{type: :service, service_component: ServiceComponent.Mini.new(data)}
+  def decode(:service_component, data), do: %Response{type: :service, service_component: ServiceComponent.Mini.new(data)}
 
   def decode(_, _), do: nil
 end

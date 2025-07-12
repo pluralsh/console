@@ -29,7 +29,8 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Email,
   Console.Deployments.PubSub.Governance,
   Console.AI.PubSub.Consumer,
-  Console.AI.PubSub.Vector.Consumer
+  Console.AI.PubSub.Vector.Consumer,
+  Console.AI.PubSub.Agent.Consumer
 ]
 
 config :console, Console.Cron.Scheduler,

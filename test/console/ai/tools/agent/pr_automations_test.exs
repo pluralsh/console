@@ -7,7 +7,7 @@ defmodule Console.AI.Tools.Agent.PrAutomationsTest do
       catalog = insert(:catalog)
       pr_automations = insert_list(2, :pr_automation, catalog: catalog)
 
-      {:ok, result} = PrAutomations.implement(%PrAutomations{catalog_id: catalog.id})
+      {:ok, result} = PrAutomations.implement(%PrAutomations{catalog: catalog.name})
       {:ok, decoded} = Jason.decode(result)
 
       assert ids_equal(decoded, pr_automations)

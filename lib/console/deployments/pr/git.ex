@@ -5,17 +5,28 @@ defmodule Console.Deployments.Pr.Git do
   @type git_resp :: {:ok, binary} | Console.error
 
   @spec setup(ScmConnection.t, binary, binary) :: {:ok, ScmConnection.t} | Console.error
-  def setup(%ScmConnection{} = conn, id, branch) do
+  def setup(%ScmConnection{} = conn, identifier, branch) do
     with {:ok, dir} <- Briefly.create(directory: true),
          conn = %{conn | dir: dir},
          {:ok, conn} <- backfill_token(conn),
-         {:ok, _} <- git(conn, "clone", branch_args(conn) ++ [url(conn, id), dir]),
+         {:ok, _} <- git(conn, "clone", branch_args(conn) ++ [url(conn, identifier), dir]),
          {:ok, b} <- branch(conn),
          {:ok, _} <- git(conn, "config", ["user.email", conn.author.email]),
          {:ok, _} <- git(conn, "config", ["user.name", conn.author.name]),
          :ok <- configure_signing(conn),
          {:ok, _} <- git(conn, "checkout", ["-b", branch]),
       do: {:ok, %{conn | branch: b}}
+  end
+
+  def clone_branch(%ScmConnection{} = conn, identifier, branch) do
+    with {:ok, dir} <- Briefly.create(directory: true),
+         conn = %{conn | dir: dir, branch: branch},
+         {:ok, conn} <- backfill_token(conn),
+         {:ok, _} <- git(conn, "clone", branch_args(conn) ++ [url(conn, identifier), dir]),
+         {:ok, _} <- git(conn, "config", ["user.email", conn.author.email]),
+         {:ok, _} <- git(conn, "config", ["user.name", conn.author.name]),
+         :ok <- configure_signing(conn),
+      do: {:ok, conn}
   end
 
   @spec commit(ScmConnection.t, binary) :: git_resp
@@ -33,6 +44,10 @@ defmodule Console.Deployments.Pr.Git do
   @spec push(ScmConnection.t, binary) :: git_resp
   def push(%ScmConnection{} = conn, branch),
     do: git(conn, "push", ["--set-upstream", "origin", branch])
+
+  @spec push(ScmConnection.t) :: git_resp
+  def push(%ScmConnection{} = conn),
+    do: git(conn, "push", [])
 
   def git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
     case System.cmd("git", [cmd | args], opts(conn)) do

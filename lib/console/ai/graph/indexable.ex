@@ -32,9 +32,14 @@ defmodule Console.AI.Graph.IndexableItem do
     """
     #{item.provider} #{item.type} with id #{item.id} and attributes:
 
-    ```yaml
-    #{Utils.yaml_encode(item.attributes)}
-    ```
+    #{maybe_yaml(item.attributes)}
     """
+  end
+
+  defp maybe_yaml(val) do
+    case Utils.yaml_encode(val) do
+      {:ok, yaml} -> "```yaml\n#{yaml}\n```"
+      {:error, _} -> "```json\n#{Jason.encode!(val)}\n```"
+    end
   end
 end

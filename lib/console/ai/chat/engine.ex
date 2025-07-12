@@ -3,7 +3,16 @@ defmodule Console.AI.Chat.Engine do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
   import Console.AI.Chat.System
-  alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit, AgentSession}
+  alias Console.Schema.{
+    Chat,
+    Chat.Attributes,
+    ChatThread,
+    Flow,
+    User,
+    McpServer,
+    McpServerAudit,
+    AgentSession
+  }
   alias Console.AI.{Provider, Tool, Stream}
   alias Console.AI.Tools.{
     Clusters,
@@ -24,7 +33,7 @@ defmodule Console.AI.Chat.Engine do
     DeleteRelationships,
     Graph
   }
-  alias Console.AI.Tools.Agent
+  alias Console.AI.Tools.Agent, as: AgentTool
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
@@ -52,18 +61,37 @@ defmodule Console.AI.Chat.Engine do
   ]
 
   @agent_tools [
-    Agent.Query,
-    Agent.Schema,
-    Agent.Plan,
-    Agent.Catalogs,
-    Agent.Automations,
-    Agent.Clusters,
-    Agent.Search,
-    Agent.Stack
+    # AgentTool.Query,
+    # AgentTool.Schema,
+    AgentTool.Plan,
+    AgentTool.Catalogs,
+    AgentTool.PrAutomations,
+    AgentTool.Clusters,
+    AgentTool.ServiceComponent,
+    # AgentTool.Search,
+    AgentTool.Stack
   ]
 
   @agent_planned_tools [
-    Agent.CallPr,
+    AgentTool.CallPr,
+  ]
+
+  @code_pre_tools [
+    AgentTool.Stack,
+    AgentTool.Coding.StackFiles,
+    AgentTool.Coding.Pr
+  ]
+
+  @code_post_tools [
+    AgentTool.Coding.Commit,
+    AgentTool.Stack,
+    AgentTool.Coding.StackFiles,
+  ]
+
+  @kubernetes_code_pre_tools [
+    AgentTool.ServiceComponent,
+    AgentTool.Coding.ServiceFiles,
+    AgentTool.Coding.GenericPr
   ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
@@ -139,7 +167,7 @@ defmodule Console.AI.Chat.Engine do
           end
         else
           {:error, err, acc} when is_list(acc) ->
-            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :assistant}])
+            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :user}])
             |> Enum.map(&Chat.attributes/1)
             |> ChatSvc.save_messages(thread_id, user)
           err -> err
@@ -160,14 +188,25 @@ defmodule Console.AI.Chat.Engine do
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
-        Stream.publish(stream, content, 1)
-        Stream.offset(1)
-        {:cont, [tool_msg(content, id, nil, name, args) | acc]}
+        case tool_msg(content, id, nil, name, args) do
+          [_ | _] = msgs ->
+            Enum.each(msgs, fn %{content: content} ->
+              publish_to_stream(stream, content)
+              Stream.offset(1)
+            end)
+            {:cont, Enum.concat(msgs, acc)}
+          %{content: content} = msg ->
+            publish_to_stream(stream, content)
+            Stream.offset(1)
+            {:cont, [msg | acc]}
+        end
       else
-        :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
+        :error ->
+          {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:halt, {:error, "failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", Enum.reverse(acc)}}
-        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
+          {:cont, [tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, nil, name, args) | acc]}
+        err ->
+          {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
       end
     end)
     |> tool_results()
@@ -181,7 +220,7 @@ defmodule Console.AI.Chat.Engine do
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
-        Stream.publish(stream, content, 1)
+        publish_to_stream(stream, content)
         Stream.offset(1)
         {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
@@ -214,7 +253,7 @@ defmodule Console.AI.Chat.Engine do
     |> execute(extract: :tool)
   end
 
-  @spec tool_msg(binary, binary | nil, McpServer.t | nil, binary, map) :: map
+  @spec tool_msg(binary | map | [map], binary | nil, McpServer.t | nil, binary, map) :: map
   defp tool_msg(content, call_id, server, name, args) when is_binary(content) or is_nil(content) do
     %{
       role: :user,
@@ -231,8 +270,14 @@ defmodule Console.AI.Chat.Engine do
     }
   end
 
+  defp tool_msg([_ | _] = msgs, call_id, server, name, args) do
+    msgs
+    |> Enum.map(&tool_msg(&1, call_id, server, name, args))
+    |> Enum.map(&Map.put(&1, :role, :user))
+  end
+
   defp tool_msg(%{} = msg, call_id, _, name, args) do
-    Map.merge(%{
+    DeepMerge.deep_merge(%{
       role: :assistant,
       attributes: %{tool: %{call_id: call_id, name: name, arguments: args}}
     }, msg)
@@ -271,6 +316,10 @@ defmodule Console.AI.Chat.Engine do
     |> trim_messages(msgs, Provider.context_window())
   end
 
+  defp publish_to_stream(stream, %{content: content}), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(stream, content) when is_binary(content), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(_, _), do: :ok
+
   defp trim_messages(total, msgs, window) when total < window, do: msgs
   defp trim_messages(_, [_] = msgs, _), do: msgs
   defp trim_messages(_, [] = msgs, _), do: msgs
@@ -281,9 +330,17 @@ defmodule Console.AI.Chat.Engine do
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
 
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, pull_request_id: id}})
+    when is_binary(id), do: []
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
+    do: @kubernetes_code_pre_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p, pull_request_id: nil}}) when is_binary(p),
+    do: @code_pre_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
   defp agent_tools(_), do: []
 
+  defp agent_planned_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: []
   defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
   defp agent_planned_tools(_), do: []
 

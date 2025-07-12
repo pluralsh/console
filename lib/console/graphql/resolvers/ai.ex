@@ -158,6 +158,9 @@ defmodule Console.GraphQl.Resolvers.AI do
   def delete_pin(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.delete_pin(id, user)
 
+  def create_agent_session(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: ChatSvc.create_agent_session(attrs, user)
+
   def raw_resource(%{version: v, kind: k, name: n, group: g} = comp, _, _) do
     %{cluster: cluster} = comp = Console.Repo.preload(comp, [:cluster])
     Clusters.control_plane(cluster) |> Kube.Utils.save_kubeconfig()
