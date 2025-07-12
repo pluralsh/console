@@ -2539,6 +2539,9 @@
   - version: v1.12.2-eksbuild.4
     compatibilities:
     - '1.33'
+  - version: v1.12.2-eksbuild.1
+    compatibilities:
+    - '1.33'
   - version: v1.12.1-eksbuild.2
     compatibilities:
     - '1.33'
@@ -2616,6 +2619,13 @@
   - version: v1.11.1-eksbuild.3
     compatibilities:
     - '1.29'
+  - version: v1.10.1-eksbuild.35
+    compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.10.1-eksbuild.18
     compatibilities:
     - '1.31'
@@ -2686,6 +2696,13 @@
   - version: v1.10.1-eksbuild.1
     compatibilities:
     - '1.27'
+  - version: v1.9.3-eksbuild.39
+    compatibilities:
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
   - version: v1.9.3-eksbuild.22
     compatibilities:
     - '1.28'
@@ -3596,6 +3613,10 @@
   - version: v1.33.0-eksbuild.2
     compatibilities:
     - '1.33'
+  - version: v1.32.6-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
   - version: v1.32.5-eksbuild.2
     compatibilities:
     - '1.33'
@@ -3612,6 +3633,11 @@
     compatibilities:
     - '1.33'
     - '1.32'
+  - version: v1.31.10-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.9-eksbuild.2
     compatibilities:
     - '1.33'
@@ -3642,6 +3668,12 @@
   - version: v1.31.0-eksbuild.2
     compatibilities:
     - '1.31'
+  - version: v1.30.14-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.13-eksbuild.2
     compatibilities:
     - '1.33'
@@ -3695,6 +3727,12 @@
   - version: v1.30.0-eksbuild.2
     compatibilities:
     - '1.30'
+  - version: v1.29.15-eksbuild.10
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.29.15-eksbuild.7
     compatibilities:
     - '1.32'
@@ -3770,6 +3808,11 @@
     compatibilities:
     - '1.30'
     - '1.29'
+  - version: v1.28.15-eksbuild.25
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.28.15-eksbuild.22
     compatibilities:
     - '1.30'
@@ -3844,6 +3887,12 @@
   - version: v1.28.1-eksbuild.1
     compatibilities:
     - '1.28'
+  - version: v1.27.16-eksbuild.35
+    compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.27.16-eksbuild.32
     compatibilities:
     - '1.30'
@@ -5364,6 +5413,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.19.6-eksbuild.7
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.19.6-eksbuild.1
     compatibilities:
     - '1.33'
