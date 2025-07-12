@@ -51,8 +51,8 @@ defmodule Console.AI.PubSub.Vectorizable.Stack do
       Enum.reject(items, &String.starts_with?(&1.identifier, "data."))
       |> Enum.map(&StackState.Mini.new(%{state | stack: stack}, &1))
     [
-      %Indexable{delete: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
-      %Indexable{data: minis, filters: [stack_id: stack.id]}
+      %Indexable{delete: true, force: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
+      %Indexable{data: minis, filters: [stack_id: stack.id], force: true}
     ]
   end
 
