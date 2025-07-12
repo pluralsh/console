@@ -31,7 +31,7 @@ defmodule Console.AI.Fixer.Base do
     subfolder = folder(svc)
     too_large = Provider.context_window()
     with {:ok, contents} <- Tar.tar_stream(f) do
-      prompt = Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      prompt = Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
                |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
                |> prepend({:user, @preface})
 
@@ -51,7 +51,7 @@ defmodule Console.AI.Fixer.Base do
 
   def code_prompt(f, subfolder, preface \\ @preface) do
     with {:ok, contents} <- Tar.tar_stream(f) do
-      Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
       |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
       |> prepend({:user, preface})
       |> ok()

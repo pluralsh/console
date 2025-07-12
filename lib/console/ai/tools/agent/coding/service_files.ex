@@ -23,7 +23,6 @@ defmodule Console.AI.Tools.Agent.Coding.ServiceFiles do
   def description(), do: "Finds the terraform files for a Plural service and renders them as a sequence of messages"
 
   def implement(%__MODULE__{service_id: id}) do
-    Console.AI.Fixer.Base.raw()
     with %Service{} = service <- Services.get_service(id) |> Console.Repo.preload([:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, service} <- Policies.allow(service, user, :write),
