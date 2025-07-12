@@ -432,4 +432,34 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       assert c > 0
     end
   end
+
+  describe "ServiceComponentsUpdated" do
+    test "it can vector index service components" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      service = insert(:service)
+      insert(:service_component, service: service)
+
+      event = %PubSub.ServiceComponentsUpdated{item: service}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+  end
 end

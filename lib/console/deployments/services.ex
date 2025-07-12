@@ -716,10 +716,10 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
-      running = Enum.all?(components, & &1.state == :running || is_nil(&1.state)) && !Enum.empty?(components)
-      failed = Enum.any?(components, & &1.state == :failed) || !Enum.empty?(service.errors)
-      paused = Enum.any?(components, & &1.state == :paused)
-      unsynced = Enum.any?(components, & !&1.synced)
+      running     = Enum.all?(components, & &1.state == :running || is_nil(&1.state)) && !Enum.empty?(components)
+      failed      = Enum.any?(components, & &1.state == :failed) || !Enum.empty?(service.errors)
+      paused      = Enum.any?(components, & &1.state == :paused)
+      unsynced    = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
       case {failed, paused, running, latest_vsn(service, attrs), unsynced} do

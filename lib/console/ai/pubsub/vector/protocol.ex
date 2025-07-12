@@ -95,3 +95,24 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
   end
   def resource(_), do: :ok
 end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpdated do
+  alias Console.Schema.{ServiceComponent, Service}
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %Service{} = service}) do
+    case Console.Repo.preload(service, [:repository, :cluster, components: [:content, :children]]) do
+      %Service{components: [_ | _] = components} = service ->
+        minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
+                |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
+        Console.debounce({:vectorizer, :components, :erlang.phash2(minis)}, fn ->
+          [
+            %Indexable{delete: true, force: true, filters: [service_id: service.id, datatype: {:raw, :service_component}]},
+            %Indexable{data: minis, filters: [service_id: service.id], force: true}
+          ]
+        end)
+      _ -> :ok
+    end
+  end
+  def resource(_), do: :ok
+end

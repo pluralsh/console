@@ -67,3 +67,70 @@ defmodule Console.Schema.ServiceComponent do
     |> validate_required([:kind, :name])
   end
 end
+
+defmodule Console.Schema.ServiceComponent.Mini do
+  alias Console.Schema.{ServiceComponent, Service}
+
+  defstruct [:service_id, :service_url, :name, :kind, :namespace, :group, :version, :children, :service]
+
+  def new(%ServiceComponent{} = comp) do
+    %__MODULE__{
+      service_id: comp.service_id,
+      service_url: Console.url("/cd/clusters/#{comp.service.cluster_id}/services/#{comp.service_id}"),
+      name: comp.name,
+      kind: comp.kind,
+      namespace: comp.namespace,
+      group: comp.group,
+      version: comp.version,
+      children: handle_children(comp.children),
+      service: service_mini(comp.service)
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      name: attrs["name"],
+      kind: attrs["kind"],
+      namespace: attrs["namespace"],
+      group: attrs["group"],
+      version: attrs["version"],
+      children: attrs["children"],
+      service: attrs["service"],
+      service_id: attrs["service_id"],
+      service_url: attrs["service_url"]
+    }
+  end
+
+  defp handle_children([_ | _] = children) do
+    Enum.map(children, & %{
+      name: &1.name,
+      kind: &1.kind,
+      namespace: &1.namespace,
+      group: &1.group,
+      version: &1.version,
+    })
+  end
+  defp handle_children(_), do: nil
+
+  defp service_mini(%Service{} = service) do
+    Console.mapify(service)
+    |> Map.take(~w(name helm git repository cluster namespace)a)
+    |> add_cluster_info()
+    |> add_git_info()
+    |> add_helm_info()
+    |> Map.drop(~w(repository)a)
+  end
+  defp service_mini(_), do: nil
+
+  defp add_helm_info(%{helm: %{} = helm} = attrs),
+    do: Map.put(attrs, :helm, Map.take(helm, ~w(url chart version values_files)a))
+  defp add_helm_info(attrs), do: attrs
+
+  defp add_cluster_info(%{cluster: %{} = cluster} = attrs),
+    do: Map.put(attrs, :cluster, Map.take(cluster, ~w(name handle distro)a))
+  defp add_cluster_info(attrs), do: attrs
+
+  defp add_git_info(%{git: %{ref: r, folder: f}, repository: %{url: u}} = attrs),
+    do: Map.put(attrs, :git, %{url: u, ref: r, folder: f})
+  defp add_git_info(attrs), do: attrs
+end

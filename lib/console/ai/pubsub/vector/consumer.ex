@@ -16,7 +16,7 @@ defmodule Console.AI.PubSub.Vector.Consumer do
   end
 
   defp insert(l) when is_list(l), do: Enum.each(l, &insert(&1))
-  defp insert(%Indexable{data: resources, filters: fs} = indexable) when is_list(resources) do
+  defp insert(%Indexable{data: resources} = indexable) when is_list(resources) do
     Console.throttle(resources, count: 10, pause: 200)
     |> Enum.each(&insert(%{indexable | data: &1}))
   end

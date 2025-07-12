@@ -67,6 +67,7 @@ defmodule Console.AI.Chat.Engine do
     AgentTool.Catalogs,
     AgentTool.PrAutomations,
     AgentTool.Clusters,
+    AgentTool.ServiceComponent,
     # AgentTool.Search,
     AgentTool.Stack
   ]
