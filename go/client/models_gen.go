@@ -123,6 +123,8 @@ type AgentMigrationAttributes struct {
 }
 
 type AgentSessionAttributes struct {
+	// the type of agent this session is for
+	Type *AgentSessionType `json:"type,omitempty"`
 	// whether the provisioning plan has been confirmed
 	PlanConfirmed *bool `json:"planConfirmed,omitempty"`
 	// the prompt to use for this session
@@ -1006,6 +1008,10 @@ type Cluster struct {
 	CPUTotal *float64 `json:"cpuTotal,omitempty"`
 	// The total memory capacity of the cluster
 	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
+	// The CPU utilization of the cluster
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// The memory utilization of the cluster
+	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1367,6 +1373,8 @@ type ClusterPing struct {
 	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
 	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
 	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
+	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
+	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
@@ -7078,6 +7086,47 @@ type YamlOverlayAttributes struct {
 	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+}
+
+type AgentSessionType string
+
+const (
+	AgentSessionTypeTerraform  AgentSessionType = "TERRAFORM"
+	AgentSessionTypeKubernetes AgentSessionType = "KUBERNETES"
+)
+
+var AllAgentSessionType = []AgentSessionType{
+	AgentSessionTypeTerraform,
+	AgentSessionTypeKubernetes,
+}
+
+func (e AgentSessionType) IsValid() bool {
+	switch e {
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes:
+		return true
+	}
+	return false
+}
+
+func (e AgentSessionType) String() string {
+	return string(e)
+}
+
+func (e *AgentSessionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentSessionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentSessionType", str)
+	}
+	return nil
+}
+
+func (e AgentSessionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AiProvider string

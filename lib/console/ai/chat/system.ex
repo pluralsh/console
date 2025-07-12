@@ -49,6 +49,17 @@ defmodule Console.AI.Chat.System do
   6. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
   """
 
+  @kubernetes_code_agent """
+  You're a devops engineer being asked to complete a basic scoped task around reconfiguring kubernetes infrastructure using GitOps.  You're given a prompt and will execute a workflow
+  that follows this pattern:
+
+  1. Find the Plural Serice that needs to be modified, we'll provide you with a tool call to do this that allows for general semantic search.
+  2. Modify the helm or gitops code encapsulated in the service to accomplish the given task and create a PR.  This will be the single pr and no need to create multiple PRs.
+  3. The code change should be the most direct and straightforward way to fix the issue described.  Change only the minimal amount of lines in the original files provided to successfully fix the issue
+  4. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
+  """
+
+  def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p}}) when is_binary(p), do: @kubernetes_code_agent
   def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_agent
   def prompt(%ChatThread{session: %AgentSession{}}), do: @base_agent
   def prompt(_), do: @chat

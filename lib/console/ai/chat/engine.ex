@@ -88,6 +88,12 @@ defmodule Console.AI.Chat.Engine do
     AgentTool.Coding.StackFiles,
   ]
 
+  @kubernetes_code_pre_tools [
+    AgentTool.ServiceComponent,
+    AgentTool.Coding.ServiceFiles,
+    AgentTool.Coding.GenericPr
+  ]
+
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
     %Chat{confirm: true, attributes: %Attributes{tool: %Attributes.ToolAttributes{name: name, arguments: args}}} = chat,
@@ -182,9 +188,18 @@ defmodule Console.AI.Chat.Engine do
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
-        publish_to_stream(stream, content)
-        Stream.offset(1)
-        {:cont, [tool_msg(content, id, nil, name, args) | acc]}
+        case tool_msg(content, id, nil, name, args) do
+          [_ | _] = msgs ->
+            Enum.each(msgs, fn %{content: content} ->
+              publish_to_stream(stream, content)
+              Stream.offset(1)
+            end)
+            {:cont, Enum.concat(msgs, acc)}
+          %{content: content} = msg ->
+            publish_to_stream(stream, content)
+            Stream.offset(1)
+            {:cont, [msg | acc]}
+        end
       else
         :error ->
           {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
@@ -238,7 +253,7 @@ defmodule Console.AI.Chat.Engine do
     |> execute(extract: :tool)
   end
 
-  @spec tool_msg(binary, binary | nil, McpServer.t | nil, binary, map) :: map
+  @spec tool_msg(binary | map | [map], binary | nil, McpServer.t | nil, binary, map) :: map
   defp tool_msg(content, call_id, server, name, args) when is_binary(content) or is_nil(content) do
     %{
       role: :user,
@@ -253,6 +268,12 @@ defmodule Console.AI.Chat.Engine do
         }
       }
     }
+  end
+
+  defp tool_msg([_ | _] = msgs, call_id, server, name, args) do
+    msgs
+    |> Enum.map(&tool_msg(&1, call_id, server, name, args))
+    |> Enum.map(&Map.put(&1, :role, :user))
   end
 
   defp tool_msg(%{} = msg, call_id, _, name, args) do
@@ -309,6 +330,10 @@ defmodule Console.AI.Chat.Engine do
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
 
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, pull_request_id: id}})
+    when is_binary(id), do: []
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
+    do: @kubernetes_code_pre_tools
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p, pull_request_id: nil}}) when is_binary(p),
     do: @code_pre_tools
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools

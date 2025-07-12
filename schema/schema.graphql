@@ -5456,6 +5456,10 @@ input ClusterPing {
 
   memoryTotal: Float
 
+  cpuUtil: Float
+
+  memoryUtil: Float
+
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
 
@@ -6001,6 +6005,12 @@ type Cluster {
 
   "The total memory capacity of the cluster"
   memoryTotal: Float
+
+  "The CPU utilization of the cluster"
+  cpuUtil: Float
+
+  "The memory utilization of the cluster"
+  memoryUtil: Float
 
   "The helm values for the agent installation"
   agentHelmValues: String
@@ -8079,6 +8089,11 @@ enum EvidenceType {
   KNOWLEDGE
 }
 
+enum AgentSessionType {
+  TERRAFORM
+  KUBERNETES
+}
+
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
 enum AiRole {
   SYSTEM
@@ -8136,6 +8151,9 @@ input ChatThreadAttributes {
 }
 
 input AgentSessionAttributes {
+  "the type of agent this session is for"
+  type: AgentSessionType
+
   "whether the provisioning plan has been confirmed"
   planConfirmed: Boolean
 

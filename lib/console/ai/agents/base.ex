@@ -10,6 +10,7 @@ defmodule Console.AI.Agents.Base do
       use GenServer, restart: :transient
       import Console.AI.Agents.Base
       alias Console.Schema.AgentSession
+      alias Console.AI.Stream
       require Logger
 
       def registry(), do: Console.AI.Agents
@@ -32,8 +33,8 @@ defmodule Console.AI.Agents.Base do
         Logger.info("Booting agent session #{session.id}")
         {thread, session} = setup_context(session)
 
-        Console.AI.Stream.topic(:thread, thread.id, thread.user)
-        |> Console.AI.Stream.enable()
+        Stream.topic(:thread, thread.id, thread.user)
+        |> Stream.enable()
 
         {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
         {:ok, session} = initialized(session)
@@ -46,8 +47,8 @@ defmodule Console.AI.Agents.Base do
         Logger.info("restarting agent session #{session.id}")
         {thread, session} = setup_context(session)
 
-        Console.AI.Stream.topic(:thread, thread.id, thread.user)
-        |> Console.AI.Stream.enable()
+        Stream.topic(:thread, thread.id, thread.user)
+        |> Stream.enable()
 
         {:noreply, {thread, session}}
       end

@@ -216,7 +216,7 @@ export function ChatMessageActions({
           type={iconFrameType}
           onClick={onDelete}
           icon={
-            deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-xlight" />
+            deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
           }
         />
       </Flex>

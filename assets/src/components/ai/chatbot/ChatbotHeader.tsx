@@ -9,8 +9,10 @@ import {
   Flex,
   IconFrame,
   Input,
+  ListBoxItem,
   Modal,
   RobotIcon,
+  Select,
   ShrinkIcon,
   Spinner,
   Toast,
@@ -19,6 +21,7 @@ import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
+  AgentSessionType,
   AiInsightFragment,
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
@@ -246,11 +249,12 @@ function AgentSessionButton({
   const { goToThread } = useChatbot()
   const [showInputModal, setShowInputModal] = useState(false)
   const [prompt, setPrompt] = useState('')
+  const [type, setType] = useState(AgentSessionType.Terraform)
   const [
     createAgentSession,
     { loading: agentSessionLoading, error: agentSessionError },
   ] = useCreateAgentSessionMutation({
-    variables: { attributes: { connectionId, prompt } },
+    variables: { attributes: { connectionId, prompt, type } },
     onCompleted: (data) =>
       data.createAgentSession?.id && goToThread(data.createAgentSession.id),
   })
@@ -266,6 +270,7 @@ function AgentSessionButton({
       />
       <Modal
         header="Set prompt"
+        size="large"
         open={showInputModal}
         onClose={() => setShowInputModal(false)}
         asForm
@@ -282,10 +287,31 @@ function AgentSessionButton({
           </Button>
         }
       >
-        <Input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-        />
+        <Flex
+          gap="small"
+          direction="row"
+        >
+          <Select
+            label="Agent Type"
+            selectedKey={type}
+            onSelectionChange={(key) => setType(key as AgentSessionType)}
+          >
+            <ListBoxItem
+              key={AgentSessionType.Terraform}
+              label="Terraform"
+            />
+            <ListBoxItem
+              key={AgentSessionType.Kubernetes}
+              label="Kubernetes"
+            />
+          </Select>
+          <Input
+            placeholder="Enter a prompt"
+            width="100%"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+        </Flex>
       </Modal>
       <Toast
         show={!!agentSessionError}

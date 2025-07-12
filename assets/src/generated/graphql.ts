@@ -182,7 +182,14 @@ export type AgentSessionAttributes = {
   planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
   /** the prompt to use for this session */
   prompt?: InputMaybe<Scalars['String']['input']>;
+  /** the type of agent this session is for */
+  type?: InputMaybe<AgentSessionType>;
 };
+
+export enum AgentSessionType {
+  Kubernetes = 'KUBERNETES',
+  Terraform = 'TERRAFORM'
+}
 
 export type AiDelta = {
   __typename?: 'AiDelta';
@@ -1197,6 +1204,8 @@ export type Cluster = {
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
   /** The total CPU capacity of the cluster */
   cpuTotal?: Maybe<Scalars['Float']['output']>;
+  /** The CPU utilization of the cluster */
+  cpuUtil?: Maybe<Scalars['Float']['output']>;
   /** a custom credential to use when provisioning this cluster */
   credential?: Maybe<ProviderCredential>;
   /** current k8s version as told to us by the deployment operator */
@@ -1236,6 +1245,8 @@ export type Cluster = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** The total memory capacity of the cluster */
   memoryTotal?: Maybe<Scalars['Float']['output']>;
+  /** The memory utilization of the cluster */
+  memoryUtil?: Maybe<Scalars['Float']['output']>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
   /** A summation of the metrics utilization of the current cluster */
@@ -1692,6 +1703,7 @@ export type ClusterNodeMetrics = {
 
 export type ClusterPing = {
   cpuTotal?: InputMaybe<Scalars['Float']['input']>;
+  cpuUtil?: InputMaybe<Scalars['Float']['input']>;
   currentVersion: Scalars['String']['input'];
   distro?: InputMaybe<ClusterDistro>;
   healthScore?: InputMaybe<Scalars['Int']['input']>;
@@ -1699,6 +1711,7 @@ export type ClusterPing = {
   insightComponents?: InputMaybe<Array<InputMaybe<ClusterInsightComponentAttributes>>>;
   kubeletVersion?: InputMaybe<Scalars['String']['input']>;
   memoryTotal?: InputMaybe<Scalars['Float']['input']>;
+  memoryUtil?: InputMaybe<Scalars['Float']['input']>;
   namespaceCount?: InputMaybe<Scalars['Int']['input']>;
   nodeCount?: InputMaybe<Scalars['Int']['input']>;
   nodeStatistics?: InputMaybe<Array<InputMaybe<NodeStatisticAttributes>>>;
