@@ -27,9 +27,9 @@ defmodule Console.AI.Tools.Agent.Coding.ServiceFiles do
     with %Service{} = service <- Services.get_service(id) |> Console.Repo.preload([:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, service} <- Policies.allow(service, user, :write),
-         {:ok, [_ | rest]} <- ServiceFixer.prompt(service, ""),
+         {:ok, result} <- ServiceFixer.file_contents(service, ctx_window_scale: 0.5),
          {:ok, _} <- update_session(%{service_id: id}) do
-      {:ok, Enum.map(rest, fn {:user, raw} -> %{content: raw} end)}
+      Jason.encode(result)
     else
       {:error, err} -> {:error, "failed to get service files, reason: #{inspect(err)}"}
       nil -> {:error, "could not find service with id #{id}"}

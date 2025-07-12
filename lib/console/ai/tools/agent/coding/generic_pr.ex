@@ -99,8 +99,10 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
     end
   end
 
-  defp session_attrs(%AgentSession{} = session),
-    do: Map.take(session, ~w(session_id stack_id service_id)a)
+  defp session_attrs(%AgentSession{} = session) do
+    Map.take(session, ~w(stack_id service_id)a)
+    |> Map.put(:session_id, session.id)
+  end
 
   def apply_fs_changes(pr, dir) do
     with :ok <- file_updates(pr, dir),

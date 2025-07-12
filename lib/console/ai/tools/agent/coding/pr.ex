@@ -79,7 +79,7 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write),
          {:conn, %ScmConnection{} = conn} <- {:conn, Tool.scm_connection()},
-         conn <- %{conn | author: Tool.actor()},
+         conn <- %{conn | author: user},
          url = to_http(conn, url),
          {:ok, %ScmConnection{dir: d} = conn} <- setup(conn, url, branch),
          :ok <- apply_fs_changes(pr, d),

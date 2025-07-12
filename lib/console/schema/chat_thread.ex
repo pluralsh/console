@@ -4,7 +4,7 @@ defmodule Console.Schema.ChatThread do
 
   @max_threads 50
 
-  @expiry [days: -14]
+  @expiry [days: -7]
 
   schema "chat_threads" do
     field :summary,    :string

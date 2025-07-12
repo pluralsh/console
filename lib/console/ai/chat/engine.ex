@@ -37,6 +37,7 @@ defmodule Console.AI.Chat.Engine do
   alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
+  require Logger
 
   @plrl_tools [
     Clusters,
@@ -91,6 +92,10 @@ defmodule Console.AI.Chat.Engine do
   @kubernetes_code_pre_tools [
     AgentTool.ServiceComponent,
     AgentTool.Coding.ServiceFiles,
+    AgentTool.Coding.PrPlan
+  ]
+
+  @kubernetes_code_post_tools [
     AgentTool.Coding.GenericPr
   ]
 
@@ -161,6 +166,7 @@ defmodule Console.AI.Chat.Engine do
             true ->
               completion
               |> Enum.map(&Chat.attributes/1)
+              |> Enum.filter(&persist?/1)
               |> ChatSvc.save_messages(thread_id, user)
             false ->
               completion(messages, thread, user, completion, level + 1)
@@ -169,6 +175,7 @@ defmodule Console.AI.Chat.Engine do
           {:error, err, acc} when is_list(acc) ->
             (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :user}])
             |> Enum.map(&Chat.attributes/1)
+            |> Enum.filter(&persist?/1)
             |> ChatSvc.save_messages(thread_id, user)
           err -> err
         end
@@ -186,6 +193,7 @@ defmodule Console.AI.Chat.Engine do
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
+           _ <- Logger.info("calling tool: #{name} with args: #{inspect(args)}"),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
         case tool_msg(content, id, nil, name, args) do
@@ -274,6 +282,7 @@ defmodule Console.AI.Chat.Engine do
     msgs
     |> Enum.map(&tool_msg(&1, call_id, server, name, args))
     |> Enum.map(&Map.put(&1, :role, :user))
+    |> Enum.reverse()
   end
 
   defp tool_msg(%{} = msg, call_id, _, name, args) do
@@ -311,6 +320,9 @@ defmodule Console.AI.Chat.Engine do
     end
   end
 
+  defp persist?(%{persist: false}), do: false
+  defp persist?(_), do: true
+
   defp fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
@@ -332,6 +344,8 @@ defmodule Console.AI.Chat.Engine do
 
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, pull_request_id: id}})
     when is_binary(id), do: []
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, plan_confirmed: true}}),
+    do: @kubernetes_code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
     do: @kubernetes_code_pre_tools
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p, pull_request_id: nil}}) when is_binary(p),

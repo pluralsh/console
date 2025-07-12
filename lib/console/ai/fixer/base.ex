@@ -27,12 +27,13 @@ defmodule Console.AI.Fixer.Base do
   def folder(%Service{git: %Service.Git{folder: folder}}) when is_binary(folder), do: folder
   def folder(_), do: ""
 
-  def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc) do
-    subfolder = folder(svc)
-    too_large = Provider.context_window()
+  def svc_code_prompt(f, svc, opts \\ [])
+  def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc, opts) do
+    # subfolder = folder(svc)
+    too_large = floor(Provider.context_window() * (opts[:ctx_window_scale] || 0.5))
     with {:ok, contents} <- Tar.tar_stream(f) do
-      prompt = Enum.filter(contents, & !blacklist(elem(&1, 0)))
-               |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
+      prompt = Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
+               |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: p, content: content})} end)
                |> prepend({:user, @preface})
 
       case prompt_size(prompt) do
@@ -41,7 +42,7 @@ defmodule Console.AI.Fixer.Base do
       end
     end
   end
-  def svc_code_prompt(f, svc), do: code_prompt(f, folder(svc))
+  def svc_code_prompt(f, svc, _opts), do: code_prompt(f, folder(svc))
 
   def git_code_prompt(subfolder, %Service.Git{} = ref, %GitRepository{} = repo) do
     with {:ok, f} <- Git.Discovery.fetch(repo, ref) do
@@ -51,7 +52,7 @@ defmodule Console.AI.Fixer.Base do
 
   def code_prompt(f, subfolder, preface \\ @preface) do
     with {:ok, contents} <- Tar.tar_stream(f) do
-      Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
       |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
       |> prepend({:user, preface})
       |> ok()
