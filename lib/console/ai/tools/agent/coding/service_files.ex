@@ -13,6 +13,7 @@ defmodule Console.AI.Tools.Agent.Coding.ServiceFiles do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> check_uuid(:service_id)
     |> validate_required(@valid)
   end
 

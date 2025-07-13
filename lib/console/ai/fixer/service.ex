@@ -95,7 +95,7 @@ defmodule Console.AI.Fixer.Service do
     """
   end
 
-  def helm_details(%Service{helm: %Service.Helm{} = h} = svc) do
+  def helm_details(%Service{helm: %Service.Helm{} = h}) do
     """
     The service uses helm-specific configuration as follows:
 
@@ -106,12 +106,6 @@ defmodule Console.AI.Fixer.Service do
       (if h.values, do: "helm values overrides:\n#{h.values}", else: nil),
       (if is_list(h.values_files) && !Enum.empty?(h.values_files), do: "values files: #{Enum.join(h.values_files, ",")}", else: nil)
     ])}
-
-    #{compress_and_join([(
-      if svc.git,
-        do: "Values override files are likely sourced from git branch #{svc.git.ref} in the #{svc.git.folder} folder of the #{svc.repository.url} repository",
-        else: nil
-    )])}
 
     Changes to helm charts should be focused on dedicated values files or values overrides. You should *always* prefer
     to make changes in the custom values file already configured, but if none is relevant, simply add the customized values

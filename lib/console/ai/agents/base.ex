@@ -4,6 +4,7 @@ defmodule Console.AI.Agents.Base do
   alias Console.Schema.{ChatThread, Chat, AgentSession}
   alias Console.Repo
   alias Console.AI.Chat.Engine
+  require Logger
 
   defmacro __using__(_) do
     quote do
@@ -39,6 +40,7 @@ defmodule Console.AI.Agents.Base do
         {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
         {:ok, session} = initialized(session)
         update_context(%{session: session})
+        enqueue(self(),:booted)
         Logger.info("Booted agent session #{session.id}")
         {:noreply, {thread, session}}
       end
@@ -68,6 +70,12 @@ defmodule Console.AI.Agents.Base do
       def handle_info(:die, session), do: {:stop, :normal, session}
       def handle_info(_, session), do: {:noreply, session}
     end
+  end
+
+  def handle_result({:ok, thread, session}, _, _), do: {:noreply, {thread, session}}
+  def handle_result(err, thread, session) do
+    Logger.info "agent thread failure: #{inspect(err)}"
+    {:noreply, {thread, session}}
   end
 
   def refetch(%AgentSession{id: id}), do: Console.Repo.get!(AgentSession, id)
@@ -122,7 +130,8 @@ defmodule Console.AI.Agents.Base do
   end
 
   def initialized(%AgentSession{} = session) do
-    AgentSession.changeset(session, %{initialized: true})
+    refetch(session)
+    |> AgentSession.changeset(%{initialized: true})
     |> Console.Repo.update()
   end
 end

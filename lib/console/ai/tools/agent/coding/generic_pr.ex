@@ -64,7 +64,7 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
     end
   end
 
-  @json_schema Console.priv_file!("tools/agent/coding/pr.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/agent/coding/generic_pr.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("create_pr")

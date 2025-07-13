@@ -54,14 +54,28 @@ defmodule Console.AI.Chat.System do
   that follows these guidelines:
 
   1. Find the Plural service that needs to be modified, we'll provide you with a tool call to do this that allows for general semantic search.
-  2. Generate a plan of what should be changed and in what git repositories.  If that looks good, proceed to generating the pr with that given plan.
-  3. Modify the helm or gitops code encapsulated in the service to accomplish the given task and create a PR.  This will be the single pr and no need to create multiple PRs.
-  4. The code change should be the most direct and straightforward way to fix the issue described.
-  5. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
-  6. If you don't know how to fix the issue, explain why the information is lacking and ask the user for additional clarification.  Do not end the conversation empty.
-  7. Do not repeatedly call the same tools, they'll simply give you the exact same information each time.
+  2. List the manifests for the service, these will likely include files from a combination of git repositories and helm charts.  Helm repositories are usually external and cannot be modified.
+  3. Inspect the helm or gitops code encapsulated in the service to accomplish the given task and create a plan for a PR to generate.  It's important to plan your work first, then you'll be able to create the full PR.
+  4. The plan should include the following: the git repository url you need to update, the full paths of the files that are needed to change, and a concise explanation of the changes that are needed.
+  5. Generate the plan with the set of files you're given, don't keep repeatedly looking for files again and again.
+  6. **Do not repeatedly call the same tools, they'll simply give you the exact same information each time.**
   """
 
+  @kubernetes_code_pr_agent """
+  You've already been given a list of files for a Plural service that requires reconfiguration, and now you're being asked to create the PR.  You'll need to inspect the manifests for the service and make the changes necessary to accomplish the task.
+
+  You're also given a high level plan for the PR you want to create, which should be used to determine how the PR should look.
+
+  You'll need to:
+
+  1. Inspect the helm or gitops code encapsulated in the service to accomplish the given task and create a PR to do what is required.
+  2. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
+  3. If you don't know how to fix the issue, explain why the information is lacking and ask the user for additional clarification.  Do not end the conversation empty, but do your best to generate some plan with the information you're given.
+  4. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
+  5. **Do not repeatedly call the same tools, they'll simply give you the exact same information each time.**
+  """
+
+  def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p, service_id: id}}) when is_binary(id), do: "#{@kubernetes_code_pr_agent}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p}}) when is_binary(p), do: "#{@kubernetes_code_agent}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: "#{@code_agent}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{}}), do: @base_agent

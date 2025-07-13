@@ -32,6 +32,8 @@ defmodule Console.AI.Agents.Terraform do
     end
   end
 
+  def handle_cast(_, state), do: {:noreply, state}
+
   defp failed_run_messages(%StackRun{} = run) do
     case Repo.preload(run, [:steps]) do
       %StackRun{steps: [_ | _] = steps} ->
@@ -46,11 +48,5 @@ defmodule Console.AI.Agents.Terraform do
     logs = Enum.map(logs, & &1.logs)
           |> Enum.join("")
     {:user, "The stack run has a failing command `#{cmd} #{Enum.join(args, " ")}, with logs: #{logs}"}
-  end
-
-  defp handle_result({:ok, thread, session}, _, _), do: {:noreply, {thread, session}}
-  defp handle_result(err, thread, session) do
-    Logger.info "terraform agent thread failure: #{inspect(err)}"
-    {:noreply, {thread, session}}
   end
 end

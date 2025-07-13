@@ -10,94 +10,13 @@ defmodule Console.AI.Chat.Engine do
     Flow,
     User,
     McpServer,
-    McpServerAudit,
-    AgentSession
+    McpServerAudit
   }
   alias Console.AI.{Provider, Tool, Stream}
-  alias Console.AI.Tools.{
-    Clusters,
-    Logs,
-    Pods,
-    Component,
-    Prs,
-    Pipelines,
-    Alerts,
-    AlertsResolutions
-  }
-  alias Console.AI.Tools.Knowledge.{
-    CreateEntity,
-    CreateObservations,
-    CreateRelationships,
-    DeleteEntity,
-    DeleteObservations,
-    DeleteRelationships,
-    Graph
-  }
-  alias Console.AI.Tools.Agent, as: AgentTool
-  alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
+  alias Console.AI.Chat.Tools
   require Logger
-
-  @plrl_tools [
-    Clusters,
-    SvcTool,
-    Logs,
-    Pods,
-    Component,
-    Prs,
-    Pipelines,
-    Alerts,
-    AlertsResolutions
-  ]
-
-  @memory_tools [
-    CreateEntity,
-    CreateObservations,
-    CreateRelationships,
-    DeleteEntity,
-    DeleteObservations,
-    DeleteRelationships,
-    Graph
-  ]
-
-  @agent_tools [
-    # AgentTool.Query,
-    # AgentTool.Schema,
-    AgentTool.Plan,
-    AgentTool.Catalogs,
-    AgentTool.PrAutomations,
-    AgentTool.Clusters,
-    AgentTool.ServiceComponent,
-    # AgentTool.Search,
-    AgentTool.Stack
-  ]
-
-  @agent_planned_tools [
-    AgentTool.CallPr,
-  ]
-
-  @code_pre_tools [
-    AgentTool.Stack,
-    AgentTool.Coding.StackFiles,
-    AgentTool.Coding.Pr
-  ]
-
-  @code_post_tools [
-    AgentTool.Coding.Commit,
-    AgentTool.Stack,
-    AgentTool.Coding.StackFiles,
-  ]
-
-  @kubernetes_code_pre_tools [
-    AgentTool.ServiceComponent,
-    AgentTool.Coding.ServiceFiles,
-    AgentTool.Coding.PrPlan
-  ]
-
-  @kubernetes_code_post_tools [
-    AgentTool.Coding.GenericPr
-  ]
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
@@ -155,7 +74,7 @@ defmodule Console.AI.Chat.Engine do
         |> ChatSvc.save_messages(thread_id, user)
       {:ok, content, tools} ->
         {plural, mcp} = Enum.split_with(tools, &String.starts_with?(&1.name, "__plrl__"))
-        with {:ok, plrl_res} <- call_plrl_tools(plural, internal_tools(thread)),
+        with {:ok, plrl_res} <- call_plrl_tools(plural, Tools.tools(thread)),
              {:ok, mcp_res} <- call_mcp_tools(mcp, thread, user) do
           completion = completion ++ tool_msgs(content, mcp_res ++ plrl_res)
           Enum.any?(completion, fn
@@ -298,25 +217,11 @@ defmodule Console.AI.Chat.Engine do
   defp include_tools(opts, thread) do
     case {thread, ChatSvc.find_tools(thread)} do
       {_, {:ok, [_ | _] = tools}} ->
-        [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
+        [{:tools, tools}, {:plural, Tools.tools(thread)} | opts]
       {%ChatThread{flow: %Flow{}}, _} ->
-        [{:plural, internal_tools(thread)} | opts]
+        [{:plural, Tools.tools(thread)} | opts]
       _ ->
-        [{:plural, internal_tools(thread)} | opts]
-    end
-  end
-
-  defp internal_tools(%ChatThread{} = t) do
-    memory_tools(t)
-    |> Enum.concat(flow_tools(t))
-    |> Enum.concat(agent_tools(t))
-    |> Enum.concat(agent_planned_tools(t))
-  end
-
-  defp memory_tools(%ChatThread{} = t) do
-    case ChatThread.settings(t, :memory) do
-      true -> @memory_tools
-      false -> []
+        [{:plural, Tools.tools(thread)} | opts]
     end
   end
 
@@ -341,23 +246,4 @@ defmodule Console.AI.Chat.Engine do
   defp msg_size(%{content: content}), do: byte_size(content)
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
-
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, pull_request_id: id}})
-    when is_binary(id), do: []
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, plan_confirmed: true}}),
-    do: @kubernetes_code_post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
-    do: @kubernetes_code_pre_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p, pull_request_id: nil}}) when is_binary(p),
-    do: @code_pre_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
-  defp agent_tools(_), do: []
-
-  defp agent_planned_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: []
-  defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
-  defp agent_planned_tools(_), do: []
-
-  defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
-  defp flow_tools(_), do: []
 end

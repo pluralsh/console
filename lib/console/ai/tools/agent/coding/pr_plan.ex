@@ -18,7 +18,7 @@ defmodule Console.AI.Tools.Agent.Coding.PrPlan do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("pr_plan")
-  def description(), do: "Records and a plan for a PR to perform, and unlocks the ability to generate a PR as the next step"
+  def description(), do: "Records a plan for generating a PR, this will guide the next step which is actually generating the PR a user requests"
 
   def implement(%__MODULE__{} = plan) do
     with {:ok, _} <- update_session(%{plan_confirmed: true}) do

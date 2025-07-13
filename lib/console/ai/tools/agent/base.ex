@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Agent.Base do
   @moduledoc false
-
+  import Ecto.Changeset
   alias Console.AI.Tool
   alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
   alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
@@ -17,6 +17,16 @@ defmodule Console.AI.Tools.Agent.Base do
       alias CloudQuery.Client
       alias Cloudquery.CloudQuery.Stub
       alias Console.Schema.{AgentSession, CloudConnection}
+    end
+  end
+
+  def check_uuid(cs, field) do
+    with v when is_binary(v) <- get_change(cs, field),
+         {{:ok, _}, _v} <- {Ecto.UUID.cast(v), v} do
+      cs
+    else
+      {:error, value} -> add_error(cs, field, "is not a valid UUID, got #{value}")
+      _ -> cs
     end
   end
 
