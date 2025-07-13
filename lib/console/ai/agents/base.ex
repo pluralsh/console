@@ -81,30 +81,37 @@ defmodule Console.AI.Agents.Base do
   def refetch(%AgentSession{id: id}), do: Console.Repo.get!(AgentSession, id)
 
   def drive(thread, messages \\ [], user) do
-    start_transaction()
-    |> add_operation(:save, fn _ -> ChatSvc.save(format(messages), thread.id, thread.user) end)
-    |> add_operation(:chat, fn _ ->
-      Chat.for_thread(thread.id)
-      |> Chat.ordered()
-      |> Repo.all()
-      |> ChatSvc.fit_context_window()
-      |> Enum.map(&Chat.message/1)
-      |> Enum.filter(& &1)
-      |> Engine.completion(thread, user)
+    Enum.reduce_while(0..3, :ok, fn val, _ ->
+      if val > 0 do
+        Logger.info "retrying agent thread #{thread.id} #{val} times"
+        :timer.sleep(:timer.seconds(1))
+      end
+
+      start_transaction()
+      |> add_operation(:save, fn _ -> ChatSvc.save(format(messages), thread.id, thread.user) end)
+      |> add_operation(:chat, fn _ ->
+        Chat.for_thread(thread.id)
+        |> Chat.ordered()
+        |> Repo.all()
+        |> ChatSvc.fit_context_window()
+        |> Enum.map(&Chat.message/1)
+        |> Enum.filter(& &1)
+        |> Engine.completion(thread, user)
+      end)
+      |> add_operation(:bump, fn _ ->
+        ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+        |> Repo.update()
+      end)
+      |> add_operation(:init, fn %{bump: %{session: session}} ->
+        AgentSession.changeset(session, %{initialized: true})
+        |> Repo.update()
+      end)
+      |> execute(timeout: 300_000)
+      |> case do
+        {:ok, %{bump: thread, init: session}} -> {:halt, {:ok, thread, session}}
+        err -> {:cont, err}
+      end
     end)
-    |> add_operation(:bump, fn _ ->
-      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
-      |> Repo.update()
-    end)
-    |> add_operation(:init, fn %{bump: %{session: session}} ->
-      AgentSession.changeset(session, %{initialized: true})
-      |> Repo.update()
-    end)
-    |> execute(timeout: 300_000)
-    |> case do
-      {:ok, %{bump: thread, init: session}} -> {:ok, thread, session}
-      err -> err
-    end
   end
 
   defp format(messages) do
