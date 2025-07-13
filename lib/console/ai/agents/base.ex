@@ -61,10 +61,8 @@ defmodule Console.AI.Agents.Base do
 
       def handle_info({:move, session}, state) do
         case Console.AI.Agents.Discovery.local?(session) do
-          true ->
-            {:noreply, state}
-          false ->
-            {:stop, :moved, state}
+          true -> {:noreply, state}
+          false -> {:stop, :moved, state}
         end
       end
       def handle_info(:die, session), do: {:stop, :normal, session}
@@ -126,7 +124,8 @@ defmodule Console.AI.Agents.Base do
   @thread_preloads [session: [:connection, :pull_request, :stack], user: :groups]
 
   def setup_context(%AgentSession{} = session) do
-    thread = ChatSvc.get_thread!(session.thread_id) |> Repo.preload(@thread_preloads)
+    thread = ChatSvc.get_thread!(session.thread_id)
+             |> Repo.preload(@thread_preloads)
     Console.AI.Tool.context(%{
       user: thread.user,
       flow: thread.flow,

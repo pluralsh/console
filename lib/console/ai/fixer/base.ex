@@ -27,6 +27,11 @@ defmodule Console.AI.Fixer.Base do
   def folder(%Service{git: %Service.Git{folder: folder}}) when is_binary(folder), do: folder
   def folder(_), do: ""
 
+  def file_prompts(contents, subfolder \\ "") do
+    Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
+    |> Enum.map(fn {p, content} -> %{file: Path.join(subfolder, p), content: content} end)
+  end
+
   def svc_code_prompt(f, svc, opts \\ [])
   def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc, opts) do
     subfolder = folder(svc)

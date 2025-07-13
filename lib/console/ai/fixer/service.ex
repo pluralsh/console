@@ -3,61 +3,32 @@ defmodule Console.AI.Fixer.Service do
   use Console.AI.Evidence.Base
   import Console.AI.Fixer.Base
   alias Console.Repo
-  alias Console.AI.Fixer.Parent
+  alias Console.AI.{Fixer.Parent, Provider}
   alias Console.Schema.{Service, GitRepository, Cluster}
-  alias Console.Deployments.{Services}
+  alias Console.Deployments.{Services, Tar}
+  alias Console.Deployments.Git.Discovery
 
   def file_contents(%Service{} = svc, opts \\ []) do
     svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent, insight: :evidence])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, [_ | code]} <- svc_code_prompt(f, svc, opts) do
-      %{
-        details: svc_details(svc),
-        files: Enum.map(code, fn {:user, file} -> file end)
-      }
-      |> maybe_add_parent(svc)
-      |> ok()
-    end
+    %{
+      details: svc_details(svc),
+    }
+    |> add_git(svc)
+    |> add_helm(svc, opts)
+    |> maybe_add_parent(svc, opts[:ignore])
+    |> ok()
   end
 
-  defp maybe_add_parent(result, svc) do
+  defp maybe_add_parent(result, _, true), do: result
+  defp maybe_add_parent(result, svc, _) do
     opts = [
       child: "#{svc.name} service",
       cr: "ServiceDeployment",
       cr_additional: " specifying the name #{svc.name} and namespace #{svc.namespace}"
     ]
-    case Parent.parent_prompt(svc, opts) do
-      [{:user, explanation}, {:user, spec}, _ | rest] ->
-        Map.put(result, :parent, %{
-          explanation: explanation,
-          details: spec,
-          files: Enum.map(rest, fn {:user, file} -> file end)
-        })
+    case Parent.parent_details(svc, opts) do
+      {:ok, details} -> Map.put(result, :parent, details)
       _ -> result
-    end
-  end
-
-  def raw_prompt(%Service{} = svc, insight, opts \\ []) do
-    svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent, insight: :evidence])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- svc_code_prompt(f, svc, opts) do
-      Enum.concat([
-        {:user, """
-          We've found the following insight about a Plural service that is currently in #{svc.status} state:
-
-          #{insight}
-
-          We'd like you to suggest a simple code or configuration change that can fix the issues identified in that insight.
-          I'll do my best to list all the needed resources below.  Additional useful context is that Plural templates any file with a `.liquid` extension with the metadata of the cluster, or secrets attached to the service itself.
-        """},
-        {:user, svc_details(svc)} | code
-      ], Parent.parent_prompt(
-        svc,
-        child: "#{svc.name} service",
-        cr: "ServiceDeployment",
-        cr_additional: " specifying the name #{svc.name} and namespace #{svc.namespace}"
-      ))
-      |> ok()
     end
   end
 
@@ -102,6 +73,7 @@ defmodule Console.AI.Fixer.Service do
     #{compress_and_join([
       (if h.chart, do: "chart: #{h.chart}", else: nil),
       (if h.version, do: "version: #{h.version}", else: nil),
+      (if h.url, do: "url: #{h.url}", else: nil),
       (if h.release, do: "release: #{h.release}", else: nil),
       (if h.values, do: "helm values overrides:\n#{h.values}", else: nil),
       (if is_list(h.values_files) && !Enum.empty?(h.values_files), do: "values files: #{Enum.join(h.values_files, ",")}", else: nil)
@@ -110,6 +82,8 @@ defmodule Console.AI.Fixer.Service do
     Changes to helm charts should be focused on dedicated values files or values overrides. You should *always* prefer
     to make changes in the custom values file already configured, but if none is relevant, simply add the customized values
     as the `spec.helm.values` field, which supports any unstructured map type, of the associated ServiceDeployment kubernetes custom resource for this service.
+
+    We'll attempt to list the contents of the helm chart, but might need to truncate it to simply values files if its too large.
     """
   end
   def helm_details(_), do: nil
@@ -120,4 +94,59 @@ defmodule Console.AI.Fixer.Service do
     """
   end
   def git_details(_), do: nil
+
+  defp add_git(attrs, %Service{git: %Service.Git{folder: path} = git, repository: %GitRepository{} = repo} = svc) do
+    with {:ok, f} <- Discovery.fetch(repo, git),
+         {:ok, contents} <- Tar.tar_stream(f) do
+      {contents, multisource} = prune_multisource(contents, svc)
+      Map.put(attrs, :git, %{
+        details: "#{git_details(svc)}#{multisource}",
+        files: file_prompts(contents)
+               |> Enum.map(fn %{file: p} = file ->
+                  Map.merge(file, %{git_location: Path.join(path, p), dest_location: p})
+                  |> Map.delete(:file)
+               end)
+      })
+    else
+      _ -> attrs
+    end
+  end
+  defp add_git(attrs, _), do: attrs
+
+  defp prune_multisource(contents, %Service{helm: %Service.Helm{values_files: [_ | _] = files}}) do
+    {Enum.filter(contents, fn {k, _} -> k in files end), "\n\nThis is a multisource helm service, so the git contents are restricted to the values files in [#{Enum.join(files, ", ")}]"}
+  end
+  defp prune_multisource(contents, _), do: {contents, ""}
+
+  defp add_helm(attrs, %Service{helm: %Service.Helm{url: url}} = svc, opts) when is_binary(url),
+    do: do_add_helm(attrs, svc, opts)
+  defp add_helm(attrs, %Service{helm: %Service.Helm{repository: %{name: _, namespace: _}}} = svc, opts),
+    do: do_add_helm(attrs, svc, opts)
+  defp add_helm(attrs, %Service{helm: %Service.Helm{repository_id: id, git: %{ref: _, folder: _}}} = svc, opts)
+    when is_binary(id), do: do_add_helm(attrs, svc, opts)
+  defp add_helm(attrs, _, _), do: attrs
+
+  defp do_add_helm(attrs, %Service{} = svc, opts) do
+    with {:ok, f} <- Services.tarfile(svc),
+         {:ok, contents} <- Tar.tar_stream(f) do
+      files = file_prompts(contents)
+      too_large = floor(Provider.context_window() * (opts[:ctx_window_scale] || 0.5))
+      case Enum.sum_by(files, &byte_size(Jason.encode!(&1))) do
+        size when size > too_large ->
+          keep_files = ~w(values.yaml values.yaml.liquid)a ++ (if svc.helm.lua_file, do: [svc.helm.lua_file], else: [])
+          Map.put(attrs, :helm, %{
+            details: "#{helm_details(svc)}\n\nThis is a large helm chart, and so we've truncated its contents to just the values file and other files related to values templating for documentation purposes",
+            files: Enum.filter(contents, fn {k, _} -> k in keep_files end)
+                   |> file_prompts()
+          })
+        _ ->
+          Map.put(attrs, :helm, %{
+            details: helm_details(svc),
+            files: files
+          })
+      end
+    else
+      _ -> attrs
+    end
+  end
 end
