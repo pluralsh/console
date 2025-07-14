@@ -206,7 +206,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
-        field :access_key,      EncryptedString
+        field :access_token,    EncryptedString
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do

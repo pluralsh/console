@@ -4,8 +4,24 @@ defmodule Console.AI.Agents.Terraform do
   alias Console.Schema.{StackRun, StackState, RunStep}
   alias Console.Repo
 
-  def handle_cast({:enqueue, %StackRun{status: :failed} = run}, {thread, session}) do
+  def handle_cast({:enqueue, :booted}, {_, %AgentSession{stack_id: id} = session})
+      when is_binary(id) do
+    Logger.info "handling booted terraform agent, proceeding to pr generation #{session.id}"
+    {thread, session} = setup_context(session)
+    Logger.info "context resetup for #{session.id}"
+    drive(thread, [
+      {:user, """
+      Ok we've found the needed files, now create a pr for this to solve for:
+
+      #{session.prompt}
+      """}
+    ], thread.user)
+    |> handle_result(thread, session)
+  end
+
+  def handle_cast({:enqueue, %StackRun{status: :failed} = run}, {_thread, session}) do
     Logger.info("found failed terraform run in agent session #{session.id}")
+    {thread, session} = setup_context(session)
     case failed_run_messages(run) do
       [_ | _] = messages ->
         Logger.info("handling failed terraform run in agent session #{session.id}")
@@ -15,8 +31,9 @@ defmodule Console.AI.Agents.Terraform do
     end
   end
 
-  def handle_cast({:enqueue, %StackRun{} = run}, {thread, session}) do
+  def handle_cast({:enqueue, %StackRun{} = run}, {_thread, session}) do
     Logger.info("found successful terraform run in agent session #{session.id}")
+    {thread, session} = setup_context(session)
     case Repo.preload(run, [:state]) do
       %StackRun{state: %StackState{plan: p}} when is_binary(p) and byte_size(p) > 0 ->
         Logger.info("handling successful terraform run in agent session #{session.id}")

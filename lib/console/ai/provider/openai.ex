@@ -16,7 +16,7 @@ defmodule Console.AI.OpenAI do
   def default_model(), do: @model
   def default_embedding_model(), do: @embedding_model
 
-  defstruct [:access_key, :model, :tool_model, :embedding_model, :base_url, :params, :stream]
+  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -82,6 +82,7 @@ defmodule Console.AI.OpenAI do
       tool_model: opts.tool_model,
       base_url: opts.base_url,
       embedding_model: opts.embedding_model,
+      azure_token: Map.get(opts, :azure_token, nil),
       stream: Stream.stream()
     }
   end
@@ -143,7 +144,7 @@ defmodule Console.AI.OpenAI do
     end)
   end
 
-  defp chat(%__MODULE__{access_key: token, stream: %Stream{} = stream} = openai, history, opts) do
+  defp chat(%__MODULE__{stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
       all = tools(opts)
       body = Map.merge(%{
@@ -156,11 +157,11 @@ defmodule Console.AI.OpenAI do
       |> Jason.encode!()
 
       url(openai, "/chat/completions")
-      |> HTTPoison.post(body, json_headers(token), [stream_to: self(), async: :once] ++ @options)
+      |> HTTPoison.post(body, json_headers(openai), [stream_to: self(), async: :once] ++ @options)
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token} = openai, history, opts) do
+  defp chat(%__MODULE__{} = openai, history, opts) do
     all = tools(opts)
     body = Console.drop_nils(%{
       model: model(openai),
@@ -171,11 +172,11 @@ defmodule Console.AI.OpenAI do
     |> Jason.encode!()
 
     url(openai, "/chat/completions")
-    |> HTTPoison.post(body, json_headers(token), @options)
+    |> HTTPoison.post(body, json_headers(openai), @options)
     |> handle_response(CompletionResponse.spec())
   end
 
-  defp embed(%__MODULE__{access_key: token, embedding_model: model} = openai, text) do
+  defp embed(%__MODULE__{embedding_model: model} = openai, text) do
     body = Console.drop_nils(%{
       model: model || @embedding_model,
       input: String.slice(text, 0, 8100),
@@ -185,7 +186,7 @@ defmodule Console.AI.OpenAI do
     |> Jason.encode!()
 
     url(openai, "/embeddings")
-    |> HTTPoison.post(body, json_headers(token), @options)
+    |> HTTPoison.post(body, json_headers(openai), @options)
     |> handle_response(EmbeddingResponse.spec())
   end
 
@@ -200,12 +201,15 @@ defmodule Console.AI.OpenAI do
   defp url(%__MODULE__{base_url: url} = c, path) when is_binary(url), do: with_params(c, Path.join(url, path))
   defp url(c, path), do: with_params(c, "https://api.openai.com/v1#{path}")
 
-  defp with_params(%__MODULE__{params: params}, p) when is_map(params), do: "#{p}&#{URI.encode_query(params)}"
+  defp with_params(%__MODULE__{params: params}, p) when is_map(params), do: "#{p}?#{URI.encode_query(params)}"
   defp with_params(_, p), do: p
 
-  defp json_headers(token), do: headers([{"Content-Type", "application/json"}], token)
+  defp json_headers(opneai), do: headers([{"Content-Type", "application/json"}], opneai)
 
-  defp headers(headers, token) when is_binary(token), do: [{"Authorization", "Bearer #{token}"} | headers]
+  defp headers(headers, %__MODULE__{azure_token: token}) when is_binary(token),
+    do: [{"api-key", token} | headers]
+  defp headers(headers, %__MODULE__{access_key: token}) when is_binary(token),
+    do: [{"Authorization", "Bearer #{token}"} | headers]
   defp headers(headers, _), do: headers
 
   defp gen_tools(calls) do

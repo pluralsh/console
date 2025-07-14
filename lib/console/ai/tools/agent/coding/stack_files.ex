@@ -28,7 +28,8 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
     with %Stack{} = stack <- Stacks.get_stack(id) |> Console.Repo.preload([:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write),
-         {:ok, [_ | rest]} <- get_prompt(stack) do
+         {:ok, [_ | rest]} <- get_prompt(stack),
+         {:ok, _} <- update_session(%{stack_id: id}) do
       Enum.map(rest, fn {:user, raw} -> raw end)
       |> Jason.encode()
     else
