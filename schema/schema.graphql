@@ -1586,7 +1586,7 @@ input OllamaAttributes {
 }
 
 input AzureOpenaiAttributes {
-  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
+  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments"
   endpoint: String!
 
   "the api version you want to use"

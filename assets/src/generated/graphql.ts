@@ -690,7 +690,7 @@ export type AzureOpenaiAttributes = {
   apiVersion?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
-  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
+  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments */
   endpoint: Scalars['String']['input'];
   /** the exact model you wish to use */
   model?: InputMaybe<Scalars['String']['input']>;

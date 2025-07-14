@@ -324,6 +324,15 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model)a)
     |> validate_required(~w(access_token endpoint)a)
+    |> validate_change(:endpoint, fn :endpoint, endpoint ->
+      with %URI{path: path, scheme: "https"} <- URI.parse(endpoint),
+           true <- String.ends_with?(path, "/openai/deployments") do
+        []
+      else
+        false -> [endpoint: "must end with /openai/deployments to be a valid azure openai base url"]
+        _ -> [endpoint: "is not a valid url"]
+      end
+    end)
   end
 
   defp bedrock_changeset(model, attrs) do

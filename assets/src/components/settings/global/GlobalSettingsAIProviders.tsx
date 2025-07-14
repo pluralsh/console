@@ -308,7 +308,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Endpoint"
-        hint="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments/{deployment-id}."
+        hint="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
         flex={1}
       >

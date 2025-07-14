@@ -9,7 +9,7 @@ defmodule Console.AI.Azure do
 
   defstruct [:access_token, :api_version, :base_url, :model, :tool_model, :embedding_model]
 
-  @api_vsn "2024-10-01-preview"
+  @api_vsn "2025-04-01-preview"
 
   @type t :: %__MODULE__{}
 
@@ -20,7 +20,7 @@ defmodule Console.AI.Azure do
       model: opts.model,
       tool_model: opts.tool_model,
       embedding_model: opts.embedding_model,
-      base_url: "#{opts.endpoint}/openai"
+      base_url: opts.endpoint
     }
   end
 
