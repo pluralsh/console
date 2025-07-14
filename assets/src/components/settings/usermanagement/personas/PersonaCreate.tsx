@@ -64,6 +64,9 @@ const DEFAULT_CONFIGURATION = {
     secrets: true,
     configuration: true,
   },
+  ai: {
+    pr: true,
+  },
 } as const satisfies RequiredDeep<PersonaConfigurationAttributes>
 
 export const configTabs = {
@@ -71,6 +74,7 @@ export const configTabs = {
   deployments: 'Continuous deployment',
   sidebar: 'Sidebar',
   services: 'Services',
+  ai: 'AI',
 } as const satisfies Record<
   Exclude<keyof typeof DEFAULT_CONFIGURATION, 'all'>,
   string

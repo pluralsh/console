@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Agent.Base do
   @moduledoc false
-
+  import Ecto.Changeset
   alias Console.AI.Tool
   alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
   alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
@@ -11,11 +11,22 @@ defmodule Console.AI.Tools.Agent.Base do
       import Ecto.Changeset
       import Console.AI.Tools.Utils
       import Console.AI.Tools.Agent.Base
+      alias Console.Deployments.Policies
       alias Console.AI.Tool
       alias Console.AI.Tool.Context
       alias CloudQuery.Client
       alias Cloudquery.CloudQuery.Stub
       alias Console.Schema.{AgentSession, CloudConnection}
+    end
+  end
+
+  def check_uuid(cs, field) do
+    with v when is_binary(v) <- get_change(cs, field),
+         {{:ok, _}, _v} <- {Ecto.UUID.cast(v), v} do
+      cs
+    else
+      {:error, value} -> add_error(cs, field, "is not a valid UUID, got #{value}")
+      _ -> cs
     end
   end
 
@@ -26,24 +37,35 @@ defmodule Console.AI.Tools.Agent.Base do
     end
   end
 
+  def update_session(attrs) do
+    with {:session, %AgentSession{} = session} <- session(),
+         {:ok, session} <- AgentSession.changeset(session, attrs) |> Console.Repo.update(),
+         _ <- Tool.upsert(%{session: session}) do
+      {:ok, session}
+    else
+      {:error, err} ->
+        {:error, "failed to update session, reason: #{inspect(err)}"}
+    end
+  end
+
   def to_pb(%CloudConnection{provider: :aws} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.aws),
+      credentials: {:aws, to_pb(connection.configuration.aws)},
     }
   end
 
   def to_pb(%CloudConnection{provider: :gcp} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.gcp),
+      credentials: {:gcp, to_pb(connection.configuration.gcp)},
     }
   end
 
   def to_pb(%CloudConnection{provider: :azure} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: to_pb(connection.configuration.azure),
+      credentials: {:azure, to_pb(connection.configuration.azure)},
     }
   end
 

@@ -28,9 +28,15 @@ fragment Chat on Chat {
       name
       arguments
     }
+    prCall {
+      context
+    }
   }
   pullRequest {
     ...PullRequest
+  }
+  prAutomation {
+    ...PrAutomation
   }
   server {
     id
@@ -180,6 +186,12 @@ mutation ConfirmChat($id: ID!) {
   }
 }
 
+mutation ConfirmChatPlan($threadId: ID!) {
+  confirmPlan(threadId: $threadId) {
+    ...Chat
+  }
+}
+
 mutation ClearChatHistory($before: Int) {
   clearChatHistory(before: $before)
 }
@@ -230,9 +242,9 @@ mutation AddChatContext(
   }
 }
 
-mutation ThreadPr($threadId: ID!) {
-  threadPr(threadId: $threadId) {
-    ...Chat
+mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
+  createAgentSession(attributes: $attributes) {
+    ...ChatThread
   }
 }
 

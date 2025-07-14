@@ -1,8 +1,6 @@
 defmodule Console.AI.Fixer.Parent do
   use Console.AI.Evidence.Base
-  import Console.AI.Fixer.Base
   alias Console.AI.Fixer.Service, as: SvcFixer
-  alias Console.Deployments.{Services}
   alias Console.Schema.{Service, GlobalService, Stack, ServiceTemplate}
 
   def parent_prompt(%Stack{parent: %Service{} = svc}, info), do: do_parent_prompt(svc, info)
@@ -11,19 +9,21 @@ defmodule Console.AI.Fixer.Parent do
     do: do_parent_prompt(global, info)
   def parent_prompt(_, _), do: []
 
+  def parent_details(%Stack{parent: %Service{} = svc}, info), do: do_parent_details(svc, info)
+  def parent_details(%Service{parent: %Service{} = svc}, info), do: do_parent_details(svc, info)
+  def parent_details(%Service{owner: %GlobalService{parent: %Service{}} = global}, info),
+    do: do_parent_details(global, info)
+  def parent_details(_, _), do: :ignore
+
   defp do_parent_prompt(%Service{} = svc, info) do
     svc = Console.Repo.preload(svc, [:cluster, :repository, :parent])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- svc_code_prompt(f, svc) do
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
       [
         {:user, """
-        The #{info[:child]} is being instantiated using a Plural service-of-services structure, and will be represented as a #{info[:cr]} kubernetes
-        custom resource#{info[:cr_additional] || ""}.  It is possible this is where the fix needs to happen, especially in the wiring of helm values or
-        terraform variables.
+        #{explanation(svc, info)}
 
         I will do my best to describe the service itself and show you the manifests that's defining that service below:
-        """},
-        {:user, SvcFixer.svc_details(svc)} | code
+        """} | SvcFixer.to_prompt(details)
       ]
     else
       _ -> []
@@ -32,16 +32,14 @@ defmodule Console.AI.Fixer.Parent do
 
   defp do_parent_prompt(%GlobalService{} = global, info) do
     %{parent: svc} = global = Console.Repo.preload(global, [:project, :service, :template, parent: [:cluster, :repository, :parent]])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- svc_code_prompt(f, svc) do
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
       [
         {:user, """
-        The #{info[:child]} is being instantiated by a GlobalService named #{global.name} which is itself defined using a Plural service-of-services structure,
-        and will be represented as a GlobalService kubernetes custom resource.  It is possible this is where the fix needs to happen, especially in the wiring of helm values.
+        #{explanation(global, info)}
 
         I will do my best to describe the global service itself and show you the manifests that's defining that global service below:
         """},
-        {:user, global_details(global)} | code
+        {:user, global_details(global)} | SvcFixer.to_prompt(details)
       ]
     else
       _ -> []
@@ -49,6 +47,44 @@ defmodule Console.AI.Fixer.Parent do
   end
 
   defp do_parent_prompt(_, _), do: []
+
+  defp do_parent_details(%Service{} = svc, info) do
+    svc = Console.Repo.preload(svc, [:cluster, :repository, :parent])
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
+      {:ok, %{
+        explanation: explanation(svc, info),
+        parent_service: details,
+      }}
+    end
+  end
+
+  defp do_parent_details(%GlobalService{} = global, info) do
+    %{parent: svc} = global = Console.Repo.preload(global, [:project, :service, :template, parent: [:cluster, :repository, :parent]])
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
+      {:ok, %{
+        explanation: explanation(global, info),
+        global_service: global_details(global),
+        parent_service: details
+      }}
+    end
+  end
+
+  defp do_parent_details(_, _), do: :ignore
+
+  defp explanation(%GlobalService{} = global, info) do
+    """
+    The #{info[:child]} is being instantiated by a GlobalService named #{global.name} which is itself defined using a Plural service-of-services structure,
+    and will be represented as a GlobalService kubernetes custom resource.  It is possible this is where the fix needs to happen, especially in the wiring of helm values.
+    """
+  end
+
+  defp explanation(%Service{}, info) do
+    """
+    The #{info[:child]} is being instantiated using a Plural service-of-services structure, and will be represented as a #{info[:cr]} kubernetes
+    custom resource#{info[:cr_additional] || ""}.  It is possible this is where a fix needs to happen, especially in the wiring of helm values or
+    terraform variables.
+    """
+  end
 
   defp global_details(%GlobalService{} = global) do
     """

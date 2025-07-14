@@ -1,0 +1,75 @@
+{
+    "type": "object",
+    "properties": {
+        "repo_url": {
+            "type": "string",
+            "description": "The HTTPS url for the git repository you'll create a PR in"
+        },
+        "commit_message": {
+            "type": "string",
+            "description": "The commit message to use for this PR"
+        },
+        "file_updates": {
+            "type": "array",
+            "description": "A list of files to update in this PR",
+            "items": {
+                "type": "object",
+                "description": "An update to an individual file.  Be sure to include surrounding lines to allow us to find the appropriate block being replaced, AND leading whitespace on each line should be preserved.",
+                "properties": {
+                    "file_name": {
+                      "description": "the relative file path name for this update",
+                      "type": "string"
+                    },
+                    "replacement": {
+                        "description": "the file content you want to write to this file",
+                        "type": "string"
+                    },
+                    "previous": {
+                        "description": "the previous content within the file this will be replacing, including all whitespace and line characters.  Provide an empty string if you want to simply append to the file.",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name", "replacement", "previous"],
+                "additionalProperties": false
+            }
+        },
+        "file_deletes": {
+            "type": "array",
+            "description": "A list of files to delete in this PR",
+            "items": {
+                "type": "object",
+                "description": "A file to delete in this PR",
+                "properties": {
+                    "file_name": {
+                        "description": "the relative file path name for this delete",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name"],
+                "additionalProperties": false
+            }
+        },
+        "file_creates": {
+            "type": "array",
+            "description": "A list of files to create in this PR",
+            "items": {
+                "type": "object",
+                "description": "A file to create in this PR",
+                "properties": {
+                    "file_name": {
+                        "description": "the relative file path name for this create",
+                        "type": "string"
+                    },
+                    "content": {
+                        "description": "the content to write to the file",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name", "content"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["repo_url", "commit_message"],
+    "additionalProperties": false
+}

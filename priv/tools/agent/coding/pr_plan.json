@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "plan": {
+            "type": "string",
+            "description": "A plan for a PR to perform, this should be a list of changes to be made to the repository clearly described"
+        },
+        "repo_url": {
+            "type": "string",
+            "description": "The url of the repository to create a PR for"
+        }
+    },
+    "required": ["plan", "repo_url"],
+    "additionalProperties": false
+}

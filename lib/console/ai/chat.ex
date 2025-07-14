@@ -114,6 +114,21 @@ defmodule Console.AI.Chat do
     |> execute(extract: :thread)
   end
 
+  def create_agent_session(attrs, %User{} = user) do
+    start_transaction()
+    |> add_operation(:thread, fn _ ->
+      %ChatThread{user_id: user.id}
+      |> ChatThread.changeset(%{
+        summary: "An agent session to handle: #{attrs[:prompt] || "a user request"}",
+        session: attrs
+      })
+      |> allow(user, :create)
+      |> when_ok(:insert)
+    end)
+    |> execute(extract: :thread)
+    |> notify(:session)
+  end
+
   @doc """
   Updates a thread
   """
@@ -462,6 +477,7 @@ defmodule Console.AI.Chat do
          {:ok, [_ | prompt]} <- context_prompt(source) do
       Enum.map(prompt, fn
         {role, %{file: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
+        {role, %{git_location: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
         {role, c} -> %{role: role, content: c}
       end)
       |> prepend(%{
@@ -576,7 +592,7 @@ defmodule Console.AI.Chat do
     )
   end
 
-  defp fit_context_window(msgs, preface \\ @chat) do
+  def fit_context_window(msgs, preface \\ @chat) do
     Enum.reduce(msgs, byte_size(preface), &byte_size(&1.content) + &2)
     |> trim_messages(msgs, Provider.context_window())
   end
@@ -588,4 +604,8 @@ defmodule Console.AI.Chat do
     do: trim_messages(total - byte_size(content), rest, window)
 
   defp msg(text), do: %{role: :assistant, content: text}
+
+  defp notify({:ok, %ChatThread{} = build}, :session),
+    do: handle_notify(Console.PubSub.AgentSessionCreated, build)
+  defp notify(pass, _), do: pass
 end

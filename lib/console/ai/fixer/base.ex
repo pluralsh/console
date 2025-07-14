@@ -1,6 +1,6 @@
 defmodule Console.AI.Fixer.Base do
   use Console.AI.Evidence.Base
-  alias Console.Deployments.Tar
+  alias Console.Deployments.{Tar, Git}
   alias Console.Deployments.Pr.File
   alias Console.AI.Vector.Storable
   alias Console.AI.Provider
@@ -8,7 +8,8 @@ defmodule Console.AI.Fixer.Base do
     Service,
     AiInsightEvidence,
     AiInsight,
-    Alert
+    Alert,
+    GitRepository
   }
 
   @extension_blacklist ~w(.tgz .png .jpeg .jpg .gz .tar .zip .tar.gz)
@@ -26,11 +27,17 @@ defmodule Console.AI.Fixer.Base do
   def folder(%Service{git: %Service.Git{folder: folder}}) when is_binary(folder), do: folder
   def folder(_), do: ""
 
-  def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc) do
+  def file_prompts(contents, subfolder \\ "") do
+    Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
+    |> Enum.map(fn {p, content} -> %{file: Path.join(subfolder, p), content: content} end)
+  end
+
+  def svc_code_prompt(f, svc, opts \\ [])
+  def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc, opts) do
     subfolder = folder(svc)
-    too_large = Provider.context_window()
+    too_large = floor(Provider.context_window() * (opts[:ctx_window_scale] || 0.5))
     with {:ok, contents} <- Tar.tar_stream(f) do
-      prompt = Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      prompt = Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
                |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
                |> prepend({:user, @preface})
 
@@ -40,11 +47,17 @@ defmodule Console.AI.Fixer.Base do
       end
     end
   end
-  def svc_code_prompt(f, svc), do: code_prompt(f, folder(svc))
+  def svc_code_prompt(f, svc, _opts), do: code_prompt(f, folder(svc))
+
+  def git_code_prompt(subfolder, %Service.Git{} = ref, %GitRepository{} = repo) do
+    with {:ok, f} <- Git.Discovery.fetch(repo, ref) do
+      code_prompt(f, subfolder)
+    end
+  end
 
   def code_prompt(f, subfolder, preface \\ @preface) do
     with {:ok, contents} <- Tar.tar_stream(f) do
-      Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
       |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)
       |> prepend({:user, preface})
       |> ok()
@@ -56,6 +69,13 @@ defmodule Console.AI.Fixer.Base do
       {_, %{} = m}, acc -> acc + byte_size(Jason.encode!(m))
       {_, txt}, acc when is_binary(txt) -> acc + byte_size(txt)
     end)
+  end
+
+  def maybe_encode(map) do
+    case raw?() do
+      true -> map
+      _ -> Jason.encode!(map)
+    end
   end
 
   def evidence_prompts(%AiInsight{evidence: [_ | _] = evidence}) do
@@ -107,13 +127,6 @@ defmodule Console.AI.Fixer.Base do
     """})
   end
   defp maybe_add_values(contents, _), do: contents
-
-  defp maybe_encode(map) do
-    case raw?() do
-      true -> map
-      _ -> Jason.encode!(map)
-    end
-  end
 
   defp blacklist(filename) do
     cond do

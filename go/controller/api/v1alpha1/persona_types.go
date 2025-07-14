@@ -122,6 +122,10 @@ type PersonaConfiguration struct {
 	// Services enable individual parts of the services views.
 	// +kubebuilder:validation:Optional
 	Services *PersonaServices `json:"services,omitempty"`
+
+	// AI enables individual parts of the ai views.
+	// +kubebuilder:validation:Optional
+	AI *PersonaAI `json:"ai,omitempty"`
 }
 
 func (in *PersonaConfiguration) Attributes() *console.PersonaConfigurationAttributes {
@@ -135,6 +139,7 @@ func (in *PersonaConfiguration) Attributes() *console.PersonaConfigurationAttrib
 		Deployments: in.Deployments.Attributes(),
 		Sidebar:     in.Sidebar.Attributes(),
 		Services:    in.Services.Attributes(),
+		Ai:          in.AI.Attributes(),
 	}
 }
 
@@ -154,6 +159,22 @@ func (in *PersonaHome) Attributes() *console.PersonaHomeAttributes {
 	return &console.PersonaHomeAttributes{
 		Manager:  in.Manager,
 		Security: in.Security,
+	}
+}
+
+type PersonaAI struct {
+	// Enables whether users bound to this persona can use AI to generate PRs.
+	// +kubebuilder:validation:Optional
+	PR *bool `json:"pr,omitempty"`
+}
+
+func (in *PersonaAI) Attributes() *console.PersonaAiAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaAiAttributes{
+		Pr: in.PR,
 	}
 }
 

@@ -25,7 +25,13 @@ defmodule Console.AI.Tools.Agent.Plan do
   def implement(%__MODULE__{plan: plan} = model) do
     with {:session, %AgentSession{} = session} <- session(),
          {:ok, _} <- unconfirm(session) do
-      {:ok, %{content: plan, type: :implementation_plan, attributes: %{plan: Map.take(model, [:required_services, :open_questions])}}}
+      {:ok, %{
+        content: plan,
+        type: :implementation_plan,
+        attributes: %{
+          plan: Map.take(model, [:required_services, :open_questions])}
+        }
+      }
     else
       {:session, _} -> {:ok, "No cloud connection tied to this session, cannot plan"}
       err -> err

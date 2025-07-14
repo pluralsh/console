@@ -160,6 +160,7 @@ export function ChatbotPanelThread({
           <Fragment key={msg.id}>
             <ChatMessage
               {...msg}
+              threadId={currentThread.id}
               serverName={msg.server?.name}
             />
             {!isEmpty(evidence) && // only attaches evidence to the initial insight

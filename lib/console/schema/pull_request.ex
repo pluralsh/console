@@ -1,6 +1,6 @@
 defmodule Console.Schema.PullRequest do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow, PrGovernance}
+  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow, PrGovernance, AgentSession}
 
   defenum Status, open: 0, merged: 1, closed: 2
 
@@ -32,6 +32,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :stack,      Stack
     belongs_to :flow,       Flow
     belongs_to :governance, PrGovernance
+    belongs_to :session,    AgentSession
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -108,6 +109,7 @@ defmodule Console.Schema.PullRequest do
     governance_id
     approved
     governance_state
+    session_id
   )a
 
   def changeset(model, attrs \\ %{}) do

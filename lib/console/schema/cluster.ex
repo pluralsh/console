@@ -108,6 +108,15 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
+    field :openshift_version, :string
+    field :node_count,        :integer
+    field :pod_count,         :integer
+    field :namespace_count,   :integer
+    field :cpu_total,         :float
+    field :memory_total,      :float
+    field :cpu_util,          :float
+    field :memory_util,       :float
+
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
 
@@ -456,7 +465,12 @@ defmodule Console.Schema.Cluster do
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at distro health_score kubelet_version current_version installed)a)
+    |> cast(
+      attrs,
+      ~w(pinged_at distro health_score kubelet_version current_version
+         installed openshift_version node_count pod_count namespace_count
+         cpu_total memory_total cpu_util memory_util)a
+    )
     |> cast_assoc(:insight_components)
     |> cast_assoc(:node_statistics)
     |> change_markers(distro: :distro_changed)

@@ -3,68 +3,20 @@ defmodule Console.AI.Chat.Engine do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   import Console.AI.Evidence.Base, only: [append: 2]
   import Console.AI.Chat.System
-  alias Console.Schema.{Chat, Chat.Attributes, ChatThread, Flow, User, McpServer, McpServerAudit, AgentSession}
+  alias Console.Schema.{
+    Chat,
+    Chat.Attributes,
+    ChatThread,
+    Flow,
+    User,
+    McpServer,
+    McpServerAudit
+  }
   alias Console.AI.{Provider, Tool, Stream}
-  alias Console.AI.Tools.{
-    Clusters,
-    Logs,
-    Pods,
-    Component,
-    Prs,
-    Pipelines,
-    Alerts,
-    AlertsResolutions
-  }
-  alias Console.AI.Tools.Knowledge.{
-    CreateEntity,
-    CreateObservations,
-    CreateRelationships,
-    DeleteEntity,
-    DeleteObservations,
-    DeleteRelationships,
-    Graph
-  }
-  alias Console.AI.Tools.Agent
-  alias Console.AI.Tools.Services, as: SvcTool
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.Chat, as: ChatSvc
-
-  @plrl_tools [
-    Clusters,
-    SvcTool,
-    Logs,
-    Pods,
-    Component,
-    Prs,
-    Pipelines,
-    Alerts,
-    AlertsResolutions
-  ]
-
-  @memory_tools [
-    CreateEntity,
-    CreateObservations,
-    CreateRelationships,
-    DeleteEntity,
-    DeleteObservations,
-    DeleteRelationships,
-    Graph
-  ]
-
-  @agent_tools [
-    Agent.Query,
-    Agent.Schema,
-    Agent.Plan,
-    Agent.Catalogs,
-    Agent.Automations,
-    Agent.Clusters,
-    Agent.Search,
-    Agent.Stack
-  ]
-
-  @agent_planned_tools [
-    Agent.CallPr,
-  ]
+  alias Console.AI.Chat.Tools
+  require Logger
 
   @spec call_tool(Chat.t, User.t) :: {:ok, Chat.t} | {:error, term}
   def call_tool(
@@ -122,7 +74,7 @@ defmodule Console.AI.Chat.Engine do
         |> ChatSvc.save_messages(thread_id, user)
       {:ok, content, tools} ->
         {plural, mcp} = Enum.split_with(tools, &String.starts_with?(&1.name, "__plrl__"))
-        with {:ok, plrl_res} <- call_plrl_tools(plural, internal_tools(thread)),
+        with {:ok, plrl_res} <- call_plrl_tools(plural, Tools.tools(thread)),
              {:ok, mcp_res} <- call_mcp_tools(mcp, thread, user) do
           completion = completion ++ tool_msgs(content, mcp_res ++ plrl_res)
           Enum.any?(completion, fn
@@ -133,14 +85,16 @@ defmodule Console.AI.Chat.Engine do
             true ->
               completion
               |> Enum.map(&Chat.attributes/1)
+              |> Enum.filter(&persist?/1)
               |> ChatSvc.save_messages(thread_id, user)
             false ->
               completion(messages, thread, user, completion, level + 1)
           end
         else
           {:error, err, acc} when is_list(acc) ->
-            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :assistant}])
+            (completion ++ tool_msgs(content, acc) ++ [%{type: :error, content: err, role: :user}])
             |> Enum.map(&Chat.attributes/1)
+            |> Enum.filter(&persist?/1)
             |> ChatSvc.save_messages(thread_id, user)
           err -> err
         end
@@ -158,16 +112,28 @@ defmodule Console.AI.Chat.Engine do
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
+           _ <- Logger.info("calling tool: #{name} with args: #{inspect(args)}"),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
-        Stream.publish(stream, content, 1)
-        Stream.offset(1)
-        {:cont, [tool_msg(content, id, nil, name, args) | acc]}
+        case tool_msg(content, id, nil, name, args) do
+          [_ | _] = msgs ->
+            Enum.each(msgs, fn %{content: content} ->
+              publish_to_stream(stream, content)
+              Stream.offset(1)
+            end)
+            {:cont, Enum.concat(msgs, acc)}
+          %{content: content} = msg ->
+            publish_to_stream(stream, content)
+            Stream.offset(1)
+            {:cont, [msg | acc]}
+        end
       else
-        :error -> {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
+        :error ->
+          {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:halt, {:error, "failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", Enum.reverse(acc)}}
-        err -> {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
+          {:cont, [tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, nil, name, args) | acc]}
+        err ->
+          {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
       end
     end)
     |> tool_results()
@@ -181,7 +147,7 @@ defmodule Console.AI.Chat.Engine do
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
-        Stream.publish(stream, content, 1)
+        publish_to_stream(stream, content)
         Stream.offset(1)
         {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
@@ -214,7 +180,7 @@ defmodule Console.AI.Chat.Engine do
     |> execute(extract: :tool)
   end
 
-  @spec tool_msg(binary, binary | nil, McpServer.t | nil, binary, map) :: map
+  @spec tool_msg(binary | map | [map], binary | nil, McpServer.t | nil, binary, map) :: map
   defp tool_msg(content, call_id, server, name, args) when is_binary(content) or is_nil(content) do
     %{
       role: :user,
@@ -231,8 +197,15 @@ defmodule Console.AI.Chat.Engine do
     }
   end
 
+  defp tool_msg([_ | _] = msgs, call_id, server, name, args) do
+    msgs
+    |> Enum.map(&tool_msg(&1, call_id, server, name, args))
+    |> Enum.map(&Map.put(&1, :role, :user))
+    |> Enum.reverse()
+  end
+
   defp tool_msg(%{} = msg, call_id, _, name, args) do
-    Map.merge(%{
+    DeepMerge.deep_merge(%{
       role: :assistant,
       attributes: %{tool: %{call_id: call_id, name: name, arguments: args}}
     }, msg)
@@ -244,32 +217,25 @@ defmodule Console.AI.Chat.Engine do
   defp include_tools(opts, thread) do
     case {thread, ChatSvc.find_tools(thread)} do
       {_, {:ok, [_ | _] = tools}} ->
-        [{:tools, tools}, {:plural, internal_tools(thread)} | opts]
+        [{:tools, tools}, {:plural, Tools.tools(thread)} | opts]
       {%ChatThread{flow: %Flow{}}, _} ->
-        [{:plural, internal_tools(thread)} | opts]
+        [{:plural, Tools.tools(thread)} | opts]
       _ ->
-        [{:plural, internal_tools(thread)} | opts]
+        [{:plural, Tools.tools(thread)} | opts]
     end
   end
 
-  defp internal_tools(%ChatThread{} = t) do
-    memory_tools(t)
-    |> Enum.concat(flow_tools(t))
-    |> Enum.concat(agent_tools(t))
-    |> Enum.concat(agent_planned_tools(t))
-  end
-
-  defp memory_tools(%ChatThread{} = t) do
-    case ChatThread.settings(t, :memory) do
-      true -> @memory_tools
-      false -> []
-    end
-  end
+  defp persist?(%{persist: false}), do: false
+  defp persist?(_), do: true
 
   defp fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
   end
+
+  defp publish_to_stream(stream, %{content: content}), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(stream, content) when is_binary(content), do: Stream.publish(stream, content, 1)
+  defp publish_to_stream(_, _), do: :ok
 
   defp trim_messages(total, msgs, window) when total < window, do: msgs
   defp trim_messages(_, [_] = msgs, _), do: msgs
@@ -280,13 +246,4 @@ defmodule Console.AI.Chat.Engine do
   defp msg_size(%{content: content}), do: byte_size(content)
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
-
-  defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
-  defp agent_tools(_), do: []
-
-  defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
-  defp agent_planned_tools(_), do: []
-
-  defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
-  defp flow_tools(_), do: []
 end

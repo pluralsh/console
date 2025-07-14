@@ -4,7 +4,7 @@ defmodule Console.Schema.ChatThread do
 
   @max_threads 50
 
-  @expiry [days: -14]
+  @expiry [days: -7]
 
   schema "chat_threads" do
     field :summary,    :string
@@ -29,7 +29,7 @@ defmodule Console.Schema.ChatThread do
   end
 
   def settings(%__MODULE__{settings: %{memory: m}}, :memory) when is_boolean(m), do: m
-  def settings(_, :memory), do: true
+  def settings(_, _), do: false
 
   def with_expired_chats(query \\ __MODULE__) do
     from(t in query,

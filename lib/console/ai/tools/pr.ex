@@ -79,16 +79,22 @@ defmodule Console.AI.Tools.Pr do
 
   defp file_updates(_, %__MODULE__{file_updates: [_ | _] = updates}, dir) do
     Enum.reduce_while(updates, :ok, fn %__MODULE__.FileUpdate{file_name: f, previous: p, replacement: r}, _ ->
-      Path.join(dir, f)
-      |> Editor.replace(p, r)
-      |> case do
-        :ok -> {:cont, :ok}
-        {:error, err} -> {:halt, {:error, "failed to write file #{f}, reason: #{inspect(err)}"}}
+      with {:ok, path} <- relpath(dir, f),
+           :ok <- Editor.replace(path, p, r) do
+        {:cont, :ok}
+      else
+        :error -> {:halt, {:error, "unsafe file path #{f}"}}
+        {:error, err} -> {:halt, {:error, "failed to update file #{f}, reason: #{inspect(err)}"}}
       end
     end)
   end
 
   defp file_updates(_, _, _), do: {:error, "no updates defined"}
+
+  defp relpath(dir, f) do
+    with {:ok, sanitized} <- Path.safe_relative(f, dir),
+      do: {:ok, Path.join(dir, sanitized)}
+  end
 
   defp file_update_changeset(model, attrs) do
     model

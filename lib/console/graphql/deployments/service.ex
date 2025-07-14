@@ -43,6 +43,14 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_namespace,   :boolean
     field :enforce_namespace,  :boolean
     field :namespace_metadata, :metadata_attributes
+    field :diff_normalizers,   list_of(:diff_normalizer_attributes), description: "A list of diff normalizers to apply to the service which controls how drift detection works"
+  end
+
+  input_object :diff_normalizer_attributes do
+    field :name, :string
+    field :kind, :string
+    field :namespace, :string
+    field :json_pointers, list_of(:string), description: "A list of json patches to apply to the service which controls how drift detection works"
   end
 
   input_object :helm_config_attributes do
@@ -468,12 +476,21 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_namespace,   :boolean, description: "whether the agent should auto-create the namespace for this service"
     field :enforce_namespace,  :boolean, description: "Whether to require all resources are placed in the same namespace"
     field :namespace_metadata, :namespace_metadata
+    field :diff_normalizers,   list_of(:diff_normalizer), description: "A list of diff normalizers to apply to the service which controls how drift detection works"
   end
 
   @desc "metadata fields for created namespaces"
   object :namespace_metadata do
     field :labels,      :map
     field :annotations, :map
+  end
+
+  @desc "Allows you to control whether a specific set of fields in a kubernetes object is drift detected"
+  object :diff_normalizer do
+    field :name,          :string, description: "The name of the resource to normalize"
+    field :kind,          :string, description: "The kind of the resource to normalize"
+    field :namespace,     :string, description: "The namespace of the resource to normalize"
+    field :json_pointers, list_of(:string), description: "A list of json pointers to the fields to ignore"
   end
 
   @desc "A reusable bundle of configuration designed to make it easy to communicate between tools like tf/pulumi and k8s"

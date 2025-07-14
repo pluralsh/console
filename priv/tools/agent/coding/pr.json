@@ -1,0 +1,87 @@
+{
+    "type": "object",
+    "properties": {
+        "stack_id": {
+            "type": "string",
+            "description": "The id of the stack you'll be creating a PR for"
+        },
+        "branch_name": {
+            "type": "string",
+            "description": "A reasonable and concise branch name for this PR"
+        },
+        "commit_message": {
+            "type": "string",
+            "description": "The commit message to use for this PR"
+        },
+        "pr_title": {
+            "type": "string",
+            "description": "The title for this PR"
+        },
+        "pr_description": {
+            "type": "string",
+            "description": "A longer-form description body for this PR, should allow users to understand the context and implications of the change.  The expected format should include a Summary section, a Changes Made section and a Rationale section to explain the PR to reviewers."
+        },
+        "file_updates": {
+            "type": "array",
+            "description": "A list of files to update in this PR",
+            "items": {
+                "type": "object",
+                "description": "An update to an individual file.  Be sure to include surrounding lines to allow us to find the appropriate block being replaced, AND leading whitespace on each line should be preserved.",
+                "properties": {
+                    "file_name": {
+                      "description": "the relative file path name for this update",
+                      "type": "string"
+                    },
+                    "replacement": {
+                        "description": "the file content you want to write to this file, including all whitespace and line characters to the correct indentation level.",
+                        "type": "string"
+                    },
+                    "previous": {
+                        "description": "the previous content within the file this will be replacing, including all whitespace and line characters.  Provide an empty string if you want to simply append to the file.",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name", "replacement", "previous"],
+                "additionalProperties": false
+            }
+        },
+        "file_deletes": {
+            "type": "array",
+            "description": "A list of files to delete in this PR",
+            "items": {
+                "type": "object",
+                "description": "A file to delete in this PR",
+                "properties": {
+                    "file_name": {
+                        "description": "the relative file path name for this delete",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name"],
+                "additionalProperties": false
+            }
+        },
+        "file_creates": {
+            "type": "array",
+            "description": "A list of files to create in this PR",
+            "items": {
+                "type": "object",
+                "description": "A file to create in this PR",
+                "properties": {
+                    "file_name": {
+                        "description": "the relative file path name for the file to create",
+                        "type": "string"
+                    },
+                    "content": {
+                        "description": "the full content to write to the file",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name", "content"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["stack_id", "branch_name", "commit_message", "pr_title", "pr_body", "pr_description"],
+    "additionalProperties": false
+}

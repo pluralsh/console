@@ -5,7 +5,7 @@ defmodule Console.AI.Tools.Agent.StackTest do
   alias Console.AI.Tools.Agent.Stack
 
   describe "implement/1" do
-    test "it can fetch catalogs" do
+    test "it can fetch stacks" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{
@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Agent.StackTest do
       )
       stack = insert(:stack, status: :successful)
 
-      expect(Console.AI.VectorStore, :fetch, fn "aws vpc", [filters: [datatype: {:raw, :stack_state}]] ->
+      expect(Console.AI.VectorStore, :fetch, fn "aws vpc", [filters: [datatype: {:raw, :stack_state}], count: 3] ->
         {:ok, [
           %Console.AI.VectorStore.Response{
             type: :stack,
@@ -32,10 +32,10 @@ defmodule Console.AI.Tools.Agent.StackTest do
               configuration: %{"key" => "value"},
               links: %{"link" => "value"},
               stack: %{
-                id: stack.id,
-                name: stack.name,
-                repository: %{url: stack.repository.url},
-                git: %{ref: stack.git.ref, folder: stack.git.folder}
+                "id" => stack.id,
+                "name" => stack.name,
+                "repository" => %{"url" => stack.repository.url},
+                "git" => %{"ref" => stack.git.ref, "folder" => stack.git.folder}
               }
             }
           }
