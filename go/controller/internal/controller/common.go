@@ -126,7 +126,7 @@ func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttribu
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
-	syncConf, err := srv.SyncConfig.Attributes()
+	syncConf, err := srv.SyncConfig.Attributes(nil)
 	if err != nil {
 		return nil, err
 	}

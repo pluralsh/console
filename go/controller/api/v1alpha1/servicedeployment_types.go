@@ -114,10 +114,10 @@ type SyncConfigAttributes struct {
 
 	// DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works
 	// +kubebuilder:validation:Optional
-	DiffNormalizers []DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`
+	DiffNormalizers []DiffNormalizers `json:"diffNormalizers,omitempty"`
 }
 
-type DiffNormalizerAttributes struct {
+type DiffNormalizers struct {
 	Name      *string `json:"name,omitempty"`
 	Kind      *string `json:"kind,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
@@ -125,7 +125,7 @@ type DiffNormalizerAttributes struct {
 	JSONPointers []string `json:"jsonPointers,omitempty"`
 }
 
-func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, error) {
+func (sca *SyncConfigAttributes) Attributes(dn []DiffNormalizers) (*console.SyncConfigAttributes, error) {
 	if sca == nil {
 		return nil, nil
 	}
@@ -168,6 +168,15 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 				JSONPointers: lo.ToSlicePtr(diffNormalizer.JSONPointers),
 			}
 		}
+	}
+
+	for _, diffNormalizer := range dn {
+		diffNormalizers = append(diffNormalizers, &console.DiffNormalizerAttributes{
+			Name:         diffNormalizer.Name,
+			Kind:         diffNormalizer.Kind,
+			Namespace:    diffNormalizer.Namespace,
+			JSONPointers: lo.ToSlicePtr(diffNormalizer.JSONPointers),
+		})
 	}
 
 	return &console.SyncConfigAttributes{
