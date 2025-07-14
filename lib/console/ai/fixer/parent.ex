@@ -1,8 +1,6 @@
 defmodule Console.AI.Fixer.Parent do
   use Console.AI.Evidence.Base
-  import Console.AI.Fixer.Base
   alias Console.AI.Fixer.Service, as: SvcFixer
-  alias Console.Deployments.{Services}
   alias Console.Schema.{Service, GlobalService, Stack, ServiceTemplate}
 
   def parent_prompt(%Stack{parent: %Service{} = svc}, info), do: do_parent_prompt(svc, info)
@@ -19,15 +17,13 @@ defmodule Console.AI.Fixer.Parent do
 
   defp do_parent_prompt(%Service{} = svc, info) do
     svc = Console.Repo.preload(svc, [:cluster, :repository, :parent])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- svc_code_prompt(f, svc) do
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
       [
         {:user, """
         #{explanation(svc, info)}
 
         I will do my best to describe the service itself and show you the manifests that's defining that service below:
-        """},
-        {:user, SvcFixer.svc_details(svc)} | code
+        """} | SvcFixer.to_prompt(details)
       ]
     else
       _ -> []
@@ -36,15 +32,14 @@ defmodule Console.AI.Fixer.Parent do
 
   defp do_parent_prompt(%GlobalService{} = global, info) do
     %{parent: svc} = global = Console.Repo.preload(global, [:project, :service, :template, parent: [:cluster, :repository, :parent]])
-    with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- svc_code_prompt(f, svc) do
+    with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
       [
         {:user, """
         #{explanation(global, info)}
 
         I will do my best to describe the global service itself and show you the manifests that's defining that global service below:
         """},
-        {:user, global_details(global)} | code
+        {:user, global_details(global)} | SvcFixer.to_prompt(details)
       ]
     else
       _ -> []
@@ -56,24 +51,24 @@ defmodule Console.AI.Fixer.Parent do
   defp do_parent_details(%Service{} = svc, info) do
     svc = Console.Repo.preload(svc, [:cluster, :repository, :parent])
     with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
-      Map.merge(details, %{
+      {:ok, %{
         explanation: explanation(svc, info),
-        details: SvcFixer.svc_details(svc),
-      })
-      |> ok()
+        parent_service: details,
+      }}
     end
   end
+
   defp do_parent_details(%GlobalService{} = global, info) do
     %{parent: svc} = global = Console.Repo.preload(global, [:project, :service, :template, parent: [:cluster, :repository, :parent]])
     with {:ok, details} <- SvcFixer.file_contents(svc, ignore: true) do
-      %{
+      {:ok, %{
         explanation: explanation(global, info),
-        details: global_details(global),
+        global_service: global_details(global),
         parent_service: details
-      }
-      |> ok()
+      }}
     end
   end
+
   defp do_parent_details(_, _), do: :ignore
 
   defp explanation(%GlobalService{} = global, info) do

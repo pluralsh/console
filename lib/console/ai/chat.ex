@@ -477,6 +477,7 @@ defmodule Console.AI.Chat do
          {:ok, [_ | prompt]} <- context_prompt(source) do
       Enum.map(prompt, fn
         {role, %{file: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
+        {role, %{git_location: f, content: c}} -> %{type: :file, role: role, content: c, attributes: %{file: %{name: f}}}
         {role, c} -> %{role: role, content: c}
       end)
       |> prepend(%{

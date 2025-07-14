@@ -71,6 +71,13 @@ defmodule Console.AI.Fixer.Base do
     end)
   end
 
+  def maybe_encode(map) do
+    case raw?() do
+      true -> map
+      _ -> Jason.encode!(map)
+    end
+  end
+
   def evidence_prompts(%AiInsight{evidence: [_ | _] = evidence}) do
     Enum.map(evidence, fn
       %AiInsightEvidence{alert: %AiInsightEvidence.Alert{} = alert} ->
@@ -120,13 +127,6 @@ defmodule Console.AI.Fixer.Base do
     """})
   end
   defp maybe_add_values(contents, _), do: contents
-
-  defp maybe_encode(map) do
-    case raw?() do
-      true -> map
-      _ -> Jason.encode!(map)
-    end
-  end
 
   defp blacklist(filename) do
     cond do
