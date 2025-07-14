@@ -922,6 +922,38 @@ func (t *ClusterConditionFragment) GetReason() *string {
 	return t.Reason
 }
 
+type DiffNormalizerFragment struct {
+	Namespace    *string   "json:\"namespace,omitempty\" graphql:\"namespace\""
+	Name         *string   "json:\"name,omitempty\" graphql:\"name\""
+	Kind         *string   "json:\"kind,omitempty\" graphql:\"kind\""
+	JSONPointers []*string "json:\"jsonPointers,omitempty\" graphql:\"jsonPointers\""
+}
+
+func (t *DiffNormalizerFragment) GetNamespace() *string {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.Namespace
+}
+func (t *DiffNormalizerFragment) GetName() *string {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.Name
+}
+func (t *DiffNormalizerFragment) GetKind() *string {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.Kind
+}
+func (t *DiffNormalizerFragment) GetJSONPointers() []*string {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.JSONPointers
+}
+
 type ServiceDeploymentForAgent struct {
 	ID            string                                     "json:\"id\" graphql:\"id\""
 	Name          string                                     "json:\"name\" graphql:\"name\""
@@ -5830,6 +5862,7 @@ type ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -5849,6 +5882,12 @@ func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDe
 		t = &ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.NamespaceMetadata
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ServiceDeploymentForAgent_Revision struct {
@@ -6731,6 +6770,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncCo
 	CreateNamespace   *bool                                                                                              "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                          "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -6750,6 +6790,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.NamespaceMetadata
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
@@ -12116,6 +12162,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Sy
 	CreateNamespace   *bool                                                                                                  "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                              "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -12135,6 +12182,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.NamespaceMetadata
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Revision struct {
@@ -12551,6 +12604,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -12570,6 +12624,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.NamespaceMetadata
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
@@ -24945,6 +25005,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			labels
 			annotations
 		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
 	}
 	revision {
 		id
@@ -24968,6 +25031,12 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 fragment KustomizeFragment on Kustomize {
 	path
 	enableHelm
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment RendererFragment on Renderer {
 	path
@@ -25409,6 +25478,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 			labels
 			annotations
 		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
 	}
 	revision {
 		id
@@ -25432,6 +25504,12 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 fragment KustomizeFragment on Kustomize {
 	path
 	enableHelm
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment RendererFragment on Renderer {
 	path

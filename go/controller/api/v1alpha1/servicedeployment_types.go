@@ -111,6 +111,18 @@ type SyncConfigAttributes struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+
+	// DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works
+	// +kubebuilder:validation:Optional
+	DiffNormalizers []DiffNormalizers `json:"diffNormalizers,omitempty"`
+}
+
+type DiffNormalizers struct {
+	Name      *string `json:"name,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	// A list of json patches to apply to the service which controls how drift detection works
+	JSONPointers []string `json:"jsonPointers,omitempty"`
 }
 
 func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, error) {
@@ -145,6 +157,23 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 		labels = lo.ToPtr(string(result))
 	}
 
+	var diffNormalizers []*console.DiffNormalizerAttributes
+	totalSize := len(sca.DiffNormalizers)
+	if totalSize > 0 {
+		// Preallocate the slice with the exact size required
+		diffNormalizers = make([]*console.DiffNormalizerAttributes, 0, totalSize)
+
+		// Populate from sca.DiffNormalizers
+		for _, diffNormalizer := range sca.DiffNormalizers {
+			diffNormalizers = append(diffNormalizers, &console.DiffNormalizerAttributes{
+				Name:         diffNormalizer.Name,
+				Kind:         diffNormalizer.Kind,
+				Namespace:    diffNormalizer.Namespace,
+				JSONPointers: lo.ToSlicePtr(diffNormalizer.JSONPointers),
+			})
+		}
+	}
+
 	return &console.SyncConfigAttributes{
 		CreateNamespace:  &createNamespace,
 		EnforceNamespace: &enforceNamespace,
@@ -152,6 +181,7 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 			Labels:      labels,
 			Annotations: annotations,
 		},
+		DiffNormalizers: diffNormalizers,
 	}, nil
 }
 

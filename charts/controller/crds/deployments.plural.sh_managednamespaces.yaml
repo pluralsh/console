@@ -571,6 +571,26 @@ spec:
                         type: object
                       createNamespace:
                         type: boolean
+                      diffNormalizers:
+                        description: DiffNormalizers a list of diff normalizers to
+                          apply to the service which controls how drift detection
+                          works
+                        items:
+                          properties:
+                            jsonPointers:
+                              description: A list of json patches to apply to the
+                                service which controls how drift detection works
+                              items:
+                                type: string
+                              type: array
+                            kind:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                        type: array
                       enforceNamespace:
                         type: boolean
                       labels:

@@ -645,6 +645,157 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 	})
 })
 
+var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
+	Context("When reconciling a resource", func() {
+		const (
+			serviceName = "service-diff-normalizer-test"
+			clusterName = "cluster-diff-normalizer-test"
+			repoName    = "repo-test"
+			namespace   = "default"
+			id          = "123"
+			repoUrl     = "https://test"
+			sha         = "U3JLLBUQEQXQIUFCGKVNSW3OGRXRETO5N26ZE7ZKNAQWCSRUI5BA===="
+		)
+
+		ctx := context.Background()
+
+		typeNamespacedName := types.NamespacedName{
+			Name:      serviceName,
+			Namespace: namespace,
+		}
+
+		BeforeAll(func() {
+			By("creating the custom resource for the Kind ServiceDeployment")
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, service); err == nil {
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
+			}
+			resource := &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      serviceName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ServiceSpec{
+					Version:       lo.ToPtr("1.24"),
+					ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+					SyncConfig: &v1alpha1.SyncConfigAttributes{
+						CreateNamespace: lo.ToPtr(true),
+						Labels:          map[string]string{"a": "a"},
+						Annotations:     map[string]string{"b": "b"},
+						DiffNormalizers: []v1alpha1.DiffNormalizers{
+							{
+								Kind:         lo.ToPtr("Deployment"),
+								JSONPointers: []string{"spec./template/spec/containers/0/image"},
+							},
+						},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+
+			By("creating the custom resource for the Kind Cluster")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
+				Spec: v1alpha1.ClusterSpec{
+					Cloud: "aws",
+				},
+			}, func(p *v1alpha1.Cluster) {
+				p.Status.ID = lo.ToPtr(id)
+			})).To(Succeed())
+			By("creating the custom resource for the Kind Repository")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
+				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
+				Spec: v1alpha1.GitRepositorySpec{
+					Url: repoUrl,
+				},
+			}, func(p *v1alpha1.GitRepository) {
+				p.Status.ID = lo.ToPtr(id)
+				p.Status.Health = v1alpha1.GitHealthPullable
+			})).To(Succeed())
+		})
+
+		AfterAll(func() {
+			resource := &v1alpha1.Cluster{}
+			err := k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, resource)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the specific resource instance Cluster")
+			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			repo := &v1alpha1.GitRepository{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: repoName, Namespace: namespace}, repo)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the specific resource instance Repository")
+			Expect(k8sClient.Delete(ctx, repo)).To(Succeed())
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: namespace}, service); err == nil {
+				By("Cleanup the specific resource instance ServiceDeployment")
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
+			}
+		})
+
+		It("should successfully reconcile the resource", func() {
+			By("Create resource")
+			test := struct {
+				returnGetService *gqlclient.ServiceDeploymentExtended
+				expectedStatus   v1alpha1.ServiceStatus
+			}{
+				expectedStatus: v1alpha1.ServiceStatus{
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr("123"),
+						SHA: lo.ToPtr(sha),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+							},
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "",
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
+						},
+					},
+				},
+				returnGetService: &gqlclient.ServiceDeploymentExtended{
+					ID: "123",
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
+			fakeConsoleClient.On("CreateService", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			service := &v1alpha1.ServiceDeployment{}
+			err = k8sClient.Get(ctx, typeNamespacedName, service)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeServiceConditions(service.Status)).To(Equal(sanitizeServiceConditions(test.expectedStatus)))
+		})
+	})
+})
+
 func createService(ctx context.Context, namespace, name, clusterName, repoName string) {
 	serviceDep1 := &v1alpha1.ServiceDeployment{}
 	if err := k8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, serviceDep1); err == nil {

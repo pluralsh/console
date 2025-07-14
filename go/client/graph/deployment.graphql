@@ -122,6 +122,13 @@ query GetServiceDeploymentComponents($id: ID!) {
     }
 }
 
+fragment DiffNormalizerFragment on DiffNormalizer {
+    namespace
+    name
+    kind
+    jsonPointers
+}
+
 fragment ServiceDeploymentForAgent on ServiceDeployment {
     id
     name
@@ -170,6 +177,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         namespaceMetadata {
             labels
             annotations
+        }
+        diffNormalizers {
+            ...DiffNormalizerFragment
         }
     }
     revision {
