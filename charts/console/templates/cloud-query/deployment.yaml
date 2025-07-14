@@ -42,6 +42,20 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
+        - name: cloud-query-db
+          image: "{{ .Values.cloudQuery.database.image.repository }}:{{ .Values.cloudQuery.database.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.cloudQuery.database.image.pullPolicy }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.cloudQuery.database.password.existingSecret.name }}
+                  name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
+                  key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
+                {{- else }}
+                  name: {{ include "console.cloudquery.db.secret" . }}
+                  key: password
+                {{- end }}
         - name: cloud-query
           {{- with .Values.cloudQuery.securityContext }}
           securityContext:
@@ -72,25 +86,23 @@ spec:
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.cloudQuery.readinessProbe }}
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 1
           {{- with .Values.cloudQuery.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          volumeMounts:
-            - name: {{ .Values.cloudQuery.database.volume.name }}
-              mountPath: {{ .Values.cloudQuery.database.volume.mountPath }}
           {{- with .Values.cloudQuery.volumeMounts }}
+          volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      volumes:
-        - name: {{ .Values.cloudQuery.database.volume.name }}
-          emptyDir:
-            medium: {{ .Values.cloudQuery.database.volume.medium }}
       {{- with .Values.cloudQuery.volumes }}
+      volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.cloudQuery.nodeSelector }}

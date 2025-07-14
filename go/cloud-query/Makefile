@@ -9,7 +9,7 @@ BINARY_NAME=cloud-query
 ##@ Build and run
 
 .PHONY: build ## build the cloud-query binary
-build: --download-extensions
+build:
 	@echo "Building cloud-query binary..."
 	@CGO_ENABLED=0 go build -o "${DIST_DIR}/${BINARY_NAME}" cmd/*.go
 
@@ -17,24 +17,22 @@ build: --download-extensions
 image: ## build the Docker image
 	@echo "Building cloud-query docker image..."
 	docker build --no-cache -t cloud-query:latest .
+	@echo "Building cloud-query-db docker image..."
+	docker build --no-cache -t cloud-query-db:latest -f db.Dockerfile .
 
-# run: Build (if BUILD=true) and run the cloud-query Docker image locally.
-# Usage: make run BUILD=true or BUILD=true make run
-# If BUILD=true is set, the Docker image will be built before running.
 .PHONY: run
-run: $(if $(filter true,$(BUILD)),image) ## run the Docker image
-	@echo "Running cloud-query server..."
-	docker run \
-		--rm \
-		-p 9192:9192 \
-		cloud-query:latest
+run: down ## run the Docker compose
+	@echo "Running cloud-query..."
+	docker-compose up --build -d
+
+.PHONY: down
+down: ## stop the Docker compose
+	@echo "Stopping cloud-query..."
+	docker-compose down
 
 .PHONY: clean
 clean: ## clean up build/db artifacts
 	@echo "Cleaning up"
-	@rm -rf $(DIST_DIR)/cache
-	@rm -rf $(DIST_DIR)/data
-	@rm -rf $(DIST_DIR)/runtime
 	@rm -rf $(DIST_DIR)/dump/*
 
 ##@ Codegen
