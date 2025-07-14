@@ -654,7 +654,7 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 			namespace   = "default"
 			id          = "123"
 			repoUrl     = "https://test"
-			sha         = "5APCN6EALCPFWDHCXQJIJFO3CU72OOBUOWSR63DOXKYKS66V6VBA===="
+			sha         = "U3JLLBUQEQXQIUFCGKVNSW3OGRXRETO5N26ZE7ZKNAQWCSRUI5BA===="
 		)
 
 		ctx := context.Background()
@@ -674,18 +674,6 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      serviceName,
 					Namespace: namespace,
-					Annotations: map[string]string{
-						controller.IgnoreFieldsAnnotation: `      [
-        {
-          "kind": "ValidatingWebhookConfiguration",
-          "jsonPointers": ["/webhooks/0/clientConfig/caBundle"]
-        },
-        {
-          "kind": "Deployment",
-          "jsonPointers": ["/spec/replicas"]
-        }
-      ]`,
-					},
 				},
 				Spec: v1alpha1.ServiceSpec{
 					Version:       lo.ToPtr("1.24"),

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -41,7 +40,6 @@ const (
 	ServiceFinalizer       = "deployments.plural.sh/service-protection"
 	InventoryAnnotation    = "config.k8s.io/owning-inventory"
 	ServiceOwnerAnnotation = "deployments.plural.sh/service-owner"
-	IgnoreFieldsAnnotation = "deployments.plural.sh/ignore-fields"
 )
 
 // ServiceDeploymentReconciler reconciles a Service object
@@ -255,15 +253,7 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 }
 
 func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, *ctrl.Result, error) {
-	var diffNormalizers []v1alpha1.DiffNormalizers
-
-	if ignoreFields, ok := service.GetAnnotations()[IgnoreFieldsAnnotation]; ok && ignoreFields != "" {
-		if err := json.Unmarshal([]byte(ignoreFields), &diffNormalizers); err != nil {
-			return nil, nil, err
-		}
-	}
-
-	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes(diffNormalizers)
+	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes()
 	if err != nil {
 		return nil, nil, err
 	}
