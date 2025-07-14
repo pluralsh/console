@@ -1045,7 +1045,7 @@ _Appears in:_
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | pointer to the Scaffolds GIT repository to use |  | Optional: {} <br /> |
 
 
-#### DiffNormalizerAttributes
+#### DiffNormalizers
 
 
 
@@ -3848,7 +3848,7 @@ _Appears in:_
 | `enforceNamespace` _boolean_ |  |  | Optional: {} <br /> |
 | `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `diffNormalizers` _[DiffNormalizerAttributes](#diffnormalizerattributes) array_ | DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works |  | Optional: {} <br /> |
+| `diffNormalizers` _[DiffNormalizers](#diffnormalizers) array_ | DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works |  | Optional: {} <br /> |
 
 
 #### Taint
