@@ -15,8 +15,8 @@ import NotificationsLauncher from '../notifications/NotificationsLauncher'
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './HeaderProjectSelect'
 
-const APP_ICON_LIGHT = '/console-logo.png'
-const APP_ICON_DARK = '/console-white.png'
+const APP_ICON_LIGHT = '/plural-logo.png'
+const APP_ICON_DARK = '/plural-logo-white.png'
 
 const HeaderSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-accent'],
