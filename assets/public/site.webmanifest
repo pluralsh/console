@@ -3,7 +3,7 @@
     "short_name": "console",
     "icons": [
         {
-            "src": "/console.png",
+            "src": "/plural-logo.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"

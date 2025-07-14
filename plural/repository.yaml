@@ -1,8 +1,8 @@
 name: console
 description: Web based admin panel for all your Plural applications.
 category: DEVOPS
-icon: plural/icons/console-logo.png
-darkIcon: plural/icons/console-white.png
+icon: plural/icons/plural-logo.png
+darkIcon: plural/icons/plural-logo-white.png
 notes: plural/notes.tpl
 gitUrl: https://github.com/pluralsh/console
 oauthSettings:

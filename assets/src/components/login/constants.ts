@@ -7,4 +7,4 @@ export const LOGIN_BREAKPOINT = `@media screen and (min-width: ${
 }px)`
 
 export const PLURAL_MARK = '/plural-logo.png'
-export const PLURAL_MARK_WHITE = '/plural-white.png'
+export const PLURAL_MARK_WHITE = '/plural-logo-white.png'
