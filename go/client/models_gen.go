@@ -519,7 +519,7 @@ type AzureConnectionAttributes struct {
 }
 
 type AzureOpenaiAttributes struct {
-	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
+	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments
 	Endpoint string `json:"endpoint"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`

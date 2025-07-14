@@ -126,7 +126,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :azure_openai_attributes do
-    field :endpoint,        non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :endpoint,        non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments"
     field :api_version,     :string, description: "the api version you want to use"
     field :model,           :string, description: "the exact model you wish to use"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"

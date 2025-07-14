@@ -15,6 +15,8 @@ defmodule Console.AI.Tools.Agent.Coding.StackFilesTest do
       {:ok, result} = StackFiles.implement(%StackFiles{stack_id: run.stack_id})
 
       assert is_binary(result)
+
+      assert refetch(session).stack_id == run.stack_id
     end
   end
 end
