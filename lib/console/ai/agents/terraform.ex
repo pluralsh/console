@@ -41,7 +41,9 @@ defmodule Console.AI.Agents.Terraform do
           user_message("""
           The Plural stack #{run.stack.name} has a generated a plan for the following pr, can you ensure the changes are as desired and if everything is good, feel free to ignore:
 
+          ```terraform
           #{p}
+          ```
           """)
         ], thread.user)
         |> handle_result(thread, session)
