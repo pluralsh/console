@@ -267,6 +267,7 @@ export type AiDelta = {
   message?: Maybe<Scalars['Int']['output']>;
   role?: Maybe<AiRole>;
   seq: Scalars['Int']['output'];
+  tool?: Maybe<ToolDelta>;
 };
 
 /** A representation of a LLM-derived insight */
@@ -10756,6 +10757,13 @@ export type TerraformStateUrls = {
 
 export type ToolConfigAttributes = {
   createPr?: InputMaybe<CreatePrConfigAttributes>;
+};
+
+export type ToolDelta = {
+  __typename?: 'ToolDelta';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 /** How to enforce uniqueness for a field */

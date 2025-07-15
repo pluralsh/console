@@ -118,13 +118,11 @@ defmodule Console.AI.Chat.Engine do
         case tool_msg(content, id, nil, name, args) do
           [_ | _] = msgs ->
             Enum.each(msgs, fn %{content: content} ->
-              publish_to_stream(stream, content)
-              Stream.offset(1)
+              publish_tool(stream, content, id, name)
             end)
             {:cont, Enum.concat(msgs, acc)}
           %{content: content} = msg ->
-            publish_to_stream(stream, content)
-            Stream.offset(1)
+            publish_tool(stream, content, id, name)
             {:cont, [msg | acc]}
         end
       else
@@ -147,8 +145,7 @@ defmodule Console.AI.Chat.Engine do
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
-        publish_to_stream(stream, content)
-        Stream.offset(1)
+        publish_tool(stream, content, id, name)
         {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
         {tname, %McpServer{confirm: true} = server} ->
@@ -231,6 +228,12 @@ defmodule Console.AI.Chat.Engine do
   defp fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
+  end
+
+  defp publish_tool(stream, content, id, name) do
+    Stream.tool(id, name)
+    publish_to_stream(stream, content)
+    Stream.offset(1)
   end
 
   defp publish_to_stream(stream, %{content: content}), do: Stream.publish(stream, content, 1)

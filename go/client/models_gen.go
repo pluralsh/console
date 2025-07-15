@@ -168,10 +168,11 @@ type AgentSessionEdge struct {
 }
 
 type AiDelta struct {
-	Seq     int64   `json:"seq"`
-	Content string  `json:"content"`
-	Message *int64  `json:"message,omitempty"`
-	Role    *AiRole `json:"role,omitempty"`
+	Seq     int64      `json:"seq"`
+	Content string     `json:"content"`
+	Message *int64     `json:"message,omitempty"`
+	Role    *AiRole    `json:"role,omitempty"`
+	Tool    *ToolDelta `json:"tool,omitempty"`
 }
 
 // A representation of a LLM-derived insight
@@ -6702,6 +6703,12 @@ type TerraformStateUrls struct {
 
 type ToolConfigAttributes struct {
 	CreatePr *CreatePrConfigAttributes `json:"createPr,omitempty"`
+}
+
+type ToolDelta struct {
+	ID        *string        `json:"id,omitempty"`
+	Name      *string        `json:"name,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
 }
 
 // How to enforce uniqueness for a field
