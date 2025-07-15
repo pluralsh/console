@@ -8,12 +8,18 @@ import { COLORS } from 'utils/color'
 
 import { useProjectsContext } from 'components/contexts/ProjectsContext'
 import { SliceTooltip, useGraphTheme } from 'components/utils/Graph'
+import {
+  ForecastingLayer,
+  LineGraphData,
+  ValidLineGraphDatum,
+  calculateLinearRegression,
+  getYScale,
+} from 'components/utils/NivoLineForecastingLayer'
 import { ProjectUsageHistoryFragment } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, pick } from 'lodash'
 import { useMemo } from 'react'
-import { formatDateTime } from 'utils/datetime'
+import { addDays, formatDateTime } from 'utils/datetime'
 import { METRIC_OPTIONS, ProjectUsageMetric } from './CostManagementChartView'
-import { LineGraphData } from './details/CostTimeSeriesGraph'
 import {
   formatCpu,
   formatMemory,
@@ -25,20 +31,26 @@ export function ProjectUsageTimeSeries({
   projectId,
   loading,
   error,
+  forecastingEnabled,
+  forecastingDays,
 }: {
   data: ProjectUsageHistoryFragment[]
   metric: ProjectUsageMetric
   projectId: string
   loading: boolean
   error?: Nullable<ApolloError>
+  forecastingEnabled: boolean
+  forecastingDays: Nullable<number>
 }) {
   const { projects } = useProjectsContext()
   const graphTheme = useGraphTheme()
 
-  const graphData = useMemo(() => {
+  const { graphData, trendLineData, yScale } = useMemo(() => {
     const groupedData = groupBy(data, 'projectId')
     const filteredData =
       projectId !== 'all' ? pick(groupedData, projectId) : groupedData
+    let trendLineData: ValidLineGraphDatum[] = []
+
     const graphDataArr = Object.entries(filteredData).flatMap(
       ([projectId, points], i) => {
         const timestamps = new Set() // for avoiding duplicates
@@ -61,9 +73,30 @@ export function ProjectUsageTimeSeries({
       }
     )
 
+    const shouldCalculateTrend =
+      forecastingEnabled && !!forecastingDays && graphDataArr.length === 1
+    const originalData = graphDataArr[0]?.data ?? []
+
+    if (shouldCalculateTrend) {
+      trendLineData = calculateLinearRegression(originalData, forecastingDays)
+      // add the last point of the trend line to the original data so the graph expands to fit
+      const trendLineEndDate = addDays(originalData.at(-1)?.x, forecastingDays)
+      if (trendLineEndDate)
+        originalData.push({
+          x: trendLineEndDate,
+          y: null,
+        })
+    }
+
     // return null if all the arrays are empty
-    return graphDataArr.every((obj) => isEmpty(obj)) ? null : graphDataArr
-  }, [data, metric, projectId, projects])
+    return {
+      graphData: graphDataArr.every((obj) => isEmpty(obj))
+        ? null
+        : graphDataArr,
+      trendLineData,
+      yScale: getYScale(forecastingEnabled, originalData, trendLineData),
+    }
+  }, [data, metric, projectId, projects, forecastingEnabled, forecastingDays])
 
   if (error) return <GqlError error={error} />
   if (!graphData)
@@ -82,11 +115,7 @@ export function ProjectUsageTimeSeries({
       margin={{ top: 32, right: 96, bottom: 56, left: 78 }}
       yFormat={(value) => formatByMetric(value, metric)}
       xScale={{ type: 'time' }}
-      yScale={{
-        type: 'linear',
-        min: 'auto',
-        max: 'auto',
-      }}
+      yScale={yScale}
       curve="natural"
       axisBottom={{
         format: (value) => formatDateTime(value, 'M/DD'),
@@ -101,12 +130,30 @@ export function ProjectUsageTimeSeries({
       axisLeft={{
         format: (value) => formatByMetric(value, metric),
         legend: METRIC_OPTIONS[metric]?.label ?? '',
+        tickValues: 5,
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
         legendOffset: -60,
         legendPosition: 'middle',
       }}
+      layers={[
+        'mesh',
+        'grid',
+        'axes',
+        'lines',
+        ({ xScale, yScale, data }) =>
+          forecastingEnabled && !isEmpty(trendLineData) ? (
+            <ForecastingLayer
+              xScale={xScale}
+              yScale={yScale}
+              originalData={data[0]?.data ?? []}
+              trendLineData={trendLineData}
+            />
+          ) : null,
+        'crosshair',
+        'legends',
+      ]}
       xFormat={(value) => formatDateTime(value, 'MMM DD, YYYY')}
       pointSize={0}
       enableTouchCrosshair

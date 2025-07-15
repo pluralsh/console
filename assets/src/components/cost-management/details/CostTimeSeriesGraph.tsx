@@ -7,6 +7,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime } from 'utils/datetime'
 import { SliceTooltip, useGraphTheme } from '../../utils/Graph'
 import { dollarize } from '../ClusterUsagesTableCols'
+import { LineGraphData } from 'components/utils/NivoLineForecastingLayer'
 
 export const GRAPH_CARD_MAX_HEIGHT = 330
 
@@ -91,13 +92,6 @@ export function CostTimeSeriesGraph({
   )
 }
 
-export type LineGraphData = {
-  id: string
-  data: {
-    x: Date
-    y: number | null
-  }[]
-}
 const getGraphData = (history: ClusterUsageHistoryFragment[]) => {
   const cpuData: LineGraphData = {
     id: 'CPU',
