@@ -32,6 +32,7 @@ services:
       - "--database-user=cloudquery"
       - "--database-password=cloudquery"
       - "--database-name=cloudquery"
+      - "--v=4"
     ports:
       - "9192:9192"
     depends_on:
