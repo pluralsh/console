@@ -57,6 +57,7 @@ defmodule Console.GraphQl.AI do
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
     field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
+    field :done,           :boolean, description: "whether to immediately mark this session in a done state, eg no backgroud work"
   end
 
   @desc "the settings for an AI chat thread"

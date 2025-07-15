@@ -8164,6 +8164,9 @@ input AgentSessionAttributes {
 
   "the id of the cloud connection to use for this session"
   connectionId: ID
+
+  "whether to immediately mark this session in a done state, eg no backgroud work"
+  done: Boolean
 }
 
 "the settings for an AI chat thread"
