@@ -101,7 +101,19 @@ fragment CloudConnectionTiny on CloudConnection {
 fragment AgentSession on AgentSession {
   id
   type
+  done
   planConfirmed
+}
+
+fragment AiDelta on AiDelta {
+  seq
+  message
+  role
+  content
+  tool {
+    id
+    name
+  }
 }
 
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
@@ -269,9 +281,6 @@ subscription AIChatStream(
     scopeId: $scopeId
     recommendationId: $recommendationId
   ) {
-    seq
-    message
-    role
-    content
+    ...AiDelta
   }
 }
