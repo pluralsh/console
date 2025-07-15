@@ -42,7 +42,7 @@ defmodule Console.AI.Agents.Terraform do
           The Plural stack #{run.stack.name} has a generated a plan for the following pr, can you ensure the changes are as desired and if everything is good, feel free to ignore:
 
           ```terraform
-          #{p}
+          #{Console.Deployments.Pr.Utils.filter_ansi(p)}
           ```
           """)
         ], thread.user)
