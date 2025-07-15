@@ -1,5 +1,6 @@
 import { ComputedNode } from '@nivo/treemap'
 import {
+  CalendarIcon,
   Card,
   CpuIcon,
   DatabaseIcon,
@@ -9,6 +10,7 @@ import {
   ProjectIcon,
   RamIcon,
   Select,
+  Switch,
 } from '@pluralsh/design-system'
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
@@ -16,7 +18,7 @@ import { GqlError } from 'components/utils/Alert'
 import ProjectSelect, {
   AllProjectsOption,
 } from 'components/utils/ProjectSelector'
-import { OverlineH1 } from 'components/utils/typography/Text'
+import { Body2P, OverlineH1 } from 'components/utils/typography/Text'
 import {
   ProjectUsageHistoryFragment,
   useClusterUsagesQuery,
@@ -51,8 +53,14 @@ export const METRIC_OPTIONS: Partial<
   storageCost: { Icon: DatabaseIcon, label: 'Storage cost' },
 }
 
+const FORECASTING_RANGE_OPTIONS = [
+  { label: '3 months', value: 90 },
+  { label: '6 months', value: 180 },
+  { label: '1 year', value: 365 },
+]
+
 export function CostManagementChartView() {
-  const { spacing } = useTheme()
+  const { spacing, colors } = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
   const { tagKeysState, tagOpState } = useOutletContext<CMContextType>()
@@ -62,6 +70,12 @@ export function CostManagementChartView() {
   )
   const [timeSeriesMetric, setTimeSeriesMetric] =
     useState<ProjectUsageMetric>('memory')
+  const [forecastingDays, setForecastingDays] = useState(
+    `${FORECASTING_RANGE_OPTIONS[0].value}`
+  )
+  const [forecastingSwitchState, setForecastingSwitchState] = useState(false)
+  const showForecastingOptions = timeSeriesProjectId !== AllProjectsOption.id
+  const forecastingEnabled = forecastingSwitchState && showForecastingOptions
 
   const {
     data: clusterUsagesData,
@@ -124,11 +138,11 @@ export function CostManagementChartView() {
             css={{ width: 300 }}
           >
             <ProjectSelect
+              allowSelectAll
               selectedProject={timeSeriesProjectId}
               setSelectedProject={setTimeSeriesProjectId}
               titleContent={null}
               leftContent={<ProjectIcon color="icon-light" />}
-              allowSelectAll
             />
           </FormField>
           <FormField
@@ -155,12 +169,67 @@ export function CostManagementChartView() {
               ))}
             </Select>
           </FormField>
+          {showForecastingOptions && (
+            <>
+              <FormField
+                label="Forecasting range"
+                css={{ width: 'max-content', whiteSpace: 'nowrap' }}
+              >
+                <Select
+                  label="Select forecasting range"
+                  leftContent={<CalendarIcon />}
+                  selectedKey={forecastingDays}
+                  onSelectionChange={(days) => setForecastingDays(`${days}`)}
+                >
+                  {FORECASTING_RANGE_OPTIONS.map(({ label, value }) => (
+                    <ListBoxItem
+                      key={`${value}`}
+                      label={label}
+                    />
+                  ))}
+                </Select>
+              </FormField>
+              <FormField
+                label="Forecasting"
+                css={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  '& > div:nth-child(2)': { flex: 1 },
+                }}
+              >
+                <Flex
+                  gap="small"
+                  align="center"
+                  height="100%"
+                >
+                  <Body2P $color={!forecastingEnabled ? 'text' : 'text-light'}>
+                    Off
+                  </Body2P>
+                  <Switch
+                    checked={forecastingEnabled}
+                    onChange={setForecastingSwitchState}
+                    css={{
+                      color: forecastingEnabled
+                        ? colors['text']
+                        : colors['text-light'],
+                    }}
+                  >
+                    On
+                  </Switch>
+                </Flex>
+              </FormField>
+            </>
+          )}
         </Flex>
         <TimeSeriesContainerSC>
           <ProjectUsageTimeSeries
             data={timeSeries}
             metric={timeSeriesMetric}
             projectId={timeSeriesProjectId}
+            forecastingEnabled={forecastingEnabled}
+            forecastingDays={
+              forecastingEnabled ? Number(forecastingDays) || null : null
+            }
             loading={timeSeriesLoading}
             error={timeSeriesError}
           />

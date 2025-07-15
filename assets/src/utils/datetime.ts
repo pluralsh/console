@@ -9,9 +9,11 @@ import utc from 'dayjs/plugin/utc'
 export type DateParam = dayjs.ConfigType
 
 // Time constants
+export const SECOND_TO_MILLISECONDS = 1000
 export const MINUTE_TO_SECONDS = 60
 export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
 export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
+export const DAY_TO_MILLISECONDS = DAY_TO_SECONDS * SECOND_TO_MILLISECONDS
 
 // Duration presets for graphs/charts
 export const DURATIONS = [
@@ -135,4 +137,10 @@ export const isValidDateTime = (
 ): boolean => {
   if (!date) return false
   return dayjs(date, format, strict).isValid()
+}
+
+export function addDays(date: DateParam, days: number): Date | undefined {
+  if (!date || Number.isNaN(days)) return undefined
+  const result = dayjs(date).add(days, 'day')
+  return result.isValid() ? result.toDate() : undefined
 }
