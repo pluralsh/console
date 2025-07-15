@@ -238,6 +238,8 @@ export type AgentSessionStacksArgs = {
 export type AgentSessionAttributes = {
   /** the id of the cloud connection to use for this session */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether to immediately mark this session in a done state, eg no backgroud work */
+  done?: InputMaybe<Scalars['Boolean']['input']>;
   /** whether the provisioning plan has been confirmed */
   planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
   /** the prompt to use for this session */

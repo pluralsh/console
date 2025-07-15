@@ -157,6 +157,8 @@ type AgentSessionAttributes struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// whether to immediately mark this session in a done state, eg no backgroud work
+	Done *bool `json:"done,omitempty"`
 }
 
 type AgentSessionConnection struct {
