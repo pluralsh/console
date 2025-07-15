@@ -40,10 +40,10 @@ defmodule Console.AI.Chat.Tools do
 
   @code_pre_tools [Agent.Stack, Agent.Coding.StackFiles]
   @code_pr_tools [Agent.Coding.GenericPr]
-  @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles]
+  @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles, Agent.Done]
 
   @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles]
-  @kubernetes_code_post_tools [Agent.Coding.GenericPr]
+  @kubernetes_code_post_tools [Agent.Coding.GenericPr, Agent.Done]
 
   def tools(%ChatThread{} = t) do
     memory_tools(t)

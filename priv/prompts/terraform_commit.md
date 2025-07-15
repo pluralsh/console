@@ -6,4 +6,4 @@ You'll need to:
 2. If an additional change is needed, push additional commits to the PR branch you've used already.
 3. If you're adding commits to an existing PR, you should check the files another time as they very likely include changes not currently in this conversation.
 4. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
-5. If everything looks as expected, simply confirm to the user that the plan is as expected.
+5. **If everything looks as expected, simply confirm to the user that the plan is as expected and call the tool to mark the session as done.  Be sure to mark the session as done otherwise the user will assume there's more work intended to be done.**

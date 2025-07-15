@@ -12,6 +12,7 @@ defmodule Console.Schema.AgentSession do
     field :branch,         :string
     field :initialized,    :boolean, default: false
     field :commit_count,   :integer, default: 0
+    field :done,           :boolean, default: false
 
     belongs_to :connection,   CloudConnection
     belongs_to :thread,       ChatThread
@@ -33,7 +34,7 @@ defmodule Console.Schema.AgentSession do
     from(s in query, order_by: ^order)
   end
 
-  @valid ~w(type plan_confirmed connection_id thread_id stack_id service_id pull_request_id prompt branch initialized commit_count)a
+  @valid ~w(type done plan_confirmed connection_id thread_id stack_id service_id pull_request_id prompt branch initialized commit_count)a
 
   def changeset(model, attrs \\ %{}) do
     model

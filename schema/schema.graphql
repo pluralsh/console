@@ -8280,6 +8280,9 @@ type AgentSession {
   "the branch this session's pr is operating on"
   branch: String
 
+  "whether the agent has declared the work for this session done"
+  done: Boolean
+
   service: ServiceDeployment
 
   stack: InfrastructureStack
