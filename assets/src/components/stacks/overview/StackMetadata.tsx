@@ -58,18 +58,6 @@ export default function StackMetadata() {
         >
           {stack.paused ? 'Paused' : 'Active'}
         </Prop>
-        <Prop
-          title="Ref"
-          margin={0}
-        >
-          {stack.git.ref}
-        </Prop>
-        <Prop
-          title="Folder"
-          margin={0}
-        >
-          {stack.git.folder}
-        </Prop>
         {stack.configuration.image && (
           <Prop
             title="Image"
@@ -82,7 +70,7 @@ export default function StackMetadata() {
           title="Version"
           margin={0}
         >
-          {stack.configuration.version}
+          {stack.configuration.version ?? '-'}
         </Prop>
         <Prop
           title="Approval"

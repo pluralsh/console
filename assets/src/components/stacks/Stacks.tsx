@@ -3,7 +3,6 @@ import {
   CloseIcon,
   EmptyState,
   FiltersIcon,
-  GearTrainIcon,
   IconFrame,
   Input,
   ListBoxItem,
@@ -20,14 +19,17 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+
+import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
+
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+
+import usePersistedState from 'components/hooks/usePersistedState'
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { isEmpty } from 'lodash'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-
-import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
-
-import usePersistedState from 'components/hooks/usePersistedState'
 
 import { keySetToTagArray } from 'utils/clusterTags'
 
@@ -55,19 +57,16 @@ import {
   STACK_VARS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
+
+import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
+
+import { MoreMenu } from '../utils/MoreMenu'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
-
-import { useProjectId } from '../contexts/ProjectsContext'
-
-import { MoreMenu } from '../utils/MoreMenu'
-
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { InsightsTabLabel } from 'components/utils/AiInsights'
 import StackStatusChip from './common/StackStatusChip.tsx'
 import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
@@ -77,7 +76,6 @@ import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
 import StackEntry from './StacksEntry'
-import { StackSettingsModal } from './StackSettingsModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -98,7 +96,6 @@ export const getBreadcrumbs = (
 enum MenuItemKey {
   None = '',
   ManagePermissions = 'managePermissions',
-  Settings = 'settings',
   Detach = 'detach',
   Delete = 'delete',
 }
@@ -125,7 +122,7 @@ const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },
   { path: STACK_FILES_REL_PATH, label: 'Files', enabled: true },
   { path: STACK_JOB_REL_PATH, label: 'Job', enabled: true },
-  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview', enabled: true },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Configuration', enabled: true },
 ]
 
 export default function Stacks() {
@@ -450,12 +447,6 @@ export default function Stacks() {
                 leftContent={<PeopleIcon />}
               />
               <ListBoxItem
-                key={MenuItemKey.Settings}
-                leftContent={<GearTrainIcon />}
-                label="Settings"
-                textValue="Settings"
-              />
-              <ListBoxItem
                 destructive
                 key={MenuItemKey.Detach}
                 label="Detach stack"
@@ -477,11 +468,6 @@ export default function Stacks() {
                 <StackPermissionsModal
                   stack={fullStack}
                   open={menuKey === MenuItemKey.ManagePermissions}
-                  onClose={() => setMenuKey(MenuItemKey.None)}
-                />
-                <StackSettingsModal
-                  stack={fullStack}
-                  open={menuKey === MenuItemKey.Settings}
                   onClose={() => setMenuKey(MenuItemKey.None)}
                 />
                 <StackDetachModal
