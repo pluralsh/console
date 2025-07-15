@@ -18,8 +18,12 @@ defmodule Console.AI.Tools.Agent.Done do
   def description(), do: "Mark the current task for this session as done"
 
   def implement(_) do
-    with {:ok, _session} <- update_session(%{done: true}) do
+    with {:session, %AgentSession{done: false}} <- session(),
+         {:ok, _session} <- update_session(%{done: true}) do
       {:ok, "Session successfully marked as done"}
+    else
+      {:session, %AgentSession{}} -> {:error, "Session already marked as done"}
+      err -> err
     end
   end
 end
