@@ -138,9 +138,7 @@ export function ChatbotHeader({
               createNewThread({
                 summary: 'New chat with Plural Copilot',
                 ...(featureFlags.Copilot &&
-                  connectionId && {
-                    session: { connectionId },
-                  }),
+                  connectionId && { session: { connectionId, done: true } }),
               })
             }
           />

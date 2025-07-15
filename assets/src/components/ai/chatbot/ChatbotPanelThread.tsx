@@ -17,7 +17,7 @@ import { useCanScroll } from 'components/hooks/useCanScroll.ts'
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
-  AiDelta,
+  AiDeltaFragment,
   AiRole,
   ChatThreadDetailsQueryResult,
   ChatThreadFragment,
@@ -70,7 +70,9 @@ export function ChatbotPanelThread({
     ?.filter(isNonNullable)
     .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
-  const [streamedMessages, setStreamedMessages] = useState<AiDelta[][]>([])
+  const [streamedMessages, setStreamedMessages] = useState<AiDeltaFragment[][]>(
+    []
+  )
   useAiChatStreamSubscription({
     variables: { threadId: currentThread.id },
     onData: ({ data: { data } }) => {
@@ -85,6 +87,7 @@ export function ChatbotPanelThread({
             seq: newDelta?.seq ?? 0,
             content: newDelta?.content ?? '',
             role: newDelta?.role ?? AiRole.Assistant,
+            tool: newDelta?.tool,
           })
         })
       )
@@ -173,14 +176,14 @@ export function ChatbotPanelThread({
         ))}
         {!isEmpty(streamedMessages) ? (
           streamedMessages.map((message, i) => {
-            // TODO: will need to update this
-            const isToolCall = message[0]?.role === AiRole.User
+            const { tool, role } = message[0] ?? {}
             return (
               <ChatMessage
                 key={i}
                 disableActions
-                role={isToolCall ? AiRole.User : AiRole.Assistant}
-                type={isToolCall ? ChatType.Tool : ChatType.Text}
+                role={role ?? AiRole.Assistant}
+                type={!!tool ? ChatType.Tool : ChatType.Text}
+                attributes={tool ? { tool: { name: tool.name } } : undefined}
                 highlightToolContent={false}
                 content={message
                   .toSorted((a, b) => a.seq - b.seq)
@@ -189,7 +192,7 @@ export function ChatbotPanelThread({
               />
             )
           })
-        ) : sendingMessage ? (
+        ) : sendingMessage || currentThread.session?.done === false ? (
           <GeneratingResponseMessage />
         ) : null}
         {messageError && <GqlError error={messageError} />}
