@@ -380,7 +380,13 @@ function ToolMessageContent({
                 </Code>
               )}
               {format === MessageFormat.Markdown && (
-                <Card css={{ padding: spacing.medium, background: 'none' }}>
+                <Card
+                  css={{
+                    padding: spacing.medium,
+                    background: 'none',
+                    height: '100%',
+                  }}
+                >
                   <Markdown text={content} />
                 </Card>
               )}
@@ -422,7 +428,7 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.large,
 }))
 const ToolMessageContentSC = styled.div(({ theme }) => ({
-  height: 324,
+  maxHeight: 324,
   marginTop: theme.spacing.small,
   maxWidth: '100%',
   overflow: 'auto',

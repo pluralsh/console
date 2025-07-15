@@ -84,6 +84,9 @@ fragment ChatThread on ChatThread {
   tools {
     ...McpServerTool
   }
+  session {
+    ...AgentSession
+  }
 }
 
 fragment ChatThreadSettings on ChatThreadSettings {
@@ -93,6 +96,12 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+}
+
+fragment AgentSession on AgentSession {
+  id
+  type
+  planConfirmed
 }
 
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {

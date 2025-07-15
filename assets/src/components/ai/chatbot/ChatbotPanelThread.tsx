@@ -151,6 +151,7 @@ export function ChatbotPanelThread({
         fullscreen={fullscreen}
       >
         {isEmpty(messages) &&
+          !currentThread.session?.type &&
           (error ? (
             <GqlError error={error} />
           ) : (
@@ -170,27 +171,27 @@ export function ChatbotPanelThread({
               )}
           </Fragment>
         ))}
-        {sendingMessage &&
-          (!isEmpty(streamedMessages) ? (
-            streamedMessages.map((message, i) => {
-              const isToolCall = message[0]?.role === AiRole.User
-              return (
-                <ChatMessage
-                  key={i}
-                  disableActions
-                  role={isToolCall ? AiRole.User : AiRole.Assistant}
-                  type={isToolCall ? ChatType.Tool : ChatType.Text}
-                  highlightToolContent={false}
-                  content={message
-                    .toSorted((a, b) => a.seq - b.seq)
-                    .map((delta) => delta.content)
-                    .join('')}
-                />
-              )
-            })
-          ) : (
-            <GeneratingResponseMessage />
-          ))}
+        {!isEmpty(streamedMessages) ? (
+          streamedMessages.map((message, i) => {
+            // TODO: will need to update this
+            const isToolCall = message[0]?.role === AiRole.User
+            return (
+              <ChatMessage
+                key={i}
+                disableActions
+                role={isToolCall ? AiRole.User : AiRole.Assistant}
+                type={isToolCall ? ChatType.Tool : ChatType.Text}
+                highlightToolContent={false}
+                content={message
+                  .toSorted((a, b) => a.seq - b.seq)
+                  .map((delta) => delta.content)
+                  .join('')}
+              />
+            )
+          })
+        ) : sendingMessage ? (
+          <GeneratingResponseMessage />
+        ) : null}
         {messageError && <GqlError error={messageError} />}
         {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
