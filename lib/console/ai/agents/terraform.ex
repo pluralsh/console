@@ -10,11 +10,11 @@ defmodule Console.AI.Agents.Terraform do
     {thread, session} = setup_context(session)
     Logger.info "context resetup for #{session.id}"
     drive(thread, [
-      {:user, """
+      user_message("""
       Ok we've found the needed files, now create a pr for this to solve for:
 
       #{session.prompt}
-      """}
+      """)
     ], thread.user)
     |> handle_result(thread, session)
   end
@@ -38,11 +38,11 @@ defmodule Console.AI.Agents.Terraform do
       %StackRun{state: %StackState{plan: p}} when is_binary(p) and byte_size(p) > 0 ->
         Logger.info("handling successful terraform run in agent session #{session.id}")
         drive(thread, [
-          {:user, """
+          user_message("""
           The Plural stack #{run.stack.name} has a generated a plan for the following pr, can you ensure the changes are as desired and if everything is good, feel free to ignore:
 
           #{p}
-          """}
+          """)
         ], thread.user)
         |> handle_result(thread, session)
       _ -> {:noreply, {thread, session}}
@@ -55,7 +55,7 @@ defmodule Console.AI.Agents.Terraform do
     case Repo.preload(run, [:steps]) do
       %StackRun{steps: [_ | _] = steps} ->
         Enum.map(steps, &step_message/1)
-        |> prepend({:user, "The stack run has failed, I'll list the logs explaining the failure, and perhaps they can inform any necessary code changes."})
+        |> prepend(user_message("The stack run has failed, I'll list the logs explaining the failure, and perhaps they can inform any necessary code changes."))
       _ ->
         []
     end
@@ -64,6 +64,6 @@ defmodule Console.AI.Agents.Terraform do
   defp step_message(%RunStep{logs: logs, cmd: cmd, args: args}) do
     logs = Enum.map(logs, & &1.logs)
           |> Enum.join("")
-    {:user, "The stack run has a failing command `#{cmd} #{Enum.join(args, " ")}, with logs: #{logs}"}
+    user_message("The stack run has a failing command `#{cmd} #{Enum.join(args, " ")}, with logs: #{logs}")
   end
 end

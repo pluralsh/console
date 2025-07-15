@@ -8418,11 +8418,18 @@ type ClusterInsightComponent {
   resource: KubernetesUnstructured
 }
 
+type ToolDelta {
+  id: ID
+  name: String
+  arguments: Map
+}
+
 type AiDelta {
   seq: Int!
   content: String!
   message: Int
   role: AiRole
+  tool: ToolDelta
 }
 
 type ChatConnection {

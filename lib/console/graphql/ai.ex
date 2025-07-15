@@ -275,11 +275,18 @@ defmodule Console.GraphQl.AI do
     end
   end
 
+  object :tool_delta do
+    field :id,        :id
+    field :name,      :string
+    field :arguments, :map
+  end
+
   object :ai_delta do
-    field :seq,     non_null(:integer)
-    field :content, non_null(:string)
-    field :message, :integer
-    field :role,    :ai_role
+    field :seq,       non_null(:integer)
+    field :content,   non_null(:string)
+    field :message,   :integer
+    field :role,      :ai_role
+    field :tool,      :tool_delta
   end
 
   connection node_type: :chat

@@ -4,6 +4,7 @@ defmodule Console.AI.Agents.Base do
   alias Console.Schema.{ChatThread, Chat, AgentSession}
   alias Console.Repo
   alias Console.AI.Chat.Engine
+  alias Console.AI.Stream
   require Logger
 
   defmacro __using__(_) do
@@ -37,7 +38,7 @@ defmodule Console.AI.Agents.Base do
         Stream.topic(:thread, thread.id, thread.user)
         |> Stream.enable()
 
-        {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
+        {:ok, thread, session} = drive(thread, [user_message(session.prompt)], thread.user)
         {:ok, session} = initialized(session)
         update_context(%{session: session})
         enqueue(self(),:booted)
@@ -139,5 +140,12 @@ defmodule Console.AI.Agents.Base do
     refetch(session)
     |> AgentSession.changeset(%{initialized: true})
     |> Console.Repo.update()
+  end
+
+  def user_message(content) when is_binary(content) do
+    stream = Stream.stream(:user)
+    Stream.publish(stream, content, 1)
+    Stream.offset(1)
+    {:user, content}
   end
 end
