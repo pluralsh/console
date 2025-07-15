@@ -255,8 +255,10 @@ function AgentSessionButton({
     { loading: agentSessionLoading, error: agentSessionError },
   ] = useCreateAgentSessionMutation({
     variables: { attributes: { connectionId, prompt, type } },
-    onCompleted: (data) =>
-      data.createAgentSession?.id && goToThread(data.createAgentSession.id),
+    onCompleted: (data) => {
+      if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
+      setShowInputModal(false)
+    },
   })
   return (
     <>
