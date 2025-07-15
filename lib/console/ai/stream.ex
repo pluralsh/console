@@ -2,7 +2,7 @@ defmodule Console.AI.Stream do
   alias Console.Schema.User
   alias ConsoleWeb.AIChannel
 
-  defstruct [:topic, :role, offset: 0, msg: 0]
+  defstruct [:topic, role: :assistant, offset: 0, msg: 0]
 
   @stream {__MODULE__, :ai, :stream}
   @tool {__MODULE__, :ai, :tool}

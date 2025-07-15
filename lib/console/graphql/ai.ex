@@ -144,6 +144,7 @@ defmodule Console.GraphQl.AI do
     field :thread,         :chat_thread, resolve: dataloader(AI)
     field :connection,     :cloud_connection, resolve: dataloader(Deployments)
     field :branch,         :string, description: "the branch this session's pr is operating on"
+    field :done,           :boolean, description: "whether the agent has declared the work for this session done"
 
     field :service,      :service_deployment, resolve: dataloader(Deployments)
     field :stack,        :infrastructure_stack, resolve: dataloader(Deployments)

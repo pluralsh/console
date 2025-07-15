@@ -132,7 +132,9 @@ type AgentSession struct {
 	Thread        *ChatThread      `json:"thread,omitempty"`
 	Connection    *CloudConnection `json:"connection,omitempty"`
 	// the branch this session's pr is operating on
-	Branch      *string              `json:"branch,omitempty"`
+	Branch *string `json:"branch,omitempty"`
+	// whether the agent has declared the work for this session done
+	Done        *bool                `json:"done,omitempty"`
 	Service     *ServiceDeployment   `json:"service,omitempty"`
 	Stack       *InfrastructureStack `json:"stack,omitempty"`
 	PullRequest *PullRequest         `json:"pullRequest,omitempty"`

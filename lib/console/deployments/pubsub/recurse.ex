@@ -116,7 +116,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
          _ <- Console.Retrier.retry(fn ->
             Discovery.kick(stack.repository)
           end, max: 2, pause: :timer.seconds(15)),
-      do: Stacks.poll(pr)
+      do: Stacks.poll(pr) |> IO.inspect(label: "poll result")
     end, ttl: :timer.minutes(2))
   end
 

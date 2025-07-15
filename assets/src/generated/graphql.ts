@@ -181,6 +181,8 @@ export type AgentSession = {
   /** the branch this session's pr is operating on */
   branch?: Maybe<Scalars['String']['output']>;
   connection?: Maybe<CloudConnection>;
+  /** whether the agent has declared the work for this session done */
+  done?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether the provisioning plan has been confirmed */
