@@ -86,6 +86,34 @@ entries:
     version: 0.0.1
   console:
   - apiVersion: v2
+    appVersion: 0.11.29
+    created: "2025-07-15T01:59:30.046691348Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.134
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 724bbe28c7ced98ed4425261166d9751aff5060e159a5f22aedc169d59f133a0
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.106/console-0.3.106.tgz
+    version: 0.3.106
+  - apiVersion: v2
     appVersion: 0.11.28
     created: "2025-07-08T01:34:36.033346424Z"
     dependencies:
@@ -7653,6 +7681,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.29
+    created: "2025-07-15T01:59:30.160865398Z"
+    description: deploys the datastore operator for plural cd
+    digest: 9d76516cc3ffd3c0286659f43704d0a3ee98d905054662185915e687487a50fe
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.12/datastore-0.0.12.tgz
+    version: 0.0.12
+  - apiVersion: v2
     appVersion: 0.11.28
     created: "2025-07-08T01:34:36.253360239Z"
     description: deploys the datastore operator for plural cd
@@ -7930,4 +7968,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-15T00:58:07.70964068Z"
+generated: "2025-07-15T01:59:30.161777996Z"
