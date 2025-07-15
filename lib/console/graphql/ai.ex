@@ -114,9 +114,10 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :flow,     :flow,       resolve: dataloader(Deployments)
-    field :user,     :user,       resolve: dataloader(User)
-    field :insight,  :ai_insight, resolve: dataloader(AI)
+    field :flow,     :flow,          resolve: dataloader(Deployments)
+    field :user,     :user,          resolve: dataloader(User)
+    field :insight,  :ai_insight,    resolve: dataloader(AI)
+    field :session,  :agent_session, resolve: dataloader(AI)
 
     @desc "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
     field :tools, list_of(:mcp_server_tool) do
@@ -284,6 +285,7 @@ defmodule Console.GraphQl.AI do
   connection node_type: :chat
   connection node_type: :chat_thread
   connection node_type: :ai_pin
+  connection node_type: :agent_session
 
   object :ai_queries do
     field :ai_insight, :ai_insight do
@@ -340,6 +342,12 @@ defmodule Console.GraphQl.AI do
       arg :flow_id, :id, description: "only show threads for this flow"
 
       resolve &AI.threads/2
+    end
+
+    connection field :agent_sessions, node_type: :agent_session do
+      middleware Authenticated
+
+      resolve &AI.sessions/2
     end
 
     connection field :ai_pins, node_type: :ai_pin do

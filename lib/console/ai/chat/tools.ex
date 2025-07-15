@@ -36,28 +36,13 @@ defmodule Console.AI.Chat.Tools do
     # Agent.Search,
     Agent.Stack
   ]
+  @agent_planned_tools [Agent.CallPr]
 
-  @agent_planned_tools [
-    Agent.CallPr,
-  ]
+  @code_pre_tools [Agent.Stack, Agent.Coding.StackFiles]
+  @code_pr_tools [Agent.Coding.GenericPr]
+  @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles]
 
-  @code_pre_tools [
-    Agent.Stack,
-    Agent.Coding.StackFiles
-  ]
-
-  @code_pr_tools [Agent.Coding.Pr]
-
-  @code_post_tools [
-    Agent.Coding.Commit,
-    Agent.Coding.StackFiles
-  ]
-
-  @kubernetes_code_pre_tools [
-    Agent.ServiceComponent,
-    Agent.Coding.ServiceFiles
-  ]
-
+  @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles]
   @kubernetes_code_post_tools [Agent.Coding.GenericPr]
 
   def tools(%ChatThread{} = t) do

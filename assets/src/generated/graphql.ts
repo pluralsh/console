@@ -175,6 +175,64 @@ export type AgentMigrationAttributes = {
   ref?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSession = {
+  __typename?: 'AgentSession';
+  /** the branch this session's pr is operating on */
+  branch?: Maybe<Scalars['String']['output']>;
+  connection?: Maybe<CloudConnection>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the provisioning plan has been confirmed */
+  planConfirmed?: Maybe<Scalars['Boolean']['output']>;
+  pullRequest?: Maybe<PullRequest>;
+  /** the pull requests associated with this chat, usually from an agentic workflow */
+  pullRequests?: Maybe<PullRequestConnection>;
+  service?: Maybe<ServiceDeployment>;
+  /** the services associated with this chat, usually from an agentic workflow */
+  serviceDeployments?: Maybe<ServiceDeploymentConnection>;
+  stack?: Maybe<InfrastructureStack>;
+  /** the stacks associated with this chat, usually from an agentic workflow */
+  stacks?: Maybe<InfrastructureStackConnection>;
+  thread?: Maybe<ChatThread>;
+  /** the type of agent this session is for */
+  type?: Maybe<AgentSessionType>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSessionPullRequestsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  open?: InputMaybe<Scalars['Boolean']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSessionServiceDeploymentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  errored?: InputMaybe<Scalars['Boolean']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
+};
+
+
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSessionStacksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AgentSessionAttributes = {
   /** the id of the cloud connection to use for this session */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
@@ -184,6 +242,18 @@ export type AgentSessionAttributes = {
   prompt?: InputMaybe<Scalars['String']['input']>;
   /** the type of agent this session is for */
   type?: InputMaybe<AgentSessionType>;
+};
+
+export type AgentSessionConnection = {
+  __typename?: 'AgentSessionConnection';
+  edges?: Maybe<Array<Maybe<AgentSessionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentSessionEdge = {
+  __typename?: 'AgentSessionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentSession>;
 };
 
 export enum AgentSessionType {
@@ -992,6 +1062,7 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  session?: Maybe<AgentSession>;
   settings?: Maybe<ChatThreadSettings>;
   summary: Scalars['String']['output'];
   /** the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists */
@@ -7894,6 +7965,7 @@ export type RootQueryType = {
   accessToken?: Maybe<AccessToken>;
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
+  agentSessions?: Maybe<AgentSessionConnection>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
   aiInsight?: Maybe<AiInsight>;
@@ -8092,6 +8164,14 @@ export type RootQueryTypeAccessTokenArgs = {
 
 
 export type RootQueryTypeAccessTokensArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeAgentSessionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
