@@ -3,13 +3,14 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
-
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import StackMetadata from './StackMetadata'
+import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 import StackConfiguration from './StackConfiguration'
+
+import StackMetadata from './StackMetadata'
 import StackRepository from './StackRepository'
+import StackTags from './StackTags.tsx'
 
 export default function StackOverview() {
   const theme = useTheme()
@@ -34,6 +35,7 @@ export default function StackOverview() {
         <StackMetadata />
         <StackConfiguration />
         <StackRepository />
+        <StackTags />
       </div>
     </ScrollablePage>
   )
