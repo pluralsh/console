@@ -122,6 +122,30 @@ type AgentMigrationAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 }
 
+// A session for an AI agent to use when acting in a chat thread
+type AgentSession struct {
+	ID string `json:"id"`
+	// the type of agent this session is for
+	Type *AgentSessionType `json:"type,omitempty"`
+	// whether the provisioning plan has been confirmed
+	PlanConfirmed *bool            `json:"planConfirmed,omitempty"`
+	Thread        *ChatThread      `json:"thread,omitempty"`
+	Connection    *CloudConnection `json:"connection,omitempty"`
+	// the branch this session's pr is operating on
+	Branch      *string              `json:"branch,omitempty"`
+	Service     *ServiceDeployment   `json:"service,omitempty"`
+	Stack       *InfrastructureStack `json:"stack,omitempty"`
+	PullRequest *PullRequest         `json:"pullRequest,omitempty"`
+	// the services associated with this chat, usually from an agentic workflow
+	ServiceDeployments *ServiceDeploymentConnection `json:"serviceDeployments,omitempty"`
+	// the stacks associated with this chat, usually from an agentic workflow
+	Stacks *InfrastructureStackConnection `json:"stacks,omitempty"`
+	// the pull requests associated with this chat, usually from an agentic workflow
+	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
+	InsertedAt   *string                `json:"insertedAt,omitempty"`
+	UpdatedAt    *string                `json:"updatedAt,omitempty"`
+}
+
 type AgentSessionAttributes struct {
 	// the type of agent this session is for
 	Type *AgentSessionType `json:"type,omitempty"`
@@ -131,6 +155,16 @@ type AgentSessionAttributes struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
+}
+
+type AgentSessionConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*AgentSessionEdge `json:"edges,omitempty"`
+}
+
+type AgentSessionEdge struct {
+	Node   *AgentSession `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 type AiDelta struct {
@@ -807,6 +841,7 @@ type ChatThread struct {
 	Flow          *Flow               `json:"flow,omitempty"`
 	User          *User               `json:"user,omitempty"`
 	Insight       *AiInsight          `json:"insight,omitempty"`
+	Session       *AgentSession       `json:"session,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`

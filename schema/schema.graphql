@@ -465,6 +465,8 @@ type RootQueryType {
     flowId: ID
   ): ChatThreadConnection
 
+  agentSessions(after: String, first: Int, before: String, last: Int): AgentSessionConnection
+
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 
   aiPin(insightId: ID, threadId: ID): AiPin
@@ -8243,6 +8245,8 @@ type ChatThread {
 
   insight: AiInsight
 
+  session: AgentSession
+
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
@@ -8257,6 +8261,45 @@ type ChatThread {
 type ChatThreadSettings {
   "controls whether this thread uses knowledge graph-basedmemory"
   memory: Boolean
+}
+
+"A session for an AI agent to use when acting in a chat thread"
+type AgentSession {
+  id: ID!
+
+  "the type of agent this session is for"
+  type: AgentSessionType
+
+  "whether the provisioning plan has been confirmed"
+  planConfirmed: Boolean
+
+  thread: ChatThread
+
+  connection: CloudConnection
+
+  "the branch this session's pr is operating on"
+  branch: String
+
+  service: ServiceDeployment
+
+  stack: InfrastructureStack
+
+  pullRequest: PullRequest
+
+  "the services associated with this chat, usually from an agentic workflow"
+  serviceDeployments(
+    after: String, first: Int, before: String, last: Int, q: String, status: ServiceDeploymentStatus, errored: Boolean
+  ): ServiceDeploymentConnection
+
+  "the stacks associated with this chat, usually from an agentic workflow"
+  stacks(after: String, first: Int, before: String, last: Int, q: String): InfrastructureStackConnection
+
+  "the pull requests associated with this chat, usually from an agentic workflow"
+  pullRequests(after: String, first: Int, before: String, last: Int, open: Boolean, q: String): PullRequestConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "A saved item for future ai-based investigation"
@@ -8395,6 +8438,11 @@ type ChatThreadConnection {
 type AiPinConnection {
   pageInfo: PageInfo!
   edges: [AiPinEdge]
+}
+
+type AgentSessionConnection {
+  pageInfo: PageInfo!
+  edges: [AgentSessionEdge]
 }
 
 type Account {
@@ -9805,6 +9853,11 @@ type PodEdge {
 
 type AuditEdge {
   node: Audit
+  cursor: String
+}
+
+type AgentSessionEdge {
+  node: AgentSession
   cursor: String
 }
 

@@ -7,18 +7,43 @@ defmodule Console.AI.Fixer.Stack do
   alias Console.Schema.{Stack, StackRun, Service, GitRepository, PullRequest}
   alias Console.Deployments.{Stacks}
 
-  @spec healthy_prompt(Stack.t()) :: {:ok, [{:user, binary}]} | Console.error()
+  @spec healthy_prompt(Stack.t) :: {:ok, [{:user, binary}]} | Console.error()
   def healthy_prompt(%Stack{} = stack) do
     stack = Repo.preload(stack, [:repository])
-    with {:ok, f} <- Stacks.tarstream(last_healthy_run(stack)),
-      do: code_prompt(f, stack.git.folder)
+    with {:ok, files} <- git_code_prompt(stack.git.folder, stack.git, stack.repository) do
+      %{details: stack_details(stack), files: files}
+      |> maybe_add_parent(stack)
+      |> ok()
+    end
   end
 
-  @spec pr_prompt(Stack.t(), PullRequest.t()) :: {:ok, [{:user, binary}]} | Console.error()
-  def pr_prompt(%Stack{} = stack, %PullRequest{} = pr) do
+  @spec pr_prompt(Stack.t, PullRequest.t, binary) :: {:ok, [{:user, binary}]} | Console.error()
+  def pr_prompt(%Stack{} = stack, %PullRequest{} = pr, branch) do
     stack = Repo.preload(stack, [:repository])
-    with {:ok, f} <- Stacks.tarstream(last_pr_run(stack, pr)),
-      do: code_prompt(f, stack.git.folder)
+    with {:ok, files} <- git_code_prompt(stack.git.folder, %{stack.git | ref: branch}, stack.repository) do
+      %{details: "#{stack_details(stack)}\n\n#{pr_details(pr, branch)}", files: files}
+      |> maybe_add_parent(stack)
+      |> ok()
+    end
+  end
+
+  defp pr_details(%PullRequest{url: url}, branch) do
+    """
+    The stack is currently under review via a pull request at url #{url} and branch #{branch}.  The files
+    provided will be for that branch of the git repository.
+    """
+  end
+
+  defp maybe_add_parent(result, stack) do
+    opts = [
+      child: "#{stack.name} stack",
+      cr: "InfrastructureStack",
+      cr_additional: " specifying the name #{stack.name}"
+    ]
+    case Parent.parent_details(stack, opts) do
+      {:ok, details} -> Map.put(result, :parent, details)
+      _ -> result
+    end
   end
 
   @spec prompt(Stack.t(), AiInsight.t()) :: {:ok, [{:user, binary}]} | Console.error()
@@ -54,25 +79,9 @@ defmodule Console.AI.Fixer.Stack do
     """
   end
 
-  defp last_healthy_run(%Stack{} = stack) do
-    StackRun.for_stack(stack.id)
-    |> StackRun.for_status(:successful)
-    |> StackRun.ordered(desc: :id)
-    |> StackRun.limit(1)
-    |> Repo.one()
-  end
-
   defp last_run(%Stack{} = stack) do
     StackRun.for_stack(stack.id)
     |> StackRun.for_status(:failed)
-    |> StackRun.ordered(desc: :id)
-    |> StackRun.limit(1)
-    |> Repo.one()
-  end
-
-  defp last_pr_run(%Stack{} = stack, %PullRequest{} = pr) do
-    StackRun.for_stack(stack.id)
-    |> StackRun.for_pr(pr.id)
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)
     |> Repo.one()

@@ -22,6 +22,17 @@ defmodule Console.Schema.AgentSession do
     timestamps()
   end
 
+  def for_user(query \\ __MODULE__, user_id) do
+    from(s in query,
+      join: t in assoc(s, :thread),
+      where: t.user_id == ^user_id
+    )
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+    from(s in query, order_by: ^order)
+  end
+
   @valid ~w(type plan_confirmed connection_id thread_id stack_id service_id pull_request_id prompt branch initialized commit_count)a
 
   def changeset(model, attrs \\ %{}) do

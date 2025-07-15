@@ -74,6 +74,7 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
     branch = "plrl/ai/#{branch}-#{Console.rand_alphanum(6)}"
     with {:conn, %ScmConnection{} = conn} <- {:conn, Tool.scm_connection()},
          conn <- %{conn | author: Tool.actor()},
+         {:session, %AgentSession{pull_request_id: nil} = sess} <- session(),
          url = to_http(conn, url),
          {:ok, %ScmConnection{dir: d} = conn} <- setup(conn, url, branch),
          :ok <- apply_fs_changes(pr, d),
@@ -88,14 +89,18 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
                           message: pr.pr_description,
                           identifier: identifier,
                         }, branch, %{}),
-        {:session, %AgentSession{} = sess} <- session(),
         {:ok, pull_request} <- GitSvc.create_pull_request(Map.merge(attrs, session_attrs(sess))),
         {:ok, _} <- update_session(%{pull_request_id: pull_request.id, branch: branch}) do
       {:ok, "Pull request created at url #{pull_request.url}!  Be sure to explain to the user that it was created successfully."}
     else
-      {:conn, _} -> {:ok, "no scm connection configured for AI yet, cannot create pull request"}
-      {:error, err} -> {:ok, "failed to create pull request, reason: #{inspect(err)}"}
-      err -> {:ok, "failed to create pull request with unknown reason: #{inspect(err)}"}
+      {:session, _} ->
+        {:ok, "You've already created a pull request for this session, you cannot create another one."}
+      {:conn, _} ->
+        {:ok, "no scm connection configured for AI yet, cannot create pull request"}
+      {:error, err} ->
+        {:ok, "failed to create pull request, reason: #{inspect(err)}"}
+      err ->
+        {:ok, "failed to create pull request with unknown reason: #{inspect(err)}"}
     end
   end
 

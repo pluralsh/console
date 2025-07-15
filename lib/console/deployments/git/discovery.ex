@@ -59,8 +59,11 @@ defmodule Console.Deployments.Git.Discovery do
          :ok <- maybe_rpc(repo, fn pid ->
             Agent.kick(pid)
             :ok
-         end),
-      do: {:ok, repo}
+         end) do
+      {:ok, repo}
+    else
+      _ -> {:error, "failed to kick git repository"}
+    end
   end
   def kick(_), do: {:error, "not a git repository"}
 

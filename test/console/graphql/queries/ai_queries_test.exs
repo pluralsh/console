@@ -313,4 +313,23 @@ defmodule Console.GraphQl.AiQueriesTest do
       assert claims["groups"] == [group.name]
     end
   end
+
+  describe "agentSessions" do
+    test "it can list a users agent sessions" do
+      user = insert(:user)
+      sessions = insert_list(3, :agent_session, thread: build(:chat_thread, user: user))
+      insert_list(2, :agent_session)
+
+      {:ok, %{data: %{"agentSessions" => found}}} = run_query("""
+        query {
+          agentSessions(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(sessions)
+    end
+  end
 end
