@@ -25,7 +25,19 @@ defmodule Console.AI.Chat.Tools do
     Tools.Knowledge.Graph
   ]
 
-  @agent_tools [
+  @agent_pre_tools [Agent.Role]
+
+  @agent_search_tools [
+    Agent.ServiceComponent,
+    Agent.Stack,
+    Agent.Role
+  ]
+
+  @agent_manifests_tools [
+    Agent.Role
+  ]
+
+  @agent_provisioning_tools [
     # Agent.Query,
     # Agent.Schema,
     Agent.Plan,
@@ -34,7 +46,8 @@ defmodule Console.AI.Chat.Tools do
     Agent.Clusters,
     Agent.ServiceComponent,
     # Agent.Search,
-    Agent.Stack
+    Agent.Stack,
+    Agent.Role
   ]
   @agent_planned_tools [Agent.CallPr]
 
@@ -51,7 +64,6 @@ defmodule Console.AI.Chat.Tools do
     memory_tools(t)
     |> Enum.concat(flow_tools(t))
     |> Enum.concat(agent_tools(t))
-    |> Enum.concat(agent_planned_tools(t))
     |> Enum.concat(cluster_tools(t))
   end
 
@@ -74,12 +86,13 @@ defmodule Console.AI.Chat.Tools do
   defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform}}), do: @code_pre_tools
 
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_tools
-  defp agent_tools(_), do: []
 
-  defp agent_planned_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: []
-  defp agent_planned_tools(%ChatThread{session: %AgentSession{plan_confirmed: true}}), do: @agent_planned_tools
-  defp agent_planned_tools(_), do: []
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :search}}), do: @agent_search_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning, plan_confirmed: true}}), do: @agent_planned_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning}}), do: @agent_provisioning_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_pre_tools
+  defp agent_tools(_), do: []
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []
