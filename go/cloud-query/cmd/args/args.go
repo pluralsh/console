@@ -125,7 +125,7 @@ func DatabaseConnectionTTL() time.Duration {
 		return defaultDatabaseConnectionTTL
 	}
 
-	if *argDatabaseConnectionTTL < 10*time.Minute {
+	if *argDatabaseConnectionTTL < defaultDatabaseConnectionTTL {
 		klog.Warningf("Connection TTL is set to a very low value (%s), this may lead to performance issues", *argDatabaseConnectionTTL)
 	}
 
