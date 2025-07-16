@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { useUpdateStackMutation } from '../../../generated/graphql'
+import { StackType, useUpdateStackMutation } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 import { OverlineH1 } from '../../utils/typography/Text'
 
@@ -36,7 +36,13 @@ export default function StackConfiguration() {
         clusterId: stack.cluster?.id ?? '',
         repositoryId: stack.repository?.id ?? '',
         git: { folder: stack.git.folder, ref: stack.git.ref },
-        configuration: { image, version, terraform: { refresh, parallelism } },
+        configuration: {
+          image,
+          version,
+          ...(stack.type === StackType.Terraform
+            ? { terraform: { refresh, parallelism } }
+            : {}),
+        },
       },
     },
     onCompleted: () => refetch?.(),
@@ -83,34 +89,38 @@ export default function StackConfiguration() {
             onChange={(e) => setVersion(e.currentTarget.value)}
           />
         </FormField>
-        <FormField label="Parallelism">
-          <Input
-            value={parallelism?.toString() ?? ''}
-            placeholder="Enter integer"
-            onChange={(e) => {
-              const value = e.currentTarget.value.replace(/[^0-9]/g, '')
-              setParallelism(value === '' ? null : parseInt(value, 10))
-            }}
-          />
-        </FormField>
-        <FormField label="Refresh">
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.small,
-              alignItems: 'center',
-              height: '38px',
-            }}
-          >
-            <span>Off</span>
-            <Switch
-              checked={refresh ?? false}
-              onChange={(checked) => setRefresh(checked)}
-              css={{ gap: 0 }}
-            />
-            <span>On</span>
-          </div>
-        </FormField>
+        {stack.type === StackType.Terraform && (
+          <>
+            <FormField label="Parallelism">
+              <Input
+                value={parallelism?.toString() ?? ''}
+                placeholder="Enter integer"
+                onChange={(e) => {
+                  const value = e.currentTarget.value.replace(/[^0-9]/g, '')
+                  setParallelism(value === '' ? null : parseInt(value, 10))
+                }}
+              />
+            </FormField>
+            <FormField label="Refresh">
+              <div
+                css={{
+                  display: 'flex',
+                  gap: theme.spacing.small,
+                  alignItems: 'center',
+                  height: '38px',
+                }}
+              >
+                <span>Off</span>
+                <Switch
+                  checked={refresh ?? false}
+                  onChange={(checked) => setRefresh(checked)}
+                  css={{ gap: 0 }}
+                />
+                <span>On</span>
+              </div>
+            </FormField>
+          </>
+        )}
       </div>
       {error && <GqlError error={error} />}
       <div
