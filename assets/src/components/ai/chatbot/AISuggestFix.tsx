@@ -24,6 +24,7 @@ import {
   useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
 } from '../../../generated/graphql.ts'
+import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { AIPanel } from '../AIPanel.tsx'
@@ -93,6 +94,7 @@ function FixPr({
   insightId: string
   fix: string
 }): ReactNode {
+  const { personaConfiguration } = useLogin()
   const [mutation, { data, loading, error }] = useAiFixPrMutation({
     variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
   })
@@ -121,7 +123,7 @@ function FixPr({
         >
           View PR
         </Button>
-      ) : (
+      ) : personaConfiguration?.ai?.pr !== false ? (
         <Button
           startIcon={<PrOpenIcon />}
           onClick={() => mutation()}
@@ -129,7 +131,7 @@ function FixPr({
         >
           Create PR
         </Button>
-      )}
+      ) : null}
     </>
   )
 }
