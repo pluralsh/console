@@ -307,7 +307,7 @@ defmodule Console.AI.Chat do
     end
   end
 
-  @thread_preloads [session: :connection, user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+  @thread_preloads [session: [:connection, :cluster], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
 
   @doc """
   Generates a context map for a PR associated with a chat thread

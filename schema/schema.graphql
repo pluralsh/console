@@ -8165,6 +8165,9 @@ input AgentSessionAttributes {
   "the id of the cloud connection to use for this session"
   connectionId: ID
 
+  "the id of the cluster to use for this session"
+  clusterId: ID
+
   "whether to immediately mark this session in a done state, eg no backgroud work"
   done: Boolean
 }
@@ -8291,6 +8294,8 @@ type AgentSession {
   stack: InfrastructureStack
 
   pullRequest: PullRequest
+
+  cluster: Cluster
 
   "the services associated with this chat, usually from an agentic workflow"
   serviceDeployments(

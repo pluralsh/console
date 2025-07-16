@@ -1,7 +1,7 @@
 defmodule Console.AI.Chat.Tools do
   alias Console.AI.Tools
   alias Console.AI.Tools.Agent
-  alias Console.Schema.{ChatThread, AgentSession}
+  alias Console.Schema.{ChatThread, AgentSession, Cluster}
 
   @plrl_tools [
     Tools.Clusters,
@@ -45,11 +45,14 @@ defmodule Console.AI.Chat.Tools do
   @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles]
   @kubernetes_code_post_tools [Agent.Coding.GenericPr, Agent.Done]
 
+  @cluster_tools [Agent.Discovery, Agent.ApiSpec]
+
   def tools(%ChatThread{} = t) do
     memory_tools(t)
     |> Enum.concat(flow_tools(t))
     |> Enum.concat(agent_tools(t))
     |> Enum.concat(agent_planned_tools(t))
+    |> Enum.concat(cluster_tools(t))
   end
 
   defp memory_tools(%ChatThread{} = t) do
@@ -80,4 +83,8 @@ defmodule Console.AI.Chat.Tools do
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []
+
+  defp cluster_tools(%ChatThread{session: %AgentSession{cluster: %Cluster{}}}),
+    do: @cluster_tools
+  defp cluster_tools(_), do: []
 end

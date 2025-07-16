@@ -11,7 +11,7 @@ defmodule Console.Deployments.Discovery do
 
   @concurrency 20
 
-  def discovery(server) do
+  def discovery(%Kazan.Server{} = server) do
     {:ok, gvs} = fetch_group_versions(server)
 
     Task.async_stream(gvs, fn group_version ->
@@ -26,6 +26,16 @@ defmodule Console.Deployments.Discovery do
       {:ok, {:ok, results}}, acc -> Enum.into(results, acc)
       _, acc -> acc
     end)
+  end
+
+  def api_spec(%Kazan.Server{} = server, group, version) do
+    %Kazan.Request{
+      method: "get",
+      path: "/openapi/v3/apis/#{group}/#{version}",
+      content_type: @json,
+      response_model: Kube.Client.EchoModel
+    }
+    |> Kazan.run(server: server)
   end
 
   defp get_core_apis(server) do

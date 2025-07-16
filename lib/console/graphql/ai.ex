@@ -57,6 +57,7 @@ defmodule Console.GraphQl.AI do
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
     field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
+    field :cluster_id,     :id, description: "the id of the cluster to use for this session"
     field :done,           :boolean, description: "whether to immediately mark this session in a done state, eg no backgroud work"
   end
 
@@ -150,6 +151,7 @@ defmodule Console.GraphQl.AI do
     field :service,      :service_deployment, resolve: dataloader(Deployments)
     field :stack,        :infrastructure_stack, resolve: dataloader(Deployments)
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :cluster,      :cluster, resolve: dataloader(Deployments)
 
     @desc "the services associated with this chat, usually from an agentic workflow"
     connection field :service_deployments, node_type: :service_deployment do

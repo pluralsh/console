@@ -138,6 +138,7 @@ type AgentSession struct {
 	Service     *ServiceDeployment   `json:"service,omitempty"`
 	Stack       *InfrastructureStack `json:"stack,omitempty"`
 	PullRequest *PullRequest         `json:"pullRequest,omitempty"`
+	Cluster     *Cluster             `json:"cluster,omitempty"`
 	// the services associated with this chat, usually from an agentic workflow
 	ServiceDeployments *ServiceDeploymentConnection `json:"serviceDeployments,omitempty"`
 	// the stacks associated with this chat, usually from an agentic workflow
@@ -157,6 +158,8 @@ type AgentSessionAttributes struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// the id of the cluster to use for this session
+	ClusterID *string `json:"clusterId,omitempty"`
 	// whether to immediately mark this session in a done state, eg no backgroud work
 	Done *bool `json:"done,omitempty"`
 }
