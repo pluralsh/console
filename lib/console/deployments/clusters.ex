@@ -124,6 +124,16 @@ defmodule Console.Deployments.Clusters do
     |> Console.Deployments.Discovery.discovery()
   end
 
+  @doc """
+  Gets the openapi spec for a given group and version on a cluster
+  """
+  @spec api_spec(Cluster.t, binary, binary) :: {:ok, map} | Console.error
+  @decorate cacheable(cache: @multilevel_adapter, key: {:api_spec, cluster.id, group, version}, opts: [ttl: :timer.minutes(30)])
+  def api_spec(%Cluster{} = cluster, group, version) do
+    control_plane(cluster)
+    |> Console.Deployments.Discovery.api_spec(group, version)
+  end
+
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{self: true} = cluster) do
     case Console.cloud?() do

@@ -1,6 +1,6 @@
 defmodule Console.Schema.AgentSession do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{CloudConnection, ChatThread, Stack, PullRequest, Service}
+  alias Console.Schema.{CloudConnection, ChatThread, Stack, PullRequest, Service, Cluster}
 
   defenum Type, terraform: 0, kubernetes: 1
 
@@ -19,6 +19,7 @@ defmodule Console.Schema.AgentSession do
     belongs_to :stack,        Stack
     belongs_to :service,      Service
     belongs_to :pull_request, PullRequest
+    belongs_to :cluster,      Cluster
 
     timestamps()
   end
@@ -34,7 +35,7 @@ defmodule Console.Schema.AgentSession do
     from(s in query, order_by: ^order)
   end
 
-  @valid ~w(type done plan_confirmed connection_id thread_id stack_id service_id pull_request_id prompt branch initialized commit_count)a
+  @valid ~w(type done plan_confirmed connection_id thread_id stack_id service_id cluster_id pull_request_id prompt branch initialized commit_count)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -180,6 +180,7 @@ export type AgentSession = {
   __typename?: 'AgentSession';
   /** the branch this session's pr is operating on */
   branch?: Maybe<Scalars['String']['output']>;
+  cluster?: Maybe<Cluster>;
   connection?: Maybe<CloudConnection>;
   /** whether the agent has declared the work for this session done */
   done?: Maybe<Scalars['Boolean']['output']>;
@@ -236,6 +237,8 @@ export type AgentSessionStacksArgs = {
 };
 
 export type AgentSessionAttributes = {
+  /** the id of the cluster to use for this session */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the id of the cloud connection to use for this session */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** whether to immediately mark this session in a done state, eg no backgroud work */
