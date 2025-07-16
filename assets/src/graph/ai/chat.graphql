@@ -64,6 +64,9 @@ fragment ChatThreadTiny on ChatThread {
     name
     icon
   }
+  session {
+    ...AgentSession
+  }
 }
 
 fragment ChatThread on ChatThread {
@@ -83,9 +86,6 @@ fragment ChatThread on ChatThread {
   }
   tools {
     ...McpServerTool
-  }
-  session {
-    ...AgentSession
   }
 }
 

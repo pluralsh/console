@@ -17,6 +17,7 @@ import {
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
+import ClusterSelector from 'components/cd/utils/ClusterSelector'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
@@ -89,6 +90,10 @@ export function ChatbotHeader({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
+  const [selectedClusterId, setSelectedClusterId] = useState<string | null>(
+    null
+  )
+
   return (
     <WrapperSC $fullscreen={fullscreen}>
       {state === 'list' ? (
@@ -122,6 +127,28 @@ export function ChatbotHeader({
       )}
       {!cloudConnectionsLoading && (
         <>
+          <div css={{ width: 220 }}>
+            <ClusterSelector
+              allowDeselect
+              onClusterChange={(cluster) => {
+                setSelectedClusterId(cluster?.id ?? null)
+                if (!!currentThread?.session?.id)
+                  updateThread({
+                    variables: {
+                      id: currentThread.id,
+                      attributes: {
+                        summary: currentThread.summary,
+                        session: { clusterId: cluster?.id },
+                      },
+                    },
+                  })
+              }}
+              clusterId={selectedClusterId}
+              placeholder="Select cluster"
+              startIcon={null}
+              deselectLabel="Deselect"
+            />
+          </div>
           {featureFlags.Copilot && connectionId && (
             <AgentSessionButton
               connectionId={connectionId}
@@ -138,7 +165,15 @@ export function ChatbotHeader({
               createNewThread({
                 summary: 'New chat with Plural Copilot',
                 ...(featureFlags.Copilot &&
-                  connectionId && { session: { connectionId, done: true } }),
+                  connectionId && {
+                    session: {
+                      connectionId,
+                      done: true,
+                      ...(selectedClusterId && {
+                        clusterId: selectedClusterId,
+                      }),
+                    },
+                  }),
               })
             }
           />

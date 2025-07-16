@@ -15,7 +15,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useCallback, useMemo, useState } from 'react'
+import { ComponentPropsWithRef, useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -29,6 +29,8 @@ export default function ClusterSelector({
   hideTitleContent = false,
   showUpgrades = false,
   placeholder = 'Filter by cluster',
+  deselectLabel = 'Show all clusters',
+  ...props
 }: {
   onClusterChange: (cluster: ClusterTinyFragment | null) => void
   clusterId: Nullable<string>
@@ -36,7 +38,8 @@ export default function ClusterSelector({
   hideTitleContent?: boolean
   showUpgrades?: boolean
   placeholder?: string
-}) {
+  deselectLabel?: string
+} & Omit<ComponentPropsWithRef<typeof ComboBox>, 'children'>) {
   const theme = useTheme()
   const projectId = useProjectId()
   const [inputValue, setInputValue] = useState('')
@@ -144,7 +147,7 @@ export default function ClusterSelector({
                   }}
                   leftContent={<ClusterIcon />}
                 >
-                  Show all clusters
+                  {deselectLabel}
                 </ListBoxFooterPlus>
               ),
             }
@@ -158,6 +161,7 @@ export default function ClusterSelector({
           }
           setInputValue('')
         }}
+        {...props}
       >
         {clusters.map((cluster) => (
           <ListBoxItem
