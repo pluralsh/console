@@ -20,6 +20,7 @@ import {
   AiInsightFragment,
   AiRole,
   ChatMessage,
+  PersonaConfiguration,
   useAiChatStreamSubscription,
   useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
@@ -27,6 +28,7 @@ import {
 import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
@@ -123,7 +125,7 @@ function FixPr({
         >
           View PR
         </Button>
-      ) : personaConfiguration?.ai?.pr !== false ? (
+      ) : hasAccess(personaConfiguration as PersonaConfiguration, 'ai.pr') ? (
         <Button
           startIcon={<PrOpenIcon />}
           onClick={() => mutation()}
