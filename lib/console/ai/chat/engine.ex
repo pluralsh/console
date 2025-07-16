@@ -7,6 +7,7 @@ defmodule Console.AI.Chat.Engine do
     Chat,
     Chat.Attributes,
     ChatThread,
+    AgentSession,
     Flow,
     User,
     McpServer,
@@ -211,7 +212,8 @@ defmodule Console.AI.Chat.Engine do
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err
 
-  defp include_tools(opts, thread) do
+  defp include_tools(opts, %ChatThread{} = thread) do
+    thread = current_thread(thread)
     case {thread, ChatSvc.find_tools(thread)} do
       {_, {:ok, [_ | _] = tools}} ->
         [{:tools, tools}, {:plural, Tools.tools(thread)} | opts]
@@ -219,6 +221,14 @@ defmodule Console.AI.Chat.Engine do
         [{:plural, Tools.tools(thread)} | opts]
       _ ->
         [{:plural, Tools.tools(thread)} | opts]
+    end
+  end
+
+  defp current_thread(%ChatThread{} = thread) do
+    case Tool.context() do
+      %Tool.Context{session: %AgentSession{} = session} ->
+        %{thread | session: session}
+      _ -> thread
     end
   end
 

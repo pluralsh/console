@@ -44,6 +44,21 @@ defmodule Console.AI.ChatTest do
       assert update.summary == "update"
     end
 
+    test "users can update their threads session" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      cluster = insert(:cluster)
+
+      {:ok, update} = Chat.update_thread(%{
+        summary: "update",
+        session: %{cluster_id: cluster.id}
+      }, thread.id, user)
+
+      assert update.id == thread.id
+      assert update.summary == "update"
+      assert update.session.cluster_id == cluster.id
+    end
+
     test "users cannot update other users threads" do
       user = insert(:user)
       thread = insert(:chat_thread)

@@ -41,6 +41,8 @@ defmodule Console.AI.Tool do
 
   @ctx {__MODULE__, :context}
 
+  def context(), do: Process.get(@ctx)
+
   def context(attrs), do: Process.put(@ctx, struct(Context, attrs))
 
   def upsert(attrs) do

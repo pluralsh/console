@@ -12,7 +12,7 @@ defmodule Console.AI.Tools.Agent.ApiSpec do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("api_spec")
-  def description(), do: "Prints the openapi spec for a given kubernetes group and version, core versions not supported but are also fully well-known."
+  def description(), do: "Prints the openapi spec for a given kubernetes group and version, core versions not supported but are also fully well-known.  To find the exact group and version, use the api_discovery tool, this is especially useful when a user is looking to write a complex kubernetes manifest."
 
   @valid ~w(group version)a
 
