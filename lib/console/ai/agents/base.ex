@@ -66,7 +66,12 @@ defmodule Console.AI.Agents.Base do
           false -> {:stop, :moved, state}
         end
       end
-      def handle_info(:die, session), do: {:stop, :normal, session}
+
+      def handle_info(:die, {_, session} = state) do
+        done(session)
+        {:stop, :normal, state}
+      end
+
       def handle_info(_, session), do: {:noreply, session}
     end
   end
@@ -139,6 +144,12 @@ defmodule Console.AI.Agents.Base do
   def initialized(%AgentSession{} = session) do
     refetch(session)
     |> AgentSession.changeset(%{initialized: true})
+    |> Console.Repo.update()
+  end
+
+  def done(%AgentSession{} = session) do
+    refetch(session)
+    |> AgentSession.changeset(%{done: true})
     |> Console.Repo.update()
   end
 
