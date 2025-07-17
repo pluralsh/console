@@ -58,7 +58,7 @@ defmodule Console.AI.Agents.Terraform do
   def handle_cast(_, state), do: {:noreply, state}
 
   defp failed_run_messages(%StackRun{} = run) do
-    case Repo.preload(run, [:steps]) do
+    case Repo.preload(run, [steps: :logs]) do
       %StackRun{steps: [_ | _] = steps} ->
         Enum.map(steps, &step_message/1)
         |> prepend(user_message("The stack run has failed, I'll list the logs explaining the failure, and perhaps they can inform any necessary code changes."))
@@ -68,8 +68,7 @@ defmodule Console.AI.Agents.Terraform do
   end
 
   defp step_message(%RunStep{logs: logs, cmd: cmd, args: args}) do
-    logs = Enum.map(logs, & &1.logs)
-          |> Enum.join("")
-    user_message("The stack run has a failing command `#{cmd} #{Enum.join(args, " ")}, with logs: #{logs}")
+    logs = Enum.map(logs, & &1.logs) |> Enum.join("")
+    user_message("The stack run executed the command `#{cmd} #{Enum.join(args, " ")}, with logs: #{logs}")
   end
 end
