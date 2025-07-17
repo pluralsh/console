@@ -20,12 +20,15 @@ import {
   AiInsightFragment,
   AiRole,
   ChatMessage,
+  PersonaConfiguration,
   useAiChatStreamSubscription,
   useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
 } from '../../../generated/graphql.ts'
+import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
@@ -93,6 +96,7 @@ function FixPr({
   insightId: string
   fix: string
 }): ReactNode {
+  const { personaConfiguration } = useLogin()
   const [mutation, { data, loading, error }] = useAiFixPrMutation({
     variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
   })
@@ -121,7 +125,7 @@ function FixPr({
         >
           View PR
         </Button>
-      ) : (
+      ) : hasAccess(personaConfiguration as PersonaConfiguration, 'ai.pr') ? (
         <Button
           startIcon={<PrOpenIcon />}
           onClick={() => mutation()}
@@ -129,7 +133,7 @@ function FixPr({
         >
           Create PR
         </Button>
-      )}
+      ) : null}
     </>
   )
 }

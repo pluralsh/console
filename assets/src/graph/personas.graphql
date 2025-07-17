@@ -24,6 +24,9 @@ fragment PersonaConfiguration on PersonaConfiguration {
     configuration
     secrets
   }
+  ai {
+    pr
+  }
 }
 
 fragment Persona on Persona {
