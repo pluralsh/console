@@ -33,11 +33,11 @@
                       "type": "string"
                     },
                     "replacement": {
-                        "description": "the file content you want to write to this file, including all whitespace and line characters to the correct indentation level.",
+                        "description": "the file content you want to write to this file, including all whitespace and line characters to the correct indentation level. This should be the exact content and not include ... or any indicator of truncated prior content.",
                         "type": "string"
                     },
                     "previous": {
-                        "description": "the previous content within the file this will be replacing, including all whitespace and line characters.  Provide an empty string if you want to simply append to the file.",
+                        "description": "the previous content within the file this will be replacing, including all whitespace and line characters.  Provide an empty string if you want to simply append to the file, and this should be the exact content and not include ... or any indicator of truncated prior content..",
                         "type": "string"
                     }
                 },

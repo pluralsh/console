@@ -111,20 +111,16 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
   end
 
   def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
-    IO.inspect(pr, label: "stack pr")
     Console.debounce({:stack_pr, pr.id}, fn ->
       with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
-         _ <- Console.Retrier.retry(fn ->
-            Discovery.kick(stack.repository)
-          end, max: 2, pause: :timer.seconds(15)),
-      do: Stacks.poll(pr) |> IO.inspect(label: "polling stack")
+            _ <- Console.Retrier.retry(fn ->
+              Discovery.kick(stack.repository)
+            end, max: 3, pause: :timer.seconds(30)),
+        do: Stacks.poll(pr)
     end, ttl: :timer.minutes(2))
   end
 
-  def process(%{item: item}) do
-    IO.inspect(item, label: "ignoring pr")
-    :ok
-  end
+  def process(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do

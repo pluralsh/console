@@ -65,7 +65,6 @@ defmodule Console.AI.Chat.Engine do
 
     thread = current_thread(thread)
     opts = include_tools([preface: preface], thread)
-    IO.inspect(opts[:plural], label: "active tools")
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
@@ -116,7 +115,6 @@ defmodule Console.AI.Chat.Engine do
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
-           _ <- Logger.info("calling tool: #{name} with args: #{inspect(args)}"),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
         case tool_msg(content, id, nil, name, args) do
