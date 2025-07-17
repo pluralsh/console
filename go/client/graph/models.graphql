@@ -67,6 +67,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
     flow {
         id
     }
+    syncConfig {
+        createNamespace
+        enforceNamespace
+        namespaceMetadata {
+            labels
+            annotations
+        }
+        diffNormalizers {
+            ...DiffNormalizerFragment
+        }
+    }
 }
 
 fragment ServiceDeploymentExtended on ServiceDeployment {
