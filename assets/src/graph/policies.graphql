@@ -145,6 +145,26 @@ query ComplianceReportGenerators(
   }
 }
 
+query ComplianceReportGenerator($id: ID, $name: String) {
+  complianceReportGenerator(id: $id, name: $name) {
+    ...ComplianceReportGenerator
+  }
+}
+
+mutation CreateComplianceReportGenerator(
+  $attributes: ComplianceReportGeneratorAttributes!
+) {
+  upsertComplianceReportGenerator(attributes: $attributes) {
+    ...ComplianceReportGenerator
+  }
+}
+
+mutation DeleteComplianceReport($id: ID!) {
+  deleteComplianceReportGenerator(id: $id) {
+    ...ComplianceReportGenerator
+  }
+}
+
 query ComplianceReports(
   $after: String
   $before: String
