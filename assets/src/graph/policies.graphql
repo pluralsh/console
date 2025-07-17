@@ -15,6 +15,15 @@ fragment PolicyConstraint on PolicyConstraint {
   violationCount
 }
 
+fragment ComplianceReportGenerator on ComplianceReportGenerator {
+  id
+  name
+  format
+  readBindings {
+    ...PolicyBinding
+  }
+}
+
 fragment ComplianceReport on ComplianceReports {
   insertedAt
   id
@@ -110,6 +119,29 @@ query PolicyStatistics(
   ) {
     count
     aggregate
+  }
+}
+
+query ComplianceReportGenerators(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+) {
+  complianceReportGenerators(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ComplianceReportGenerator
+      }
+    }
   }
 }
 
