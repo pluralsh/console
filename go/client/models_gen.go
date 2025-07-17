@@ -7140,18 +7140,24 @@ type YamlOverlayAttributes struct {
 type AgentSessionType string
 
 const (
-	AgentSessionTypeTerraform  AgentSessionType = "TERRAFORM"
-	AgentSessionTypeKubernetes AgentSessionType = "KUBERNETES"
+	AgentSessionTypeTerraform    AgentSessionType = "TERRAFORM"
+	AgentSessionTypeKubernetes   AgentSessionType = "KUBERNETES"
+	AgentSessionTypeProvisioning AgentSessionType = "PROVISIONING"
+	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
+	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 )
 
 var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeTerraform,
 	AgentSessionTypeKubernetes,
+	AgentSessionTypeProvisioning,
+	AgentSessionTypeSearch,
+	AgentSessionTypeManifests,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests:
 		return true
 	}
 	return false

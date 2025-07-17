@@ -265,6 +265,9 @@ export type AgentSessionEdge = {
 
 export enum AgentSessionType {
   Kubernetes = 'KUBERNETES',
+  Manifests = 'MANIFESTS',
+  Provisioning = 'PROVISIONING',
+  Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
 

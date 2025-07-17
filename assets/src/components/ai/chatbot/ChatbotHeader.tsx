@@ -138,7 +138,7 @@ export function ChatbotHeader({
                       id: currentThread.id,
                       attributes: {
                         summary: currentThread.summary,
-                        session: { clusterId: cluster?.id },
+                        session: { clusterId: cluster?.id ?? null },
                       },
                     },
                   })
@@ -147,6 +147,12 @@ export function ChatbotHeader({
               placeholder="Select cluster"
               startIcon={null}
               deselectLabel="Deselect"
+              inputProps={{
+                style: {
+                  minHeight: fullscreen ? 40 : 32,
+                  height: fullscreen ? 40 : 32,
+                },
+              }}
             />
           </div>
           {featureFlags.Copilot && connectionId && (
