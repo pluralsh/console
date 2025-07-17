@@ -63,11 +63,13 @@ defmodule Console.AI.Chat.Engine do
   def completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
     preface = prompt(thread)
 
+    thread = current_thread(thread)
+    opts = include_tools([preface: preface], thread)
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
     |> fit_context_window(preface)
-    |> Provider.completion(include_tools([preface: preface], thread))
+    |> Provider.completion(opts)
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})
@@ -75,7 +77,7 @@ defmodule Console.AI.Chat.Engine do
         |> ChatSvc.save_messages(thread_id, user)
       {:ok, content, tools} ->
         {plural, mcp} = Enum.split_with(tools, &String.starts_with?(&1.name, "__plrl__"))
-        with {:ok, plrl_res} <- call_plrl_tools(plural, Tools.tools(thread)),
+        with {:ok, plrl_res} <- call_plrl_tools(plural, opts[:plural]),
              {:ok, mcp_res} <- call_mcp_tools(mcp, thread, user) do
           completion = completion ++ tool_msgs(content, mcp_res ++ plrl_res)
           Enum.any?(completion, fn
@@ -213,7 +215,6 @@ defmodule Console.AI.Chat.Engine do
   defp tool_results(err), do: err
 
   defp include_tools(opts, %ChatThread{} = thread) do
-    thread = current_thread(thread)
     case {thread, ChatSvc.find_tools(thread)} do
       {_, {:ok, [_ | _] = tools}} ->
         [{:tools, tools}, {:plural, Tools.tools(thread)} | opts]

@@ -29,12 +29,12 @@ defmodule Console.AI.Chat.Tools do
 
   @agent_search_tools [
     Agent.ServiceComponent,
-    Agent.Stack,
-    Agent.Role
+    Agent.Stack
   ]
 
   @agent_manifests_tools [
-    Agent.Role
+    Agent.Discovery,
+    Agent.ApiSpec
   ]
 
   @agent_provisioning_tools [
@@ -46,8 +46,7 @@ defmodule Console.AI.Chat.Tools do
     Agent.Clusters,
     Agent.ServiceComponent,
     # Agent.Search,
-    Agent.Stack,
-    Agent.Role
+    Agent.Stack
   ]
   @agent_planned_tools [Agent.CallPr]
 
@@ -65,6 +64,7 @@ defmodule Console.AI.Chat.Tools do
     |> Enum.concat(flow_tools(t))
     |> Enum.concat(agent_tools(t))
     |> Enum.concat(cluster_tools(t))
+    |> Enum.uniq()
   end
 
   defp memory_tools(%ChatThread{} = t) do
@@ -73,6 +73,8 @@ defmodule Console.AI.Chat.Tools do
       false -> []
     end
   end
+
+  defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
 
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id}}) when is_binary(id),
     do: @kubernetes_code_post_tools

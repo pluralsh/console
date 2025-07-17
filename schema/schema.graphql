@@ -8094,6 +8094,9 @@ enum EvidenceType {
 enum AgentSessionType {
   TERRAFORM
   KUBERNETES
+  PROVISIONING
+  SEARCH
+  MANIFESTS
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"

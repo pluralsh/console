@@ -32,8 +32,10 @@ defmodule Console.AI.Tools.Agent.Coding.StackFiles do
          {:ok, _} <- update_session(%{stack_id: id}) do
       Jason.encode(details)
     else
-      {:error, err} -> {:error, "failed to get stack files, reason: #{inspect(err)}"}
-      nil -> {:error, "could not find stack with id #{id}"}
+      {:error, err} ->
+        {:error, "failed to get stack files, reason: #{inspect(err)}"}
+      nil ->
+        {:error, "could not find stack with id #{id}"}
     end
   end
 

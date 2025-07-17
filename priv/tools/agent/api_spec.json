@@ -8,8 +8,12 @@
         "version": {
             "type": "string",
             "description": "The version of the kubernetes group to fetch the api spec for"
+        },
+        "query": {
+            "type": "string",
+            "description": "a search query to use to find the relevant kind within that api group and version"
         }
     },
-    "required": ["group", "version"],
+    "required": ["group", "version", "query"],
     "additionalProperties": false
 }
