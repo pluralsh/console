@@ -111,6 +111,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
   end
 
   def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
+    IO.inspect(pr, label: "stackpr")
     Utils.deduplicate({:stack_pr, pr.id}, fn ->
       with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
          _ <- Console.Retrier.retry(fn ->
