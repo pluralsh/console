@@ -13,6 +13,8 @@ defmodule Console.Schema.AgentSession do
     field :initialized,    :boolean, default: false
     field :commit_count,   :integer, default: 0
     field :done,           :boolean, default: false
+    field :tf_planned,     :boolean, virtual: true, default: false
+    field :tf_booted,      :boolean, virtual: true, default: false
 
     belongs_to :connection,   CloudConnection
     belongs_to :thread,       ChatThread
