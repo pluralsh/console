@@ -94,6 +94,10 @@ export function ChatbotHeader({
     null
   )
 
+  const hideClusterSelector =
+    currentThread?.session?.type === AgentSessionType.Kubernetes ||
+    currentThread?.session?.type === AgentSessionType.Terraform
+
   return (
     <WrapperSC $fullscreen={fullscreen}>
       {state === 'list' ? (
@@ -125,7 +129,7 @@ export function ChatbotHeader({
           />
         </>
       )}
-      {!cloudConnectionsLoading && (
+      {!cloudConnectionsLoading && !hideClusterSelector && (
         <>
           <div css={{ width: 220 }}>
             <ClusterSelector
