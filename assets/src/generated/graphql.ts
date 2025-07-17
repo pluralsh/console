@@ -2928,6 +2928,8 @@ export type DeprecatedCustomResourceAttributes = {
 /** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */
 export type DiffNormalizer = {
   __typename?: 'DiffNormalizer';
+  /** Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely */
+  backfill?: Maybe<Scalars['Boolean']['output']>;
   /** A list of json pointers to the fields to ignore */
   jsonPointers?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** The kind of the resource to normalize */
@@ -2939,6 +2941,8 @@ export type DiffNormalizer = {
 };
 
 export type DiffNormalizerAttributes = {
+  /** whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely */
+  backfill?: InputMaybe<Scalars['Boolean']['input']>;
   /** A list of json patches to apply to the service which controls how drift detection works */
   jsonPointers?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   kind?: InputMaybe<Scalars['String']['input']>;

@@ -1060,7 +1060,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ |  |  |  |
 | `kind` _string_ |  |  |  |
-| `namespace` _string_ |  |  |  |
+| `namespace` _string_ |  |  | Optional: {} <br /> |
+| `backfill` _boolean_ | Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely |  | Optional: {} <br /> |
 | `jsonPointers` _string array_ | A list of json patches to apply to the service which controls how drift detection works |  |  |
 
 

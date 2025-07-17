@@ -2383,6 +2383,8 @@ type DiffNormalizer struct {
 	Kind *string `json:"kind,omitempty"`
 	// The namespace of the resource to normalize
 	Namespace *string `json:"namespace,omitempty"`
+	// Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely
+	Backfill *bool `json:"backfill,omitempty"`
 	// A list of json pointers to the fields to ignore
 	JSONPointers []*string `json:"jsonPointers,omitempty"`
 }
@@ -2391,6 +2393,8 @@ type DiffNormalizerAttributes struct {
 	Name      *string `json:"name,omitempty"`
 	Kind      *string `json:"kind,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
+	// whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely
+	Backfill *bool `json:"backfill,omitempty"`
 	// A list of json patches to apply to the service which controls how drift detection works
 	JSONPointers []*string `json:"jsonPointers,omitempty"`
 }
