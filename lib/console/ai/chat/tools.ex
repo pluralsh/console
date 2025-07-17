@@ -88,8 +88,7 @@ defmodule Console.AI.Chat.Tools do
     stack_id: id,
     pull_request_id: pr_id,
     tf_planned: true
-  }})
-    when is_binary(id) and is_binary(pr_id), do: @code_post_tools
+  }}) when is_binary(id) and is_binary(pr_id), do: @code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, pull_request_id: pr_id}})
     when is_binary(id) and is_binary(pr_id), do: @post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, tf_booted: true}})

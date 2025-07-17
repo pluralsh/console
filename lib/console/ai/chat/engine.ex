@@ -228,7 +228,7 @@ defmodule Console.AI.Chat.Engine do
   defp current_thread(%ChatThread{} = thread) do
     case Tool.context() do
       %Tool.Context{session: %AgentSession{} = session} ->
-        %{thread | session: session}
+        %{thread | session: IO.inspect(session, label: "session")}
       _ -> thread
     end
   end
