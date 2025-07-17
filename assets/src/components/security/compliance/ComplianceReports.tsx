@@ -1,4 +1,13 @@
-import { Flex, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  InvoicesIcon,
+  ListIcon,
+  PeopleIcon,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import {
   COMPLIANCE_REPORTS_ABS_PATH,
   SECURITY_ABS_PATH,
@@ -8,40 +17,48 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { Edge } from '../../../utils/graphql.ts'
 import {
-  ComplianceReportFragment,
-  useComplianceReportsQuery,
+  ComplianceReportGeneratorFragment,
+  useComplianceReportGeneratorsQuery,
 } from '../../../generated/graphql.ts'
-import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
-import { CreateComplianceReportButton } from './CreateComplianceReportModal.tsx'
-import { useMemo } from 'react'
-import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment.tsx'
 
-const columnHelper = createColumnHelper<Edge<ComplianceReportFragment>>()
+const columnHelper =
+  createColumnHelper<Edge<ComplianceReportGeneratorFragment>>()
 
 export const columns = [
   columnHelper.accessor(({ node }) => node?.name, {
     id: 'name',
-    header: 'Report name',
-
     cell: ({ getValue }) => <div>{getValue()}</div>,
   }),
-  columnHelper.accessor(({ node }) => node?.sha256, {
-    id: 'sha256',
-    header: 'SHA256',
-    meta: { truncate: true },
-    cell: ({ getValue }) => <div>{getValue()}</div>,
-  }),
-  columnHelper.accessor(({ node }) => node?.insertedAt, {
-    id: 'insertedAt',
-    header: 'Created',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  columnHelper.accessor(({ node }) => node, {
+    id: 'actions',
+    meta: { gridTemplate: `fit-content(300px)` },
+    cell: ({}) => (
+      <Flex gap={'small'}>
+        <IconFrame
+          clickable
+          icon={<PeopleIcon />}
+          type={'floating'}
+        />
+        <IconFrame
+          clickable
+          icon={<ListIcon />}
+          type={'floating'}
+        />
+        <Button
+          floating
+          small
+          startIcon={<InvoicesIcon />}
+          type="submit"
+        >
+          Create report
+        </Button>
+      </Flex>
+    ),
   }),
 ]
 
@@ -58,31 +75,28 @@ export function ComplianceReports() {
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useComplianceReportsQuery,
-      keyPath: ['complianceReports'],
+      queryHook: useComplianceReportGeneratorsQuery,
+      keyPath: ['complianceReportGenerators'],
     })
-
-  const header = useMemo(
-    () => (
-      <Flex>
-        <CreateComplianceReportButton />
-      </Flex>
-    ),
-    []
-  )
-
-  useSetPageHeaderContent(header)
 
   if (error) return <GqlError error={error} />
 
   return (
     <Table
       fullHeightWrap
+      hideHeader
+      rowBg="raised"
       virtualizeRows
-      data={data?.complianceReports?.edges || []}
+      data={[
+        { node: { name: 'test' } }, // TODO data?.complianceReportGenerators?.edges || []
+        { node: { name: 'test' } },
+        { node: { name: 'test' } },
+        { node: { name: 'test' } },
+        { node: { name: 'test' } },
+      ]}
       loading={!data && loading}
       columns={columns}
-      hasNextPage={data?.complianceReports?.pageInfo?.hasNextPage}
+      hasNextPage={data?.complianceReportGenerators?.pageInfo?.hasNextPage}
       isFetchingNextPage={loading}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       onVirtualSliceChange={setVirtualSlice}
