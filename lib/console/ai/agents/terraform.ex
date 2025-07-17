@@ -2,12 +2,14 @@ defmodule Console.AI.Agents.Terraform do
   use Console.AI.Agents.Base
   import Console.AI.Evidence.Base, only: [prepend: 2]
   alias Console.Schema.{StackRun, StackState, RunStep}
+  alias Console.AI.Tool
   alias Console.Repo
 
   def handle_cast({:enqueue, :booted}, {_, %AgentSession{stack_id: id} = session})
       when is_binary(id) do
     Logger.info "handling booted terraform agent, proceeding to pr generation #{session.id}"
     {thread, session} = setup_context(session)
+    Tool.upsert(%{session: %{session | tf_booted: true}})
     Logger.info "context resetup for #{session.id}"
     drive(thread, [
       user_message("""
@@ -22,6 +24,7 @@ defmodule Console.AI.Agents.Terraform do
   def handle_cast({:enqueue, %StackRun{status: :failed} = run}, {_thread, session}) do
     Logger.info("found failed terraform run in agent session #{session.id}")
     {thread, session} = setup_context(session)
+    Tool.upsert(%{session: %{session | tf_planned: true, tf_booted: true}})
     case failed_run_messages(run) do
       [_ | _] = messages ->
         Logger.info("handling failed terraform run in agent session #{session.id}")
@@ -34,6 +37,7 @@ defmodule Console.AI.Agents.Terraform do
   def handle_cast({:enqueue, %StackRun{} = run}, {_thread, session}) do
     Logger.info("found successful terraform run in agent session #{session.id}")
     {thread, session} = setup_context(session)
+    Tool.upsert(%{session: %{session | tf_planned: true, tf_booted: true}})
     case Repo.preload(run, [:state]) do
       %StackRun{state: %StackState{plan: p}} when is_binary(p) and byte_size(p) > 0 ->
         Logger.info("handling successful terraform run in agent session #{session.id}")
