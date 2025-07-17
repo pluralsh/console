@@ -4588,6 +4588,9 @@ input DiffNormalizerAttributes {
 
   namespace: String
 
+  "whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely"
+  backfill: Boolean
+
   "A list of json patches to apply to the service which controls how drift detection works"
   jsonPointers: [String]
 }
@@ -5246,6 +5249,9 @@ type DiffNormalizer {
 
   "The namespace of the resource to normalize"
   namespace: String
+
+  "Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely"
+  backfill: Boolean
 
   "A list of json pointers to the fields to ignore"
   jsonPointers: [String]

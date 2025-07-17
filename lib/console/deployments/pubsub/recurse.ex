@@ -100,20 +100,20 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
+  alias Console.Repo
   alias Console.Schema.{PullRequest, Stack}
   alias Console.Deployments.{Stacks, Git.Discovery}
-  alias Console.Deployments.Notifications.Utils
 
-  def process(%{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
-    with %PullRequest{stack: %Stack{} = stack} <- Console.Repo.preload(pr, [stack: :repository]),
+  def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
+    with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
          _ <- Discovery.kick(stack.repository),
       do: Stacks.poll(stack)
   end
 
-  def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
-    IO.inspect(pr, label: "stackpr")
-    Utils.deduplicate({:stack_pr, pr.id}, fn ->
-      with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
+  def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
+    IO.inspect(pr, label: "stack pr")
+    Console.debounce({:stack_pr, pr.id}, fn ->
+      with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
          _ <- Console.Retrier.retry(fn ->
             Discovery.kick(stack.repository)
           end, max: 2, pause: :timer.seconds(15)),
@@ -121,7 +121,10 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
     end, ttl: :timer.minutes(2))
   end
 
-  def process(_), do: :ok
+  def process(%{item: item}) do
+    IO.inspect(item, label: "ignoring pr")
+    :ok
+  end
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do

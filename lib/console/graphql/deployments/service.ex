@@ -47,9 +47,10 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :diff_normalizer_attributes do
-    field :name, :string
-    field :kind, :string
+    field :name,      :string
+    field :kind,      :string
     field :namespace, :string
+    field :backfill,  :boolean, description: "whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely"
     field :json_pointers, list_of(:string), description: "A list of json patches to apply to the service which controls how drift detection works"
   end
 
@@ -490,6 +491,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,          :string, description: "The name of the resource to normalize"
     field :kind,          :string, description: "The kind of the resource to normalize"
     field :namespace,     :string, description: "The namespace of the resource to normalize"
+    field :backfill,      :boolean, description: "Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely"
     field :json_pointers, list_of(:string), description: "A list of json pointers to the fields to ignore"
   end
 

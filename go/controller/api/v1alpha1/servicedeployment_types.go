@@ -118,9 +118,16 @@ type SyncConfigAttributes struct {
 }
 
 type DiffNormalizers struct {
-	Name      *string `json:"name,omitempty"`
-	Kind      *string `json:"kind,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Kind *string `json:"kind,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty"`
+
+	// Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely
+	// +kubebuilder:validation:Optional
+	Backfill *bool `json:"backfill,omitempty"`
+
 	// A list of json patches to apply to the service which controls how drift detection works
 	JSONPointers []string `json:"jsonPointers,omitempty"`
 }
@@ -169,6 +176,7 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 				Name:         diffNormalizer.Name,
 				Kind:         diffNormalizer.Kind,
 				Namespace:    diffNormalizer.Namespace,
+				Backfill:     diffNormalizer.Backfill,
 				JSONPointers: lo.ToSlicePtr(diffNormalizer.JSONPointers),
 			})
 		}

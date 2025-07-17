@@ -65,6 +65,7 @@ defmodule Console.AI.Chat.Engine do
 
     thread = current_thread(thread)
     opts = include_tools([preface: preface], thread)
+    IO.inspect(opts[:plural], label: "active tools")
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
@@ -228,7 +229,7 @@ defmodule Console.AI.Chat.Engine do
   defp current_thread(%ChatThread{} = thread) do
     case Tool.context() do
       %Tool.Context{session: %AgentSession{} = session} ->
-        %{thread | session: IO.inspect(session, label: "session")}
+        %{thread | session: session}
       _ -> thread
     end
   end

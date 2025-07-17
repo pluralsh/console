@@ -635,6 +635,10 @@ spec:
                       to the service which controls how drift detection works
                     items:
                       properties:
+                        backfill:
+                          description: Whether to backfill the given pointers with
+                            the current live value, or otherwise ignore it entirely
+                          type: boolean
                         jsonPointers:
                           description: A list of json patches to apply to the service
                             which controls how drift detection works
