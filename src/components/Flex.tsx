@@ -7,7 +7,7 @@ type FlexBaseProps = {
   /**
    * Alias for flexDirection
    */
-  direction?: 'row' | 'column'
+  direction?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
   /**
    * wrap flex property
    */

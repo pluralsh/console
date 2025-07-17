@@ -1,5 +1,5 @@
-import { Children, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
+import { Children, ReactElement, ReactNode, useMemo } from 'react'
+import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
@@ -15,19 +15,7 @@ type MarkdownProps = {
   text: string
   gitUrl?: string
   mainBranch?: string
-}
-
-const render = ({ component: Component, props: extraProps }: any) =>
-  function renderComponent({ node: _, ...props }: any) {
-    return (
-      <Component
-        {...{
-          ...props,
-          ...extraProps,
-        }}
-      />
-    )
-  }
+} & ReactMarkdownOptions
 
 function getLastStringChild(children: any, depth = 0): any {
   let lastChild = null
@@ -43,15 +31,15 @@ function getLastStringChild(children: any, depth = 0): any {
   return lastChild
 }
 
-function MarkdownPreformatted({ children, ...props }: any) {
+function MarkdownPreformatted({ children }: { children?: ReactNode }) {
   const theme = useTheme()
   let lang
 
-  const className = children?.[0]?.props?.className
+  const className = (children as ReactElement<any, any>)?.props?.className ?? ''
 
-  if (className && typeof className === 'string') {
+  if (className && typeof className === 'string')
     lang = /language-(\w+)/.exec(className)?.[1] || ''
-  }
+
   const stringChild = getLastStringChild(children) || ''
 
   return (
@@ -63,7 +51,6 @@ function MarkdownPreformatted({ children, ...props }: any) {
         },
       }}
       language={lang}
-      {...props}
     >
       {stringChild}
     </MultilineCode>
@@ -292,7 +279,7 @@ function MarkdownLink({
   mainBranch,
   ...props
 }: {
-  href: string
+  href?: string
   gitUrl: string
   mainBranch: string
 }) {
@@ -313,46 +300,54 @@ function MarkdownLink({
   )
 }
 
-function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
+function Markdown({ text, gitUrl, mainBranch, ...props }: MarkdownProps) {
   return useMemo(
     () => (
       <ReactMarkdown
+        {...props}
         rehypePlugins={[rehypeRaw]}
         remarkPlugins={[remarkGfm]}
         components={{
-          blockquote: render({ component: MdBlockquote }),
-          ul: render({ component: MdUl }),
-          ol: render({ component: MdOl }),
-          li: render({ component: MdLi }),
-          h1: render({ component: MdH1 }),
-          h2: render({ component: MdH2 }),
-          h3: render({ component: MdH3 }),
-          h4: render({ component: MdH4 }),
-          h5: render({ component: MdH5 }),
-          h6: render({ component: MdH6 }),
-          img: render({
-            component: MarkdownImage,
-            props: { gitUrl, mainBranch },
-          }),
-          p: render({ component: MdP }),
-          div: render({ component: MdDiv }),
-          a: render({
-            component: MarkdownLink,
-            props: { gitUrl, mainBranch },
-          }),
-          span: render({ component: MdSpan }),
-          code: render({ component: InlineCode }),
-          pre: render({ component: MarkdownPreformatted }),
-          hr: render({ component: MdHr }),
-          th: render({ component: MdTh }),
-          td: render({ component: MdTd }),
-          table: render({ component: MdTable }),
+          blockquote: (props) => <MdBlockquote {...props} />,
+          ul: (props) => <MdUl {...props} />,
+          ol: (props) => <MdOl {...props} />,
+          li: (props) => <MdLi {...props} />,
+          h1: (props) => <MdH1 {...props} />,
+          h2: (props) => <MdH2 {...props} />,
+          h3: (props) => <MdH3 {...props} />,
+          h4: (props) => <MdH4 {...props} />,
+          h5: (props) => <MdH5 {...props} />,
+          h6: (props) => <MdH6 {...props} />,
+          img: (props) => (
+            <MarkdownImage
+              {...props}
+              gitUrl={gitUrl}
+              mainBranch={mainBranch}
+            />
+          ),
+          p: (props) => <MdP {...props} />,
+          div: (props) => <MdDiv {...props} />,
+          a: (props) => (
+            <MarkdownLink
+              {...props}
+              gitUrl={gitUrl}
+              mainBranch={mainBranch}
+            />
+          ),
+          span: (props) => <MdSpan {...props} />,
+          code: (props) => <InlineCode {...props} />,
+          pre: ({ node: _, ...props }) => <MarkdownPreformatted {...props} />,
+          hr: (props) => <MdHr {...props} />,
+          th: (props) => <MdTh {...props} />,
+          td: (props) => <MdTd {...props} />,
+          table: (props) => <MdTable {...props} />,
+          ...props.components,
         }}
       >
         {text}
       </ReactMarkdown>
     ),
-    [text, gitUrl, mainBranch]
+    [props, gitUrl, mainBranch, text]
   )
 }
 
