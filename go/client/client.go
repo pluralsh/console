@@ -1843,6 +1843,7 @@ type ServiceDeploymentFragment struct {
 	Templated     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
 	Configuration []*ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Flow          *ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
+	SyncConfig    *ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 }
 
 func (t *ServiceDeploymentFragment) GetID() string {
@@ -1953,6 +1954,12 @@ func (t *ServiceDeploymentFragment) GetFlow() *ServiceDeploymentFragment_Flow {
 	}
 	return t.Flow
 }
+func (t *ServiceDeploymentFragment) GetSyncConfig() *ServiceDeploymentFragment_SyncConfig {
+	if t == nil {
+		t = &ServiceDeploymentFragment{}
+	}
+	return t.SyncConfig
+}
 
 type ServiceDeploymentExtended struct {
 	Cluster       *BaseClusterFragment                                                 "json:\"cluster,omitempty\" graphql:\"cluster\""
@@ -1977,6 +1984,7 @@ type ServiceDeploymentExtended struct {
 	Templated     *bool                                                                "json:\"templated,omitempty\" graphql:\"templated\""
 	Configuration []*ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Flow          *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
+	SyncConfig    *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 }
 
 func (t *ServiceDeploymentExtended) GetCluster() *BaseClusterFragment {
@@ -2110,6 +2118,12 @@ func (t *ServiceDeploymentExtended) GetFlow() *ServiceDeploymentExtended_Service
 		t = &ServiceDeploymentExtended{}
 	}
 	return t.Flow
+}
+func (t *ServiceDeploymentExtended) GetSyncConfig() *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig {
+	if t == nil {
+		t = &ServiceDeploymentExtended{}
+	}
+	return t.SyncConfig
 }
 
 type ErrorFragment struct {
@@ -5574,6 +5588,56 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 	return t.ID
 }
 
+type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                            "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                            "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -5675,6 +5739,56 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow) GetID()
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ServiceDeploymentForAgent_Cluster struct {
@@ -6299,6 +6413,56 @@ func (t *ServiceDeploymentFragment_Flow) GetID() string {
 	return t.ID
 }
 
+type ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -6418,6 +6582,56 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow) GetID() strin
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type RevisionFragment_Git struct {
@@ -6583,6 +6797,56 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                     "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                     "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
@@ -8545,6 +8809,56 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 	return t.ID
 }
 
+type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type CreateCluster_CreateCluster struct {
 	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 	ID             string                   "json:\"id\" graphql:\"id\""
@@ -8792,6 +9106,56 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 	return t.ID
 }
 
+type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type DeleteCluster_DeleteCluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -8917,6 +9281,56 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 	return t.ID
 }
 
+type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -9020,6 +9434,56 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 	return t.ID
 }
 
+type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -9121,6 +9585,56 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type PingCluster_PingCluster struct {
@@ -9244,6 +9758,56 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 	return t.ID
 }
 
+type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                                                 "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                                                 "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type ListClusters_Clusters struct {
 	Edges []*ClusterEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
 }
@@ -9356,6 +9920,56 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ListClustersWithParameters_Clusters struct {
@@ -9479,6 +10093,56 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 	return t.ID
 }
 
+type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type GetAgentUrl_Cluster struct {
 	AgentURL *string "json:\"agentUrl,omitempty\" graphql:\"agentUrl\""
 }
@@ -9591,6 +10255,56 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type GetClusterWithToken_Cluster struct {
@@ -9840,6 +10554,56 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	return t.ID
 }
 
+type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -9941,6 +10705,56 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -10046,6 +10860,56 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 	return t.ID
 }
 
+type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -10147,6 +11011,56 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ListServiceDeployments_ServiceDeployments_Edges struct {
@@ -10315,6 +11229,56 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster struct {
@@ -10692,6 +11656,56 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	return t.ID
 }
 
+type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -10813,6 +11827,56 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 	return t.ID
 }
 
+type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -10916,6 +11980,56 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 	return t.ID
 }
 
+type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -11017,6 +12131,56 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -11140,6 +12304,56 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	return t.ID
 }
 
+type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -11261,6 +12475,56 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 	return t.ID
 }
 
+type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -11362,6 +12626,56 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Flow) Get
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components struct {
@@ -11467,6 +12781,56 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 	return t.ID
 }
 
+type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                 "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                 "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type RollbackService_RollbackService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -11568,6 +12932,56 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Flow) GetID()
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
@@ -11673,6 +13087,56 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 	return t.ID
 }
 
+type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -11774,6 +13238,56 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Flow)
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                           "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                           "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                       "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
@@ -11939,6 +13453,56 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                    "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                    "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type GetServiceDeploymentComponents_ServiceDeployment_Components struct {
@@ -12388,6 +13952,56 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                            "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                            "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ListServiceDeployment_ServiceDeployments struct {
@@ -12945,6 +14559,56 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 	return t.ID
 }
 
+type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                     "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                     "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
+}
+
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -13064,6 +14728,56 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type GetClusterRegistrations_ClusterRegistrations_Edges struct {
@@ -14432,6 +16146,56 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow{}
 	}
 	return t.ID
+}
+
+type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+}
+
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Annotations
+}
+
+type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
+	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+}
+
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.CreateNamespace
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.NamespaceMetadata
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 
 type ListProviders_ClusterProviders_Edges struct {
@@ -20269,6 +22033,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -20304,6 +22079,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -20480,6 +22261,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -20515,6 +22307,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -20701,6 +22499,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -20736,6 +22545,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -20821,6 +22636,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -20856,6 +22682,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -20942,6 +22774,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -20977,6 +22820,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -21158,6 +23007,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -21193,6 +23053,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -21385,6 +23251,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -21420,6 +23297,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -21601,6 +23484,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -21636,6 +23530,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -21876,6 +23776,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -21911,6 +23822,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -22088,6 +24005,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -22123,6 +24051,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -22260,6 +24194,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -22295,6 +24240,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -22380,6 +24331,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -22415,6 +24377,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -22539,6 +24507,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -22582,6 +24561,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -22747,6 +24732,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -22782,6 +24778,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -23247,6 +25249,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -23282,6 +25295,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -23437,6 +25456,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -23472,6 +25502,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -23527,6 +25563,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -23570,6 +25617,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -23624,6 +25677,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -23667,6 +25731,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -23821,6 +25891,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -23856,6 +25937,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24011,6 +26098,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24046,6 +26144,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24102,6 +26206,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24145,6 +26260,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24201,6 +26322,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24244,6 +26376,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24301,6 +26439,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24344,6 +26493,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24399,6 +26554,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24442,6 +26608,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24500,6 +26672,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24543,6 +26726,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -24868,6 +27057,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -24903,6 +27103,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -25203,6 +27409,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -25238,6 +27455,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -26034,6 +28257,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -26069,6 +28303,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -26223,6 +28463,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -26258,6 +28509,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 `
 
@@ -31667,6 +33924,17 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 	flow {
 		id
 	}
+	syncConfig {
+		createNamespace
+		enforceNamespace
+		namespaceMetadata {
+			labels
+			annotations
+		}
+		diffNormalizers {
+			... DiffNormalizerFragment
+		}
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -31702,6 +33970,12 @@ fragment ComponentContentFragment on ComponentContent {
 	id
 	live
 	desired
+}
+fragment DiffNormalizerFragment on DiffNormalizer {
+	namespace
+	name
+	kind
+	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
