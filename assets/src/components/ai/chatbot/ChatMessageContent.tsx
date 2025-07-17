@@ -13,6 +13,7 @@ import {
   Flex,
   Markdown,
   PrQueueIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import isJson from 'is-json'
@@ -70,6 +71,7 @@ export function ChatMessageContent({
   serverName,
   highlightToolContent = true,
 }: ChatMessageContentProps) {
+  const { spacing } = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -105,10 +107,18 @@ export function ChatMessageContent({
       return <PrCallContent prAutomation={prAutomation} />
     case ChatType.Text:
     default:
-      return role === AiRole.Assistant || role === AiRole.System ? (
-        <Markdown text={content ?? ''} />
-      ) : (
-        <StandardMessageContent content={content} />
+      return (
+        <WrapWithIf
+          condition={!(role === AiRole.Assistant || role === AiRole.System)}
+          wrapper={
+            <Card
+              css={{ padding: spacing.medium }}
+              fillLevel={2}
+            />
+          }
+        >
+          <Markdown text={content ?? ''} />
+        </WrapWithIf>
       )
   }
 }
@@ -435,23 +445,3 @@ const ToolMessageContentSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
-
-function StandardMessageContent({ content }: { content: string }) {
-  const { spacing } = useTheme()
-  return (
-    <Card
-      css={{ padding: spacing.medium }}
-      fillLevel={2}
-    >
-      {content.split('\n').map((line, i, arr) => (
-        <div
-          key={`${i}-${line}`}
-          css={{ display: 'contents' }}
-        >
-          {line}
-          {i !== arr.length - 1 ? <br /> : null}
-        </div>
-      ))}
-    </Card>
-  )
-}
