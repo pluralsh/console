@@ -18,7 +18,6 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import ClusterSelector from 'components/cd/utils/ClusterSelector'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
@@ -29,7 +28,7 @@ import {
   useCreateAgentSessionMutation,
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { use, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
 import { AIPinButton } from '../AIPinButton'
@@ -50,7 +49,7 @@ export function ChatbotHeader({
   currentInsight?: Nullable<AiInsightFragment>
 }) {
   const { colors } = useTheme()
-  const { featureFlags } = use(FeatureFlagContext)
+
   const {
     setFullscreen,
     closeChatbot,
@@ -159,7 +158,7 @@ export function ChatbotHeader({
               }}
             />
           </div>
-          {featureFlags.Copilot && connectionId && (
+          {connectionId && (
             <AgentSessionButton
               connectionId={connectionId}
               fullscreen={fullscreen}
@@ -174,16 +173,15 @@ export function ChatbotHeader({
             onClick={() =>
               createNewThread({
                 summary: 'New chat with Plural Copilot',
-                ...(featureFlags.Copilot &&
-                  connectionId && {
-                    session: {
-                      connectionId,
-                      done: true,
-                      ...(selectedClusterId && {
-                        clusterId: selectedClusterId,
-                      }),
-                    },
-                  }),
+                ...(connectionId && {
+                  session: {
+                    connectionId,
+                    done: true,
+                    ...(selectedClusterId && {
+                      clusterId: selectedClusterId,
+                    }),
+                  },
+                }),
               })
             }
           />

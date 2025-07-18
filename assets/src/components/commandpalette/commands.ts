@@ -23,7 +23,6 @@ import {
   useThemeColorMode,
   EdgeComputeIcon,
   FlowIcon,
-  AiSparkleFilledIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -151,16 +150,6 @@ export function useCommands({
                   label: 'Enable Edge',
                   icon: EdgeComputeIcon,
                   callback: () => setFeatureFlag('Edge', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
-          ...(!featureFlags.Copilot
-            ? [
-                {
-                  label: 'Enable Copilot',
-                  icon: AiSparkleFilledIcon,
-                  callback: () => setFeatureFlag('Copilot', true),
                   deps: [setFeatureFlag],
                 },
               ]
