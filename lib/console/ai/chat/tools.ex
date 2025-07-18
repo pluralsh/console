@@ -52,12 +52,12 @@ defmodule Console.AI.Chat.Tools do
 
   @code_pre_tools [Agent.Stack, Agent.Coding.StackFiles]
   @code_pr_tools [Agent.Coding.GenericPr]
-  @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles, Agent.Done]
+  @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles]
 
   @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles]
-  @kubernetes_code_post_tools [Agent.Coding.GenericPr, Agent.Done]
+  @kubernetes_code_post_tools [Agent.Coding.GenericPr]
 
-  @post_tools [Agent.Done]
+  @post_tools []
 
   @cluster_tools [Agent.Discovery, Agent.ApiSpec]
 
@@ -83,16 +83,17 @@ defmodule Console.AI.Chat.Tools do
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
     do: @kubernetes_code_pre_tools
 
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, tf_booted: true}})
+    when is_binary(id), do: @code_pr_tools
   defp agent_tools(%ChatThread{session: %AgentSession{
     type: :terraform,
     stack_id: id,
     pull_request_id: pr_id,
     tf_planned: true
-  }}) when is_binary(id) and is_binary(pr_id), do: @code_post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, pull_request_id: pr_id}})
+  }})
     when is_binary(id) and is_binary(pr_id), do: @post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, tf_booted: true}})
-    when is_binary(id), do: @code_pr_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, pull_request_id: pr_id}})
+    when is_binary(id) and is_binary(pr_id), do: @code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform}}), do: @code_pre_tools
 
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools

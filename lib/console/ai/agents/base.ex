@@ -85,6 +85,7 @@ defmodule Console.AI.Agents.Base do
   def refetch(%AgentSession{id: id}), do: Console.Repo.get!(AgentSession, id)
 
   def drive(thread, messages \\ [], user) do
+    done(thread.session, false)
     Enum.reduce_while(0..3, :ok, fn val, _ ->
       if val > 0 do
         Logger.info "retrying agent thread #{thread.id} #{val} times"
@@ -112,7 +113,9 @@ defmodule Console.AI.Agents.Base do
       end)
       |> execute(timeout: 300_000)
       |> case do
-        {:ok, %{bump: thread, init: session}} -> {:halt, {:ok, thread, session}}
+        {:ok, %{bump: thread, init: session}} ->
+          done(session)
+          {:halt, {:ok, thread, session}}
         err -> {:cont, err}
       end
     end)
@@ -147,9 +150,9 @@ defmodule Console.AI.Agents.Base do
     |> Console.Repo.update()
   end
 
-  def done(%AgentSession{} = session) do
+  def done(%AgentSession{} = session, done \\ true) do
     refetch(session)
-    |> AgentSession.changeset(%{done: true})
+    |> AgentSession.changeset(%{done: done})
     |> Console.Repo.update()
   end
 

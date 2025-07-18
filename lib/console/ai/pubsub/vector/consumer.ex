@@ -1,7 +1,7 @@
 defmodule Console.AI.PubSub.Vector.Consumer do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 200
   alias Console.AI.PubSub.{Vectorizable, Vector.Indexable}
   alias Console.AI.VectorStore
   require Logger

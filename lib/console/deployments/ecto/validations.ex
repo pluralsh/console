@@ -47,6 +47,6 @@ defmodule Console.Deployments.Ecto.Validations do
   end
 
   def kubernetes_name(cs, field) do
-    validate_format(cs, field, ~r/[a-z][a-z\-]*[a-z]/, message: "#{field} must be a valid kubernetes name")
+    validate_format(cs, field, ~r/[a-z]([-a-z0-9]*[a-z0-9])?/, message: "#{field} must be a valid kubernetes name")
   end
 end
