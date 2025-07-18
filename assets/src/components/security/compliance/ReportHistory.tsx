@@ -85,6 +85,7 @@ export function ReportHistoryModal({
           </Button>
         </Flex>
       }
+      css={{ maxHeight: '75vh' }}
     >
       <Table
         fillLevel={2}
