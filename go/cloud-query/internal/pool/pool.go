@@ -2,6 +2,7 @@ package pool
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
@@ -20,6 +22,7 @@ type ConnectionPool struct {
 	admin connection.Connection
 	pool  cmap.ConcurrentMap[string, entry]
 	ttl   time.Duration
+	mux   sync.Mutex
 }
 
 func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
@@ -40,14 +43,16 @@ func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
 }
 
 func (c *ConnectionPool) cleanupRoutine() {
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		for item := range c.pool.IterBuffered() {
 			if !item.Val.alive(c.ttl) {
-				_ = item.Val.connection.Close()
-				c.Remove(item)
+				err := c.Remove(item)
+				if err != nil {
+					klog.ErrorS(err, "failed to remove stale connection", "connection", item.Val.uuid)
+				}
 			}
 		}
 	}
@@ -87,15 +92,21 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 }
 
 func (c *ConnectionPool) cleanup(connection string) error {
-	_, err := c.admin.Exec(`
+	query := fmt.Sprintf(`
 		-- Cleanup the connection
-		DROP SERVER IF EXISTS steampipe_$1;
-
-		-- Cleanup the schema
-		DROP SCHEMA IF EXISTS "$1" CASCADE;
+		DROP SERVER IF EXISTS %[1]s CASCADE;
 
 		-- Cleanup the user
-		DROP USER IF EXISTS "$1";`, connection)
+		DROP OWNED BY %[2]s;
+		DROP USER IF EXISTS %[2]s;
+
+		-- Cleanup the schema
+		DROP SCHEMA IF EXISTS %[2]s CASCADE;`,
+		pq.QuoteIdentifier("steampipe_"+connection),
+		pq.QuoteIdentifier(connection),
+	)
+
+	_, err := c.admin.Exec(query)
 	return err
 }
 
@@ -107,7 +118,10 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 
 	data, exists := c.pool.Get(sha)
 	if exists && !data.alive(c.ttl) {
-		c.Remove(cmap.Tuple[string, entry]{Key: sha, Val: data})
+		err = c.Remove(cmap.Tuple[string, entry]{Key: sha, Val: data})
+		if err != nil {
+			return nil, fmt.Errorf("failed to remove stale connection: %w", err)
+		}
 	}
 
 	if !exists || !data.alive(c.ttl) {
@@ -117,6 +131,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
+		klog.V(log.LogLevelVerbose).InfoS("creating new connection", "connection", connectionName)
 		if err = c.setup(connectionName, string(config.Provider())); err != nil {
 			return nil, fmt.Errorf("setup failed: %w", err)
 		}
@@ -139,6 +154,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		return conn, nil
 	}
 
+	klog.V(log.LogLevelVerbose).InfoS("reusing existing connection", "connection", data.uuid)
 	data.ping = time.Now()
 	c.pool.Set(sha, data)
 	return data.connection, nil
@@ -148,14 +164,29 @@ func (c *ConnectionPool) Set(key string, value connection.Connection) {
 	c.pool.Set(key, entry{connection: value, ping: time.Now()})
 }
 
-func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) {
-	_ = c.cleanup(t.Val.uuid)
-	err := t.Val.connection.Close()
+func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) error {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	if !c.pool.Has(t.Key) {
+		return nil
+	}
+
+	err := c.cleanup(t.Val.uuid)
+	if err != nil {
+		klog.ErrorS(err, "failed to cleanup connection", "connection", t.Val.uuid)
+		return err
+	}
+
+	err = t.Val.connection.Close()
 	if err != nil {
 		klog.ErrorS(err, "failed to close connection", "connection", t.Val.uuid)
+		return err
 	}
 
 	c.pool.Remove(t.Key)
+	klog.V(log.LogLevelExtended).InfoS("removed connection", "connection", t.Val.uuid)
+	return nil
 }
 
 func (c *ConnectionPool) Wipe() {

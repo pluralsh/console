@@ -34,7 +34,7 @@ const (
 	defaultDatabasePassword       = "postgres"
 	defaultDatabaseHost           = "localhost"
 	defaultDatabasePort           = "5432"
-	defaultDatabaseConnectionTTL  = 15 * time.Minute
+	defaultDatabaseConnectionTTL  = 3 * time.Hour
 	defaultServerAddress          = ":9192"
 	defaultServerEnableReflection = false
 )
@@ -125,7 +125,7 @@ func DatabaseConnectionTTL() time.Duration {
 		return defaultDatabaseConnectionTTL
 	}
 
-	if *argDatabaseConnectionTTL < 1*time.Minute {
+	if *argDatabaseConnectionTTL < defaultDatabaseConnectionTTL {
 		klog.Warningf("Connection TTL is set to a very low value (%s), this may lead to performance issues", *argDatabaseConnectionTTL)
 	}
 
