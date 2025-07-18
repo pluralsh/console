@@ -1,9 +1,7 @@
 import {
   Button,
   Flex,
-  IconFrame,
   InvoicesIcon,
-  PeopleIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -28,6 +26,7 @@ import { parse } from 'content-disposition'
 import streamSaver from 'streamsaver'
 import { fetchToken } from '../../../helpers/auth.ts'
 import { ReportHistory } from './ReportHistory.tsx'
+import { Permissions } from './Permissions.tsx'
 
 const fetchPolicyReport = (generator: string, token: string) => {
   streamSaver.mitm = '/mitm.html'
@@ -62,11 +61,7 @@ export const columns = [
 
       return (
         <Flex gap={'small'}>
-          <IconFrame
-            clickable
-            icon={<PeopleIcon />}
-            type={'floating'}
-          />
+          <Permissions name={node.name} />
           <ReportHistory name={node.name} />
           <Button
             floating
