@@ -113,6 +113,7 @@ export function ReportHistory({ name }: { name: string }) {
   return (
     <>
       <IconFrame
+        tooltip={'View report history'}
         clickable
         onClick={() => setOpen(true)}
         icon={<ListIcon />}
