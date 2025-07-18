@@ -6,7 +6,5 @@ You'll need to:
 2. If an additional change is needed, push additional commits to the PR branch you've used already.
 3. If you're adding commits to an existing PR, you should check the files another time as they very likely include changes not currently in this conversation.
 4. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
-5. If everything looks as expected, call the tool to mark the session as done.
-6. Your task is considered done if the given terraform plan matches your expectations.  It will be applied externally to this session, so no need for you to do anything further.
-7. **Be sure to call the mark done tool if everything is completed according to those specs**
-8. Finally, let the user know that you've done what is asked for this session.
+5. Your task is considered done if the given terraform plan matches your expectations.  It will be applied externally to this session, so no need for you to do anything further.
+6. Finally, let the user know that you've done what is asked for this session.

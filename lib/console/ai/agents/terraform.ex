@@ -62,7 +62,7 @@ defmodule Console.AI.Agents.Terraform do
     case Repo.preload(run, [steps: :logs]) do
       %StackRun{steps: [_ | _] = steps} ->
         Enum.map(steps, &step_message/1)
-        |> prepend(user_message("The stack run has failed, I'll list the logs explaining the failure, and perhaps they can inform any necessary code changes."))
+        |> prepend(user_message("The terraform stack plan has failed, I'll list the logs explaining the failure, and please make the necessary changes to the stack to fix the issue."))
       _ ->
         []
     end
