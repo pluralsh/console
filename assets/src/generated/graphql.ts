@@ -13582,6 +13582,8 @@ export type DeletePersonaMutation = { __typename?: 'RootMutationType', deletePer
 
 export type PolicyConstraintFragment = { __typename?: 'PolicyConstraint', description?: string | null, id: string, insertedAt?: string | null, name: string, recommendation?: string | null, updatedAt?: string | null, violationCount?: number | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, ref?: { __typename?: 'ConstraintRef', kind: string, name: string } | null };
 
+export type ComplianceReportGeneratorFragment = { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
 export type ComplianceReportFragment = { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null };
 
 export type PolicyConstraintsQueryVariables = Exact<{
@@ -13628,7 +13630,7 @@ export type PolicyStatisticsQueryVariables = Exact<{
 
 export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
-export type ComplianceReportsQueryVariables = Exact<{
+export type ComplianceReportGeneratorsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -13636,7 +13638,41 @@ export type ComplianceReportsQueryVariables = Exact<{
 }>;
 
 
-export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null };
+export type ComplianceReportGeneratorsQuery = { __typename?: 'RootQueryType', complianceReportGenerators?: { __typename?: 'ComplianceReportGeneratorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportGeneratorEdge', node?: { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+
+export type ComplianceReportGeneratorQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ComplianceReportGeneratorQuery = { __typename?: 'RootQueryType', complianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpsertComplianceReportGeneratorMutationVariables = Exact<{
+  attributes: ComplianceReportGeneratorAttributes;
+}>;
+
+
+export type UpsertComplianceReportGeneratorMutation = { __typename?: 'RootMutationType', upsertComplianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeleteComplianceReportMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteComplianceReportMutation = { __typename?: 'RootMutationType', deleteComplianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type ComplianceReportsQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null } | null };
 
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null };
 
@@ -17601,6 +17637,16 @@ export const PolicyConstraintFragmentDoc = gql`
   violationCount
 }
     ${ClusterBasicFragmentDoc}`;
+export const ComplianceReportGeneratorFragmentDoc = gql`
+    fragment ComplianceReportGenerator on ComplianceReportGenerator {
+  id
+  name
+  format
+  readBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const ComplianceReportFragmentDoc = gql`
     fragment ComplianceReport on ComplianceReports {
   insertedAt
@@ -28465,15 +28511,180 @@ export type PolicyStatisticsQueryHookResult = ReturnType<typeof usePolicyStatist
 export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicyStatisticsLazyQuery>;
 export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
 export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
-export const ComplianceReportsDocument = gql`
-    query ComplianceReports($after: String, $before: String, $first: Int, $last: Int) {
-  complianceReports(after: $after, before: $before, first: $first, last: $last) {
+export const ComplianceReportGeneratorsDocument = gql`
+    query ComplianceReportGenerators($after: String, $before: String, $first: Int, $last: Int) {
+  complianceReportGenerators(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
     pageInfo {
       ...PageInfo
     }
     edges {
       node {
-        ...ComplianceReport
+        ...ComplianceReportGenerator
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ComplianceReportGeneratorFragmentDoc}`;
+
+/**
+ * __useComplianceReportGeneratorsQuery__
+ *
+ * To run a query within a React component, call `useComplianceReportGeneratorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useComplianceReportGeneratorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useComplianceReportGeneratorsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useComplianceReportGeneratorsQuery(baseOptions?: Apollo.QueryHookOptions<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>(ComplianceReportGeneratorsDocument, options);
+      }
+export function useComplianceReportGeneratorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>(ComplianceReportGeneratorsDocument, options);
+        }
+export function useComplianceReportGeneratorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>(ComplianceReportGeneratorsDocument, options);
+        }
+export type ComplianceReportGeneratorsQueryHookResult = ReturnType<typeof useComplianceReportGeneratorsQuery>;
+export type ComplianceReportGeneratorsLazyQueryHookResult = ReturnType<typeof useComplianceReportGeneratorsLazyQuery>;
+export type ComplianceReportGeneratorsSuspenseQueryHookResult = ReturnType<typeof useComplianceReportGeneratorsSuspenseQuery>;
+export type ComplianceReportGeneratorsQueryResult = Apollo.QueryResult<ComplianceReportGeneratorsQuery, ComplianceReportGeneratorsQueryVariables>;
+export const ComplianceReportGeneratorDocument = gql`
+    query ComplianceReportGenerator($id: ID, $name: String) {
+  complianceReportGenerator(id: $id, name: $name) {
+    ...ComplianceReportGenerator
+  }
+}
+    ${ComplianceReportGeneratorFragmentDoc}`;
+
+/**
+ * __useComplianceReportGeneratorQuery__
+ *
+ * To run a query within a React component, call `useComplianceReportGeneratorQuery` and pass it any options that fit your needs.
+ * When your component renders, `useComplianceReportGeneratorQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useComplianceReportGeneratorQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useComplianceReportGeneratorQuery(baseOptions?: Apollo.QueryHookOptions<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>(ComplianceReportGeneratorDocument, options);
+      }
+export function useComplianceReportGeneratorLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>(ComplianceReportGeneratorDocument, options);
+        }
+export function useComplianceReportGeneratorSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>(ComplianceReportGeneratorDocument, options);
+        }
+export type ComplianceReportGeneratorQueryHookResult = ReturnType<typeof useComplianceReportGeneratorQuery>;
+export type ComplianceReportGeneratorLazyQueryHookResult = ReturnType<typeof useComplianceReportGeneratorLazyQuery>;
+export type ComplianceReportGeneratorSuspenseQueryHookResult = ReturnType<typeof useComplianceReportGeneratorSuspenseQuery>;
+export type ComplianceReportGeneratorQueryResult = Apollo.QueryResult<ComplianceReportGeneratorQuery, ComplianceReportGeneratorQueryVariables>;
+export const UpsertComplianceReportGeneratorDocument = gql`
+    mutation UpsertComplianceReportGenerator($attributes: ComplianceReportGeneratorAttributes!) {
+  upsertComplianceReportGenerator(attributes: $attributes) {
+    ...ComplianceReportGenerator
+  }
+}
+    ${ComplianceReportGeneratorFragmentDoc}`;
+export type UpsertComplianceReportGeneratorMutationFn = Apollo.MutationFunction<UpsertComplianceReportGeneratorMutation, UpsertComplianceReportGeneratorMutationVariables>;
+
+/**
+ * __useUpsertComplianceReportGeneratorMutation__
+ *
+ * To run a mutation, you first call `useUpsertComplianceReportGeneratorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertComplianceReportGeneratorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertComplianceReportGeneratorMutation, { data, loading, error }] = useUpsertComplianceReportGeneratorMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertComplianceReportGeneratorMutation(baseOptions?: Apollo.MutationHookOptions<UpsertComplianceReportGeneratorMutation, UpsertComplianceReportGeneratorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertComplianceReportGeneratorMutation, UpsertComplianceReportGeneratorMutationVariables>(UpsertComplianceReportGeneratorDocument, options);
+      }
+export type UpsertComplianceReportGeneratorMutationHookResult = ReturnType<typeof useUpsertComplianceReportGeneratorMutation>;
+export type UpsertComplianceReportGeneratorMutationResult = Apollo.MutationResult<UpsertComplianceReportGeneratorMutation>;
+export type UpsertComplianceReportGeneratorMutationOptions = Apollo.BaseMutationOptions<UpsertComplianceReportGeneratorMutation, UpsertComplianceReportGeneratorMutationVariables>;
+export const DeleteComplianceReportDocument = gql`
+    mutation DeleteComplianceReport($id: ID!) {
+  deleteComplianceReportGenerator(id: $id) {
+    ...ComplianceReportGenerator
+  }
+}
+    ${ComplianceReportGeneratorFragmentDoc}`;
+export type DeleteComplianceReportMutationFn = Apollo.MutationFunction<DeleteComplianceReportMutation, DeleteComplianceReportMutationVariables>;
+
+/**
+ * __useDeleteComplianceReportMutation__
+ *
+ * To run a mutation, you first call `useDeleteComplianceReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteComplianceReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteComplianceReportMutation, { data, loading, error }] = useDeleteComplianceReportMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteComplianceReportMutation(baseOptions?: Apollo.MutationHookOptions<DeleteComplianceReportMutation, DeleteComplianceReportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteComplianceReportMutation, DeleteComplianceReportMutationVariables>(DeleteComplianceReportDocument, options);
+      }
+export type DeleteComplianceReportMutationHookResult = ReturnType<typeof useDeleteComplianceReportMutation>;
+export type DeleteComplianceReportMutationResult = Apollo.MutationResult<DeleteComplianceReportMutation>;
+export type DeleteComplianceReportMutationOptions = Apollo.BaseMutationOptions<DeleteComplianceReportMutation, DeleteComplianceReportMutationVariables>;
+export const ComplianceReportsDocument = gql`
+    query ComplianceReports($id: ID, $name: String, $after: String, $before: String, $first: Int, $last: Int) {
+  complianceReportGenerator(id: $id, name: $name) {
+    complianceReports(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ComplianceReport
+        }
       }
     }
   }
@@ -28493,6 +28704,8 @@ ${ComplianceReportFragmentDoc}`;
  * @example
  * const { data, loading, error } = useComplianceReportsQuery({
  *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      first: // value for 'first'
@@ -30971,6 +31184,8 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
     PolicyStatistics: 'PolicyStatistics',
+    ComplianceReportGenerators: 'ComplianceReportGenerators',
+    ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReports: 'ComplianceReports',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
@@ -31108,6 +31323,8 @@ export const namedOperations = {
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
+    UpsertComplianceReportGenerator: 'UpsertComplianceReportGenerator',
+    DeleteComplianceReport: 'DeleteComplianceReport',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
@@ -31334,6 +31551,7 @@ export const namedOperations = {
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PolicyConstraint: 'PolicyConstraint',
+    ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReport: 'ComplianceReport',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',

@@ -15,6 +15,15 @@ fragment PolicyConstraint on PolicyConstraint {
   violationCount
 }
 
+fragment ComplianceReportGenerator on ComplianceReportGenerator {
+  id
+  name
+  format
+  readBindings {
+    ...PolicyBinding
+  }
+}
+
 fragment ComplianceReport on ComplianceReports {
   insertedAt
   id
@@ -113,13 +122,13 @@ query PolicyStatistics(
   }
 }
 
-query ComplianceReports(
+query ComplianceReportGenerators(
   $after: String
   $before: String
   $first: Int
   $last: Int
 ) {
-  complianceReports(
+  complianceReportGenerators(
     after: $after
     before: $before
     first: $first
@@ -130,7 +139,54 @@ query ComplianceReports(
     }
     edges {
       node {
-        ...ComplianceReport
+        ...ComplianceReportGenerator
+      }
+    }
+  }
+}
+
+query ComplianceReportGenerator($id: ID, $name: String) {
+  complianceReportGenerator(id: $id, name: $name) {
+    ...ComplianceReportGenerator
+  }
+}
+
+mutation UpsertComplianceReportGenerator(
+  $attributes: ComplianceReportGeneratorAttributes!
+) {
+  upsertComplianceReportGenerator(attributes: $attributes) {
+    ...ComplianceReportGenerator
+  }
+}
+
+mutation DeleteComplianceReport($id: ID!) {
+  deleteComplianceReportGenerator(id: $id) {
+    ...ComplianceReportGenerator
+  }
+}
+
+query ComplianceReports(
+  $id: ID
+  $name: String
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+) {
+  complianceReportGenerator(id: $id, name: $name) {
+    complianceReports(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ComplianceReport
+        }
       }
     }
   }
