@@ -3,7 +3,6 @@ import {
   Flex,
   IconFrame,
   InvoicesIcon,
-  ListIcon,
   PeopleIcon,
   Table,
   useSetBreadcrumbs,
@@ -28,6 +27,7 @@ import { GqlError } from '../../utils/Alert.tsx'
 import { parse } from 'content-disposition'
 import streamSaver from 'streamsaver'
 import { fetchToken } from '../../../helpers/auth.ts'
+import { ReportHistory } from './ReportHistory.tsx'
 
 const fetchPolicyReport = (generator: string, token: string) => {
   streamSaver.mitm = '/mitm.html'
@@ -67,11 +67,7 @@ export const columns = [
             icon={<PeopleIcon />}
             type={'floating'}
           />
-          <IconFrame
-            clickable
-            icon={<ListIcon />}
-            type={'floating'}
-          />
+          <ReportHistory name={node.name} />
           <Button
             floating
             small

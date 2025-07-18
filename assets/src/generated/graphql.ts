@@ -13663,6 +13663,8 @@ export type DeleteComplianceReportMutationVariables = Exact<{
 export type DeleteComplianceReportMutation = { __typename?: 'RootMutationType', deleteComplianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', id: string, name: string, format: ComplianceReportFormat, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ComplianceReportsQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -13670,7 +13672,7 @@ export type ComplianceReportsQueryVariables = Exact<{
 }>;
 
 
-export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null };
+export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null } | null };
 
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null };
 
@@ -28670,14 +28672,16 @@ export type DeleteComplianceReportMutationHookResult = ReturnType<typeof useDele
 export type DeleteComplianceReportMutationResult = Apollo.MutationResult<DeleteComplianceReportMutation>;
 export type DeleteComplianceReportMutationOptions = Apollo.BaseMutationOptions<DeleteComplianceReportMutation, DeleteComplianceReportMutationVariables>;
 export const ComplianceReportsDocument = gql`
-    query ComplianceReports($after: String, $before: String, $first: Int, $last: Int) {
-  complianceReports(after: $after, before: $before, first: $first, last: $last) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ComplianceReport
+    query ComplianceReports($id: ID, $name: String, $after: String, $before: String, $first: Int, $last: Int) {
+  complianceReportGenerator(id: $id, name: $name) {
+    complianceReports(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ComplianceReport
+        }
       }
     }
   }
@@ -28697,6 +28701,8 @@ ${ComplianceReportFragmentDoc}`;
  * @example
  * const { data, loading, error } = useComplianceReportsQuery({
  *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      first: // value for 'first'

@@ -1,13 +1,21 @@
-import { Button, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  ListIcon,
+  Modal,
+} from '@pluralsh/design-system'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-export function CreateComplianceReportModal({
+export function ReportHistoryModal({
+  name,
   open,
   onClose,
 }: {
+  name: string
   open: boolean
   onClose: Nullable<() => void>
 }) {
@@ -19,43 +27,41 @@ export function CreateComplianceReportModal({
       onClose={onClose}
       asForm
       onSubmit={() => {}}
-      header="Create compliance report"
-      actions={
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row-reverse',
-            gap: theme.spacing.small,
-          }}
+      header={
+        <Flex
+          align={'center'}
+          justify={'space-between'}
         >
-          <Button
-            primary
-            type="submit"
-          >
-            Create compliance report
-          </Button>
+          Report history
           <Button
             secondary
+            small
             onClick={() => onClose?.()}
           >
-            Cancel
+            Close
           </Button>
-        </div>
+        </Flex>
       }
     >
-      sad
+      ...
     </Modal>
   )
 }
 
-export function CreateComplianceReportButton() {
+export function ReportHistory({ name }: { name: string }) {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Create report</Button>
+      <IconFrame
+        clickable
+        onClick={() => setOpen(true)}
+        icon={<ListIcon />}
+        type={'floating'}
+      />
       <ModalMountTransition open={open}>
-        <CreateComplianceReportModal
+        <ReportHistoryModal
+          name={name}
           open={open}
           onClose={() => setOpen(false)}
         />

@@ -166,23 +166,27 @@ mutation DeleteComplianceReport($id: ID!) {
 }
 
 query ComplianceReports(
+  $id: ID
+  $name: String
   $after: String
   $before: String
   $first: Int
   $last: Int
 ) {
-  complianceReports(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-  ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ComplianceReport
+  complianceReportGenerator(id: $id, name: $name) {
+    complianceReports(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ComplianceReport
+        }
       }
     }
   }
