@@ -135,6 +135,7 @@ defmodule Console.AI.Chat do
   @spec update_thread(map, binary, User.t) :: thread_resp
   def update_thread(attrs, thread_id, %User{} = user) do
     get_thread!(thread_id)
+    |> Repo.preload(:session)
     |> ChatThread.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
@@ -307,7 +308,7 @@ defmodule Console.AI.Chat do
     end
   end
 
-  @thread_preloads [session: :connection, user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+  @thread_preloads [session: [:connection, :cluster], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
 
   @doc """
   Generates a context map for a PR associated with a chat thread

@@ -110,7 +110,10 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
     skip: !currentThread,
     variables: { id: currentThread?.id ?? '' },
     onCompleted: (data) =>
-      setShowPrompts(isEmpty(data.chatThread?.chats?.edges)),
+      setShowPrompts(
+        isEmpty(data.chatThread?.chats?.edges) &&
+          !data.chatThread?.session?.type
+      ),
   })
   const tools =
     threadDetailsQuery.data?.chatThread?.tools?.filter(isNonNullable) ?? []

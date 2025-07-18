@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["role"],
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": ["search", "provisioning", "manifests"],
+      "description": "The role the assistant will play in helping the user.  Search is for general search and explanation of a users kubernetes and cloud estate, provisioning is for creation of new kubernetes or cloud infrastructure, and manifests is for writing new kubernetes manifests within the context of a cluster."
+    }
+  }
+}

@@ -17,7 +17,7 @@ import {
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
+import ClusterSelector from 'components/cd/utils/ClusterSelector'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
@@ -28,7 +28,7 @@ import {
   useCreateAgentSessionMutation,
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { use, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
 import { AIPinButton } from '../AIPinButton'
@@ -49,7 +49,7 @@ export function ChatbotHeader({
   currentInsight?: Nullable<AiInsightFragment>
 }) {
   const { colors } = useTheme()
-  const { featureFlags } = use(FeatureFlagContext)
+
   const {
     setFullscreen,
     closeChatbot,
@@ -89,6 +89,11 @@ export function ChatbotHeader({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
+  const hideClusterSelector =
+    currentThread?.session?.type === AgentSessionType.Kubernetes ||
+    currentThread?.session?.type === AgentSessionType.Terraform ||
+    !currentThread?.session?.id
+
   return (
     <WrapperSC $fullscreen={fullscreen}>
       {state === 'list' ? (
@@ -120,9 +125,37 @@ export function ChatbotHeader({
           />
         </>
       )}
-      {!cloudConnectionsLoading && (
+      {!cloudConnectionsLoading && !hideClusterSelector && (
         <>
-          {featureFlags.Copilot && connectionId && (
+          <div css={{ width: 220 }}>
+            <ClusterSelector
+              allowDeselect
+              onClusterChange={(cluster) => {
+                if (cluster?.id !== currentThread?.session?.cluster?.id)
+                  updateThread({
+                    variables: {
+                      id: currentThread.id,
+                      attributes: {
+                        summary: currentThread.summary,
+                        session: { clusterId: cluster?.id ?? null },
+                      },
+                    },
+                  })
+              }}
+              clusterId={currentThread?.session?.cluster?.id}
+              loading={updateThreadLoading}
+              placeholder="Select cluster"
+              startIcon={null}
+              deselectLabel="Deselect"
+              inputProps={{
+                style: {
+                  minHeight: fullscreen ? 40 : 32,
+                  height: fullscreen ? 40 : 32,
+                },
+              }}
+            />
+          </div>
+          {connectionId && (
             <AgentSessionButton
               connectionId={connectionId}
               fullscreen={fullscreen}
@@ -137,10 +170,12 @@ export function ChatbotHeader({
             onClick={() =>
               createNewThread({
                 summary: 'New chat with Plural Copilot',
-                ...(featureFlags.Copilot &&
-                  connectionId && {
-                    session: { connectionId },
-                  }),
+                ...(connectionId && {
+                  session: {
+                    connectionId,
+                    done: true,
+                  },
+                }),
               })
             }
           />
@@ -255,8 +290,10 @@ function AgentSessionButton({
     { loading: agentSessionLoading, error: agentSessionError },
   ] = useCreateAgentSessionMutation({
     variables: { attributes: { connectionId, prompt, type } },
-    onCompleted: (data) =>
-      data.createAgentSession?.id && goToThread(data.createAgentSession.id),
+    onCompleted: (data) => {
+      if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
+      setShowInputModal(false)
+    },
   })
   return (
     <>

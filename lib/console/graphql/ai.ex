@@ -57,6 +57,8 @@ defmodule Console.GraphQl.AI do
     field :plan_confirmed, :boolean, description: "whether the provisioning plan has been confirmed"
     field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
+    field :cluster_id,     :id, description: "the id of the cluster to use for this session"
+    field :done,           :boolean, description: "whether to immediately mark this session in a done state, eg no backgroud work"
   end
 
   @desc "the settings for an AI chat thread"
@@ -114,9 +116,10 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :flow,     :flow,       resolve: dataloader(Deployments)
-    field :user,     :user,       resolve: dataloader(User)
-    field :insight,  :ai_insight, resolve: dataloader(AI)
+    field :flow,     :flow,          resolve: dataloader(Deployments)
+    field :user,     :user,          resolve: dataloader(User)
+    field :insight,  :ai_insight,    resolve: dataloader(AI)
+    field :session,  :agent_session, resolve: dataloader(AI)
 
     @desc "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
     field :tools, list_of(:mcp_server_tool) do
@@ -143,10 +146,12 @@ defmodule Console.GraphQl.AI do
     field :thread,         :chat_thread, resolve: dataloader(AI)
     field :connection,     :cloud_connection, resolve: dataloader(Deployments)
     field :branch,         :string, description: "the branch this session's pr is operating on"
+    field :done,           :boolean, description: "whether the agent has declared the work for this session done"
 
     field :service,      :service_deployment, resolve: dataloader(Deployments)
     field :stack,        :infrastructure_stack, resolve: dataloader(Deployments)
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :cluster,      :cluster, resolve: dataloader(Deployments)
 
     @desc "the services associated with this chat, usually from an agentic workflow"
     connection field :service_deployments, node_type: :service_deployment do
@@ -274,16 +279,24 @@ defmodule Console.GraphQl.AI do
     end
   end
 
+  object :tool_delta do
+    field :id,        :id
+    field :name,      :string
+    field :arguments, :map
+  end
+
   object :ai_delta do
-    field :seq,     non_null(:integer)
-    field :content, non_null(:string)
-    field :message, :integer
-    field :role,    :ai_role
+    field :seq,       non_null(:integer)
+    field :content,   non_null(:string)
+    field :message,   :integer
+    field :role,      :ai_role
+    field :tool,      :tool_delta
   end
 
   connection node_type: :chat
   connection node_type: :chat_thread
   connection node_type: :ai_pin
+  connection node_type: :agent_session
 
   object :ai_queries do
     field :ai_insight, :ai_insight do
@@ -340,6 +353,12 @@ defmodule Console.GraphQl.AI do
       arg :flow_id, :id, description: "only show threads for this flow"
 
       resolve &AI.threads/2
+    end
+
+    connection field :agent_sessions, node_type: :agent_session do
+      middleware Authenticated
+
+      resolve &AI.sessions/2
     end
 
     connection field :ai_pins, node_type: :ai_pin do

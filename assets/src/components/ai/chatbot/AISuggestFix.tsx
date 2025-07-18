@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react'
 import {
-  AiDelta,
+  AiDeltaFragment,
   AiInsightFragment,
   AiRole,
   ChatMessage,
@@ -59,7 +59,7 @@ export function AiStream({
   scrollToBottom?: () => void
   setStreaming?: Dispatch<SetStateAction<boolean>>
 }) {
-  const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
+  const [streamedMessage, setStreamedMessage] = useState<AiDeltaFragment[]>([])
   useAiChatStreamSubscription({
     variables: { insightId, scopeId, recommendationId },
     onData: ({ data: { data } }) => {

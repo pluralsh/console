@@ -64,6 +64,9 @@ fragment ChatThreadTiny on ChatThread {
     name
     icon
   }
+  session {
+    ...AgentSession
+  }
 }
 
 fragment ChatThread on ChatThread {
@@ -93,6 +96,27 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+}
+
+fragment AgentSession on AgentSession {
+  id
+  type
+  done
+  planConfirmed
+  cluster {
+    id
+  }
+}
+
+fragment AiDelta on AiDelta {
+  seq
+  message
+  role
+  content
+  tool {
+    id
+    name
+  }
 }
 
 query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
@@ -260,9 +284,6 @@ subscription AIChatStream(
     scopeId: $scopeId
     recommendationId: $recommendationId
   ) {
-    seq
-    message
-    role
-    content
+    ...AiDelta
   }
 }

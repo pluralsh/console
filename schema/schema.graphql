@@ -465,6 +465,8 @@ type RootQueryType {
     flowId: ID
   ): ChatThreadConnection
 
+  agentSessions(after: String, first: Int, before: String, last: Int): AgentSessionConnection
+
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 
   aiPin(insightId: ID, threadId: ID): AiPin
@@ -4586,6 +4588,9 @@ input DiffNormalizerAttributes {
 
   namespace: String
 
+  "whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely"
+  backfill: Boolean
+
   "A list of json patches to apply to the service which controls how drift detection works"
   jsonPointers: [String]
 }
@@ -5244,6 +5249,9 @@ type DiffNormalizer {
 
   "The namespace of the resource to normalize"
   namespace: String
+
+  "Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely"
+  backfill: Boolean
 
   "A list of json pointers to the fields to ignore"
   jsonPointers: [String]
@@ -8092,6 +8100,9 @@ enum EvidenceType {
 enum AgentSessionType {
   TERRAFORM
   KUBERNETES
+  PROVISIONING
+  SEARCH
+  MANIFESTS
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -8162,6 +8173,12 @@ input AgentSessionAttributes {
 
   "the id of the cloud connection to use for this session"
   connectionId: ID
+
+  "the id of the cluster to use for this session"
+  clusterId: ID
+
+  "whether to immediately mark this session in a done state, eg no backgroud work"
+  done: Boolean
 }
 
 "the settings for an AI chat thread"
@@ -8243,6 +8260,8 @@ type ChatThread {
 
   insight: AiInsight
 
+  session: AgentSession
+
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
@@ -8257,6 +8276,50 @@ type ChatThread {
 type ChatThreadSettings {
   "controls whether this thread uses knowledge graph-basedmemory"
   memory: Boolean
+}
+
+"A session for an AI agent to use when acting in a chat thread"
+type AgentSession {
+  id: ID!
+
+  "the type of agent this session is for"
+  type: AgentSessionType
+
+  "whether the provisioning plan has been confirmed"
+  planConfirmed: Boolean
+
+  thread: ChatThread
+
+  connection: CloudConnection
+
+  "the branch this session's pr is operating on"
+  branch: String
+
+  "whether the agent has declared the work for this session done"
+  done: Boolean
+
+  service: ServiceDeployment
+
+  stack: InfrastructureStack
+
+  pullRequest: PullRequest
+
+  cluster: Cluster
+
+  "the services associated with this chat, usually from an agentic workflow"
+  serviceDeployments(
+    after: String, first: Int, before: String, last: Int, q: String, status: ServiceDeploymentStatus, errored: Boolean
+  ): ServiceDeploymentConnection
+
+  "the stacks associated with this chat, usually from an agentic workflow"
+  stacks(after: String, first: Int, before: String, last: Int, q: String): InfrastructureStackConnection
+
+  "the pull requests associated with this chat, usually from an agentic workflow"
+  pullRequests(after: String, first: Int, before: String, last: Int, open: Boolean, q: String): PullRequestConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "A saved item for future ai-based investigation"
@@ -8375,11 +8438,18 @@ type ClusterInsightComponent {
   resource: KubernetesUnstructured
 }
 
+type ToolDelta {
+  id: ID
+  name: String
+  arguments: Map
+}
+
 type AiDelta {
   seq: Int!
   content: String!
   message: Int
   role: AiRole
+  tool: ToolDelta
 }
 
 type ChatConnection {
@@ -8395,6 +8465,11 @@ type ChatThreadConnection {
 type AiPinConnection {
   pageInfo: PageInfo!
   edges: [AiPinEdge]
+}
+
+type AgentSessionConnection {
+  pageInfo: PageInfo!
+  edges: [AgentSessionEdge]
 }
 
 type Account {
@@ -9805,6 +9880,11 @@ type PodEdge {
 
 type AuditEdge {
   node: Audit
+  cursor: String
+}
+
+type AgentSessionEdge {
+  node: AgentSession
   cursor: String
 }
 

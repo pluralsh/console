@@ -122,6 +122,33 @@ type AgentMigrationAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 }
 
+// A session for an AI agent to use when acting in a chat thread
+type AgentSession struct {
+	ID string `json:"id"`
+	// the type of agent this session is for
+	Type *AgentSessionType `json:"type,omitempty"`
+	// whether the provisioning plan has been confirmed
+	PlanConfirmed *bool            `json:"planConfirmed,omitempty"`
+	Thread        *ChatThread      `json:"thread,omitempty"`
+	Connection    *CloudConnection `json:"connection,omitempty"`
+	// the branch this session's pr is operating on
+	Branch *string `json:"branch,omitempty"`
+	// whether the agent has declared the work for this session done
+	Done        *bool                `json:"done,omitempty"`
+	Service     *ServiceDeployment   `json:"service,omitempty"`
+	Stack       *InfrastructureStack `json:"stack,omitempty"`
+	PullRequest *PullRequest         `json:"pullRequest,omitempty"`
+	Cluster     *Cluster             `json:"cluster,omitempty"`
+	// the services associated with this chat, usually from an agentic workflow
+	ServiceDeployments *ServiceDeploymentConnection `json:"serviceDeployments,omitempty"`
+	// the stacks associated with this chat, usually from an agentic workflow
+	Stacks *InfrastructureStackConnection `json:"stacks,omitempty"`
+	// the pull requests associated with this chat, usually from an agentic workflow
+	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
+	InsertedAt   *string                `json:"insertedAt,omitempty"`
+	UpdatedAt    *string                `json:"updatedAt,omitempty"`
+}
+
 type AgentSessionAttributes struct {
 	// the type of agent this session is for
 	Type *AgentSessionType `json:"type,omitempty"`
@@ -131,13 +158,28 @@ type AgentSessionAttributes struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// the id of the cloud connection to use for this session
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// the id of the cluster to use for this session
+	ClusterID *string `json:"clusterId,omitempty"`
+	// whether to immediately mark this session in a done state, eg no backgroud work
+	Done *bool `json:"done,omitempty"`
+}
+
+type AgentSessionConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*AgentSessionEdge `json:"edges,omitempty"`
+}
+
+type AgentSessionEdge struct {
+	Node   *AgentSession `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 type AiDelta struct {
-	Seq     int64   `json:"seq"`
-	Content string  `json:"content"`
-	Message *int64  `json:"message,omitempty"`
-	Role    *AiRole `json:"role,omitempty"`
+	Seq     int64      `json:"seq"`
+	Content string     `json:"content"`
+	Message *int64     `json:"message,omitempty"`
+	Role    *AiRole    `json:"role,omitempty"`
+	Tool    *ToolDelta `json:"tool,omitempty"`
 }
 
 // A representation of a LLM-derived insight
@@ -807,6 +849,7 @@ type ChatThread struct {
 	Flow          *Flow               `json:"flow,omitempty"`
 	User          *User               `json:"user,omitempty"`
 	Insight       *AiInsight          `json:"insight,omitempty"`
+	Session       *AgentSession       `json:"session,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -2340,6 +2383,8 @@ type DiffNormalizer struct {
 	Kind *string `json:"kind,omitempty"`
 	// The namespace of the resource to normalize
 	Namespace *string `json:"namespace,omitempty"`
+	// Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely
+	Backfill *bool `json:"backfill,omitempty"`
 	// A list of json pointers to the fields to ignore
 	JSONPointers []*string `json:"jsonPointers,omitempty"`
 }
@@ -2348,6 +2393,8 @@ type DiffNormalizerAttributes struct {
 	Name      *string `json:"name,omitempty"`
 	Kind      *string `json:"kind,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
+	// whether you should backfill the given pointers with the current live value, or otherwise ignore it entirely
+	Backfill *bool `json:"backfill,omitempty"`
 	// A list of json patches to apply to the service which controls how drift detection works
 	JSONPointers []*string `json:"jsonPointers,omitempty"`
 }
@@ -6669,6 +6716,12 @@ type ToolConfigAttributes struct {
 	CreatePr *CreatePrConfigAttributes `json:"createPr,omitempty"`
 }
 
+type ToolDelta struct {
+	ID        *string        `json:"id,omitempty"`
+	Name      *string        `json:"name,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // How to enforce uniqueness for a field
 type UniqByAttributes struct {
 	// the scope this name is uniq w/in
@@ -7091,18 +7144,24 @@ type YamlOverlayAttributes struct {
 type AgentSessionType string
 
 const (
-	AgentSessionTypeTerraform  AgentSessionType = "TERRAFORM"
-	AgentSessionTypeKubernetes AgentSessionType = "KUBERNETES"
+	AgentSessionTypeTerraform    AgentSessionType = "TERRAFORM"
+	AgentSessionTypeKubernetes   AgentSessionType = "KUBERNETES"
+	AgentSessionTypeProvisioning AgentSessionType = "PROVISIONING"
+	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
+	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 )
 
 var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeTerraform,
 	AgentSessionTypeKubernetes,
+	AgentSessionTypeProvisioning,
+	AgentSessionTypeSearch,
+	AgentSessionTypeManifests,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests:
 		return true
 	}
 	return false

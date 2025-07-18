@@ -4,6 +4,7 @@ defmodule Console.AI.Agents.Base do
   alias Console.Schema.{ChatThread, Chat, AgentSession}
   alias Console.Repo
   alias Console.AI.Chat.Engine
+  alias Console.AI.Stream
   require Logger
 
   defmacro __using__(_) do
@@ -37,7 +38,7 @@ defmodule Console.AI.Agents.Base do
         Stream.topic(:thread, thread.id, thread.user)
         |> Stream.enable()
 
-        {:ok, thread, session} = drive(thread, [{:user, session.prompt}], thread.user)
+        {:ok, thread, session} = drive(thread, [user_message(session.prompt)], thread.user)
         {:ok, session} = initialized(session)
         update_context(%{session: session})
         enqueue(self(),:booted)
@@ -65,7 +66,12 @@ defmodule Console.AI.Agents.Base do
           false -> {:stop, :moved, state}
         end
       end
-      def handle_info(:die, session), do: {:stop, :normal, session}
+
+      def handle_info(:die, {_, session} = state) do
+        done(session)
+        {:stop, :normal, state}
+      end
+
       def handle_info(_, session), do: {:noreply, session}
     end
   end
@@ -79,6 +85,7 @@ defmodule Console.AI.Agents.Base do
   def refetch(%AgentSession{id: id}), do: Console.Repo.get!(AgentSession, id)
 
   def drive(thread, messages \\ [], user) do
+    done(thread.session, false)
     Enum.reduce_while(0..3, :ok, fn val, _ ->
       if val > 0 do
         Logger.info "retrying agent thread #{thread.id} #{val} times"
@@ -106,7 +113,9 @@ defmodule Console.AI.Agents.Base do
       end)
       |> execute(timeout: 300_000)
       |> case do
-        {:ok, %{bump: thread, init: session}} -> {:halt, {:ok, thread, session}}
+        {:ok, %{bump: thread, init: session}} ->
+          done(session)
+          {:halt, {:ok, thread, session}}
         err -> {:cont, err}
       end
     end)
@@ -139,5 +148,18 @@ defmodule Console.AI.Agents.Base do
     refetch(session)
     |> AgentSession.changeset(%{initialized: true})
     |> Console.Repo.update()
+  end
+
+  def done(%AgentSession{} = session, done \\ true) do
+    refetch(session)
+    |> AgentSession.changeset(%{done: done})
+    |> Console.Repo.update()
+  end
+
+  def user_message(content) when is_binary(content) do
+    stream = Stream.stream(:user)
+    Stream.publish(stream, content, 1)
+    Stream.offset(1)
+    {:user, content}
   end
 end

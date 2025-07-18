@@ -7,6 +7,7 @@ defmodule Console.AI.Chat.Engine do
     Chat,
     Chat.Attributes,
     ChatThread,
+    AgentSession,
     Flow,
     User,
     McpServer,
@@ -62,11 +63,13 @@ defmodule Console.AI.Chat.Engine do
   def completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
     preface = prompt(thread)
 
+    thread = current_thread(thread)
+    opts = include_tools([preface: preface], thread)
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
     |> fit_context_window(preface)
-    |> Provider.completion(include_tools([preface: preface], thread))
+    |> Provider.completion(opts)
     |> case do
       {:ok, content} ->
         append(completion, {:assistant, content})
@@ -74,7 +77,7 @@ defmodule Console.AI.Chat.Engine do
         |> ChatSvc.save_messages(thread_id, user)
       {:ok, content, tools} ->
         {plural, mcp} = Enum.split_with(tools, &String.starts_with?(&1.name, "__plrl__"))
-        with {:ok, plrl_res} <- call_plrl_tools(plural, Tools.tools(thread)),
+        with {:ok, plrl_res} <- call_plrl_tools(plural, opts[:plural]),
              {:ok, mcp_res} <- call_mcp_tools(mcp, thread, user) do
           completion = completion ++ tool_msgs(content, mcp_res ++ plrl_res)
           Enum.any?(completion, fn
@@ -112,19 +115,16 @@ defmodule Console.AI.Chat.Engine do
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
-           _ <- Logger.info("calling tool: #{name} with args: #{inspect(args)}"),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
         case tool_msg(content, id, nil, name, args) do
           [_ | _] = msgs ->
             Enum.each(msgs, fn %{content: content} ->
-              publish_to_stream(stream, content)
-              Stream.offset(1)
+              publish_tool(stream, content, id, name)
             end)
             {:cont, Enum.concat(msgs, acc)}
           %{content: content} = msg ->
-            publish_to_stream(stream, content)
-            Stream.offset(1)
+            publish_tool(stream, content, id, name)
             {:cont, [msg | acc]}
         end
       else
@@ -147,8 +147,7 @@ defmodule Console.AI.Chat.Engine do
       with {sname, tname} <- Agent.tool_name(name),
            {tname, %McpServer{confirm: false} = server} <- {tname, servers_by_name[sname]},
            {:ok, content} <- call_tool(tool, thread, server, user) do
-        publish_to_stream(stream, content)
-        Stream.offset(1)
+        publish_tool(stream, content, id, name)
         {:cont, [tool_msg(content, id, server, tname, args) | acc]}
       else
         {tname, %McpServer{confirm: true} = server} ->
@@ -214,7 +213,7 @@ defmodule Console.AI.Chat.Engine do
   defp tool_results(res) when is_list(res), do: {:ok, Enum.reverse(res)}
   defp tool_results(err), do: err
 
-  defp include_tools(opts, thread) do
+  defp include_tools(opts, %ChatThread{} = thread) do
     case {thread, ChatSvc.find_tools(thread)} do
       {_, {:ok, [_ | _] = tools}} ->
         [{:tools, tools}, {:plural, Tools.tools(thread)} | opts]
@@ -225,12 +224,26 @@ defmodule Console.AI.Chat.Engine do
     end
   end
 
+  defp current_thread(%ChatThread{} = thread) do
+    case Tool.context() do
+      %Tool.Context{session: %AgentSession{} = session} ->
+        %{thread | session: session}
+      _ -> thread
+    end
+  end
+
   defp persist?(%{persist: false}), do: false
   defp persist?(_), do: true
 
   defp fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
+  end
+
+  defp publish_tool(stream, content, id, name) do
+    Stream.tool(id, name)
+    publish_to_stream(stream, content)
+    Stream.offset(1)
   end
 
   defp publish_to_stream(stream, %{content: content}), do: Stream.publish(stream, content, 1)

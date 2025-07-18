@@ -59,10 +59,11 @@ defmodule Console.Schema.DiffNormalizer do
     field :kind,          :string
     field :name,          :string
     field :namespace,     :string
+    field :backfill,      :boolean, default: false
     field :json_pointers, {:array, :string}
   end
 
-  @valid ~w(json_pointers group kind name namespace)a
+  @valid ~w(json_pointers group kind name namespace backfill)a
 
   def changeset(model, attrs \\ %{}) do
     model

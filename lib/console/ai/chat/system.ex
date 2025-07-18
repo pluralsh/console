@@ -5,6 +5,9 @@ defmodule Console.AI.Chat.System do
   alias Console.Schema.{ChatThread, AgentSession}
 
   @chat Console.priv_file!("prompts/chat.md")
+  @agent_pre Console.priv_file!("prompts/agent_pre.md")
+  @agent_search Console.priv_file!("prompts/agent_search.md")
+  @agent_manifests Console.priv_file!("prompts/agent_manifests.md")
   @base_agent Console.priv_file!("prompts/agent.md")
   @code_agent Console.priv_file!("prompts/terraform_agent.md")
   @code_pr Console.priv_file!("prompts/terraform_pr.md")
@@ -19,6 +22,10 @@ defmodule Console.AI.Chat.System do
   def prompt(%ChatThread{session: %AgentSession{type: :terraform, prompt: p, service_id: id}})
     when is_binary(id), do: "#{@code_pr}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: "#{@code_agent}\n\nThis is your task: #{p}"
+  def prompt(%ChatThread{session: %AgentSession{type: nil}}), do: @agent_pre
+  def prompt(%ChatThread{session: %AgentSession{type: :search}}), do: @agent_search
+  def prompt(%ChatThread{session: %AgentSession{type: :provisioning}}), do: @base_agent
+  def prompt(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests
   def prompt(%ChatThread{session: %AgentSession{}}), do: @base_agent
   def prompt(_), do: @chat
 end

@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
   alias Console.AI.{Service, Provider, Fixer}
-  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(ChatThread, _), do: ChatThread
   def query(AiPin, _), do: AiPin
   def query(AiInsightEvidence, _), do: AiInsightEvidence
+  def query(AgentSession, _), do: AgentSession
   def query(_, _), do: AiInsight
 
   def resolve_insight(%{id: id}, %{context: %{current_user: user}}),
@@ -31,6 +32,13 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatThread.for_user(user.id)
     |> ChatThread.ordered()
     |> thread_filters(args)
+    |> paginate(args)
+  end
+
+  def sessions(args, %{context: %{current_user: user}}) do
+    AgentSession.for_user(user.id)
+    |> AgentSession.agent()
+    |> AgentSession.ordered()
     |> paginate(args)
   end
 

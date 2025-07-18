@@ -1975,6 +1975,11 @@ func (in *DiffNormalizers) DeepCopyInto(out *DiffNormalizers) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Backfill != nil {
+		in, out := &in.Backfill, &out.Backfill
+		*out = new(bool)
+		**out = **in
+	}
 	if in.JSONPointers != nil {
 		in, out := &in.JSONPointers, &out.JSONPointers
 		*out = make([]string, len(*in))

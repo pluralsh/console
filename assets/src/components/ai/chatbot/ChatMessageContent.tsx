@@ -13,6 +13,7 @@ import {
   Flex,
   Markdown,
   PrQueueIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import isJson from 'is-json'
@@ -70,6 +71,7 @@ export function ChatMessageContent({
   serverName,
   highlightToolContent = true,
 }: ChatMessageContentProps) {
+  const { spacing } = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -105,10 +107,18 @@ export function ChatMessageContent({
       return <PrCallContent prAutomation={prAutomation} />
     case ChatType.Text:
     default:
-      return role === AiRole.Assistant || role === AiRole.System ? (
-        <Markdown text={content ?? ''} />
-      ) : (
-        <StandardMessageContent content={content} />
+      return (
+        <WrapWithIf
+          condition={!(role === AiRole.Assistant || role === AiRole.System)}
+          wrapper={
+            <Card
+              css={{ padding: spacing.medium }}
+              fillLevel={2}
+            />
+          }
+        >
+          <Markdown text={content ?? ''} />
+        </WrapWithIf>
       )
   }
 }
@@ -380,7 +390,13 @@ function ToolMessageContent({
                 </Code>
               )}
               {format === MessageFormat.Markdown && (
-                <Card css={{ padding: spacing.medium, background: 'none' }}>
+                <Card
+                  css={{
+                    padding: spacing.medium,
+                    background: 'none',
+                    height: '100%',
+                  }}
+                >
                   <Markdown text={content} />
                 </Card>
               )}
@@ -422,30 +438,10 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.large,
 }))
 const ToolMessageContentSC = styled.div(({ theme }) => ({
-  height: 324,
+  maxHeight: 324,
   marginTop: theme.spacing.small,
   maxWidth: '100%',
   overflow: 'auto',
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
-
-function StandardMessageContent({ content }: { content: string }) {
-  const { spacing } = useTheme()
-  return (
-    <Card
-      css={{ padding: spacing.medium }}
-      fillLevel={2}
-    >
-      {content.split('\n').map((line, i, arr) => (
-        <div
-          key={`${i}-${line}`}
-          css={{ display: 'contents' }}
-        >
-          {line}
-          {i !== arr.length - 1 ? <br /> : null}
-        </div>
-      ))}
-    </Card>
-  )
-}

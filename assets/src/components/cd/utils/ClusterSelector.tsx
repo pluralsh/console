@@ -1,6 +1,7 @@
 import {
   ClusterIcon,
   ComboBox,
+  Input2,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -15,7 +16,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useCallback, useMemo, useState } from 'react'
+import { ComponentPropsWithRef, useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -29,6 +30,9 @@ export default function ClusterSelector({
   hideTitleContent = false,
   showUpgrades = false,
   placeholder = 'Filter by cluster',
+  deselectLabel = 'Show all clusters',
+  inputProps,
+  ...props
 }: {
   onClusterChange: (cluster: ClusterTinyFragment | null) => void
   clusterId: Nullable<string>
@@ -36,7 +40,9 @@ export default function ClusterSelector({
   hideTitleContent?: boolean
   showUpgrades?: boolean
   placeholder?: string
-}) {
+  deselectLabel?: string
+  inputProps?: ComponentPropsWithRef<typeof Input2>
+} & Omit<ComponentPropsWithRef<typeof ComboBox>, 'children'>) {
   const theme = useTheme()
   const projectId = useProjectId()
   const [inputValue, setInputValue] = useState('')
@@ -81,6 +87,7 @@ export default function ClusterSelector({
       <ComboBox
         inputProps={{
           placeholder: selectedCluster ? selectedCluster.name : placeholder,
+          ...inputProps,
         }}
         titleContent={
           !hideTitleContent ? (
@@ -144,7 +151,7 @@ export default function ClusterSelector({
                   }}
                   leftContent={<ClusterIcon />}
                 >
-                  Show all clusters
+                  {deselectLabel}
                 </ListBoxFooterPlus>
               ),
             }
@@ -158,6 +165,7 @@ export default function ClusterSelector({
           }
           setInputValue('')
         }}
+        {...props}
       >
         {clusters.map((cluster) => (
           <ListBoxItem
