@@ -5,47 +5,115 @@ import {
   Modal,
   PeopleIcon,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import {
+  ComplianceReportGeneratorFragment,
+  useUpsertComplianceReportGeneratorMutation,
+} from '../../../generated/graphql.ts'
+import RoleFormBindings from '../../settings/usermanagement/roles/RoleFormBindings.tsx'
+import uniqWith from 'lodash/uniqWith'
+import isEqual from 'lodash/isEqual'
+import { isNonNullable } from '../../../utils/isNonNullable.ts'
+import { bindingToBindingAttributes } from '../../settings/usermanagement/roles/misc.ts'
+import { GqlError } from '../../utils/Alert.tsx'
 
 export function PermissionsModal({
-  name,
+  generator,
   open,
   onClose,
 }: {
-  name: string
+  generator: ComplianceReportGeneratorFragment
   open: boolean
   onClose: Nullable<() => void>
 }) {
+  const [bindings, setBindings] = useState(generator.readBindings)
+
+  useEffect(() => setBindings(generator.readBindings), [generator.readBindings])
+
+  const uniqueBindings = useMemo(() => uniqWith(bindings, isEqual), [bindings])
+
+  const [mutation, { loading, error }] =
+    useUpsertComplianceReportGeneratorMutation({
+      onCompleted: () => {
+        onClose?.()
+      },
+    })
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (bindings) {
+        mutation({
+          variables: {
+            attributes: {
+              name: generator.name,
+              format: generator.format,
+              readBindings: bindings
+                ?.filter(isNonNullable)
+                .map(bindingToBindingAttributes),
+            },
+          },
+        })
+      }
+    },
+    [bindings, generator.name, generator.format, mutation]
+  )
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       size={'large'}
+      asForm
+      formProps={{ onSubmit }}
       header={
         <Flex
           align={'center'}
           justify={'space-between'}
         >
           Permissions
-          <Button
-            secondary
-            small
-            onClick={() => onClose?.()}
-          >
-            Cancel
-          </Button>
+          <Flex gap={'small'}>
+            <Button
+              secondary
+              small
+              onClick={() => onClose?.()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              loading={loading}
+              small
+              primary
+            >
+              Save
+            </Button>
+          </Flex>
         </Flex>
       }
       css={{ maxHeight: '75vh' }}
     >
-      {name}
+      <Flex
+        gap={'medium'}
+        direction={'column'}
+      >
+        <RoleFormBindings
+          bindings={uniqueBindings}
+          setBindings={setBindings}
+        />
+        {error && <GqlError error={error} />}
+      </Flex>
     </Modal>
   )
 }
 
-export function Permissions({ name }: { name: string }) {
+export function Permissions({
+  generator,
+}: {
+  generator: ComplianceReportGeneratorFragment
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -59,7 +127,7 @@ export function Permissions({ name }: { name: string }) {
       />
       <ModalMountTransition open={open}>
         <PermissionsModal
-          name={name}
+          generator={generator}
           open={open}
           onClose={() => setOpen(false)}
         />

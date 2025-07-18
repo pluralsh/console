@@ -151,7 +151,7 @@ query ComplianceReportGenerator($id: ID, $name: String) {
   }
 }
 
-mutation CreateComplianceReportGenerator(
+mutation UpsertComplianceReportGenerator(
   $attributes: ComplianceReportGeneratorAttributes!
 ) {
   upsertComplianceReportGenerator(attributes: $attributes) {

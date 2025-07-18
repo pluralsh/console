@@ -61,7 +61,7 @@ export const columns = [
 
       return (
         <Flex gap={'small'}>
-          <Permissions name={node.name} />
+          <Permissions generator={node} />
           <ReportHistory name={node.name} />
           <Button
             floating
