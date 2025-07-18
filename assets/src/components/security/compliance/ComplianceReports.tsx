@@ -87,13 +87,7 @@ export function ComplianceReports() {
       hideHeader
       rowBg="raised"
       virtualizeRows
-      data={[
-        { node: { name: 'test' } }, // TODO data?.complianceReportGenerators?.edges || []
-        { node: { name: 'test' } },
-        { node: { name: 'test' } },
-        { node: { name: 'test' } },
-        { node: { name: 'test' } },
-      ]}
+      data={data?.complianceReportGenerators?.edges || []}
       loading={!data && loading}
       columns={columns}
       hasNextPage={data?.complianceReportGenerators?.pageInfo?.hasNextPage}
