@@ -62,6 +62,10 @@ fragment Stack on InfrastructureStack {
   configuration {
     image
     version
+    terraform {
+      parallelism
+      refresh
+    }
   }
   repository {
     id
@@ -231,6 +235,10 @@ fragment CustomStackRun on CustomStackRun {
 fragment StackConfiguration on StackConfiguration {
   version
   image
+  terraform {
+    parallelism
+    refresh
+  }
 }
 
 fragment StackStateResource on StackStateResource {
