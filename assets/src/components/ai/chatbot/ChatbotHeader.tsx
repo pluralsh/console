@@ -89,13 +89,10 @@ export function ChatbotHeader({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
-  const [selectedClusterId, setSelectedClusterId] = useState<string | null>(
-    null
-  )
-
   const hideClusterSelector =
     currentThread?.session?.type === AgentSessionType.Kubernetes ||
-    currentThread?.session?.type === AgentSessionType.Terraform
+    currentThread?.session?.type === AgentSessionType.Terraform ||
+    !currentThread?.session?.id
 
   return (
     <WrapperSC $fullscreen={fullscreen}>
@@ -134,8 +131,7 @@ export function ChatbotHeader({
             <ClusterSelector
               allowDeselect
               onClusterChange={(cluster) => {
-                setSelectedClusterId(cluster?.id ?? null)
-                if (!!currentThread?.session?.id)
+                if (cluster?.id !== currentThread?.session?.cluster?.id)
                   updateThread({
                     variables: {
                       id: currentThread.id,
@@ -146,7 +142,8 @@ export function ChatbotHeader({
                     },
                   })
               }}
-              clusterId={selectedClusterId}
+              clusterId={currentThread?.session?.cluster?.id}
+              loading={updateThreadLoading}
               placeholder="Select cluster"
               startIcon={null}
               deselectLabel="Deselect"
@@ -177,9 +174,6 @@ export function ChatbotHeader({
                   session: {
                     connectionId,
                     done: true,
-                    ...(selectedClusterId && {
-                      clusterId: selectedClusterId,
-                    }),
                   },
                 }),
               })

@@ -103,6 +103,9 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  cluster {
+    id
+  }
 }
 
 fragment AiDelta on AiDelta {
