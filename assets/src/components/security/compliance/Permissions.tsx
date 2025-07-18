@@ -76,6 +76,7 @@ export function PermissionsModal({
           Permissions
           <Flex gap={'small'}>
             <Button
+              type={'button'}
               secondary
               small
               onClick={() => onClose?.()}
