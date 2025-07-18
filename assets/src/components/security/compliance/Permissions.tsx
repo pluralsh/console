@@ -119,7 +119,7 @@ export function Permissions({
   return (
     <>
       <IconFrame
-        tooltip={'View permissions'}
+        tooltip={'Manage permissions'}
         clickable
         onClick={() => setOpen(true)}
         icon={<PeopleIcon />}
