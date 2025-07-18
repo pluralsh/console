@@ -25,6 +25,23 @@ import {
   useFetchPaginatedData,
 } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
+import { parse } from 'content-disposition'
+import streamSaver from 'streamsaver'
+import { fetchToken } from '../../../helpers/auth.ts'
+
+const fetchPolicyReport = (generator: string, token: string) => {
+  streamSaver.mitm = '/mitm.html'
+  fetch(`/v1/compliance/report/${generator}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((res) => {
+    const contentDisposition = res.headers?.get('content-disposition') ?? ''
+    const filename =
+      parse(contentDisposition)?.parameters?.filename ?? 'report.zip'
+    const writeStream = streamSaver.createWriteStream(filename)
+    return res.body?.pipeTo(writeStream)
+  })
+}
 
 const columnHelper =
   createColumnHelper<Edge<ComplianceReportGeneratorFragment>>()
@@ -37,28 +54,35 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     meta: { gridTemplate: `fit-content(300px)` },
-    cell: ({}) => (
-      <Flex gap={'small'}>
-        <IconFrame
-          clickable
-          icon={<PeopleIcon />}
-          type={'floating'}
-        />
-        <IconFrame
-          clickable
-          icon={<ListIcon />}
-          type={'floating'}
-        />
-        <Button
-          floating
-          small
-          startIcon={<InvoicesIcon />}
-          type="submit"
-        >
-          Create report
-        </Button>
-      </Flex>
-    ),
+    cell: function Cell({ getValue }) {
+      const node = getValue()
+      const token = fetchToken()
+
+      if (!node) return null
+
+      return (
+        <Flex gap={'small'}>
+          <IconFrame
+            clickable
+            icon={<PeopleIcon />}
+            type={'floating'}
+          />
+          <IconFrame
+            clickable
+            icon={<ListIcon />}
+            type={'floating'}
+          />
+          <Button
+            floating
+            small
+            startIcon={<InvoicesIcon />}
+            onClick={() => fetchPolicyReport(node.name, token)}
+          >
+            Create report
+          </Button>
+        </Flex>
+      )
+    },
   }),
 ]
 
