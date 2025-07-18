@@ -37,6 +37,7 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def sessions(args, %{context: %{current_user: user}}) do
     AgentSession.for_user(user.id)
+    |> AgentSession.agent()
     |> AgentSession.ordered()
     |> paginate(args)
   end

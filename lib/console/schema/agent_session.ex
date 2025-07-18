@@ -26,6 +26,12 @@ defmodule Console.Schema.AgentSession do
     timestamps()
   end
 
+  @agent_types ~w(terraform kubernetes)a
+
+  def agent(query \\ __MODULE__) do
+    from(s in query, where: s.type in ^@agent_types)
+  end
+
   def for_user(query \\ __MODULE__, user_id) do
     from(s in query,
       join: t in assoc(s, :thread),

@@ -317,7 +317,8 @@ defmodule Console.GraphQl.AiQueriesTest do
   describe "agentSessions" do
     test "it can list a users agent sessions" do
       user = insert(:user)
-      sessions = insert_list(3, :agent_session, thread: build(:chat_thread, user: user))
+      sessions = insert_list(3, :agent_session, type: :terraform, thread: build(:chat_thread, user: user))
+      insert_list(3, :agent_session, type: :search, thread: build(:chat_thread, user: user))
       insert_list(2, :agent_session)
 
       {:ok, %{data: %{"agentSessions" => found}}} = run_query("""
