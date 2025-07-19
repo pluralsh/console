@@ -1,7 +1,7 @@
 defmodule Console.Deployments.PubSub.Governance do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 100
   alias Console.Deployments.PubSub.Governable
   require Logger
 

@@ -1,7 +1,7 @@
 defmodule Console.Deployments.PubSub.Email do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 100
   alias Console.Deployments.PubSub.Emailable
 
 
