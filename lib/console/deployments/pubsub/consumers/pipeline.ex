@@ -1,7 +1,7 @@
 defmodule Console.Deployments.PubSub.Pipeline do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 20
+    max_demand: 200
   alias Console.Deployments.PubSub.Pipelineable
   alias Console.Schema.{PipelineStage, PipelinePromotion}
   alias Console.Deployments.Pipelines.Discovery
