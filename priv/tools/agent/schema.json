@@ -1,11 +1,5 @@
 {
     "type": "object",
-    "properties": {
-        "table": {
-            "type": "string",
-            "description": "The table you want to dump the schema for, only query this if you know the exact table, otherwise don't set this parameter to list all available tables"
-        }
-    },
-    "required": [],
-    "additionalProperties": false
+    "properties": {},
+    "required": []
 }

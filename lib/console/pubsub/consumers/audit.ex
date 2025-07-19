@@ -1,7 +1,7 @@
 defmodule Console.PubSub.Consumers.Audit do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 100
   alias Console.Schema.{Audit, AuditContext}
   alias Console.PubSub.Auditable
 
