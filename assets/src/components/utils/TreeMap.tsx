@@ -31,6 +31,7 @@ export type TreeMapProps = {
   colorScheme?: 'blue' | 'purple'
   emptyStateMessage?: string
   enableParentLabel?: boolean
+  rounded?: boolean
 } & (TreeMapHtmlProps | TreeMapCanvasProps)
 
 const commonTreeMapProps = {
@@ -59,6 +60,7 @@ export const TreeMap = memo(function TreeMap({
   colorScheme = 'blue',
   emptyStateMessage = 'No data to display',
   enableParentLabel = true,
+  rounded = false,
   ...props
 }: TreeMapProps) {
   const graphTheme = useGraphTheme()
@@ -78,6 +80,7 @@ export const TreeMap = memo(function TreeMap({
     <WrapperSC
       $hasParentLabel={enableParentLabel}
       $outlineColor={borderColor}
+      $rounded={rounded}
     >
       {derivedType === 'canvas' ? (
         <ResponsiveTreeMapCanvas
@@ -121,7 +124,8 @@ export const TreeMap = memo(function TreeMap({
 const WrapperSC = styled.div<{
   $hasParentLabel: boolean
   $outlineColor: string
-}>(({ $hasParentLabel, $outlineColor }) => ({
+  $rounded: boolean
+}>(({ $hasParentLabel, $outlineColor, $rounded, theme }) => ({
   width: '100%',
   height: '100%',
   // this targets all nodes, using outline instead of border so the border doesn't affect layout
@@ -143,6 +147,10 @@ const WrapperSC = styled.div<{
     // this targets only the top-level parent node
     [`& div[id="${PARENT_NODE_NAME}"]`]: { display: 'none' },
   },
+  ...($rounded && {
+    borderRadius: theme.borderRadiuses.large,
+    overflow: 'hidden',
+  }),
 }))
 
 const TreeMapSkeletonSC = styled.div(({ theme }) => ({

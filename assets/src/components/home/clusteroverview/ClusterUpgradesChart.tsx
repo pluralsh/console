@@ -115,10 +115,7 @@ export function ClusterUpgradesFilterBtns({
   values: Record<UpgradeChartFilter, number>
 }) {
   return (
-    <Flex
-      gap="small"
-      flexWrap="wrap"
-    >
+    <Flex gap="xsmall">
       {selectableFilterOptions.map((filter) => (
         <HomeFilterOptionCard
           key={filter}

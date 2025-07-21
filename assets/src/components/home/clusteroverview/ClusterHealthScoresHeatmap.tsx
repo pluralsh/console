@@ -2,10 +2,7 @@ import { Flex, severityToColor } from '@pluralsh/design-system'
 import { healthScoreToSeverity } from 'components/cd/clusters/ClusterHealthChip'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { TreeMap, TreeMapData } from 'components/utils/TreeMap'
-import {
-  ClusterHealthScoreFragment,
-  ClustersRowFragment,
-} from 'generated/graphql'
+import { ClusterHealthScoreFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
@@ -20,7 +17,7 @@ export function ClusterHealthScoresHeatmap({
   clusters,
   onClick,
 }: {
-  clusters: ClustersRowFragment[]
+  clusters: ClusterHealthScoreFragment[]
   onClick: (clusterName: string) => void
 }) {
   const { colors } = useTheme()
@@ -39,6 +36,7 @@ export function ClusterHealthScoresHeatmap({
 
   return (
     <TreeMap
+      rounded
       data={data}
       colors={getColor}
       label={truncatedGraphLabel}
@@ -76,10 +74,7 @@ export function ClusterHealthScoresFilterBtns({
   values: Record<HealthScoreFilterLabel, number>
 }) {
   return (
-    <Flex
-      gap="small"
-      flexWrap="wrap"
-    >
+    <Flex gap="xsmall">
       {selectableFilterOptions.map((filter) => (
         <HomeFilterOptionCard
           key={filter}
@@ -144,7 +139,9 @@ const healthScoreLabelToBaseColor: Record<
   '<20': '#EB5F7D',
 }
 
-const getHeatmapData = (clusters: ClustersRowFragment[]): TreeMapData => {
+const getHeatmapData = (
+  clusters: ClusterHealthScoreFragment[]
+): TreeMapData => {
   return {
     name: 'Clusters',
     children: clusters.map((cluster) => ({
