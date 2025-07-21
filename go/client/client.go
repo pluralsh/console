@@ -926,6 +926,7 @@ type DiffNormalizerFragment struct {
 	Namespace    *string   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	Name         *string   "json:\"name,omitempty\" graphql:\"name\""
 	Kind         *string   "json:\"kind,omitempty\" graphql:\"kind\""
+	Backfill     *bool     "json:\"backfill,omitempty\" graphql:\"backfill\""
 	JSONPointers []*string "json:\"jsonPointers,omitempty\" graphql:\"jsonPointers\""
 }
 
@@ -946,6 +947,12 @@ func (t *DiffNormalizerFragment) GetKind() *string {
 		t = &DiffNormalizerFragment{}
 	}
 	return t.Kind
+}
+func (t *DiffNormalizerFragment) GetBackfill() *bool {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.Backfill
 }
 func (t *DiffNormalizerFragment) GetJSONPointers() []*string {
 	if t == nil {
@@ -22084,6 +22091,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22312,6 +22320,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22550,6 +22559,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22687,6 +22697,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22825,6 +22836,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23058,6 +23070,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23302,6 +23315,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23535,6 +23549,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23827,6 +23842,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24056,6 +24072,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24245,6 +24262,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24382,6 +24400,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24566,6 +24585,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -24783,6 +24803,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -25300,6 +25321,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25507,6 +25529,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25622,6 +25645,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25736,6 +25760,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25942,6 +25967,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26149,6 +26175,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26265,6 +26292,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26381,6 +26409,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26498,6 +26527,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26613,6 +26643,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26731,6 +26762,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27108,6 +27140,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27242,6 +27275,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment RendererFragment on Renderer {
@@ -27460,6 +27494,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27732,6 +27767,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment RendererFragment on Renderer {
@@ -28308,6 +28344,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -28514,6 +28551,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -33975,6 +34013,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
