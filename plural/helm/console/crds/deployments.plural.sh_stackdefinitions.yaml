@@ -50,7 +50,7 @@ spec:
                   and execution.
                 properties:
                   hooks:
-                    description: Hooks to run at various stages of the stack run
+                    description: Hooks to run at various stages of the stack run.
                     items:
                       properties:
                         afterStage:
@@ -62,12 +62,13 @@ spec:
                           - DESTROY
                           type: string
                         args:
-                          description: optional arguments to pass to the command
+                          description: Args contain optional arguments to pass to
+                            the command.
                           items:
                             type: string
                           type: array
                         cmd:
-                          description: the command this hook will execute
+                          description: Cmd is the command to execute.
                           type: string
                       required:
                       - afterStage
@@ -75,29 +76,30 @@ spec:
                       type: object
                     type: array
                   image:
-                    description: Image optional custom image you might want to use
+                    description: |-
+                      Image contains the optional Docker image to use for the IaC tool.
+                      If not provided, the default image for the tool will be used.
                     type: string
                   tag:
-                    description: |-
-                      Tag is the docker image tag you wish to use
-                      if you're customizing the version
+                    description: Tag of the IaC tool Docker image to use.
                     type: string
                   terraform:
-                    description: Terraform is the terraform configuration for this
-                      stack
+                    description: Terraform configuration for this stack.
                     properties:
                       parallelism:
-                        description: Parallelism is the number of concurrent operations
-                          to run, equivalent to the -parallelism flag in terraform
+                        description: |-
+                          Parallelism is the number of concurrent operations to run,
+                          equivalent to the -parallelism flag in Terraform.
                         format: int64
                         type: integer
                       refresh:
-                        description: Refresh is whether to refresh the state of the
-                          stack, equivalent to the -refresh flag in terraform
+                        description: |-
+                          Refresh is whether to refresh the state of the stack,
+                          equivalent to the -refresh flag in Terraform.
                         type: boolean
                     type: object
                   version:
-                    description: Version the semver of the tool you wish to use
+                    description: Version of the IaC tool to use.
                     type: string
                 type: object
               description:
