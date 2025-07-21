@@ -10,8 +10,9 @@ func init() {
 	SchemeBuilder.Register(&NamespaceCredentials{}, &NamespaceCredentialsList{})
 }
 
-// NamespaceCredentialsList contains a list of NamespaceCredentials.
 // +kubebuilder:object:root=true
+
+// NamespaceCredentialsList contains a list of NamespaceCredentials resources.
 type NamespaceCredentialsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -19,11 +20,15 @@ type NamespaceCredentialsList struct {
 	Items []NamespaceCredentials `json:"items"`
 }
 
-// NamespaceCredentials connects namespaces with credentials from secret ref,
-// which are then used by other controllers during reconciling.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
+
+// NamespaceCredentials enables secure multi-tenancy by overriding operator credentials at the namespace level.
+// It connects specific namespaces with credentials from a secret reference, allowing fine-grained control over
+// resource reconciliation permissions. This prevents GitOps from becoming implicit God-mode by ensuring operators
+// use bounded credentials for specific namespaces, supporting the principle of least privilege in enterprise
+// fleet management scenarios.
 type NamespaceCredentials struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -39,12 +44,15 @@ func (in *NamespaceCredentials) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+// NamespaceCredentialsSpec defines the desired state of the NamespaceCredentials resource.
 type NamespaceCredentialsSpec struct {
-	// Namespaces that will be connected with credentials from SecretRef.
+	// Namespaces specifies the list of Kubernetes namespaces that will use the credentials
+	// from SecretRef during resource reconciliation, enabling namespace-level credential isolation.
 	// +kubebuilder:validation:Required
 	Namespaces []string `json:"namespaces"`
 
-	// SecretRef contains reference to secret with credentials.
+	// SecretRef references a Secret containing the credentials that operators will use
+	// when reconciling resources within the specified namespaces, overriding default operator credentials.
 	// +kubebuilder:validation:Required
 	SecretRef corev1.SecretReference `json:"secretRef,omitempty"`
 }
