@@ -18,7 +18,11 @@ type BootstrapTokenList struct {
 	Items           []BootstrapToken `json:"items"`
 }
 
-// BootstrapToken is the Schema for the BootstrapTokens API
+// BootstrapToken is a restricted authentication token for secure cluster registration.
+// It enables edge devices and new clusters to self-register with the Plural Console
+// without exposing full user credentials. The token is scope-limited to cluster
+// registration operations only and automatically assigns registered clusters to a
+// specified project.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
@@ -33,18 +37,18 @@ type BootstrapToken struct {
 
 // BootstrapTokenSpec defines the desired state of BootstrapToken
 type BootstrapTokenSpec struct {
-	// User is an optional email to the user identity for this bootstrap token in audit logs
+	// User is an optional email to attribute bootstrap token operations in audit logs.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
 	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty"`
 
-	// ProjectRef is the project that all clusters spawned by generated bootstrap token will belong to
+	// ProjectRef is the project that all clusters registered with this token will belong to.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Project is immutable"
 	// +kubebuilder:validation:Required
 	ProjectRef v1.ObjectReference `json:"projectRef,omitempty"`
 
-	// TokenSecretRef points to an output secret where bootstrap token will be stored.
-	// It will be created automatically in the same namespace as BootstrapToken and cannot exist.
+	// TokenSecretRef points to a secret where the generated bootstrap token will be stored.
+	// The secret is created automatically and must not already exist when the BootstrapToken is created.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Token secret is immutable"
 	// +kubebuilder:validation:Required
 	TokenSecretRef v1.SecretReference `json:"tokenSecretRef,omitempty"`
