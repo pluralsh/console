@@ -69,3 +69,12 @@ const ColorSwatchSC = styled.div<{ $color: string }>(({ $color, theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   backgroundColor: $color,
 }))
+
+export const HOME_CHARTS_COLORS = {
+  green: '#17E8A0',
+  blue: '#17DEE8',
+  yellow: '#FFD346',
+  orange: '#FD984A',
+  red: '#EB5F7D',
+  purple: '#747AF6',
+}

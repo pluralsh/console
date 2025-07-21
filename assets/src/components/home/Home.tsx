@@ -208,7 +208,7 @@ export function Home() {
 const ChartAndFilterWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
+  gap: theme.spacing.xsmall,
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px ${theme.spacing.large}px`,
   flex: 1,
   whiteSpace: 'nowrap',

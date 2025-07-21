@@ -10,6 +10,7 @@ import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { truncatedGraphLabel } from 'components/utils/UtilizationHeatmap'
 import { isEmpty } from 'lodash'
 import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
+import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 
 export type HealthScoreFilterLabel = keyof typeof healthScoreLabelToRange
 
@@ -132,11 +133,11 @@ const healthScoreLabelToBaseColor: Record<
   Exclude<HealthScoreFilterLabel, 'All'>,
   string
 > = {
-  '>80': '#17E8A0',
-  '61 - 80': '#17DEE8',
-  '41 - 60': '#FFD346',
-  '20 - 40': '#FD984A',
-  '<20': '#EB5F7D',
+  '>80': HOME_CHARTS_COLORS.green,
+  '61 - 80': HOME_CHARTS_COLORS.blue,
+  '41 - 60': HOME_CHARTS_COLORS.yellow,
+  '20 - 40': HOME_CHARTS_COLORS.orange,
+  '<20': HOME_CHARTS_COLORS.red,
 }
 
 const getHeatmapData = (

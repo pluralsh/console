@@ -1,6 +1,6 @@
 import styled, { useTheme } from 'styled-components'
 
-const PATTERN_HEIGHT = 204
+const PATTERN_HEIGHT = 212
 
 export function EmptyHeatmapSvg({ label }: { label: string }) {
   const { colors } = useTheme()
