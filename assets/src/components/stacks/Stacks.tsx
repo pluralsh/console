@@ -199,7 +199,8 @@ export default function Stacks() {
   const deleting = !!fullStack?.deletedAt
 
   useEffect(() => {
-    if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
+    if (!isEmpty(stacks) && !stackId)
+      navigate(getStacksAbsPath(stacks[0]?.id), { replace: true })
   }, [stacks, stackId, navigate])
 
   useSetBreadcrumbs(
