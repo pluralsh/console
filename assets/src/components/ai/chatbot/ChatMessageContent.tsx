@@ -22,7 +22,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AiRole,
   ChatType,
@@ -379,28 +379,51 @@ function ToolMessageContent({
               </Flex>
             }
           >
-            <ToolMessageContentSC>
-              {format === MessageFormat.Json && (
-                <Code
-                  language="json"
-                  showHeader={false}
-                  css={{ height: '100%', background: 'none' }}
-                >
-                  {prettifyJson(content)}
-                </Code>
+            <Flex
+              direction="column"
+              marginTop={spacing.small}
+              gap="small"
+            >
+              {attributes?.tool?.arguments && (
+                <div>
+                  <Body2P $color="text-light">Arguments:</Body2P>
+                  <ToolMessageContentSC>
+                    <Code
+                      language="json"
+                      showHeader={false}
+                      css={{ height: '100%', background: 'none' }}
+                    >
+                      {JSON.stringify(attributes?.tool?.arguments, null, 2)}
+                    </Code>
+                  </ToolMessageContentSC>
+                </div>
               )}
-              {format === MessageFormat.Markdown && (
-                <Card
-                  css={{
-                    padding: spacing.medium,
-                    background: 'none',
-                    height: '100%',
-                  }}
-                >
-                  <Markdown text={content} />
-                </Card>
-              )}
-            </ToolMessageContentSC>
+              <div>
+                <Body2P $color="text-light">Response:</Body2P>
+                <ToolMessageContentSC>
+                  {format === MessageFormat.Json && (
+                    <Code
+                      language="json"
+                      showHeader={false}
+                      css={{ height: '100%', background: 'none' }}
+                    >
+                      {prettifyJson(content)}
+                    </Code>
+                  )}
+                  {format === MessageFormat.Markdown && (
+                    <Card
+                      css={{
+                        padding: spacing.medium,
+                        background: 'none',
+                        height: '100%',
+                      }}
+                    >
+                      <Markdown text={content} />
+                    </Card>
+                  )}
+                </ToolMessageContentSC>
+              </div>
+            </Flex>
           </AccordionItem>
         </Accordion>
         {pendingConfirmation && (
@@ -439,7 +462,7 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
 }))
 const ToolMessageContentSC = styled.div(({ theme }) => ({
   maxHeight: 324,
-  marginTop: theme.spacing.small,
+  marginTop: theme.spacing.xxsmall,
   maxWidth: '100%',
   overflow: 'auto',
   background: theme.colors['fill-two'],
