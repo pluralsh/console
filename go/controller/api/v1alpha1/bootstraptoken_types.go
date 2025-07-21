@@ -10,23 +10,25 @@ func init() {
 	SchemeBuilder.Register(&BootstrapToken{}, &BootstrapTokenList{})
 }
 
-// BootstrapTokenList contains a list of BootstrapToken
 // +kubebuilder:object:root=true
+
+// BootstrapTokenList contains a list of BootstrapToken resources.
 type BootstrapTokenList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []BootstrapToken `json:"items"`
 }
 
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the BootstrapToken in the Console API."
+
 // BootstrapToken is a restricted authentication token for secure cluster registration.
 // It enables edge devices and new clusters to self-register with the Plural Console
 // without exposing full user credentials. The token is scope-limited to cluster
 // registration operations only and automatically assigns registered clusters to a
 // specified project.
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Namespaced
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the BootstrapToken in the Console API."
 type BootstrapToken struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

@@ -14,7 +14,7 @@ func init() {
 
 //+kubebuilder:object:root=true
 
-// CatalogList contains a list of Catalog
+// CatalogList contains a list of Catalog resources.
 type CatalogList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
