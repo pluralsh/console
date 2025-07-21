@@ -5,7 +5,6 @@ import {
   IconFrame,
   IconFrameProps,
   IconProps,
-  Tooltip,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
@@ -19,14 +18,12 @@ export function AiInsightSummaryIcon({
   insight,
   navPath,
   preserveSpace = false,
-  asIconFrame = true,
   iconFrameType = 'tertiary',
   ...props
 }: {
   insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
   preserveSpace?: boolean
-  asIconFrame?: boolean
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
   const theme = useTheme()
@@ -50,23 +47,25 @@ export function AiInsightSummaryIcon({
     navigate(navPath ?? '')
   }
 
-  const icon =
-    insight.freshness === InsightFreshness.Fresh ? (
-      <AiSparkleFilledIcon
-        color="icon-info"
-        {...props}
-      />
-    ) : (
-      <AiSparkleOutlineIcon {...props} />
-    )
-
   return (
-    <Tooltip
-      placement="top"
-      label={
+    <IconFrame
+      {...(navPath && { clickable: true, onClick: handleClick })}
+      type={iconFrameType}
+      tooltipProps={{
+        style: {
+          ...theme.partials.text.body2,
+          padding: theme.spacing.large,
+          border: '1px solid transparent',
+          borderRadius: theme.borderRadiuses.medium,
+          backgroundImage: `linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'padding-box, border-box',
+        },
+      }}
+      tooltip={
         <Flex
           direction="column"
-          gap="xsmall"
+          gap="small"
           maxWidth={320}
           color={theme.colors.text}
         >
@@ -82,24 +81,17 @@ export function AiInsightSummaryIcon({
           {insight.summary}
         </Flex>
       }
-      css={{
-        border: '1px solid transparent',
-        borderRadius: theme.borderRadiuses.medium,
-        backgroundImage: `linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
-        backgroundOrigin: 'border-box',
-        backgroundClip: 'padding-box, border-box',
-      }}
-    >
-      {asIconFrame ? (
-        <IconFrame
-          {...(navPath && { clickable: true, onClick: handleClick })}
-          type={iconFrameType}
-          icon={icon}
-        />
-      ) : (
-        icon
-      )}
-    </Tooltip>
+      icon={
+        insight.freshness === InsightFreshness.Fresh ? (
+          <AiSparkleFilledIcon
+            color="icon-info"
+            {...props}
+          />
+        ) : (
+          <AiSparkleOutlineIcon {...props} />
+        )
+      }
+    />
   )
 }
 

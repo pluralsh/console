@@ -23,7 +23,7 @@ defmodule Console.AI.Provider do
 
   @summary """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure as Code.  The following is a detailed explanation of how to debug an issue in a user's kubernetes or cloud infrastructure.
-  Please provide a brief, easily digestable summary of this in at most 3 sentences.
+  Please provide a brief, easily digestable summary. The whole summary should be two sentences. Summarize the problem in a single sentence, then explain the solution at a high level in a single sentence.
   """
 
   @callback completion(struct, history, keyword) :: completion_result
