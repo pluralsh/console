@@ -20,8 +20,9 @@ func init() {
 	SchemeBuilder.Register(&Cluster{}, &ClusterList{})
 }
 
-// ClusterList contains a list of Cluster resources.
 // +kubebuilder:object:root=true
+
+// ClusterList contains a list of Cluster resources.
 type ClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
