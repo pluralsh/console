@@ -409,14 +409,15 @@ type ServiceComponent struct {
 	Synced bool `json:"synced"`
 }
 
-// ServiceDeployment provides a GitOps-driven approach to deploy and manage Kubernetes applications from Git repositories.
-// It represents a reference to a service deployed from a Git repo into a Cluster, enabling complete GitOps workflows
-// with full auditability and automated synchronization. The operator manages the deployment lifecycle by fetching
-// manifests from Git repositories and applying them to target clusters with support for Helm, Kustomize, and raw YAML.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console repo Id"
+
+// ServiceDeployment provides a GitOps-driven approach to deploy and manage Kubernetes applications from Git repositories.
+// It represents a reference to a service deployed from a Git repo into a Cluster, enabling complete GitOps workflows
+// with full auditability and automated synchronization. The operator manages the deployment lifecycle by fetching
+// manifests from Git repositories and applying them to target clusters with support for Helm, Kustomize, and raw YAML.
 type ServiceDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -455,6 +456,7 @@ func (s *ServiceDeployment) SetCondition(condition metav1.Condition) {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// ServiceDeploymentList contains a list of ServiceDeployment resources.
 type ServiceDeploymentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
