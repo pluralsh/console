@@ -30,22 +30,24 @@ func init() {
 	SchemeBuilder.Register(&InfrastructureStack{}, &InfrastructureStackList{})
 }
 
-// InfrastructureStackList contains a list of InfrastructureStack resources.
 // +kubebuilder:object:root=true
+
+// InfrastructureStackList contains a list of InfrastructureStack resources.
 type InfrastructureStackList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []InfrastructureStack `json:"items"`
 }
 
-// InfrastructureStack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach.
-// It declaratively defines a stack with a type, Git repository location, and target cluster for execution.
-// On each commit to the tracked repository, a run is created which the Plural deployment operator detects
-// and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the InfrastructureStack in the Console API."
+
+// InfrastructureStack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach.
+// It declaratively defines a stack with a type, Git repository location, and target cluster for execution.
+// On each commit to the tracked repository, a run is created which the Plural deployment operator detects
+// and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
 type InfrastructureStack struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -56,7 +58,8 @@ type InfrastructureStack struct {
 
 // InfrastructureStackSpec defines the desired state of the InfrastructureStack.
 type InfrastructureStackSpec struct {
-	// Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.
+	// Name of this stack.
+	// If not provided, the name from InfrastructureStack.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 

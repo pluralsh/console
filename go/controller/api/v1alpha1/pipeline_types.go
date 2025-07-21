@@ -250,14 +250,15 @@ type EnvFrom struct {
 	ConfigMap string `json:"configMap"`
 }
 
-// Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
-// It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
-// customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
-// configuration of deployment flows, including gating, promotions, and service progression.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="Console ID"
+
+// Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
+// It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
+// customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
+// configuration of deployment flows, including gating, promotions, and service progression.
 type Pipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -282,8 +283,9 @@ func (p *Pipeline) HasProjectRef() bool {
 	return p.Spec.ProjectRef != nil
 }
 
-// PipelineList contains a list of Pipeline resources.
 // +kubebuilder:object:root=true
+
+// PipelineList contains a list of Pipeline resources.
 type PipelineList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
