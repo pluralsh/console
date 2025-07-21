@@ -125,36 +125,38 @@ export function ChatbotHeader({
           />
         </>
       )}
-      {!cloudConnectionsLoading && !hideClusterSelector && (
+      {!cloudConnectionsLoading && (
         <>
-          <div css={{ width: 220 }}>
-            <ClusterSelector
-              allowDeselect
-              onClusterChange={(cluster) => {
-                if (cluster?.id !== currentThread?.session?.cluster?.id)
-                  updateThread({
-                    variables: {
-                      id: currentThread.id,
-                      attributes: {
-                        summary: currentThread.summary,
-                        session: { clusterId: cluster?.id ?? null },
+          {!hideClusterSelector && (
+            <div css={{ width: 220 }}>
+              <ClusterSelector
+                allowDeselect
+                onClusterChange={(cluster) => {
+                  if (cluster?.id !== currentThread?.session?.cluster?.id)
+                    updateThread({
+                      variables: {
+                        id: currentThread.id,
+                        attributes: {
+                          summary: currentThread.summary,
+                          session: { clusterId: cluster?.id ?? null },
+                        },
                       },
-                    },
-                  })
-              }}
-              clusterId={currentThread?.session?.cluster?.id}
-              loading={updateThreadLoading}
-              placeholder="Select cluster"
-              startIcon={null}
-              deselectLabel="Deselect"
-              inputProps={{
-                style: {
-                  minHeight: fullscreen ? 40 : 32,
-                  height: fullscreen ? 40 : 32,
-                },
-              }}
-            />
-          </div>
+                    })
+                }}
+                clusterId={currentThread?.session?.cluster?.id}
+                loading={updateThreadLoading}
+                placeholder="Select cluster"
+                startIcon={null}
+                deselectLabel="Deselect"
+                inputProps={{
+                  style: {
+                    minHeight: fullscreen ? 40 : 32,
+                    height: fullscreen ? 40 : 32,
+                  },
+                }}
+              />
+            </div>
+          )}
           {connectionId && (
             <AgentSessionButton
               connectionId={connectionId}
