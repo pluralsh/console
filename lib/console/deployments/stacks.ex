@@ -277,7 +277,7 @@ defmodule Console.Deployments.Stacks do
   """
   @spec restart_run(StackRun.t | binary, User.t) :: run_resp
   def restart_run(%StackRun{dry_run: true}, _), do: {:error, "you cannot restart dry runs"}
-  def restart_run(%StackRun{git: %{ref: ref}, message: msg} = run, %User{} = user) do
+  def restart_run(%StackRun{git: %{ref: ref}, message: msg, pull_request_id: nil} = run, %User{} = user) do
     with {:ok, run} <- allow(run, user, :write) do
       case Repo.preload(run, [:stack]) do
         %{stack: %Stack{sha: ^ref} = stack} ->
@@ -286,6 +286,8 @@ defmodule Console.Deployments.Stacks do
       end
     end
   end
+  def restart_run(%StackRun{}, _),
+    do: {:error, "you cannot restart a run that is not associated with a pull request"}
   def restart_run(id, %User{} = user) when is_binary(id) do
     get_run!(id)
     |> restart_run(user)

@@ -286,6 +286,7 @@ defmodule Console.Deployments.Cron do
     |> Repo.stream(method: :keyset)
     |> Stream.concat(
       PullRequest.stack()
+      |> PullRequest.open()
       |> PullRequest.stream()
       |> Repo.stream(method: :keyset)
     )

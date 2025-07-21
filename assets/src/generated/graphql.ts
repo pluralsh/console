@@ -1613,6 +1613,7 @@ export enum ClusterDistro {
   Generic = 'GENERIC',
   Gke = 'GKE',
   K3S = 'K3S',
+  Openshift = 'OPENSHIFT',
   Rke = 'RKE'
 }
 

@@ -25,7 +25,7 @@ defmodule Console.Schema.Cluster do
     NodeStatistic
   }
 
-  defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
+  defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5, openshift: 6
 
   defmodule Kubeconfig do
     use Piazza.Ecto.Schema
