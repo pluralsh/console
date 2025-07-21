@@ -54,7 +54,7 @@ type InfrastructureStack struct {
 	Status Status                  `json:"status,omitempty"`
 }
 
-// InfrastructureStackSpec defines the desired state of InfrastructureStack.
+// InfrastructureStackSpec defines the desired state of the InfrastructureStack.
 type InfrastructureStackSpec struct {
 	// Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
@@ -108,7 +108,7 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Approval *bool `json:"approval,omitempty"`
 
-	// Bindings contain read and write policies of this cluster.
+	// Bindings contain read and write policies of this stack.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 

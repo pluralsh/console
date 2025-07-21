@@ -946,8 +946,12 @@ spec:
                       annotations:
                         additionalProperties:
                           type: string
+                        description: Annotations to apply to the job for additional
+                          metadata.
                         type: object
                       containers:
+                        description: Containers to run as part of the job, such as
+                          test runners or validation scripts.
                         items:
                           properties:
                             args:
@@ -958,8 +962,12 @@ spec:
                               items:
                                 properties:
                                   name:
+                                    description: Name of the environment variable
+                                      to set.
                                     type: string
                                   value:
+                                    description: Value of the environment variable
+                                      to set.
                                     type: string
                                 required:
                                 - name
@@ -970,8 +978,12 @@ spec:
                               items:
                                 properties:
                                   configMap:
+                                    description: ConfigMap to source environment variables
+                                      from.
                                     type: string
                                   secret:
+                                    description: Secret to source environment variables
+                                      from.
                                     type: string
                                 required:
                                 - configMap
@@ -1004,12 +1016,16 @@ spec:
                       labels:
                         additionalProperties:
                           type: string
+                        description: Labels to apply to the job for organization and
+                          selection.
                         type: object
                       namespace:
+                        description: Namespace where the job will be executed.
                         type: string
                       raw:
-                        description: Raw can be used if you'd rather define the job
-                          spec via straight Kubernetes manifest file.
+                        description: |-
+                          Raw allows defining the job using a full Kubernetes JobSpec manifest
+                          instead of the simplified container-based approach.
                         properties:
                           activeDeadlineSeconds:
                             description: |-
@@ -9688,8 +9704,9 @@ spec:
                         - template
                         type: object
                       resources:
-                        description: Resource specification that overrides implicit
-                          container resources when containers are not directly configured.
+                        description: |-
+                          Resources specification that overrides implicit container resources
+                          when containers are not directly configured.
                         properties:
                           limits:
                             properties:
@@ -9707,6 +9724,7 @@ spec:
                             type: object
                         type: object
                       serviceAccount:
+                        description: ServiceAccount to use for the job execution.
                         type: string
                     required:
                     - namespace

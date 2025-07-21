@@ -1184,7 +1184,7 @@ _Appears in:_
 
 
 
-GateSpec is a more refined spec for parameters needed for complex gates.
+GateSpec provides detailed configuration for complex gate types, particularly JOB gates.
 
 
 
@@ -1193,7 +1193,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `job` _[JobSpec](#jobspec)_ |  |  | Optional: {} <br /> |
+| `job` _[JobSpec](#jobspec)_ | Job configuration for JOB gate types, enabling custom validation jobs<br />such as integration tests, security scans, or other promotion checks. |  | Optional: {} <br /> |
 
 
 #### GeneratedSecret
@@ -1600,7 +1600,7 @@ and executes on the targeted cluster, enabling fine-grained permissions and netw
 
 
 
-InfrastructureStackSpec defines the desired state of InfrastructureStack.
+InfrastructureStackSpec defines the desired state of the InfrastructureStack.
 
 
 
@@ -1621,7 +1621,7 @@ _Appears in:_
 | `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration specifies version/image config for the IaC tool being used. |  | Optional: {} <br /> |
 | `cron` _[StackCron](#stackcron)_ | Cron configuration for automated, scheduled generation of stack runs. |  | Optional: {} <br /> |
 | `approval` _boolean_ | Approval when set to true, requires human approval before Terraform apply triggers,<br />ensuring verification of the plan to reduce misconfiguration risk. |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster. |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this stack. |  | Optional: {} <br /> |
 | `environment` _[StackEnvironment](#stackenvironment) array_ | Environment variables to inject into the stack execution environment. |  | Optional: {} <br /> |
 | `files` _[StackFile](#stackfile) array_ | Files to mount from Secrets into the stack execution environment,<br />commonly used for cloud credentials (though IRSA/Workload Identity is preferred). |  | Optional: {} <br /> |
 | `detach` _boolean_ | Detach indicates whether to detach the stack on deletion instead of destroying it.<br />This leaves all cloud resources in place. |  | Optional: {} <br /> |
@@ -1639,7 +1639,8 @@ _Appears in:_
 
 
 
-JobSpec is a spec for a job gate.
+JobSpec defines a Kubernetes Job to execute as part of a JOB gate, allowing
+inline job definition with containers, resources, and Kubernetes-native configurations.
 
 
 
@@ -1650,13 +1651,13 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `namespace` _string_ |  |  | Required: {} <br />Type: string <br /> |
-| `containers` _[Container](#container) array_ |  |  | Optional: {} <br /> |
-| `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
-| `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br /> |
-| `resources` _[ContainerResources](#containerresources)_ | Resource specification that overrides implicit container resources when containers are not directly configured. |  | Optional: {} <br /> |
+| `namespace` _string_ | Namespace where the job will be executed. |  | Required: {} <br />Type: string <br /> |
+| `containers` _[Container](#container) array_ | Containers to run as part of the job, such as test runners or validation scripts. |  | Optional: {} <br /> |
+| `labels` _object (keys:string, values:string)_ | Labels to apply to the job for organization and selection. |  | Optional: {} <br /> |
+| `annotations` _object (keys:string, values:string)_ | Annotations to apply to the job for additional metadata. |  | Optional: {} <br /> |
+| `serviceAccount` _string_ | ServiceAccount to use for the job execution. |  | Optional: {} <br />Type: string <br /> |
+| `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw allows defining the job using a full Kubernetes JobSpec manifest<br />instead of the simplified container-based approach. |  | Optional: {} <br /> |
+| `resources` _[ContainerResources](#containerresources)_ | Resources specification that overrides implicit container resources<br />when containers are not directly configured. |  | Optional: {} <br /> |
 
 
 #### LoggingSettings
@@ -2495,7 +2496,10 @@ _Appears in:_
 
 
 
-Pipeline is the Schema for the pipelines API
+Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
+It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
+customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
+configuration of deployment flows, including gating, promotions, and service progression.
 
 
 
@@ -2548,7 +2552,8 @@ _Appears in:_
 
 
 
-PipelineEdge is a specification of an edge between two pipeline stages.
+PipelineEdge defines the flow of execution between stages, controlling promotion paths
+and enabling attachment of gates for additional validation and approval.
 
 
 
@@ -2568,7 +2573,9 @@ _Appears in:_
 
 
 
-PipelineGate will configure a promotion gate for a pipeline.
+PipelineGate serves as a checkpoint between pipeline stages, enforcing promotion policies.
+Three gate types are supported: APPROVAL (human sign-off), WINDOW (time-based constraints),
+and JOB (custom validation jobs like tests or security scans).
 
 
 
@@ -2578,16 +2585,16 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this gate. |  | Required: {} <br />Type: string <br /> |
-| `type` _[GateType](#gatetype)_ | Type of gate this is. |  | Enum: [APPROVAL WINDOW JOB] <br />Required: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef of a Cluster this gate will execute on. |  | Optional: {} <br /> |
-| `spec` _[GateSpec](#gatespec)_ | Spec contains specification for more complex gate types. |  | Optional: {} <br /> |
+| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB] <br />Required: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef specifies the target cluster where this gate will execute. |  | Optional: {} <br /> |
+| `spec` _[GateSpec](#gatespec)_ | Spec contains detailed configuration for complex gate types like JOB gates. |  | Optional: {} <br /> |
 
 
 #### PipelineSpec
 
 
 
-PipelineSpec defines the desired state of Pipeline.
+PipelineSpec defines the desired state of the Pipeline.
 
 
 
@@ -2596,18 +2603,19 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `stages` _[PipelineStage](#pipelinestage) array_ | Stages of a pipeline. |  |  |
-| `edges` _[PipelineEdge](#pipelineedge) array_ | Edges of a pipeline. |  |  |
-| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a Flow this pipeline belongs within |  | Optional: {} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this pipeline |  | Optional: {} <br /> |
+| `stages` _[PipelineStage](#pipelinestage) array_ | Stages represent discrete steps in the deployment pipeline, such as environments (dev, staging, prod)<br />or specific deployment phases that services progress through. |  |  |
+| `edges` _[PipelineEdge](#pipelineedge) array_ | Edges define the dependencies and flow between stages, controlling the execution order<br />and promotion path through the pipeline. |  |  |
+| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this pipeline belongs within. |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this pipeline belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies controlling access to this pipeline. |  | Optional: {} <br /> |
 
 
 #### PipelineStage
 
 
 
-PipelineStage defines the Pipeline stage.
+PipelineStage represents a logical unit within the pipeline, typically corresponding to
+environments (e.g., dev, staging, prod) or specific deployment phases.
 
 
 
@@ -2617,15 +2625,15 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stage. |  | Required: {} <br />Type: string <br /> |
-| `services` _[PipelineStageService](#pipelinestageservice) array_ | Services including optional promotion criteria. |  |  |
+| `services` _[PipelineStageService](#pipelinestageservice) array_ | Services deployed in this stage, including optional promotion criteria<br />that dictate when and how services advance to subsequent stages. |  |  |
 
 
 #### PipelineStageService
 
 
 
-PipelineStageService is the configuration of a service within a pipeline stage,
-including optional promotion criteria.
+PipelineStageService defines a service within a pipeline stage and its promotion rules.
+This enables conditional promotions, a critical part of automating production deployments safely.
 
 
 
@@ -2634,15 +2642,16 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  |  |
-| `criteria` _[PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)_ |  |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references the ServiceDeployment being deployed at this stage. |  |  |
+| `criteria` _[PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)_ | Criteria defines optional promotion rules that control when and how<br />this service is allowed to advance to the next stage. |  | Optional: {} <br /> |
 
 
 #### PipelineStageServicePromotionCriteria
 
 
 
-PipelineStageServicePromotionCriteria represents actions to perform if this stage service were promoted.
+PipelineStageServicePromotionCriteria defines actions to perform when promoting this service
+to the next stage, including source references and secrets to copy.
 
 
 
@@ -2651,9 +2660,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to source service to promote from. |  | Optional: {} <br /> |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PR automation to promote from. |  | Optional: {} <br /> |
-| `repository` _string_ | The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console) |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to a source ServiceDeployment to promote from. |  | Optional: {} <br /> |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to a source PrAutomation to promote from. |  | Optional: {} <br /> |
+| `repository` _string_ | The repository slug the PrAutomation will use.<br />E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console. |  | Optional: {} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: {} <br /> |
 
 
