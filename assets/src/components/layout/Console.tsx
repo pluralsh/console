@@ -73,6 +73,7 @@ function ConsoleContent() {
       overflow="hidden"
       flexDirection="column"
       flexGrow={1}
+      container="console / inline-size"
     >
       {isProduction && (
         <WithApplicationUpdate>

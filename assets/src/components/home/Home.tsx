@@ -138,7 +138,6 @@ export function Home() {
       direction="column"
       overflow="auto"
       height="100%"
-      containerType="inline-size"
     >
       <ChartSectionSC>
         <WidthLimiterSC $type="charts">

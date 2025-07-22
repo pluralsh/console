@@ -11,7 +11,7 @@ function gridLayoutWithSideNavStyle(
     display: 'grid',
     gridTemplateColumns: hideSidecar ? '240px 1fr' : '240px 1fr 200px',
     ...(hideSidecar && {
-      [`@media (min-width: ${theme.breakpoints.desktop}px)`]: {
+      [`@container (min-width: ${theme.breakpoints.desktop}px)`]: {
         gridTemplateColumns: '240px 1fr 200px',
       },
     }),
