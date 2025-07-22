@@ -7593,12 +7593,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:19.0.4":
-  version: 19.0.4
-  resolution: "@types/react-dom@npm:19.0.4"
+"@types/react-dom@npm:19.0.6":
+  version: 19.0.6
+  resolution: "@types/react-dom@npm:19.0.6"
   peerDependencies:
     "@types/react": ^19.0.0
-  checksum: 2d0c74769ddcb4a9f404a62b3241d3e550ca962ff80c8c5b624f6626cd39f8b18aadee8e447424b52cffdd9165b1f02eb51020fc486584c8395236d97d4abedf
+  checksum: cf6232700909f0ae31ed9c4cd93c25ce0ef726ba3a19745e99141b0daf3a88b2561972b0923aa1c8f2a494aa504939c26887861f9462b3ff6ea8cab627103a9c
   languageName: node
   linkType: hard
 
@@ -7611,12 +7611,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:19.0.10":
+"@types/react@npm:*":
   version: 19.0.10
   resolution: "@types/react@npm:19.0.10"
   dependencies:
     csstype: ^3.0.2
   checksum: e257e87bc3464825014523aecc700540a9da41c3c23136c03da9b2b7999251ac70ef9e594febdefeea6abe51da2475b42e5d96af6559d76f8d54bffc0b0ddacd
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:19.0.14":
+  version: 19.0.14
+  resolution: "@types/react@npm:19.0.14"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: fa749597f3500e1e8d045b4460cdbb6c67f4bc37e13ffb9d5ce059b71526f62f8c6836169772e3a1a64df9326291477d5c1c92262100161f74d5b5fa2a420c8d
   languageName: node
   linkType: hard
 
@@ -10117,8 +10126,8 @@ __metadata:
     "@types/lodash": 4.17.13
     "@types/mocha": 10.0.8
     "@types/node": 22.13.1
-    "@types/react": 19.0.10
-    "@types/react-dom": 19.0.4
+    "@types/react": 19.0.14
+    "@types/react-dom": 19.0.6
     "@types/react-window": 1.8.8
     "@types/uuid": 9.0.8
     "@typescript-eslint/eslint-plugin": 8.24.0
