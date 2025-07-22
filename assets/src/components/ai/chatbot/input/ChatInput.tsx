@@ -14,6 +14,7 @@ import {
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
+  useCloudConnectionsQuery,
 } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
@@ -31,6 +32,7 @@ import { useInterval } from 'usehooks-ts'
 import { ChatMessage } from '../ChatMessage.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { ChatInputAgentSelect } from './ChatInputAgentSelect.tsx'
 
 export function ChatInput({
   currentThread,
@@ -99,6 +101,10 @@ export function ChatInput({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
+  const { data: cloudConnections, loading: cloudConnectionsLoading } =
+    useCloudConnectionsQuery()
+  const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
+
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -164,6 +170,9 @@ export function ChatInput({
                 tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
                 onClick={() => setShowMcpServers(!showMcpServers)}
               />
+            )}
+            {!cloudConnectionsLoading && connectionId && (
+              <ChatInputAgentSelect connectionId={connectionId} />
             )}
           </Flex>
           <IconFrame
