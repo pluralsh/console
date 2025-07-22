@@ -7452,14 +7452,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsdom@npm:21.1.5":
-  version: 21.1.5
-  resolution: "@types/jsdom@npm:21.1.5"
+"@types/jsdom@npm:21.1.7":
+  version: 21.1.7
+  resolution: "@types/jsdom@npm:21.1.7"
   dependencies:
     "@types/node": "*"
     "@types/tough-cookie": "*"
     parse5: ^7.0.0
-  checksum: f80a01ef8d712c9d0118ec3af492c41706629305cd55366c15c4c539c322407e1f1ea9f7d297d9050d41e5fbecab9064f8b1697749d54ab4516746ed193f83bf
+  checksum: b7465d5a471ed4e68a54e2639c534d364134674598687be69645736731215e7407fe37a4af66dc616ef03be9c5515cb355df2eda5c8080146c05bd569ea8810d
   languageName: node
   linkType: hard
 
@@ -10113,7 +10113,7 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     "@types/content-disposition": ^0.5.8
     "@types/humanize-duration": 3.27.4
-    "@types/jsdom": 21.1.5
+    "@types/jsdom": 21.1.7
     "@types/lodash": 4.17.13
     "@types/mocha": 10.0.8
     "@types/node": 22.13.1
