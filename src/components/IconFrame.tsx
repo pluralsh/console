@@ -70,7 +70,7 @@ function typeToBorder(theme: DefaultTheme): Record<Type, string> {
 }
 
 const sizeToIconSize: Record<Size, number> = {
-  xsmall: 8,
+  xsmall: 10,
   small: 16,
   medium: 16,
   large: 16,
@@ -78,7 +78,7 @@ const sizeToIconSize: Record<Size, number> = {
 }
 
 const sizeToFrameSize: Record<Size, number> = {
-  xsmall: 16,
+  xsmall: 18,
   small: 24,
   medium: 32,
   large: 40,
