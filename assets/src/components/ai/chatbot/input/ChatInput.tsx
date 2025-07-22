@@ -1,22 +1,20 @@
 import {
-  Button,
+  AiSparkleFilledIcon,
   Chip,
   Flex,
   IconFrame,
-  MagicWandIcon,
   PlusIcon,
   SendMessageIcon,
   ServersIcon,
-  Tooltip,
 } from '@pluralsh/design-system'
-import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-import { GqlError } from 'components/utils/Alert'
-import { EditableDiv } from 'components/utils/EditableDiv'
+import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import {
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
-} from 'generated/graphql'
+} from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -30,10 +28,11 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
-import { ChatMessage } from './ChatMessage'
-import { useCurrentPageChatContext } from './useCurrentPageChatContext'
+import { ChatMessage } from '../ChatMessage.tsx'
+import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
+import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 
-export function SendMessageForm({
+export function ChatInput({
   currentThread,
   sendMessage,
   fullscreen,
@@ -53,7 +52,6 @@ export function SendMessageForm({
   showPrompts: boolean
   setShowPrompts: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
-  const theme = useTheme()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -142,50 +140,30 @@ export function SendMessageForm({
         />
         <Flex justifyContent="space-between">
           <Flex
-            gap="small"
-            height="100%"
+            gap="xxsmall"
+            align="flex-end"
           >
-            <IconFrame
-              icon={<MagicWandIcon />}
-              type="secondary"
-              clickable
-              tooltip={
-                showPrompts ? 'Hide example prompts' : 'Show example prompts'
-              }
-              onClick={() => setShowPrompts(!showPrompts)}
-              css={{
-                borderColor: showPrompts
-                  ? theme.colors['border-primary']
-                  : undefined,
-              }}
-            />
-            {!isEmpty(serverNames) && (
-              <IconFrame
-                icon={<ServersIcon />}
-                type="secondary"
-                clickable
-                tooltip={
-                  showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'
-                }
-                onClick={() => setShowMcpServers(!showMcpServers)}
+            {showContextBtn && (
+              <ChatInputIconFrame
+                disabled={contextBtnClicked}
+                loading={contextLoading}
+                icon={<PlusIcon />}
+                onClick={handleAddPageContext}
+                tooltip={`Append prompts and files related to the ${source.toLowerCase()} currently being viewed`}
               />
             )}
-            {showContextBtn && (
-              <Tooltip
-                label={`Appends prompts and files related to the ${source.toLowerCase()} currently being viewed`}
-                placement="top"
-              >
-                <Button
-                  small
-                  secondary
-                  disabled={contextBtnClicked}
-                  loading={contextLoading}
-                  onClick={handleAddPageContext}
-                  startIcon={<PlusIcon />}
-                >
-                  Add page context
-                </Button>
-              </Tooltip>
+            <ChatInputIconFrame
+              active={showPrompts}
+              icon={<AiSparkleFilledIcon />}
+              tooltip={`${showPrompts ? 'Hide' : 'Show'} example prompts`}
+              onClick={() => setShowPrompts(!showPrompts)}
+            />
+            {!isEmpty(serverNames) && (
+              <ChatInputIconFrame
+                icon={<ServersIcon />}
+                tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
+                onClick={() => setShowMcpServers(!showMcpServers)}
+              />
             )}
           </Flex>
           <IconFrame
@@ -238,6 +216,13 @@ const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
   })
 )
 
+const ChipListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  maxWidth: 256,
+  minWidth: 0,
+}))
+
 export function GeneratingResponseMessage() {
   const theme = useTheme()
   const [dots, setDots] = useState('.')
@@ -259,10 +244,3 @@ export function GeneratingResponseMessage() {
     />
   )
 }
-
-const ChipListSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  maxWidth: 256,
-  minWidth: 0,
-}))

@@ -4467,9 +4467,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.20.2":
-  version: 5.20.2
-  resolution: "@pluralsh/design-system@npm:5.20.2"
+"@pluralsh/design-system@npm:5.20.3":
+  version: 5.20.3
+  resolution: "@pluralsh/design-system@npm:5.20.3"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -4514,7 +4514,7 @@ __metadata:
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 967d77ac6e1fef66937f2372cbf0f00adf38aa860c71332425f32a16ec156cd2b8cea126c435538aea314a107f20e46739720481833748a9e553e179af3141b2
+  checksum: a01b5bd6bc6465017e10727f1d049cf5838ccd16437f8ed8c1352042669322b420e0a5d2cc9f92eee14c18b5fb66887ec9dc9fd1ddac8db474d467980a391907
   languageName: node
   linkType: hard
 
@@ -10098,7 +10098,7 @@ __metadata:
     "@nivo/radial-bar": 0.99.0
     "@nivo/tooltip": 0.99.0
     "@nivo/treemap": 0.99.0
-    "@pluralsh/design-system": 5.20.2
+    "@pluralsh/design-system": 5.20.3
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0

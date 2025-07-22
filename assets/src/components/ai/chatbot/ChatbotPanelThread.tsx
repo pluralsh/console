@@ -33,10 +33,7 @@ import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
-import {
-  GeneratingResponseMessage,
-  SendMessageForm,
-} from './ChatbotSendMessageForm.tsx'
+import { ChatInput, GeneratingResponseMessage } from './input/ChatInput.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 
@@ -203,7 +200,7 @@ export function ChatbotPanelThread({
           />
         )}
       </ChatbotMessagesWrapper>
-      <SendMessageForm
+      <ChatInput
         currentThread={currentThread}
         sendMessage={sendMessage}
         fullscreen={fullscreen}
