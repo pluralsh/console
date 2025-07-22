@@ -2,10 +2,13 @@ import {
   AiSparkleOutlineIcon,
   ArrowTopRightIcon,
   CatalogIcon,
+  ChatOutlineIcon,
   ClusterIcon,
   CostManagementIcon,
   DocumentIcon,
+  EdgeComputeIcon,
   EyeIcon,
+  FlowIcon,
   GearTrainIcon,
   GitPullIcon,
   HomeIcon,
@@ -15,37 +18,43 @@ import {
   PodContainerIcon,
   PrOpenIcon,
   PrQueueIcon,
+  setThemeColorMode,
   SprayIcon,
   StackIcon,
   ToolsIcon,
-  WarningShieldIcon,
-  setThemeColorMode,
   useThemeColorMode,
-  EdgeComputeIcon,
-  FlowIcon,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
+import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
-import { ComponentType, use, useMemo } from 'react'
+import { ComponentType, ReactElement, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
-import { useClustersTinyQuery } from '../../generated/graphql'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
+import {
+  ChatThreadTinyFragment,
+  useChatThreadsQuery,
+  useClustersTinyQuery,
+} from '../../generated/graphql'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
+import {
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  getClusterDetailsPath,
+  PODS_REL_PATH,
+  SERVICES_REL_PATH,
+} from '../../routes/cdRoutesConsts'
+import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
+import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
+import { SECURITY_ABS_PATH } from '../../routes/securityRoutesConsts.tsx'
 import {
   CATALOGS_ABS_PATH,
   PR_ABS_PATH,
   PR_AUTOMATIONS_ABS_PATH,
 } from '../../routes/selfServiceRoutesConsts.tsx'
-import {
-  CD_ABS_PATH,
-  CLUSTERS_REL_PATH,
-  PODS_REL_PATH,
-  SERVICES_REL_PATH,
-  getClusterDetailsPath,
-} from '../../routes/cdRoutesConsts'
-import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import { SECURITY_ABS_PATH } from '../../routes/securityRoutesConsts.tsx'
 import {
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_ABS_PATH,
@@ -54,11 +63,8 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
-import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
-import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
 
-type CommandGroup = {
+export type CommandGroup = {
   commands: Command[]
   title?: string
 }
@@ -92,6 +98,9 @@ export type Command = {
   // Hotkeys that will trigger this command.
   hotkeys?: string[]
 
+  // Component allows providing a custom React element to be rendered in the command palette.
+  component?: ReactElement
+
   // Hotkeys options.
   options?: UseHotkeysOptions
 }
@@ -117,8 +126,10 @@ export function useCommandsWithHotkeys() {
 
 export function useCommands({
   showHidden = false,
+  filter = '',
 }: {
   showHidden?: boolean
+  filter?: string
 } = {}): CommandGroup[] {
   const open = useShareSecretOpen()
   const mode = useThemeColorMode()
@@ -160,7 +171,7 @@ export function useCommands({
     [featureFlags, setFeatureFlag]
   )
 
-  return useMemo(
+  const commands = useMemo(
     () => [
       {
         commands: [
@@ -350,4 +361,65 @@ export function useCommands({
       hiddenCommands,
     ]
   )
+
+  return useMemo(() => {
+    return commands.map((group) => {
+      const fuse = new Fuse(group.commands as Array<Command>, {
+        keys: ['label', 'prefix'],
+        threshold: 0.3,
+      })
+
+      return {
+        ...group,
+        commands:
+          filter?.length > 0
+            ? fuse.search(filter).map((result) => result.item)
+            : group.commands,
+      }
+    })
+  }, [commands, filter])
+}
+
+// TODO: allow passing custom component here
+export function useHistory({
+  filter,
+  component,
+}: {
+  filter: string
+  component?: (thread: ChatThreadTinyFragment) => ReactElement
+}): {
+  loading: boolean
+  history: Array<CommandGroup>
+} {
+  const { loading, data } = useChatThreadsQuery({
+    pollInterval: 120_000,
+    fetchPolicy: 'cache-and-network',
+    variables: { first: 100 },
+  })
+
+  const threads = useMemo(() => {
+    const threads = data?.chatThreads?.edges?.map((edge) => edge?.node) ?? []
+    const fuse = new Fuse(threads, {
+      keys: ['summary'],
+      threshold: 0.3,
+    })
+    return filter?.length > 0
+      ? (fuse.search(filter).map((result) => result.item) ?? [])
+      : threads
+  }, [data?.chatThreads?.edges, filter])
+
+  const history = threads.map((thread) => {
+    return {
+      label: thread?.summary ?? 'Untitled',
+      icon: ChatOutlineIcon,
+      callback: () => {
+        // TODO: Implement thread navigation
+      },
+      deps: [],
+      disabled: false,
+      component: component?.(thread as ChatThreadTinyFragment),
+    } as Command
+  })
+
+  return { loading, history: [{ commands: history }] }
 }

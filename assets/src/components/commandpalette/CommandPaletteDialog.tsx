@@ -1,10 +1,9 @@
-import { Command } from 'cmdk'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-
 import { ModalWrapper } from '@pluralsh/design-system'
 
 import chroma from 'chroma-js'
+import { Command } from 'cmdk'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
 
@@ -17,20 +16,35 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
     boxShadow: theme.boxShadows.modal,
     display: 'flex',
     flexDirection: 'column',
-    width: 480,
-    maxHeight: 480,
+    width: 880,
+    maxHeight: 800,
 
-    '[cmdk-input]': {
-      ...theme.partials.reset.input,
-      ...theme.partials.text.body2,
-      backgroundColor: theme.colors['fill-two'],
-      border: 'none',
+    '#cmdk-input-wrapper': {
+      backgroundColor: theme.colors['fill-zero'],
       borderBottom: theme.borders.input,
       borderTopLeftRadius: theme.borderRadiuses.large,
       borderTopRightRadius: theme.borderRadiuses.large,
+      padding: theme.spacing.medium,
+    },
+
+    '#cmdk-input-tabs': {
+      paddingTop: theme.spacing.small,
+      display: 'flex',
+    },
+
+    '#cmdk-input': {
+      ...theme.partials.reset.input,
+      ...theme.partials.text.body2,
+      backgroundColor: theme.colors['fill-zero'],
+      border: theme.borders['input'],
+      borderRadius: theme.borderRadiuses.medium,
       color: theme.colors.text,
-      padding: '14px 16px',
+      padding: theme.spacing.small,
       width: '100%',
+
+      '&:focus': {
+        border: theme.borders['outline-focused'],
+      },
 
       '&::placeholder': {
         color: theme.colors['text-xlight'],
@@ -52,9 +66,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
     },
 
     '[cmdk-list]': {
-      backgroundColor: theme.colors['fill-one'],
-      borderBottomLeftRadius: theme.borderRadiuses.large,
-      borderBottomRightRadius: theme.borderRadiuses.large,
+      backgroundColor: theme.colors['fill-zero'],
       height: `calc(var(--cmdk-list-height) + ${theme.spacing.small * 2}px)`,
       overflow: 'auto',
       padding: theme.spacing.small,
@@ -109,6 +121,23 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
         backgroundColor: theme.colors['border-input'],
         height: 1,
         margin: `${theme.spacing.small}px -${theme.spacing.small}px`,
+      },
+    },
+
+    '#cmdk-footer': {
+      display: 'flex',
+      gap: theme.spacing.xsmall,
+      padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+      backgroundColor: theme.colors['fill-zero-selected'],
+      borderTop: theme.borders['input'],
+      borderBottomLeftRadius: theme.borderRadiuses.large,
+      borderBottomRightRadius: theme.borderRadiuses.large,
+
+      '> div': {
+        display: 'flex',
+        gap: theme.spacing.xsmall,
+        alignItems: 'center',
+        color: theme.colors['text-input-disabled'],
       },
     },
   },

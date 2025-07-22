@@ -1,12 +1,12 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
 import { usePlatform } from 'components/hooks/usePlatform'
-import { useCallback, useState } from 'react'
 
 import { Body2BoldP } from 'components/utils/typography/Text'
+import { useCallback, useState } from 'react'
 import CommandHotkeys from './CommandHotkeys'
 import CommandPaletteDialog from './CommandPaletteDialog'
-import { useCommandsWithHotkeys } from './commands'
+import { useCommandsWithHotkeys } from './commands.ts'
 
 export default function CommandPaletteLauncher() {
   const { modKeyString, keyCombinerString } = usePlatform()
