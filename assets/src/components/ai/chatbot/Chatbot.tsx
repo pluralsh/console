@@ -24,7 +24,6 @@ import { AITable } from '../AITable.tsx'
 import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import {
   ChatbotMessagesWrapperSC,
   ChatbotPanelThread,
@@ -74,13 +73,12 @@ export function ChatbotPanel() {
 function ChatbotPanelInner() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const { currentThread, currentInsight, detailsLoading, detailsError } =
-    useChatbot()
+  const { currentThread, detailsLoading, detailsError } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const threadsQuery = useFetchPaginatedData({
-    skip: !!currentThread || !!currentInsight,
+    skip: !!currentThread,
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
   })
@@ -128,12 +126,9 @@ function ChatbotPanelInner() {
       )}
       <FillLevelProvider value={1}>
         <RightSideSC $showMcpServers={showMcpServers}>
-          <ChatbotHeader
-            currentThread={currentThread}
-            currentInsight={currentInsight}
-          />
+          <ChatbotHeader currentThread={currentThread} />
           {detailsError && <GqlError error={detailsError} />}
-          {!currentThread && !currentInsight && detailsLoading ? (
+          {!currentThread && detailsLoading ? (
             <ChatbotMessagesWrapperSC>
               <LoadingIndicator />
             </ChatbotMessagesWrapperSC>
@@ -146,8 +141,6 @@ function ChatbotPanelInner() {
               showExamplePrompts={showPrompts}
               setShowExamplePrompts={setShowPrompts}
             />
-          ) : currentInsight ? (
-            <ChatbotPanelInsight currentInsight={currentInsight} />
           ) : (
             <ChatbotTableWrapperSC>
               <AITable

@@ -1,6 +1,4 @@
 import {
-  AiSparkleFilledIcon,
-  AiSparkleOutlineIcon,
   AppIcon,
   ArrowTopRightIcon,
   ChatFilledIcon,
@@ -38,7 +36,6 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts.tsx'
 import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
-import { MoreMenuTrigger } from '../utils/MoreMenu.tsx'
 import { ClusterProviderIcon } from '../utils/Provider.tsx'
 import { useChatbot } from './AIContext.tsx'
 import { AITableActions } from './AITableActions.tsx'
@@ -75,10 +72,9 @@ export function AITableEntry({
 } & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const { goToThread, goToInsight } = useChatbot()
+  const { goToThread } = useChatbot()
 
   const isPin = item.__typename === 'AiPin'
-  const isInsight = isPin && !item.thread
 
   const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
   const insight = item.insight
@@ -89,11 +85,10 @@ export function AITableEntry({
   const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
   const onClick = useCallback(() => {
-    if (isInsight && insight) goToInsight(insight)
-    if (!isInsight && thread) goToThread(thread.id)
-  }, [isInsight, insight, goToInsight, thread, goToThread])
+    if (thread) goToThread(thread.id)
+  }, [thread, goToThread])
 
-  if ((isInsight && !insight) || (!isInsight && !thread)) return null
+  if (!thread) return null
 
   return (
     <AIThreadsTableEntrySC
@@ -105,7 +100,6 @@ export function AITableEntry({
     >
       <AIEntryLabel
         insight={insight}
-        isInsight={isInsight}
         isStale={isStale}
         thread={thread}
         opacity={isStale ? 0.6 : 1}
@@ -147,14 +141,7 @@ export function AITableEntry({
           )}
         </>
       )}
-      {isInsight ? (
-        <MoreMenuTrigger
-          disabled
-          css={{ cursor: 'default' }}
-        />
-      ) : (
-        <AITableActions thread={thread} />
-      )}
+      <AITableActions thread={thread} />
     </AIThreadsTableEntrySC>
   )
 }
@@ -162,13 +149,11 @@ export function AITableEntry({
 export function AIEntryLabel({
   thread,
   insight,
-  isInsight,
   isStale,
   ...props
 }: {
   thread?: Nullable<ChatThreadTinyFragment>
   insight?: Nullable<AiInsightSummaryFragment>
-  isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
   const insightPathInfo = getInsightPathInfo(insight)
@@ -190,7 +175,6 @@ export function AIEntryLabel({
         css={{ flexShrink: 0 }}
         icon={
           <TableEntryIcon
-            isInsight={isInsight}
             isStale={isStale}
             thread={thread}
             insight={insight}
@@ -198,9 +182,7 @@ export function AIEntryLabel({
         }
       />
       <StackedText
-        first={
-          isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
-        }
+        first={truncate(thread?.summary)}
         second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
         firstPartialType="body2"
         firstColor="text"
@@ -211,12 +193,10 @@ export function AIEntryLabel({
 }
 
 function TableEntryIcon({
-  isInsight,
   isStale,
   insight,
   thread,
 }: {
-  isInsight: boolean
   isStale: boolean
   insight: Nullable<AiInsightSummaryFragment>
   thread?: Nullable<ChatThreadTinyFragment>
@@ -266,19 +246,6 @@ function TableEntryIcon({
     )
 
   // TODO: Add handler for insight?.clusterInsightComponent once we have a page for it
-
-  if (isInsight)
-    return isStale ? (
-      <AiSparkleOutlineIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-light']}
-      />
-    ) : (
-      <AiSparkleFilledIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-info']}
-      />
-    )
 
   if (thread?.flow)
     return (

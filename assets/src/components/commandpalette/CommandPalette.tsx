@@ -241,12 +241,10 @@ function HistoryItem({ thread }: HistoryItemProps): ReactElement {
   const timestamp = getThreadOrPinTimestamp(thread)
 
   const insight = thread.insight
-  const isInsight = !!thread.insight
 
   return (
     <>
       <AIEntryLabel
-        isInsight={isInsight}
         isStale={false}
         thread={thread}
         insight={insight}

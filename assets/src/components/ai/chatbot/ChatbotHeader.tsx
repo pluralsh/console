@@ -14,7 +14,6 @@ import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
   AgentSessionType,
-  AiInsightFragment,
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
   useUpdateChatThreadMutation,
@@ -22,20 +21,15 @@ import {
 import { useCallback } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
-import { AIPinButton } from '../AIPinButton'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../AITableEntry'
-import { AISuggestFix } from './AISuggestFix'
-import { ChatWithAIButton, insightMessage } from './ChatbotButton'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 
-type HeaderState = 'list' | 'thread' | 'insight'
+type HeaderState = 'list' | 'thread'
 
 export function ChatbotHeader({
   currentThread,
-  currentInsight,
 }: {
   currentThread?: Nullable<ChatThreadTinyFragment>
-  currentInsight?: Nullable<AiInsightFragment>
 }) {
   const { colors } = useTheme()
 
@@ -47,10 +41,7 @@ export function ChatbotHeader({
     mutationError,
   } = useChatbot()
 
-  const insight = currentThread?.insight || currentInsight
-  let state: HeaderState = 'list'
-  if (currentThread) state = 'thread'
-  else if (insight) state = 'insight'
+  const state: HeaderState = currentThread ? 'thread' : 'list'
 
   const timestamp = getThreadOrPinTimestamp(currentThread)
   const isStale =
@@ -106,9 +97,8 @@ export function ChatbotHeader({
             onClick={() => goToThreadList()}
           />
           <AIEntryLabel
-            insight={insight}
+            insight={currentThread?.insight}
             thread={currentThread}
-            isInsight={state === 'insight'}
             isStale={isStale}
           />
         </>
@@ -140,7 +130,6 @@ export function ChatbotHeader({
               />
             </div>
           )}
-
           <IconFrame
             clickable
             icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
@@ -157,25 +146,6 @@ export function ChatbotHeader({
                 }),
               })
             }
-          />
-        </>
-      )}
-      {state === 'insight' && (
-        <>
-          <AIPinButton
-            insight={insight}
-            thread={currentThread}
-          />
-          <ChatWithAIButton
-            floating
-            iconOnly
-            insightId={insight?.id}
-            messages={[insightMessage(insight)]}
-            bodyText="Chat about it"
-          />
-          <AISuggestFix
-            buttonProps={{ iconOnly: true }}
-            insight={insight}
           />
         </>
       )}
