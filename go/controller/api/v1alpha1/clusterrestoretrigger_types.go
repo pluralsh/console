@@ -22,38 +22,55 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ClusterRestoreTriggerSpec defines the desired state of ClusterRestoreTrigger
-type ClusterRestoreTriggerSpec struct {
-	// ClusterRestoreRef pointing to source ClusterRestore.
-	// +kubebuilder:validation:Optional
-	ClusterRestoreRef *corev1.ObjectReference `json:"clusterRestoreRef,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
-// ClusterRestoreTrigger is the Schema for the clusterrestoretriggers API
-type ClusterRestoreTrigger struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ClusterRestoreTriggerSpec `json:"spec,omitempty"`
-	Status Status                    `json:"status,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-
-// ClusterRestoreTriggerList contains a list of ClusterRestoreTrigger
-type ClusterRestoreTriggerList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterRestoreTrigger `json:"items"`
-}
-
 func init() {
 	SchemeBuilder.Register(&ClusterRestoreTrigger{}, &ClusterRestoreTriggerList{})
 }
 
+//+kubebuilder:object:root=true
+
+// ClusterRestoreTriggerList contains a list of ClusterRestoreTrigger resources.
+type ClusterRestoreTriggerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []ClusterRestoreTrigger `json:"items"`
+}
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Namespaced
+
+// ClusterRestoreTrigger triggers cluster restore operations.
+// It provides a declarative way to initiate cluster restore processes from existing backups.
+//
+// The ClusterRestoreTrigger works in conjunction with ClusterRestore resource to manage
+// the complete backup and restore lifecycle for Kubernetes clusters in the Plural platform.
+type ClusterRestoreTrigger struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec defines the desired state and configuration for the cluster restore trigger.
+	Spec ClusterRestoreTriggerSpec `json:"spec,omitempty"`
+
+	// Status represents the current state of the cluster restore trigger operation.
+	Status Status `json:"status,omitempty"`
+}
+
+// SetCondition updates the status conditions of the ClusterRestoreTrigger.
 func (p *ClusterRestoreTrigger) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
+// ClusterRestoreTriggerSpec defines the desired state and configuration for a ClusterRestoreTrigger.
+// It specifies which backup should be restored and provides the necessary references
+// to locate and access the backup data for the restore operation.
+type ClusterRestoreTriggerSpec struct {
+	// ClusterRestoreRef is a reference to the ClusterRestore resource that contains
+	// the backup data and configuration for the restore operation.
+	//
+	// This reference should point to a valid ClusterRestore resource that has been
+	// successfully created and contains the backup data needed for restoration.
+	//
+	// +kubebuilder:validation:Optional
+	ClusterRestoreRef *corev1.ObjectReference `json:"clusterRestoreRef,omitempty"`
 }
