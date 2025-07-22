@@ -1,95 +1,104 @@
 import { useChatbot } from '../../AIContext.tsx'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   AgentSessionType,
   useCreateAgentSessionMutation,
 } from '../../../../generated/graphql.ts'
 import {
-  Button,
-  Flex,
-  IconFrame,
-  Input,
+  KubernetesIcon,
   ListBoxItem,
-  Modal,
   RobotIcon,
   Select,
+  TerraformLogoIcon,
   Toast,
 } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+import { lowerCase } from 'lodash'
+import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
+
+function getIcon(type: AgentSessionType | undefined, size = 16) {
+  switch (type) {
+    case AgentSessionType.Terraform:
+      return (
+        <TerraformLogoIcon
+          fullColor
+          size={size}
+        />
+      )
+    case AgentSessionType.Kubernetes:
+      return (
+        <KubernetesIcon
+          color={'#326CE5'} // TODO: Fix fullColor prop in KubernetesIcon.
+          size={size}
+        />
+      )
+    default:
+      return <RobotIcon size={size} />
+  }
+}
 
 export function ChatInputAgentSelect({
   connectionId,
 }: {
   connectionId: string
 }) {
+  const theme = useTheme()
   const { goToThread } = useChatbot()
-  const [showInputModal, setShowInputModal] = useState(false)
-  const [prompt, setPrompt] = useState('')
-  const [type, setType] = useState(AgentSessionType.Terraform)
+  const [type, setType] = useState<AgentSessionType | undefined>()
   const [
-    createAgentSession,
-    { loading: agentSessionLoading, error: agentSessionError },
+    _createAgentSession,
+    { loading: _agentSessionLoading, error: agentSessionError },
   ] = useCreateAgentSessionMutation({
-    variables: { attributes: { connectionId, prompt, type } },
+    variables: { attributes: { connectionId, prompt: '', type } }, // TODO: Use real prompt.
     onCompleted: (data) => {
       if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
-      setShowInputModal(false)
     },
   })
+
+  const icon = useMemo(() => getIcon(type, 12), [type])
+
+  // TODO:
+  //  - Change the button in the chatbot to indicate that the agent is selected.
+  //    When the button is clicked then the _createAgentSession mutation should be called
+  //    if _agentSessionLoading is false at that time.
+  //  - Export common part of the code to the new select component so it can be reused.
+
   return (
     <>
-      <IconFrame
-        clickable
-        icon={<RobotIcon />}
-        size="xsmall"
-        type="secondary"
-        tooltip="Use our coding agent to run background task."
-        onClick={() => setShowInputModal(true)}
-      />
-      <Modal
-        header="Set prompt"
-        size="large"
-        open={showInputModal}
-        onClose={() => setShowInputModal(false)}
-        asForm
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (!agentSessionLoading) createAgentSession()
-        }}
-        actions={
-          <Button
-            type="submit"
-            loading={agentSessionLoading}
+      <Select
+        selectedKey={type}
+        onSelectionChange={(key) => setType(key as AgentSessionType)}
+        label="agent"
+        width={270}
+        dropdownHeaderFixed={
+          <div
+            css={{
+              color: theme.colors['text-xlight'],
+              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+            }}
           >
-            Create
-          </Button>
+            Select agent type
+          </div>
+        }
+        triggerButton={
+          <ChatInputSelectButton tooltip="Use our coding agent to run background task">
+            {icon} {lowerCase(type)} agent
+          </ChatInputSelectButton>
         }
       >
-        <Flex
-          gap="small"
-          direction="row"
-        >
-          <Select
-            label="Agent Type"
-            selectedKey={type}
-            onSelectionChange={(key) => setType(key as AgentSessionType)}
-          >
-            <ListBoxItem
-              key={AgentSessionType.Terraform}
-              label="Terraform"
-            />
-            <ListBoxItem
-              key={AgentSessionType.Kubernetes}
-              label="Kubernetes"
-            />
-          </Select>
-          <Input
-            placeholder="Enter a prompt"
-            width="100%"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-          />
-        </Flex>
-      </Modal>
+        <ListBoxItem
+          key={AgentSessionType.Terraform}
+          leftContent={getIcon(AgentSessionType.Terraform)}
+          label="Terraform agent"
+          description="Descriptive sentence here"
+        />
+        <ListBoxItem
+          key={AgentSessionType.Kubernetes}
+          leftContent={getIcon(AgentSessionType.Kubernetes)}
+          label="Kubernetes agent"
+          description="Descriptive sentence here"
+        />
+      </Select>
       <Toast
         show={!!agentSessionError}
         severity="danger"
