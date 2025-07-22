@@ -58,10 +58,9 @@ export function ChatInputAgentSelect({
   const icon = useMemo(() => getIcon(type, 12), [type])
 
   // TODO:
-  //  - Change the button in the chatbot to indicate that the agent is selected.
-  //    When the button is clicked then the _createAgentSession mutation should be called
-  //    if _agentSessionLoading is false at that time.
-  //  - Export common part of the code to the new select component so it can be reused.
+  //  Change the button in the chatbot to indicate that the agent is selected.
+  //  When the button is clicked then the _createAgentSession mutation should be called
+  //  if _agentSessionLoading is false at that time.
 
   return (
     <>
