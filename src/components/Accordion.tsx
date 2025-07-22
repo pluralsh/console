@@ -7,6 +7,7 @@ import {
 } from 'react'
 
 import styled, {
+  CSSObject,
   type DefaultTheme,
   css,
   keyframes,
@@ -46,6 +47,7 @@ function AccordionItem({
   paddingArea = 'all',
   caret = 'right',
   trigger,
+  additionalContentStyles,
   children,
   ...props
 }: {
@@ -55,6 +57,7 @@ function AccordionItem({
   caret?: 'none' | 'left' | 'right'
   trigger: ReactNode
   children: ReactNode
+  additionalContentStyles?: CSSObject
 } & Omit<ComponentProps<typeof RadixAccordion.Item>, 'value'>) {
   const theme = useTheme()
   const paddingSize = getPaddingSize(theme, padding)
@@ -79,7 +82,7 @@ function AccordionItem({
           )}
         </TriggerSC>
       </RadixAccordion.Header>
-      <ContentSC>
+      <ContentSC css={additionalContentStyles}>
         <div
           style={
             paddingArea === 'all'
