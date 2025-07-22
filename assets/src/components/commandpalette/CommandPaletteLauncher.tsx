@@ -1,44 +1,14 @@
-import { Chip, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useState } from 'react'
-import { usePlatform } from 'components/hooks/usePlatform'
-import styled, { useTheme } from 'styled-components'
+import { Chip, Flex } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
+import { usePlatform } from 'components/hooks/usePlatform'
+import { useCallback, useState } from 'react'
 
+import { Body2BoldP } from 'components/utils/typography/Text'
+import CommandHotkeys from './CommandHotkeys'
 import CommandPaletteDialog from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands'
-import CommandHotkeys from './CommandHotkeys'
-
-export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  ...theme.partials.text.body2,
-  height: theme.spacing.xlarge,
-  padding: `${0}px ${theme.spacing.medium}px`,
-  background: 'transparent',
-  border: theme.borders.input,
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-xlight'],
-  '&, .content': {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  gap: theme.spacing.xsmall,
-  '.content': {
-    display: 'flex',
-    gap: theme.spacing.small,
-  },
-  '&:hover': {
-    background: theme.colors['fill-zero'],
-  },
-  '&:focus, &:focus-visible': {
-    outline: 'none',
-  },
-  '&:focus-visible': {
-    border: theme.borders['outline-focused'],
-  },
-}))
 
 export default function CommandPaletteLauncher() {
-  const theme = useTheme()
   const { modKeyString, keyCombinerString } = usePlatform()
   const commands = useCommandsWithHotkeys()
   const [open, setOpen] = useState(false)
@@ -51,24 +21,19 @@ export default function CommandPaletteLauncher() {
 
   return (
     <>
-      <CommandPaletteLauncherSC onClick={openCommandPalette}>
-        <div className="content">
-          <SearchIcon
-            size={16}
-            color={theme.colors['text-light']}
-          />
-          <span>Search</span>
-          <Chip
-            fillLevel={3}
-            size="small"
-            userSelect="none"
-            whiteSpace="nowrap"
-          >
-            {modKeyString}
-            {keyCombinerString}K
-          </Chip>
-        </div>
-      </CommandPaletteLauncherSC>
+      <Chip
+        clickable
+        inactive
+        onClick={openCommandPalette}
+        size="small"
+        userSelect="none"
+        whiteSpace="nowrap"
+      >
+        <Flex gap="xxsmall">
+          <Body2BoldP $color="text-light">{modKeyString}</Body2BoldP>
+          <Body2BoldP $color="text-xlight">{keyCombinerString}K</Body2BoldP>
+        </Flex>
+      </Chip>
       <CommandPaletteDialog
         open={open}
         setOpen={setOpen}

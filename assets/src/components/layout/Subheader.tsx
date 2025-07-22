@@ -4,7 +4,7 @@ import {
   Breadcrumbs,
   IconFrame,
 } from '@pluralsh/design-system'
-import { Chatbot } from 'components/ai/chatbot/Chatbot.tsx'
+import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher.tsx'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import ExplainWithAI from '../ai/explain/ExplainWithAI.tsx'
@@ -68,7 +68,7 @@ export default function Subheader() {
         }}
       >
         <ExplainWithAI />
-        <Chatbot />
+        <CommandPaletteLauncher />
       </div>
     </SubheaderSC>
   )

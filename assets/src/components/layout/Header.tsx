@@ -8,10 +8,10 @@ import styled, { useTheme } from 'styled-components'
 
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
 import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
-import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher'
 
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
+import { Chatbot } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './HeaderProjectSelect'
 
@@ -56,13 +56,13 @@ export default function Header() {
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
         <NotificationsLauncher />
-        <CommandPaletteLauncher />
         <LightDarkSwitch
           checked={theme.mode === 'dark'}
           onChange={(val) => {
             setThemeColorMode(val ? 'dark' : 'light')
           }}
         />
+        <Chatbot />
       </HeaderContentSC>
     </HeaderSC>
   )

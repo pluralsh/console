@@ -138,6 +138,7 @@ export function Home() {
       direction="column"
       overflow="auto"
       height="100%"
+      containerType="inline-size"
     >
       <ChartSectionSC>
         <WidthLimiterSC $type="charts">
@@ -218,7 +219,7 @@ const ChartAndFilterWrapperSC = styled.div(({ theme }) => ({
 
 const ChartSectionSC = styled.div(({ theme }) => ({
   minHeight: 350,
-  [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
+  [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
     minHeight: 700,
   },
   width: '100%',
@@ -246,7 +247,7 @@ const WidthLimiterSC = styled.div<{
   width: '100%',
   ...($type === 'charts' && {
     display: 'flex',
-    [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
+    [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
       flexDirection: 'column',
     },
   }),

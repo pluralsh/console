@@ -25,7 +25,6 @@ import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useTheme } from 'styled-components'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import Header from './Header'
-import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
@@ -116,7 +115,6 @@ function ConsoleContent() {
           overflowX="hidden"
           position="relative"
         >
-          <ContentOverlay />
           <Subheader />
           <Suspense fallback={<LoadingIndicator />}>
             <Outlet />
