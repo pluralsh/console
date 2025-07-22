@@ -37,8 +37,8 @@ export const ClusterProviderIcons = {
     light: `${DISTRO_ICON_PATH}/rke.svg`,
   },
   [ClusterDistro.Openshift]: {
-    dark: `${DISTRO_ICON_PATH}/k8s.svg`,
-    light: `${DISTRO_ICON_PATH}/k8s.svg`,
+    dark: `${DISTRO_ICON_PATH}/openshift-dark.svg`,
+    light: `${DISTRO_ICON_PATH}/openshift-light.svg`,
   },
   [ClusterDistro.Generic]: {
     dark: `${DISTRO_ICON_PATH}/k8s.svg`,
