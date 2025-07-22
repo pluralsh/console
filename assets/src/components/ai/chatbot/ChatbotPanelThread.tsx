@@ -39,7 +39,6 @@ import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
-  fullscreen,
   threadDetailsQuery: { data, loading, error },
   showMcpServers,
   setShowMcpServers,
@@ -47,7 +46,6 @@ export function ChatbotPanelThread({
   setShowExamplePrompts,
 }: {
   currentThread: ChatThreadFragment
-  fullscreen: boolean
   threadDetailsQuery: ChatThreadDetailsQueryResult
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
@@ -146,10 +144,7 @@ export function ChatbotPanelThread({
 
   return (
     <>
-      <ChatbotMessagesWrapper
-        messageListRef={messageListRef}
-        fullscreen={fullscreen}
-      >
+      <ChatbotMessagesWrapper messageListRef={messageListRef}>
         {isEmpty(messages) &&
           !currentThread.session?.type &&
           (error ? (
@@ -203,7 +198,6 @@ export function ChatbotPanelThread({
       <ChatInput
         currentThread={currentThread}
         sendMessage={sendMessage}
-        fullscreen={fullscreen}
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
@@ -215,11 +209,9 @@ export function ChatbotPanelThread({
 }
 
 export const ChatbotMessagesWrapper = ({
-  fullscreen,
   messageListRef,
   children,
 }: {
-  fullscreen: boolean
   messageListRef?: RefObject<HTMLDivElement | null>
   children: ReactNode
 }) => {
@@ -228,7 +220,7 @@ export const ChatbotMessagesWrapper = ({
   const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
 
   return (
-    <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
+    <ChatbotMessagesWrapperSC>
       <ScrollGradientSC
         $show={canScrollUp}
         $position="top"
@@ -246,21 +238,15 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    position: 'relative',
-    ...($fullscreen && {
-      borderRadius: theme.borderRadiuses.large,
-      border: theme.borders.input,
-    }),
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.colors['fill-one'],
-    overflow: 'hidden',
-    padding: `0 ${theme.spacing.xsmall}px`,
-    flex: 1,
-  })
-)
+export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  backgroundColor: theme.colors['fill-one'],
+  overflow: 'hidden',
+  padding: `0 ${theme.spacing.xsmall}px`,
+  flex: 1,
+}))
 
 const ChatbotMessagesListSC = styled.div(({ theme }) => ({
   ...theme.partials.reset.list,

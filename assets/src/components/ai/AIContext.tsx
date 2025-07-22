@@ -44,8 +44,6 @@ type ExplainWithAIContextT = {
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
-  fullscreen: boolean
-  setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThreadId: (threadId: Nullable<string>) => void
   currentInsight: Nullable<AiInsightSummaryFragment>
@@ -74,7 +72,6 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [currentInsight, setCurrentInsight] =
     useState<Nullable<AiInsightSummaryFragment>>()
@@ -98,8 +95,6 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         setOpen,
         currentThread: threadData?.chatThread,
         setCurrentThreadId,
-        fullscreen,
-        setFullscreen,
         currentInsight,
         setCurrentInsight,
         threadLoading,
@@ -156,8 +151,6 @@ export function useChatbot() {
     setOpen,
     currentThread,
     setCurrentThreadId,
-    fullscreen,
-    setFullscreen,
     currentInsight,
     setCurrentInsight,
     threadLoading,
@@ -220,8 +213,6 @@ export function useChatbot() {
     closeChatbot: () => setOpen(false),
     currentThread,
     currentInsight,
-    fullscreen,
-    setFullscreen,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,

@@ -4,10 +4,8 @@ import {
   ChatFilledIcon,
   CloseIcon,
   ComposeIcon,
-  ExpandIcon,
   Flex,
   IconFrame,
-  ShrinkIcon,
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
@@ -33,18 +31,15 @@ import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 type HeaderState = 'list' | 'thread' | 'insight'
 
 export function ChatbotHeader({
-  fullscreen,
   currentThread,
   currentInsight,
 }: {
-  fullscreen: boolean
   currentThread?: Nullable<ChatThreadTinyFragment>
   currentInsight?: Nullable<AiInsightFragment>
 }) {
   const { colors } = useTheme()
 
   const {
-    setFullscreen,
     closeChatbot,
     goToThreadList,
     createNewThread,
@@ -88,7 +83,7 @@ export function ChatbotHeader({
     !currentThread?.session?.id
 
   return (
-    <WrapperSC $fullscreen={fullscreen}>
+    <WrapperSC>
       {state === 'list' ? (
         <Flex
           alignItems="center"
@@ -141,12 +136,7 @@ export function ChatbotHeader({
                 placeholder="Select cluster"
                 startIcon={null}
                 deselectLabel="Deselect"
-                inputProps={{
-                  style: {
-                    minHeight: fullscreen ? 40 : 32,
-                    height: fullscreen ? 40 : 32,
-                  },
-                }}
+                inputProps={{ style: { minHeight: 32, height: 32 } }}
               />
             </div>
           )}
@@ -154,7 +144,6 @@ export function ChatbotHeader({
           <IconFrame
             clickable
             icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
-            size={fullscreen ? 'large' : 'medium'}
             type="secondary"
             tooltip="Start a new chat"
             onClick={() =>
@@ -171,31 +160,21 @@ export function ChatbotHeader({
           />
         </>
       )}
-      <IconFrame
-        {...(fullscreen
-          ? { icon: <ShrinkIcon />, size: 'large' }
-          : { icon: <ExpandIcon /> })}
-        type="secondary"
-        tooltip={fullscreen ? 'Collapse' : 'Expand'}
-        clickable
-        onClick={() => setFullscreen(!fullscreen)}
-      />
       {state === 'insight' && (
         <>
           <AIPinButton
-            size={fullscreen ? 'large' : 'medium'}
             insight={insight}
             thread={currentThread}
           />
           <ChatWithAIButton
             floating
-            iconOnly={!fullscreen}
+            iconOnly
             insightId={insight?.id}
             messages={[insightMessage(insight)]}
             bodyText="Chat about it"
           />
           <AISuggestFix
-            buttonProps={{ iconOnly: !fullscreen }}
+            buttonProps={{ iconOnly: true }}
             insight={insight}
           />
         </>
@@ -221,7 +200,6 @@ export function ChatbotHeader({
                 ? colors['border-primary']
                 : undefined,
             }}
-            size={fullscreen ? 'large' : 'medium'}
             icon={
               updateThreadLoading ? (
                 <Spinner css={{ width: 16 }} />
@@ -231,14 +209,13 @@ export function ChatbotHeader({
             }
             onClick={toggleKnowledgeGraph}
           />
-          <ChatbotThreadMoreMenu fullscreen={fullscreen} />
+          <ChatbotThreadMoreMenu />
         </>
       ) : (
         <IconFrame
           clickable
           tooltip="Close"
           type="secondary"
-          size={fullscreen ? 'large' : 'medium'}
           icon={<CloseIcon css={{ width: 16 }} />}
           onClick={() => closeChatbot()}
         />
@@ -264,21 +241,11 @@ export function ChatbotHeader({
   )
 }
 
-const WrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    gap: theme.spacing.small,
-    alignItems: 'center',
-    padding: theme.spacing.medium,
-    ...($fullscreen
-      ? {
-          border: theme.borders.input,
-          borderRadius: theme.borderRadiuses.large,
-          background: theme.colors['fill-one'],
-        }
-      : {
-          background: theme.colors['fill-two'],
-          borderBottom: theme.borders['fill-two'],
-        }),
-  })
-)
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.small,
+  alignItems: 'center',
+  padding: theme.spacing.medium,
+  background: theme.colors['fill-two'],
+  borderBottom: theme.borders['fill-two'],
+}))

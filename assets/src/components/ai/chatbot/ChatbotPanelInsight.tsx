@@ -7,17 +7,15 @@ import { isEmpty } from 'lodash'
 
 export function ChatbotPanelInsight({
   currentInsight,
-  fullscreen,
 }: {
   currentInsight: AiInsightFragment
-  fullscreen: boolean
 }) {
   const evidence = currentInsight?.evidence
     ?.filter(isNonNullable)
     .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
   return (
-    <ChatbotMessagesWrapper fullscreen={fullscreen}>
+    <ChatbotMessagesWrapper>
       <ChatMessage
         key={currentInsight.id}
         role={AiRole.Assistant}

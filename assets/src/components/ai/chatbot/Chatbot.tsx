@@ -1,7 +1,8 @@
 import {
+  Accordion,
+  AccordionItem,
   ChatOutlineIcon,
   FillLevelProvider,
-  ModalWrapper,
 } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
@@ -14,7 +15,7 @@ import {
   useChatThreadsQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentPropsWithRef, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
@@ -30,67 +31,47 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 
-type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
-  fullscreen: boolean
-}
-
-export function Chatbot() {
-  const { open, setOpen, fullscreen } = useChatbotContext()
+export function ChatbotLauncher() {
+  const { open, setOpen } = useChatbotContext()
   const settings = useDeploymentSettings()
 
-  if (!settings.ai?.enabled) return null
+  if (!settings.ai?.enabled || open) return null
 
   return (
-    <div css={{ position: 'relative' }}>
-      <ChatbotIconButton
-        active={open}
-        onClick={() => setOpen(true)}
-      >
-        <ChatOutlineIcon />
-      </ChatbotIconButton>
-      <ChatbotPanel
-        fullscreen={fullscreen}
-        open={open}
-      />
-    </div>
-  )
-}
-
-export function ChatbotPanel({
-  open,
-  fullscreen = false,
-  ...props
-}: {
-  open: boolean
-} & ChatbotPanelInnerProps) {
-  const theme = useTheme()
-  const { closeChatbot } = useChatbot()
-  return (
-    <ModalWrapper
-      overlayStyles={
-        fullscreen
-          ? {}
-          : {
-              background: 'none',
-              padding: theme.spacing.medium,
-              top: theme.spacing.xxxxlarge,
-              left: 'unset',
-            }
-      }
-      css={{ height: '100%' }}
-      open={open}
-      onOpenChange={closeChatbot}
-      title="Ask Plural AI"
+    <ChatbotIconButton
+      active={open}
+      onClick={() => setOpen(true)}
     >
-      <ChatbotPanelInner
-        fullscreen={fullscreen}
-        {...props}
-      />
-    </ModalWrapper>
+      <ChatOutlineIcon />
+    </ChatbotIconButton>
   )
 }
 
-function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
+export function ChatbotPanel() {
+  const { open } = useChatbotContext()
+  return (
+    <Accordion
+      type="single"
+      value={`${open}`}
+      orientation="horizontal"
+      css={{ border: 'none' }}
+    >
+      <AccordionItem
+        value={`${true}`}
+        caret="none"
+        padding="none"
+        trigger={null}
+        css={{ height: '100%', width: '100%' }}
+      >
+        <PanelWrapperSC>
+          <ChatbotPanelInner />
+        </PanelWrapperSC>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+function ChatbotPanelInner() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const { currentThread, currentInsight, detailsLoading, detailsError } =
@@ -137,50 +118,38 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
   }, [threadsQuery.data, pathname])
 
   return (
-    <ChatbotFrameSC
-      $fullscreen={fullscreen}
-      {...props}
-    >
+    <ChatbotFrameSC>
       {!isEmpty(tools) && (
         <McpServerShelf
           isOpen={showMcpServers}
           setIsOpen={setShowMcpServers}
-          fullscreen={fullscreen}
           tools={tools}
         />
       )}
       <FillLevelProvider value={1}>
-        <RightSideSC
-          $showMcpServers={showMcpServers}
-          $fullscreen={fullscreen}
-        >
+        <RightSideSC $showMcpServers={showMcpServers}>
           <ChatbotHeader
-            fullscreen={fullscreen}
             currentThread={currentThread}
             currentInsight={currentInsight}
           />
           {detailsError && <GqlError error={detailsError} />}
           {!currentThread && !currentInsight && detailsLoading ? (
-            <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
+            <ChatbotMessagesWrapperSC>
               <LoadingIndicator />
             </ChatbotMessagesWrapperSC>
           ) : currentThread ? (
             <ChatbotPanelThread
               currentThread={currentThread}
               threadDetailsQuery={threadDetailsQuery}
-              fullscreen={fullscreen}
               showMcpServers={showMcpServers}
               setShowMcpServers={setShowMcpServers}
               showExamplePrompts={showPrompts}
               setShowExamplePrompts={setShowPrompts}
             />
           ) : currentInsight ? (
-            <ChatbotPanelInsight
-              currentInsight={currentInsight}
-              fullscreen={fullscreen}
-            />
+            <ChatbotPanelInsight currentInsight={currentInsight} />
           ) : (
-            <ChatbotTableWrapperSC $fullscreen={fullscreen}>
+            <ChatbotTableWrapperSC>
               <AITable
                 modal
                 query={threadsQuery}
@@ -200,44 +169,38 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
   )
 }
 
-const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    ...($fullscreen
-      ? { '& > *': { boxShadow: theme.boxShadows.modal } }
-      : {
-          border: theme.borders['fill-two'],
-          borderRadius: theme.borderRadiuses.large,
-        }),
-    display: 'flex',
-    overflow: 'auto hidden',
-    height: '100%',
-    width: '100%',
-    maxWidth: $fullscreen ? '80vw' : 1096,
-  })
-)
+const ChatbotFrameSC = styled.div(({ theme }) => ({
+  border: theme.borders['fill-two'],
+  borderRadius: theme.borderRadiuses.large,
+  display: 'flex',
+  overflow: 'auto hidden',
+  height: '100%',
+  width: '100%',
+  maxWidth: 1096,
+}))
 
-const ChatbotTableWrapperSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    height: '100%',
-    overflow: 'hidden',
-    backgroundColor: theme.colors['fill-one'],
-    ...($fullscreen && {
-      border: theme.borders['fill-two'],
-      borderRadius: theme.borderRadiuses.large,
-    }),
-  })
-)
+const ChatbotTableWrapperSC = styled.div(({ theme }) => ({
+  height: '100%',
+  overflow: 'hidden',
+  backgroundColor: theme.colors['fill-one'],
+}))
 
 const RightSideSC = styled.div<{
-  $fullscreen?: boolean
   $showMcpServers?: boolean
-}>(({ $fullscreen, theme, $showMcpServers }) => ({
+}>(({ theme, $showMcpServers }) => ({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
   width: 768,
   minWidth: 768,
-  ...($fullscreen
-    ? { gap: theme.spacing.medium, marginLeft: theme.spacing.medium }
-    : { borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none' }),
+  borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none',
+}))
+
+const PanelWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  width: 'max(35vw, 450px)',
+  borderLeft: theme.borders['fill-three'],
+  background: theme.colors['fill-accent'],
 }))

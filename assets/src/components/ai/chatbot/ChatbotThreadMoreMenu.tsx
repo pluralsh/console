@@ -24,7 +24,7 @@ enum MenuItemKey {
   Delete = 'delete',
 }
 
-export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
+export function ChatbotThreadMoreMenu() {
   const { forkThread, mutationLoading, currentThread } = useChatbot()
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
@@ -69,12 +69,10 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
           (newOpen || !(pinHovered || forkHovered)) && setIsOpen(newOpen)
         }
         onSelectionChange={handleSelectionChange}
-        size={fullscreen ? 'large' : 'medium'}
         triggerButton={
           <IconFrame
             clickable
             type="secondary"
-            size={fullscreen ? 'large' : 'medium'}
             icon={<MoreIcon css={{ width: 16 }} />}
           />
         }

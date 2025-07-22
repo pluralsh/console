@@ -33,12 +33,10 @@ type ServerWithTools = {
 export function McpServerShelf({
   isOpen,
   setIsOpen,
-  fullscreen,
   tools,
 }: {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  fullscreen: boolean
   tools: McpServerToolFragment[]
 }) {
   const { borders, spacing } = useTheme()
@@ -71,8 +69,8 @@ export function McpServerShelf({
         trigger={null}
         css={{ height: '100%' }}
       >
-        <WrapperSC $fullscreen={fullscreen}>
-          <HeaderSC $fullscreen={fullscreen}>
+        <WrapperSC>
+          <HeaderSC>
             <Body2BoldP>MCP servers</Body2BoldP>
             <Flex gap="xsmall">
               <IconFrame
@@ -93,10 +91,7 @@ export function McpServerShelf({
               />
             </Flex>
           </HeaderSC>
-          <ContentAccordionSC
-            type="multiple"
-            $fullscreen={fullscreen}
-          >
+          <ContentAccordionSC type="multiple">
             {serversWithTools.map((server) => (
               <AccordionItem
                 key={server.name}
@@ -171,39 +166,22 @@ export function McpServerShelf({
   )
 }
 
-const WrapperSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    width: 320,
-    ...($fullscreen && {
-      gap: theme.spacing.medium,
-    }),
-  })
-)
+const WrapperSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  width: 320,
+})
 
-const HeaderSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: theme.borders['fill-two'],
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    ...($fullscreen
-      ? {
-          minHeight: 75,
-          border: theme.borders.input,
-          borderRadius: theme.borderRadiuses.large,
-          background: theme.colors['fill-one'],
-        }
-      : {
-          minHeight: 69,
-          background: theme.colors['fill-two'],
-          borderBottom: theme.borders['fill-two'],
-        }),
-  })
-)
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottom: theme.borders['fill-two'],
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  minHeight: 69,
+  background: theme.colors['fill-two'],
+}))
 
 const WrapperAccordionSC = styled(Accordion)({
   border: 'none',
@@ -211,19 +189,12 @@ const WrapperAccordionSC = styled(Accordion)({
   maxWidth: '50%',
 })
 
-const ContentAccordionSC = styled(Accordion)<{ $fullscreen: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    border: 'none',
-    background: theme.colors['fill-one'],
-    height: '100%',
-    overflow: 'auto',
-    ...($fullscreen && {
-      border: theme.borders.input,
-      borderRadius: theme.borderRadiuses.large,
-      background: theme.colors['fill-one'],
-    }),
-  })
-)
+const ContentAccordionSC = styled(Accordion)(({ theme }) => ({
+  border: 'none',
+  background: theme.colors['fill-one'],
+  height: '100%',
+  overflow: 'auto',
+}))
 
 const ToolRowSC = styled.div(({ theme }) => ({
   display: 'flex',

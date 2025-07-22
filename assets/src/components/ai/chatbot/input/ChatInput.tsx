@@ -37,7 +37,6 @@ import { ChatInputAgentSelect } from './ChatInputAgentSelect.tsx'
 export function ChatInput({
   currentThread,
   sendMessage,
-  fullscreen,
   serverNames,
   showMcpServers,
   setShowMcpServers,
@@ -47,7 +46,6 @@ export function ChatInput({
 }: {
   currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
-  fullscreen: boolean
   serverNames: string[]
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
@@ -108,7 +106,6 @@ export function ChatInput({
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
-      $fullscreen={fullscreen}
       ref={formRef}
     >
       {!isEmpty(serverNames) && (
@@ -133,7 +130,7 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC $fullscreen={fullscreen}>
+      <EditableContentWrapperSC>
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder="Start typing..."
@@ -191,39 +188,26 @@ export function ChatInput({
   )
 }
 
-const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-    position: 'relative',
-    borderRadius: $fullscreen ? theme.borderRadiuses.large : '0px',
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-one']
-      : theme.colors['fill-two'],
-    borderTop: $fullscreen ? undefined : theme.borders['fill-two'],
-    padding: theme.spacing.medium,
-    ...($fullscreen && {
-      border: theme.borders.input,
-    }),
-  })
-)
+const SendMessageFormSC = styled.form(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  position: 'relative',
+  backgroundColor: theme.colors['fill-two'],
+  padding: theme.spacing.medium,
+}))
 
-const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-    padding: theme.spacing.small,
-    borderRadius: theme.borderRadiuses.large,
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-two']
-      : theme.colors['fill-three'],
-    '&:has(div:focus)': {
-      outline: theme.borders['outline-focused'],
-    },
-  })
-)
+const EditableContentWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  padding: theme.spacing.small,
+  borderRadius: theme.borderRadiuses.large,
+  backgroundColor: theme.colors['fill-three'],
+  '&:has(div:focus)': {
+    outline: theme.borders['outline-focused'],
+  },
+}))
 
 const ChipListSC = styled.div(({ theme }) => ({
   display: 'flex',

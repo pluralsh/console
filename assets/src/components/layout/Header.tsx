@@ -11,7 +11,7 @@ import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
-import { Chatbot } from 'components/ai/chatbot/Chatbot'
+import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './HeaderProjectSelect'
 
@@ -62,7 +62,7 @@ export default function Header() {
             setThemeColorMode(val ? 'dark' : 'light')
           }}
         />
-        <Chatbot />
+        <ChatbotLauncher />
       </HeaderContentSC>
     </HeaderSC>
   )
