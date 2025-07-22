@@ -14,7 +14,7 @@
   "packageManager": "yarn@3.6.0",
   "devDependencies": {
     "@cypress/webpack-preprocessor": "5.17.1",
-    "@pluralsh/eslint-config-typescript": "2.5.112",
+    "@pluralsh/eslint-config-typescript": "2.5.198",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "cypress": "10.11.0",
     "ts-loader": "9.5.0",

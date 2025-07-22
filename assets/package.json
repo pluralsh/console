@@ -132,7 +132,7 @@
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-codegen/typescript-react-apollo": "4.1.0",
-    "@pluralsh/eslint-config-typescript": "2.5.150",
+    "@pluralsh/eslint-config-typescript": "2.5.198",
     "@pluralsh/stylelint-config": "2.0.10",
     "@react-types/shared": "3.25.0",
     "@testing-library/dom": "10.4.0",
