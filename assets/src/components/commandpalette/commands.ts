@@ -380,7 +380,6 @@ export function useCommands({
   }, [commands, filter])
 }
 
-// TODO: allow passing custom component here
 export function useHistory({
   filter,
   component,
@@ -391,6 +390,7 @@ export function useHistory({
   loading: boolean
   history: Array<CommandGroup>
 } {
+  // TODO: this should support pagination
   const { loading, data } = useChatThreadsQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
