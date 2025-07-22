@@ -10,8 +10,6 @@ export const ChatInputSelectButton = styled(
     ...props
   }: {
     tooltip?: string
-    ref: React.Ref<HTMLButtonElement>
-    children?: React.ReactNode
   } & DetailedHTMLProps<
     ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
