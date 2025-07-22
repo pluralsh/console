@@ -89,13 +89,13 @@ export function ChatInputAgentSelect({
           key={AgentSessionType.Terraform}
           leftContent={getIcon(AgentSessionType.Terraform)}
           label="Terraform agent"
-          description="Descriptive sentence here"
+          description="Descriptive sentence here" // TODO
         />
         <ListBoxItem
           key={AgentSessionType.Kubernetes}
           leftContent={getIcon(AgentSessionType.Kubernetes)}
           label="Kubernetes agent"
-          description="Descriptive sentence here"
+          description="Descriptive sentence here" // TODO
         />
       </Select>
       <Toast

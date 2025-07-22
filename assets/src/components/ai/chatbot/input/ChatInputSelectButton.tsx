@@ -34,7 +34,7 @@ export const ChatInputSelectButton = styled(
   display: 'flex',
   fontSize: 12,
   gap: theme.spacing.xxsmall,
-  height: 16,
+  height: 18,
   padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
 
   '&:hover': {
