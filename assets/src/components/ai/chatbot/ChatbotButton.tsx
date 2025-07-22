@@ -35,7 +35,7 @@ export function ChatbotIconButton({
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
-      Chat with AI
+      Ask Copilot
     </AIButton>
   )
 }
