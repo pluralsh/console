@@ -1184,7 +1184,7 @@ _Appears in:_
 
 
 
-GateSpec is a more refined spec for parameters needed for complex gates.
+GateSpec provides detailed configuration for complex gate types, particularly JOB gates.
 
 
 
@@ -1193,7 +1193,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `job` _[JobSpec](#jobspec)_ |  |  | Optional: {} <br /> |
+| `job` _[JobSpec](#jobspec)_ | Job configuration for JOB gate types, enabling custom validation jobs<br />such as integration tests, security scans, or other promotion checks. |  | Optional: {} <br /> |
 
 
 #### GeneratedSecret
@@ -1579,7 +1579,10 @@ _Appears in:_
 
 
 
-InfrastructureStack is the Schema for the infrastructurestacks API
+InfrastructureStack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach.
+It declaratively defines a stack with a type, Git repository location, and target cluster for execution.
+On each commit to the tracked repository, a run is created which the Plural deployment operator detects
+and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
 
 
 
@@ -1597,7 +1600,7 @@ InfrastructureStack is the Schema for the infrastructurestacks API
 
 
 
-InfrastructureStackSpec defines the desired state of InfrastructureStack
+InfrastructureStackSpec defines the desired state of the InfrastructureStack.
 
 
 
@@ -1606,37 +1609,38 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ | Name of this Stack. If not provided InfrastructureStack's own name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the tool to use to apply it |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef to source IaC from |  | Required: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
-| `git` _[GitRef](#gitref)_ | Git reference w/in the repository where the IaC lives |  |  |
-| `manageState` _boolean_ | ManageState - whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
-| `workdir` _string_ | Workdir - the working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
-| `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
-| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  | Optional: {} <br /> |
-| `cron` _[StackCron](#stackcron)_ | Configuration for cron generation of stack runs |  | Optional: {} <br /> |
-| `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
-| `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
-| `files` _[StackFile](#stackfile) array_ | Files reference to Secret with a key as a part of mount path and value as a content |  | Optional: {} <br /> |
-| `detach` _boolean_ | Detach if true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
-| `actor` _string_ | Actor - user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
+| `name` _string_ | Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. |  | Required: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Required: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references a project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+| `git` _[GitRef](#gitref)_ | Git contains reference within the repository where the IaC manifests are located. |  |  |
+| `manageState` _boolean_ | ManageState indicates whether Plural should manage the Terraform state of this stack. |  | Optional: {} <br /> |
+| `workdir` _string_ | Workdir specifies the working directory within the Git repository to execute commands in.<br />It is useful for projects with external modules or nested folder structures. |  | Optional: {} <br /> |
+| `jobSpec` _[JobSpec](#jobspec)_ | JobSpec contains an optional configuration for the job that will apply this stack. |  | Optional: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration specifies version/image config for the IaC tool being used. |  | Optional: {} <br /> |
+| `cron` _[StackCron](#stackcron)_ | Cron configuration for automated, scheduled generation of stack runs. |  | Optional: {} <br /> |
+| `approval` _boolean_ | Approval when set to true, requires human approval before Terraform apply triggers,<br />ensuring verification of the plan to reduce misconfiguration risk. |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this stack. |  | Optional: {} <br /> |
+| `environment` _[StackEnvironment](#stackenvironment) array_ | Environment variables to inject into the stack execution environment. |  | Optional: {} <br /> |
+| `files` _[StackFile](#stackfile) array_ | Files to mount from Secrets into the stack execution environment,<br />commonly used for cloud credentials (though IRSA/Workload Identity is preferred). |  | Optional: {} <br /> |
+| `detach` _boolean_ | Detach indicates whether to detach the stack on deletion instead of destroying it.<br />This leaves all cloud resources in place. |  | Optional: {} <br /> |
+| `actor` _string_ | Actor is a user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
-| `observableMetrics` _[ObservableMetric](#observablemetric) array_ |  |  | Optional: {} <br /> |
-| `tags` _object (keys:string, values:string)_ | Tags used to filter stacks. |  | Optional: {} <br /> |
-| `variables` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Variables represents a file with variables in the stack run environment.<br />It will be automatically passed to the specific tool depending on the<br />stack Type (except [console.StackTypeCustom]). |  | Optional: {} <br /> |
+| `observableMetrics` _[ObservableMetric](#observablemetric) array_ | ObservableMetrics is a list of metrics to poll to determine if a stack run should be canceled. |  | Optional: {} <br /> |
+| `tags` _object (keys:string, values:string)_ | Tags represent a set of key-value pairs that can be used to filter stacks. |  | Optional: {} <br /> |
+| `variables` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Variables represent a file with variables in the stack run environment.<br />It will be automatically passed to the specific tool depending on the<br />stack Type (except [console.StackTypeCustom]). |  | Optional: {} <br /> |
 | `policyEngine` _[PolicyEngine](#policyengine)_ | PolicyEngine is a configuration for applying policy enforcement to a stack. |  | Optional: {} <br /> |
-| `agentId` _string_ | The agent session id that created this service, used for ui linking and otherwise ignored |  | Optional: {} <br /> |
+| `agentId` _string_ | AgentId represents agent session ID that created this stack.<br />It is used for UI linking and otherwise ignored. |  | Optional: {} <br /> |
 
 
 #### JobSpec
 
 
 
-JobSpec is a spec for a job gate.
+JobSpec defines a Kubernetes Job to execute as part of a JOB gate, allowing
+inline job definition with containers, resources, and Kubernetes-native configurations.
 
 
 
@@ -1647,13 +1651,13 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `namespace` _string_ |  |  | Required: {} <br />Type: string <br /> |
-| `containers` _[Container](#container) array_ |  |  | Optional: {} <br /> |
-| `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
-| `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br /> |
-| `resources` _[ContainerResources](#containerresources)_ | Resource specification that overrides implicit container resources when containers are not directly configured. |  | Optional: {} <br /> |
+| `namespace` _string_ | Namespace where the job will be executed. |  | Required: {} <br />Type: string <br /> |
+| `containers` _[Container](#container) array_ | Containers to run as part of the job, such as test runners or validation scripts. |  | Optional: {} <br /> |
+| `labels` _object (keys:string, values:string)_ | Labels to apply to the job for organization and selection. |  | Optional: {} <br /> |
+| `annotations` _object (keys:string, values:string)_ | Annotations to apply to the job for additional metadata. |  | Optional: {} <br /> |
+| `serviceAccount` _string_ | ServiceAccount to use for the job execution. |  | Optional: {} <br />Type: string <br /> |
+| `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw allows defining the job using a full Kubernetes JobSpec manifest<br />instead of the simplified container-based approach. |  | Optional: {} <br /> |
+| `resources` _[ContainerResources](#containerresources)_ | Resources specification that overrides implicit container resources<br />when containers are not directly configured. |  | Optional: {} <br /> |
 
 
 #### LoggingSettings
@@ -2492,7 +2496,10 @@ _Appears in:_
 
 
 
-Pipeline is the Schema for the pipelines API
+Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
+It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
+customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
+configuration of deployment flows, including gating, promotions, and service progression.
 
 
 
@@ -2545,7 +2552,8 @@ _Appears in:_
 
 
 
-PipelineEdge is a specification of an edge between two pipeline stages.
+PipelineEdge defines the flow of execution between stages, controlling promotion paths
+and enabling attachment of gates for additional validation and approval.
 
 
 
@@ -2565,7 +2573,9 @@ _Appears in:_
 
 
 
-PipelineGate will configure a promotion gate for a pipeline.
+PipelineGate serves as a checkpoint between pipeline stages, enforcing promotion policies.
+Three gate types are supported: APPROVAL (human sign-off), WINDOW (time-based constraints),
+and JOB (custom validation jobs like tests or security scans).
 
 
 
@@ -2575,16 +2585,16 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this gate. |  | Required: {} <br />Type: string <br /> |
-| `type` _[GateType](#gatetype)_ | Type of gate this is. |  | Enum: [APPROVAL WINDOW JOB] <br />Required: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef of a Cluster this gate will execute on. |  | Optional: {} <br /> |
-| `spec` _[GateSpec](#gatespec)_ | Spec contains specification for more complex gate types. |  | Optional: {} <br /> |
+| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB] <br />Required: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef specifies the target cluster where this gate will execute. |  | Optional: {} <br /> |
+| `spec` _[GateSpec](#gatespec)_ | Spec contains detailed configuration for complex gate types like JOB gates. |  | Optional: {} <br /> |
 
 
 #### PipelineSpec
 
 
 
-PipelineSpec defines the desired state of Pipeline.
+PipelineSpec defines the desired state of the Pipeline.
 
 
 
@@ -2593,18 +2603,19 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `stages` _[PipelineStage](#pipelinestage) array_ | Stages of a pipeline. |  |  |
-| `edges` _[PipelineEdge](#pipelineedge) array_ | Edges of a pipeline. |  |  |
-| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a Flow this pipeline belongs within |  | Optional: {} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this pipeline |  | Optional: {} <br /> |
+| `stages` _[PipelineStage](#pipelinestage) array_ | Stages represent discrete steps in the deployment pipeline, such as environments (dev, staging, prod)<br />or specific deployment phases that services progress through. |  |  |
+| `edges` _[PipelineEdge](#pipelineedge) array_ | Edges define the dependencies and flow between stages, controlling the execution order<br />and promotion path through the pipeline. |  |  |
+| `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this pipeline belongs within. |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this pipeline belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies controlling access to this pipeline. |  | Optional: {} <br /> |
 
 
 #### PipelineStage
 
 
 
-PipelineStage defines the Pipeline stage.
+PipelineStage represents a logical unit within the pipeline, typically corresponding to
+environments (e.g., dev, staging, prod) or specific deployment phases.
 
 
 
@@ -2614,15 +2625,15 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stage. |  | Required: {} <br />Type: string <br /> |
-| `services` _[PipelineStageService](#pipelinestageservice) array_ | Services including optional promotion criteria. |  |  |
+| `services` _[PipelineStageService](#pipelinestageservice) array_ | Services deployed in this stage, including optional promotion criteria<br />that dictate when and how services advance to subsequent stages. |  |  |
 
 
 #### PipelineStageService
 
 
 
-PipelineStageService is the configuration of a service within a pipeline stage,
-including optional promotion criteria.
+PipelineStageService defines a service within a pipeline stage and its promotion rules.
+This enables conditional promotions, a critical part of automating production deployments safely.
 
 
 
@@ -2631,15 +2642,16 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  |  |
-| `criteria` _[PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)_ |  |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references the ServiceDeployment being deployed at this stage. |  |  |
+| `criteria` _[PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)_ | Criteria defines optional promotion rules that control when and how<br />this service is allowed to advance to the next stage. |  | Optional: {} <br /> |
 
 
 #### PipelineStageServicePromotionCriteria
 
 
 
-PipelineStageServicePromotionCriteria represents actions to perform if this stage service were promoted.
+PipelineStageServicePromotionCriteria defines actions to perform when promoting this service
+to the next stage, including source references and secrets to copy.
 
 
 
@@ -2648,9 +2660,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to source service to promote from. |  | Optional: {} <br /> |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PR automation to promote from. |  | Optional: {} <br /> |
-| `repository` _string_ | The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console) |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to a source ServiceDeployment to promote from. |  | Optional: {} <br /> |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to a source PrAutomation to promote from. |  | Optional: {} <br /> |
+| `repository` _string_ | The repository slug the PrAutomation will use.<br />E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console. |  | Optional: {} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: {} <br /> |
 
 
@@ -2677,7 +2689,7 @@ _Appears in:_
 
 
 
-
+PolicyEngine defines configuration for applying policy enforcement to a stack.
 
 
 
@@ -2686,8 +2698,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[PolicyEngineType](#policyenginetype)_ | Type is the policy engine to use with this stack |  | Enum: [TRIVY] <br />Required: {} <br /> |
-| `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: {} <br /> |
+| `type` _[PolicyEngineType](#policyenginetype)_ | Type of the policy engine to use with this stack.<br />At the moment only TRIVY is supported. |  | Enum: [TRIVY] <br />Required: {} <br /> |
+| `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run.<br />One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE. |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: {} <br /> |
 
 
 #### PrAutomation
@@ -3661,11 +3673,11 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
-| `version` _string_ | Version the semver of the tool you wish to use |  | Optional: {} <br /> |
-| `tag` _string_ | Tag is the docker image tag you wish to use<br />if you're customizing the version |  | Optional: {} <br /> |
-| `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
-| `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: {} <br /> |
+| `image` _string_ | Image contains the optional Docker image to use for the IaC tool.<br />If not provided, the default image for the tool will be used. |  | Optional: {} <br /> |
+| `version` _string_ | Version of the IaC tool to use. |  | Optional: {} <br /> |
+| `tag` _string_ | Tag of the IaC tool Docker image to use. |  | Optional: {} <br /> |
+| `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: {} <br /> |
+| `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: {} <br /> |
 
 
 #### StackCron
@@ -3681,9 +3693,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `crontab` _string_ | The crontab on which to spawn stack runs |  |  |
-| `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs |  | Optional: {} <br /> |
-| `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration |  | Optional: {} <br /> |
+| `crontab` _string_ | The crontab on which to spawn stack runs. |  |  |
+| `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs. |  | Optional: {} <br /> |
+| `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration. |  | Optional: {} <br /> |
 
 
 #### StackDefinition
@@ -3736,17 +3748,17 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ |  |  | Required: {} <br /> |
-| `value` _string_ |  |  | Optional: {} <br /> |
-| `secretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
-| `configMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
+| `name` _string_ | Name of the environment variable to set. |  | Required: {} <br /> |
+| `value` _string_ | Value of the environment variable to set. |  | Optional: {} <br /> |
+| `secretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | SecretKeyRef references a key in a Secret to set the environment variable value. |  | Optional: {} <br /> |
+| `configMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ | ConfigMapRef references a key in a ConfigMap to set the environment variable value. |  | Optional: {} <br /> |
 
 
 #### StackFile
 
 
 
-
+StackFile represents	a file to mount from secrets into the stack execution environment.
 
 
 
@@ -3755,8 +3767,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `mountPath` _string_ |  |  |  |
-| `secretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ |  |  |  |
+| `mountPath` _string_ | MountPath is the path where the file will be mounted in the stack execution environment. |  |  |
+| `secretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | SecretRef is a reference to the secret containing the file. |  |  |
 
 
 #### StackHook
@@ -3772,8 +3784,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `cmd` _string_ | the command this hook will execute |  | Required: {} <br /> |
-| `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
+| `cmd` _string_ | Cmd is the command to execute. |  | Required: {} <br /> |
+| `args` _string array_ | Args contain optional arguments to pass to the command. |  | Optional: {} <br /> |
 | `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY DESTROY] <br />Required: {} <br /> |
 
 
@@ -3913,8 +3925,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `parallelism` _integer_ | Parallelism is the number of concurrent operations to run, equivalent to the -parallelism flag in terraform |  | Optional: {} <br /> |
-| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack, equivalent to the -refresh flag in terraform |  | Optional: {} <br /> |
+| `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag in Terraform. |  | Optional: {} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag in Terraform. |  | Optional: {} <br /> |
 
 
 #### Tools
