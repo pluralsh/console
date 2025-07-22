@@ -7531,10 +7531,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:10.0.8":
-  version: 10.0.8
-  resolution: "@types/mocha@npm:10.0.8"
-  checksum: d64faa9f1ed249441944a6ae3f01d72c756b54d8bcf8e2edccb09c0d084cec6d8a0cd8b717df517812f045ade20b4b8768e06aa8633bd2485a41ec37f06be710
+"@types/mocha@npm:10.0.10":
+  version: 10.0.10
+  resolution: "@types/mocha@npm:10.0.10"
+  checksum: 17a56add60a8cc8362d3c62cb6798be3f89f4b6ccd5b9abd12b46e31ff299be21ff2faebf5993de7e0099559f58ca5a3b49a505d302dfa5d65c5a4edfc089195
   languageName: node
   linkType: hard
 
@@ -10115,7 +10115,7 @@ __metadata:
     "@types/humanize-duration": 3.27.4
     "@types/jsdom": 21.1.5
     "@types/lodash": 4.17.13
-    "@types/mocha": 10.0.8
+    "@types/mocha": 10.0.10
     "@types/node": 22.13.1
     "@types/react": 19.0.10
     "@types/react-dom": 19.0.4
