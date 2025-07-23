@@ -183,7 +183,7 @@ const RightSideSC = styled.div<{
   flex: 1,
   width: 768,
   minWidth: 768,
-  borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none',
+  borderLeft: $showMcpServers ? theme.borders.default : 'none',
 }))
 
 const PanelWrapperSC = styled.div(({ theme }) => ({

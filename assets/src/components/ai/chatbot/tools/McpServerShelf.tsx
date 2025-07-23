@@ -2,10 +2,10 @@ import {
   Accordion,
   AccordionItem,
   Chip,
+  CloseIcon,
   EyeIcon,
   Flex,
   GearTrainIcon,
-  HamburgerMenuCollapsedIcon,
   IconFrame,
   ToolIcon,
 } from '@pluralsh/design-system'
@@ -39,7 +39,7 @@ export function McpServerShelf({
   setIsOpen: (isOpen: boolean) => void
   tools: McpServerToolFragment[]
 }) {
-  const { borders, spacing } = useTheme()
+  const theme = useTheme()
   const { closeChatbot } = useChatbot()
   const value = isOpen ? ARBITRARY_VALUE_NAME : ''
   const [selectedToolDetails, setSelectedToolDetails] = useState<{
@@ -76,7 +76,7 @@ export function McpServerShelf({
               <IconFrame
                 clickable
                 as={Link}
-                type="secondary"
+                type="tertiary"
                 to={AI_MCP_SERVERS_ABS_PATH}
                 onClick={() => closeChatbot()}
                 tooltip="Go to MCP server settings"
@@ -84,10 +84,10 @@ export function McpServerShelf({
               />
               <IconFrame
                 clickable
-                type="secondary"
-                icon={<HamburgerMenuCollapsedIcon />}
+                type="tertiary"
+                icon={<CloseIcon />}
                 onClick={() => setIsOpen(!isOpen)}
-                tooltip="Close panel"
+                tooltip="Close"
               />
             </Flex>
           </HeaderSC>
@@ -96,7 +96,7 @@ export function McpServerShelf({
               <AccordionItem
                 key={server.name}
                 paddingArea="trigger-only"
-                css={{ borderBottom: borders.input }}
+                css={{ borderBottom: theme.borders.input }}
                 trigger={
                   <Flex
                     direction="column"
@@ -122,7 +122,10 @@ export function McpServerShelf({
                 {server.tools.length === 0 && (
                   <Body1P
                     $color="text-light"
-                    css={{ textAlign: 'center', paddingBottom: spacing.medium }}
+                    css={{
+                      textAlign: 'center',
+                      paddingBottom: theme.spacing.medium,
+                    }}
                   >
                     No tools found.
                   </Body1P>
@@ -177,10 +180,8 @@ const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderBottom: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  minHeight: 69,
-  background: theme.colors['fill-two'],
 }))
 
 const WrapperAccordionSC = styled(Accordion)({
@@ -191,7 +192,7 @@ const WrapperAccordionSC = styled(Accordion)({
 
 const ContentAccordionSC = styled(Accordion)(({ theme }) => ({
   border: 'none',
-  background: theme.colors['fill-one'],
+  background: theme.colors['fill-accent'],
   height: '100%',
   overflow: 'auto',
 }))
@@ -203,5 +204,5 @@ const ToolRowSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   padding: theme.spacing.small,
   borderTop: theme.borders.input,
-  background: theme.colors['fill-one-selected'],
+  background: theme.colors['fill-zero-selected'],
 }))
