@@ -39,7 +39,7 @@ export function ChatInputClusterSelect({
   const throttledInput = useThrottle(inputValue, 100)
   const currentClusterId = currentThread?.session?.cluster?.id
 
-  const { data, pageInfo, fetchNextPage } = useFetchPaginatedData(
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
       queryHook: useClusterSelectorQuery,
       keyPath: ['clusters'],
@@ -92,6 +92,8 @@ export function ChatInputClusterSelect({
     },
     [currentThread.id, currentThread.summary, currentClusterId, updateThread]
   )
+
+  if (loading) return <Spinner size={12} />
 
   return (
     <>

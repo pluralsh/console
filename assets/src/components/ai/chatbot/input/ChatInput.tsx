@@ -16,7 +16,6 @@ import {
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
-  useCloudConnectionsQuery,
 } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
@@ -36,6 +35,7 @@ import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputAgentSelect } from './ChatInputAgentSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
+import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 
 export function ChatInput({
   currentThread,
@@ -62,6 +62,9 @@ export function ChatInput({
     'currentAiChatMessage',
     ''
   )
+  const [cloudConnectionId, setCloudConnectionId] = useState<
+    string | undefined
+  >()
   const [agent, setAgent] = useState<AgentSessionType | undefined>()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
@@ -103,10 +106,6 @@ export function ChatInput({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
-  const { data: cloudConnections, loading: cloudConnectionsLoading } =
-    useCloudConnectionsQuery()
-  const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
-
   const hideClusterSelector =
     currentThread?.session?.type === AgentSessionType.Kubernetes ||
     currentThread?.session?.type === AgentSessionType.Terraform ||
@@ -139,7 +138,7 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC>
+      <EditableContentWrapperSC $agent={!!agent}>
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder="Start typing..."
@@ -177,20 +176,24 @@ export function ChatInput({
                 onClick={() => setShowMcpServers(!showMcpServers)}
               />
             )}
-            {!cloudConnectionsLoading && (
-              <>
-                {!hideClusterSelector && (
-                  <ChatInputClusterSelect currentThread={currentThread} />
-                )}
-                {connectionId && (
-                  <ChatInputAgentSelect
-                    agent={agent}
-                    setAgent={setAgent}
-                    connectionId={connectionId}
-                  />
-                )}
-              </>
-            )}
+            <>
+              <ChatInputCloudSelect
+                currentThread={currentThread}
+                cloudConnectionId={cloudConnectionId}
+                setCloudConnectionId={setCloudConnectionId}
+              />
+              {!hideClusterSelector && (
+                <ChatInputClusterSelect currentThread={currentThread} />
+              )}
+              {cloudConnectionId && (
+                <ChatInputAgentSelect
+                  agent={agent}
+                  setAgent={setAgent}
+                  connectionId={cloudConnectionId}
+                  // {/*  TODO: Disable when no  cloud connection? */}
+                />
+              )}
+            </>
           </Flex>
           <Button
             disabled={!newMessage.trim()}
@@ -218,20 +221,25 @@ const SendMessageFormSC = styled.form(({ theme }) => ({
   padding: theme.spacing.medium,
 }))
 
-const EditableContentWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.large,
-  backgroundColor: theme.colors['fill-zero'],
-  border: theme.borders.input,
+const EditableContentWrapperSC = styled.div<{ $agent: boolean }>(
+  ({ theme, $agent: agent }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+    padding: theme.spacing.small,
+    borderRadius: theme.borderRadiuses.large,
+    backgroundColor: theme.colors['fill-zero'],
+    border: theme.borders.input,
 
-  '&:has(div:focus)': {
-    backgroundColor: theme.colors['fill-zero-selected'],
-    outline: theme.borders['outline-focused'],
-  },
-}))
+    '&:has(div:focus)': {
+      backgroundColor: theme.colors['fill-zero-selected'],
+      boxShadow: theme.boxShadows.modalPurple,
+      outline: agent
+        ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}` // TODO: Shadow effect.
+        : theme.borders['outline-focused'],
+    },
+  })
+)
 
 const ChipListSC = styled.div(({ theme }) => ({
   display: 'flex',
