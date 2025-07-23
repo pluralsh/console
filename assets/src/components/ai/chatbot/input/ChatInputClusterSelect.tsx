@@ -93,7 +93,7 @@ export function ChatInputClusterSelect({
     [currentThread.id, currentThread.summary, currentClusterId, updateThread]
   )
 
-  if (loading) return <Spinner size={12} />
+  if (loading && !data) return <Spinner size={12} />
 
   return (
     <>

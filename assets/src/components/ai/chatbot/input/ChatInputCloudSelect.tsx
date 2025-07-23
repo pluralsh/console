@@ -52,7 +52,7 @@ export function ChatInputCloudSelect({
     [cloudConnectionId, cloudConnections]
   )
 
-  if (loading) return <Spinner size={12} />
+  if (loading && !data) return <Spinner size={12} />
 
   return (
     <Select
