@@ -121,11 +121,11 @@ export function ChatbotHeader({
             tooltip={
               <Flex direction="column">
                 <CaptionP $color="text-light">
-                  {currentThread?.settings?.memory ? 'Disable' : 'Enable'}
-                  {' knowledge graph'}
+                  {currentThread?.settings?.memory ? 'Disable ' : 'Enable '}
+                  knowledge graph
                 </CaptionP>
                 <CaptionP $color="text-xlight">
-                  {"Use and add to Plural AI's memory with this thread"}
+                  Use and add to Plural AI&#39;s memory with this thread
                 </CaptionP>
               </Flex>
             }

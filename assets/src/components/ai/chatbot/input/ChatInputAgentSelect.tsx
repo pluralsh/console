@@ -1,5 +1,5 @@
 import { useChatbot } from '../../AIContext.tsx'
-import { useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useMemo } from 'react'
 import {
   AgentSessionType,
   useCreateAgentSessionMutation,
@@ -38,24 +38,27 @@ function getIcon(type: AgentSessionType | undefined, size = 16) {
 }
 
 export function ChatInputAgentSelect({
+  agent,
+  setAgent,
   connectionId,
 }: {
+  agent: AgentSessionType | undefined
+  setAgent: Dispatch<SetStateAction<AgentSessionType | undefined>>
   connectionId: string
 }) {
   const theme = useTheme()
   const { goToThread } = useChatbot()
-  const [type, setType] = useState<AgentSessionType | undefined>()
   const [
     _createAgentSession,
     { loading: _agentSessionLoading, error: agentSessionError },
   ] = useCreateAgentSessionMutation({
-    variables: { attributes: { connectionId, prompt: '', type } }, // TODO: Use real prompt.
+    variables: { attributes: { connectionId, prompt: '', type: agent } }, // TODO: Use real prompt.
     onCompleted: (data) => {
       if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
     },
   })
 
-  const icon = useMemo(() => getIcon(type, 12), [type])
+  const icon = useMemo(() => getIcon(agent, 12), [agent])
 
   // TODO:
   //  Change the button in the chatbot to indicate that the agent is selected.
@@ -65,8 +68,8 @@ export function ChatInputAgentSelect({
   return (
     <>
       <Select
-        selectedKey={type}
-        onSelectionChange={(key) => setType(key as AgentSessionType)}
+        selectedKey={agent}
+        onSelectionChange={(key) => setAgent(key as AgentSessionType)}
         label="agent"
         width={270}
         dropdownHeaderFixed={
@@ -81,7 +84,7 @@ export function ChatInputAgentSelect({
         }
         triggerButton={
           <ChatInputSelectButton tooltip="Use our coding agent to run background task">
-            {icon} {lowerCase(type)} agent
+            {icon} {lowerCase(agent)} agent
           </ChatInputSelectButton>
         }
       >

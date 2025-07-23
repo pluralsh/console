@@ -72,7 +72,7 @@ export function ChatbotThreadMoreMenu() {
         triggerButton={
           <IconFrame
             clickable
-            type="secondary"
+            type="tertiary"
             icon={<MoreIcon css={{ width: 16 }} />}
           />
         }

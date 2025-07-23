@@ -1,9 +1,10 @@
 import {
   AiSparkleFilledIcon,
+  Button,
   Chip,
   Flex,
-  IconFrame,
   PlusIcon,
+  RobotIcon,
   SendMessageIcon,
   ServersIcon,
 } from '@pluralsh/design-system'
@@ -61,6 +62,7 @@ export function ChatInput({
     'currentAiChatMessage',
     ''
   )
+  const [agent, setAgent] = useState<AgentSessionType | undefined>()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
@@ -144,7 +146,7 @@ export function ChatInput({
           setValue={setNewMessage}
           initialValue={newMessage}
           onEnter={() => formRef.current?.requestSubmit()}
-          css={{ maxHeight: 176 }}
+          css={{ maxHeight: 130 }}
           {...props}
           ref={contentEditableRef}
         />
@@ -181,21 +183,27 @@ export function ChatInput({
                   <ChatInputClusterSelect currentThread={currentThread} />
                 )}
                 {connectionId && (
-                  <ChatInputAgentSelect connectionId={connectionId} />
+                  <ChatInputAgentSelect
+                    agent={agent}
+                    setAgent={setAgent}
+                    connectionId={connectionId}
+                  />
                 )}
               </>
             )}
           </Flex>
-          <IconFrame
-            icon={<SendMessageIcon />}
-            clickable
-            type="secondary"
-            css={{ '&:disabled': { opacity: 0.5 } }}
+          <Button
             disabled={!newMessage.trim()}
+            endIcon={<SendMessageIcon />}
             onClick={() => {
-              formRef.current?.requestSubmit()
+              formRef.current?.requestSubmit() // TODO
             }}
-          />
+            secondary={!agent}
+            small
+            startIcon={agent ? <RobotIcon /> : undefined}
+          >
+            {agent ? 'Agent' : 'Copilot'}
+          </Button>
         </Flex>
       </EditableContentWrapperSC>
     </SendMessageFormSC>
