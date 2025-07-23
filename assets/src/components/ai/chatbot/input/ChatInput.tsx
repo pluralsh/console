@@ -193,7 +193,6 @@ const SendMessageFormSC = styled.form(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.small,
   position: 'relative',
-  backgroundColor: theme.colors['fill-two'],
   padding: theme.spacing.medium,
 }))
 
@@ -203,8 +202,11 @@ const EditableContentWrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
-  backgroundColor: theme.colors['fill-three'],
+  backgroundColor: theme.colors['fill-zero'],
+  border: theme.borders.input,
+
   '&:has(div:focus)': {
+    backgroundColor: theme.colors['fill-zero-selected'],
     outline: theme.borders['outline-focused'],
   },
 }))

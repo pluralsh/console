@@ -1,4 +1,4 @@
-import { EmptyState, usePrevious } from '@pluralsh/design-system'
+import { usePrevious } from '@pluralsh/design-system'
 
 import {
   Dispatch,
@@ -36,6 +36,7 @@ import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 import { ChatInput, GeneratingResponseMessage } from './input/ChatInput.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { Body1P } from '../../utils/typography/Text.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -150,7 +151,9 @@ export function ChatbotPanelThread({
           (error ? (
             <GqlError error={error} />
           ) : (
-            <EmptyState message="No messages yet." />
+            <Body1P css={{ color: theme.colors['text-long-form'] }}>
+              How can I help you?
+            </Body1P>
           ))}
         {messages.map((msg) => (
           <Fragment key={msg.id}>
@@ -242,7 +245,6 @@ export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: theme.colors['fill-one'],
   overflow: 'hidden',
   padding: `0 ${theme.spacing.xsmall}px`,
   flex: 1,
@@ -267,6 +269,6 @@ const ScrollGradientSC = styled.div<{
   left: 0,
   right: 0,
   height: theme.spacing.xxlarge,
-  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, rgba(42, 46, 55, 0.90) 0%, rgba(42, 46, 55, 0.20) 75%, transparent 100%)`,
+  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%, transparent 100%)`,
   pointerEvents: 'none',
 }))

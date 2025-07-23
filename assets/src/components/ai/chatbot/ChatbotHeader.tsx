@@ -216,6 +216,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   alignItems: 'center',
   padding: theme.spacing.medium,
-  background: theme.colors['fill-two'],
-  borderBottom: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  maxHeight: 57,
 }))

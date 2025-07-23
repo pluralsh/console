@@ -162,9 +162,7 @@ function ChatbotPanelInner() {
   )
 }
 
-const ChatbotFrameSC = styled.div(({ theme }) => ({
-  border: theme.borders['fill-two'],
-  borderRadius: theme.borderRadiuses.large,
+const ChatbotFrameSC = styled.div(() => ({
   display: 'flex',
   overflow: 'auto hidden',
   height: '100%',
@@ -172,10 +170,9 @@ const ChatbotFrameSC = styled.div(({ theme }) => ({
   maxWidth: 1096,
 }))
 
-const ChatbotTableWrapperSC = styled.div(({ theme }) => ({
+const ChatbotTableWrapperSC = styled.div(() => ({
   height: '100%',
   overflow: 'hidden',
-  backgroundColor: theme.colors['fill-one'],
 }))
 
 const RightSideSC = styled.div<{
@@ -194,6 +191,6 @@ const PanelWrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   height: '100%',
   width: 'max(35vw, 450px)',
-  borderLeft: theme.borders['fill-three'],
+  borderLeft: theme.borders.default,
   background: theme.colors['fill-accent'],
 }))
