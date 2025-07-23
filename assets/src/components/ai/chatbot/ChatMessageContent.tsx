@@ -71,7 +71,7 @@ export function ChatMessageContent({
   serverName,
   highlightToolContent = true,
 }: ChatMessageContentProps) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -117,8 +117,11 @@ export function ChatMessageContent({
           condition={!(role === AiRole.Assistant || role === AiRole.System)}
           wrapper={
             <Card
-              css={{ padding: spacing.medium }}
-              fillLevel={2}
+              css={{
+                backgroundColor: theme.colors['fill-zero'],
+                border: theme.borders.default,
+                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+              }}
             />
           }
         >
