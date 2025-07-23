@@ -136,10 +136,13 @@ function FileMessageContent({
   content,
   attributes,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
+  const theme = useTheme()
   const fileName = attributes?.file?.name ?? ''
   return (
-    <Accordion type="single">
+    <Accordion
+      type="single"
+      css={{ border: theme.borders.default }}
+    >
       <AccordionItem
         padding="compact"
         caret="right"
@@ -148,7 +151,7 @@ function FileMessageContent({
             gap="small"
             align="center"
             wordBreak="break-word"
-            marginRight={spacing.small}
+            marginRight={theme.spacing.small}
           >
             <FileIcon
               size={12}
@@ -166,8 +169,12 @@ function FileMessageContent({
             />
           </Flex>
         }
+        css={{
+          background: theme.colors['fill-zero'],
+          borderRadius: theme.borderRadiuses.large,
+        }}
       >
-        <Code css={{ background: colors['fill-three'], maxWidth: '100%' }}>
+        <Code css={{ background: theme.colors['fill-one'], maxWidth: '100%' }}>
           {content}
         </Code>
       </AccordionItem>
