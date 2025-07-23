@@ -100,9 +100,15 @@ type ServiceDependency struct {
 }
 
 type SyncConfigAttributes struct {
+	// Whether to auto-create the namespace for this service (specifying labels and annotations will also add those to the created namespace)
 	// +kubebuilder:validation:Optional
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
 
+	// Whether to delete the namespace for this service upon deletion
+	// +kubebuilder:validation:Optional
+	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
+
+	// Whether to enforce all created resources are placed in the service namespace
 	// +kubebuilder:validation:Optional
 	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
 
@@ -141,6 +147,12 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 	if sca.CreateNamespace != nil {
 		createNamespace = *sca.CreateNamespace
 	}
+
+	deleteNamespace := false
+	if sca.DeleteNamespace != nil {
+		deleteNamespace = *sca.DeleteNamespace
+	}
+
 	enforceNamespace := false
 	if sca.EnforceNamespace != nil {
 		enforceNamespace = *sca.EnforceNamespace
@@ -185,6 +197,7 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 	return &console.SyncConfigAttributes{
 		CreateNamespace:  &createNamespace,
 		EnforceNamespace: &enforceNamespace,
+		DeleteNamespace:  &deleteNamespace,
 		NamespaceMetadata: &console.MetadataAttributes{
 			Labels:      labels,
 			Annotations: annotations,

@@ -7489,6 +7489,11 @@ func (in *SyncConfigAttributes) DeepCopyInto(out *SyncConfigAttributes) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.DeleteNamespace != nil {
+		in, out := &in.DeleteNamespace, &out.DeleteNamespace
+		*out = new(bool)
+		**out = **in
+	}
 	if in.EnforceNamespace != nil {
 		in, out := &in.EnforceNamespace, &out.EnforceNamespace
 		*out = new(bool)

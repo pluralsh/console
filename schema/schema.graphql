@@ -4577,6 +4577,8 @@ input SyncConfigAttributes {
 
   enforceNamespace: Boolean
 
+  deleteNamespace: Boolean
+
   namespaceMetadata: MetadataAttributes
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -5225,6 +5227,9 @@ type ServiceStatusCount {
 type SyncConfig {
   "whether the agent should auto-create the namespace for this service"
   createNamespace: Boolean
+
+  "whether the agent should delete the namespace for this service upon deletion"
+  deleteNamespace: Boolean
 
   "Whether to require all resources are placed in the same namespace"
   enforceNamespace: Boolean

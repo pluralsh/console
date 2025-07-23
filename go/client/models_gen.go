@@ -6605,6 +6605,8 @@ type StatusCondition struct {
 type SyncConfig struct {
 	// whether the agent should auto-create the namespace for this service
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
+	// whether the agent should delete the namespace for this service upon deletion
+	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
 	// Whether to require all resources are placed in the same namespace
 	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
@@ -6615,6 +6617,7 @@ type SyncConfig struct {
 type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
+	DeleteNamespace   *bool               `json:"deleteNamespace,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`

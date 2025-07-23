@@ -10651,6 +10651,8 @@ export type SyncConfig = {
   __typename?: 'SyncConfig';
   /** whether the agent should auto-create the namespace for this service */
   createNamespace?: Maybe<Scalars['Boolean']['output']>;
+  /** whether the agent should delete the namespace for this service upon deletion */
+  deleteNamespace?: Maybe<Scalars['Boolean']['output']>;
   /** A list of diff normalizers to apply to the service which controls how drift detection works */
   diffNormalizers?: Maybe<Array<Maybe<DiffNormalizer>>>;
   /** Whether to require all resources are placed in the same namespace */
@@ -10660,6 +10662,7 @@ export type SyncConfig = {
 
 export type SyncConfigAttributes = {
   createNamespace?: InputMaybe<Scalars['Boolean']['input']>;
+  deleteNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   /** A list of diff normalizers to apply to the service which controls how drift detection works */
   diffNormalizers?: InputMaybe<Array<InputMaybe<DiffNormalizerAttributes>>>;
   enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;

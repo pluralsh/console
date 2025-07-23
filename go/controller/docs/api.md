@@ -3845,8 +3845,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `createNamespace` _boolean_ |  |  | Optional: {} <br /> |
-| `enforceNamespace` _boolean_ |  |  | Optional: {} <br /> |
+| `createNamespace` _boolean_ | Whether to auto-create the namespace for this service (specifying labels and annotations will also add those to the created namespace) |  | Optional: {} <br /> |
+| `deleteNamespace` _boolean_ | Whether to delete the namespace for this service upon deletion |  | Optional: {} <br /> |
+| `enforceNamespace` _boolean_ | Whether to enforce all created resources are placed in the service namespace |  | Optional: {} <br /> |
 | `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `diffNormalizers` _[DiffNormalizers](#diffnormalizers) array_ | DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works |  | Optional: {} <br /> |
