@@ -1,16 +1,14 @@
 import {
-  ArrowLeftIcon,
   BrainIcon,
-  ChatFilledIcon,
   CloseIcon,
   ComposeIcon,
   Flex,
+  HamburgerMenuCollapseIcon,
   IconFrame,
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
-import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
-import dayjs from 'dayjs'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
@@ -19,10 +17,14 @@ import {
 import { useCallback } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../AIContext'
-import { AIEntryLabel, getThreadOrPinTimestamp } from '../AITableEntry'
+import {
+  getInsightPathInfo,
+  TableEntryResourceLink,
+  truncate,
+} from '../AITableEntry'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
-
-type HeaderState = 'list' | 'thread'
+import { StackedText } from '../../utils/table/StackedText.tsx'
+import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 
 export function ChatbotHeader({
   currentThread,
@@ -31,19 +33,8 @@ export function ChatbotHeader({
 }) {
   const { colors } = useTheme()
 
-  const {
-    closeChatbot,
-    goToThreadList,
-    createNewThread,
-    mutationLoading,
-    mutationError,
-  } = useChatbot()
-
-  const state: HeaderState = currentThread ? 'thread' : 'list'
-
-  const timestamp = getThreadOrPinTimestamp(currentThread)
-  const isStale =
-    !!timestamp && dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
+  const { closeChatbot, createNewThread, mutationLoading, mutationError } =
+    useChatbot()
 
   const [
     updateThread,
@@ -66,36 +57,28 @@ export function ChatbotHeader({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
+  const insightPathInfo = getInsightPathInfo(currentThread?.insight)
+  const flowPath = currentThread?.flow && {
+    path: [currentThread.flow.name],
+    url: getFlowDetailsPath({ flowId: currentThread.flow.id }),
+  }
+
   return (
     <WrapperSC>
-      {state === 'list' ? (
-        <Flex
-          alignItems="center"
-          gap="small"
-          flex={1}
-        >
-          <IconFrame
-            type="floating"
-            icon={<ChatFilledIcon color="icon-info" />}
-          />
-          <Body1BoldP>All threads</Body1BoldP>
-        </Flex>
-      ) : (
-        <>
-          <IconFrame
-            tooltip="View all threads"
-            icon={<ArrowLeftIcon />}
-            type="secondary"
-            clickable
-            onClick={() => goToThreadList()}
-          />
-          <AIEntryLabel
-            insight={currentThread?.insight}
-            thread={currentThread}
-            isStale={isStale}
-          />
-        </>
-      )}
+      <IconFrame
+        size="small"
+        icon={<HamburgerMenuCollapseIcon />}
+        // TODO: Clickable?
+      />
+      <Body2BoldP css={{ color: colors['text-light'] }}>Copilot</Body2BoldP>
+      <StackedText
+        first={truncate(currentThread?.summary)}
+        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
+        firstPartialType="body2"
+        firstColor="text"
+        secondPartialType="caption"
+        // TODO: Update styling.
+      />
       {!cloudConnectionsLoading && (
         <IconFrame
           clickable
@@ -115,47 +98,44 @@ export function ChatbotHeader({
           }
         />
       )}
-      {state === 'thread' ? (
-        <>
-          <IconFrame
-            tooltip={
-              <Flex direction="column">
-                <CaptionP $color="text-light">
-                  {currentThread?.settings?.memory ? 'Disable ' : 'Enable '}
-                  knowledge graph
-                </CaptionP>
-                <CaptionP $color="text-xlight">
-                  Use and add to Plural AI&#39;s memory with this thread
-                </CaptionP>
-              </Flex>
-            }
-            clickable
-            type="tertiary"
-            style={{
-              borderColor: currentThread?.settings?.memory
-                ? colors['border-primary']
-                : undefined,
-            }}
-            icon={
-              updateThreadLoading ? (
-                <Spinner css={{ width: 16 }} />
-              ) : (
-                <BrainIcon css={{ width: 16 }} />
-              )
-            }
-            onClick={toggleKnowledgeGraph}
-          />
-          <ChatbotThreadMoreMenu />
-        </>
-      ) : (
+      <>
         <IconFrame
+          tooltip={
+            <Flex direction="column">
+              <CaptionP $color="text-light">
+                {currentThread?.settings?.memory ? 'Disable ' : 'Enable '}
+                knowledge graph
+              </CaptionP>
+              <CaptionP $color="text-xlight">
+                Use and add to Plural AI&#39;s memory with this thread
+              </CaptionP>
+            </Flex>
+          }
           clickable
-          tooltip="Close"
           type="tertiary"
-          icon={<CloseIcon css={{ width: 16 }} />}
-          onClick={() => closeChatbot()}
+          style={{
+            borderColor: currentThread?.settings?.memory
+              ? colors['border-primary']
+              : undefined,
+          }}
+          icon={
+            updateThreadLoading ? (
+              <Spinner css={{ width: 16 }} />
+            ) : (
+              <BrainIcon css={{ width: 16 }} />
+            )
+          }
+          onClick={toggleKnowledgeGraph}
         />
-      )}
+        <ChatbotThreadMoreMenu />
+      </>
+      <IconFrame
+        clickable
+        tooltip="Close"
+        type="tertiary"
+        icon={<CloseIcon css={{ width: 16 }} />}
+        onClick={() => closeChatbot()}
+      />
       <Toast
         show={!!updateThreadError}
         severity="danger"

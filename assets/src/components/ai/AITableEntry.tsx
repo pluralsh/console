@@ -332,7 +332,7 @@ export function getInsightPathInfo(
   return null
 }
 
-function TableEntryResourceLink({
+export function TableEntryResourceLink({
   path,
   url,
 }: {
