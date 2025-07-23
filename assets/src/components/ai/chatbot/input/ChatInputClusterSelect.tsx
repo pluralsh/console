@@ -150,20 +150,18 @@ export function ChatInputClusterSelect({
           </ListBoxFooterPlus>
         }
         triggerButton={
-          <ChatInputSelectButton tooltip="Use our coding agent to run background task">
-            <>
-              {updateThreadLoading ? (
-                <Spinner size={12} />
-              ) : selectedCluster ? (
-                <ClusterProviderIcon
-                  cluster={selectedCluster}
-                  size={12}
-                />
-              ) : (
-                <ClusterIcon size={12} />
-              )}
-              {selectedCluster?.name || 'cluster'}
-            </>
+          <ChatInputSelectButton>
+            {updateThreadLoading ? (
+              <Spinner size={12} />
+            ) : selectedCluster ? (
+              <ClusterProviderIcon
+                cluster={selectedCluster}
+                size={12}
+              />
+            ) : (
+              <ClusterIcon size={12} />
+            )}
+            {selectedCluster?.name || 'cluster'}
           </ChatInputSelectButton>
         }
       >

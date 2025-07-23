@@ -100,7 +100,7 @@ export function ChatbotHeader({
         <IconFrame
           clickable
           icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
-          type="secondary"
+          type="tertiary"
           tooltip="Start a new chat"
           onClick={() =>
             createNewThread({
@@ -130,7 +130,7 @@ export function ChatbotHeader({
               </Flex>
             }
             clickable
-            type="secondary"
+            type="tertiary"
             style={{
               borderColor: currentThread?.settings?.memory
                 ? colors['border-primary']
@@ -151,7 +151,7 @@ export function ChatbotHeader({
         <IconFrame
           clickable
           tooltip="Close"
-          type="secondary"
+          type="tertiary"
           icon={<CloseIcon css={{ width: 16 }} />}
           onClick={() => closeChatbot()}
         />
