@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { CaretDownIcon, Tooltip } from '@pluralsh/design-system'
+import { CaretDownIcon, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import { ButtonHTMLAttributes, DetailedHTMLProps } from 'react'
 
 export const ChatInputSelectButton = styled(
@@ -14,7 +14,10 @@ export const ChatInputSelectButton = styled(
     ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   >) => (
-    <Tooltip label={tooltip}>
+    <WrapWithIf
+      condition={!!tooltip}
+      wrapper={<Tooltip label={tooltip} />}
+    >
       <button
         ref={ref}
         {...props}
@@ -25,7 +28,7 @@ export const ChatInputSelectButton = styled(
           className="dropdownIcon"
         />
       </button>
-    </Tooltip>
+    </WrapWithIf>
   )
 )<{ isOpen?: boolean }>(({ theme, isOpen = false }) => ({
   ...theme.partials.reset.button,
