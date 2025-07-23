@@ -5,6 +5,7 @@ import {
 } from '../../../../generated/graphql.ts'
 import {
   ClusterIcon,
+  Input,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -95,18 +96,32 @@ export function ChatInputClusterSelect({
   return (
     <>
       <Select
-        selectedKey={currentClusterId}
+        selectedKey={currentClusterId ?? ''}
         onSelectionChange={(key) => onClusterChange(key as string | null)}
         label="cluster"
         width={270}
         dropdownHeaderFixed={
           <div
             css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xsmall,
               color: theme.colors['text-xlight'],
               padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
             }}
           >
-            Select cluster
+            Cluster
+            <Input
+              small
+              inputProps={{ lineHeight: '12px' }}
+              type="text"
+              showClearButton
+              placeholder="Search..."
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.currentTarget.value)
+              }}
+            />
           </div>
         }
         dropdownFooter={
