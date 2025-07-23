@@ -177,11 +177,11 @@ export function ChatInput({
             )}
             {!cloudConnectionsLoading && (
               <>
-                {connectionId && (
-                  <ChatInputAgentSelect connectionId={connectionId} />
-                )}
                 {!hideClusterSelector && (
                   <ChatInputClusterSelect currentThread={currentThread} />
+                )}
+                {connectionId && (
+                  <ChatInputAgentSelect connectionId={connectionId} />
                 )}
               </>
             )}

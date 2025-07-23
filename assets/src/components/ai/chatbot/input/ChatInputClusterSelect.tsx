@@ -1,10 +1,26 @@
 import {
   ChatThreadTinyFragment,
+  useClusterSelectorQuery,
   useUpdateChatThreadMutation,
 } from '../../../../generated/graphql.ts'
-import { Toast } from '@pluralsh/design-system'
+import {
+  ClusterIcon,
+  ListBoxFooter,
+  ListBoxFooterPlus,
+  ListBoxItem,
+  Select,
+  Spinner,
+  Toast,
+} from '@pluralsh/design-system'
 
-import ClusterSelector from '../../../cd/utils/ClusterSelector.tsx'
+import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
+import { useTheme } from 'styled-components'
+import { useProjectId } from '../../../contexts/ProjectsContext.tsx'
+import { useCallback, useMemo, useState } from 'react'
+import { useThrottle } from '../../../hooks/useThrottle.tsx'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
+import { ClusterProviderIcon } from '../../../utils/Provider.tsx'
+import isEmpty from 'lodash/isEmpty'
 
 export function ChatInputClusterSelect({
   currentThread,
@@ -16,36 +32,140 @@ export function ChatInputClusterSelect({
     { loading: updateThreadLoading, error: updateThreadError },
   ] = useUpdateChatThreadMutation()
 
-  // TODO:
-  //  Change the button in the chatbot to indicate that the agent is selected.
-  //  When the button is clicked then the _createAgentSession mutation should be called
-  //  if _agentSessionLoading is false at that time.
+  const theme = useTheme()
+  const projectId = useProjectId()
+  const [inputValue, setInputValue] = useState('')
+  const throttledInput = useThrottle(inputValue, 100)
+  const currentClusterId = currentThread?.session?.cluster?.id
+
+  const { data, pageInfo, fetchNextPage } = useFetchPaginatedData(
+    {
+      queryHook: useClusterSelectorQuery,
+      keyPath: ['clusters'],
+      errorPolicy: 'ignore',
+    },
+    {
+      q: throttledInput || null,
+      currentClusterId,
+      projectId,
+    }
+  )
+
+  const clusters = useMemo(
+    () => data?.clusters?.edges?.flatMap((e) => (e?.node ? e.node : [])) || [],
+    [data?.clusters?.edges]
+  )
+
+  const findCluster = useCallback(
+    (clusterId: Nullable<string>) => {
+      if (!clusterId) {
+        return null
+      }
+      if (data?.cluster && data?.cluster.id === clusterId) {
+        return data.cluster
+      }
+
+      return clusters?.find((cluster) => cluster?.id === clusterId)
+    },
+    [clusters, data?.cluster]
+  )
+
+  const selectedCluster = useMemo(
+    () => findCluster(currentClusterId),
+    [currentClusterId, findCluster]
+  )
+
+  const onClusterChange = useCallback(
+    (clusterId: string | null) => {
+      if (clusterId !== currentClusterId) {
+        updateThread({
+          variables: {
+            id: currentThread.id,
+            attributes: {
+              summary: currentThread.summary,
+              session: { clusterId },
+            },
+          },
+        })
+      }
+    },
+    [currentThread.id, currentThread.summary, currentClusterId, updateThread]
+  )
 
   return (
     <>
-      <div css={{ width: 220 }}>
-        <ClusterSelector
-          allowDeselect
-          onClusterChange={(cluster) => {
-            if (cluster?.id !== currentThread?.session?.cluster?.id)
-              updateThread({
-                variables: {
-                  id: currentThread.id,
-                  attributes: {
-                    summary: currentThread.summary,
-                    session: { clusterId: cluster?.id ?? null },
-                  },
-                },
-              })
-          }}
-          clusterId={currentThread?.session?.cluster?.id}
-          loading={updateThreadLoading}
-          placeholder="Select cluster"
-          startIcon={null}
-          deselectLabel="Deselect"
-          inputProps={{ style: { minHeight: 18, height: 18 } }}
-        />
-      </div>
+      <Select
+        selectedKey={currentClusterId}
+        onSelectionChange={(key) => onClusterChange(key as string | null)}
+        label="cluster"
+        width={270}
+        dropdownHeaderFixed={
+          <div
+            css={{
+              color: theme.colors['text-xlight'],
+              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+            }}
+          >
+            Select cluster
+          </div>
+        }
+        dropdownFooter={
+          !data ? (
+            <ListBoxFooter>Loading</ListBoxFooter>
+          ) : isEmpty(clusters) ? (
+            <ListBoxFooter>No results</ListBoxFooter>
+          ) : pageInfo?.hasNextPage ? (
+            <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
+          ) : undefined
+        }
+        onFooterClick={() => {
+          if (pageInfo?.hasNextPage) {
+            fetchNextPage()
+          }
+        }}
+        dropdownFooterFixed={
+          <ListBoxFooterPlus
+            onClick={() => {
+              setInputValue('')
+              onClusterChange?.(null)
+            }}
+            leftContent={<ClusterIcon />}
+          >
+            Deselect cluster
+          </ListBoxFooterPlus>
+        }
+        triggerButton={
+          <ChatInputSelectButton tooltip="Use our coding agent to run background task">
+            <>
+              {updateThreadLoading ? (
+                <Spinner size={12} />
+              ) : selectedCluster ? (
+                <ClusterProviderIcon
+                  cluster={selectedCluster}
+                  size={12}
+                />
+              ) : (
+                <ClusterIcon size={12} />
+              )}
+              {selectedCluster?.name || 'cluster'}
+            </>
+          </ChatInputSelectButton>
+        }
+      >
+        {clusters.map((cluster) => (
+          <ListBoxItem
+            key={cluster?.id}
+            label={cluster?.name}
+            textValue={cluster?.name}
+            leftContent={
+              <ClusterProviderIcon
+                cluster={cluster}
+                size={16}
+              />
+            }
+          />
+        ))}
+      </Select>
       <Toast
         show={!!updateThreadError}
         severity="danger"
