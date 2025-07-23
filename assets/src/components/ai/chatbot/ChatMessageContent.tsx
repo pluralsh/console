@@ -462,8 +462,8 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  background: 'none',
-  border: theme.borders.input,
+  background: theme.colors['fill-one'],
+  border: theme.borders.default,
   padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
 }))
