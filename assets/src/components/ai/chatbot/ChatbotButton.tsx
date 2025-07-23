@@ -31,7 +31,7 @@ export function ChatbotIconButton({
     <AIButton
       onClick={onClick}
       active={active}
-      visible={true}
+      visible
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >

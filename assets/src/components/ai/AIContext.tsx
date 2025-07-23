@@ -65,7 +65,7 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [showForkToast, setShowForkToast] = useState(false)
 
