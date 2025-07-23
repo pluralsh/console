@@ -29,7 +29,10 @@ defmodule Console.AI.Chat.Tools do
 
   @agent_search_tools [
     Agent.ServiceComponent,
-    Agent.Stack
+    Agent.Stack,
+    Agent.Query,
+    Agent.Schema,
+    Agent.Search
   ]
 
   @agent_manifests_tools [

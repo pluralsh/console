@@ -7625,12 +7625,13 @@ func (e ChatType) MarshalGQL(w io.Writer) {
 type ClusterDistro string
 
 const (
-	ClusterDistroGeneric ClusterDistro = "GENERIC"
-	ClusterDistroEks     ClusterDistro = "EKS"
-	ClusterDistroAks     ClusterDistro = "AKS"
-	ClusterDistroGke     ClusterDistro = "GKE"
-	ClusterDistroRke     ClusterDistro = "RKE"
-	ClusterDistroK3s     ClusterDistro = "K3S"
+	ClusterDistroGeneric   ClusterDistro = "GENERIC"
+	ClusterDistroEks       ClusterDistro = "EKS"
+	ClusterDistroAks       ClusterDistro = "AKS"
+	ClusterDistroGke       ClusterDistro = "GKE"
+	ClusterDistroRke       ClusterDistro = "RKE"
+	ClusterDistroK3s       ClusterDistro = "K3S"
+	ClusterDistroOpenshift ClusterDistro = "OPENSHIFT"
 )
 
 var AllClusterDistro = []ClusterDistro{
@@ -7640,11 +7641,12 @@ var AllClusterDistro = []ClusterDistro{
 	ClusterDistroGke,
 	ClusterDistroRke,
 	ClusterDistroK3s,
+	ClusterDistroOpenshift,
 }
 
 func (e ClusterDistro) IsValid() bool {
 	switch e {
-	case ClusterDistroGeneric, ClusterDistroEks, ClusterDistroAks, ClusterDistroGke, ClusterDistroRke, ClusterDistroK3s:
+	case ClusterDistroGeneric, ClusterDistroEks, ClusterDistroAks, ClusterDistroGke, ClusterDistroRke, ClusterDistroK3s, ClusterDistroOpenshift:
 		return true
 	}
 	return false

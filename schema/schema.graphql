@@ -407,7 +407,7 @@ type RootQueryType {
 
   cloudConnection(id: ID, name: String): CloudConnection
 
-  cloudConnections(after: String, first: Int, before: String, last: Int): CloudConnectionConnection
+  cloudConnections(after: String, first: Int, before: String, last: Int, q: String): CloudConnectionConnection
 
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
@@ -463,6 +463,8 @@ type RootQueryType {
 
     "only show threads for this flow"
     flowId: ID
+
+    q: String
   ): ChatThreadConnection
 
   agentSessions(after: String, first: Int, before: String, last: Int): AgentSessionConnection
@@ -5338,6 +5340,7 @@ enum ClusterDistro {
   GKE
   RKE
   K3S
+  OPENSHIFT
 }
 
 enum UpgradeInsightStatus {

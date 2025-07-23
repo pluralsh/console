@@ -36,6 +36,10 @@ export const ClusterProviderIcons = {
     dark: `${DISTRO_ICON_PATH}/rke.svg`,
     light: `${DISTRO_ICON_PATH}/rke.svg`,
   },
+  [ClusterDistro.Openshift]: {
+    dark: `${DISTRO_ICON_PATH}/openshift-dark.svg`,
+    light: `${DISTRO_ICON_PATH}/openshift-light.svg`,
+  },
   [ClusterDistro.Generic]: {
     dark: `${DISTRO_ICON_PATH}/k8s.svg`,
     light: `${DISTRO_ICON_PATH}/k8s.svg`,
@@ -51,6 +55,7 @@ export const ClusterDistroShortNames = {
   [ClusterDistro.Gke]: 'GKE',
   [ClusterDistro.K3S]: 'K3s',
   [ClusterDistro.Rke]: 'RKE',
+  [ClusterDistro.Openshift]: 'OpenShift',
   [ClusterDistro.Generic]: 'BYOK',
 } as const satisfies Record<ClusterDistro, string>
 
@@ -60,6 +65,7 @@ export const ClusterDistroLongNames = {
   [ClusterDistro.Gke]: 'Google Kubernetes Engine (AKS)',
   [ClusterDistro.K3S]: 'K3s',
   [ClusterDistro.Rke]: 'Rancher Kubernetes Engine (RKE)',
+  [ClusterDistro.Openshift]: 'OpenShift',
   [ClusterDistro.Generic]: 'BYOK',
 } as const satisfies Record<ClusterDistro, string>
 

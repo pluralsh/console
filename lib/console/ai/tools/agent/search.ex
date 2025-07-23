@@ -19,7 +19,12 @@ defmodule Console.AI.Tools.Agent.Search do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("cloud_search")
-  def description(), do: "Execute a semantic search against your cloud data, this will return a list of resources that vector-match the given input query. Use this when a user is searching for a specific cloud resource, rather than aggregate queries across a cloud account. **If the user is looking for how its configured as a stack or infrastructure as code, use a stack search instead.**"
+  def description(), do: """
+  Execute a semantic search against your cloud data, this will return a list of resources that semantically match
+  the given input query. Use this when a user is searching for an individual cloud resource, rather than aggregate queries across a cloud account.
+
+  **If the user is looking for how its configured as a stack or infrastructure as code, or how its deployed, use a stack search or service search instead.**
+  """
 
   def implement(%__MODULE__{query: query}) do
     with %User{} = user <- Console.AI.Tool.actor(),

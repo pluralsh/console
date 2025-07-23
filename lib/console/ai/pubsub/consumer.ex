@@ -1,7 +1,7 @@
 defmodule Console.AI.PubSub.Consumer do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 100
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.PubSub
   alias Console.Schema.{AiInsight, Service, Stack, StackState, Alert}
