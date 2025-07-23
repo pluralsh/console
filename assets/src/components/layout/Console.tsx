@@ -79,6 +79,7 @@ function ConsoleContent() {
         flexDirection="column"
         flexGrow={1}
         container="console / inline-size"
+        zIndex={0} // needed so chatbot flyovers render over main console content
       >
         {isProduction && (
           <WithApplicationUpdate>

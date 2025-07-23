@@ -2,7 +2,6 @@ import {
   Accordion,
   AccordionItem,
   ChatOutlineIcon,
-  FillLevelProvider,
 } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
@@ -53,7 +52,7 @@ export function ChatbotPanel() {
       type="single"
       value={`${open}`}
       orientation="horizontal"
-      css={{ border: 'none' }}
+      css={{ border: 'none', zIndex: 1 }} // corresponds with zIndex={0} over main console content in Console.tsx
     >
       <AccordionItem
         value={`${true}`}
@@ -61,10 +60,9 @@ export function ChatbotPanel() {
         padding="none"
         trigger={null}
         css={{ height: '100%', width: '100%' }}
+        additionalContentStyles={{ overflow: 'visible' }}
       >
-        <PanelWrapperSC>
-          <ChatbotPanelInner />
-        </PanelWrapperSC>
+        <ChatbotPanelInner />
       </AccordionItem>
     </Accordion>
   )
@@ -116,7 +114,7 @@ function ChatbotPanelInner() {
   }, [threadsQuery.data, pathname])
 
   return (
-    <ChatbotFrameSC>
+    <div css={{ position: 'relative', height: '100%' }}>
       {!isEmpty(tools) && (
         <McpServerShelf
           isOpen={showMcpServers}
@@ -124,69 +122,47 @@ function ChatbotPanelInner() {
           tools={tools}
         />
       )}
-      <FillLevelProvider value={1}>
-        <RightSideSC $showMcpServers={showMcpServers}>
-          <ChatbotHeader currentThread={currentThread} />
-          {detailsError && <GqlError error={detailsError} />}
-          {!currentThread && detailsLoading ? (
-            <ChatbotMessagesWrapperSC>
-              <LoadingIndicator />
-            </ChatbotMessagesWrapperSC>
-          ) : currentThread ? (
-            <ChatbotPanelThread
-              currentThread={currentThread}
-              threadDetailsQuery={threadDetailsQuery}
-              showMcpServers={showMcpServers}
-              setShowMcpServers={setShowMcpServers}
-              showExamplePrompts={showPrompts}
-              setShowExamplePrompts={setShowPrompts}
+      <MainContentWrapperSC>
+        <ChatbotHeader currentThread={currentThread} />
+        {detailsError && <GqlError error={detailsError} />}
+        {!currentThread && detailsLoading ? (
+          <ChatbotMessagesWrapperSC>
+            <LoadingIndicator />
+          </ChatbotMessagesWrapperSC>
+        ) : currentThread ? (
+          <ChatbotPanelThread
+            currentThread={currentThread}
+            threadDetailsQuery={threadDetailsQuery}
+            showMcpServers={showMcpServers}
+            setShowMcpServers={setShowMcpServers}
+            showExamplePrompts={showPrompts}
+            setShowExamplePrompts={setShowPrompts}
+          />
+        ) : (
+          <ChatbotTableWrapperSC>
+            <AITable
+              modal
+              query={threadsQuery}
+              rowData={rows}
+              borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
+              border="none"
+              fillLevel={1}
+              borderRadius={0}
             />
-          ) : (
-            <ChatbotTableWrapperSC>
-              <AITable
-                modal
-                query={threadsQuery}
-                rowData={rows}
-                borderBottom={
-                  isEmpty(rows) ? 'none' : theme.borders['fill-two']
-                }
-                border="none"
-                fillLevel={1}
-                borderRadius={0}
-              />
-            </ChatbotTableWrapperSC>
-          )}
-        </RightSideSC>
-      </FillLevelProvider>
-    </ChatbotFrameSC>
+          </ChatbotTableWrapperSC>
+        )}
+      </MainContentWrapperSC>
+    </div>
   )
 }
-
-const ChatbotFrameSC = styled.div(() => ({
-  display: 'flex',
-  overflow: 'auto hidden',
-  height: '100%',
-  width: '100%',
-  maxWidth: 1096,
-}))
 
 const ChatbotTableWrapperSC = styled.div(() => ({
   height: '100%',
   overflow: 'hidden',
 }))
 
-const RightSideSC = styled.div<{
-  $showMcpServers?: boolean
-}>(({ theme, $showMcpServers }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  width: 768,
-  minWidth: 768,
-  borderLeft: $showMcpServers ? theme.borders.default : 'none',
-}))
-
-const PanelWrapperSC = styled.div(({ theme }) => ({
+const MainContentWrapperSC = styled.div(({ theme }) => ({
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   height: '100%',

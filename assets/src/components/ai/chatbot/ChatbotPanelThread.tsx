@@ -241,20 +241,20 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
+export const ChatbotMessagesWrapperSC = styled.div({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  padding: `0 ${theme.spacing.xsmall}px`,
   flex: 1,
-}))
+})
 
 const ChatbotMessagesListSC = styled.div(({ theme }) => ({
   ...theme.partials.reset.list,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: theme.spacing.xsmall,
+  padding: theme.spacing.medium,
+  height: '100%',
 }))
 
 const ScrollGradientSC = styled.div<{

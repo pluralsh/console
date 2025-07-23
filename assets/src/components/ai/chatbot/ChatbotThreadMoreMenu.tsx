@@ -1,5 +1,7 @@
 import {
   ArrowRightIcon,
+  BrainIcon,
+  DiffColumnIcon,
   EditIcon,
   GitForkIcon,
   IconFrame,
@@ -9,27 +11,37 @@ import {
   PushPinFilledIcon,
   PushPinOutlineIcon,
   Spinner,
+  Toast,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { MoreMenu } from 'components/utils/MoreMenu'
-import { useState } from 'react'
+import { useUpdateChatThreadMutation } from 'generated/graphql'
+import { useCallback, useRef, useState } from 'react'
 import { useChatbot } from '../AIContext'
 import { useAiPin } from '../AIPinButton'
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
 
 enum MenuItemKey {
+  KnowledgeGraph = 'knowledgeGraph',
   Pin = 'pin',
   Rename = 'rename',
   Fork = 'fork',
   Delete = 'delete',
+  AllThreads = 'all',
 }
 
 export function ChatbotThreadMoreMenu() {
-  const { forkThread, mutationLoading, currentThread } = useChatbot()
+  const {
+    forkThread,
+    mutationLoading: forkLoading,
+    currentThread,
+    goToThreadList,
+  } = useChatbot()
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
-  const [pinHovered, setPinHovered] = useState(false)
-  const [forkHovered, setForkHovered] = useState(false)
+
+  // need a ref instead of state because state doesn't update before onOpenChange fires
+  const blockClose = useRef(false)
 
   const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
     thread: currentThread,
@@ -38,11 +50,16 @@ export function ChatbotThreadMoreMenu() {
 
   const closeMenu = () => {
     setIsOpen(false)
+    blockClose.current = false
     setMenuKey('')
   }
 
   const handleSelectionChange = (selectedKey: MenuItemKey) => {
+    blockClose.current = true
     switch (selectedKey) {
+      case MenuItemKey.KnowledgeGraph:
+        toggleKnowledgeGraph()
+        break
       case MenuItemKey.Pin:
         handlePin()
         break
@@ -52,11 +69,33 @@ export function ChatbotThreadMoreMenu() {
           onCompleted: () => closeMenu(),
         })
         break
+      case MenuItemKey.AllThreads:
+        goToThreadList()
+        closeMenu()
+        break
       default:
+        blockClose.current = false
         setMenuKey(selectedKey)
         break
     }
   }
+
+  const [
+    updateThread,
+    { loading: knowledgeGraphLoading, error: knowledgeGraphError },
+  ] = useUpdateChatThreadMutation()
+
+  const toggleKnowledgeGraph = useCallback(() => {
+    updateThread({
+      variables: {
+        id: currentThread?.id ?? '',
+        attributes: {
+          summary: currentThread?.summary ?? '',
+          settings: { memory: !currentThread?.settings?.memory },
+        },
+      },
+    })
+  }, [currentThread, updateThread])
 
   if (!currentThread) return null
 
@@ -64,10 +103,12 @@ export function ChatbotThreadMoreMenu() {
     <>
       <MoreMenu
         isOpen={isOpen}
-        // a bit hacky but basically just blocks closing menu if pin or fork options are hovered, so we can see their loading states
-        onOpenChange={(newOpen) =>
-          (newOpen || !(pinHovered || forkHovered)) && setIsOpen(newOpen)
-        }
+        // a bit hacky but basically just blocks closing menu if mutations are running, so we can see their loading states
+        onOpenChange={(newOpen) => {
+          if (!newOpen && blockClose.current)
+            blockClose.current = false // unblock it so user can still manually close menu
+          else setIsOpen(newOpen)
+        }}
         onSelectionChange={handleSelectionChange}
         triggerButton={
           <IconFrame
@@ -79,8 +120,32 @@ export function ChatbotThreadMoreMenu() {
         width={256}
       >
         <ListBoxItem
-          onMouseEnter={() => setPinHovered(true)}
-          onMouseLeave={() => setPinHovered(false)}
+          key={MenuItemKey.AllThreads}
+          leftContent={<DiffColumnIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
+          label="View all threads"
+        />
+        <ListBoxItem
+          key={MenuItemKey.KnowledgeGraph}
+          leftContent={
+            knowledgeGraphLoading ? (
+              <Spinner />
+            ) : (
+              <BrainIcon
+                color={
+                  currentThread?.settings?.memory ? 'icon-info' : 'icon-default'
+                }
+              />
+            )
+          }
+          label={
+            currentThread?.settings?.memory
+              ? 'Disable knowledge graph'
+              : 'Enable knowledge graph'
+          }
+          disabled={knowledgeGraphLoading}
+        />
+        <ListBoxItem
           key={MenuItemKey.Pin}
           leftContent={
             pinLoading ? (
@@ -102,10 +167,8 @@ export function ChatbotThreadMoreMenu() {
           label="Rename thread"
         />
         <ListBoxItem
-          onMouseEnter={() => setForkHovered(true)}
-          onMouseLeave={() => setForkHovered(false)}
           key={MenuItemKey.Fork}
-          leftContent={mutationLoading ? <Spinner /> : <GitForkIcon />}
+          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
           rightContent={<ArrowRightIcon color="icon-default" />}
           label="Fork thread"
         />
@@ -130,6 +193,14 @@ export function ChatbotThreadMoreMenu() {
         open={menuKey === MenuItemKey.Delete}
         onClose={closeMenu}
       />
+      <Toast
+        show={!!knowledgeGraphError}
+        severity="danger"
+        position="bottom"
+        marginBottom="medium"
+      >
+        Error updating thread settings.
+      </Toast>
     </>
   )
 }

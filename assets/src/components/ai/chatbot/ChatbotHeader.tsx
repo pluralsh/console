@@ -1,21 +1,19 @@
 import {
-  BrainIcon,
   CloseIcon,
   ComposeIcon,
-  Flex,
   HamburgerMenuCollapseIcon,
   IconFrame,
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
-  useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { useCallback } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
+import { StackedText } from '../../utils/table/StackedText.tsx'
 import { useChatbot } from '../AIContext'
 import {
   getInsightPathInfo,
@@ -23,8 +21,6 @@ import {
   truncate,
 } from '../AITableEntry'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
-import { StackedText } from '../../utils/table/StackedText.tsx'
-import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 
 export function ChatbotHeader({
   currentThread,
@@ -35,23 +31,6 @@ export function ChatbotHeader({
 
   const { closeChatbot, createNewThread, mutationLoading, mutationError } =
     useChatbot()
-
-  const [
-    updateThread,
-    { loading: updateThreadLoading, error: updateThreadError },
-  ] = useUpdateChatThreadMutation()
-
-  const toggleKnowledgeGraph = useCallback(() => {
-    updateThread({
-      variables: {
-        id: currentThread?.id ?? '',
-        attributes: {
-          summary: currentThread?.summary ?? '',
-          settings: { memory: !currentThread?.settings?.memory },
-        },
-      },
-    })
-  }, [currentThread, updateThread])
 
   const { data: cloudConnections, loading: cloudConnectionsLoading } =
     useCloudConnectionsQuery()
@@ -64,86 +43,51 @@ export function ChatbotHeader({
   }
 
   return (
-    <WrapperSC>
-      <IconFrame
-        size="small"
-        icon={<HamburgerMenuCollapseIcon />}
-        // TODO: Clickable?
-      />
-      <Body2BoldP css={{ color: colors['text-light'] }}>Copilot</Body2BoldP>
-      <StackedText
-        first={truncate(currentThread?.summary)}
-        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
-        firstPartialType="body2"
-        firstColor="text"
-        secondPartialType="caption"
-        // TODO: Update styling.
-      />
-      {!cloudConnectionsLoading && (
+    <>
+      <WrapperSC>
         <IconFrame
-          clickable
-          icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
-          type="tertiary"
-          tooltip="Start a new chat"
-          onClick={() =>
-            createNewThread({
-              summary: 'New chat with Plural Copilot',
-              ...(connectionId && {
-                session: {
-                  connectionId,
-                  done: true,
-                },
-              }),
-            })
-          }
+          size="small"
+          icon={<HamburgerMenuCollapseIcon />}
+          // TODO: Clickable?
         />
-      )}
-      <>
-        <IconFrame
-          tooltip={
-            <Flex direction="column">
-              <CaptionP $color="text-light">
-                {currentThread?.settings?.memory ? 'Disable ' : 'Enable '}
-                knowledge graph
-              </CaptionP>
-              <CaptionP $color="text-xlight">
-                Use and add to Plural AI&#39;s memory with this thread
-              </CaptionP>
-            </Flex>
-          }
-          clickable
-          type="tertiary"
-          style={{
-            borderColor: currentThread?.settings?.memory
-              ? colors['border-primary']
-              : undefined,
-          }}
-          icon={
-            updateThreadLoading ? (
-              <Spinner css={{ width: 16 }} />
-            ) : (
-              <BrainIcon css={{ width: 16 }} />
-            )
-          }
-          onClick={toggleKnowledgeGraph}
+        <Body2BoldP css={{ color: colors['text-light'] }}>Copilot</Body2BoldP>
+        <StackedText
+          truncate
+          first={truncate(currentThread?.summary)}
+          second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
+          firstPartialType="body2"
+          firstColor="text"
+          secondPartialType="caption"
+          css={{ flex: 1 }}
         />
+        {!cloudConnectionsLoading && (
+          <IconFrame
+            clickable
+            icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+            type="tertiary"
+            tooltip="Start a new chat"
+            onClick={() =>
+              createNewThread({
+                summary: 'New chat with Plural Copilot',
+                ...(connectionId && {
+                  session: {
+                    connectionId,
+                    done: true,
+                  },
+                }),
+              })
+            }
+          />
+        )}
         <ChatbotThreadMoreMenu />
-      </>
-      <IconFrame
-        clickable
-        tooltip="Close"
-        type="tertiary"
-        icon={<CloseIcon css={{ width: 16 }} />}
-        onClick={() => closeChatbot()}
-      />
-      <Toast
-        show={!!updateThreadError}
-        severity="danger"
-        position="bottom"
-        marginBottom="medium"
-      >
-        Error updating thread settings.
-      </Toast>
+        <IconFrame
+          clickable
+          tooltip="Close"
+          type="tertiary"
+          icon={<CloseIcon css={{ width: 16 }} />}
+          onClick={() => closeChatbot()}
+        />
+      </WrapperSC>
       <Toast
         show={!!mutationError}
         closeTimeout={5000}
@@ -153,13 +97,13 @@ export function ChatbotHeader({
       >
         <strong>Error creating new thread:</strong> {mutationError?.message}
       </Toast>
-    </WrapperSC>
+    </>
   )
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  gap: theme.spacing.small,
+  gap: theme.spacing.xsmall,
   alignItems: 'center',
   padding: theme.spacing.medium,
   borderBottom: theme.borders.default,

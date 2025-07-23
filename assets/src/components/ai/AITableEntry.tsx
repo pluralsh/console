@@ -71,14 +71,12 @@ export function AITableEntry({
   hidePins?: boolean | null
 } & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
   const theme = useTheme()
-  const { pathname } = useLocation()
   const { goToThread } = useChatbot()
 
   const isPin = item.__typename === 'AiPin'
 
   const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
   const insight = item.insight
-  const insightPathUrl = getInsightPathInfo(insight)?.url
 
   const timestamp = getThreadOrPinTimestamp(item)
 
@@ -104,14 +102,6 @@ export function AITableEntry({
         thread={thread}
         opacity={isStale ? 0.6 : 1}
       />
-      {insightPathUrl && pathname?.includes(insightPathUrl) && (
-        <Chip
-          css={{ minWidth: 'fit-content' }}
-          severity="info"
-        >
-          Current page
-        </Chip>
-      )}
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
         {fromNow(timestamp)}
       </CaptionP>
@@ -156,6 +146,7 @@ export function AIEntryLabel({
   insight?: Nullable<AiInsightSummaryFragment>
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
+  const { pathname } = useLocation()
   const insightPathInfo = getInsightPathInfo(insight)
   const flowPath = thread?.flow && {
     path: [thread.flow.name],
@@ -183,7 +174,18 @@ export function AIEntryLabel({
       />
       <StackedText
         first={truncate(thread?.summary)}
-        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
+        second={
+          <Flex
+            gap="small"
+            align="center"
+          >
+            <TableEntryResourceLink {...(insightPathInfo || flowPath)} />{' '}
+            {insightPathInfo?.url &&
+              pathname?.includes(insightPathInfo.url) && (
+                <CaptionP $color="icon-info">Current page</CaptionP>
+              )}
+          </Flex>
+        }
         firstPartialType="body2"
         firstColor="text"
         secondPartialType="caption"
@@ -341,7 +343,6 @@ export function TableEntryResourceLink({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { closeChatbot } = useChatbot()
 
   if (!path) return null
 
@@ -349,10 +350,7 @@ export function TableEntryResourceLink({
     <a
       onClick={(e) => {
         e.stopPropagation()
-        if (url) {
-          navigate(url)
-          closeChatbot()
-        }
+        if (url) navigate(url)
       }}
       css={{
         display: 'flex',
