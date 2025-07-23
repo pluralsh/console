@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.AI do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.AiInsight
+  import Console.GraphQl.Resolvers.Deployments.Base, only: [maybe_search: 3]
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
   alias Console.AI.{Service, Provider, Fixer}
@@ -32,6 +33,7 @@ defmodule Console.GraphQl.Resolvers.AI do
     ChatThread.for_user(user.id)
     |> ChatThread.ordered()
     |> thread_filters(args)
+    |> maybe_search(ChatThread, args)
     |> paginate(args)
   end
 

@@ -446,6 +446,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     connection field :cloud_connections, node_type: :cloud_connection do
       middleware Authenticated
       middleware Scope, api: "cloudConnections"
+      arg :q, :string
 
       resolve &Deployments.list_cloud_connections/2
     end

@@ -28,6 +28,10 @@ defmodule Console.Schema.ChatThread do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(t in query, where: ilike(t.summary, ^"%#{q}%"))
+  end
+
   def settings(%__MODULE__{settings: %{memory: m}}, :memory) when is_boolean(m), do: m
   def settings(_, _), do: false
 

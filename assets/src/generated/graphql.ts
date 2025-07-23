@@ -8296,6 +8296,7 @@ export type RootQueryTypeChatThreadsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   flowId?: InputMaybe<Scalars['ID']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8319,6 +8320,7 @@ export type RootQueryTypeCloudConnectionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
