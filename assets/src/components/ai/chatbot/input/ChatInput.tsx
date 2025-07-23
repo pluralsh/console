@@ -11,6 +11,7 @@ import usePersistedSessionState from 'components/hooks/usePersistedSessionState.
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import {
+  AgentSessionType,
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
@@ -33,6 +34,7 @@ import { ChatMessage } from '../ChatMessage.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputAgentSelect } from './ChatInputAgentSelect.tsx'
+import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 
 export function ChatInput({
   currentThread,
@@ -103,6 +105,11 @@ export function ChatInput({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
+  const hideClusterSelector =
+    currentThread?.session?.type === AgentSessionType.Kubernetes ||
+    currentThread?.session?.type === AgentSessionType.Terraform ||
+    !currentThread?.session?.id
+
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -168,8 +175,15 @@ export function ChatInput({
                 onClick={() => setShowMcpServers(!showMcpServers)}
               />
             )}
-            {!cloudConnectionsLoading && connectionId && (
-              <ChatInputAgentSelect connectionId={connectionId} />
+            {!cloudConnectionsLoading && (
+              <>
+                {connectionId && (
+                  <ChatInputAgentSelect connectionId={connectionId} />
+                )}
+                {!hideClusterSelector && (
+                  <ChatInputClusterSelect currentThread={currentThread} />
+                )}
+              </>
             )}
           </Flex>
           <IconFrame

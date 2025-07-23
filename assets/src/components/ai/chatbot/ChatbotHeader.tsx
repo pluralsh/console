@@ -9,11 +9,9 @@ import {
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
-import ClusterSelector from 'components/cd/utils/ClusterSelector'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import {
-  AgentSessionType,
   ChatThreadTinyFragment,
   useCloudConnectionsQuery,
   useUpdateChatThreadMutation,
@@ -68,11 +66,6 @@ export function ChatbotHeader({
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
-  const hideClusterSelector =
-    currentThread?.session?.type === AgentSessionType.Kubernetes ||
-    currentThread?.session?.type === AgentSessionType.Terraform ||
-    !currentThread?.session?.id
-
   return (
     <WrapperSC>
       {state === 'list' ? (
@@ -104,50 +97,23 @@ export function ChatbotHeader({
         </>
       )}
       {!cloudConnectionsLoading && (
-        <>
-          {!hideClusterSelector && (
-            <div css={{ width: 220 }}>
-              <ClusterSelector
-                allowDeselect
-                onClusterChange={(cluster) => {
-                  if (cluster?.id !== currentThread?.session?.cluster?.id)
-                    updateThread({
-                      variables: {
-                        id: currentThread.id,
-                        attributes: {
-                          summary: currentThread.summary,
-                          session: { clusterId: cluster?.id ?? null },
-                        },
-                      },
-                    })
-                }}
-                clusterId={currentThread?.session?.cluster?.id}
-                loading={updateThreadLoading}
-                placeholder="Select cluster"
-                startIcon={null}
-                deselectLabel="Deselect"
-                inputProps={{ style: { minHeight: 32, height: 32 } }}
-              />
-            </div>
-          )}
-          <IconFrame
-            clickable
-            icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
-            type="secondary"
-            tooltip="Start a new chat"
-            onClick={() =>
-              createNewThread({
-                summary: 'New chat with Plural Copilot',
-                ...(connectionId && {
-                  session: {
-                    connectionId,
-                    done: true,
-                  },
-                }),
-              })
-            }
-          />
-        </>
+        <IconFrame
+          clickable
+          icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+          type="secondary"
+          tooltip="Start a new chat"
+          onClick={() =>
+            createNewThread({
+              summary: 'New chat with Plural Copilot',
+              ...(connectionId && {
+                session: {
+                  connectionId,
+                  done: true,
+                },
+              }),
+            })
+          }
+        />
       )}
       {state === 'thread' ? (
         <>
