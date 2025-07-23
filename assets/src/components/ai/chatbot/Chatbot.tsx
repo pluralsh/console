@@ -117,11 +117,14 @@ function ChatbotPanelInner() {
     <div css={{ position: 'relative', height: '100%' }}>
       {!isEmpty(tools) && (
         <McpServerShelf
+          $zIndex={2}
           isOpen={showMcpServers}
           setIsOpen={setShowMcpServers}
           tools={tools}
         />
       )}
+      {/* TODO: add similar simple flyover here for the chat action panel (what the header hamburger menu opens) */}
+      {/* should be z index 1 so mcp renders over it */}
       <MainContentWrapperSC>
         <ChatbotHeader currentThread={currentThread} />
         {detailsError && <GqlError error={detailsError} />}
@@ -146,7 +149,6 @@ function ChatbotPanelInner() {
               rowData={rows}
               borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
               border="none"
-              fillLevel={1}
               borderRadius={0}
             />
           </ChatbotTableWrapperSC>
@@ -163,6 +165,7 @@ const ChatbotTableWrapperSC = styled.div(() => ({
 
 const MainContentWrapperSC = styled.div(({ theme }) => ({
   position: 'relative',
+  zIndex: theme.zIndexes.modal,
   display: 'flex',
   flexDirection: 'column',
   height: '100%',

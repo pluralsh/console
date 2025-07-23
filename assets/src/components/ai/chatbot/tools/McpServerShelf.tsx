@@ -10,18 +10,18 @@ import {
   ToolIcon,
   usePrevious,
 } from '@pluralsh/design-system'
+import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { McpServerToolFragment, McpToolFragment } from 'generated/graphql'
 import { groupBy } from 'lodash'
-import { useState } from 'react'
+import { ComponentPropsWithRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ToolDetailsModal } from './ToolDetailsModal'
-import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 
 type ServerWithTools = {
   name: Nullable<string>
@@ -34,11 +34,12 @@ export function McpServerShelf({
   isOpen,
   setIsOpen,
   tools,
+  ...props
 }: {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   tools: McpServerToolFragment[]
-}) {
+} & Omit<ComponentPropsWithRef<typeof SimpleFlyover>, '$shouldAnimate'>) {
   const theme = useTheme()
   const [selectedToolDetails, setSelectedToolDetails] = useState<{
     serverName: string
@@ -60,6 +61,7 @@ export function McpServerShelf({
     <SimpleFlyover
       $shouldAnimate={!!isOpen !== !!prevOpen}
       data-state={isOpen ? 'open' : 'closed'}
+      {...props}
     >
       <HeaderSC>
         <Body2BoldP>MCP servers</Body2BoldP>

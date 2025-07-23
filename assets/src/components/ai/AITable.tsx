@@ -44,7 +44,6 @@ export function AITable({
         height={70}
         centered={true}
         styles={{
-          background: theme.colors['fill-one'],
           height: '100%',
           padding: theme.spacing.xlarge,
           '> svg': {
@@ -56,6 +55,7 @@ export function AITable({
 
   return (
     <Table
+      rowBg="base"
       fullHeightWrap
       virtualizeRows
       padCells={false}
@@ -69,9 +69,6 @@ export function AITable({
       reactTableOptions={reactTableOptions}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       emptyStateProps={{ message: 'No entries found.' }}
-      border={theme.borders['fill-two']}
-      height={'100%'}
-      overflowX={'hidden'}
       {...props}
     />
   )

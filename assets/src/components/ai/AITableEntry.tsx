@@ -46,11 +46,10 @@ const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   gap: theme.spacing.xlarge,
   height: '100%',
   width: '100%',
-  background: theme.colors['fill-one'],
   padding: theme.spacing.medium,
   '&:not(:has(button:hover)):not(:has(a:hover))': {
     '&:hover': {
-      background: theme.colors['fill-two-selected'],
+      background: theme.colors['fill-zero-hover'],
       cursor: 'pointer',
     },
   },
