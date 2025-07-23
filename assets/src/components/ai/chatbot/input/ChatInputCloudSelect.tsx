@@ -4,7 +4,6 @@ import {
 } from '../../../../generated/graphql.ts'
 import {
   CloudIcon,
-  ClusterIcon,
   Input,
   ListBoxFooter,
   ListBoxFooterPlus,
@@ -18,6 +17,7 @@ import { useTheme } from 'styled-components'
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
 import { isEmpty } from 'lodash'
+import ProviderIcon from '../../../utils/Provider.tsx'
 
 export function ChatInputCloudSelect({
   cloudConnectionId,
@@ -37,7 +37,7 @@ export function ChatInputCloudSelect({
       keyPath: ['cloudConnections'],
       errorPolicy: 'ignore',
     },
-    {} // TODO: Add pagination and search support.
+    {} // TODO: Add search support.
   )
 
   const cloudConnections = useMemo(
@@ -56,7 +56,7 @@ export function ChatInputCloudSelect({
 
   return (
     <Select
-      selectedKey={cloudConnectionId}
+      selectedKey={cloudConnectionId ?? ''}
       onSelectionChange={(key) =>
         setCloudConnectionId(key as string | undefined)
       }
@@ -113,29 +113,28 @@ export function ChatInputCloudSelect({
       triggerButton={
         <ChatInputSelectButton>
           {selectedCloudConnection ? (
-            // <ClusterProviderIcon
-            //   cluster={selectedCloudConnection}
-            //   size={12}
-            // />
-            <CloudIcon />
+            <ProviderIcon
+              provider={selectedCloudConnection?.provider}
+              size={16}
+            />
           ) : (
-            <ClusterIcon size={12} />
+            <CloudIcon size={12} />
           )}
           {selectedCloudConnection?.name || 'cloud'}
         </ChatInputSelectButton>
       }
     >
-      {cloudConnections.map((cluster) => (
+      {cloudConnections.map((c) => (
         <ListBoxItem
-          key={cluster?.id}
-          label={cluster?.name}
-          textValue={cluster?.name}
-          // leftContent={
-          //   <ClusterProviderIcon
-          //     cluster={cluster}
-          //     size={16}
-          //   />
-          // }
+          key={c?.id}
+          label={c?.name}
+          textValue={c?.name}
+          leftContent={
+            <ProviderIcon
+              provider={c?.provider}
+              size={16}
+            />
+          }
         />
       ))}
     </Select>

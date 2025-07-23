@@ -96,6 +96,7 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
 
 fragment AgentSession on AgentSession {

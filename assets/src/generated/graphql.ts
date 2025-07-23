@@ -11342,7 +11342,7 @@ export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, defaul
 
 export type ChatThreadSettingsFragment = { __typename?: 'ChatThreadSettings', memory?: boolean | null };
 
-export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: string, name: string };
+export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: string, name: string, provider: Provider };
 
 export type AgentSessionFragment = { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null };
 
@@ -11391,7 +11391,7 @@ export type CloudConnectionsQueryVariables = Exact<{
 }>;
 
 
-export type CloudConnectionsQuery = { __typename?: 'RootQueryType', cloudConnections?: { __typename?: 'CloudConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CloudConnectionEdge', node?: { __typename?: 'CloudConnection', id: string, name: string } | null } | null> | null } | null };
+export type CloudConnectionsQuery = { __typename?: 'RootQueryType', cloudConnections?: { __typename?: 'CloudConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CloudConnectionEdge', node?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null } | null };
 
 export type CreateAiPinMutationVariables = Exact<{
   attributes: AiPinAttributes;
@@ -14827,6 +14827,7 @@ export const CloudConnectionTinyFragmentDoc = gql`
     fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
     `;
 export const AiDeltaFragmentDoc = gql`
