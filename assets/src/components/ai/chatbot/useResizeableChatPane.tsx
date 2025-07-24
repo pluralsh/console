@@ -6,14 +6,6 @@ import { useState } from 'react'
 const STORAGE_KEY = 'chatbot-panel-width'
 
 export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
-  const [calculatedPanelWidth, setCalculatedPanelWidth] = usePersistedState(
-    STORAGE_KEY,
-    minWidthPx,
-    1000
-  )
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
-
   const clampNewWidth = (newWidth: number) =>
     // maxWidthVw could be smaller than minWidthPx on narrow screens
     clamp(
@@ -22,10 +14,18 @@ export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
       Math.max(minWidthPx, window.innerWidth * (maxWidthVw / 100))
     )
 
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
+
+  const [calculatedPanelWidth, setCalculatedPanelWidthState] =
+    usePersistedState(STORAGE_KEY, minWidthPx, 1000)
+  const setPanelWidth = (newWidth: number) =>
+    setCalculatedPanelWidthState(clampNewWidth(newWidth))
+
   // clamps the current width if necessary when window size changes
-  useResizeObserver({ current: document.body }, () => {
-    setCalculatedPanelWidth(clampNewWidth(calculatedPanelWidth))
-  })
+  useResizeObserver({ current: document.body }, () =>
+    setPanelWidth(calculatedPanelWidth)
+  )
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
@@ -39,16 +39,22 @@ export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (isDragging)
-      setCalculatedPanelWidth(
-        clampNewWidth(dragStart.width + (dragStart.x - e.clientX))
-      )
+    if (isDragging) setPanelWidth(dragStart.width + (dragStart.x - e.clientX))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault()
+      e.stopPropagation()
+      setPanelWidth(calculatedPanelWidth + (e.key === 'ArrowLeft' ? 10 : -10))
+    }
   }
 
   const dragHandleProps = {
     onPointerDown: handlePointerDown,
     onPointerMove: handlePointerMove,
     onPointerUp: handlePointerUp,
+    onKeyDown: handleKeyDown,
   }
 
   return { calculatedPanelWidth, dragHandleProps, isDragging }

@@ -177,11 +177,9 @@ function ChatbotPanelInner() {
         )}
       </MainContentWrapperSC>
       <DragHandleSC
+        tabIndex={0}
         {...dragHandleProps}
         $isDragging={isDragging}
-        aria-label="Resize chatbot panel"
-        role="separator"
-        tabIndex={-1}
       />
     </div>
   )
@@ -215,9 +213,11 @@ const DragHandleSC = styled.div<{ $isDragging: boolean }>(
     background: 'transparent',
     display: 'flex',
     justifyContent: 'center',
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
     // make the part the highlights while dragging a little thinner than full drag area
     '&::before': {
       content: '""',
+      pointerEvents: 'none',
       width: HANDLE_THICKNESS / 4,
       background: $isDragging ? theme.colors['icon-primary'] : 'transparent',
       transition: 'background 0.2s ease-in-out',
