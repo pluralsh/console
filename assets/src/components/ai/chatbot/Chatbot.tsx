@@ -147,7 +147,7 @@ function ChatbotPanelInner() {
         <ChatbotHeader
           currentThread={currentThread}
           isActionsPanelOpen={showActionsPanel}
-          toggleActionsPanel={() => setShowActionsPanel(!showActionsPanel)}
+          setIsActionsPanelOpen={setShowActionsPanel}
         />
         {detailsError && <GqlError error={detailsError} />}
         {!currentThread && detailsLoading ? (

@@ -23,11 +23,11 @@ import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 export function ChatbotHeader({
   currentThread,
   isActionsPanelOpen,
-  toggleActionsPanel,
+  setIsActionsPanelOpen,
 }: {
   currentThread?: Nullable<ChatThreadTinyFragment>
   isActionsPanelOpen: boolean
-  toggleActionsPanel: () => void
+  setIsActionsPanelOpen: (isOpen: boolean) => void
 }) {
   const { colors, spacing } = useTheme()
 
@@ -68,7 +68,7 @@ export function ChatbotHeader({
                   : 'Open actions panel'
               }
               icon={<HamburgerMenuCollapseIcon />}
-              onClick={toggleActionsPanel}
+              onClick={() => setIsActionsPanelOpen(!isActionsPanelOpen)}
             />
           </div>
         )}
@@ -111,7 +111,10 @@ export function ChatbotHeader({
             tooltip="View all threads"
             type="tertiary"
             icon={<HistoryIcon />}
-            onClick={() => goToThreadList()}
+            onClick={() => {
+              goToThreadList()
+              setIsActionsPanelOpen(false)
+            }}
           />
         )}
         <ChatbotThreadMoreMenu />
