@@ -102,12 +102,14 @@ export function ChatInputCloudSelect({
         }
       }}
       dropdownFooterFixed={
-        <ListBoxFooterPlus
-          onClick={() => setCloudConnectionId(undefined)}
-          leftContent={<CloudIcon />}
-        >
-          Deselect cloud connection
-        </ListBoxFooterPlus>
+        cloudConnectionId ? (
+          <ListBoxFooterPlus
+            onClick={() => setCloudConnectionId(undefined)}
+            leftContent={<CloudIcon />}
+          >
+            Deselect cloud connection
+          </ListBoxFooterPlus>
+        ) : undefined
       }
       triggerButton={
         <ChatInputSelectButton>

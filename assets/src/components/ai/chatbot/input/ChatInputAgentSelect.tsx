@@ -83,7 +83,7 @@ export function ChatInputAgentSelect({
         createNewThread({ summary: 'New chat with Plural Copilot' })
       }
     },
-    [agent, createAgentSession, loading]
+    [agent, connectionId, createAgentSession, createNewThread, loading, prompt]
   )
 
   return (
@@ -106,12 +106,14 @@ export function ChatInputAgentSelect({
           </div>
         }
         dropdownFooterFixed={
-          <ListBoxFooterPlus
-            onClick={() => onAgentChange(undefined)}
-            leftContent={<CloudIcon />}
-          >
-            Deselect agent
-          </ListBoxFooterPlus>
+          agent ? (
+            <ListBoxFooterPlus
+              onClick={() => onAgentChange(undefined)}
+              leftContent={<CloudIcon />}
+            >
+              Deselect agent
+            </ListBoxFooterPlus>
+          ) : undefined
         }
         triggerButton={
           <ChatInputSelectButton tooltip="Use our coding agent to run background task">

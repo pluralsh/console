@@ -142,15 +142,17 @@ export function ChatInputClusterSelect({
           }
         }}
         dropdownFooterFixed={
-          <ListBoxFooterPlus
-            onClick={() => {
-              setInputValue('')
-              onClusterChange?.(null)
-            }}
-            leftContent={<ClusterIcon />}
-          >
-            Deselect cluster
-          </ListBoxFooterPlus>
+          selectedCluster ? (
+            <ListBoxFooterPlus
+              onClick={() => {
+                setInputValue('')
+                onClusterChange?.(null)
+              }}
+              leftContent={<ClusterIcon />}
+            >
+              Deselect cluster
+            </ListBoxFooterPlus>
+          ) : undefined
         }
         triggerButton={
           <ChatInputSelectButton>
