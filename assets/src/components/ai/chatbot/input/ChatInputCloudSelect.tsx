@@ -18,6 +18,7 @@ import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
 import { isEmpty } from 'lodash'
 import ProviderIcon from '../../../utils/Provider.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
 
 export function ChatInputCloudSelect({
   cloudConnectionId,
@@ -120,7 +121,9 @@ export function ChatInputCloudSelect({
           ) : (
             <CloudIcon size={12} />
           )}
-          {selectedCloudConnection?.name || 'cloud'}
+          <span css={{ ...TRUNCATE }}>
+            {selectedCloudConnection?.name || 'cloud'}
+          </span>
         </ChatInputSelectButton>
       }
     >

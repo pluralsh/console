@@ -22,6 +22,7 @@ import { useThrottle } from '../../../hooks/useThrottle.tsx'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
 import { ClusterProviderIcon } from '../../../utils/Provider.tsx'
 import isEmpty from 'lodash/isEmpty'
+import { TRUNCATE } from '../../../utils/truncate.ts'
 
 export function ChatInputClusterSelect({
   currentThread,
@@ -163,7 +164,9 @@ export function ChatInputClusterSelect({
             ) : (
               <ClusterIcon size={12} />
             )}
-            {selectedCluster?.name || 'cluster'}
+            <span css={{ ...TRUNCATE }}>
+              {selectedCluster?.name || 'cluster'}
+            </span>
           </ChatInputSelectButton>
         }
       >

@@ -153,6 +153,7 @@ export function ChatInput({
           <Flex
             gap="xxsmall"
             align="flex-end"
+            overflow="hidden"
           >
             {showContextBtn && (
               <ChatInputIconFrame

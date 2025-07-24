@@ -15,6 +15,7 @@ import {
 import { useTheme } from 'styled-components'
 import { lowerCase } from 'lodash'
 import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
 
 function getIcon(type: AgentSessionType | undefined, size = 16) {
   switch (type) {
@@ -84,7 +85,8 @@ export function ChatInputAgentSelect({
         }
         triggerButton={
           <ChatInputSelectButton tooltip="Use our coding agent to run background task">
-            {icon} {lowerCase(agent)} agent
+            {icon}
+            <span css={{ ...TRUNCATE }}>{lowerCase(agent)} agent</span>
           </ChatInputSelectButton>
         }
       >
