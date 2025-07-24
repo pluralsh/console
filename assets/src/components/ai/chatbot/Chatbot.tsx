@@ -28,6 +28,11 @@ import {
   ChatbotPanelThread,
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
+import { useResizablePane } from './useResizeableChatPane.tsx'
+
+const MIN_WIDTH = 400
+const MAX_WIDTH_VW = 40
+const HANDLE_THICKNESS = 20
 
 export function ChatbotLauncher() {
   const { open, setOpen } = useChatbotContext()
@@ -113,8 +118,13 @@ function ChatbotPanelInner() {
     return [...curPageThreads, ...otherThreads]
   }, [threadsQuery.data, pathname])
 
+  const { calculatedPanelWidth, dragHandleProps, isDragging } =
+    useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
   return (
-    <div css={{ position: 'relative', height: '100%' }}>
+    <div
+      css={{ position: 'relative', height: '100%' }}
+      style={{ '--chatbot-panel-width': `${calculatedPanelWidth}px` }}
+    >
       {!isEmpty(tools) && (
         <McpServerShelf
           $zIndex={2}
@@ -154,6 +164,13 @@ function ChatbotPanelInner() {
           </ChatbotTableWrapperSC>
         )}
       </MainContentWrapperSC>
+      <DragHandleSC
+        {...dragHandleProps}
+        $isDragging={isDragging}
+        aria-label="Resize chatbot panel"
+        role="separator"
+        tabIndex={-1}
+      />
     </div>
   )
 }
@@ -169,7 +186,29 @@ const MainContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
-  width: 'max(35vw, 450px)',
+  width: 'var(--chatbot-panel-width)',
   borderLeft: theme.borders.default,
   background: theme.colors['fill-accent'],
 }))
+
+const DragHandleSC = styled.div<{ $isDragging: boolean }>(
+  ({ theme, $isDragging }) => ({
+    position: 'absolute',
+    zIndex: theme.zIndexes.modal,
+    left: -HANDLE_THICKNESS / 2,
+    top: 0,
+    width: HANDLE_THICKNESS,
+    height: '100%',
+    cursor: 'ew-resize',
+    background: 'transparent',
+    display: 'flex',
+    justifyContent: 'center',
+    // make the part the highlights while dragging a little thinner than full drag area
+    '&::before': {
+      content: '""',
+      width: HANDLE_THICKNESS / 4,
+      background: $isDragging ? theme.colors['icon-primary'] : 'transparent',
+      transition: 'background 0.2s ease-in-out',
+    },
+  })
+)

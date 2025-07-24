@@ -3,10 +3,14 @@ import 'styled-components'
 
 import { type styledTheme } from '@pluralsh/design-system'
 
-// Allow css prop on html elements
+// allow css prop on html elements
+// also allow any CSS custom variable to be used in CSSProperties
 declare module 'react' {
   interface Attributes {
     css?: CSSProp | undefined
+  }
+  interface CSSProperties {
+    [key: `--${string}`]: Nullable<string | number>
   }
 }
 
