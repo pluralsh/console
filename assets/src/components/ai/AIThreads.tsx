@@ -4,19 +4,14 @@ import {
   ChatOutlineIcon,
   Flex,
   GearTrainIcon,
-  PushPinFilledIcon,
 } from '@pluralsh/design-system'
-import { StackedText } from 'components/utils/table/StackedText.tsx'
 import {
   FetchPaginatedDataResult,
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
-  AiPinFragment,
-  AiPinsQuery,
   ChatThreadTinyFragment,
   ChatThreadsQuery,
-  useAiPinsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
@@ -35,32 +30,15 @@ export function AIThreads() {
     keyPath: ['chatThreads'],
   })
 
-  const pinsQuery = useFetchPaginatedData({
-    queryHook: useAiPinsQuery,
-    keyPath: ['aiPins'],
-  })
-
-  const filteredPins = useMemo(
-    () =>
-      pinsQuery.data?.aiPins?.edges
-        ?.map((edge) => edge?.node)
-        ?.sort(sortThreadsOrPins)
-        ?.filter((pin): pin is AiPinFragment => Boolean(pin)) ?? [],
-    [pinsQuery.data?.aiPins?.edges]
-  )
-
   const filteredThreads = useMemo(
     () =>
       threadsQuery.data?.chatThreads?.edges
         ?.map((edge) => edge?.node)
         ?.sort(sortThreadsOrPins)
-        ?.filter(
-          (thread) => !filteredPins.some((pin) => pin.thread?.id === thread?.id)
-        )
         ?.filter((thread): thread is ChatThreadTinyFragment =>
           Boolean(thread)
         ) ?? [],
-    [filteredPins, threadsQuery.data?.chatThreads?.edges]
+    [threadsQuery.data?.chatThreads?.edges]
   )
 
   return (
@@ -75,55 +53,11 @@ export function AIThreads() {
         gap="large"
         height="100%"
       >
-        <PinnedSection
-          filteredPins={filteredPins}
-          pinsQuery={pinsQuery}
-        />
         <ThreadsSection
           filteredThreads={filteredThreads}
           threadsQuery={threadsQuery}
         />
       </Flex>
-    </Flex>
-  )
-}
-
-function PinnedSection({
-  filteredPins,
-  pinsQuery,
-}: {
-  filteredPins: AiPinFragment[]
-  pinsQuery: FetchPaginatedDataResult<AiPinsQuery>
-}) {
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-      maxHeight="40%"
-      css={{ overflow: 'hidden' }}
-    >
-      <StackedText
-        first="Pins"
-        firstPartialType="subtitle2"
-      />
-      {isEmpty(filteredPins) && pinsQuery.data ? (
-        <EmptyStateCompact
-          icon={
-            <PushPinFilledIcon
-              color="icon-primary"
-              size={24}
-            />
-          }
-          message="No pinned threads or insights"
-          description="Click on the pin icon of any thread or insight to access it here."
-          cssProps={{ overflow: 'auto' }}
-        />
-      ) : (
-        <AITable
-          query={pinsQuery}
-          rowData={filteredPins}
-        />
-      )}
     </Flex>
   )
 }
@@ -143,10 +77,6 @@ function ThreadsSection({
       overflow="hidden"
       paddingBottom={36} // this is a magic number to make the table fit
     >
-      <StackedText
-        first="Other threads"
-        firstPartialType="subtitle2"
-      />
       {isEmpty(filteredThreads) && threadsQuery.data ? (
         <EmptyStateCompact
           icon={

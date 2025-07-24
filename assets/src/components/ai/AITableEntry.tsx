@@ -39,6 +39,7 @@ import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
 import { ClusterProviderIcon } from '../utils/Provider.tsx'
 import { useChatbot } from './AIContext.tsx'
 import { AITableActions } from './AITableActions.tsx'
+import { useAiPin } from './AIPinButton.tsx'
 
 const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -57,24 +58,21 @@ const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
 
 export function AITableEntry({
   item,
-  onClickPin,
-  pinLoading,
   modal,
   hidePins,
   ...props
 }: {
-  item: ChatThreadTinyFragment | AiPinFragment
-  onClickPin?: () => void
-  pinLoading?: boolean
+  item: ChatThreadTinyFragment
   modal?: boolean | null
   hidePins?: boolean | null
 } & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
   const theme = useTheme()
   const { goToThread } = useChatbot()
 
-  const isPin = item.__typename === 'AiPin'
+  const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
+    thread: item,
+  })
 
-  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
   const insight = item.insight
 
   const timestamp = getThreadOrPinTimestamp(item)
@@ -82,10 +80,10 @@ export function AITableEntry({
   const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
   const onClick = useCallback(() => {
-    if (thread) goToThread(thread.id)
-  }, [thread, goToThread])
+    if (item) goToThread(item.id)
+  }, [item, goToThread])
 
-  if (!thread) return null
+  if (!item) return null
 
   return (
     <AIThreadsTableEntrySC
@@ -98,7 +96,7 @@ export function AITableEntry({
       <AIEntryLabel
         insight={insight}
         isStale={isStale}
-        thread={thread}
+        thread={item}
         opacity={isStale ? 0.6 : 1}
       />
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
@@ -114,13 +112,13 @@ export function AITableEntry({
               clickable
               onClick={(e) => {
                 e.stopPropagation()
-                if (pinLoading) return
-                onClickPin?.()
+                if (pinCreating || pinDeleting) return
+                handlePin()
               }}
               icon={
-                pinLoading ? (
+                pinCreating || pinDeleting ? (
                   <Spinner />
-                ) : isPin ? (
+                ) : isPinned ? (
                   <PushPinFilledIcon color={theme.colors['icon-info']} />
                 ) : (
                   <PushPinOutlineIcon />
@@ -130,7 +128,7 @@ export function AITableEntry({
           )}
         </>
       )}
-      <AITableActions thread={thread} />
+      <AITableActions thread={item} />
     </AIThreadsTableEntrySC>
   )
 }
