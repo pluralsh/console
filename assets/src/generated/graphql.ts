@@ -11388,6 +11388,7 @@ export type CloudConnectionsQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -18579,8 +18580,14 @@ export type ChatThreadDetailsLazyQueryHookResult = ReturnType<typeof useChatThre
 export type ChatThreadDetailsSuspenseQueryHookResult = ReturnType<typeof useChatThreadDetailsSuspenseQuery>;
 export type ChatThreadDetailsQueryResult = Apollo.QueryResult<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>;
 export const CloudConnectionsDocument = gql`
-    query CloudConnections($first: Int = 100, $last: Int, $after: String, $before: String) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+    query CloudConnections($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -18610,6 +18617,7 @@ ${CloudConnectionTinyFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      q: // value for 'q'
  *   },
  * });
  */

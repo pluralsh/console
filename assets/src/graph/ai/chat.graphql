@@ -168,8 +168,15 @@ query CloudConnections(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }

@@ -19,6 +19,7 @@ import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedDat
 import { isEmpty } from 'lodash'
 import ProviderIcon from '../../../utils/Provider.tsx'
 import { TRUNCATE } from '../../../utils/truncate.ts'
+import { useThrottle } from '../../../hooks/useThrottle.tsx'
 
 export function ChatInputCloudSelect({
   cloudConnectionId,
@@ -30,7 +31,7 @@ export function ChatInputCloudSelect({
 }) {
   const theme = useTheme()
   const [inputValue, setInputValue] = useState('')
-  // const throttledInput = useThrottle(inputValue, 100)
+  const throttledInput = useThrottle(inputValue, 100)
 
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
@@ -38,7 +39,7 @@ export function ChatInputCloudSelect({
       keyPath: ['cloudConnections'],
       errorPolicy: 'ignore',
     },
-    {} // TODO: Add search support.
+    { q: throttledInput }
   )
 
   const cloudConnections = useMemo(
