@@ -47,5 +47,5 @@ function Template({ size, ...args }: any) {
 
 export const Default = Template.bind({})
 Default.args = {
-  size: 24,
+  size: 32,
 }
