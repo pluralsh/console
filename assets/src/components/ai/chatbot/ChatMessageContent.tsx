@@ -474,6 +474,7 @@ function ToolMessageContent({
 }
 const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   width: 480,
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,

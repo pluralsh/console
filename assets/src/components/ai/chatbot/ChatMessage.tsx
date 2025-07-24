@@ -14,9 +14,6 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
-import { ComponentPropsWithRef, useState } from 'react'
-import styled, { CSSObject, useTheme } from 'styled-components'
-
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AiRole,
@@ -26,7 +23,10 @@ import {
   PullRequestFragment,
   useDeleteChatMutation,
 } from 'generated/graphql'
+
+import { ComponentPropsWithRef, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import styled, { CSSObject, useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
@@ -298,6 +298,8 @@ const ActionsWrapperSC = styled.div<{
 }))
 
 const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
+  containerType: 'inline-size',
+  containerName: 'chat-message',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,

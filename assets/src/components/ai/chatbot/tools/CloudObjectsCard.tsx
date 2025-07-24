@@ -1,17 +1,20 @@
 import { ReactElement, useMemo } from 'react'
 import styled from 'styled-components'
-import { AwsObjects } from './cloudquery/aws.tsx'
+import { AwsObjects } from './cloudquery/AWS.tsx'
 
 // Cloud query uses prefixes to identify the provider and object type.
 // It should match i.e. `aws_vpc`, `gcp_vpc`, `azure_vpc` etc.
 enum ProviderPrefix {
   AWS = 'aws_',
   GCP = 'gcp_',
-  AZURE = 'azure_',
+  Azure = 'azure_',
 }
 
 export enum ProviderObjectType {
   VPC = 'vpc',
+  VPCSubnet = 'vpc_subnet',
+  Account = 'account',
+  EKS = 'eks_cluster',
 }
 
 interface CloudObjectsCardProps {
@@ -23,17 +26,13 @@ export default function CloudObjectsCard({
   query,
   content,
 }: CloudObjectsCardProps): ReactElement | null {
-  // This is just a heuristic check to determine the provider based
-  // on the query string.
+  // This is just a heuristic check to determine the provider/type based
+  // on the query string. Should be eventually replaced with properly
+  // typed API responses.
   const provider = useMemo(() => {
     for (const prefix of Object.values(ProviderPrefix)) {
-      // Check if query contains a table name with the prefix
-      if (query?.includes(`FROM ${prefix}`)) {
-        return prefix
-      }
-
-      // Fallback check for prefix in the query
-      if (query?.includes(prefix)) {
+      const pattern = new RegExp(`^.*from\\s${prefix}.*$`, 'i')
+      if (pattern.test(query?.toLowerCase() ?? '')) {
         return prefix
       }
     }
@@ -43,19 +42,27 @@ export default function CloudObjectsCard({
 
   const objectType = useMemo(() => {
     for (const type of Object.values(ProviderObjectType)) {
-      if (query?.includes(`FROM ${provider}${type}`)) {
-        return type
-      }
-
-      // TODO: this could potentially be a second loop to first check all FROM
-      // clauses and then check the content
-      if (query?.includes(`${provider}${type}`)) {
+      const pattern = new RegExp(`^.*(from\\s)?${provider}${type}(?!_).*$`, 'i')
+      if (pattern.test(query?.toLowerCase() ?? '')) {
         return type
       }
     }
   }, [provider, query])
 
-  if (!provider || !objectType) {
+  console.log(provider, '===', objectType)
+
+  const isValidContent = useMemo(() => {
+    if (!content) return false
+
+    try {
+      const parsed = JSON.parse(content)
+      return Array.isArray(parsed) && parsed.length > 0
+    } catch (_) {
+      return false
+    }
+  }, [content])
+
+  if (!provider || !objectType || !isValidContent) {
     return null
   }
 
@@ -70,13 +77,16 @@ export default function CloudObjectsCard({
   )
 }
 const CloudObjectsCardSC = styled.div(({ theme }) => ({
+  '@container chat-message (min-width: 480px)': {
+    width: '100cqw',
+  },
+
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   background: theme.colors['fill-zero'],
   border: theme.borders.default,
-  padding: theme.spacing.small,
+  padding: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.large,
 }))
 
