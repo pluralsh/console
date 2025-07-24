@@ -49,8 +49,6 @@ export default function CloudObjectsCard({
     }
   }, [provider, query])
 
-  console.log(provider, '===', objectType)
-
   const isValidContent = useMemo(() => {
     if (!content) return false
 

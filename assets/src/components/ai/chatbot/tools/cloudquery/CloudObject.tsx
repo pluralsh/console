@@ -35,71 +35,67 @@ export default function CloudObject({
   const theme = useTheme()
 
   return (
-    <div>
-      <Accordion
-        type="single"
-        value={openValue}
-        onValueChange={setOpenValue}
-        css={{ border: 'none', background: 'none' }}
-      >
-        <AccordionItem
-          value={ARBITRARY_VALUE_NAME}
-          padding="none"
-          caret="none"
-          css={{
-            gap: theme.spacing.medium,
-          }}
-          trigger={
-            <Flex
-              justify="space-between"
-              align="center"
-              width="100%"
+    <Accordion
+      type="single"
+      value={openValue}
+      onValueChange={setOpenValue}
+      css={{ border: 'none', background: 'none' }}
+    >
+      <AccordionItem
+        value={ARBITRARY_VALUE_NAME}
+        padding="none"
+        caret="none"
+        css={{
+          gap: theme.spacing.medium,
+        }}
+        trigger={
+          <Flex
+            justify="space-between"
+            align="center"
+            width="100%"
+          >
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.xsmall,
+                minWidth: 0,
+              }}
             >
-              <div
+              {icon}
+              <span
                 css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: theme.spacing.xsmall,
-                  maxWidth: '100%',
+                  ...theme.partials.text['body2'],
+                  ...TRUNCATE,
                 }}
               >
-                {icon}
-                <span
-                  css={{
-                    ...theme.partials.text['body2'],
-                    ...TRUNCATE,
-                  }}
-                >
-                  {type} [{id}]
-                </span>
-                <CopyButton
-                  text={json}
-                  tooltip={`Copy ${type} JSON`}
-                  type="tertiary"
-                />
-              </div>
-              <CaretRightIcon
-                color="icon-light"
-                style={{
-                  transition: 'transform 0.2s ease-in-out',
-                  transform:
-                    openValue === ARBITRARY_VALUE_NAME
-                      ? 'rotate(90deg)'
-                      : 'none',
-                }}
+                {type} [{id}]
+              </span>
+              <CopyButton
+                text={json}
+                tooltip={`Copy ${type} JSON`}
+                type="tertiary"
               />
-            </Flex>
-          }
+            </div>
+            <CaretRightIcon
+              color="icon-light"
+              style={{
+                transition: 'transform 0.2s ease-in-out',
+                transform:
+                  openValue === ARBITRARY_VALUE_NAME ? 'rotate(90deg)' : 'none',
+              }}
+            />
+          </Flex>
+        }
+      >
+        <Code
+          language="json"
+          showHeader={false}
+          css={{ height: '100%', background: theme.colors['fill-two'] }}
         >
-          <Code
-            language="json"
-            showHeader={false}
-            css={{ height: '100%', background: theme.colors['fill-two'] }}
-          >
-            {json}
-          </Code>
-        </AccordionItem>
-      </Accordion>
-    </div>
+          {json}
+        </Code>
+      </AccordionItem>
+    </Accordion>
   )
 }

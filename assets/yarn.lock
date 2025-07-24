@@ -4467,9 +4467,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.21.0":
-  version: 5.21.0
-  resolution: "@pluralsh/design-system@npm:5.21.0"
+"@pluralsh/design-system@npm:5.21.1":
+  version: 5.21.1
+  resolution: "@pluralsh/design-system@npm:5.21.1"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -4514,7 +4514,7 @@ __metadata:
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 6922c1d5014541ac5778bb8490adf0f961a70621c0990ca22a2a5bb1fa3045b873db76bdb89a6895993139fb1ab6470fa79edff4c18eff0bda05ac27a1192763
+  checksum: 6ea1a9e87d71caab7115b322cd7e0036b0088645c8009b7e5297dee7b216cc8a3ebd6e8c7b7f9fabef52aa0b6b87faa838975e26cb156aa0f434217f266b3edd
   languageName: node
   linkType: hard
 
@@ -7216,7 +7216,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/content-disposition@npm:^0.5.8":
+"@types/content-disposition@npm:0.5.8":
   version: 0.5.8
   resolution: "@types/content-disposition@npm:0.5.8"
   checksum: eeea868fb510ae7a32aa2d7de680fba79d59001f3e758a334621e10bc0a6496d3a42bb79243a5e53b9c63cb524522853ccc144fe1ab160c4247d37cdb81146c4
@@ -10098,7 +10098,7 @@ __metadata:
     "@nivo/radial-bar": 0.99.0
     "@nivo/tooltip": 0.99.0
     "@nivo/treemap": 0.99.0
-    "@pluralsh/design-system": 5.21.0
+    "@pluralsh/design-system": 5.21.1
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -10111,7 +10111,7 @@ __metadata:
     "@testing-library/jest-dom": 5.16.5
     "@testing-library/react": 16.0.1
     "@testing-library/user-event": 14.4.3
-    "@types/content-disposition": ^0.5.8
+    "@types/content-disposition": 0.5.8
     "@types/humanize-duration": 3.27.4
     "@types/jsdom": 21.1.5
     "@types/lodash": 4.17.13
@@ -10140,7 +10140,7 @@ __metadata:
     classnames: 2.3.2
     cmdk: 1.0.0
     concurrently: 8.1.0
-    content-disposition: ^0.5.4
+    content-disposition: 0.5.4
     country-code-lookup: 0.0.23
     customize-cra: 1.0.0
     cypress: 12.14.0
@@ -10159,7 +10159,7 @@ __metadata:
     filesize: 10.1.6
     fuse.js: 6.6.2
     globals: 15.10.0
-    graphql-ws: ^5.16.0
+    graphql-ws: 5.16.0
     husky: 8.0.3
     immer: 10.0.3
     is-json: 2.0.1
@@ -10198,7 +10198,7 @@ __metadata:
     react-window-reversed: 1.4.1
     regenerator-runtime: 0.13.11
     semver: 7.5.4
-    streamsaver: ^2.0.6
+    streamsaver: 2.0.6
     styled-components: 6.1.15
     stylelint: 15.11.0
     type-fest: 4.8.3
@@ -10236,7 +10236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"content-disposition@npm:^0.5.4":
+"content-disposition@npm:0.5.4":
   version: 0.5.4
   resolution: "content-disposition@npm:0.5.4"
   dependencies:
@@ -13350,7 +13350,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-ws@npm:^5.16.0, graphql-ws@npm:^5.9.0":
+"graphql-ws@npm:5.16.0":
+  version: 5.16.0
+  resolution: "graphql-ws@npm:5.16.0"
+  peerDependencies:
+    graphql: ">=0.11 <=16"
+  checksum: e3e077ec187a92be3fd5dfae49e23af11a82711d3537064384f6861c2b5ceb339f60dc1871d0026b47ff05e4ed3c941404812a8086347e454688e0e6ef0e69f3
+  languageName: node
+  linkType: hard
+
+"graphql-ws@npm:^5.9.0":
   version: 5.16.2
   resolution: "graphql-ws@npm:5.16.2"
   peerDependencies:
@@ -19532,7 +19541,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"streamsaver@npm:^2.0.6":
+"streamsaver@npm:2.0.6":
   version: 2.0.6
   resolution: "streamsaver@npm:2.0.6"
   checksum: 7b4b06d8da3864b74f1887e5e9d142de380abb48864ca1d6ba38ba3b7b9b964213c5976820f5f09b3b7164fe05d824b4d6296e23b142e7d1c42f87f998f63a2a

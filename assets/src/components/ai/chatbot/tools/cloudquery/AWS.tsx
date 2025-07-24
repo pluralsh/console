@@ -1,3 +1,4 @@
+import { AWSIcon, AWSIconName } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { ProviderObjectType } from '../CloudObjectsCard.tsx'
@@ -48,24 +49,28 @@ function AwsObjects({
         return decodedList.map((item: AwsVpc) => ({
           type: 'VPC',
           id: item.vpc_name ?? item.vpc_id,
+          icon: <AWSIcon name={AWSIconName.VPC} />,
           object: item,
         }))
       case ProviderObjectType.VPCSubnet:
         return decodedList.map((item: AwsVpcSubnet) => ({
           type: 'VPC Subnet',
           id: item.subnet_id,
+          icon: <AWSIcon name={AWSIconName.VPC} />,
           object: item,
         }))
       case ProviderObjectType.Account:
         return decodedList.map((item: AwsAccount) => ({
           type: 'Account',
           id: item.title ?? item.account_id,
+          icon: <AWSIcon name={AWSIconName.Account} />,
           object: item,
         }))
       case ProviderObjectType.EKS:
         return decodedList.map((item: AwsEks) => ({
           type: 'EKS',
           id: item.name,
+          icon: <AWSIcon name={AWSIconName.EKS} />,
           object: item,
         }))
       default:
