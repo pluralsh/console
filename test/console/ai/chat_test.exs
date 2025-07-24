@@ -381,6 +381,30 @@ defmodule Console.AI.ChatTest do
         assert c.seq == i
       end
     end
+
+    test "it can clone a thread with an agent session attached" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      session = insert(:agent_session, cluster: insert(:cluster), thread: thread)
+      for i <- 1..3, do: insert(:chat, content: "msg #{i}", seq: i, thread: thread, user: user)
+      {:ok, clone} = Chat.clone_thread(4, thread.id, user)
+
+      refute clone.id == thread.id
+      refute clone.session.id == session.id
+      assert clone.session.cluster_id == session.cluster_id
+
+      chats = Console.Schema.Chat.for_thread(clone.id)
+              |> Console.Schema.Chat.ordered()
+              |> Repo.all()
+
+      assert length(chats) == 3
+      for {c, i} <- Enum.with_index(chats) do
+        assert c.user_id == user.id
+        assert c.thread_id == clone.id
+        assert c.content == "msg #{i + 1}"
+        assert c.seq == i
+      end
+    end
   end
 
   describe "confirm_plan/2" do

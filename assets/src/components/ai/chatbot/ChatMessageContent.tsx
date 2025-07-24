@@ -104,7 +104,12 @@ export function ChatMessageContent({
         />
       )
     case ChatType.PrCall:
-      return <PrCallContent prAutomation={prAutomation} />
+      return (
+        <PrCallContent
+          prAutomation={prAutomation}
+          threadId={threadId}
+        />
+      )
     case ChatType.Text:
     default:
       return (
@@ -233,7 +238,8 @@ function ImplementationPlanMessageContent({
 
 function PrCallContent({
   prAutomation,
-}: Pick<ChatMessageContentProps, 'prAutomation'>) {
+  threadId,
+}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId'>) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
 
@@ -274,6 +280,7 @@ function PrCallContent({
       </Button>
       <CreatePrModal
         prAutomation={prAutomation}
+        threadId={threadId}
         open={open}
         onClose={() => setOpen(false)}
       />

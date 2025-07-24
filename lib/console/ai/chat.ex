@@ -239,6 +239,7 @@ defmodule Console.AI.Chat do
     start_transaction()
     |> add_operation(:thread, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:clone, fn %{thread: thread} ->
+      thread = Repo.preload(thread, [:session])
       %ChatThread{user_id: user.id}
       |> ChatThread.changeset(Map.merge(Console.mapify(thread), %{summary: "Clone of #{thread.summary}"}))
       |> Repo.insert()

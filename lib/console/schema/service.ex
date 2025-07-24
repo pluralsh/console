@@ -178,6 +178,7 @@ defmodule Console.Schema.Service do
       embeds_one :namespace_metadata, Metadata, on_replace: :update
       field :enforce_namespace, :boolean, default: false
       field :create_namespace,  :boolean, default: true
+      field :delete_namespace,  :boolean, default: false
     end
 
     embeds_one :kustomize, Kustomize, on_replace: :update do
@@ -443,7 +444,7 @@ defmodule Console.Schema.Service do
 
   def sync_config_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(create_namespace enforce_namespace)a)
+    |> cast(attrs, ~w(create_namespace enforce_namespace delete_namespace)a)
     |> cast_embed(:namespace_metadata)
     |> cast_embed(:diff_normalizers)
   end

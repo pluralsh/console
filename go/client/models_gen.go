@@ -2443,6 +2443,25 @@ type Event struct {
 	Type          *string `json:"type,omitempty"`
 }
 
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredential struct {
+	ID         string         `json:"id"`
+	Issuer     string         `json:"issuer"`
+	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
+	Scopes     []*string      `json:"scopes,omitempty"`
+	User       *User          `json:"user,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredentialAttributes struct {
+	Issuer     string    `json:"issuer"`
+	ClaimsLike *string   `json:"claimsLike,omitempty"`
+	Scopes     []*string `json:"scopes,omitempty"`
+	UserID     string    `json:"userId"`
+}
+
 type Flow struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -6605,6 +6624,8 @@ type StatusCondition struct {
 type SyncConfig struct {
 	// whether the agent should auto-create the namespace for this service
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
+	// whether the agent should delete the namespace for this service upon deletion
+	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
 	// Whether to require all resources are placed in the same namespace
 	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
@@ -6615,6 +6636,7 @@ type SyncConfig struct {
 type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
+	DeleteNamespace   *bool               `json:"deleteNamespace,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`

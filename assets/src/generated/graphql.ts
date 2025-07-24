@@ -3005,6 +3005,26 @@ export enum EvidenceType {
   Pr = 'PR'
 }
 
+/** A federated credential is a way to authenticate users from an external identity provider */
+export type FederatedCredential = {
+  __typename?: 'FederatedCredential';
+  claimsLike?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issuer: Scalars['String']['output'];
+  scopes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** A federated credential is a way to authenticate users from an external identity provider */
+export type FederatedCredentialAttributes = {
+  claimsLike?: InputMaybe<Scalars['Json']['input']>;
+  issuer: Scalars['String']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  userId: Scalars['ID']['input'];
+};
+
 export type Flow = {
   __typename?: 'Flow';
   alerts?: Maybe<AlertConnection>;
@@ -6690,6 +6710,7 @@ export type RootMutationType = {
   createClusterRegistration?: Maybe<ClusterRegistration>;
   createClusterRestore?: Maybe<ClusterRestore>;
   createCustomStackRun?: Maybe<CustomStackRun>;
+  createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
@@ -6733,6 +6754,7 @@ export type RootMutationType = {
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
+  deleteFederatedCredential?: Maybe<FederatedCredential>;
   deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
@@ -6845,6 +6867,7 @@ export type RootMutationType = {
   updateClusterRestore?: Maybe<ClusterRestore>;
   updateCustomStackRun?: Maybe<CustomStackRun>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
+  updateFederatedCredential?: Maybe<FederatedCredential>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
@@ -7055,6 +7078,11 @@ export type RootMutationTypeCreateCustomStackRunArgs = {
 };
 
 
+export type RootMutationTypeCreateFederatedCredentialArgs = {
+  attributes: FederatedCredentialAttributes;
+};
+
+
 export type RootMutationTypeCreateGitRepositoryArgs = {
   attributes: GitAttributes;
 };
@@ -7262,6 +7290,11 @@ export type RootMutationTypeDeleteComplianceReportGeneratorArgs = {
 
 
 export type RootMutationTypeDeleteCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteFederatedCredentialArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7738,6 +7771,12 @@ export type RootMutationTypeUpdateDeploymentSettingsArgs = {
 };
 
 
+export type RootMutationTypeUpdateFederatedCredentialArgs = {
+  attributes: FederatedCredentialAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateGateArgs = {
   attributes: GateUpdateAttributes;
   id: Scalars['ID']['input'];
@@ -8051,6 +8090,7 @@ export type RootQueryType = {
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
+  federatedCredential?: Maybe<FederatedCredential>;
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   flow?: Maybe<Flow>;
@@ -8555,6 +8595,11 @@ export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeFederatedCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -10651,6 +10696,8 @@ export type SyncConfig = {
   __typename?: 'SyncConfig';
   /** whether the agent should auto-create the namespace for this service */
   createNamespace?: Maybe<Scalars['Boolean']['output']>;
+  /** whether the agent should delete the namespace for this service upon deletion */
+  deleteNamespace?: Maybe<Scalars['Boolean']['output']>;
   /** A list of diff normalizers to apply to the service which controls how drift detection works */
   diffNormalizers?: Maybe<Array<Maybe<DiffNormalizer>>>;
   /** Whether to require all resources are placed in the same namespace */
@@ -10660,6 +10707,7 @@ export type SyncConfig = {
 
 export type SyncConfigAttributes = {
   createNamespace?: InputMaybe<Scalars['Boolean']['input']>;
+  deleteNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   /** A list of diff normalizers to apply to the service which controls how drift detection works */
   diffNormalizers?: InputMaybe<Array<InputMaybe<DiffNormalizerAttributes>>>;
   enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;
@@ -12624,6 +12672,7 @@ export type CreatePullRequestMutationVariables = Exact<{
   branch: Scalars['String']['input'];
   identifier?: InputMaybe<Scalars['String']['input']>;
   context: Scalars['Json']['input'];
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -23955,12 +24004,13 @@ export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDelet
 export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
 export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
 export const CreatePullRequestDocument = gql`
-    mutation CreatePullRequest($id: ID!, $branch: String!, $identifier: String, $context: Json!) {
+    mutation CreatePullRequest($id: ID!, $branch: String!, $identifier: String, $context: Json!, $threadId: ID) {
   createPullRequest(
     id: $id
     branch: $branch
     identifier: $identifier
     context: $context
+    threadId: $threadId
   ) {
     ...PullRequest
   }
@@ -23985,6 +24035,7 @@ export type CreatePullRequestMutationFn = Apollo.MutationFunction<CreatePullRequ
  *      branch: // value for 'branch'
  *      identifier: // value for 'identifier'
  *      context: // value for 'context'
+ *      threadId: // value for 'threadId'
  *   },
  * });
  */

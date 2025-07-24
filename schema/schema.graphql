@@ -409,6 +409,8 @@ type RootQueryType {
 
   cloudConnections(after: String, first: Int, before: String, last: Int, q: String): CloudConnectionConnection
 
+  federatedCredential(id: ID!): FederatedCredential
+
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
   flow(id: ID!): Flow
@@ -942,6 +944,12 @@ type RootMutationType {
   deleteCloudConnection(id: ID!): CloudConnection
 
   dismissOnboarding: DeploymentSettings
+
+  createFederatedCredential(attributes: FederatedCredentialAttributes!): FederatedCredential
+
+  updateFederatedCredential(id: ID!, attributes: FederatedCredentialAttributes!): FederatedCredential
+
+  deleteFederatedCredential(id: ID!): FederatedCredential
 
   createOidcProvider(type: OidcProviderType!, attributes: OidcProviderAttributes!): OidcProvider
 
@@ -1702,6 +1710,14 @@ input AzureCloudConnectionAttributes {
   clientSecret: String!
 }
 
+"A federated credential is a way to authenticate users from an external identity provider"
+input FederatedCredentialAttributes {
+  issuer: String!
+  claimsLike: Json
+  scopes: [String]
+  userId: ID!
+}
+
 "A unit of organization to control permissions for a set of objects within your Console instance"
 type Project {
   id: ID!
@@ -2034,6 +2050,17 @@ type AzureConnectionAttributes {
 
   "the client secret for azure"
   clientSecret: String!
+}
+
+"A federated credential is a way to authenticate users from an external identity provider"
+type FederatedCredential {
+  id: ID!
+  issuer: String!
+  claimsLike: Map
+  scopes: [String]
+  user: User
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ProjectConnection {
@@ -4577,6 +4604,8 @@ input SyncConfigAttributes {
 
   enforceNamespace: Boolean
 
+  deleteNamespace: Boolean
+
   namespaceMetadata: MetadataAttributes
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -5225,6 +5254,9 @@ type ServiceStatusCount {
 type SyncConfig {
   "whether the agent should auto-create the namespace for this service"
   createNamespace: Boolean
+
+  "whether the agent should delete the namespace for this service upon deletion"
+  deleteNamespace: Boolean
 
   "Whether to require all resources are placed in the same namespace"
   enforceNamespace: Boolean

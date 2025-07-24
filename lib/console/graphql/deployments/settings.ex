@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Deployments.Settings do
   use Console.GraphQl.Schema.Base
   alias Console.Deployments.Settings
-  alias Console.GraphQl.Resolvers.{Deployments}
+  alias Console.GraphQl.Resolvers.{Deployments, User}
   alias Console.Schema.{DeploymentSettings, CloudConnection}
 
   ecto_enum :ai_provider, DeploymentSettings.AIProvider
@@ -205,6 +205,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :client_secret,   non_null(:string)
   end
 
+  @desc "A federated credential is a way to authenticate users from an external identity provider"
+  input_object :federated_credential_attributes do
+    field :issuer,       non_null(:string)
+    field :claims_like, :json
+    field :scopes,      list_of(:string)
+    field :user_id,     non_null(:id)
+  end
+
   @desc "A unit of organization to control permissions for a set of objects within your Console instance"
   object :project do
     field :id,          non_null(:id)
@@ -406,6 +414,17 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :client_secret,   non_null(:string), description: "the client secret for azure"
   end
 
+  @desc "A federated credential is a way to authenticate users from an external identity provider"
+  object :federated_credential do
+    field :id,          non_null(:id)
+    field :issuer,      non_null(:string)
+    field :claims_like, :map
+    field :scopes,      list_of(:string)
+    field :user,        :user, resolve: dataloader(User)
+
+    timestamps()
+  end
+
   connection node_type: :project
   connection node_type: :cloud_connection
 
@@ -449,6 +468,13 @@ defmodule Console.GraphQl.Deployments.Settings do
       arg :q, :string
 
       resolve &Deployments.list_cloud_connections/2
+    end
+
+    field :federated_credential, :federated_credential do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.get_federated_credential/2
     end
   end
 
@@ -508,6 +534,28 @@ defmodule Console.GraphQl.Deployments.Settings do
       middleware Authenticated
 
       resolve &Deployments.dismiss_onboarding/2
+    end
+
+    field :create_federated_credential, :federated_credential do
+      middleware Authenticated
+      arg :attributes, non_null(:federated_credential_attributes)
+
+      resolve &Deployments.create_federated_credential/2
+    end
+
+    field :update_federated_credential, :federated_credential do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:federated_credential_attributes)
+
+      resolve &Deployments.update_federated_credential/2
+    end
+
+    field :delete_federated_credential, :federated_credential do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_federated_credential/2
     end
   end
 end

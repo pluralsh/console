@@ -79,6 +79,7 @@ defmodule ConsoleWeb.Router do
     pipe_through [:auth]
 
     scope "/v1", ConsoleWeb do
+      post "/token/exchange", JWTController, :exchange
       get "/digests", GitController, :digest
       get "/compliance/report", ComplianceController, :report
       get "/compliance/report/:name", ComplianceController, :report

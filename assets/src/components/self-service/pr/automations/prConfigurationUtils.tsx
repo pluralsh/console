@@ -83,9 +83,11 @@ export function validateAndFilterConfig(
 export function usePrAutomationForm({
   prAutomation,
   onSuccess,
+  threadId,
 }: {
   prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
+  threadId?: string
 }) {
   const defaults = useMemo(() => getStateDefaults(prAutomation), [prAutomation])
   const [curConfigVals, setCurConfigVals] = useState(defaults.curConfigVals)
@@ -109,6 +111,7 @@ export function usePrAutomationForm({
   const [mutation, { loading, error }] = useCreatePullRequestMutation({
     variables: {
       id: prAutomation?.id ?? '',
+      threadId: threadId,
       branch: reviewFormState.branch,
       identifier: reviewFormState.identifier,
       context: JSON.stringify(

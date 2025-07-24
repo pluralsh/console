@@ -18,6 +18,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
     |> allow(user, :read)
   end
 
+  def get_federated_credential(%{id: id}, _), do: {:ok, Settings.get_federated_credential!(id)}
+
   def list_projects(args, %{context: %{current_user: user}}) do
     Project.for_user(user)
     |> Project.ordered()
@@ -58,6 +60,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
     do: Settings.update(attrs, user)
 
   def dismiss_onboarding(_, %{context: %{current_user: _user}}), do: Settings.onboarded()
+
+  def create_federated_credential(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Settings.create_federated_credential(attrs, user)
+
+  def update_federated_credential(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Settings.update_federated_credential(attrs, id, user)
+
+  def delete_federated_credential(%{id: id}, %{context: %{current_user: user}}),
+    do: Settings.delete_federated_credential(id, user)
 
   defp fetch_project(%{id: id}) when is_binary(id), do: Settings.get_project!(id)
   defp fetch_project(%{name: name}), do: Settings.get_project_by_name!(name)
