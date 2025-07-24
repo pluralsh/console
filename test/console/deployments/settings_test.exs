@@ -225,4 +225,62 @@ defmodule Console.Deployments.SettingsTest do
       {:error, _} = Settings.delete_cloud_connection(conn.id, insert(:user))
     end
   end
+
+  describe "#create_federated_credential/2" do
+    test "admins can create a federated credential" do
+      user = insert(:user)
+      {:ok, updated} = Settings.create_federated_credential(%{
+        issuer: "https://oidc.plural.sh",
+        claims_like: %{"sub" => ".*@example.com"},
+        scopes: ["createPullRequest"],
+        user_id: user.id
+      }, admin_user())
+
+      assert updated.issuer == "https://oidc.plural.sh"
+      assert updated.claims_like == %{"sub" => ".*@example.com"}
+      assert updated.scopes == ["createPullRequest"]
+      assert updated.user_id == user.id
+    end
+
+    test "nonadmins cannot create federated credentials" do
+      {:error, _} = Settings.create_federated_credential(%{
+        issuer: "https://oidc.plural.sh",
+        claims_like: %{"sub" => ".*@example.com"},
+        scopes: ["createPullRequest"]
+      }, insert(:user))
+    end
+  end
+
+  describe "#update_federated_credential/3" do
+    test "admins can update a federated credential" do
+      credential = insert(:federated_credential)
+      {:ok, updated} = Settings.update_federated_credential(%{
+        claims_like: %{"sub" => ".*@plural.sh"},
+        scopes: ["createPullRequest"]
+      }, credential.id, admin_user())
+
+      assert updated.id == credential.id
+      assert updated.claims_like == %{"sub" => ".*@plural.sh"}
+    end
+
+    test "nonadmins cannot create federated credentials" do
+      {:error, _} = Settings.create_federated_credential(%{
+        issuer: "https://oidc.plural.sh",
+        claims_like: %{"sub" => ".*@example.com"},
+        scopes: ["createPullRequest"]
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_federated_credential/2" do
+    test "admins can delete a federated credential" do
+      credential = insert(:federated_credential)
+      {:ok, _} = Settings.delete_federated_credential(credential.id, admin_user())
+    end
+
+    test "nonadmins cannot delete federated credentials" do
+      credential = insert(:federated_credential)
+      {:error, _} = Settings.delete_federated_credential(credential.id, insert(:user))
+    end
+  end
 end

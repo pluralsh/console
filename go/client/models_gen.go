@@ -2443,6 +2443,25 @@ type Event struct {
 	Type          *string `json:"type,omitempty"`
 }
 
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredential struct {
+	ID         string         `json:"id"`
+	Issuer     string         `json:"issuer"`
+	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
+	Scopes     []*string      `json:"scopes,omitempty"`
+	User       *User          `json:"user,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredentialAttributes struct {
+	Issuer     string    `json:"issuer"`
+	ClaimsLike *string   `json:"claimsLike,omitempty"`
+	Scopes     []*string `json:"scopes,omitempty"`
+	UserID     string    `json:"userId"`
+}
+
 type Flow struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`

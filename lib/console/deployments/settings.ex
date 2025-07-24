@@ -6,7 +6,7 @@ defmodule Console.Deployments.Settings do
   alias Console.Commands.Plural
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection}
+  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection, FederatedCredential}
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
@@ -17,6 +17,7 @@ defmodule Console.Deployments.Settings do
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
   @type project_resp :: {:ok, Project.t} | Console.error
   @type cloud_connection_resp :: {:ok, CloudConnection.t} | Console.error
+  @type federated_credential_resp :: {:ok, FederatedCredential.t} | Console.error
 
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
@@ -37,6 +38,9 @@ defmodule Console.Deployments.Settings do
 
   @spec get_cloud_connection_by_name!(binary) :: CloudConnection.t
   def get_cloud_connection_by_name!(name), do: Repo.get_by!(CloudConnection, name: name)
+
+  @spec get_federated_credential!(binary) :: FederatedCredential.t
+  def get_federated_credential!(id), do: Repo.get!(FederatedCredential, id)
 
   @doc """
   same as `fetch/0` but caches in the process dict
@@ -282,6 +286,38 @@ defmodule Console.Deployments.Settings do
   @spec delete_cloud_connection(binary, User.t) :: cloud_connection_resp
   def delete_cloud_connection(id, %User{} = user) do
     get_cloud_connection!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+  Creates a new federated credential, fails if a user isn't an admin
+  """
+  @spec create_federated_credential(map, User.t) :: federated_credential_resp
+  def create_federated_credential(attrs, %User{} = user) do
+    %FederatedCredential{}
+    |> FederatedCredential.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Updates a federated credential, fails if a user isn't an admin
+  """
+  @spec update_federated_credential(map, binary, User.t) :: federated_credential_resp
+  def update_federated_credential(attrs, id, %User{} = user) do
+    get_federated_credential!(id)
+    |> FederatedCredential.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Deletes a federated credential, fails if a user isn't an admin
+  """
+  @spec delete_federated_credential(binary, User.t) :: federated_credential_resp
+  def delete_federated_credential(id, %User{} = user) do
+    get_federated_credential!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
   end

@@ -3005,6 +3005,26 @@ export enum EvidenceType {
   Pr = 'PR'
 }
 
+/** A federated credential is a way to authenticate users from an external identity provider */
+export type FederatedCredential = {
+  __typename?: 'FederatedCredential';
+  claimsLike?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issuer: Scalars['String']['output'];
+  scopes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** A federated credential is a way to authenticate users from an external identity provider */
+export type FederatedCredentialAttributes = {
+  claimsLike?: InputMaybe<Scalars['Json']['input']>;
+  issuer: Scalars['String']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  userId: Scalars['ID']['input'];
+};
+
 export type Flow = {
   __typename?: 'Flow';
   alerts?: Maybe<AlertConnection>;
@@ -6690,6 +6710,7 @@ export type RootMutationType = {
   createClusterRegistration?: Maybe<ClusterRegistration>;
   createClusterRestore?: Maybe<ClusterRestore>;
   createCustomStackRun?: Maybe<CustomStackRun>;
+  createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
@@ -6733,6 +6754,7 @@ export type RootMutationType = {
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
+  deleteFederatedCredential?: Maybe<FederatedCredential>;
   deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
@@ -6845,6 +6867,7 @@ export type RootMutationType = {
   updateClusterRestore?: Maybe<ClusterRestore>;
   updateCustomStackRun?: Maybe<CustomStackRun>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
+  updateFederatedCredential?: Maybe<FederatedCredential>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
@@ -7055,6 +7078,11 @@ export type RootMutationTypeCreateCustomStackRunArgs = {
 };
 
 
+export type RootMutationTypeCreateFederatedCredentialArgs = {
+  attributes: FederatedCredentialAttributes;
+};
+
+
 export type RootMutationTypeCreateGitRepositoryArgs = {
   attributes: GitAttributes;
 };
@@ -7262,6 +7290,11 @@ export type RootMutationTypeDeleteComplianceReportGeneratorArgs = {
 
 
 export type RootMutationTypeDeleteCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteFederatedCredentialArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7738,6 +7771,12 @@ export type RootMutationTypeUpdateDeploymentSettingsArgs = {
 };
 
 
+export type RootMutationTypeUpdateFederatedCredentialArgs = {
+  attributes: FederatedCredentialAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateGateArgs = {
   attributes: GateUpdateAttributes;
   id: Scalars['ID']['input'];
@@ -8051,6 +8090,7 @@ export type RootQueryType = {
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
+  federatedCredential?: Maybe<FederatedCredential>;
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   flow?: Maybe<Flow>;
@@ -8555,6 +8595,11 @@ export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeFederatedCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

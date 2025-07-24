@@ -1022,6 +1022,15 @@ defmodule Console.Factory do
     }
   end
 
+  def federated_credential_factory do
+    %Schema.FederatedCredential{
+      issuer: "https://oidc.plural.sh",
+      claims_like: %{"sub" => ".*@example.com"},
+      scopes: ["createPullRequest"],
+      user: build(:user)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
