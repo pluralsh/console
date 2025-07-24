@@ -25,6 +25,7 @@ import {
   SetStateAction,
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -65,7 +66,6 @@ export function ChatInput({
   const [cloudConnectionId, setCloudConnectionId] = useState<
     string | undefined
   >()
-  const [agent, setAgent] = useState<AgentSessionType | undefined>()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
@@ -106,10 +106,15 @@ export function ChatInput({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
-  const hideClusterSelector =
-    currentThread?.session?.type === AgentSessionType.Kubernetes ||
-    currentThread?.session?.type === AgentSessionType.Terraform ||
-    !currentThread?.session?.id
+  const agent = useMemo(
+    () =>
+      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
+        (type) => type === currentThread.session?.type
+      ),
+    [currentThread.session?.type]
+  )
+
+  const hideClusterSelector = agent || !currentThread?.session?.id
 
   return (
     <SendMessageFormSC
@@ -187,8 +192,8 @@ export function ChatInput({
                 <ChatInputClusterSelect currentThread={currentThread} />
               )}
               <ChatInputAgentSelect
-                agent={agent}
-                setAgent={setAgent}
+                prompt={newMessage}
+                currentThread={currentThread}
                 connectionId={cloudConnectionId}
               />
             </>
@@ -196,9 +201,7 @@ export function ChatInput({
           <Button
             disabled={!newMessage.trim()}
             endIcon={<SendMessageIcon />}
-            onClick={() => {
-              formRef.current?.requestSubmit() // TODO
-            }}
+            onClick={() => formRef.current?.requestSubmit()}
             secondary={!agent}
             small
             startIcon={agent ? <RobotIcon /> : undefined}

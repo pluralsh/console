@@ -1,7 +1,8 @@
 import { useChatbot } from '../../AIContext.tsx'
-import { Dispatch, SetStateAction, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   AgentSessionType,
+  ChatThreadTinyFragment,
   useCreateAgentSessionMutation,
 } from '../../../../generated/graphql.ts'
 import {
@@ -19,7 +20,7 @@ import { lowerCase } from 'lodash'
 import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
 import { TRUNCATE } from '../../../utils/truncate.ts'
 
-function getIcon(type: AgentSessionType | undefined, size = 16) {
+function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   switch (type) {
     case AgentSessionType.Terraform:
       return (
@@ -41,38 +42,57 @@ function getIcon(type: AgentSessionType | undefined, size = 16) {
 }
 
 export function ChatInputAgentSelect({
-  agent,
-  setAgent,
+  prompt,
+  currentThread,
   connectionId,
 }: {
-  agent: AgentSessionType | undefined
-  setAgent: Dispatch<SetStateAction<AgentSessionType | undefined>>
+  prompt: string
+  currentThread: ChatThreadTinyFragment
   connectionId: string | undefined
 }) {
   const theme = useTheme()
-  const { goToThread } = useChatbot()
-  const [
-    _createAgentSession,
-    { loading: _agentSessionLoading, error: agentSessionError },
-  ] = useCreateAgentSessionMutation({
-    variables: { attributes: { connectionId, prompt: '', type: agent } }, // TODO: Use real prompt.
-    onCompleted: (data) => {
-      if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
-    },
-  })
-
+  const { createNewThread, goToThread } = useChatbot()
+  const agent = currentThread?.session?.type
   const icon = useMemo(() => getIcon(agent, 12), [agent])
 
-  // TODO:
-  //  Change the button in the chatbot to indicate that the agent is selected.
-  //  When the button is clicked then the _createAgentSession mutation should be called
-  //  if _agentSessionLoading is false at that time.
+  const [createAgentSession, { loading, error: agentSessionError }] =
+    useCreateAgentSessionMutation({
+      onCompleted: (data) => {
+        if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
+      },
+    })
+
+  const onAgentChange = useCallback(
+    (newAgent: Nullable<AgentSessionType>) => {
+      // If the selected agent is the same as the current one or if there is an
+      // ongoing change, do nothing.
+      if (newAgent === agent || loading) {
+        return
+      }
+
+      // If a new agent is selected, create a new agent session.
+      if (newAgent) {
+        createAgentSession({
+          variables: { attributes: { connectionId, prompt, type: newAgent } },
+        })
+      }
+
+      // If the agent is deselected, go back to the previous thread.
+      if (!newAgent) {
+        // TODO: Instead of creating a new thread, we should go back to the previous one.
+        createNewThread({ summary: 'New chat with Plural Copilot' })
+      }
+    },
+    [agent, createAgentSession, loading]
+  )
 
   return (
     <>
       <Select
         selectedKey={agent ?? ''}
-        onSelectionChange={(key) => setAgent(key as AgentSessionType)}
+        onSelectionChange={(key) =>
+          onAgentChange(key as Nullable<AgentSessionType>)
+        }
         label="agent"
         width={270}
         dropdownHeaderFixed={
@@ -87,7 +107,7 @@ export function ChatInputAgentSelect({
         }
         dropdownFooterFixed={
           <ListBoxFooterPlus
-            onClick={() => setAgent(undefined)}
+            onClick={() => onAgentChange(undefined)}
             leftContent={<CloudIcon />}
           >
             Deselect agent
@@ -96,7 +116,7 @@ export function ChatInputAgentSelect({
         triggerButton={
           <ChatInputSelectButton tooltip="Use our coding agent to run background task">
             {icon}
-            <span css={{ ...TRUNCATE }}>{lowerCase(agent)} agent</span>
+            <span css={{ ...TRUNCATE }}>{agent && lowerCase(agent)} agent</span>
           </ChatInputSelectButton>
         }
       >
