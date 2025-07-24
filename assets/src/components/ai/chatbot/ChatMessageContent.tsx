@@ -15,13 +15,11 @@ import {
   PrQueueIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
-
-import isJson from 'is-json'
-
-import styled, { useTheme } from 'styled-components'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
+import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AiRole,
@@ -32,11 +30,14 @@ import {
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
-import { ChatMessageActions } from './ChatMessage'
+
+import isJson from 'is-json'
+import { ReactElement, useMemo, useState } from 'react'
+
+import styled, { useTheme } from 'styled-components'
 import { iconUrl } from 'utils/icon'
-import { StackedText } from 'components/utils/table/StackedText'
-import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { ChatMessageActions } from './ChatMessage'
+import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -464,6 +465,10 @@ function ToolMessageContent({
           </Flex>
         )}
       </ToolMessageWrapperSC>
+      <ToolMessageDetails
+        content={content}
+        attributes={attributes}
+      />
     </Flex>
   )
 }
@@ -485,3 +490,34 @@ const ToolMessageContentSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
+
+enum ToolCall {
+  CloudQuery = '__plrl__cloud_query',
+}
+
+function ToolMessageDetails({ content, attributes }): ReactElement | null {
+  const toolCallName = useMemo(() => {
+    switch (attributes?.tool?.name) {
+      case ToolCall.CloudQuery:
+        return ToolCall.CloudQuery
+      default:
+        return undefined
+    }
+  }, [attributes?.tool?.name])
+
+  if (!toolCallName || !content) {
+    return null
+  }
+
+  switch (toolCallName) {
+    case ToolCall.CloudQuery:
+      return (
+        <CloudObjectsCard
+          content={content}
+          query={attributes?.tool?.arguments?.query}
+        />
+      )
+    default:
+      return null
+  }
+}
