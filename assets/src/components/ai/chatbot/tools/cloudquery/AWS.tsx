@@ -22,13 +22,12 @@ interface AwsVpcSubnet {
   subnet_id: string
 }
 
-function AwsObjects({
-  type,
-  content,
-}: {
+interface AwsObjectsProps {
   type: ProviderObjectType
-  content: string
-}): ReactElement | null {
+  objects: Array<any>
+}
+
+function AwsObjects({ type, objects }: AwsObjectsProps): ReactElement | null {
   const theme = useTheme()
 
   const objectList: Array<{
@@ -37,37 +36,30 @@ function AwsObjects({
     icon?: ReactElement
     object: any
   }> = useMemo(() => {
-    let decodedList: Array<any> = []
-    try {
-      decodedList = JSON.parse(content)
-    } catch (_) {
-      return []
-    }
-
     switch (type) {
       case ProviderObjectType.VPC:
-        return decodedList.map((item: AwsVpc) => ({
+        return objects.map((item: AwsVpc) => ({
           type: 'VPC',
           id: item.vpc_name ?? item.vpc_id,
           icon: <AWSIcon name={AWSIconName.VPC} />,
           object: item,
         }))
       case ProviderObjectType.VPCSubnet:
-        return decodedList.map((item: AwsVpcSubnet) => ({
+        return objects.map((item: AwsVpcSubnet) => ({
           type: 'VPC Subnet',
           id: item.subnet_id,
           icon: <AWSIcon name={AWSIconName.VPC} />,
           object: item,
         }))
       case ProviderObjectType.Account:
-        return decodedList.map((item: AwsAccount) => ({
+        return objects.map((item: AwsAccount) => ({
           type: 'Account',
           id: item.title ?? item.account_id,
           icon: <AWSIcon name={AWSIconName.Account} />,
           object: item,
         }))
       case ProviderObjectType.EKS:
-        return decodedList.map((item: AwsEks) => ({
+        return objects.map((item: AwsEks) => ({
           type: 'EKS',
           id: item.name,
           icon: <AWSIcon name={AWSIconName.EKS} />,
@@ -76,7 +68,7 @@ function AwsObjects({
       default:
         return []
     }
-  }, [content, type])
+  }, [objects, type])
 
   return objectList?.length === 0 ? null : (
     <div

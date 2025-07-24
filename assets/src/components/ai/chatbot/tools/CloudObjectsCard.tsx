@@ -49,18 +49,21 @@ export default function CloudObjectsCard({
     }
   }, [provider, query])
 
-  const isValidContent = useMemo(() => {
-    if (!content) return false
+  const { objects, isValid } = useMemo(() => {
+    if (!content) return { objects: [], isValid: false }
 
     try {
       const parsed = JSON.parse(content)
-      return Array.isArray(parsed) && parsed.length > 0
+      return {
+        objects: parsed,
+        isValid: Array.isArray(parsed) && parsed.length > 0,
+      }
     } catch (_) {
-      return false
+      return { objects: [], isValid: false }
     }
   }, [content])
 
-  if (!provider || !objectType || !isValidContent) {
+  if (!provider || !objectType || !isValid) {
     return null
   }
 
@@ -69,7 +72,7 @@ export default function CloudObjectsCard({
       <CloudObjectCard
         provider={provider}
         type={objectType}
-        content={content}
+        objects={objects}
       />
     </CloudObjectsCardSC>
   )
@@ -88,13 +91,23 @@ const CloudObjectsCardSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.large,
 }))
 
-function CloudObjectCard({ provider, type, content }): ReactElement | null {
+interface CloudObjectCardProps {
+  provider: ProviderPrefix
+  type: ProviderObjectType
+  objects: Array<any>
+}
+
+function CloudObjectCard({
+  provider,
+  type,
+  objects,
+}: CloudObjectCardProps): ReactElement | null {
   switch (provider) {
     case ProviderPrefix.AWS:
       return (
         <AwsObjects
           type={type}
-          content={content}
+          objects={objects}
         />
       )
     default:
