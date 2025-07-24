@@ -45,7 +45,7 @@ export function ChatInputAgentSelect({
 }: {
   agent: AgentSessionType | undefined
   setAgent: Dispatch<SetStateAction<AgentSessionType | undefined>>
-  connectionId: string
+  connectionId: string | undefined
 }) {
   const theme = useTheme()
   const { goToThread } = useChatbot()

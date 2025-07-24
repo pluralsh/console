@@ -186,14 +186,11 @@ export function ChatInput({
               {!hideClusterSelector && (
                 <ChatInputClusterSelect currentThread={currentThread} />
               )}
-              {cloudConnectionId && (
-                <ChatInputAgentSelect
-                  agent={agent}
-                  setAgent={setAgent}
-                  connectionId={cloudConnectionId}
-                  // {/*  TODO: Disable when no  cloud connection? */}
-                />
-              )}
+              <ChatInputAgentSelect
+                agent={agent}
+                setAgent={setAgent}
+                connectionId={cloudConnectionId}
+              />
             </>
           </Flex>
           <Button
