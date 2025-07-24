@@ -231,9 +231,11 @@ const EditableContentWrapperSC = styled.div<{ $agent: boolean }>(
     borderRadius: theme.borderRadiuses.large,
     backgroundColor: theme.colors['fill-zero'],
     border: theme.borders.input,
+    outline: '1px solid transparent',
 
     '&:has(div:focus)': {
       backgroundColor: theme.colors['fill-zero-selected'],
+      transition: 'box-shadow 0.16s ease-in-out, outline 0.16s ease-in-out',
       boxShadow: agent
         ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
         : undefined,
