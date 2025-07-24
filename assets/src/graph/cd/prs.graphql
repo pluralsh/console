@@ -24,12 +24,14 @@ mutation CreatePullRequest(
   $branch: String!
   $identifier: String
   $context: Json!
+  $threadId: ID
 ) {
   createPullRequest(
     id: $id
     branch: $branch
     identifier: $identifier
     context: $context
+    threadId: $threadId
   ) {
     ...PullRequest
   }

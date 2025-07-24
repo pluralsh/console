@@ -12672,6 +12672,7 @@ export type CreatePullRequestMutationVariables = Exact<{
   branch: Scalars['String']['input'];
   identifier?: InputMaybe<Scalars['String']['input']>;
   context: Scalars['Json']['input'];
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -24003,12 +24004,13 @@ export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDelet
 export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
 export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
 export const CreatePullRequestDocument = gql`
-    mutation CreatePullRequest($id: ID!, $branch: String!, $identifier: String, $context: Json!) {
+    mutation CreatePullRequest($id: ID!, $branch: String!, $identifier: String, $context: Json!, $threadId: ID) {
   createPullRequest(
     id: $id
     branch: $branch
     identifier: $identifier
     context: $context
+    threadId: $threadId
   ) {
     ...PullRequest
   }
@@ -24033,6 +24035,7 @@ export type CreatePullRequestMutationFn = Apollo.MutationFunction<CreatePullRequ
  *      branch: // value for 'branch'
  *      identifier: // value for 'identifier'
  *      context: // value for 'context'
+ *      threadId: // value for 'threadId'
  *   },
  * });
  */

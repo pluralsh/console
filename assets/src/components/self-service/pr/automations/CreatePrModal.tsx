@@ -38,10 +38,12 @@ const steps = [
 function CreatePrModalBase({
   prAutomation,
   open,
+  threadId,
   onClose,
 }: {
   prAutomation: PrAutomationFragment
   open: boolean
+  threadId?: string
   onClose: Nullable<() => void>
 }) {
   const { configuration, confirmation } = prAutomation
@@ -65,6 +67,7 @@ function CreatePrModalBase({
     createPrError,
   } = usePrAutomationForm({
     prAutomation,
+    threadId,
     onSuccess: () => setCurrentStep('success'),
   })
 
