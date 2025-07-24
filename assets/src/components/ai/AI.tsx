@@ -1,11 +1,9 @@
 import {
-  Button,
-  Flex,
   GearTrainIcon,
+  IconFrame,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
-import { StackedText } from 'components/utils/table/StackedText'
 import { useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
@@ -38,27 +36,19 @@ export function AI() {
 
   return (
     <WrapperSC>
-      <HeaderSC>
-        <StackedText
-          first="Plural AI"
-          firstPartialType="subtitle1"
-          second="View and manage your workspace's AI functionality."
-          secondPartialType="body2"
-        />
-        {aiEnabled && (
-          <Flex gap="medium">
-            <SubTabs directory={directory} />
-            <Button
-              secondary
-              as={Link}
-              startIcon={<GearTrainIcon />}
-              to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
-            >
-              AI Settings
-            </Button>
-          </Flex>
-        )}
-      </HeaderSC>
+      {aiEnabled && (
+        <HeaderSC>
+          <SubTabs directory={directory} />
+          <IconFrame
+            clickable
+            icon={<GearTrainIcon />}
+            as={Link}
+            to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
+            tooltip="AI Settings"
+            type="floating"
+          />
+        </HeaderSC>
+      )}
       {aiEnabled ? <Outlet /> : <AIDisabledState />}
     </WrapperSC>
   )
@@ -76,8 +66,9 @@ const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'center',
 }))
 
-const HeaderSC = styled.div({
+const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-})
+  gap: theme.spacing.medium,
+}))

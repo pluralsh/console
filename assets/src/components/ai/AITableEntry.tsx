@@ -104,7 +104,10 @@ export function AITableEntry({
       </CaptionP>
       {!modal && (
         <>
-          <Chip severity={isStale ? 'neutral' : 'success'}>
+          <Chip
+            size="small"
+            severity={isStale ? 'neutral' : 'success'}
+          >
             {isStale ? 'Stale' : 'Active'}
           </Chip>
           {!hidePins && (
