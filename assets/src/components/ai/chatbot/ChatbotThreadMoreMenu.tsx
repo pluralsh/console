@@ -20,6 +20,8 @@ import { useCallback, useRef, useState } from 'react'
 import { useChatbot } from '../AIContext'
 import { useAiPin } from '../AIPinButton'
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
+import { useNavigate } from 'react-router-dom'
+import { AI_THREADS_ABS_PATH } from '../../../routes/aiRoutesConsts.tsx'
 
 enum MenuItemKey {
   KnowledgeGraph = 'knowledgeGraph',
@@ -27,7 +29,7 @@ enum MenuItemKey {
   Rename = 'rename',
   Fork = 'fork',
   Delete = 'delete',
-  AllThreads = 'all',
+  History = 'history',
 }
 
 export function ChatbotThreadMoreMenu() {
@@ -35,10 +37,10 @@ export function ChatbotThreadMoreMenu() {
     forkThread,
     mutationLoading: forkLoading,
     currentThread,
-    goToThreadList,
   } = useChatbot()
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   // need a ref instead of state because state doesn't update before onOpenChange fires
   const blockClose = useRef(false)
@@ -69,9 +71,9 @@ export function ChatbotThreadMoreMenu() {
           onCompleted: () => closeMenu(),
         })
         break
-      case MenuItemKey.AllThreads:
-        goToThreadList()
+      case MenuItemKey.History:
         closeMenu()
+        navigate(AI_THREADS_ABS_PATH)
         break
       default:
         blockClose.current = false
@@ -120,12 +122,6 @@ export function ChatbotThreadMoreMenu() {
         width={256}
       >
         <ListBoxItem
-          key={MenuItemKey.AllThreads}
-          leftContent={<DiffColumnIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
-          label="View all threads"
-        />
-        <ListBoxItem
           key={MenuItemKey.KnowledgeGraph}
           leftContent={
             knowledgeGraphLoading ? (
@@ -171,6 +167,12 @@ export function ChatbotThreadMoreMenu() {
           leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
           rightContent={<ArrowRightIcon color="icon-default" />}
           label="Fork thread"
+        />
+        <ListBoxItem
+          key={MenuItemKey.History}
+          leftContent={<DiffColumnIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
+          label="View history"
         />
         <ListBoxItem
           destructive

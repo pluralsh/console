@@ -185,10 +185,6 @@ export function useChatbot() {
       setCurrentThreadId(threadId)
       setOpen(true)
     },
-    goToThreadList: () => {
-      setCurrentThreadId(null)
-      setOpen(true)
-    },
     closeChatbot: () => setOpen(false),
     currentThread,
     detailsLoading: threadLoading,
