@@ -20,6 +20,18 @@ defmodule Console.Schema.FederatedCredential do
     from(f in query, where: f.user_id == ^user_id)
   end
 
+  def allow?(%__MODULE__{claims_like: %{} = conditions}, %{} = claims) do
+    Enum.all?(conditions, fn {k, v} ->
+      with {:ok, val} <- Map.fetch(claims, k),
+           {:ok, re} <- Regex.compile(v) do
+        Regex.match?(re, val)
+      else
+        _ -> false
+      end
+    end)
+  end
+  def allow?(_, _), do: false
+
   @valid ~w(issuer claims_like scopes user_id)a
 
   def changeset(model, attrs \\ %{}) do

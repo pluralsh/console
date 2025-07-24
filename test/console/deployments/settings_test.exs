@@ -283,4 +283,44 @@ defmodule Console.Deployments.SettingsTest do
       {:error, _} = Settings.delete_federated_credential(credential.id, insert(:user))
     end
   end
+
+  describe "#exchange_token/2" do
+    test "it will exchange a token for a user" do
+      user = insert(:user)
+      insert(:federated_credential,
+        issuer: "https://oidc.plural.sh",
+        user: user,
+        claims_like: %{"sub" => user.email}
+      )
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} = Console.TestToken.generate_and_sign(%{
+        "iss" => "https://oidc.plural.sh",
+        "sub" => user.email
+      }, signer)
+      expect(Oidcc.Token, :validate_jwt, fn _, _, _ -> {:ok, %{"sub" => user.email}} end)
+
+      {:ok, token} = Settings.exchange_token(token, user.email)
+
+      assert is_binary(token)
+    end
+
+    test "it will fail if no federated credential is found" do
+      user = insert(:user)
+      insert(:federated_credential,
+        issuer: "https://oidc.plural.sh",
+        user: user,
+        claims_like: %{"sub" => "ignore-me"}
+      )
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} = Console.TestToken.generate_and_sign(%{
+        "iss" => "https://oidc.plural.sh",
+        "sub" => user.email
+      }, signer)
+      expect(Oidcc.Token, :validate_jwt, fn _, _, _ -> {:ok, %{"sub" => user.email}} end)
+
+      {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
+    end
+  end
 end

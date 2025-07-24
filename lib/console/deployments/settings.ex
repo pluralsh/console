@@ -322,6 +322,52 @@ defmodule Console.Deployments.Settings do
     |> when_ok(:delete)
   end
 
+  @doc """
+  Validates a given jwt and verifies if a federated credential exists for the specified user to exchange for a console-validated jwt
+  """
+  @spec exchange_token(binary, binary) :: {:ok, binary} | Console.error()
+  def exchange_token(token, email) do
+    user = Users.get_user_by_email!(email)
+
+    with {:token, {:ok, %{"iss" => issuer}}} <- {:token, Joken.peek_claims(token)},
+         {:config, {:ok, {conf, jwks}}} <- {:config, issuer_configuration(issuer)},
+         opts = %{client_jwks: JOSE.JWK.generate_key(16)},
+         ctx = Oidcc.ClientContext.from_manual(conf, jwks, "dummy_id", "dummy_secret", opts),
+         opts = %{signing_algs: ctx.provider_configuration.id_token_signing_alg_values_supported},
+         {:validate, {:ok, claims}} <- {:validate, Oidcc.Token.validate_jwt(token, ctx, opts)} do
+      FederatedCredential.for_issuer(issuer)
+      |> FederatedCredential.for_user(user.id)
+      |> Console.Repo.all()
+      |> Enum.find(&FederatedCredential.allow?(&1, claims))
+      |> case do
+        %FederatedCredential{scopes: scopes} -> sign_token(user, scopes)
+        _ ->
+          {:error, "no federated credential for #{email} match jwt claims"}
+      end
+    else
+      {:token, _} -> {:error, "invalid jwt format"}
+      {:config, _} -> {:error, "invalid issuer url from jwt"}
+      {:validate, _} -> {:error, "could not validate jwt"}
+    end
+  end
+
+  defp sign_token(user, scopes) do
+    case Console.Guardian.encode_and_sign(user, %{"scopes" => scopes}, ttl: {1, :hour}) do
+      {:ok, token, _} -> {:ok, token}
+      {:error, _} -> {:error, "failed to generate jwt for #{user.email}"}
+    end
+  end
+
+  @doc """
+  Fetches the issuer configuration from the issuer url
+  """
+  @decorate cacheable(cache: @cache_adapter, key: {:issuer_configuration, issuer}, opts: [ttl: :timer.minutes(60)])
+  def issuer_configuration(issuer) do
+    with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, %{quirks: %{allow_issuer_mismatch: true}}),
+         {:ok, {jwks, _}} <- Oidcc.ProviderConfiguration.load_jwks(conf.jwks_uri),
+      do: {:ok, {conf, jwks}}
+  end
+
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs) do
     fetch_consistent()
