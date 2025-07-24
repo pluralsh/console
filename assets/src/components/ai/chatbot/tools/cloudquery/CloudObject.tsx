@@ -88,13 +88,27 @@ export default function CloudObject({
           </Flex>
         }
       >
-        <Code
-          language="json"
-          showHeader={false}
-          css={{ height: '100%', background: theme.colors['fill-two'] }}
+        <div
+          css={{
+            maxHeight: 324,
+            overflow: 'auto',
+            background: theme.colors['fill-two'],
+            borderRadius: theme.borderRadiuses.large,
+            border: theme.borders['fill-two'],
+          }}
         >
-          {json}
-        </Code>
+          <Code
+            language="json"
+            showHeader={false}
+            css={{
+              height: '100%',
+              background: theme.colors['fill-two'],
+              border: 'none',
+            }}
+          >
+            {json}
+          </Code>
+        </div>
       </AccordionItem>
     </Accordion>
   )
