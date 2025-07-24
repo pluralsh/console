@@ -16,19 +16,20 @@ import styled, { useTheme } from 'styled-components'
 import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { useChatbot } from '../AIContext'
-import {
-  getInsightPathInfo,
-  TableEntryResourceLink,
-  truncate,
-} from '../AITableEntry'
+import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
+import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 
 export function ChatbotHeader({
   currentThread,
+  isActionsPanelOpen,
+  toggleActionsPanel,
 }: {
   currentThread?: Nullable<ChatThreadTinyFragment>
+  isActionsPanelOpen: boolean
+  toggleActionsPanel: () => void
 }) {
-  const { colors } = useTheme()
+  const { colors, spacing } = useTheme()
 
   const {
     closeChatbot,
@@ -51,20 +52,39 @@ export function ChatbotHeader({
   return (
     <>
       <WrapperSC>
-        <IconFrame
-          size="small"
-          icon={<HamburgerMenuCollapseIcon />}
-          // TODO: Clickable?
-        />
-        <Body2BoldP css={{ color: colors['text-light'] }}>Copilot</Body2BoldP>
+        {currentThread && (
+          <div
+            css={{
+              transition: 'transform 0.16s ease-in-out',
+              transform: isActionsPanelOpen ? 'scaleX(-1)' : 'scaleX(1)',
+            }}
+          >
+            <IconFrame
+              clickable
+              size="small"
+              tooltip={
+                isActionsPanelOpen
+                  ? 'Close actions panel'
+                  : 'Open actions panel'
+              }
+              icon={<HamburgerMenuCollapseIcon />}
+              onClick={toggleActionsPanel}
+            />
+          </div>
+        )}
+        <Body2BoldP
+          css={{ color: colors['text-light'], marginRight: spacing.xxsmall }}
+        >
+          Copilot
+        </Body2BoldP>
         <StackedText
           truncate
-          first={truncate(currentThread?.summary)}
+          first={currentThread?.summary}
           second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
           firstPartialType="body2"
-          firstColor="text"
+          firstColor={insightPathInfo || flowPath ? 'text' : 'text-xlight'}
           secondPartialType="caption"
-          css={{ flex: 1 }}
+          css={{ flex: 1, marginRight: spacing.small }}
         />
         {!cloudConnectionsLoading && (
           <IconFrame
@@ -122,5 +142,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   padding: theme.spacing.medium,
   borderBottom: theme.borders.default,
-  maxHeight: 57,
+  maxHeight: CHATBOT_HEADER_HEIGHT,
 }))

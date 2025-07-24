@@ -8,7 +8,6 @@ import {
   GearTrainIcon,
   IconFrame,
   ToolIcon,
-  usePrevious,
 } from '@pluralsh/design-system'
 import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -16,12 +15,13 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { McpServerToolFragment, McpToolFragment } from 'generated/graphql'
 import { groupBy } from 'lodash'
-import { ComponentPropsWithRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ToolDetailsModal } from './ToolDetailsModal'
+import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 
 type ServerWithTools = {
   name: Nullable<string>
@@ -32,21 +32,20 @@ type ServerWithTools = {
 
 export function McpServerShelf({
   isOpen,
-  setIsOpen,
+  onClose,
   tools,
-  ...props
+  zIndex,
 }: {
   isOpen: boolean
-  setIsOpen: (isOpen: boolean) => void
+  onClose: () => void
   tools: McpServerToolFragment[]
-} & Omit<ComponentPropsWithRef<typeof SimpleFlyover>, '$shouldAnimate'>) {
+  zIndex?: number
+}) {
   const theme = useTheme()
   const [selectedToolDetails, setSelectedToolDetails] = useState<{
     serverName: string
     tool: McpToolFragment
   } | null>(null)
-
-  const prevOpen = usePrevious(isOpen)
 
   const serversWithTools: ServerWithTools[] = Object.entries(
     groupBy(tools, ({ server }) => server?.name)
@@ -59,9 +58,8 @@ export function McpServerShelf({
 
   return (
     <SimpleFlyover
-      $shouldAnimate={!!isOpen !== !!prevOpen}
-      data-state={isOpen ? 'open' : 'closed'}
-      {...props}
+      isOpen={isOpen}
+      zIndex={zIndex}
     >
       <HeaderSC>
         <Body2BoldP>MCP servers</Body2BoldP>
@@ -71,7 +69,7 @@ export function McpServerShelf({
             as={Link}
             type="tertiary"
             to={AI_MCP_SERVERS_ABS_PATH}
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
             tooltip="Go to MCP server settings"
             icon={<GearTrainIcon />}
           />
@@ -79,7 +77,7 @@ export function McpServerShelf({
             clickable
             type="tertiary"
             icon={<CloseIcon />}
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={onClose}
             tooltip="Close"
           />
         </Flex>
@@ -166,6 +164,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   borderBottom: theme.borders.default,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  height: CHATBOT_HEADER_HEIGHT,
 }))
 
 const ContentAccordionSC = styled(Accordion)(({ theme }) => ({

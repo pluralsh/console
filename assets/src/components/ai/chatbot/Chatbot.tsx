@@ -29,10 +29,12 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 
 const MIN_WIDTH = 400
 const MAX_WIDTH_VW = 40
 const HANDLE_THICKNESS = 20
+export const CHATBOT_HEADER_HEIGHT = 57
 
 export function ChatbotLauncher() {
   const { open, setOpen } = useChatbotContext()
@@ -78,6 +80,7 @@ function ChatbotPanelInner() {
   const { pathname } = useLocation()
   const { currentThread, detailsLoading, detailsError } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
+  const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const threadsQuery = useFetchPaginatedData({
@@ -127,16 +130,25 @@ function ChatbotPanelInner() {
     >
       {!isEmpty(tools) && (
         <McpServerShelf
-          $zIndex={2}
+          zIndex={2}
           isOpen={showMcpServers}
-          setIsOpen={setShowMcpServers}
+          onClose={() => setShowMcpServers(false)}
           tools={tools}
         />
       )}
-      {/* TODO: add similar simple flyover here for the chat action panel (what the header hamburger menu opens) */}
-      {/* should be z index 1 so mcp renders over it */}
+      {currentThread && (
+        <ChatbotActionsPanel
+          zIndex={1}
+          isOpen={showActionsPanel}
+          currentThread={currentThread}
+        />
+      )}
       <MainContentWrapperSC>
-        <ChatbotHeader currentThread={currentThread} />
+        <ChatbotHeader
+          currentThread={currentThread}
+          isActionsPanelOpen={showActionsPanel}
+          toggleActionsPanel={() => setShowActionsPanel(!showActionsPanel)}
+        />
         {detailsError && <GqlError error={detailsError} />}
         {!currentThread && detailsLoading ? (
           <ChatbotMessagesWrapperSC>
