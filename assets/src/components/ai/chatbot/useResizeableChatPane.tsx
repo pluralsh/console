@@ -1,9 +1,16 @@
 import { useResizeObserver } from '@pluralsh/design-system'
+import usePersistedState from 'components/hooks/usePersistedState'
 import { clamp } from 'lodash'
 import { useState } from 'react'
 
+const STORAGE_KEY = 'chatbot-panel-width'
+
 export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
-  const [calculatedPanelWidth, setCalculatedPanelWidth] = useState(minWidthPx)
+  const [calculatedPanelWidth, setCalculatedPanelWidth] = usePersistedState(
+    STORAGE_KEY,
+    minWidthPx,
+    1000
+  )
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
 
