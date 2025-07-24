@@ -5,7 +5,9 @@ import {
   useCreateAgentSessionMutation,
 } from '../../../../generated/graphql.ts'
 import {
+  CloudIcon,
   KubernetesIcon,
+  ListBoxFooterPlus,
   ListBoxItem,
   RobotIcon,
   Select,
@@ -69,7 +71,7 @@ export function ChatInputAgentSelect({
   return (
     <>
       <Select
-        selectedKey={agent}
+        selectedKey={agent ?? ''}
         onSelectionChange={(key) => setAgent(key as AgentSessionType)}
         label="agent"
         width={270}
@@ -80,8 +82,16 @@ export function ChatInputAgentSelect({
               padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
             }}
           >
-            Select agent type
+            Select agent
           </div>
+        }
+        dropdownFooterFixed={
+          <ListBoxFooterPlus
+            onClick={() => setAgent(undefined)}
+            leftContent={<CloudIcon />}
+          >
+            Deselect agent
+          </ListBoxFooterPlus>
         }
         triggerButton={
           <ChatInputSelectButton tooltip="Use our coding agent to run background task">

@@ -231,9 +231,11 @@ const EditableContentWrapperSC = styled.div<{ $agent: boolean }>(
 
     '&:has(div:focus)': {
       backgroundColor: theme.colors['fill-zero-selected'],
-      boxShadow: theme.boxShadows.modalPurple,
+      boxShadow: agent
+        ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
+        : undefined,
       outline: agent
-        ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}` // TODO: Shadow effect.
+        ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
         : theme.borders['outline-focused'],
     },
   })

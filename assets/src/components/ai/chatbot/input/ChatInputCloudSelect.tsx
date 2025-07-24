@@ -73,7 +73,7 @@ export function ChatInputCloudSelect({
             padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
           }}
         >
-          Query cloud connection
+          Cloud connection
           <Input
             small
             inputProps={{ lineHeight: '12px' }}
@@ -103,9 +103,7 @@ export function ChatInputCloudSelect({
       }}
       dropdownFooterFixed={
         <ListBoxFooterPlus
-          onClick={() => {
-            setCloudConnectionId(undefined)
-          }}
+          onClick={() => setCloudConnectionId(undefined)}
           leftContent={<CloudIcon />}
         >
           Deselect cloud connection
