@@ -183,7 +183,7 @@ export function ChatInput({
               />
             )}
             <>
-              <ChatInputCloudSelect currentThread={currentThread} />
+              {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
               {!hideClusterSelector && (
                 <ChatInputClusterSelect currentThread={currentThread} />
               )}
